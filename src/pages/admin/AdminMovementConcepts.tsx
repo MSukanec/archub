@@ -230,58 +230,47 @@ export default function AdminMovementConcepts() {
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Estructura de Conceptos</CardTitle>
-            <CardDescription>
-              Gestiona la jerarquía de conceptos de movimientos financieros. 
-              Los conceptos pueden organizarse de forma jerárquica para facilitar la categorización.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-muted-foreground">Cargando conceptos...</div>
+        {/* Main Content - Direct Tree without Card */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Cargando conceptos...</div>
+          </div>
+        ) : filteredConcepts.length === 0 ? (
+          <div className="text-center py-8">
+            <Package2 className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">No hay conceptos</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {hasActiveFilters 
+                ? 'No se encontraron conceptos con los filtros aplicados.'
+                : 'Comienza creando tu primer concepto de movimiento.'
+              }
+            </p>
+            {!hasActiveFilters && (
+              <div className="mt-6">
+                <Button onClick={handleOpenCreateModal}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Crear primer concepto
+                </Button>
               </div>
-            ) : filteredConcepts.length === 0 ? (
-              <div className="text-center py-8">
-                <Package2 className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-gray-900">No hay conceptos</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {hasActiveFilters 
-                    ? 'No se encontraron conceptos con los filtros aplicados.'
-                    : 'Comienza creando tu primer concepto de movimiento.'
-                  }
-                </p>
-                {!hasActiveFilters && (
-                  <div className="mt-6">
-                    <Button onClick={handleOpenCreateModal}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Crear primer concepto
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <MovementConceptTree
-                concepts={filteredConcepts}
-                expandedConcepts={expandedConcepts}
-                onToggleExpand={(conceptId) => {
-                  const newExpanded = new Set(expandedConcepts);
-                  if (newExpanded.has(conceptId)) {
-                    newExpanded.delete(conceptId);
-                  } else {
-                    newExpanded.add(conceptId);
-                  }
-                  setExpandedConcepts(newExpanded);
-                }}
-                onEdit={handleOpenEditModal}
-                onDelete={(conceptId) => setDeleteConceptId(conceptId)}
-              />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        ) : (
+          <MovementConceptTree
+            concepts={filteredConcepts}
+            expandedConcepts={expandedConcepts}
+            onToggleExpand={(conceptId) => {
+              const newExpanded = new Set(expandedConcepts);
+              if (newExpanded.has(conceptId)) {
+                newExpanded.delete(conceptId);
+              } else {
+                newExpanded.add(conceptId);
+              }
+              setExpandedConcepts(newExpanded);
+            }}
+            onEdit={handleOpenEditModal}
+            onDelete={(conceptId) => setDeleteConceptId(conceptId)}
+          />
+        )}
       </div>
 
       {/* Create/Edit Modal */}

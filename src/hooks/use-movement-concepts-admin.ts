@@ -44,7 +44,6 @@ export function useMovementConceptsAdmin(organizationId: string | undefined) {
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
         .select('*')
-        .eq('organization_id', organizationId)
         .order('name');
 
       console.log('📊 Movement concepts query result:', { concepts, error, count: concepts?.length });
