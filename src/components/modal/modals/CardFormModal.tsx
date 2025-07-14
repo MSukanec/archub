@@ -226,5 +226,9 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
     />
   );
 
-  return editPanel;
+  return {
+    editPanel,
+    headerContent,
+    footerContent
+  };
 }

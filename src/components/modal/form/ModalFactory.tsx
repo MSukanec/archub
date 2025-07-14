@@ -10,44 +10,32 @@ export function ModalFactory() {
 
   if (!open) return null;
 
-  const getModalComponents = () => {
+  const getModalData = () => {
     switch (type) {
       case 'member':
-        return {
-          content: <MemberFormModal editingMember={data?.editingMember} />,
-          header: undefined,
-          footer: undefined
-        };
+        return <MemberFormModal editingMember={data?.editingMember} />;
       case 'gallery':
-        return {
-          content: <GalleryFormModal />,
-          header: undefined,
-          footer: undefined
-        };
+        return <GalleryFormModal />;
       case 'board':
-        return {
-          content: <BoardFormModal modalData={data} onClose={closeModal} />,
-          header: undefined,
-          footer: undefined
-        };
+        return <BoardFormModal modalData={data} onClose={closeModal} />;
       case 'card':
-        return {
-          content: <CardFormModal modalData={data} onClose={closeModal} />,
-          header: undefined,
-          footer: undefined
-        };
+        return <CardFormModal modalData={data} onClose={closeModal} />;
       default:
-        return { content: null, header: undefined, footer: undefined };
+        return null;
     }
   };
 
-  const { content, header, footer } = getModalComponents();
+  const modalData = getModalData();
+  
+  if (!modalData || !modalData.editPanel) {
+    return null;
+  }
 
   return (
     <FormModalLayout
-      editPanel={content}
-      headerContent={header}
-      footerContent={footer}
+      editPanel={modalData.editPanel}
+      headerContent={modalData.headerContent}
+      footerContent={modalData.footerContent}
       onClose={closeModal}
     />
   );
