@@ -6,9 +6,9 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { FormModalLayout } from '../form/FormModalLayout';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
+import FormModalBody from '../form/FormModalBody';
 import { useModalPanelStore } from '../form/modalPanelStore';
 import { useGlobalModalStore } from '../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -238,11 +238,12 @@ export function MemberFormModal({ editingMember }: MemberModalProps) {
   );
 
   return (
-    <FormModalLayout
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
+    <>
+      {headerContent}
+      <FormModalBody>
+        {editPanel}
+      </FormModalBody>
+      {footerContent}
+    </>
   );
 }
