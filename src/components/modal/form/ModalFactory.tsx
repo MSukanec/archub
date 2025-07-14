@@ -38,8 +38,16 @@ export function ModalFactory() {
       return <DocumentUploadFormModal modalData={data} onClose={closeModal} />;
     case 'document-folder':
       return <DocumentFolderFormModal modalData={data} onClose={closeModal} />;
-    case 'movement':
-      return <MovementFormModal modalData={data} onClose={closeModal} />;
+    case 'movement': {
+      const modalContent = MovementFormModal({ modalData: data, onClose: closeModal });
+      return (
+        <FormModalLayout>
+          {modalContent.headerContent}
+          {modalContent.editPanel}
+          {modalContent.footerContent}
+        </FormModalLayout>
+      );
+    }
     default:
       return null;
   }

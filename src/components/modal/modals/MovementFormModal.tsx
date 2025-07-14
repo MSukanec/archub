@@ -13,6 +13,7 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 import FormModalBody from "@/components/modal/form/FormModalBody"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
+import { useModalPanelStore } from "@/components/modal/form/modalPanelStore"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -85,6 +86,7 @@ interface MovementFormModalProps {
 
 export default function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
   const editingMovement = modalData?.editingMovement
+  const { currentPanel } = useModalPanelStore()
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const { data: members } = useOrganizationMembers(organizationId)
@@ -574,14 +576,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                    updateMovementMutation.isPending || 
                    createConversionMutation.isPending
 
-  return (
-    <FormModalLayout>
-      <FormModalHeader 
-        title={editingMovement ? 'Editar Movimiento' : 'Nuevo Movimiento'}
-        description="Gestiona los movimientos financieros del proyecto"
-      />
+  const viewPanel = (
+    <div className="p-4">
+      <p className="text-sm text-muted-foreground">Vista de movimiento no implementada</p>
+    </div>
+  )
 
-      <FormModalBody>
+  const editPanel = (
+    <FormModalBody columns={1}>
         {isConversion ? (
           <Form {...conversionForm}>
             <form 
@@ -1198,15 +1200,28 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </form>
           </Form>
         )}
-      </FormModalBody>
-
-      <FormModalFooter
-        cancelText="Cancelar"
-        submitText={editingMovement ? "Actualizar" : "Guardar"}
-        onSubmit={isConversion ? conversionForm.handleSubmit(onSubmitConversion) : form.handleSubmit(onSubmit)}
-        onCancel={onClose}
-        isLoading={isLoading}
-      />
-    </FormModalLayout>
+    </FormModalBody>
   )
+
+  const headerContent = (
+    <FormModalHeader 
+      title={editingMovement ? 'Editar Movimiento' : 'Nuevo Movimiento'}
+    />
+  )
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={editingMovement ? "Actualizar" : "Guardar"}
+      onRightClick={isConversion ? conversionForm.handleSubmit(onSubmitConversion) : form.handleSubmit(onSubmit)}
+    />
+  )
+
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent
+  }
 }
