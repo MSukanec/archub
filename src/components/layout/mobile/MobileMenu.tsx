@@ -43,6 +43,7 @@ import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
@@ -74,7 +75,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const sortedOrganizations = userData?.organizations || [];
   const { data: projectsData } = useProjects(currentOrganization?.id);
   const effectiveCurrentProject = userData?.preferences?.last_project_id;
-  const isAdmin = userData?.organization?.is_admin || false;
+  const isAdmin = useIsAdmin();
 
   // Organization selection mutation
   const organizationMutation = useMutation({
@@ -310,25 +311,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ]
   };
 
-  // Agregar botón de administración después del menu principal
+  // Agregar botón de administración después del menu principal (solo para admins)
   if (isAdmin) {
     mainMenuItems.push({
       id: 'admin',
-      icon: Shield,
+      icon: Crown,
       label: 'Administración',
       defaultRoute: '/admin/dashboard',
       isActive: currentSidebarContext === 'admin' || location.startsWith('/admin')
     });
   }
-
-  // Agregar botón de perfil al final
-  mainMenuItems.push({
-    id: 'perfil',
-    icon: UserCircle,
-    label: 'Mi Perfil',
-    defaultRoute: '/profile',
-    isActive: currentSidebarContext === 'perfil' || location === '/profile'
-  });
 
   // Estado para determinar si estamos en menu principal o submenu
   const [currentView, setCurrentView] = useState<'main' | string>('main');
