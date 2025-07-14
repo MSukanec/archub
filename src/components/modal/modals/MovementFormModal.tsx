@@ -67,31 +67,49 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   React.useEffect(() => {
     if (editingMovement) {
+      // Wait for all data to be loaded
+      if (!members || !currencies || !wallets || !concepts) return
+      
+      // Map currency_id and wallet_id to organization-specific IDs
+      const matchingCurrency = currencies?.find((c: any) => 
+        c.currency?.id === editingMovement.currency_id
+      )
+      const matchingWallet = wallets?.find(w => 
+        w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
+      )
+      
       form.reset({
         creator_id: editingMovement.creator_id || userData?.user?.id || '',
         movement_date: editingMovement.movement_date || new Date().toISOString().split('T')[0],
         type: editingMovement.type || '',
-        currency_id: editingMovement.currency_id || '',
-        wallet_id: editingMovement.wallet_id || '',
+        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
+        wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id,
         amount: editingMovement.amount || 0,
         exchange_rate: editingMovement.exchange_rate || undefined,
         description: editingMovement.description || '',
       })
       setPanel('view')
     } else {
+      // New movement mode - wait for all data to be loaded
+      if (!members || !currencies || !wallets) return
+      
+      const currentMember = members?.find(m => m.user_id === userData?.user?.id)
+      const defaultOrgCurrency = currencies?.find((c: any) => c.is_default) || currencies?.[0]
+      const defaultWallet = wallets?.find(w => w.is_default) || wallets?.[0]
+
       form.reset({
-        creator_id: userData?.user?.id || '',
+        creator_id: currentMember?.id || '',
         movement_date: new Date().toISOString().split('T')[0],
         type: '',
-        currency_id: '',
-        wallet_id: '',
+        currency_id: defaultOrgCurrency?.currency_id || '',
+        wallet_id: defaultWallet?.wallet_id || '',
         amount: 0,
         exchange_rate: undefined,
         description: '',
       })
       setPanel('edit')
     }
-  }, [editingMovement, userData?.user?.id, form, setPanel])
+  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
@@ -322,9 +340,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {currencies?.map((currency) => (
-                      <SelectItem key={currency.currency_id} value={currency.currency_id}>
-                        {currency.currency?.name || 'Sin nombre'} ({currency.currency?.symbol || '$'})
+                    {currencies?.map((orgCurrency) => (
+                      <SelectItem key={orgCurrency.currency_id} value={orgCurrency.currency_id}>
+                        {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
                       </SelectItem>
                     ))}
                   </SelectContent>
