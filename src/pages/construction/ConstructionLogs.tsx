@@ -637,16 +637,34 @@ export default function ConstructionLogs() {
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'hsl(76, 100%, 40%, 0.1)', borderColor: 'hsl(76, 100%, 40%, 0.3)' }}>
-                                    <div className="flex items-center gap-2">
-                                      {file.file_type?.startsWith('image/') ? (
-                                        <Image className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
-                                      ) : (
+                                    {file.file_type?.startsWith('image/') ? (
+                                      <div className="space-y-2">
+                                        <div className="relative w-full h-16 bg-muted rounded overflow-hidden">
+                                          <img 
+                                            src={file.public_url} 
+                                            alt={file.original_name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                              e.currentTarget.style.display = 'none';
+                                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                                            }}
+                                          />
+                                          <div className="absolute inset-0 flex items-center justify-center bg-muted" style={{ display: 'none' }}>
+                                            <Image className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
+                                          </div>
+                                        </div>
+                                        <span className="text-xs text-muted-foreground truncate block">
+                                          {file.original_name}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-2">
                                         <Video className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
-                                      )}
-                                      <span className="text-xs text-muted-foreground truncate">
-                                        {file.original_name}
-                                      </span>
-                                    </div>
+                                        <span className="text-xs text-muted-foreground truncate">
+                                          {file.original_name}
+                                        </span>
+                                      </div>
+                                    )}
                                   </Card>
                                 ))
                               ) : (
