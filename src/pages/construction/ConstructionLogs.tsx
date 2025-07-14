@@ -633,7 +633,7 @@ export default function ConstructionLogs() {
                             <h3 className="font-medium text-muted-foreground mb-3">
                               Archivos ({siteLog.files?.length || 0}):
                             </h3>
-                            <div className="pl-4 space-y-2">
+                            <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'hsl(76, 100%, 40%, 0.1)', borderColor: 'hsl(76, 100%, 40%, 0.3)' }}>
@@ -663,7 +663,7 @@ export default function ConstructionLogs() {
                             <h3 className="font-medium text-muted-foreground mb-3">
                               Eventos ({siteLog.events?.length || 0}):
                             </h3>
-                            <div className="pl-4 space-y-2">
+                            <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
                               {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
@@ -684,12 +684,12 @@ export default function ConstructionLogs() {
                           {/* Línea divisoria punteada */}
                           <div className="border-t border-dashed border-muted-foreground/30"></div>
 
-                          {/* Personal */}
+                          {/* Asistencias */}
                           <div>
                             <h3 className="font-medium text-muted-foreground mb-3">
-                              Personal ({siteLog.attendees?.length || 0}):
+                              Asistencias ({siteLog.attendees?.length || 0}):
                             </h3>
-                            <div className="pl-4 space-y-2">
+                            <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
                               {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
@@ -723,7 +723,7 @@ export default function ConstructionLogs() {
                             <h3 className="font-medium text-muted-foreground mb-3">
                               Maquinaria ({siteLog.equipment?.length || 0}):
                             </h3>
-                            <div className="pl-4 space-y-2">
+                            <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
                               {siteLog.equipment && siteLog.equipment.length > 0 ? (
                                 siteLog.equipment.map((equipment: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: 'rgba(251, 191, 36, 0.3)' }}>
