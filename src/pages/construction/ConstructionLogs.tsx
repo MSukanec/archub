@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/ImageLightbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -175,8 +175,11 @@ export default function ConstructionLogs() {
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
-  const [showImageModal, setShowImageModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  // Initialize lightbox hook
+  const imageUrls = filteredSiteLogs.flatMap((log: any) => 
+    log.files?.filter((file: any) => file.file_type === 'image').map((file: any) => file.file_url) || []
+  );
+  const lightbox = useImageLightbox(imageUrls);
   
   const isMobile = useMobile();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -650,8 +653,10 @@ export default function ConstructionLogs() {
                                         alt={file.file_name}
                                         className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
                                         onClick={() => {
-                                          setSelectedImage(file.file_url);
-                                          setShowImageModal(true);
+                                          const imageIndex = imageUrls.indexOf(file.file_url);
+                                          if (imageIndex !== -1) {
+                                            lightbox.openLightbox(imageIndex);
+                                          }
                                         }}
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
@@ -814,26 +819,13 @@ export default function ConstructionLogs() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modal para ver imagen en tamaño completo */}
-      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
-        <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0">
-          <DialogHeader className="p-4 pb-2">
-            <DialogTitle>Vista previa de imagen</DialogTitle>
-            <DialogDescription>
-              Imagen adjunta en la bitácora de construcción
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center p-4 pt-0">
-            {selectedImage && (
-              <img 
-                src={selectedImage} 
-                alt="Vista previa" 
-                className="max-w-full max-h-[70vh] object-contain rounded"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={imageUrls}
+        currentIndex={lightbox.currentIndex}
+        isOpen={lightbox.isOpen}
+        onClose={lightbox.closeLightbox}
+      />
     </Layout>
   );
 }
