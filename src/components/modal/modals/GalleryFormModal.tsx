@@ -320,26 +320,30 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     </Form>
   );
 
+  const headerContent = (
+    <FormModalHeader
+      title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
+      icon={Images}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={editingFile ? "Actualizar" : "Subir"}
+      onRightClick={form.handleSubmit(onSubmit)}
+      rightLoading={uploadMutation.isPending}
+    />
+  );
+
   return (
     <FormModalLayout
-      editPanel={editPanel}
-      onClose={onClose}
-      headerContent={
-        <FormModalHeader
-          title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
-          description={editingFile ? "Modifica los detalles del archivo" : "Sube un nuevo archivo multimedia al proyecto"}
-        />
-      }
-      footerContent={
-        <FormModalFooter
-          onCancel={handleClose}
-          onSave={form.handleSubmit(onSubmit)}
-          cancelText="Cancelar"
-          saveText={editingFile ? "Actualizar" : "Subir"}
-          isLoading={uploadMutation.isPending}
-        />
-      }
       columns={1}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
     />
   );
 }
