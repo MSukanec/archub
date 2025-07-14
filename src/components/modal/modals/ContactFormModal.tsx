@@ -18,7 +18,7 @@ import { useSearchUsers } from "@/hooks/use-search-users";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { UserPlus, User, Mail, Phone, Building, MapPin, FileText, Link, Unlink, Search, Check, X } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Building, MapPin, FileText, Link, Unlink, Search, Check, X, Loader2 } from "lucide-react";
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -94,23 +94,31 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         linked_user_id: selectedUser?.id || null,
       };
 
-      if (isEditing) {
-        const { error } = await supabase
+      if (isEditing && editingContact) {
+        const { data: result, error } = await supabase
           .from('contacts')
           .update(contactData)
-          .eq('id', editingContact.id);
+          .eq('id', editingContact.id)
+          .select()
+          .single();
+
         if (error) throw error;
+        return result;
       } else {
-        const { error } = await supabase
+        const { data: result, error } = await supabase
           .from('contacts')
-          .insert([contactData]);
+          .insert([contactData])
+          .select()
+          .single();
+
         if (error) throw error;
+        return result;
       }
     },
     onSuccess: () => {
       toast({
-        title: isEditing ? "Contacto actualizado" : "Contacto creado",
-        description: isEditing ? "El contacto ha sido actualizado exitosamente." : "El nuevo contacto ha sido creado exitosamente.",
+        title: "Éxito",
+        description: isEditing ? "Contacto actualizado correctamente" : "Contacto creado correctamente",
       });
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       onClose();
@@ -141,96 +149,24 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     form.setValue('linked_user_id', "");
   };
 
-  // View Panel (para mostrar datos del contacto cuando no se está editando)
-  const viewPanel = (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={editingContact?.linked_user?.avatar_url} />
-          <AvatarFallback className="text-lg">
-            {editingContact?.first_name?.[0]}{editingContact?.last_name?.[0]}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h3 className="text-lg font-semibold">{editingContact?.full_name}</h3>
-          {editingContact?.company_name && (
-            <p className="text-sm text-muted-foreground">{editingContact.company_name}</p>
-          )}
-          {contactTypes.find(t => t.id === editingContact?.contact_type_id) && (
-            <Badge variant="outline" className="mt-1">
-              {contactTypes.find(t => t.id === editingContact?.contact_type_id)?.name}
-            </Badge>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {editingContact?.email && (
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{editingContact.email}</span>
-          </div>
-        )}
-        {editingContact?.phone && (
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{editingContact.phone}</span>
-          </div>
-        )}
-        {editingContact?.location && (
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{editingContact.location}</span>
-          </div>
-        )}
-      </div>
-
-      {editingContact?.notes && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Notas</h4>
-          <p className="text-sm text-muted-foreground">{editingContact.notes}</p>
-        </div>
-      )}
-
-      {editingContact?.linked_user && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Usuario vinculado</h4>
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={editingContact.linked_user.avatar_url} />
-              <AvatarFallback>
-                {editingContact.linked_user.full_name?.[0] || editingContact.linked_user.email?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium">{editingContact.linked_user.full_name}</p>
-              <p className="text-xs text-muted-foreground">{editingContact.linked_user.email}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // Edit Panel (formulario)
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="first_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre *</FormLabel>
+                <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Nombre" />
+                  <Input placeholder="Ej: Juan" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
             name="last_name"
@@ -238,7 +174,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Apellido</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Apellido" />
+                  <Input placeholder="Ej: Pérez" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -246,7 +182,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="email"
@@ -254,13 +190,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" placeholder="email@ejemplo.com" />
+                  <Input placeholder="ejemplo@correo.com" type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
             name="phone"
@@ -268,48 +204,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Teléfono</FormLabel>
                 <FormControl>
-                  <PhoneInput {...field} placeholder="Número de teléfono" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="contact_type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de contacto</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {contactTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="company_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Empresa</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Nombre de la empresa" />
+                  <PhoneInput {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -319,17 +214,58 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
         <FormField
           control={form.control}
-          name="location"
+          name="contact_type_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ubicación</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ciudad, región o dirección" />
-              </FormControl>
+              <FormLabel>Tipo de Contacto</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {contactTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="company_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Empresa</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nombre de la empresa" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ubicación</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ciudad, País" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -338,16 +274,19 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             <FormItem>
               <FormLabel>Notas</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="Notas adicionales sobre el contacto" />
+                <Textarea 
+                  placeholder="Información adicional sobre el contacto"
+                  className="resize-none"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* User Linking Section */}
         <div className="space-y-3">
-          <Label>Vincular con usuario existente</Label>
+          <Label>Usuario Vinculado</Label>
           
           {selectedUser ? (
             <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -356,9 +295,9 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                   <AvatarImage src={selectedUser.avatar_url} />
                   <AvatarFallback>{selectedUser.full_name?.[0] || selectedUser.email?.[0]}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="text-sm font-medium">{selectedUser.full_name}</p>
-                  <p className="text-xs text-muted-foreground">{selectedUser.email}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{selectedUser.full_name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{selectedUser.email}</p>
                 </div>
               </div>
               <Button
@@ -367,67 +306,51 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                 size="sm"
                 onClick={handleUnlinkUser}
               >
-                <Unlink className="h-4 w-4 mr-2" />
-                Desvincular
+                <Unlink className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              {!showUserSearch ? (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Buscar usuario por nombre o email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1"
+                />
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowUserSearch(true)}
-                  className="w-full"
+                  size="sm"
+                  onClick={() => setShowUserSearch(!showUserSearch)}
                 >
-                  <Link className="h-4 w-4 mr-2" />
-                  Buscar usuario para vincular
+                  <Search className="h-4 w-4" />
                 </Button>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Buscar usuario por nombre o email..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => {
-                        setShowUserSearch(false);
-                        setSearchTerm("");
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {searchTerm && (
-                    <div className="max-h-32 overflow-y-auto border rounded-lg">
-                      {searchResults.length > 0 ? (
-                        searchResults.map((user: any) => (
-                          <div
-                            key={user.id}
-                            className="flex items-center gap-3 p-2 hover:bg-muted cursor-pointer"
-                            onClick={() => handleLinkUser(user)}
-                          >
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.avatar_url} />
-                              <AvatarFallback>{user.full_name?.[0] || user.email?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{user.full_name}</p>
-                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                            </div>
-                            <Check className="h-4 w-4 text-primary" />
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          No se encontraron usuarios
+              </div>
+              
+              {searchTerm && (
+                <div className="max-h-32 overflow-y-auto border rounded-lg">
+                  {searchResults.length > 0 ? (
+                    searchResults.map((user: any) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center gap-3 p-2 hover:bg-muted cursor-pointer"
+                        onClick={() => handleLinkUser(user)}
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar_url} />
+                          <AvatarFallback>{user.full_name?.[0] || user.email?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{user.full_name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                         </div>
-                      )}
+                        <Check className="h-4 w-4 text-primary" />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      No se encontraron usuarios
                     </div>
                   )}
                 </div>
@@ -439,17 +362,35 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     </Form>
   );
 
-  const headerContent = {
-    title: isEditing ? "Editar Contacto" : "Nuevo Contacto",
-    icon: <UserPlus className="h-5 w-5" />
-  };
+  const viewPanel = (
+    <div className="space-y-4">
+      <div className="text-sm text-muted-foreground">
+        Información del contacto en modo de solo lectura
+      </div>
+    </div>
+  );
 
-  const footerContent = {
-    cancelText: "Cancelar",
-    submitText: isEditing ? "Actualizar" : "Crear Contacto",
-    onSubmit: form.handleSubmit(onSubmit),
-    isLoading: createContactMutation.isPending
-  };
+  const headerContent = (
+    <div className="flex items-center gap-2">
+      <UserPlus className="h-5 w-5" />
+      <span>{isEditing ? "Editar Contacto" : "Nuevo Contacto"}</span>
+    </div>
+  );
+
+  const footerContent = (
+    <div className="flex items-center justify-between">
+      <Button variant="outline" onClick={onClose}>
+        Cancelar
+      </Button>
+      <Button 
+        onClick={form.handleSubmit(onSubmit)}
+        disabled={createContactMutation.isPending}
+      >
+        {createContactMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+        {isEditing ? "Actualizar" : "Crear Contacto"}
+      </Button>
+    </div>
+  );
 
   return (
     <FormModalLayout

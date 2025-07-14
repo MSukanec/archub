@@ -56,7 +56,7 @@ const FIELD_OPTIONS = [
   { value: 'wallet', label: 'Billetera' },
 ]
 
-const REQUIRED_FIELDS = ['movement_date', 'amount', 'type']
+const REQUIRED_FIELDS = [] // No required fields for import
 
 export default function ImportMovementsModal({ open, onClose, onImport }: ImportMovementsModalProps) {
   const [step, setStep] = useState(1)
@@ -476,9 +476,6 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <Label className="font-medium">{header}</Label>
-                          {REQUIRED_FIELDS.includes(columnMapping[header]) && (
-                            <Badge variant="destructive" className="text-white">Obligatorio</Badge>
-                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           Ejemplo: {parsedData.rows[0]?.[index] || 'N/A'}
@@ -513,8 +510,7 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Los campos <strong>Fecha</strong>, <strong>Monto</strong> y <strong>Tipo</strong> son obligatorios.
-                    Las columnas no mapeadas serán ignoradas.
+                    Mapea las columnas que desees importar. Las columnas no mapeadas serán ignoradas.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -669,14 +665,11 @@ export default function ImportMovementsModal({ open, onClose, onImport }: Import
     if (step === 1) {
       // No next button for step 1, file processing handles the transition
     } else if (step === 2) {
-      const mappedFields = Object.values(columnMapping).filter(field => field !== '')
-      const hasRequiredFields = REQUIRED_FIELDS.every(field => mappedFields.includes(field))
-      
       buttons.push(
         <Button
           key="next"
           onClick={handleMappingComplete}
-          disabled={!hasRequiredFields || isProcessing}
+          disabled={isProcessing}
         >
           Siguiente
         </Button>
