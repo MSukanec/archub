@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { Kanban } from 'lucide-react';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
-import { FormModalLayout } from '../form/FormModalLayout';
 import { useModalPanelStore } from '../form/modalPanelStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -206,13 +205,10 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
     />
   );
 
-  return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
-  );
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent,
+  };
 }

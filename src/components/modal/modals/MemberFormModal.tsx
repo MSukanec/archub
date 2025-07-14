@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
-import { FormModalLayout } from '../form/FormModalLayout';
 import FormModalBody from '../form/FormModalBody';
 import { useModalPanelStore } from '../form/modalPanelStore';
 import { useGlobalModalStore } from '../form/useGlobalModalStore';
@@ -256,13 +255,10 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
     </div>
   ) : null;
 
-  return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
-  );
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent,
+  };
 }
