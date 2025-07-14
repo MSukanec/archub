@@ -95,7 +95,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           
           {/* Time period selector */}
           {onTimePeriodChange && (
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               {(['days', 'weeks', 'months'] as TimePeriod[]).map((period) => (
                 <Button
                   key={period}

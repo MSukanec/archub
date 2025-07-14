@@ -644,13 +644,13 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-chart-2/10 border-chart-2/30">
+                                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
                                     <div className="flex items-center justify-between mb-1">
-                                      <span className="text-xs font-medium text-blue-800">
+                                      <span className="text-xs font-medium" style={{ color: '#22c55e' }}>
                                         {event.event_type?.name || event.type || 'Evento'}
                                       </span>
                                     </div>
-                                    <p className="text-xs text-gray-700">{event.description || 'Sin descripción'}</p>
+                                    <p className="text-xs text-muted-foreground">{event.description || 'Sin descripción'}</p>
                                   </Card>
                                 ))
                               ) : (
@@ -665,20 +665,20 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-chart-3/10 border-chart-3/30">
+                                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
                                     <div className="flex items-center justify-between mb-1">
-                                      <span className="text-xs font-medium text-green-800">
+                                      <span className="text-xs font-medium" style={{ color: '#3b82f6' }}>
                                         {attendee.contact ? 
                                           `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' 
                                           : 'Personal'
                                         }
                                       </span>
-                                      <span className="text-xs px-1 py-0.5 bg-green-100 text-green-700 rounded">
+                                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
                                         {attendee.attendance_type || 'Presente'}
                                       </span>
                                     </div>
                                     {attendee.description && (
-                                      <p className="text-xs text-gray-700">{attendee.description}</p>
+                                      <p className="text-xs text-muted-foreground">{attendee.description}</p>
                                     )}
                                   </Card>
                                 ))
@@ -694,17 +694,17 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.equipment && siteLog.equipment.length > 0 ? (
                                 siteLog.equipment.map((equipment: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-chart-4/10 border-chart-4/30">
+                                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: 'rgba(251, 191, 36, 0.3)' }}>
                                     <div className="flex items-center justify-between mb-1">
-                                      <span className="text-xs font-medium text-orange-800">
+                                      <span className="text-xs font-medium" style={{ color: '#fbbf24' }}>
                                         {equipment.equipment?.name || 'Equipo'}
                                       </span>
-                                      <span className="text-xs px-1 py-0.5 bg-orange-100 text-orange-700 rounded">
+                                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24' }}>
                                         x{equipment.quantity || 1}
                                       </span>
                                     </div>
                                     {equipment.description && (
-                                      <p className="text-xs text-gray-700">{equipment.description}</p>
+                                      <p className="text-xs text-muted-foreground">{equipment.description}</p>
                                     )}
                                   </Card>
                                 ))
