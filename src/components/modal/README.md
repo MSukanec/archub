@@ -35,6 +35,7 @@ export default function MemberFormModal() {
     </FormModalLayout>
   )
 }
+
 ✅ Estilos y comportamiento
 El modal entero debe tener bordes redondeados, aplicados en FormModalLayout.tsx mediante rounded-xl.
 
@@ -63,3 +64,11 @@ Luego de implementarlo, abrí el modal desde la app y verificá:
 ✅ No hay doble línea en el header
 
 ✅ Tiene bordes redondeados en todo el contenedor
+
+🔁 Componentes de creacion de modal:
+Asegurate de usar siempre componentes por defecto a menos que ese modal ESPECFICIAMENTE pida otros:
+
+Inputs normales: src/components/ui/input.tsx
+Selects normales: src/components/ui/select.tsx
+Select de usuarios (ej. Creador): src/components/ui-custom/UserSelector.tsx
+Teléfonos: src/components/ui-custom/PhoneInput.tsx
