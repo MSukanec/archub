@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale';
 type DocumentCardProps = {
   document: {
     id: string;
+    name?: string;
     file_name: string;
     created_at: string;
     status: string;
@@ -87,7 +88,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
           onClick: () => onDelete?.(document)
         }
       ]}
-      className="bg-transparent border border-[var(--input-border)]"
+      className="bg-transparent border border-[var(--input-border)] p-3"
     >
       <div className="flex items-center gap-3">
         {/* File icon */}
@@ -97,20 +98,14 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* File name */}
+          {/* Document name (user-defined) */}
           <div className="font-medium text-foreground truncate mb-1">
-            {file_name}
+            {document.name || file_name}
           </div>
 
-          {/* Creator and date info */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="truncate">
-              {creator?.full_name || 'Usuario'}
-            </span>
-            <span>•</span>
-            <span>
-              {formattedDate}
-            </span>
+          {/* Real file name */}
+          <div className="text-xs text-muted-foreground truncate">
+            {file_name}
           </div>
         </div>
       </div>
