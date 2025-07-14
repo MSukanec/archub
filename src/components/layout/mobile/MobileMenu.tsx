@@ -352,8 +352,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         className="fixed bottom-0 left-0 right-0 rounded-t-xl"
         style={{ 
           backgroundColor: 'var(--menues-bg)', 
-          height: '70vh',
-          marginTop: '30vh'
+          height: '85vh',
+          marginTop: '15vh'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -419,16 +419,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </nav>
           ) : (
             // Submenu - mostrar opciones de la sección seleccionada
-            <nav className="space-y-1">
+            <nav className="space-y-2">
               {submenuContent[currentView as keyof typeof submenuContent]?.map((item, index) => (
                 <div key={index}>
                   {item.restricted ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg text-[var(--menues-fg)] opacity-50"
+                        className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
                         disabled
                       >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-5 w-5" />
                         {item.label}
                       </button>
                     </CustomRestricted>
@@ -439,13 +439,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         onClose();
                       }}
                       className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg transition-colors",
+                        "flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors",
                         location === item.href 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
                       )}
                     >
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className="h-5 w-5" />
                       {item.label}
                     </button>
                   )}
