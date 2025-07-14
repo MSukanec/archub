@@ -52,18 +52,16 @@ export function FormModalLayout({
       >
         {/* Header */}
         {headerContent && (
-          <div className="shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">{headerContent}</div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-8 w-8 p-0 m-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="shrink-0 relative">
+            {headerContent}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         )}
 
