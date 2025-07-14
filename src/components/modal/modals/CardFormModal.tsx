@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { FormModalLayout } from "../form/FormModalLayout";
 import { FormModalHeader } from "../form/FormModalHeader";
 import { FormModalFooter } from "../form/FormModalFooter";
+import FormModalBody from "../form/FormModalBody";
 import { useModalPanelStore } from "../form/modalPanelStore";
 import { useGlobalModalStore } from "../form/useGlobalModalStore";
 import { Input } from "@/components/ui/input";
@@ -228,9 +229,9 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   return (
     <>
       {headerContent}
-      <div className="p-2 overflow-y-auto text-sm space-y-4">
+      <FormModalBody>
         {editPanel}
-      </div>
+      </FormModalBody>
       {footerContent}
     </>
   );

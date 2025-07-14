@@ -8,7 +8,7 @@ interface FormModalBodyProps {
 
 export default function FormModalBody({ children }: FormModalBodyProps) {
   return (
-    <div className="flex flex-col gap-4 p-4 overflow-y-auto text-sm">
+    <div className="flex flex-col gap-2 p-2 overflow-y-auto text-sm">
       {children}
     </div>
   );
