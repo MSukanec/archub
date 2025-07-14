@@ -46,14 +46,10 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   // Query for parent concepts
   const { data: concepts = [] } = useMovementConceptsAdmin();
 
-  // Set panel to edit for new concepts or if there's an editing concept
+  // Always show edit panel for both creating and editing
   React.useEffect(() => {
-    if (editingConcept) {
-      setPanel('view');
-    } else {
-      setPanel('edit');
-    }
-  }, [editingConcept, setPanel]);
+    setPanel('edit');
+  }, [setPanel]);
 
   const form = useForm<ConceptFormData>({
     resolver: zodResolver(conceptSchema),

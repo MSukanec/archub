@@ -63,3 +63,31 @@ Luego de implementarlo, abrí el modal desde la app y verificá:
 ✅ No hay doble línea en el header
 
 ✅ Tiene bordes redondeados en todo el contenedor
+
+## ❌ ERRORES COMUNES A EVITAR
+
+### 🚨 ERROR CRÍTICO: FormModalLayout Panel Display Logic
+**Fecha del error:** Julio 14, 2025
+**Error:** Al implementar MovementConceptFormModal, configuré incorrectamente el useEffect del panel:
+```tsx
+// ❌ MAL - Esto hace que al editar se muestre viewPanel vacío
+React.useEffect(() => {
+  if (editingConcept) {
+    setPanel('view');  // ERROR: viewPanel puede ser null para formularios
+  } else {
+    setPanel('edit');
+  }
+}, [editingConcept, setPanel]);
+```
+
+**Problema:** FormModalLayout muestra viewPanel por defecto cuando currentPanel es 'view', pero muchos modales tienen viewPanel=null cuando son principalmente formularios de edición.
+
+**Solución correcta:**
+```tsx
+// ✅ CORRECTO - Siempre mostrar editPanel para modales de formulario
+React.useEffect(() => {
+  setPanel('edit');  // Siempre edit para formularios
+}, [setPanel]);
+```
+
+**Lección aprendida:** En modales que son principalmente formularios (crear/editar), SIEMPRE usar setPanel('edit') sin condiciones. Solo usar viewPanel cuando realmente hay contenido de solo lectura que mostrar.
