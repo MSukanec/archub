@@ -253,6 +253,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}

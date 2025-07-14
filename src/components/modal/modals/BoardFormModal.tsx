@@ -208,6 +208,7 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}

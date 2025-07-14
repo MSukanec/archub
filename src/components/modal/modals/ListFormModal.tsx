@@ -198,6 +198,7 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
