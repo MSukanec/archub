@@ -79,7 +79,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
               )}
             >
               <div className="flex items-center gap-1.5">
-                <span className="text-sm">{selectedCountry.flag}</span>
+                <span className="text-xs font-bold bg-accent text-accent-foreground px-1 py-0.5 rounded text-center min-w-[24px]">{selectedCountry.code}</span>
                 <span className="text-xs font-bold">{selectedCountry.dialCode}</span>
                 <ChevronDown className="h-3 w-3 opacity-50 ml-0.5" />
               </div>
@@ -105,7 +105,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                     "bg-accent text-accent-foreground"
                   )}
                 >
-                  <span className="text-sm">{country.flag}</span>
+                  <span className="text-xs font-bold bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-center min-w-[28px]">{country.code}</span>
                   <span className="flex-1 font-medium text-xs">{country.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {country.dialCode}
