@@ -1,6 +1,5 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { FileText, FileImage, FileSpreadsheet, File, Eye, Edit, Trash2 } from 'lucide-react';
 import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 import { format } from 'date-fns';
@@ -43,18 +42,7 @@ const getFileIcon = (fileType: string) => {
   }
 };
 
-// Get status badge configuration
-const getStatusBadge = (status: string) => {
-  const statusConfig = {
-    pendiente: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300', label: 'Pendiente' },
-    en_revision: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300', label: 'En Revisión' },
-    aprobado: { color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300', label: 'Aprobado' },
-    rechazado: { color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300', label: 'Rechazado' }
-  };
-  
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendiente;
-  return <Badge className={config.color}>{config.label}</Badge>;
-};
+
 
 // Utility function to get initials from name
 const getInitials = (name: string): string => {
@@ -67,24 +55,14 @@ const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-// Format file size
-const formatFileSize = (bytes?: number): string => {
-  if (!bytes) return '';
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-};
+
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, onDelete }) => {
   const {
     file_name,
     created_at,
-    status,
     creator,
-    group,
-    folder,
-    file_type,
-    file_size
+    file_type
   } = document;
 
   // Format date
@@ -96,82 +74,50 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
         {
           label: "Ver",
           icon: <Eye className="w-4 h-4" />,
-          onClick: () => onView?.(document),
-          className: "bg-blue-500"
+          onClick: () => onView?.(document)
         },
         {
           label: "Editar",
           icon: <Edit className="w-4 h-4" />,
-          onClick: () => onEdit?.(document),
-          className: "bg-yellow-500"
+          onClick: () => onEdit?.(document)
         },
         {
           label: "Eliminar",
           icon: <Trash2 className="w-4 h-4" />,
-          onClick: () => onDelete?.(document),
-          className: "bg-red-500"
+          onClick: () => onDelete?.(document)
         }
       ]}
-      className="bg-[var(--card-bg)] border border-[var(--card-border)]"
     >
-      <div className="flex items-start gap-3 p-4">
-        {/* Left side - File icon */}
-        <div className="shrink-0 mt-1">
-          {getFileIcon(file_type || '')}
+      <div className="flex items-center gap-3">
+        {/* Left side - Creator avatar */}
+        <div className="shrink-0">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={creator?.avatar_url || ""} />
+            <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
+              {getInitials(creator?.full_name || 'U')}
+            </AvatarFallback>
+          </Avatar>
         </div>
 
         {/* Middle content */}
         <div className="flex-1 min-w-0">
-          {/* File name */}
-          <div className="font-medium text-foreground truncate mb-1">
-            {file_name}
-          </div>
-
-          {/* Document metadata */}
-          <div className="flex items-center gap-2 mb-2">
-            {/* Creator avatar and name */}
-            <div className="flex items-center gap-2">
-              <Avatar className="w-4 h-4">
-                <AvatarImage src={creator?.avatar_url || ""} />
-                <AvatarFallback className="text-xs">
-                  {getInitials(creator?.full_name || 'U')}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs text-muted-foreground truncate">
-                {creator?.full_name || 'Usuario'}
-              </span>
-            </div>
-
-            {/* Date */}
-            <span className="text-xs text-muted-foreground">
-              • {formattedDate}
+          {/* File name and type */}
+          <div className="flex items-center gap-2 mb-1">
+            {getFileIcon(file_type || '')}
+            <span className="font-medium text-[var(--text-default)] truncate">
+              {file_name}
             </span>
           </div>
 
-          {/* Location info */}
-          <div className="flex flex-wrap items-center gap-1 mb-2">
-            {folder && (
-              <Badge variant="outline" className="text-xs px-1 py-0">
-                {folder.name}
-              </Badge>
-            )}
-            {group && (
-              <Badge variant="outline" className="text-xs px-1 py-0">
-                {group.name}
-              </Badge>
-            )}
-          </div>
-
-          {/* File info and status */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {file_size && (
-                <span className="text-xs text-muted-foreground">
-                  {formatFileSize(file_size)}
-                </span>
-              )}
-            </div>
-            {getStatusBadge(status)}
+          {/* Creator and date info */}
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+            <span className="truncate">
+              {creator?.full_name || 'Usuario'}
+            </span>
+            <span>•</span>
+            <span>
+              {formattedDate}
+            </span>
           </div>
         </div>
       </div>
