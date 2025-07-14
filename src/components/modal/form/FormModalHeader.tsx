@@ -1,8 +1,10 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
 
 interface FormModalHeaderProps {
   title?: string;
+  icon?: LucideIcon;
   leftActions?: ReactNode;
   rightActions?: ReactNode;
   className?: string;
@@ -10,6 +12,7 @@ interface FormModalHeaderProps {
 
 export function FormModalHeader({
   title,
+  icon: Icon,
   leftActions,
   rightActions,
   className,
@@ -19,7 +22,12 @@ export function FormModalHeader({
       <div className="flex items-center gap-2">
         {leftActions}
         {title && (
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <div className="flex items-center gap-2">
+            {Icon && (
+              <Icon className="h-4 w-4 text-[var(--accent)]" />
+            )}
+            <h2 className="text-sm font-medium text-foreground">{title}</h2>
+          </div>
         )}
       </div>
       

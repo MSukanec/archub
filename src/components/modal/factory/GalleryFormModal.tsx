@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, File } from 'lucide-react';
+import { Upload, X, File, Images } from 'lucide-react';
 import UserSelector from '@/components/ui-custom/UserSelector';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
@@ -317,6 +317,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
       headerContent={
         <FormModalHeader
           title={editingFile ? "Editar Archivo" : "Subir Archivo"}
+          icon={Images}
         />
       }
       footerContent={
