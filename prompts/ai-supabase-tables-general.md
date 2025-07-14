@@ -131,6 +131,10 @@ TABLA ORGANIZATIONS:
   {
     "column_name": "is_system",
     "data_type": "boolean"
+  },
+  {
+    "column_name": "logo_url",
+    "data_type": "text"
   }
 ]
 

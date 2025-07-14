@@ -119,6 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 14, 2025. Organization logo upload section and auto-save fixes implemented - COMPLETED
+  • Added logo upload section to organization basic data page replicating profile page structure
+  • Implemented file upload to organization-logo Supabase bucket with org-${orgId}/ prefix
+  • Added logo_url field to organizations table auto-save functionality
+  • Created uploadLogoMutation with proper file validation (image type, 5MB max size)
+  • Added Avatar component with organization initials fallback and logo display
+  • Fixed organization_data auto-save duplicate key error with proper insert/update logic
+  • Enhanced PhoneInput component: removed duplicate country codes, fixed flag display, eliminated hover effects
+  • Logo section positioned as first section in page matching profile page aesthetic exactly
+  • Complete upload workflow: file selection → validation → Supabase upload → URL update → UI refresh
+  • Toast notifications for successful uploads and error handling with descriptive messages
 - July 14, 2025. Major component reorganization and application error fixes - COMPLETED
   • Renamed multiple components for cleaner naming: CustomTable→Table, CustomEmptyState→EmptyState, CustomPhoneInput→PhoneInput, CustomKanban→KanbanBox, TaskListWithCompleted→KanbanList
   • Updated all import references across 50+ files using automated bash commands for mass refactoring efficiency
