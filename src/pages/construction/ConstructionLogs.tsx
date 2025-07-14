@@ -175,11 +175,6 @@ export default function ConstructionLogs() {
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
-  // Initialize lightbox hook
-  const imageUrls = filteredSiteLogs.flatMap((log: any) => 
-    log.files?.filter((file: any) => file.file_type === 'image').map((file: any) => file.file_url) || []
-  );
-  const lightbox = useImageLightbox(imageUrls);
   
   const isMobile = useMobile();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -270,6 +265,12 @@ export default function ConstructionLogs() {
   } else if (sortBy === "type") {
     filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
   }
+
+  // Initialize lightbox with all images from filtered logs
+  const imageUrls = filteredSiteLogs.flatMap((log: any) => 
+    log.files?.filter((file: any) => file.file_type === 'image').map((file: any) => file.file_url) || []
+  );
+  const lightbox = useImageLightbox(imageUrls);
 
   // Mutation para eliminar bitácora
   const deleteSiteLogMutation = useMutation({
