@@ -931,7 +931,9 @@ export default function DesignDocumentation() {
             <DocumentGroupCard
               key={group.id}
               group={group}
-              onEdit={(group) => {}}
+              onEdit={(group) => {
+                openModal('document-upload', { editingGroup: group });
+              }}
               onDelete={(group) => setGroupToDelete(group)}
             />
           ))}
