@@ -1,1 +1,1 @@
-export type ModalType = "movement" | "bitacora" | "contact" | "gallery";
+export type ModalType = "movement" | "bitacora" | "contact" | "gallery" | "member";

@@ -28,7 +28,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { NewMemberModal } from "@/components/modal/organization/NewMemberModal";
+import { useGlobalModalStore } from "@/components/modal/factory";
 import { useMobile } from "@/hooks/use-mobile";
 
 function getInitials(name: string): string {
@@ -57,7 +57,7 @@ function getRoleBadgeClassName(roleName: string) {
 export default function OrganizationMembers() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const [showInviteModal, setShowInviteModal] = useState(false);
+  const { openModal } = useGlobalModalStore();
   const [memberToDelete, setMemberToDelete] = useState<any>(null);
   const isMobile = useMobile();
 
@@ -179,7 +179,7 @@ export default function OrganizationMembers() {
     actions: [
       <Button 
         key="invite"
-        onClick={() => setShowInviteModal(true)}
+        onClick={() => openModal('member')}
         className="bg-accent text-accent-foreground hover:bg-accent/90"
       >
         Invitar miembro
@@ -301,7 +301,7 @@ export default function OrganizationMembers() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openModal('member', { editingMember: member })}>
                                 Editar rol
                               </DropdownMenuItem>
                               <DropdownMenuItem 
@@ -515,11 +515,7 @@ export default function OrganizationMembers() {
         </div>
       </div>
 
-      {/* Member Invitation Modal */}
-        <NewMemberModal 
-          open={showInviteModal}
-          onClose={() => setShowInviteModal(false)}
-        />
+
 
         {/* Delete Member Confirmation Modal */}
         <DangerousConfirmationModal

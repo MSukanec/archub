@@ -1,5 +1,6 @@
 import React from 'react';
 import { GalleryFormModal } from './GalleryFormModal';
+import { MemberFormModal } from './MemberFormModal';
 import { useGlobalModalStore } from './useGlobalModalStore';
 
 // TODO: Replace these placeholders with actual modals when they exist
@@ -22,6 +23,8 @@ export function ModalFactory() {
       return <ContactModal open={open} onClose={closeModal} data={data} />;
     case 'gallery':
       return <GalleryFormModal open={open} onClose={closeModal} editingFile={data?.editingFile} />;
+    case 'member':
+      return <MemberFormModal open={open} onClose={closeModal} editingMember={data?.editingMember} />;
     default:
       return null;
   }
