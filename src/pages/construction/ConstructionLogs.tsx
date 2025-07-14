@@ -19,9 +19,7 @@ import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction"
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
-import { useSiteLogActivity } from "@/hooks/use-sitelog-activity";
 import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
-import { ActivityChart } from "@/components/charts/ActivityChart";
 import { SiteLogTimelineChart } from "@/components/charts/SiteLogTimelineChart";
 import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
@@ -170,7 +168,7 @@ export default function ConstructionLogs() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
-  const [timePeriod, setTimePeriod] = useState<'week' | 'month' | 'year'>('week');
+  const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
   
   const isMobile = useMobile();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -179,13 +177,6 @@ export default function ConstructionLogs() {
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
     userData?.preferences?.last_project_id,
     userData?.organization?.id
-  );
-  
-  // Site log activity data for chart
-  const { data: siteLogActivityData = [], isLoading: activityLoading } = useSiteLogActivity(
-    userData?.organization?.id,
-    userData?.preferences?.last_project_id,
-    timePeriod
   );
   
   // Site log timeline data for timeline chart
@@ -473,14 +464,6 @@ export default function ConstructionLogs() {
         <SiteLogTimelineChart 
           data={siteLogTimelineData} 
           isLoading={timelineLoading}
-          timePeriod={timePeriod}
-          onTimePeriodChange={setTimePeriod}
-        />
-
-        {/* Activity Chart */}
-        <ActivityChart 
-          data={siteLogActivityData} 
-          isLoading={activityLoading}
           timePeriod={timePeriod}
           onTimePeriodChange={setTimePeriod}
         />

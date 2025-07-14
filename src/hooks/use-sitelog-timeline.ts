@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { format, subDays, subMonths, subYears, eachDayOfInterval, startOfDay } from 'date-fns'
+import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 interface SiteLogTimelineData {
@@ -11,12 +11,12 @@ interface SiteLogTimelineData {
   equipment: number
 }
 
-type TimePeriod = 'week' | 'month' | 'year'
+type TimePeriod = 'days' | 'weeks' | 'months'
 
 export function useSiteLogTimeline(
   organizationId: string | undefined,
   projectId: string | undefined,
-  timePeriod: TimePeriod = 'week'
+  timePeriod: TimePeriod = 'days'
 ) {
   return useQuery({
     queryKey: ['sitelog-timeline', organizationId, projectId, timePeriod],
@@ -25,31 +25,33 @@ export function useSiteLogTimeline(
         return []
       }
 
-      // Calculate date range based on time period
+      // Calculate date range and intervals based on time period
       const now = new Date()
       let startDate: Date
       let dateFormat: string
+      let intervals: Date[]
 
       switch (timePeriod) {
-        case 'week':
+        case 'days':
           startDate = subDays(now, 6) // Last 7 days including today
           dateFormat = 'dd/MM'
+          intervals = eachDayOfInterval({ start: startDate, end: now })
           break
-        case 'month':
-          startDate = subDays(now, 29) // Last 30 days including today
+        case 'weeks':
+          startDate = subWeeks(now, 6) // Last 7 weeks including current week
           dateFormat = 'dd/MM'
+          intervals = eachWeekOfInterval({ start: startDate, end: now }, { weekStartsOn: 1 }) // Monday start
           break
-        case 'year':
-          startDate = subMonths(now, 11) // Last 12 months including current
+        case 'months':
+          startDate = subMonths(now, 6) // Last 7 months including current month
           dateFormat = 'MMM'
+          intervals = eachMonthOfInterval({ start: startDate, end: now })
           break
         default:
           startDate = subDays(now, 6)
           dateFormat = 'dd/MM'
+          intervals = eachDayOfInterval({ start: startDate, end: now })
       }
-
-      // Generate all dates in the range
-      const dateRange = eachDayOfInterval({ start: startDate, end: now })
       
       // Fetch site logs in the date range
       const { data: siteLogs, error: siteLogsError } = await supabase
@@ -136,17 +138,45 @@ export function useSiteLogTimeline(
         return acc
       }, {} as Record<string, any[]>)
 
-      // Create timeline data for each date in range
-      const timelineData: SiteLogTimelineData[] = dateRange.map(date => {
-        const dateKey = format(date, 'yyyy-MM-dd')
-        const formattedDate = format(date, dateFormat, { locale: es })
-        const logsForDate = logsByDate[dateKey] || []
+      // Create timeline data for each interval
+      const timelineData: SiteLogTimelineData[] = intervals.map(intervalDate => {
+        let relevantLogs: any[] = []
+        let formattedDate: string
+        
+        if (timePeriod === 'days') {
+          // For days, get logs for that specific day
+          const dateKey = format(intervalDate, 'yyyy-MM-dd')
+          formattedDate = format(intervalDate, dateFormat, { locale: es })
+          relevantLogs = logsByDate[dateKey] || []
+        } else if (timePeriod === 'weeks') {
+          // For weeks, get all logs within that week
+          const weekStart = startOfWeek(intervalDate, { weekStartsOn: 1 })
+          const weekEnd = endOfWeek(intervalDate, { weekStartsOn: 1 })
+          formattedDate = `${format(weekStart, 'dd/MM', { locale: es })}`
+          
+          // Find all logs within this week
+          relevantLogs = (siteLogs || []).filter(log => {
+            const logDate = new Date(log.log_date)
+            return logDate >= weekStart && logDate <= weekEnd
+          })
+        } else { // months
+          // For months, get all logs within that month
+          const monthStart = startOfMonth(intervalDate)
+          const monthEnd = endOfMonth(intervalDate)
+          formattedDate = format(intervalDate, dateFormat, { locale: es })
+          
+          // Find all logs within this month
+          relevantLogs = (siteLogs || []).filter(log => {
+            const logDate = new Date(log.log_date)
+            return logDate >= monthStart && logDate <= monthEnd
+          })
+        }
 
-        // Calculate totals for this date
-        const files = logsForDate.reduce((sum, log) => sum + (filesByLogId[log.id] || 0), 0)
-        const events = logsForDate.reduce((sum, log) => sum + (eventsByLogId[log.id] || 0), 0)
-        const attendees = logsForDate.reduce((sum, log) => sum + (attendeesByLogId[log.id] || 0), 0)
-        const equipment = logsForDate.reduce((sum, log) => sum + (equipmentByLogId[log.id] || 0), 0)
+        // Calculate totals for this interval (summing all logs in the period)
+        const files = relevantLogs.reduce((sum, log) => sum + (filesByLogId[log.id] || 0), 0)
+        const events = relevantLogs.reduce((sum, log) => sum + (eventsByLogId[log.id] || 0), 0)
+        const attendees = relevantLogs.reduce((sum, log) => sum + (attendeesByLogId[log.id] || 0), 0)
+        const equipment = relevantLogs.reduce((sum, log) => sum + (equipmentByLogId[log.id] || 0), 0)
 
         return {
           date: formattedDate,

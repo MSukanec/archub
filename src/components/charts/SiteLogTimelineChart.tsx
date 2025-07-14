@@ -15,19 +15,19 @@ interface SiteLogTimelineData {
 interface SiteLogTimelineChartProps {
   data: SiteLogTimelineData[]
   isLoading?: boolean
-  timePeriod: 'week' | 'month' | 'year'
-  onTimePeriodChange?: (period: 'week' | 'month' | 'year') => void
+  timePeriod: 'days' | 'weeks' | 'months'
+  onTimePeriodChange?: (period: 'days' | 'weeks' | 'months') => void
 }
 
-type TimePeriod = 'week' | 'month' | 'year'
+type TimePeriod = 'days' | 'weeks' | 'months'
 
 export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriodChange }: SiteLogTimelineChartProps) {
   
   const getTimePeriodLabel = (period: TimePeriod) => {
     switch (period) {
-      case 'week': return 'últimos 7 días'
-      case 'month': return 'último mes'
-      case 'year': return 'último año'
+      case 'days': return 'últimos 7 días'
+      case 'weeks': return 'últimas 7 semanas'
+      case 'months': return 'últimos 7 meses'
       default: return 'período'
     }
   }
@@ -96,7 +96,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           {/* Time period selector */}
           {onTimePeriodChange && (
             <div className="flex gap-1">
-              {(['week', 'month', 'year'] as TimePeriod[]).map((period) => (
+              {(['days', 'weeks', 'months'] as TimePeriod[]).map((period) => (
                 <Button
                   key={period}
                   variant={timePeriod === period ? 'default' : 'outline'}
@@ -104,7 +104,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                   onClick={() => onTimePeriodChange(period)}
                   className="text-xs"
                 >
-                  {period === 'week' ? 'Semana' : period === 'month' ? 'Mes' : 'Año'}
+                  {period === 'days' ? 'DÍAS' : period === 'weeks' ? 'SEMANAS' : 'MESES'}
                 </Button>
               ))}
             </div>
@@ -130,18 +130,17 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
         <div className="h-80">
           {/* Custom timeline visualization */}
           <div className="relative w-full h-full">
-            {/* Y-axis labels */}
+            {/* Y-axis labels - only icons */}
             <div className="absolute left-0 top-0 h-full flex flex-col justify-between py-4">
               {displayCategories.map((category) => (
-                <div key={category.key} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div key={category.key} className="flex items-center justify-center w-6">
                   <category.icon className="w-4 h-4" style={{ color: category.color }} />
-                  <span>{category.label}</span>
                 </div>
               ))}
             </div>
 
             {/* Chart area */}
-            <div className="ml-24 h-full relative">
+            <div className="ml-8 h-full relative">
               {/* Grid lines */}
               <div className="absolute inset-0 flex flex-col justify-between py-4">
                 {displayCategories.map((_, index) => (
