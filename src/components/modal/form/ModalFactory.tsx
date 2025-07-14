@@ -8,6 +8,7 @@ import { ListFormModal } from '../modals/ListFormModal';
 import { ContactFormModal } from '../modals/ContactFormModal';
 import { ProjectFormModal } from '../modals/ProjectFormModal';
 import ProjectClientFormModal from '../modals/ProjectClientFormModal';
+import { DocumentUploadFormModal } from '../modals/DocumentUploadFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -31,6 +32,8 @@ export function ModalFactory() {
       return <ProjectFormModal modalData={data} onClose={closeModal} />;
     case 'project-client':
       return <ProjectClientFormModal onClose={closeModal} />;
+    case 'document-upload':
+      return <DocumentUploadFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }

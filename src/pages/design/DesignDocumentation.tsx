@@ -22,9 +22,9 @@ import { useMobile } from '@/hooks/use-mobile';
 import { useDesignDocumentFolders, useCreateDesignDocumentFolder, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups, useDeleteDesignDocumentGroup } from '@/hooks/use-design-document-groups';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
-import { NewDocumentUploadModal } from '@/modals/design/NewDocumentUploadModal';
 import { NewDocumentGroupModal } from '@/modals/design/NewDocumentGroupModal';
 import { NewDocumentFolderModal } from '@/modals/design/NewDocumentFolderModal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal';
 import { 
   FileText, 
@@ -75,7 +75,7 @@ export default function DesignDocumentation() {
   const [selectedFolderId, setSelectedFolderId] = useState<string>('');
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const { openModal } = useGlobalModalStore();
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
@@ -311,7 +311,7 @@ export default function DesignDocumentation() {
           id: 'upload-document',
           icon: <Upload className="h-6 w-6" />,
           label: 'Subir',
-          onClick: () => setShowUploadModal(true),
+          onClick: () => openModal('document-upload'),
         },
       });
       setShowActionBar(true);
@@ -329,7 +329,7 @@ export default function DesignDocumentation() {
     actions.push(
       <Button 
         key="upload"
-        onClick={() => setShowUploadModal(true)} 
+        onClick={() => openModal('document-upload')} 
         size="sm"
         className="h-8 px-3 text-sm font-medium"
       >
@@ -559,7 +559,7 @@ export default function DesignDocumentation() {
               <Button 
                 onClick={() => {
                   setSelectedGroupId(selectedItem.id);
-                  setShowUploadModal(true);
+                  openModal('document-upload', { defaultGroupId: selectedItem.id });
                 }}
                 size="sm"
               >
@@ -710,7 +710,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedGroupId(group.id);
-                      setShowUploadModal(true);
+                      openModal('document-upload', { defaultGroupId: group.id });
                     }}
                     className="h-6 w-6 p-0"
                   >
@@ -793,7 +793,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedFolderId(folder.id);
-                      setShowUploadModal(true);
+                      openModal('document-upload', { defaultFolderId: folder.id });
                     }}
                     className="h-6 w-6 p-0"
                   >
@@ -1002,7 +1002,7 @@ export default function DesignDocumentation() {
           title="No hay documentos"
           description="Sube documentos a este grupo para empezar"
           action={
-            <Button onClick={() => setShowUploadModal(true)} size="sm">
+            <Button onClick={() => openModal('document-upload')} size="sm">
               <Upload className="h-4 w-4 mr-2" />
               Subir Documentos
             </Button>
@@ -1022,13 +1022,7 @@ export default function DesignDocumentation() {
     <Layout headerProps={headerProps} wide={true}>
       {renderSingleColumnLayout()}
 
-      {/* Upload Modal */}
-      <NewDocumentUploadModal
-        open={showUploadModal}
-        onClose={() => setShowUploadModal(false)}
-        defaultFolderId={selectedFolderId}
-        defaultGroupId={selectedGroupId}
-      />
+
 
       {/* Group Modal */}
       <NewDocumentGroupModal
