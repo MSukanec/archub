@@ -13,21 +13,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { NewContactModal } from '@/modals/contacts/NewContactModal'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('name_asc')
   const [filterByType, setFilterByType] = useState('all')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingContact, setEditingContact] = useState<any>(null)
+  const { openModal } = useGlobalModalStore()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [contactToDelete, setContactToDelete] = useState<any>(null)
   const [showDangerousConfirmation, setShowDangerousConfirmation] = useState(false)
@@ -67,7 +65,7 @@ export default function OrganizationContacts() {
           id: 'create',
           icon: <UserPlus className="h-6 w-6" />,
           label: 'Crear Contacto',
-          onClick: () => setShowCreateModal(true),
+          onClick: () => openModal('contact', { isEditing: false }),
           variant: 'primary'
         },
         slot4: {
@@ -301,8 +299,7 @@ export default function OrganizationContacts() {
             size="sm"
             onClick={(e) => {
               e.stopPropagation()
-              setEditingContact(contact)
-              setShowEditModal(true)
+              openModal('contact', { contact, isEditing: true })
             }}
             className="h-8 w-8 p-0"
           >
@@ -367,7 +364,7 @@ export default function OrganizationContacts() {
       <Button 
         key="create"
         className="h-8 px-3 text-sm" 
-        onClick={() => setShowCreateModal(true)}
+        onClick={() => openModal('contact', { isEditing: false })}
       >
         <Plus className="w-4 h-4 mr-2" />
         Crear contacto
@@ -391,26 +388,12 @@ export default function OrganizationContacts() {
           title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"
           action={
-            <Button onClick={() => setShowCreateModal(true)}>
+            <Button onClick={() => openModal('contact', { isEditing: false })}>
               <Plus className="w-4 h-4 mr-2" />
               Crear contacto
             </Button>
           }
         />
-        
-        {showCreateModal && (
-          <NewContactModal
-            open={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ['contacts'] })
-              queryClient.invalidateQueries({ queryKey: ['organization-contacts'] })
-              setShowCreateModal(false)
-            }}
-          />
-        )}
-
-
       </Layout>
     )
   }
@@ -471,29 +454,6 @@ export default function OrganizationContacts() {
       </div>
 
       {/* Modales */}
-      {showCreateModal && (
-        <NewContactModal
-          open={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['contacts'] })
-            setShowCreateModal(false)
-          }}
-        />
-      )}
-
-      {showEditModal && editingContact && (
-        <NewContactModal
-          open={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          contact={editingContact}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['contacts'] })
-            setShowEditModal(false)
-            setEditingContact(null)
-          }}
-        />
-      )}
 
       {/* Modal de confirmación peligrosa para eliminar */}
       {contactToDelete && (

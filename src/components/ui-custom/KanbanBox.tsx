@@ -276,17 +276,35 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                             >
                                               <Edit className="h-3 w-3" />
                                             </Button>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDeleteCard?.(card.id);
-                                              }}
-                                            >
-                                              <Trash2 className="h-3 w-3" />
-                                            </Button>
+                                            <AlertDialog>
+                                              <AlertDialogTrigger asChild>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
+                                                  <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                              </AlertDialogTrigger>
+                                              <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                  <AlertDialogTitle>¿Eliminar tarjeta?</AlertDialogTitle>
+                                                  <AlertDialogDescription>
+                                                    Esta acción eliminará permanentemente la tarjeta "{card.title}".
+                                                  </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                  <AlertDialogAction 
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                    onClick={() => onDeleteCard?.(card.id)}
+                                                  >
+                                                    Eliminar
+                                                  </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                              </AlertDialogContent>
+                                            </AlertDialog>
                                           </div>
 
                                           {/* Completion Status and Creator Info Header */}
@@ -420,17 +438,35 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                         >
                                                           <Edit className="h-3 w-3" />
                                                         </Button>
-                                                        <Button
-                                                          variant="ghost"
-                                                          size="sm"
-                                                          className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
-                                                          onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onDeleteCard?.(card.id);
-                                                          }}
-                                                        >
-                                                          <Trash2 className="h-3 w-3" />
-                                                        </Button>
+                                                        <AlertDialog>
+                                                          <AlertDialogTrigger asChild>
+                                                            <Button
+                                                              variant="ghost"
+                                                              size="sm"
+                                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                                              onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                              <Trash2 className="h-3 w-3" />
+                                                            </Button>
+                                                          </AlertDialogTrigger>
+                                                          <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                              <AlertDialogTitle>¿Eliminar tarjeta?</AlertDialogTitle>
+                                                              <AlertDialogDescription>
+                                                                Esta acción eliminará permanentemente la tarjeta "{card.title}".
+                                                              </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                              <AlertDialogAction 
+                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                onClick={() => onDeleteCard?.(card.id)}
+                                                              >
+                                                                Eliminar
+                                                              </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                          </AlertDialogContent>
+                                                        </AlertDialog>
                                                       </div>
 
                                                       {/* Completion Status and Creator Info Header */}
