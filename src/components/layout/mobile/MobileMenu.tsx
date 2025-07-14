@@ -306,6 +306,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Users, label: 'Usuarios', href: '/admin/users' },
       { icon: Crown, label: 'Organizaciones', href: '/admin/organizations' },
       { icon: Shield, label: 'Roles', href: '/admin/roles' },
+      { icon: DollarSign, label: 'Conceptos de Movimientos', href: '/admin/movement-concepts' },
       { icon: Package, label: 'Materiales', href: '/admin/materials' },
       { icon: FileText, label: 'Categorías de Materiales', href: '/admin/material-categories' },
     ]

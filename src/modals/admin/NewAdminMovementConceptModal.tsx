@@ -1,88 +1,167 @@
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { CustomModalLayout } from "@/components/modal/legacy/CustomModalLayout"
-import { CustomModalHeader } from "@/components/modal/legacy/CustomModalHeader"
-import { CustomModalBody } from "@/components/modal/legacy/CustomModalBody"
-import { CustomModalFooter } from "@/components/modal/legacy/CustomModalFooter"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { useCreateMovementConcept, useUpdateMovementConcept, useParentMovementConcepts, type MovementConceptAdmin } from "@/hooks/use-movement-concepts-admin"
-import { useCurrentUser } from "@/hooks/use-current-user"
+import React from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-const conceptSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
-  description: z.string().optional(),
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import { CustomModalLayout } from '@/components/modal/legacy/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/legacy/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/legacy/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/legacy/CustomModalFooter';
+
+import { 
+  useCreateMovementConcept, 
+  useUpdateMovementConcept, 
+  MovementConceptAdmin 
+} from '@/hooks/use-movement-concepts-admin';
+import { useCurrentUser } from '@/hooks/use-current-user';
+
+const movementConceptSchema = z.object({
+  name: z.string().min(1, 'Nombre es requerido'),
   parent_id: z.string().optional(),
-  is_system: z.boolean().default(false)
-})
+  is_system: z.boolean().default(false),
+  view_mode: z.string().default('types'),
+});
 
-type ConceptForm = z.infer<typeof conceptSchema>
+type MovementConceptForm = z.infer<typeof movementConceptSchema>;
 
 interface NewAdminMovementConceptModalProps {
-  open: boolean
-  onClose: () => void
-  editingConcept?: MovementConceptAdmin | null
+  isOpen: boolean;
+  onClose: () => void;
+  editingConcept?: MovementConceptAdmin | null;
+  parentConcepts?: MovementConceptAdmin[];
 }
 
 export function NewAdminMovementConceptModal({
-  open,
+  isOpen,
   onClose,
-  editingConcept
+  editingConcept,
+  parentConcepts = []
 }: NewAdminMovementConceptModalProps) {
-  const { userData } = useCurrentUser()
-  const { data: parentConcepts } = useParentMovementConcepts()
-  const createConceptMutation = useCreateMovementConcept()
-  const updateConceptMutation = useUpdateMovementConcept()
+  const { data: userData } = useCurrentUser();
+  const createConceptMutation = useCreateMovementConcept();
+  const updateConceptMutation = useUpdateMovementConcept();
+  
+  const isEditing = !!editingConcept;
+  const isLoading = createConceptMutation.isPending || updateConceptMutation.isPending;
 
-  const form = useForm<ConceptForm>({
-    resolver: zodResolver(conceptSchema),
+  const form = useForm<MovementConceptForm>({
+    resolver: zodResolver(movementConceptSchema),
     defaultValues: {
-      name: editingConcept?.name || "",
-      description: editingConcept?.description || "",
-      parent_id: editingConcept?.parent_id || "",
-      is_system: editingConcept?.is_system || false
-    }
-  })
+      name: editingConcept?.name || '',
+      parent_id: editingConcept?.parent_id || '',
+      is_system: editingConcept?.is_system || false,
+      view_mode: editingConcept?.view_mode || 'types',
+    },
+  });
 
-  const onSubmit = async (data: ConceptForm) => {
-    if (!userData?.organization) return
+  React.useEffect(() => {
+    if (isOpen) {
+      if (editingConcept) {
+        form.reset({
+          name: editingConcept.name,
+          parent_id: editingConcept.parent_id || '',
+          is_system: editingConcept.is_system,
+          view_mode: editingConcept.view_mode,
+        });
+      } else {
+        form.reset({
+          name: '',
+          parent_id: '',
+          is_system: false,
+          view_mode: 'types',
+        });
+      }
+    }
+  }, [isOpen, editingConcept, form]);
+
+  const onSubmit = async (data: MovementConceptForm) => {
+    if (!userData?.organization?.id) {
+      console.error('No organization ID available');
+      return;
+    }
+
+    const conceptData = {
+      ...data,
+      organization_id: userData.organization.id,
+      parent_id: data.parent_id || null,
+    };
 
     try {
-      if (editingConcept) {
+      if (isEditing && editingConcept) {
         await updateConceptMutation.mutateAsync({
           id: editingConcept.id,
-          ...data
-        })
+          ...conceptData,
+        });
       } else {
-        await createConceptMutation.mutateAsync({
-          ...data,
-          organization_id: data.is_system ? undefined : userData.organization.id
-        })
+        await createConceptMutation.mutateAsync(conceptData);
       }
-      
-      form.reset()
-      onClose()
+      onClose();
     } catch (error) {
-      console.error('Error saving concept:', error)
+      console.error('Error saving movement concept:', error);
     }
-  }
+  };
 
-  const isLoading = createConceptMutation.isPending || updateConceptMutation.isPending
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      form.handleSubmit(onSubmit)();
+    }
+  };
+
+  // Flatten parent concepts for select options
+  const flattenConcepts = (concepts: MovementConceptAdmin[], level = 0): Array<{ id: string; name: string; level: number }> => {
+    const result: Array<{ id: string; name: string; level: number }> = [];
+    
+    concepts.forEach(concept => {
+      // Skip the concept being edited to prevent circular references
+      if (concept.id !== editingConcept?.id) {
+        result.push({
+          id: concept.id,
+          name: concept.name,
+          level,
+        });
+        
+        if (concept.children && concept.children.length > 0) {
+          result.push(...flattenConcepts(concept.children, level + 1));
+        }
+      }
+    });
+    
+    return result;
+  };
+
+  const flatParentConcepts = flattenConcepts(parentConcepts);
 
   return (
-    <CustomModalLayout open={open} onClose={onClose}>
-      <CustomModalHeader 
-        title={editingConcept ? "Editar Concepto" : "Nuevo Concepto"}
+    <CustomModalLayout isOpen={isOpen} onClose={onClose}>
+      <CustomModalHeader
+        title={isEditing ? 'Editar Concepto de Movimiento' : 'Nuevo Concepto de Movimiento'}
         onClose={onClose}
       />
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CustomModalBody columns={1}>
+      <CustomModalBody columns={1}>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
+            
             <FormField
               control={form.control}
               name="name"
@@ -99,42 +178,21 @@ export function NewAdminMovementConceptModal({
 
             <FormField
               control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descripción del concepto"
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="parent_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Concepto Padre</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    value={field.value || ""}
-                  >
+                  <FormLabel>Concepto Padre (opcional)</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar concepto padre (opcional)" />
+                        <SelectValue placeholder="Seleccionar concepto padre..." />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="">Sin concepto padre</SelectItem>
-                      {parentConcepts?.map((concept) => (
+                      {flatParentConcepts.map((concept) => (
                         <SelectItem key={concept.id} value={concept.id}>
-                          {concept.name}
+                          {'—'.repeat(concept.level)} {concept.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -146,15 +204,36 @@ export function NewAdminMovementConceptModal({
 
             <FormField
               control={form.control}
+              name="view_mode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Modo de Vista</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar modo..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="types">Tipos</SelectItem>
+                      <SelectItem value="categories">Categorías</SelectItem>
+                      <SelectItem value="subcategories">Subcategorías</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="is_system"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Concepto del Sistema
-                    </FormLabel>
+                    <FormLabel>Concepto del Sistema</FormLabel>
                     <div className="text-sm text-muted-foreground">
-                      Los conceptos del sistema son globales y no se pueden eliminar
+                      Los conceptos del sistema no pueden ser editados por usuarios
                     </div>
                   </div>
                   <FormControl>
@@ -166,16 +245,28 @@ export function NewAdminMovementConceptModal({
                 </FormItem>
               )}
             />
-          </CustomModalBody>
 
-          <CustomModalFooter
-            onSave={() => form.handleSubmit(onSubmit)()}
-            saveText={editingConcept ? "Actualizar" : "Crear"}
-            saveDisabled={isLoading}
-            onCancel={onClose}
-          />
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </CustomModalBody>
+
+      <CustomModalFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isLoading}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {isLoading ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear')}
+        </Button>
+      </CustomModalFooter>
     </CustomModalLayout>
-  )
+  );
 }

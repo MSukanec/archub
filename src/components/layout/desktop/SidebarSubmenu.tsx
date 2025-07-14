@@ -164,6 +164,9 @@ export function SidebarSubmenu() {
         { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
         { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories' },
       ]},
+      { type: 'accordion', label: 'FINANZAS', items: [
+        { icon: DollarSign, label: 'Conceptos de Movimientos', href: '/admin/movement-concepts' },
+      ]},
       { type: 'accordion', label: 'MATERIALES', items: [
         { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },
         { icon: Package2, label: 'Materiales', href: '/admin/materials' },
