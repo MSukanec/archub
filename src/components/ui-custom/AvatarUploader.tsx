@@ -191,11 +191,6 @@ export function AvatarUploader({
               <Upload className="h-4 w-4 mr-2" />
               {currentImageUrl ? 'Cambiar' : 'Subir'}
             </Button>
-            {currentImageUrl && (
-              <Badge variant="secondary" className="text-xs">
-                Imagen actual
-              </Badge>
-            )}
           </div>
         </div>
       </div>
