@@ -26,7 +26,7 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 const movementFormSchema = z.object({
   creator_id: z.string().min(1, 'El creador es requerido'),
   movement_date: z.string().min(1, 'La fecha es requerida'),
-  type: z.string().min(1, 'El tipo es requerido'),
+  type_id: z.string().min(1, 'El tipo es requerido'),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   wallet_id: z.string().min(1, 'La billetera es requerida'),
   amount: z.number().min(0.01, 'El monto debe ser mayor a 0'),
@@ -56,7 +56,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     defaultValues: {
       creator_id: editingMovement?.creator_id || userData?.user?.id || '',
       movement_date: editingMovement?.movement_date || new Date().toISOString().split('T')[0],
-      type: editingMovement?.type || '',
+      type_id: editingMovement?.type_id || '',
       currency_id: editingMovement?.currency_id || '',
       wallet_id: editingMovement?.wallet_id || '',
       amount: editingMovement?.amount || 0,
@@ -81,7 +81,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       form.reset({
         creator_id: editingMovement.creator_id || userData?.user?.id || '',
         movement_date: editingMovement.movement_date || new Date().toISOString().split('T')[0],
-        type: editingMovement.type || '',
+        type_id: editingMovement.type_id || '',
         currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
         wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id,
         amount: editingMovement.amount || 0,
@@ -106,7 +106,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       form.reset({
         creator_id: currentMember?.id || '',
         movement_date: new Date().toISOString().split('T')[0],
-        type: '',
+        type_id: '',
         currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.wallet_id || '',
         amount: 0,
@@ -199,7 +199,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const selectedCurrency = currencies?.find(c => c.currency?.id === form.watch('currency_id'))?.currency
   const selectedWallet = wallets?.find(w => w.wallet_id === form.watch('wallet_id'))?.wallets
   const selectedCreator = members?.find(m => m.id === form.watch('creator_id'))
-  const selectedConcept = concepts?.find(c => c.id === form.watch('type'))
+  const selectedConcept = concepts?.find(c => c.id === form.watch('type_id'))
 
   const viewPanel = editingMovement ? (
     <>
@@ -309,7 +309,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           {/* Tipo */}
           <FormField
             control={form.control}
-            name="type"
+            name="type_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo *</FormLabel>
