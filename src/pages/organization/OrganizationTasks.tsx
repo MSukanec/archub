@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-import { NewListModal } from '@/modals/tasks/NewListModal';
+
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
@@ -20,7 +20,7 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Card } from '@/components/ui/card';
 
 function TasksContent() {
-  const [showNewListModal, setShowNewListModal] = useState(false);
+
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -71,7 +71,7 @@ function TasksContent() {
         id: 'create',
         icon: <Plus className="h-6 w-6" />,
         label: 'Nueva Lista',
-        onClick: () => setShowNewListModal(true),
+        onClick: () => openModal('list', { boardId: currentBoardId }),
         variant: 'primary'
       },
       slot4: {
@@ -344,7 +344,7 @@ function TasksContent() {
             cards={cards}
             boardId={currentBoardId || ''}
             onCardMove={handleCardMove}
-            onCreateList={() => setShowNewListModal(true)}
+            onCreateList={() => openModal('list', { boardId: currentBoardId })}
             onDeleteList={handleDeleteList}
             onDeleteCard={handleDeleteCard}
             onCardEdit={setSelectedCard}
@@ -354,14 +354,6 @@ function TasksContent() {
       </div>
 
       {/* Modals */}
-      
-      {currentBoardId && (
-        <NewListModal
-          boardId={currentBoardId}
-          open={showNewListModal}
-          onClose={() => setShowNewListModal(false)}
-        />
-      )}
 
       {/* Card Details Modal - OUTSIDE Layout to fix z-index issues */}
       {selectedCard && (

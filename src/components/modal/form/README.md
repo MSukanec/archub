@@ -1,113 +1,65 @@
-# 🧱 SISTEMA DE MODALES DE ARCHUB — GUÍA OFICIAL
+🧩 README: Cómo crear un nuevo Modal en Archub (modo correcto)
+✅ Arquitectura general
+Todos los modales en Archub siguen esta estructura unificada:
 
-Esta guía explica cómo construir, reemplazar o mantener cualquier modal dentro del sistema de modales nuevo de Archub.  
-Debe seguirse **SIEMPRE**. No se deben volver a usar `CustomModalLayout`, `CustomModalHeader`, `CustomModalFooter`, ni estructuras anteriores.
+ModalFactory.tsx → ComponenteModal.tsx → FormModalLayout.tsx
+Nunca se debe usar CustomModal, CustomModalHeader, CustomModalFooter, ni CustomModalBody en los nuevos modales.
+En su lugar se usa FormModalLayout con sus secciones internas bien definidas.
 
----
+📁 Ubicación del archivo
+Guardar el nuevo archivo en: src/components/modal/modals
 
-## 📦 ESTRUCTURA DE ARCHIVOS
-
-Todos los archivos del sistema viven dentro de:
-
-src/components/modal/form/
-
-yaml
+🧱 Estructura mínima del archivo de modal
+tsx
 Copiar
 Editar
+import { FormModalLayout } from "@/components/form/modal/FormModalLayout"
+import { FormModalBody } from "@/components/form/modal/FormModalBody"
+import { FormModalFooter } from "@/components/form/modal/FormModalFooter"
+import { FormModalHeader } from "@/components/form/modal/FormModalHeader"
 
-Los principales son:
+export default function MemberFormModal() {
+  return (
+    <FormModalLayout>
+      <FormModalHeader title="Invitar Miembro" />
 
-| Archivo                    | Función                                                                 |
-|----------------------------|-------------------------------------------------------------------------|
-| `FormModalLayout.tsx`      | Ensambla header, panel y footer. No aplica padding.                    |
-| `FormModalHeader.tsx`      | Header visual reutilizable con título, ícono, y acciones.              |
-| `FormModalFooter.tsx`      | Footer estandarizado. Controla totalmente la estética de los botones.  |
-| `modalPanelStore.ts`       | Zustand para cambiar entre `view`, `edit`, `subform`.                  |
-| `ModalFactory.tsx`         | Muestra el modal correcto según tipo.                                  |
-| `useGlobalModalStore.ts`   | Zustand para abrir/cerrar modales desde cualquier lugar.               |
-| `types.ts`                 | Tipos base: `ModalType`, interfaces comunes.                           |
+      <FormModalBody>
+        {/* Aquí van los campos del formulario */}
+      </FormModalBody>
 
----
+      <FormModalFooter
+        cancelText="Cancelar"
+        submitText="Invitar"
+        onSubmit={() => {}} // reemplazar con la función real
+      />
+    </FormModalLayout>
+  )
+}
+✅ Estilos y comportamiento
+El modal entero debe tener bordes redondeados, aplicados en FormModalLayout.tsx mediante rounded-xl.
 
-## ⚙️ FUNCIONAMIENTO GENERAL
+El modal no debe tener doble borde en el header. Eso ya está resuelto internamente con la línea decorativa.
 
-Todos los modales usan una estructura común:
+Todos los contenidos deben ir dentro de FormModalBody, con scroll interno si el contenido es largo.
 
-```tsx
-<FormModalLayout
-  viewPanel={...}
-  editPanel={...}
-  subformPanel={...}
-  headerContent={...}
-  footerContent={...}
-  onClose={handleClose}
-/>
-La navegación entre paneles se maneja con:
+Los botones de acción deben ir siempre en FormModalFooter.
 
-const { currentPanel, setPanel } = useModalPanelStore();
-Los botones que activan otros paneles deben usar setPanel('subform'), setPanel('edit'), etc.
+🔁 En ModalFactory.tsx
+Asegurate de registrar correctamente el nuevo modal en ModalFactory.tsx. Por ejemplo:
 
-✅ HEADER Y FOOTER
-🧩 FormModalHeader
-Se usa así:
+case "member-form":
+  return <MemberFormModal />
+🧪 Test mínimo
+Luego de implementarlo, abrí el modal desde la app y verificá:
 
-<FormModalHeader
-  title="Editar Movimiento"
-  icon={Pen}
-  leftActions={<Button onClick={() => setPanel('view')}>Volver</Button>}
-  rightActions={<Button>Acción</Button>}
-/>
-Tiene padding interno y estilo integrado. No se le debe agregar padding externo.
+✅ Se renderiza correctamente
 
-✅ FormModalFooter
-Se maneja por completo internamente. Solo recibe texto y handlers:
+✅ Tiene el título esperado
 
-<FormModalFooter
-  leftLabel="Cancelar"
-  onLeftClick={handleCancel}
-  rightLabel="Guardar"
-  onRightClick={handleSave}
-/>
-Si se pasan los dos botones:
+✅ Tiene los campos necesarios
 
-El izquierdo mide 25%
+✅ Tiene botones funcionales
 
-El derecho mide 75%
+✅ No hay doble línea en el header
 
-Si se pasa solo rightLabel, ocupa el 100%
-
-⚠️ No se le pasa botones completos. Solo label y onClick.
-
-🛑 PROHIBIDO
-❌ No usar CustomModal* anteriores.
-
-❌ No agregar padding directamente en FormModalLayout.tsx.
-
-❌ No definir estilos de botones desde el modal individual.
-
-❌ No modificar directamente ModalFactory.tsx sin seguir esta estructura.
-
-
-🔁 ¿CÓMO CREAR UN NUEVO MODAL?
-Crear NombreEntidadModal.tsx dentro de src/components/modal/modals/.
-
-Usar FormModalLayout.
-
-Controlar la navegación con modalPanelStore.
-
-Agregar el nuevo modal a ModalFactory.tsx.
-
-Desde cualquier parte de la app, podés abrirlo así:
-
-const { openModal } = useGlobalModalStore();
-openModal("nombreEntidad", { id: 123 });
-
-# En el caso de necesitar componentes para buscar MIEMBROS (tipo creador) usar src/components/ui-custom/UserSelector.tsx.
-
-# En el caso de usar campos de teléfono, usar src/components/ui-custom/PhoneInput.tsx.
-
-# En el caso de que necesitemos la funcionalidad de usar sub-secciones, usar el componente src/components/modal/form/FormSubsectionButton.tsx.
-  
-# En el caso de que te pida REHACER un modal con estas nuevas lógicas, primero ANALIZAR que teníamos antes para replicar las funcionalidades correctamente.
-
-Esta guía es la fuente de verdad del sistema de modales en Archub. Si Replit necesita saber cómo implementar o reemplazar un modal, DEBE seguir esta estructura exacta.
+✅ Tiene bordes redondeados en todo el contenedor

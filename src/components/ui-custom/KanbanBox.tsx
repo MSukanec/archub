@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { NewListModal } from '@/modals/tasks/NewListModal';
+
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
@@ -30,7 +30,7 @@ interface KanbanBoxProps {
 }
 
 export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onDeleteList, onDeleteCard, onCardEdit, loading }: KanbanBoxProps) {
-  const [editingListId, setEditingListId] = useState<string | null>(null);
+
   const [completedAccordionState, setCompletedAccordionState] = useState<Record<string, boolean>>({});
   const { openModal } = useGlobalModalStore();
   
@@ -184,7 +184,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setEditingListId(list.id)}>
+                                <DropdownMenuItem onClick={() => openModal('list', { boardId, list, isEditing: true })}>
                                   <Edit className="h-3 w-3 mr-2" />
                                   Editar lista
                                 </DropdownMenuItem>
@@ -560,15 +560,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
         </Droppable>
       </DragDropContext>
 
-      {/* Modals */}
-      {editingListId && (
-        <NewListModal
-          boardId={boardId}
-          editingList={lists.find(l => l.id === editingListId)}
-          open={!!editingListId}
-          onClose={() => setEditingListId(null)}
-        />
-      )}
+      {/* Modals are managed by ModalFactory now */}
 
 
     </>
