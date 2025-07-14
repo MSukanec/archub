@@ -1218,10 +1218,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     />
   )
 
-  return {
-    viewPanel,
-    editPanel,
-    headerContent,
-    footerContent
-  }
+  return (
+    <FormModalLayout>
+      {headerContent}
+      {editPanel}
+      {footerContent}
+    </FormModalLayout>
+  )
 }
