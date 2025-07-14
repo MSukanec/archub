@@ -71,15 +71,15 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
               className={cn(
                 "flex items-center justify-center rounded-l-md rounded-r-none border-r-0 min-w-[85px]",
                 "text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground",
-                "transition-all duration-150",
-                "hover:bg-[var(--input-bg)] hover:border-[var(--input-border)]",
-                "focus:bg-[var(--input-bg)] focus:border-[var(--input-border)]",
+                "transition-none",
+                "hover:bg-[var(--input-bg)] hover:border-[var(--input-border)] hover:text-foreground",
+                "focus:bg-[var(--input-bg)] focus:border-[var(--input-border)] focus:text-foreground",
                 "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent",
                 "disabled:opacity-60 disabled:cursor-not-allowed"
               )}
             >
               <div className="flex items-center gap-1.5">
-                <span className="text-xs">{selectedCountry.flag}</span>
+                <span className="text-sm">{selectedCountry.flag}</span>
                 <span className="text-xs font-bold">{selectedCountry.dialCode}</span>
                 <ChevronDown className="h-3 w-3 opacity-50 ml-0.5" />
               </div>
@@ -100,14 +100,14 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                   onClick={() => handleCountrySelect(country)}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2 text-xs text-left",
-                    "hover:bg-[var(--accent-bg)] hover:text-[var(--accent-fg)]",
+                    "hover:bg-accent hover:text-accent-foreground",
                     selectedCountry.code === country.code && 
-                    "bg-[var(--accent-bg)] text-[var(--accent-fg)]"
+                    "bg-accent text-accent-foreground"
                   )}
                 >
-                  <span className="text-xs">{country.flag}</span>
+                  <span className="text-sm">{country.flag}</span>
                   <span className="flex-1 font-medium text-xs">{country.name}</span>
-                  <span className="text-xs text-[var(--muted-foreground)]">
+                  <span className="text-xs text-muted-foreground">
                     {country.dialCode}
                   </span>
                 </button>
