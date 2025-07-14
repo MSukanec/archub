@@ -64,11 +64,11 @@
 
   /* Buttons - Secondary */
   --button-secondary-bg: hsl(0, 0%, 97%);
-  --button-secondary-text: hsl(0, 0%, 50%);
-  --button-secondary-border: hsl(0, 0%, 70%);
-  --button-secondary-hover-bg: hsl(0, 0%, 93%);
-  --button-secondary-hover-text: hsl(0, 0%, 50%);
-  --button-secondary-hover-border: hsl(0, 0%, 70%);
+  --button-secondary-text: hsl(76, 100%, 40%);
+  --button-secondary-border: hsl(76, 100%, 40%);
+  --button-secondary-hover-bg: hsl(76, 100%, 95%);
+  --button-secondary-hover-text: hsl(76, 100%, 40%);
+  --button-secondary-hover-border: hsl(76, 100%, 40%);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
@@ -223,11 +223,11 @@
 
   /* Buttons - Secondary */
   --button-secondary-bg: hsl(250, 6%, 19%);
-  --button-secondary-text: hsl(0, 0%, 98%);
-  --button-secondary-border: hsl(250, 6%, 19%);
-  --button-secondary-hover-bg: hsl(240, 8%, 12%);
-  --button-secondary-hover-text: hsl(0, 0%, 98%);
-  --button-secondary-hover-border: hsl(240, 8%, 25%);
+  --button-secondary-text: hsl(76, 100%, 40%);
+  --button-secondary-border: hsl(76, 100%, 40%);
+  --button-secondary-hover-bg: hsl(76, 100%, 15%);
+  --button-secondary-hover-text: hsl(76, 100%, 40%);
+  --button-secondary-hover-border: hsl(76, 100%, 40%);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;

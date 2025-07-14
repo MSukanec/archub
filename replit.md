@@ -119,6 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 14, 2025. Modal system reorganization and secondary button color standardization - COMPLETED
+  • Moved all CustomModal components to /components/modal/legacy/ directory for better organization
+  • Updated all import references across 50+ files automatically using sed commands
+  • Standardized secondary button colors to use --accent (hsl(76, 100%, 40%)) for border and text content
+  • Enhanced visual consistency between primary and secondary buttons throughout the application
+  • Modal structure now organized: /form/ (new system), /factory/ (modal factory), /legacy/ (CustomModal compatibility)
+  • Both light and dark mode secondary buttons now use accent color for better brand consistency
 - July 14, 2025. AvatarUploader component and organization improvements completed - COMPLETED
   • Created reusable AvatarUploader component in src/components/ui-custom/ with automatic square cropping functionality
   • Component features: file validation, 400x400 pixel square cropping, Supabase upload, progress states, fallback avatar with initials
