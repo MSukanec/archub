@@ -1,12 +1,11 @@
 import { create } from 'zustand';
-
-export type ModalType = "member" | "movement" | "bitacora" | "contact" | "gallery";
+import { ModalType, ModalData } from './types';
 
 interface GlobalModalState {
   open: boolean;
   type: ModalType | null;
-  data: any;
-  openModal: (type: ModalType, data?: any) => void;
+  data: ModalData | null;
+  openModal: (type: ModalType, data?: ModalData) => void;
   closeModal: () => void;
 }
 

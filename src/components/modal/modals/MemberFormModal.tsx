@@ -6,11 +6,11 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { FormModalLayout } from './FormModalLayout';
-import { FormModalHeader } from './FormModalHeader';
-import { FormModalFooter } from './FormModalFooter';
-import { useModalPanelStore } from './modalPanelStore';
-import { useGlobalModalStore } from './useGlobalModalStore';
+import { FormModalLayout } from '../form/FormModalLayout';
+import { FormModalHeader } from '../form/FormModalHeader';
+import { FormModalFooter } from '../form/FormModalFooter';
+import { useModalPanelStore } from '../form/modalPanelStore';
+import { useGlobalModalStore } from '../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -27,7 +27,7 @@ interface MemberModalProps {
   editingMember?: any;
 }
 
-export function MemberModal({ editingMember }: MemberModalProps) {
+export function MemberFormModal({ editingMember }: MemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();

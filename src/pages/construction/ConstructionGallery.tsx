@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
 
-import { useGlobalModalStore } from '@/components/modal/factory';
+import { useGlobalModalStore } from '@/components/modal';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
 import { 
   Images, 
