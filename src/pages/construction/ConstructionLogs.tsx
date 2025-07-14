@@ -517,6 +517,12 @@ export default function ConstructionLogs() {
                     onEdit={handleEditSiteLog}
                     onDelete={handleDeleteSiteLog}
                     onToggleFavorite={toggleFavorite}
+                    onImageClick={(imageUrl, allImages) => {
+                      const imageIndex = imageUrls.indexOf(imageUrl);
+                      if (imageIndex !== -1) {
+                        lightbox.openLightbox(imageIndex);
+                      }
+                    }}
                   />
                 );
               }
