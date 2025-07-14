@@ -47,7 +47,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const { data: members } = useOrganizationMembers(userData?.organization?.id)
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
   const { data: wallets } = useOrganizationWallets(userData?.organization?.id)
-  const { data: concepts } = useMovementConcepts()
+  const { data: concepts } = useMovementConcepts('types')
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
