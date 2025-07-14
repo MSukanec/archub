@@ -19,7 +19,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal";
-import { NewProjectModal } from "@/modals/project/NewProjectModal";
+import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { MobileMenu } from "../mobile/MobileMenu";
 import { useMobileMenuStore } from "../mobile/useMobileMenuStore";
 import { MobileAvatarMenu } from "../mobile/MobileAvatarMenu";
@@ -56,8 +56,8 @@ export function Header({
 }: HeaderProps = {}) {
   const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
   const isMobile = useMobile();
-  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { openModal } = useGlobalModalStore();
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
   const { isOpen: isMobileAvatarMenuOpen, openMenu: openAvatarMenu, closeMenu: closeAvatarMenu } = useMobileAvatarMenuStore();
 
@@ -321,7 +321,7 @@ export function Header({
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setShowNewProjectModal(true)}>
+                  <DropdownMenuItem onClick={() => openModal('project', {})}>
                     <Folder className="mr-2 h-4 w-4" />
                     Crear Nuevo Proyecto
                   </DropdownMenuItem>
@@ -559,13 +559,7 @@ export function Header({
       />
     )}
 
-    {/* New Project Modal */}
-    {showNewProjectModal && (
-      <NewProjectModal
-        open={showNewProjectModal}
-        onClose={() => setShowNewProjectModal(false)}
-      />
-    )}
+
 
     {/* Mobile Menu */}
     {isMobileMenuOpen && <MobileMenu onClose={closeMenu} isOpen={isMobileMenuOpen} />}

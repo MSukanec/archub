@@ -19,7 +19,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
-import { NewProjectModal } from '@/modals/project/NewProjectModal'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
@@ -30,11 +30,11 @@ export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
-  const [editingProject, setEditingProject] = useState<any>(null)
+
 
   const [projectToDelete, setProjectToDelete] = useState<any>(null)
   const [showDangerousConfirmation, setShowDangerousConfirmation] = useState(false)
-  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const { openModal } = useGlobalModalStore()
   const [isMobile, setIsMobile] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
@@ -78,7 +78,7 @@ export default function OrganizationProjects() {
           icon: <Plus className="w-5 h-5" />,
           label: 'Crear',
           variant: 'primary',
-          onClick: () => setShowNewProjectModal(true)
+          onClick: () => openModal('project', {})
         },
         slot4: {
           id: 'filter',
@@ -186,9 +186,7 @@ export default function OrganizationProjects() {
   }
 
   const handleEdit = (project: any) => {
-    setEditingProject(project)
-    setShowNewProjectModal(true)
-    // Don't call handleSelectProject here to prevent unwanted navigation
+    openModal('project', { editingProject: project, isEditing: true })
   }
 
   const handleDeleteClick = (project: any) => {
@@ -310,7 +308,7 @@ export default function OrganizationProjects() {
     <CustomRestricted key="new-project" feature="max_projects" current={filteredProjects?.length || 0}>
       <Button 
         className="h-8 px-3 text-sm"
-        onClick={() => setShowNewProjectModal(true)}
+        onClick={() => openModal('project', {})}
       >
         <Plus className="w-4 h-4 mr-2" />
         Nuevo Proyecto
@@ -414,7 +412,7 @@ export default function OrganizationProjects() {
             action={
               !searchValue && filterByStatus === 'all' && (
                 <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-                  <Button onClick={() => setShowNewProjectModal(true)}>
+                  <Button onClick={() => openModal('project', {})}>
                     <Plus className="w-4 h-4 mr-2" />
                     Crear Primer Proyecto
                   </Button>
@@ -429,15 +427,7 @@ export default function OrganizationProjects() {
       </div>
     </Layout>
 
-    {/* New Project Modal - Outside Layout to render as overlay */}
-    <NewProjectModal
-      open={showNewProjectModal}
-      onClose={() => {
-        setShowNewProjectModal(false)
-        setEditingProject(null)
-      }}
-      editingProject={editingProject}
-    />
+
 
     {/* Modal de confirmación peligrosa para eliminar */}
     {projectToDelete && (
