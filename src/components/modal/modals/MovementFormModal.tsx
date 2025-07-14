@@ -134,6 +134,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
       const isConversionType = selectedConcept?.view_mode === 'conversion'
       
+      console.log('Conversion detection:', {
+        typeId,
+        selectedConcept,
+        view_mode: selectedConcept?.view_mode,
+        isConversionType,
+        allConcepts: concepts
+      })
+      
       // Si cambió a conversión, preservar creador y fecha
       if (isConversionType && !isConversion) {
         const currentCreator = form.getValues('created_by')
