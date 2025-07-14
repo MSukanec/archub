@@ -328,17 +328,17 @@ export function TestFormModal({ open, onClose }: TestFormModalProps) {
         return (
           <FormModalFooter
             leftActions={
-              <Badge variant="secondary">
-                Última modificación: hace 2 días
-              </Badge>
+              <Button variant="secondary" className="w-full" onClick={handleClose}>
+                Cancelar
+              </Button>
             }
             rightActions={
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setPanel('edit')}>
+              <div className="flex gap-2 w-full">
+                <Button variant="outline" className="flex-1" onClick={() => setPanel('edit')}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   Editar
                 </Button>
-                <Button variant="outline" onClick={() => setPanel('subform')}>
+                <Button className="flex-1" onClick={() => setPanel('subform')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar Evento
                 </Button>
