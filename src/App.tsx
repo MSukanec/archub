@@ -60,6 +60,7 @@ import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import AdminCategories from "@/pages/admin/AdminCategories";
 
 import NotFound from "@/pages/NotFound";
+import { ModalFactory } from "@/components/modal/factory";
 
 function Router() {
   return (
@@ -343,6 +344,7 @@ function App() {
         <MobileActionBarProvider>
           <Toaster />
           <Router />
+          <ModalFactory />
         </MobileActionBarProvider>
       </TooltipProvider>
     </QueryClientProvider>

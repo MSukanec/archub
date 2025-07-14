@@ -31,6 +31,7 @@ import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
 import { TestFormModal } from '@/components/modal/form/TestFormModal';
+import { OpenMovementButton, useGlobalModalStore } from '@/components/modal/factory';
 import { 
   Images, 
   Filter, 
@@ -51,6 +52,30 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+// Component for testing ModalFactory
+function GlobalModalTestButtons() {
+  const { openModal } = useGlobalModalStore();
+  
+  return (
+    <div className="flex gap-2">
+      <Button
+        onClick={() => openModal("bitacora", { id: "bit-123", title: "Test Bitácora" })}
+        variant="outline"
+        size="sm"
+      >
+        Bitácora
+      </Button>
+      <Button
+        onClick={() => openModal("contact", { id: "contact-456", name: "Juan Pérez" })}
+        variant="outline" 
+        size="sm"
+      >
+        Contacto
+      </Button>
+    </div>
+  );
+}
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -411,6 +436,8 @@ export default function ConstructionGallery() {
       setEntryTypeFilter('all');
     },
     actions: [
+      <OpenMovementButton key="factory-movement" />,
+      <GlobalModalTestButtons key="factory-test" />,
       <Button
         key="test-modal"
         onClick={() => setShowTestModal(true)}
