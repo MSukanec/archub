@@ -16,7 +16,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File } from 'lucide-react';
-import { UserSelector } from '@/components/ui-custom/UserSelector';
+import UserSelector from '@/components/ui-custom/UserSelector';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -42,6 +43,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
+  const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
@@ -167,9 +169,16 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
                   <FormLabel>Creador</FormLabel>
                   <FormControl>
                     <UserSelector
+                      users={organizationMembers?.map(member => ({
+                        id: member.user.id,
+                        full_name: member.user.full_name || `${member.user_data?.first_name || ''} ${member.user_data?.last_name || ''}`.trim(),
+                        email: member.user.email,
+                        avatar_url: member.user.avatar_url,
+                        first_name: member.user_data?.first_name,
+                        last_name: member.user_data?.last_name
+                      })) || []}
                       value={field.value}
                       onChange={field.onChange}
-                      organizationId={userData?.preferences?.last_organization_id || ''}
                       placeholder="Seleccionar creador"
                     />
                   </FormControl>
