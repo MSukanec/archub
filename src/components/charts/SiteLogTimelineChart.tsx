@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FileText, CalendarDays, Users, Truck, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, CalendarDays, Users, Truck } from 'lucide-react'
 
 interface SiteLogTimelineData {
   date: string
@@ -23,11 +23,6 @@ interface SiteLogTimelineChartProps {
 type TimePeriod = 'days' | 'weeks' | 'months'
 
 export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriodChange }: SiteLogTimelineChartProps) {
-  // Drag functionality for timeline scrolling
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, scrollLeft: 0 })
-  const [timelineElement, setTimelineElement] = useState<HTMLDivElement | null>(null)
-  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
   
   const getTimePeriodLabel = (period: TimePeriod) => {
     switch (period) {
@@ -59,51 +54,6 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
 
   // Categories in reverse order for display (top to bottom: Maquinarias, Asistencias, Eventos, Archivos)
   const displayCategories = [...categories].reverse()
-
-  // Drag functionality handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!timelineElement) return
-    setIsDragging(true)
-    setDragStart({
-      x: e.pageX - timelineElement.offsetLeft,
-      scrollLeft: timelineElement.scrollLeft,
-    })
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !timelineElement) return
-    e.preventDefault()
-    const x = e.pageX - timelineElement.offsetLeft
-    const walk = (x - dragStart.x) * 2 // Scroll speed multiplier
-    timelineElement.scrollLeft = dragStart.scrollLeft - walk
-  }
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
-
-  const handleMouseLeave = () => {
-    setIsDragging(false)
-  }
-
-  // Smooth scroll functionality for hover navigation
-  const startSmoothScroll = (direction: 'left' | 'right') => {
-    if (scrollIntervalRef.current) return
-    
-    scrollIntervalRef.current = setInterval(() => {
-      if (timelineElement) {
-        const scrollAmount = direction === 'left' ? -2 : 2 // Small increments for smooth scroll
-        timelineElement.scrollLeft += scrollAmount
-      }
-    }, 16) // ~60fps for smooth animation
-  }
-
-  const stopSmoothScroll = () => {
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current)
-      scrollIntervalRef.current = null
-    }
-  }
 
   if (isLoading) {
     return (
@@ -163,143 +113,107 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
       </CardHeader>
       
       <CardContent className="pt-8">
-        {/* Timeline Container with Drag Navigation */}
-        <div className="relative pb-8">
-          {/* Y-axis labels - fixed position, doesn't scroll */}
-          <div className="absolute left-0 top-0 z-10 h-32">
-            {displayCategories.map((category, index) => {
-              const topPosition = (index * 100) / (displayCategories.length - 1)
-              return (
-                <div 
-                  key={category.key} 
-                  className="absolute flex items-center justify-center w-6 bg-background"
-                  style={{ 
-                    top: `${topPosition}%`,
-                    transform: 'translateY(-50%)'
-                  }}
-                >
-                  <category.icon className="w-4 h-4" style={{ color: category.color }} />
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Left Hover Area - for scroll navigation */}
-          <div
-            className="absolute left-8 z-20 w-[15px] h-32 bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
-            onMouseEnter={() => startSmoothScroll('left')}
-            onMouseLeave={stopSmoothScroll}
-          >
-            <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
-              <ChevronLeft className="w-3 h-3 text-muted-foreground" />
+        {/* Chart area - separated from dates */}
+        <div className="h-32">
+          {/* Custom timeline visualization */}
+          <div className="relative w-full h-full">
+            {/* Y-axis labels - icons perfectly aligned with horizontal lines */}
+            <div className="absolute left-0 top-0 h-full">
+              {displayCategories.map((category, index) => {
+                // Perfect alignment: equal spacing across full height
+                const topPosition = (index * 100) / (displayCategories.length - 1)
+                return (
+                  <div 
+                    key={category.key} 
+                    className="absolute flex items-center justify-center w-6"
+                    style={{ 
+                      top: `${topPosition}%`,
+                      transform: 'translateY(-50%)'
+                    }}
+                  >
+                    <category.icon className="w-4 h-4" style={{ color: category.color }} />
+                  </div>
+                )
+              })}
             </div>
-          </div>
 
-          {/* Right Hover Area - for scroll navigation */}
-          <div
-            className="absolute right-0 z-20 w-[15px] h-32 bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
-            onMouseEnter={() => startSmoothScroll('right')}
-            onMouseLeave={stopSmoothScroll}
-          >
-            <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
-              <ChevronRight className="w-3 h-3 text-muted-foreground" />
-            </div>
-          </div>
-
-          {/* Scrollable Timeline Container */}
-          <div className="ml-8 relative">
-            <div 
-              ref={setTimelineElement}
-              className={`overflow-x-auto h-32 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hidden`}
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-                userSelect: isDragging ? 'none' : 'auto'
-              }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseLeave}
-            >
-              {/* Timeline content with table structure */}
-              <div 
-                className="relative h-full"
-                style={{ 
-                  minWidth: `${Math.max(data.length * 80, 1600)}px`,
-                  width: `${Math.max(data.length * 80, 1600)}px`
-                }}
-              >
-                {/* Horizontal grid lines */}
-                <div className="absolute inset-0 h-full">
-                  {displayCategories.map((_, index) => {
-                    const topPosition = (index * 100) / (displayCategories.length - 1)
-                    return (
-                      <div 
-                        key={index} 
-                        className="absolute border-b border-dashed opacity-30 w-full" 
-                        style={{ 
-                          borderColor: 'var(--chart-grid-text)',
-                          top: `${topPosition}%`
-                        }} 
-                      />
-                    )
-                  })}
-                </div>
-                
-                {/* Vertical grid lines and data points with fixed column width */}
-                <div className="absolute inset-0 flex">
-                  {data.map((dayData, dayIndex) => (
-                    <div 
-                      key={dayIndex} 
-                      className="relative border-l border-dashed opacity-30 h-full"
-                      style={{ 
-                        width: '80px',
-                        borderColor: 'var(--chart-grid-text)'
-                      }}
-                    >
-                      {/* Data points for this day */}
-                      {displayCategories.map((category, categoryIndex) => {
-                        const count = dayData[category.key as keyof SiteLogTimelineData] as number
-                        const topPosition = (categoryIndex * 100) / (displayCategories.length - 1)
-                        return (
-                          <div 
-                            key={category.key} 
-                            className="absolute flex items-center justify-center w-full"
-                            style={{ 
-                              top: `${topPosition}%`,
-                              transform: 'translateY(-50%)'
-                            }}
-                          >
-                            {count > 0 && (
-                              <div
-                                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white"
-                                style={{ backgroundColor: category.color }}
-                              >
-                                {count}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ))}
-                </div>
-
-                {/* X-axis (dates) - scrolls with content */}
-                <div className="absolute top-full pt-4 w-full flex">
-                  {data.map((dayData, index) => (
+            {/* Chart area */}
+            <div className="ml-8 h-full relative">
+              {/* Horizontal grid lines - exactly aligned with icons */}
+              <div className="absolute inset-0 h-full">
+                {displayCategories.map((_, index) => {
+                  // Same formula as icons for perfect alignment
+                  const topPosition = (index * 100) / (displayCategories.length - 1)
+                  return (
                     <div 
                       key={index} 
-                      className="text-xs text-muted-foreground text-center"
-                      style={{ width: '80px' }}
-                    >
-                      {dayData.date}
-                    </div>
-                  ))}
-                </div>
+                      className="absolute border-b border-dashed opacity-30 w-full" 
+                      style={{ 
+                        borderColor: 'var(--chart-grid-text)',
+                        top: `${topPosition}%`
+                      }} 
+                    />
+                  )
+                })}
+              </div>
+              
+              {/* Vertical grid lines - from first to last horizontal line */}
+              <div className="absolute inset-0 flex justify-around">
+                {data.map((_, index) => (
+                  <div 
+                    key={index} 
+                    className="border-l border-dashed opacity-30 h-full" 
+                    style={{ 
+                      borderColor: 'var(--chart-grid-text)'
+                    }} 
+                  />
+                ))}
+              </div>
+
+              {/* Data points - positioned exactly at grid intersections */}
+              <div className="absolute inset-0 flex justify-around">
+                {data.map((dayData, dayIndex) => (
+                  <div key={dayIndex} className="h-full relative">
+                    {displayCategories.map((category, categoryIndex) => {
+                      const count = dayData[category.key as keyof SiteLogTimelineData] as number
+                      // Same formula as icons and lines for perfect intersection positioning
+                      const topPosition = (categoryIndex * 100) / (displayCategories.length - 1)
+                      return (
+                        <div 
+                          key={category.key} 
+                          className="absolute flex items-center justify-center"
+                          style={{ 
+                            top: `${topPosition}%`,
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)'
+                          }}
+                        >
+                          {count > 0 && (
+                            <div
+                              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white"
+                              style={{ backgroundColor: category.color }}
+                            >
+                              {count}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* X-axis (dates) - BELOW the chart, perfectly aligned with vertical lines */}
+        <div className="relative">
+          <div className="ml-8 flex justify-around pt-6">
+            {data.map((dayData, index) => (
+              <div key={index} className="text-xs text-muted-foreground text-center flex-1">
+                {dayData.date}
+              </div>
+            ))}
           </div>
         </div>
         

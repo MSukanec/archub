@@ -33,18 +33,18 @@ export function useSiteLogTimeline(
 
       switch (timePeriod) {
         case 'days': // Now shows individual days
-          startDate = subDays(now, 20) // Last 21 days including today
+          startDate = subDays(now, 6) // Last 7 days including today
           intervals = eachDayOfInterval({ start: startDate, end: now })
           break
         case 'weeks': // Now shows months
-          startDate = subMonths(now, 11) // Last 12 months including current month
+          startDate = subMonths(now, 6) // Last 7 months including current month
           intervals = eachMonthOfInterval({ start: startDate, end: now })
           break
         case 'months': // Now shows quarters
-          startDate = subMonths(now, 24) // Last 8 quarters (24 months back)
+          startDate = subMonths(now, 18) // Last 7 quarters (21 months back)
           intervals = []
           // Generate quarterly intervals manually
-          for (let i = 7; i >= 0; i--) {
+          for (let i = 6; i >= 0; i--) {
             const quarterDate = subMonths(now, i * 3)
             intervals.push(startOfQuarter(quarterDate))
           }
