@@ -37,7 +37,8 @@ const getTimeBasedGreeting = () => {
 };
 
 // Function to get organization initials
-const getOrganizationInitials = (name: string) => {
+const getOrganizationInitials = (name: string | null | undefined) => {
+  if (!name) return "ORG";
   return name
     .split(" ")
     .map((word) => word.charAt(0))
