@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File } from 'lucide-react';
+import { UserSelector } from '@/components/ui-custom/UserSelector';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -25,6 +26,7 @@ const supabase = createClient(
 const gallerySchema = z.object({
   title: z.string().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
+  created_by: z.string().min(1, 'El creador es obligatorio'),
 });
 
 type GalleryFormData = z.infer<typeof gallerySchema>;
@@ -46,6 +48,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
     defaultValues: {
       title: '',
       description: '',
+      created_by: userData?.user.id || '',
     },
   });
 
@@ -57,14 +60,16 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
       reset({
         title: editingFile.title || '',
         description: editingFile.description || '',
+        created_by: editingFile.created_by || userData?.user.id || '',
       });
     } else {
       reset({
         title: '',
         description: '',
+        created_by: userData?.user.id || '',
       });
     }
-  }, [editingFile, reset]);
+  }, [editingFile, reset, userData]);
 
   const uploadMutation = useMutation({
     mutationFn: async (data: GalleryFormData) => {
@@ -153,33 +158,19 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
     <div className="space-y-6 p-4">
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Title Field */}
+            {/* Creator Field */}
             <FormField
               control={form.control}
-              name="title"
+              name="created_by"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título</FormLabel>
+                  <FormLabel>Creador</FormLabel>
                   <FormControl>
-                    <Input placeholder="Título del archivo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description Field */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (Opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descripción del archivo"
-                      rows={3}
-                      {...field}
+                    <UserSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                      organizationId={userData?.preferences?.last_organization_id || ''}
+                      placeholder="Seleccionar creador"
                     />
                   </FormControl>
                   <FormMessage />
@@ -246,6 +237,40 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
                 )}
               </div>
             )}
+
+            {/* Title Field */}
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Título del archivo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Description Field */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (Opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Descripción del archivo"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
       </div>

@@ -13,8 +13,6 @@ export function ModalFactory() {
 
   if (!open || !type) return null;
 
-  console.log('ModalFactory rendering:', { open, type, data });
-
   switch (type) {
     case 'movement':
       return <MovementModal open={open} onClose={closeModal} data={data} />;
@@ -23,7 +21,6 @@ export function ModalFactory() {
     case 'contact':
       return <ContactModal open={open} onClose={closeModal} data={data} />;
     case 'gallery':
-      console.log('Rendering GalleryFormModal with props:', { open, editingFile: data?.editingFile });
       return <GalleryFormModal open={open} onClose={closeModal} editingFile={data?.editingFile} />;
     default:
       return null;
