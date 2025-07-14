@@ -280,10 +280,10 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                 <FormLabel>Creador *</FormLabel>
                 <FormControl>
                   <UserSelector
-                    organizationId={userData?.organization?.id}
+                    users={members || []}
                     value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="Seleccionar creador..."
+                    onChange={field.onChange}
+                    placeholder="Seleccionar creador"
                   />
                 </FormControl>
                 <FormMessage />
