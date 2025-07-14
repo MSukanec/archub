@@ -288,7 +288,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           ) : (
             <Button
               type="button"
-              variant="outline"
               onClick={() => setIsLinkingUser(true)}
               className="w-full"
             >
