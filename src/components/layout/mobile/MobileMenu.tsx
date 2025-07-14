@@ -30,6 +30,11 @@ import {
   Handshake,
   CreditCard,
   HandCoins,
+  HardHat,
+  Brush,
+  NotebookPen,
+  FileImage,
+  FileCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -187,23 +192,65 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     setExpandedAccordion(prev => prev === key ? null : key);
   };
 
-  // Context titles - removing all titles as requested
-  const sidebarContextTitles = {
-    organization: null,
-    organizations: null,
-    project: null,
-    design: null,
-    construction: null,
-    finances: null,
-    commercialization: null,
-    admin: 'ADMINISTRACIÓN' // Only admin keeps title for accordion organization
-  };
+  // Mobile menu principal - exactamente igual que desktop sidebar
+  const mainMenuItems = [
+    { 
+      id: 'organizacion', 
+      icon: Building, 
+      label: 'Organización', 
+      defaultRoute: '/organization/dashboard',
+      isActive: currentSidebarContext === 'organization' || location.startsWith('/organization') || location === '/dashboard' || location === '/tasks'
+    },
+    { 
+      id: 'proyecto', 
+      icon: FolderOpen, 
+      label: 'Proyecto', 
+      defaultRoute: '/project/dashboard',
+      isActive: currentSidebarContext === 'project' || location.startsWith('/project')
+    },
+    { 
+      id: 'obra', 
+      icon: HardHat, 
+      label: 'Obra', 
+      defaultRoute: '/construction/dashboard',
+      isActive: currentSidebarContext === 'construction' || location.startsWith('/construction')
+    },
+    { 
+      id: 'finanzas', 
+      icon: DollarSign, 
+      label: 'Finanzas', 
+      defaultRoute: '/finances/dashboard',
+      isActive: currentSidebarContext === 'finances' || location.startsWith('/finances')
+    },
+    { 
+      id: 'diseno', 
+      icon: Brush, 
+      label: 'Diseño', 
+      defaultRoute: '/design/dashboard',
+      isActive: currentSidebarContext === 'design' || location.startsWith('/design'),
+      restricted: true
+    },
+    { 
+      id: 'comercializacion', 
+      icon: Handshake, 
+      label: 'Comercialización', 
+      defaultRoute: '/commercialization/dashboard',
+      isActive: currentSidebarContext === 'commercialization' || location.startsWith('/commercialization'),
+      restricted: true
+    },
+    { 
+      id: 'post-venta', 
+      icon: CreditCard, 
+      label: 'Post-Venta', 
+      defaultRoute: '/postsale/dashboard',
+      isActive: currentSidebarContext === 'postsale' || location.startsWith('/postsale'),
+      restricted: true
+    }
+  ];
 
-  // Exact sidebar structure from Sidebar.tsx
-  const sidebarContexts = {
-    organization: [
-      { icon: ArrowRight, label: 'Ir al Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'left') },
-      { type: 'divider' },
+  // Submenus para cada sección principal (igual que SidebarSubmenu.tsx)
+  const submenuContent = {
+    organizacion: [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
@@ -213,98 +260,89 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
-    project: [
-      { icon: ArrowLeft, label: 'Volver a Organización', href: '#', onClick: () => handleNavigationWithAnimation('/organization/dashboard', 'organization', 'right') },
-      { type: 'divider' },
+    proyecto: [
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: Database, label: 'Datos Básicos', href: '/project/basic-data' },
+      { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data' },
       { icon: Users, label: 'Clientes', href: '/project/clients' },
-      { icon: FileText, label: 'Documentación', href: '/project/documentation' },
+      { icon: FileImage, label: 'Documentación', href: '/project/documentation' },
       { icon: Images, label: 'Galería', href: '/project/gallery' },
-      { icon: FolderOpen, label: 'Diseño', href: '#', onClick: () => handleNavigationWithAnimation('/design/dashboard', 'design', 'left') },
-      { icon: Building, label: 'Obra', href: '#', onClick: () => handleNavigationWithAnimation('/construction/dashboard', 'construction', 'left') },
-      { icon: DollarSign, label: 'Finanzas', href: '#', onClick: () => handleNavigationWithAnimation('/finances/dashboard', 'finances', 'left') },
-      { icon: Users, label: 'Comercialización', href: '#', onClick: () => handleNavigationWithAnimation('/commercialization/dashboard', 'commercialization', 'left'), restricted: true },
-      { icon: Handshake, label: 'Post-Venta', href: '#', onClick: () => handleNavigationWithAnimation('/postsale/dashboard', 'postsale', 'left'), restricted: true },
     ],
-    design: [
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
-      { type: 'divider' },
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: Database, label: 'Datos', href: '/design/data', restricted: true },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
-      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
-      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
-      { icon: Settings, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
-    ],
-    construction: [
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
-      { type: 'divider' },
+    obra: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Asistencia', href: '/construction/personnel' },
     ],
-    finances: [
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
-      { type: 'divider' },
+    finanzas: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments' },
     ],
-    commercialization: [
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
-      { type: 'divider' },
+    diseno: [
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
+      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
+      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
+      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: true },
+      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
+    ],
+    comercializacion: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
       { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
       { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
       { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
     ],
-
-    postsale: [
-      { icon: ArrowLeft, label: 'Volver a Proyecto', href: '#', onClick: () => handleNavigationWithAnimation('/project/dashboard', 'project', 'right') },
-      { type: 'divider' },
-      { icon: Handshake, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
+    'post-venta': [
+      { icon: Home, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
     ],
     admin: [
-      { type: 'divider' },
-      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      {
-        label: 'Comunidad',
-        isAccordion: true,
-        expanded: expandedAccordion === 'comunidad',
-        onToggle: () => toggleAccordion('comunidad'),
-        items: [
-          { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
-          { icon: Users, label: 'Usuarios', href: '/admin/users' },
-        ]
-      },
-      {
-        label: 'Tareas',
-        isAccordion: true,
-        expanded: expandedAccordion === 'tareas',
-        onToggle: () => toggleAccordion('tareas'),
-        items: [
-          { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-          { icon: Settings, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
-          { icon: Package2, label: 'Categorías de Tareas', href: '/admin/categories' },
-        ]
-      },
-      {
-        label: 'Materiales',
-        isAccordion: true,
-        expanded: expandedAccordion === 'materiales',
-        onToggle: () => toggleAccordion('materiales'),
-        items: [
-          { icon: Package, label: 'Materiales', href: '/admin/materials' },
-          { icon: FileText, label: 'Categorías de Materiales', href: '/admin/material-categories' },
-        ]
-      },
+      { icon: Home, label: 'Panel de Administración', href: '/admin/dashboard' },
+      { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
+      { icon: Package2, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
+      { icon: Package, label: 'Categorías de Tareas', href: '/admin/task-categories' },
+      { icon: Users, label: 'Usuarios', href: '/admin/users' },
+      { icon: Crown, label: 'Organizaciones', href: '/admin/organizations' },
+      { icon: Shield, label: 'Roles', href: '/admin/roles' },
+      { icon: Package, label: 'Materiales', href: '/admin/materials' },
+      { icon: FileText, label: 'Categorías de Materiales', href: '/admin/material-categories' },
     ]
   };
 
-  const navigationItems = sidebarContexts[currentSidebarContext as keyof typeof sidebarContexts] || sidebarContexts.organization;
+  // Agregar botón de administración después del menu principal
+  if (isAdmin) {
+    mainMenuItems.push({
+      id: 'admin',
+      icon: Shield,
+      label: 'Administración',
+      defaultRoute: '/admin/dashboard',
+      isActive: currentSidebarContext === 'admin' || location.startsWith('/admin')
+    });
+  }
+
+  // Agregar botón de perfil al final
+  mainMenuItems.push({
+    id: 'perfil',
+    icon: UserCircle,
+    label: 'Mi Perfil',
+    defaultRoute: '/profile',
+    isActive: currentSidebarContext === 'perfil' || location === '/profile'
+  });
+
+  // Estado para determinar si estamos en menu principal o submenu
+  const [currentView, setCurrentView] = useState<'main' | string>('main');
+  
+  // Función para manejar navegación desde menu principal a submenu
+  const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
+    setCurrentView(menuId);
+    setSidebarContext(menuId as any);
+    navigate(defaultRoute);
+  };
+  
+  // Función para volver al menu principal
+  const handleBackToMain = () => {
+    setCurrentView('main');
+  };
 
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
@@ -317,103 +355,107 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-
-
-      {/* Navigation Menu - Flex grow para ocupar el espacio disponible */}
-      <div className="flex-1 px-1.5 py-2 overflow-y-auto">
-        <nav className="space-y-0">
-          {/* Context Title */}
-          {sidebarContextTitles[currentSidebarContext] && (
-            <div className="px-3 py-2 mb-2">
-              <span className="text-xs font-medium text-[var(--menues-fg)] opacity-60">
-                {sidebarContextTitles[currentSidebarContext]}
-              </span>
-            </div>
+        {/* Header con botón de cierre */}
+        <div className="flex justify-between items-center p-4 border-b border-[var(--menues-border)]">
+          {currentView !== 'main' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToMain}
+              className="text-[var(--menues-fg)]"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
           )}
-          {navigationItems.map((item: any, index: number) => (
-            <div key={`${item.label || 'divider'}-${index}`}>
-              {/* Divider */}
-              {item.type === 'divider' ? (
-                <div className="mx-3 my-3 border-t border-[var(--menues-border)]" />
-              ) : (
-                <>
-                  {/* Main Button with potential restriction */}
+          <div className="flex-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-[var(--menues-fg)]"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Navigation Menu */}
+        <div className="flex-1 px-4 py-2 overflow-y-auto">
+          {currentView === 'main' ? (
+            // Menu principal - solo botones principales
+            <nav className="space-y-2">
+              {mainMenuItems.map((item) => (
+                <div key={item.id}>
                   {item.restricted ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
-                        className={cn(
-                          "flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors",
-                          isButtonActive(item.href) 
-                            ? "bg-[hsl(76,100%,40%)] text-white" 
-                            : "text-[var(--menues-fg)]"
-                        )}
+                        className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
+                        disabled
                       >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-5 w-5" />
                         {item.label}
-                        {item.isAccordion ? (
-                          <div className="ml-auto">
-                            {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                          </div>
-                        ) : item.hasChevron ? (
-                          <div className="ml-auto">
-                            <ChevronRight className="h-4 w-4" />
-                          </div>
-                        ) : null}
+                        <ChevronRight className="h-4 w-4 ml-auto" />
                       </button>
                     </CustomRestricted>
                   ) : (
                     <button
-                      onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
+                      onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
                       className={cn(
-                        "flex w-full items-center gap-3 px-2 py-3 text-base font-medium rounded-xl transition-colors",
-                        isButtonActive(item.href) 
+                        "flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors",
+                        item.isActive 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "text-[var(--menues-fg)]"
+                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                      <ChevronRight className="h-4 w-4 ml-auto" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </nav>
+          ) : (
+            // Submenu - mostrar opciones de la sección seleccionada
+            <nav className="space-y-1">
+              {submenuContent[currentView as keyof typeof submenuContent]?.map((item, index) => (
+                <div key={index}>
+                  {item.restricted ? (
+                    <CustomRestricted reason="coming_soon" functionName={item.label}>
+                      <button
+                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg text-[var(--menues-fg)] opacity-50"
+                        disabled
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    </CustomRestricted>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        navigate(item.href);
+                        onClose();
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg transition-colors",
+                        location === item.href 
+                          ? "bg-[hsl(76,100%,40%)] text-white" 
+                          : "text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
                       )}
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
-                      {item.isAccordion ? (
-                        <div className="ml-auto">
-                          {item.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </div>
-                      ) : item.hasChevron ? (
-                        <div className="ml-auto">
-                          <ChevronRight className="h-4 w-4" />
-                        </div>
-                      ) : null}
                     </button>
                   )}
-
-                  {/* Accordion content */}
-                  {item.isAccordion && item.expanded && item.items && (
-                    <div className="ml-6 mt-1 space-y-1">
-                      {item.items.map((subItem: any, subIndex: number) => (
-                        <button
-                          key={subIndex}
-                          onClick={() => handleNavigation(subItem.href)}
-                          className={cn(
-                            "flex w-full items-center gap-2 px-2 py-3 text-base rounded-xl transition-colors",
-                            isButtonActive(subItem.href) 
-                              ? "bg-[hsl(76,100%,40%)] text-white" 
-                              : "text-[var(--menues-fg)]"
-                          )}
-                        >
-                          <subItem.icon className="h-4 w-4" />
-                          {subItem.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </>
+                </div>
+              )) || (
+                <div className="text-center py-4 text-[var(--menues-fg)] opacity-60">
+                  No hay opciones disponibles
+                </div>
               )}
-            </div>
-          ))}
-        </nav>
-      </div>
-
-
+            </nav>
+          )}
+        </div>
       </div>
     </div>
   );
