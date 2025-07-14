@@ -97,11 +97,17 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       const defaultOrgCurrency = currencies?.find((c: any) => c.is_default) || currencies?.[0]
       const defaultWallet = wallets?.find(w => w.is_default) || wallets?.[0]
 
+      console.log('Setting defaults:', {
+        currentMember: currentMember?.id,
+        defaultCurrency: defaultOrgCurrency?.currency?.id,
+        defaultWallet: defaultWallet?.wallet_id
+      })
+
       form.reset({
         creator_id: currentMember?.id || '',
         movement_date: new Date().toISOString().split('T')[0],
         type: '',
-        currency_id: defaultOrgCurrency?.currency_id || '',
+        currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.wallet_id || '',
         amount: 0,
         exchange_rate: undefined,
@@ -190,7 +196,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const isLoading = createMovementMutation.isPending
 
   // Encontrar datos para display
-  const selectedCurrency = currencies?.find(c => c.currency_id === form.watch('currency_id'))?.currency
+  const selectedCurrency = currencies?.find(c => c.currency?.id === form.watch('currency_id'))?.currency
   const selectedWallet = wallets?.find(w => w.wallet_id === form.watch('wallet_id'))?.wallets
   const selectedCreator = members?.find(m => m.id === form.watch('creator_id'))
   const selectedConcept = concepts?.find(c => c.id === form.watch('type'))
@@ -341,7 +347,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   </FormControl>
                   <SelectContent>
                     {currencies?.map((orgCurrency) => (
-                      <SelectItem key={orgCurrency.currency_id} value={orgCurrency.currency_id}>
+                      <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
                         {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
                       </SelectItem>
                     ))}
