@@ -5,9 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Link, Unlink, Search } from "lucide-react";
 
-import { FormModalHeader } from "../form/FormModalHeader";
-import { FormModalFooter } from "../form/FormModalFooter";
-import { FormModalLayout } from "../form/FormModalLayout";
+import { CustomModalLayout } from "../legacy/CustomModalLayout";
+import { CustomModalHeader } from "../legacy/CustomModalHeader";
+import { CustomModalBody } from "../legacy/CustomModalBody";
+import { CustomModalFooter } from "../legacy/CustomModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -173,68 +174,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     form.setValue("linked_user_id", "");
   };
 
-  // View Panel Content
-  const viewPanel = editingContact ? (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Nombre</Label>
-          <p className="text-sm">{editingContact.first_name}</p>
-        </div>
-        {editingContact.last_name && (
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Apellido</Label>
-            <p className="text-sm">{editingContact.last_name}</p>
-          </div>
-        )}
-        {editingContact.email && (
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Email</Label>
-            <p className="text-sm">{editingContact.email}</p>
-          </div>
-        )}
-        {editingContact.phone && (
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Teléfono</Label>
-            <p className="text-sm">{editingContact.phone}</p>
-          </div>
-        )}
-        {editingContact.company_name && (
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Empresa</Label>
-            <p className="text-sm">{editingContact.company_name}</p>
-          </div>
-        )}
-        {editingContact.location && (
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Ubicación</Label>
-            <p className="text-sm">{editingContact.location}</p>
-          </div>
-        )}
-      </div>
-      {editingContact.notes && (
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Notas</Label>
-          <p className="text-sm whitespace-pre-wrap">{editingContact.notes}</p>
-        </div>
-      )}
-      {editingContact.linked_user && (
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Usuario vinculado</Label>
-          <div className="flex items-center gap-3 mt-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={editingContact.linked_user.avatar_url} />
-              <AvatarFallback>{editingContact.linked_user.full_name?.[0]}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium">{editingContact.linked_user.full_name}</p>
-              <p className="text-xs text-muted-foreground">{editingContact.linked_user.email}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  ) : null;
+
 
   // Edit Panel Content
   const editPanel = (
@@ -460,30 +400,31 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     </Form>
   );
 
-  const headerContent = (
-    <FormModalHeader
-      title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
-      icon={UserPlus}
-    />
-  );
-
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleClose}
-      rightLabel={isEditing ? "Actualizar" : "Crear Contacto"}
-      onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={createContactMutation.isPending}
-    />
-  );
-
   return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
+    <CustomModalLayout open={true} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
+            description={isEditing ? "Modifica los detalles del contacto" : "Crea un nuevo contacto para tu organización"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody columns={2}>
+            {editPanel}
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(onSubmit)}
+            cancelText="Cancelar"
+            saveText={isEditing ? "Actualizar" : "Crear Contacto"}
+            isLoading={createContactMutation.isPending}
+          />
+        )
+      }}
+    </CustomModalLayout>
   );
 }

@@ -7,9 +7,10 @@ import { createClient } from '@supabase/supabase-js';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
-import { FormModalHeader } from '../form/FormModalHeader';
-import { FormModalFooter } from '../form/FormModalFooter';
-import { FormModalLayout } from '../form/FormModalLayout';
+import { CustomModalLayout } from '../legacy/CustomModalLayout';
+import { CustomModalHeader } from '../legacy/CustomModalHeader';
+import { CustomModalBody } from '../legacy/CustomModalBody';
+import { CustomModalFooter } from '../legacy/CustomModalFooter';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -180,22 +181,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   if (userLoading) return null;
 
-  const viewPanel = editingFile ? (
-    <div className="space-y-4">
-      <div>
-        <h4 className="font-medium">Título</h4>
-        <p className="text-muted-foreground mt-1">{editingFile?.title || 'Sin título'}</p>
-      </div>
-      <div>
-        <h4 className="font-medium">Descripción</h4>
-        <p className="text-muted-foreground mt-1">{editingFile?.description || 'Sin descripción'}</p>
-      </div>
-      <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">{editingFile?.creator?.full_name || 'Sin creador'}</p>
-      </div>
-    </div>
-  ) : null;
+
 
   const editPanel = (
     <Form {...form}>
@@ -328,30 +314,31 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     </Form>
   );
 
-  const headerContent = (
-    <FormModalHeader
-      title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
-      icon={Images}
-    />
-  );
-
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleClose}
-      rightLabel={editingFile ? "Actualizar" : "Subir"}
-      onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={uploadMutation.isPending}
-    />
-  );
-
   return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
+    <CustomModalLayout open={true} onClose={handleClose}>
+      {{
+        header: (
+          <CustomModalHeader
+            title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
+            description={editingFile ? "Modifica los detalles del archivo" : "Sube un nuevo archivo multimedia al proyecto"}
+            onClose={handleClose}
+          />
+        ),
+        body: (
+          <CustomModalBody columns={1}>
+            {editPanel}
+          </CustomModalBody>
+        ),
+        footer: (
+          <CustomModalFooter
+            onCancel={handleClose}
+            onSave={form.handleSubmit(onSubmit)}
+            cancelText="Cancelar"
+            saveText={editingFile ? "Actualizar" : "Subir"}
+            isLoading={uploadMutation.isPending}
+          />
+        )
+      }}
+    </CustomModalLayout>
   );
 }
