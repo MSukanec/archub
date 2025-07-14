@@ -23,7 +23,7 @@ import { useDesignDocumentFolders, useCreateDesignDocumentFolder, useDeleteDesig
 import { useDesignDocumentGroups, useDeleteDesignDocumentGroup } from '@/hooks/use-design-document-groups';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { NewDocumentGroupModal } from '@/modals/design/NewDocumentGroupModal';
-import { NewDocumentFolderModal } from '@/modals/design/NewDocumentFolderModal';
+
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal';
 import { 
@@ -77,7 +77,7 @@ export default function DesignDocumentation() {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const { openModal } = useGlobalModalStore();
   const [showGroupModal, setShowGroupModal] = useState(false);
-  const [showFolderModal, setShowFolderModal] = useState(false);
+
   const [editingGroup, setEditingGroup] = useState(null);
   const [groupToDelete, setGroupToDelete] = useState(null);
   const [subfolderParent, setSubfolderParent] = useState<{id: string; name: string} | null>(null);
@@ -378,7 +378,7 @@ export default function DesignDocumentation() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSubfolderParent({id: folder.id, name: folder.name});
-                    setShowFolderModal(true);
+                    openModal('document-folder', { parentId: folder.id, parentName: folder.name });
                   }}
                   className="h-6 px-2 text-xs"
                 >
@@ -391,7 +391,7 @@ export default function DesignDocumentation() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setEditingFolder(folder);
-                    setShowFolderModal(true);
+                    openModal('document-folder', { editingFolder: folder });
                   }}
                   className="h-6 w-6 p-0"
                 >
@@ -474,7 +474,7 @@ export default function DesignDocumentation() {
           <div className="text-center py-8">
             <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm text-muted-foreground mb-4">No hay carpetas</p>
-            <Button onClick={() => setShowFolderModal(true)} size="sm">
+            <Button onClick={() => openModal('document-folder')} size="sm">
               <FolderPlus className="h-4 w-4 mr-2" />
               Crear Primera Carpeta
             </Button>
@@ -643,7 +643,7 @@ export default function DesignDocumentation() {
                 </SelectContent>
               </Select>
               <Button
-                onClick={() => setShowFolderModal(true)}
+                onClick={() => openModal('document-folder')}
                 size="sm"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -805,7 +805,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSubfolderParent({id: folder.id, name: folder.name});
-                      setShowFolderModal(true);
+                      openModal('document-folder', { parentId: folder.id, parentName: folder.name });
                     }}
                     className="h-6 w-6 p-0"
                   >
@@ -817,7 +817,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingFolder(folder);
-                      setShowFolderModal(true);
+                      openModal('document-folder', { editingFolder: folder });
                     }}
                     className="h-6 w-6 p-0"
                   >
@@ -872,7 +872,7 @@ export default function DesignDocumentation() {
           title="No hay carpetas"
           description="Crea tu primera carpeta para organizar documentos"
           action={
-            <Button onClick={() => setShowFolderModal(true)} size="sm">
+            <Button onClick={() => openModal('document-folder')} size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Crear Primera Carpeta
             </Button>
@@ -912,7 +912,7 @@ export default function DesignDocumentation() {
                 <Badge variant="secondary">{filteredFolders.length}</Badge>
               </div>
               <Button 
-                onClick={() => setShowFolderModal(true)} 
+                onClick={() => openModal('document-folder')} 
                 size="sm"
                 variant="outline"
               >
@@ -1035,18 +1035,7 @@ export default function DesignDocumentation() {
         defaultFolderId={selectedFolderId}
       />
 
-      {/* Folder Modal */}
-      <NewDocumentFolderModal
-        open={showFolderModal}
-        onClose={() => {
-          setShowFolderModal(false);
-          setSubfolderParent(null);
-          setEditingFolder(null);
-        }}
-        parentId={subfolderParent?.id}
-        parentName={subfolderParent?.name}
-        editingFolder={editingFolder}
-      />
+
 
       {/* Delete Group Confirmation */}
       <AlertDialog open={!!groupToDelete} onOpenChange={(open) => !open && setGroupToDelete(null)}>
