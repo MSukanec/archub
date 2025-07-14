@@ -289,49 +289,28 @@ export function TestFormModal({ open, onClose }: TestFormModalProps) {
       case 'subform':
         return (
           <FormModalFooter
-            leftButton={
-              <Button variant="secondary" className="w-full" onClick={() => setPanel('edit')}>
-                Cancelar
-              </Button>
-            }
-            rightButton={
-              <Button className="w-full" onClick={() => setPanel('edit')}>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Evento
-              </Button>
-            }
+            leftLabel="Cancelar"
+            onLeftClick={() => setPanel('edit')}
+            rightLabel="Guardar Evento"
+            onRightClick={() => setPanel('edit')}
           />
         );
       case 'edit':
         return (
           <FormModalFooter
-            leftButton={
-              <Button variant="secondary" className="w-full" onClick={() => setPanel('view')}>
-                Cancelar Edición
-              </Button>
-            }
-            rightButton={
-              <Button className="w-full" onClick={() => setPanel('view')}>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Cambios
-              </Button>
-            }
+            leftLabel="Cancelar Edición"
+            onLeftClick={() => setPanel('view')}
+            rightLabel="Guardar Cambios"
+            onRightClick={() => setPanel('view')}
           />
         );
       default:
         return (
           <FormModalFooter
-            leftButton={
-              <Button variant="secondary" className="w-full" onClick={handleClose}>
-                Cancelar
-              </Button>
-            }
-            rightButton={
-              <Button className="w-full" onClick={() => setPanel('edit')}>
-                <Edit3 className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-            }
+            leftLabel="Cancelar"
+            onLeftClick={handleClose}
+            rightLabel="Editar"
+            onRightClick={() => setPanel('edit')}
           />
         );
     }
