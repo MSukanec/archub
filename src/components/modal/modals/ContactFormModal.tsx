@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
+import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Link, Unlink, Search } from "lucide-react";
+
+import { FormModalHeader } from "../form/FormModalHeader";
+import { FormModalFooter } from "../form/FormModalFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,13 +15,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { PhoneInput } from "@/components/ui-custom/PhoneInput";
+
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useContactTypes } from "@/hooks/use-contact-types";
 import { useSearchUsers } from "@/hooks/use-search-users";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { UserPlus, User, Mail, Phone, Building, MapPin, FileText, Link, Unlink, Search, Check, X, Loader2 } from "lucide-react";
+import { PhoneInput } from "@/components/ui-custom/PhoneInput";
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -34,34 +38,51 @@ const createContactSchema = z.object({
 
 type CreateContactForm = z.infer<typeof createContactSchema>;
 
+interface Contact {
+  id: string;
+  organization_id: string;
+  first_name: string;
+  last_name?: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  contact_type_id?: string;
+  company_name?: string;
+  location?: string;
+  notes?: string;
+  linked_user_id?: string;
+  created_at: string;
+  linked_user?: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url?: string;
+  };
+}
+
 interface ContactFormModalProps {
   modalData?: {
-    contact?: any;
+    editingContact?: Contact;
     isEditing?: boolean;
   };
   onClose: () => void;
 }
 
-// Lista hardcoded de tipos de contacto
-const contactTypes = [
-  { id: 'arquitecto', name: 'Arquitecto' },
-  { id: 'ingeniero', name: 'Ingeniero' },
-  { id: 'constructor', name: 'Constructor' },
-  { id: 'proveedor', name: 'Proveedor' },
-  { id: 'cliente', name: 'Cliente' }
-];
-
 export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showUserSearch, setShowUserSearch] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-
-  const { data: userData } = useCurrentUser();
-  const { data: searchResults = [] } = useSearchUsers(searchTerm);
   const { toast } = useToast();
-
+  const { user, organization } = useCurrentUser();
+  const { data: contactTypes } = useContactTypes();
+  
+  const editingContact = modalData?.editingContact;
   const isEditing = modalData?.isEditing || false;
-  const editingContact = modalData?.contact;
+
+  const [isLinkingUser, setIsLinkingUser] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  
+  const { data: searchResults } = useSearchUsers(searchTerm, {
+    enabled: isLinkingUser && searchTerm.length > 2
+  });
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
@@ -78,95 +99,161 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     },
   });
 
-  // Set selected user if editing existing contact with linked user
-  useEffect(() => {
-    if (editingContact?.linked_user) {
-      setSelectedUser(editingContact.linked_user);
-    }
-  }, [editingContact]);
-
   const createContactMutation = useMutation({
     mutationFn: async (data: CreateContactForm) => {
+      if (!organization?.id) throw new Error("No organization found");
+
       const contactData = {
         ...data,
-        organization_id: userData?.organization?.id,
-        full_name: `${data.first_name} ${data.last_name || ''}`.trim(),
-        linked_user_id: selectedUser?.id || null,
+        organization_id: organization.id,
+        linked_user_id: selectedUser?.id || data.linked_user_id || null,
       };
 
       if (isEditing && editingContact) {
-        const { data: result, error } = await supabase
-          .from('contacts')
+        const { error } = await supabase
+          .from("contacts")
           .update(contactData)
-          .eq('id', editingContact.id)
-          .select()
-          .single();
-
+          .eq("id", editingContact.id);
+        
         if (error) throw error;
-        return result;
+        return { ...editingContact, ...contactData };
       } else {
-        const { data: result, error } = await supabase
-          .from('contacts')
+        const { data: contact, error } = await supabase
+          .from("contacts")
           .insert([contactData])
           .select()
           .single();
-
+        
         if (error) throw error;
-        return result;
+        return contact;
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-contacts"] });
+      
       toast({
-        title: "Éxito",
-        description: isEditing ? "Contacto actualizado correctamente" : "Contacto creado correctamente",
+        title: isEditing ? "Contacto actualizado" : "Contacto creado",
+        description: isEditing ? "El contacto ha sido actualizado correctamente." : "El contacto ha sido agregado correctamente.",
       });
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      
       onClose();
     },
     onError: (error: any) => {
-      console.error('Error:', error);
+      console.error("Error al crear/actualizar contacto:", error);
       toast({
         title: "Error",
-        description: error?.message || "Ocurrió un error inesperado",
+        description: error.message || "Hubo un error al procesar el contacto",
         variant: "destructive",
       });
     },
   });
 
+  const handleClose = () => {
+    setIsLinkingUser(false);
+    setSelectedUser(null);
+    setSearchTerm("");
+    onClose();
+  };
+
   const onSubmit = (data: CreateContactForm) => {
     createContactMutation.mutate(data);
   };
 
-  const handleLinkUser = (user: any) => {
+  const handleLinkUser = (userId: string) => {
+    const user = searchResults?.find((u: any) => u.id === userId);
     setSelectedUser(user);
-    form.setValue('linked_user_id', user.id);
-    setShowUserSearch(false);
-    setSearchTerm("");
+    setIsLinkingUser(false);
+    form.setValue("linked_user_id", userId);
   };
 
   const handleUnlinkUser = () => {
     setSelectedUser(null);
-    form.setValue('linked_user_id', "");
+    form.setValue("linked_user_id", "");
   };
 
+  // View Panel Content
+  const viewPanel = editingContact ? (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Nombre</Label>
+          <p className="text-sm">{editingContact.first_name}</p>
+        </div>
+        {editingContact.last_name && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Apellido</Label>
+            <p className="text-sm">{editingContact.last_name}</p>
+          </div>
+        )}
+        {editingContact.email && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Email</Label>
+            <p className="text-sm">{editingContact.email}</p>
+          </div>
+        )}
+        {editingContact.phone && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Teléfono</Label>
+            <p className="text-sm">{editingContact.phone}</p>
+          </div>
+        )}
+        {editingContact.company_name && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Empresa</Label>
+            <p className="text-sm">{editingContact.company_name}</p>
+          </div>
+        )}
+        {editingContact.location && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Ubicación</Label>
+            <p className="text-sm">{editingContact.location}</p>
+          </div>
+        )}
+      </div>
+      {editingContact.notes && (
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Notas</Label>
+          <p className="text-sm whitespace-pre-wrap">{editingContact.notes}</p>
+        </div>
+      )}
+      {editingContact.linked_user && (
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Usuario vinculado</Label>
+          <div className="flex items-center gap-3 mt-2">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={editingContact.linked_user.avatar_url} />
+              <AvatarFallback>{editingContact.linked_user.full_name?.[0]}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium">{editingContact.linked_user.full_name}</p>
+              <p className="text-xs text-muted-foreground">{editingContact.linked_user.email}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  ) : null;
+
+  // Edit Panel Content
   const editPanel = (
     <Form {...form}>
-      <form className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="first_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel>Nombre *</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: Juan" {...field} />
+                  <Input placeholder="Nombre" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="last_name"
@@ -174,15 +261,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Apellido</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: Pérez" {...field} />
+                  <Input placeholder="Apellido" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="email"
@@ -190,13 +275,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="ejemplo@correo.com" type="email" {...field} />
+                  <Input type="email" placeholder="email@ejemplo.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="phone"
@@ -204,40 +289,42 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Teléfono</FormLabel>
                 <FormControl>
-                  <PhoneInput {...field} />
+                  <PhoneInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Número de teléfono"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="contact_type_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Contacto</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {contactTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="contact_type_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Contacto</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {contactTypes?.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="company_name"
@@ -251,21 +338,21 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </FormItem>
             )}
           />
-          
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ubicación</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ciudad, País" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
+
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ubicación</FormLabel>
+              <FormControl>
+                <Input placeholder="Ciudad, País" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -275,8 +362,8 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormLabel>Notas</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Información adicional sobre el contacto"
-                  className="resize-none"
+                  placeholder="Notas adicionales sobre el contacto"
+                  rows={3}
                   {...field}
                 />
               </FormControl>
@@ -285,19 +372,25 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           )}
         />
 
+        {/* User Linking Section */}
         <div className="space-y-3">
-          <Label>Usuario Vinculado</Label>
-          
-          {selectedUser ? (
+          <Label>Vincular Usuario</Label>
+          {selectedUser || editingContact?.linked_user ? (
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={selectedUser.avatar_url} />
-                  <AvatarFallback>{selectedUser.full_name?.[0] || selectedUser.email?.[0]}</AvatarFallback>
+                  <AvatarImage src={selectedUser?.avatar_url || editingContact?.linked_user?.avatar_url} />
+                  <AvatarFallback>
+                    {(selectedUser?.full_name || editingContact?.linked_user?.full_name)?.[0]}
+                  </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{selectedUser.full_name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{selectedUser.email}</p>
+                <div>
+                  <p className="text-sm font-medium">
+                    {selectedUser?.full_name || editingContact?.linked_user?.full_name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedUser?.email || editingContact?.linked_user?.email}
+                  </p>
                 </div>
               </div>
               <Button
@@ -310,47 +403,51 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Buscar usuario por nombre o email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1"
-                />
+            <div className="space-y-2">
+              {!isLinkingUser ? (
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
-                  onClick={() => setShowUserSearch(!showUserSearch)}
+                  onClick={() => setIsLinkingUser(true)}
+                  className="w-full"
                 >
-                  <Search className="h-4 w-4" />
+                  <Link className="h-4 w-4 mr-2" />
+                  Vincular Usuario
                 </Button>
-              </div>
-              
-              {searchTerm && (
-                <div className="max-h-32 overflow-y-auto border rounded-lg">
-                  {searchResults.length > 0 ? (
-                    searchResults.map((user: any) => (
-                      <div
-                        key={user.id}
-                        className="flex items-center gap-3 p-2 hover:bg-muted cursor-pointer"
-                        onClick={() => handleLinkUser(user)}
-                      >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.avatar_url} />
-                          <AvatarFallback>{user.full_name?.[0] || user.email?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{user.full_name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Buscar usuario por nombre o email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsLinkingUser(false)}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                  {searchResults && searchResults.length > 0 && (
+                    <div className="border rounded-lg max-h-48 overflow-y-auto">
+                      {searchResults.map((user: any) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center gap-3 p-2 hover:bg-muted cursor-pointer"
+                          onClick={() => handleLinkUser(user.id)}
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.avatar_url} />
+                            <AvatarFallback>{user.full_name?.[0]}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{user.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                          </div>
                         </div>
-                        <Check className="h-4 w-4 text-primary" />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-sm text-muted-foreground">
-                      No se encontraron usuarios
+                      ))}
                     </div>
                   )}
                 </div>
@@ -362,44 +459,27 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     </Form>
   );
 
-  const viewPanel = (
-    <div className="space-y-4">
-      <div className="text-sm text-muted-foreground">
-        Información del contacto en modo de solo lectura
-      </div>
-    </div>
-  );
-
   const headerContent = (
-    <div className="flex items-center gap-2">
-      <UserPlus className="h-5 w-5" />
-      <span>{isEditing ? "Editar Contacto" : "Nuevo Contacto"}</span>
-    </div>
+    <FormModalHeader
+      title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
+      icon={UserPlus}
+    />
   );
 
   const footerContent = (
-    <div className="flex items-center justify-between">
-      <Button variant="outline" onClick={onClose}>
-        Cancelar
-      </Button>
-      <Button 
-        onClick={form.handleSubmit(onSubmit)}
-        disabled={createContactMutation.isPending}
-      >
-        {createContactMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-        {isEditing ? "Actualizar" : "Crear Contacto"}
-      </Button>
-    </div>
-  );
-
-  return (
-    <FormModalLayout
-      headerContent={headerContent}
-      footerContent={footerContent}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      onClose={onClose}
-      isEditing={isEditing}
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={isEditing ? "Actualizar" : "Crear Contacto"}
+      onRightClick={form.handleSubmit(onSubmit)}
+      rightLoading={createContactMutation.isPending}
     />
   );
+
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent
+  };
 }
