@@ -18,7 +18,7 @@ export function FormModalHeader({
   className,
 }: FormModalHeaderProps) {
   return (
-    <div className={cn("p-2 flex items-center justify-between", className)}>
+    <div className={cn("p-2 flex items-center justify-between border-b border-[var(--card-border)]", className)}>
       <div className="flex items-center gap-2">
         {leftActions}
         {title && (
