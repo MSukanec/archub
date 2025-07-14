@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
+import { FormModalLayout } from '../form/FormModalLayout';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -344,10 +345,13 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     />
   );
 
-  return {
-    viewPanel,
-    editPanel,
-    headerContent,
-    footerContent
-  };
+  return (
+    <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+    />
+  );
 }
