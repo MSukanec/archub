@@ -89,28 +89,20 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
       ]}
     >
       <div className="flex items-center gap-3">
-        {/* Left side - Creator avatar */}
+        {/* File icon */}
         <div className="shrink-0">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={creator?.avatar_url || ""} />
-            <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
-              {getInitials(creator?.full_name || 'U')}
-            </AvatarFallback>
-          </Avatar>
+          {getFileIcon(file_type || '')}
         </div>
 
-        {/* Middle content */}
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* File name and type */}
-          <div className="flex items-center gap-2 mb-1">
-            {getFileIcon(file_type || '')}
-            <span className="font-medium text-[var(--text-default)] truncate">
-              {file_name}
-            </span>
+          {/* File name */}
+          <div className="font-medium text-foreground truncate mb-1">
+            {file_name}
           </div>
 
           {/* Creator and date info */}
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="truncate">
               {creator?.full_name || 'Usuario'}
             </span>

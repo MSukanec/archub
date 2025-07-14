@@ -660,7 +660,8 @@ export default function DesignDocumentation() {
       {/* Card de control de visualización */}
       <Card>
         <CardHeader className="py-4">
-          <div className="flex items-center justify-between h-full">
+          {/* Desktop layout */}
+          <div className="hidden md:flex items-center justify-between h-full">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold">Documentación</h3>
             </div>
@@ -687,6 +688,49 @@ export default function DesignDocumentation() {
               <Button
                 onClick={() => openModal('document-folder')}
                 size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nueva Carpeta
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile layout - 3 lines */}
+          <div className="md:hidden space-y-3">
+            {/* Line 1: Title */}
+            <div>
+              <h3 className="text-lg font-semibold">Documentación</h3>
+            </div>
+            
+            {/* Line 2: Select */}
+            <div>
+              <Select value={viewMode} onValueChange={(value: ViewMode) => setViewMode(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="folders">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="w-4 h-4" />
+                      <span>Carpetas</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="documents">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Documentos</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Line 3: Button */}
+            <div>
+              <Button
+                onClick={() => openModal('document-folder')}
+                size="sm"
+                className="w-full"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nueva Carpeta
