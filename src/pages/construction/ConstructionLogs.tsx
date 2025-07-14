@@ -610,17 +610,30 @@ export default function ConstructionLogs() {
 
                     <CollapsibleContent>
                       <div className="px-4 pb-4 pt-2 border-t bg-muted/30">
-                        <div className="grid grid-cols-5 gap-4 text-sm">
-                          {/* Comentario Completo */}
+                        <div className="space-y-4">
+                          {/* Comentarios */}
                           <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Comentario Completo</span>
-                            <p className="text-sm">{siteLog.comments || 'Sin comentarios adicionales'}</p>
+                            <h3 className="font-medium text-muted-foreground mb-3">
+                              Comentarios ({siteLog.comments ? '1' : '0'}):
+                            </h3>
+                            <div className="pl-4">
+                              {siteLog.comments ? (
+                                <p className="text-sm">{siteLog.comments}</p>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">Sin comentarios adicionales</p>
+                              )}
+                            </div>
                           </div>
+
+                          {/* Línea divisoria punteada */}
+                          <div className="border-t border-dashed border-muted-foreground/30"></div>
 
                           {/* Archivos Adjuntos */}
                           <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Archivos Adjuntos</span>
-                            <div className="space-y-2">
+                            <h3 className="font-medium text-muted-foreground mb-3">
+                              Archivos ({siteLog.files?.length || 0}):
+                            </h3>
+                            <div className="pl-4 space-y-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'hsl(76, 100%, 40%, 0.1)', borderColor: 'hsl(76, 100%, 40%, 0.3)' }}>
@@ -637,15 +650,20 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <span className="text-xs text-muted-foreground">Sin archivos adjuntos</span>
+                                <p className="text-sm text-muted-foreground">Sin archivos adjuntos</p>
                               )}
                             </div>
                           </div>
 
+                          {/* Línea divisoria punteada */}
+                          <div className="border-t border-dashed border-muted-foreground/30"></div>
+
                           {/* Eventos */}
                           <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Eventos</span>
-                            <div className="space-y-2">
+                            <h3 className="font-medium text-muted-foreground mb-3">
+                              Eventos ({siteLog.events?.length || 0}):
+                            </h3>
+                            <div className="pl-4 space-y-2">
                               {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)' }}>
@@ -658,15 +676,20 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin eventos registrados</p>
+                                <p className="text-sm text-muted-foreground">Sin eventos registrados</p>
                               )}
                             </div>
                           </div>
 
+                          {/* Línea divisoria punteada */}
+                          <div className="border-t border-dashed border-muted-foreground/30"></div>
+
                           {/* Personal */}
                           <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Personal</span>
-                            <div className="space-y-2">
+                            <h3 className="font-medium text-muted-foreground mb-3">
+                              Personal ({siteLog.attendees?.length || 0}):
+                            </h3>
+                            <div className="pl-4 space-y-2">
                               {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
@@ -687,15 +710,20 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin personal registrado</p>
+                                <p className="text-sm text-muted-foreground">Sin personal registrado</p>
                               )}
                             </div>
                           </div>
 
+                          {/* Línea divisoria punteada */}
+                          <div className="border-t border-dashed border-muted-foreground/30"></div>
+
                           {/* Maquinaria */}
                           <div>
-                            <span className="font-medium text-muted-foreground block mb-2">Maquinaria</span>
-                            <div className="space-y-2">
+                            <h3 className="font-medium text-muted-foreground mb-3">
+                              Maquinaria ({siteLog.equipment?.length || 0}):
+                            </h3>
+                            <div className="pl-4 space-y-2">
                               {siteLog.equipment && siteLog.equipment.length > 0 ? (
                                 siteLog.equipment.map((equipment: any, index: number) => (
                                   <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: 'rgba(251, 191, 36, 0.3)' }}>
@@ -713,7 +741,7 @@ export default function ConstructionLogs() {
                                   </Card>
                                 ))
                               ) : (
-                                <p className="text-xs text-muted-foreground">Sin maquinaria registrada</p>
+                                <p className="text-sm text-muted-foreground">Sin maquinaria registrada</p>
                               )}
                             </div>
                           </div>
