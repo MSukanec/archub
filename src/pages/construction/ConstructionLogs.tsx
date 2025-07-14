@@ -639,8 +639,9 @@ export default function ConstructionLogs() {
                             </h3>
                             <div className="pl-4 flex flex-wrap gap-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
-                                siteLog.files.map((file: any, index: number) => (
-                                  file.file_type?.startsWith('image/') ? (
+                                siteLog.files.map((file: any, index: number) => {
+                                  console.log('File data:', file);
+                                  return file.file_type?.startsWith('image/') ? (
                                     <div key={index} className="relative group">
                                       <img 
                                         src={file.public_url} 
@@ -671,8 +672,8 @@ export default function ConstructionLogs() {
                                         }
                                       </span>
                                     </div>
-                                  )
-                                ))
+                                  );
+                                })
                               ) : (
                                 <p className="text-sm text-muted-foreground">Sin archivos adjuntos</p>
                               )}
