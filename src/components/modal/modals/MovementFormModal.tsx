@@ -14,6 +14,7 @@ import FormModalBody from "@/components/modal/form/FormModalBody"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore"
+import { DollarSign } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -608,7 +609,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   </AccordionTrigger>
                   <AccordionContent className="space-y-3 pt-3">
                     {/* Creador y Fecha */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <FormField
                         control={conversionForm.control}
                         name="created_by"
@@ -617,9 +618,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                             <FormLabel>Creador</FormLabel>
                             <FormControl>
                               <UserSelector
-                                organizationId={organizationId}
+                                users={members || []}
                                 value={field.value}
-                                onValueChange={field.onChange}
+                                onChange={field.onChange}
+                                placeholder="Seleccionar creador"
                               />
                             </FormControl>
                             <FormMessage />
@@ -867,7 +869,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   </AccordionTrigger>
                   <AccordionContent className="space-y-3 pt-3">
                     {/* Creador y Fecha */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <FormField
                         control={form.control}
                         name="created_by"
@@ -876,9 +878,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                             <FormLabel>Creador</FormLabel>
                             <FormControl>
                               <UserSelector
-                                organizationId={organizationId}
+                                users={members || []}
                                 value={field.value}
-                                onValueChange={field.onChange}
+                                onChange={field.onChange}
+                                placeholder="Seleccionar creador"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1210,6 +1213,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const headerContent = (
     <FormModalHeader 
       title={editingMovement ? 'Editar Movimiento' : 'Nuevo Movimiento'}
+      icon={DollarSign}
     />
   )
 
