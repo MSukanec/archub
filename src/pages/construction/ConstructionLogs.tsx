@@ -633,39 +633,41 @@ export default function ConstructionLogs() {
                             <h3 className="font-medium text-muted-foreground mb-3">
                               Archivos ({siteLog.files?.length || 0}):
                             </h3>
-                            <div className="pl-4 grid grid-cols-1 md:grid-cols-5 gap-2">
+                            <div className="pl-4 flex flex-wrap gap-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
-                                  <Card key={index} className="p-2" style={{ backgroundColor: 'hsl(76, 100%, 40%, 0.1)', borderColor: 'hsl(76, 100%, 40%, 0.3)' }}>
-                                    {file.file_type?.startsWith('image/') ? (
-                                      <div className="space-y-2">
-                                        <div className="relative w-full h-16 bg-muted rounded overflow-hidden">
-                                          <img 
-                                            src={file.public_url} 
-                                            alt={file.original_name}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                              e.currentTarget.style.display = 'none';
-                                              e.currentTarget.nextElementSibling.style.display = 'flex';
-                                            }}
-                                          />
-                                          <div className="absolute inset-0 flex items-center justify-center bg-muted" style={{ display: 'none' }}>
-                                            <Image className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
-                                          </div>
-                                        </div>
-                                        <span className="text-xs text-muted-foreground truncate block">
-                                          {file.original_name}
-                                        </span>
+                                  file.file_type?.startsWith('image/') ? (
+                                    <div key={index} className="relative group">
+                                      <img 
+                                        src={file.public_url} 
+                                        alt={file.original_name}
+                                        className="w-16 h-16 object-cover rounded border-2 border-gray-200 hover:border-gray-300 transition-colors cursor-pointer"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                          e.currentTarget.nextElementSibling.style.display = 'flex';
+                                        }}
+                                      />
+                                      <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
+                                        <Image className="h-6 w-6 text-gray-400" />
                                       </div>
-                                    ) : (
-                                      <div className="flex items-center gap-2">
-                                        <Video className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
-                                        <span className="text-xs text-muted-foreground truncate">
-                                          {file.original_name}
-                                        </span>
+                                      <div className="absolute -bottom-6 left-0 right-0 text-xs text-muted-foreground text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {file.original_name.length > 12 ? 
+                                          file.original_name.substring(0, 12) + '...' : 
+                                          file.original_name
+                                        }
                                       </div>
-                                    )}
-                                  </Card>
+                                    </div>
+                                  ) : (
+                                    <div key={index} className="flex items-center gap-2 px-2 py-1 rounded border border-gray-200">
+                                      <Video className="h-4 w-4 text-gray-500" />
+                                      <span className="text-xs text-muted-foreground">
+                                        {file.original_name.length > 15 ? 
+                                          file.original_name.substring(0, 15) + '...' : 
+                                          file.original_name
+                                        }
+                                      </span>
+                                    </div>
+                                  )
                                 ))
                               ) : (
                                 <p className="text-sm text-muted-foreground">Sin archivos adjuntos</p>
