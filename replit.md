@@ -119,10 +119,10 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 14, 2025. Modal system column specification standardization completed - COMPLETED
-  • Standardized all FormModalLayout modals to explicitly specify columns parameter
-  • ContactFormModal and ProjectFormModal: columns={2} for multi-field forms with responsive design
-  • MemberFormModal, BoardFormModal, CardFormModal, ListFormModal: columns={1} for simple single-column layouts
+- July 14, 2025. Modal system simplified to single column layout - COMPLETED
+  • Changed ALL modals to use columns={1} for consistent single-column layout
+  • ContactFormModal, ProjectFormModal, MemberFormModal, BoardFormModal, CardFormModal, ListFormModal: all use columns={1}
+  • Simplified design eliminates responsive layout complexity and provides consistent user experience
   • Fixed hardcoded grid classes removal from ContactFormModal and ProjectFormModal editPanels
   • Eliminated all col-span-2 hardcoded classes that were overriding responsive design
   • Enhanced PhoneInput component height consistency with h-10 forced height and text-sm sizing
