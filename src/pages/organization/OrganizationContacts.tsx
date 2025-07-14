@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import CustomTable from '@/components/ui-custom/CustomTable'
+import CustomTable from '@/components/ui-custom/Table'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Building, Phone, Mail, Share2, UserCheck } from 'lucide-react'
@@ -446,7 +446,7 @@ export default function OrganizationContacts() {
           ]}
         />
 
-        <CustomTable
+        <Table
           data={filteredContacts}
           columns={columns}
           isLoading={contactsLoading}

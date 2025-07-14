@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { Table } from '@/components/ui-custom/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -376,7 +376,7 @@ export default function AdminOrganizations() {
           </Card>
         </div>
 
-        <CustomTable
+        <Table
           data={filteredOrganizations}
           columns={columns}
           isLoading={isLoading}

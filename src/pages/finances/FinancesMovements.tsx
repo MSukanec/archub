@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { CustomTable } from "@/components/ui-custom/CustomTable";
+import { Table } from "@/components/ui-custom/Table";
 import { CustomEmptyState } from "@/components/ui-custom/CustomEmptyState";
 import { FinancialCards } from "@/components/ui-custom/FinancialCards";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
@@ -1110,7 +1110,7 @@ export default function Movements() {
         defaultCurrency={defaultCurrency?.name}
       />
       
-      <CustomTable
+      <Table
         columns={tableColumns}
         data={processedMovements}
         isLoading={isLoading}

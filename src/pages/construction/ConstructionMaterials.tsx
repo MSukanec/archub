@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
+import { Table } from '@/components/ui-custom/Table'
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -157,7 +157,7 @@ export default function ConstructionMaterials() {
             description="Los materiales aparecerán aquí cuando agregues tareas con materiales a los presupuestos del proyecto"
           />
         ) : (
-          <CustomTable
+          <Table
             data={filteredMaterials}
             columns={columns}
             isLoading={materialsLoading}

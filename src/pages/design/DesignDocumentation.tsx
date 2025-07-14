@@ -7,7 +7,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { DocumentGroupCard } from '@/components/ui-custom/DocumentGroupCard';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { Table } from '@/components/ui-custom/Table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -555,7 +555,7 @@ export default function DesignDocumentation() {
               </Button>
             </div>
           ) : (
-            <CustomTable
+            <Table
               columns={documentColumns}
               data={groupDocuments}
               emptyState={
@@ -735,7 +735,7 @@ export default function DesignDocumentation() {
               <>
                 <div className="border-t border-border" />
                 <CardContent className="py-4">
-                  <CustomTable
+                  <Table
                     columns={documentColumns}
                     data={groupDocuments}
                     emptyState={
@@ -996,7 +996,7 @@ export default function DesignDocumentation() {
           }
         />
       ) : (
-        <CustomTable
+        <Table
           columns={documentColumns}
           data={filteredDocuments}
           defaultSort={{ key: 'name', direction: 'asc' }}

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 import { Layout } from '@/components/layout/desktop/Layout'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
+import { Table } from '@/components/ui-custom/Table'
 import { NewAdminMaterialModal } from '@/modals/admin/NewAdminMaterialModal'
 
 import { Plus, Edit, Trash2, Package, Crown } from 'lucide-react'
@@ -280,7 +280,7 @@ export default function AdminMaterials() {
         </div>
 
         {/* Materials Table */}
-        <CustomTable
+        <Table
           data={sortedMaterials}
           columns={columns}
           isLoading={isLoading}

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { Table } from '@/components/ui-custom/Table';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';

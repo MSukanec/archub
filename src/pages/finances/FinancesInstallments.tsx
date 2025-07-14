@@ -6,7 +6,7 @@ import { Receipt, Edit, Trash2 } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
+import { Table } from '@/components/ui-custom/Table'
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Badge } from '@/components/ui/badge'
@@ -996,7 +996,7 @@ export default function FinancesInstallments() {
               <h3 className="text-lg font-semibold">Resumen por Cliente</h3>
               <p className="text-sm text-muted-foreground">Resumen general por cliente con monto total y aporte dolarizado</p>
             </div>
-            <CustomTable
+            <Table
               data={clientSummary}
               columns={contactSummaryColumns}
               defaultSort={{ key: 'contacto', direction: 'asc' }}
@@ -1017,7 +1017,7 @@ export default function FinancesInstallments() {
               <h3 className="text-lg font-semibold">Detalle por Moneda</h3>
               <p className="text-sm text-muted-foreground">Totales detallados por cliente, moneda y billetera</p>
             </div>
-            <CustomTable
+            <Table
               data={clientSummary}
               columns={summaryColumns}
               defaultSort={{ key: 'contacto', direction: 'asc' }}
@@ -1035,7 +1035,7 @@ export default function FinancesInstallments() {
               <h3 className="text-lg font-semibold">Detalle de Compromisos</h3>
               <p className="text-sm text-muted-foreground">Todos los compromisos de pago registrados en el proyecto</p>
             </div>
-            <CustomTable
+            <Table
               data={filteredInstallments}
               columns={detailColumns}
               defaultSort={{ key: 'movement_date', direction: 'desc' }}

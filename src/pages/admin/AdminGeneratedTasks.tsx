@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 import { Layout } from '@/components/layout/desktop/Layout'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
+import { Table } from '@/components/ui-custom/Table'
 import { NewAdminGeneratedTaskModal } from '@/modals/admin/tasks/NewAdminGeneratedTaskModal'
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
@@ -332,7 +332,7 @@ export default function AdminGeneratedTasks() {
         </div>
 
         {/* Generated Tasks Table */}
-        <CustomTable
+        <Table
           data={filteredGeneratedTasks}
           columns={columns}
           isLoading={isLoading}

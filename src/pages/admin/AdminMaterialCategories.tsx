@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { Table } from '@/components/ui-custom/Table';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
 import { NewAdminMaterialCategoryModal } from '@/modals/admin/NewAdminMaterialCategoryModal';
@@ -209,7 +209,7 @@ export default function AdminMaterialCategories() {
         </div>
 
         {/* Categories Table */}
-        <CustomTable
+        <Table
           data={filteredCategories}
           columns={columns}
           isLoading={isLoading}

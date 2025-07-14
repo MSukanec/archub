@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 
 type SortDirection = 'asc' | 'desc' | null
 
-interface CustomTableProps<T = any> {
+interface TableProps<T = any> {
   columns: {
     key: keyof T | string
     label: string
@@ -40,7 +40,7 @@ interface CustomTableProps<T = any> {
   cardSpacing?: string
 }
 
-export function CustomTable<T = any>({ 
+export function Table<T = any>({ 
   columns, 
   data, 
   emptyState, 
@@ -55,7 +55,7 @@ export function CustomTable<T = any>({
   defaultSort,
   renderCard,
   cardSpacing = "space-y-2"
-}: CustomTableProps<T>) {
+}: TableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
   const [currentPage, setCurrentPage] = useState(1)

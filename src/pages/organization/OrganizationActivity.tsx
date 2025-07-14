@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { CustomTable } from '@/components/ui-custom/CustomTable';
+import { Table } from '@/components/ui-custom/Table';
 import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { MemberActivityChart } from '@/components/charts/MemberActivityChart';
@@ -316,7 +316,7 @@ export default function OrganizationActivity() {
             actionOnClick={() => navigate('/finances/movements')}
           />
         ) : (
-          <CustomTable
+          <Table
             data={sortedActivities}
             columns={columns}
             searchValue={searchValue}

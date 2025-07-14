@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { CustomTable } from '@/components/ui-custom/CustomTable'
+import { Table } from '@/components/ui-custom/Table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -357,7 +357,7 @@ export default function AdminUsers() {
         </div>
 
         {/* Users Table */}
-        <CustomTable
+        <Table
           data={users}
           columns={columns}
           isLoading={isLoading}
