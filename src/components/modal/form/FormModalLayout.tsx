@@ -76,9 +76,7 @@ export function FormModalLayout({
         )}
 
         {/* Current Panel Content */}
-        <div className="flex-1 overflow-hidden">
-          <FormModalBody columns={columns}>{getCurrentPanel()}</FormModalBody>
-        </div>
+        <FormModalBody columns={columns}>{getCurrentPanel()}</FormModalBody>
 
         {/* Footer */}
         {footerContent && (

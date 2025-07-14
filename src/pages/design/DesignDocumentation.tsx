@@ -1022,11 +1022,13 @@ export default function DesignDocumentation() {
           }
         />
       ) : (
-        <Table
-          columns={documentColumns}
-          data={filteredDocuments}
-          defaultSort={{ key: 'name', direction: 'asc' }}
-        />
+        <div className="-m-6">
+          <Table
+            columns={documentColumns}
+            data={filteredDocuments}
+            defaultSort={{ key: 'name', direction: 'asc' }}
+          />
+        </div>
       )}
     </div>
   );
