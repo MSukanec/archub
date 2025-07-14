@@ -13,6 +13,7 @@ interface FormModalLayoutProps {
   headerContent?: ReactNode;
   footerContent?: ReactNode;
   className?: string;
+  columns?: number;
 }
 
 export function FormModalLayout({
@@ -23,6 +24,7 @@ export function FormModalLayout({
   headerContent,
   footerContent,
   className,
+  columns = 2,
 }: FormModalLayoutProps) {
   const { currentPanel } = useModalPanelStore();
 
@@ -40,7 +42,14 @@ export function FormModalLayout({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+    <div 
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div
         className={cn(
           "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl",
@@ -49,6 +58,7 @@ export function FormModalLayout({
           "flex flex-col",
           className,
         )}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {headerContent && (
@@ -67,7 +77,7 @@ export function FormModalLayout({
 
         {/* Current Panel Content */}
         <div className="flex-1 overflow-hidden">
-          <FormModalBody>{getCurrentPanel()}</FormModalBody>
+          <FormModalBody columns={columns}>{getCurrentPanel()}</FormModalBody>
         </div>
 
         {/* Footer */}
