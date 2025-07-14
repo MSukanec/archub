@@ -2,91 +2,78 @@ import React, { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useModalPanelStore } from './modalPanelStore';
 
 interface FormModalLayoutProps {
-  leftPanel?: ReactNode;
-  centerPanel?: ReactNode;
-  rightPanel?: ReactNode;
+  viewPanel?: ReactNode;
+  editPanel?: ReactNode;
+  subformPanel?: ReactNode;
   onClose: () => void;
-  showHeader?: boolean;
-  showFooter?: boolean;
   headerContent?: ReactNode;
   footerContent?: ReactNode;
   className?: string;
 }
 
 export function FormModalLayout({
-  leftPanel,
-  centerPanel,
-  rightPanel,
+  viewPanel,
+  editPanel,
+  subformPanel,
   onClose,
-  showHeader = true,
-  showFooter = true,
   headerContent,
   footerContent,
   className,
 }: FormModalLayoutProps) {
+  const { currentPanel } = useModalPanelStore();
+
+  const getCurrentPanel = () => {
+    switch (currentPanel) {
+      case 'view':
+        return viewPanel;
+      case 'edit':
+        return editPanel;
+      case 'subform':
+        return subformPanel;
+      default:
+        return viewPanel;
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div 
         className={cn(
-          "bg-background border border-border rounded-lg shadow-xl",
-          "w-full h-full max-w-screen-2xl max-h-screen",
-          "md:w-auto md:h-auto md:max-w-screen-2xl md:max-h-[90vh]",
+          "bg-background border border-border shadow-xl",
+          "w-full h-full rounded-none", // Mobile: full viewport
+          "md:w-auto md:h-auto md:max-w-screen-2xl md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // Desktop: centered with max width
           "flex flex-col",
           className
         )}
       >
         {/* Header */}
-        {showHeader && (
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <div className="flex-1">
-              {headerContent}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+          <div className="flex-1">
+            {headerContent}
           </div>
-        )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-        {/* Content Panels */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel */}
-          {leftPanel && (
-            <div className="w-full md:w-1/3 md:max-w-md border-r border-border overflow-y-auto">
-              <div className="p-4">
-                {leftPanel}
-              </div>
-            </div>
-          )}
-
-          {/* Center Panel */}
-          {centerPanel && (
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-4">
-                {centerPanel}
-              </div>
-            </div>
-          )}
-
-          {/* Right Panel */}
-          {rightPanel && (
-            <div className="w-full md:w-1/3 md:max-w-md border-l border-border overflow-y-auto">
-              <div className="p-4">
-                {rightPanel}
-              </div>
-            </div>
-          )}
+        {/* Current Panel Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {getCurrentPanel()}
+          </div>
         </div>
 
         {/* Footer */}
-        {showFooter && footerContent && (
-          <div className="p-4 border-t border-border">
+        {footerContent && (
+          <div className="p-4 border-t border-border shrink-0">
             {footerContent}
           </div>
         )}

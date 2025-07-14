@@ -2,31 +2,31 @@ import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FormModalFooterProps {
-  leftContent?: ReactNode;
-  rightContent?: ReactNode;
+  leftActions?: ReactNode;
+  rightActions?: ReactNode;
   children?: ReactNode;
   className?: string;
 }
 
 export function FormModalFooter({
-  leftContent,
-  rightContent,
+  leftActions,
+  rightActions,
   children,
   className,
 }: FormModalFooterProps) {
   return (
-    <div className={cn("p-4 border-t border-border", className)}>
+    <div className={cn("flex items-center justify-between", className)}>
       {children ? (
         children
       ) : (
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            {leftContent}
+        <>
+          <div className="flex items-center gap-2">
+            {leftActions}
           </div>
           <div className="flex items-center gap-2">
-            {rightContent}
+            {rightActions}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
