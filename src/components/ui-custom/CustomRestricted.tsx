@@ -16,6 +16,7 @@ interface CustomRestrictedProps {
   feature?: string;
   current?: number;
   reason?: "coming_soon" | string;
+  functionName?: string;
   children: React.ReactNode;
 }
 
@@ -23,6 +24,7 @@ export function CustomRestricted({
   feature,
   current,
   reason,
+  functionName,
   children,
 }: CustomRestrictedProps) {
   const { can, limit } = usePlanFeatures();
@@ -171,7 +173,7 @@ export function CustomRestricted({
                 className="font-medium text-sm" 
                 style={{ color: 'hsl(0, 0%, 95%)' }}
               >
-                Función Bloqueada
+                {functionName ? `${functionName} - Función Bloqueada` : 'Función Bloqueada'}
               </h4>
               <p 
                 className="text-xs mt-1"

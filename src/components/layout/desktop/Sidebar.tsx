@@ -217,13 +217,6 @@ export function Sidebar() {
       isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project')
     },
     { 
-      id: 'diseno', 
-      icon: Brush, 
-      label: 'Diseño', 
-      defaultRoute: '/design/dashboard',
-      isActive: activeSidebarSection === 'diseno' || location.startsWith('/design')
-    },
-    { 
       id: 'obra', 
       icon: HardHat, 
       label: 'Obra', 
@@ -236,6 +229,14 @@ export function Sidebar() {
       label: 'Finanzas', 
       defaultRoute: '/finances/dashboard',
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
+    },
+    { 
+      id: 'diseno', 
+      icon: Brush, 
+      label: 'Diseño', 
+      defaultRoute: '/design/dashboard',
+      isActive: activeSidebarSection === 'diseno' || location.startsWith('/design'),
+      restricted: true
     },
     { 
       id: 'comercializacion', 
@@ -281,7 +282,7 @@ export function Sidebar() {
               <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button with potential restriction */}
                 {item.restricted ? (
-                  <CustomRestricted reason="coming_soon">
+                  <CustomRestricted reason="coming_soon" functionName={item.label}>
                     <SidebarButton
                       icon={<item.icon className="w-[18px] h-[18px]" />}
                       label={item.label}

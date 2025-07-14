@@ -119,6 +119,14 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
+- July 13, 2025. Enhanced CustomRestricted component and repositioned design button with restrictions - COMPLETED
+  • Modified CustomRestricted component to display function names in tooltips (e.g., "Diseño - Función Bloqueada")
+  • Added functionName prop to CustomRestricted interface for dynamic tooltip content
+  • Applied restrictions to design button in main sidebar with proper function name display
+  • Moved design button from third position to fifth position (after finanzas) in both desktop and mobile sidebars
+  • Updated sidebar order: Organización → Proyecto → Obra → Finanzas → Diseño → Comercialización → Post-Venta
+  • Applied functionName parameter to all restricted buttons in both desktop Sidebar.tsx and mobile MobileMenu.tsx
+  • Enhanced user experience with specific function identification in restriction tooltips
 - July 13, 2025. Major navigation restructure: moved DOCUMENTACIÓN and GALERÍA pages from DISEÑO to PROYECTOS sidebar - COMPLETED
   • Moved DOCUMENTACIÓN page from design sidebar to project sidebar (positioned below CLIENTES button)
   • Moved GALERÍA page from construction sidebar to project sidebar (positioned below DOCUMENTACIÓN)

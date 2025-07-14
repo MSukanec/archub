@@ -343,7 +343,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <>
                   {/* Main Button with potential restriction */}
                   {item.restricted ? (
-                    <CustomRestricted reason="coming_soon">
+                    <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
                         onClick={item.isAccordion ? item.onToggle : (item.onClick || (() => handleNavigation(item.href)))}
                         className={cn(
