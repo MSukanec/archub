@@ -990,6 +990,7 @@ export default function DesignDocumentation() {
               key={group.id}
               group={group}
               onEdit={(group) => {
+                console.log('Opening modal with group:', group);
                 openModal('document-upload', { editingGroup: group });
               }}
               onDelete={(group) => setGroupToDelete(group)}
