@@ -13,22 +13,45 @@ export interface GalleryFileInput {
 
 export async function uploadGalleryFiles(
   files: GalleryFileInput[],
-  userId: string,
+  projectId: string,
   organizationId: string,
-  projectId: string
+  createdBy: string
 ): Promise<void> {
   if (!files || files.length === 0) {
     throw new Error('No hay archivos para subir');
   }
 
   for (const { file, title, description } of files) {
-    // Create database record first (for RLS compliance)
+    // Generate unique filename first
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const filePath = `gallery/${fileName}`;
+
+    // Upload file to storage first
+    const { error: uploadError } = await supabase.storage
+      .from('site-log-files')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      throw new Error(`Error al subir archivo: ${uploadError.message}`);
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('site-log-files')
+      .getPublicUrl(filePath);
+
+    // Create database record with all required fields
     const fileRecord = {
       file_name: title,
       file_type: file.type.startsWith('image/') ? 'image' : 'video',
       file_size: file.size,
       description: description || null,
-      user_id: userId,
+      created_by: createdBy,
+      organization_id: organizationId,
+      file_url: publicUrl,
+      file_path: filePath,
       // No site_log_id for independent gallery uploads
     };
 
@@ -40,60 +63,11 @@ export async function uploadGalleryFiles(
 
     if (dbError) {
       console.error('Database error:', dbError);
+      // Cleanup uploaded file if database insertion fails
+      await supabase.storage
+        .from('site-log-files')
+        .remove([filePath]);
       throw new Error(`Error al crear registro en base de datos: ${dbError.message}`);
-    }
-
-    // Generate unique filename
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `gallery/${fileName}`;
-
-    try {
-      // Upload file to storage
-      const { error: uploadError } = await supabase.storage
-        .from('site-log-files')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        // Cleanup database record if upload fails
-        await supabase
-          .from('site_log_files')
-          .delete()
-          .eq('id', dbFile.id);
-        throw new Error(`Error al subir archivo: ${uploadError.message}`);
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('site-log-files')
-        .getPublicUrl(filePath);
-
-      // Update database record with file URL and path
-      const { error: updateError } = await supabase
-        .from('site_log_files')
-        .update({
-          file_path: filePath,
-          file_url: publicUrl,
-        })
-        .eq('id', dbFile.id);
-
-      if (updateError) {
-        console.error('Database update error:', updateError);
-        // Try to cleanup both storage and database
-        await supabase.storage
-          .from('site-log-files')
-          .remove([filePath]);
-        await supabase
-          .from('site_log_files')
-          .delete()
-          .eq('id', dbFile.id);
-        throw new Error(`Error al actualizar registro: ${updateError.message}`);
-      }
-
-    } catch (error) {
-      console.error('Upload process error:', error);
-      throw error;
     }
   }
 }

@@ -93,7 +93,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
         galleryFiles,
         userData.preferences.last_project_id,
         userData.preferences.last_organization_id,
-        userData.user.id
+        data.created_by
       );
     },
     onSuccess: () => {
