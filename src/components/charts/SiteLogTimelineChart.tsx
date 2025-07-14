@@ -210,7 +210,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           <div className="ml-8 relative">
             <div 
               ref={setTimelineElement}
-              className={`overflow-x-auto h-32 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} [&::-webkit-scrollbar]:hidden`}
+              className={`overflow-x-auto h-32 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hidden`}
               style={{ 
                 scrollbarWidth: 'none', 
                 msOverflowStyle: 'none',

@@ -525,3 +525,13 @@ input[type="number"] {
     -ms-text-size-adjust: 100% !important;
   }
 }
+
+/* Hide scrollbar for timeline components */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
