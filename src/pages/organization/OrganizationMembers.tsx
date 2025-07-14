@@ -28,7 +28,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { useGlobalModalStore } from "@/components/modal/factory";
+import { useGlobalModalStore } from "@/components/modal/form";
 import { useMobile } from "@/hooks/use-mobile";
 
 function getInitials(name: string): string {
