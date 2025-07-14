@@ -260,8 +260,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="contents">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
           {/* Creador */}
           <FormField
             control={form.control}
@@ -397,7 +396,6 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
               </FormItem>
             )}
           />
-        </div>
       </form>
     </Form>
   );

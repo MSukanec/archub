@@ -128,6 +128,11 @@ Changelog:
   • Enhanced PhoneInput component height consistency with h-10 forced height and text-sm sizing
   • Changed "VINCULAR USUARIO EXISTENTE" button to primary style (accent color) instead of outline
   • All modals now properly implement responsive design: 1 column mobile, specified columns desktop
+  • Fixed hardcoded grid classes removal from ContactFormModal and ProjectFormModal editPanels
+  • Eliminated all col-span-2 hardcoded classes that were overriding responsive design
+  • Enhanced PhoneInput component height consistency with h-10 forced height and text-sm sizing
+  • Changed "VINCULAR USUARIO EXISTENTE" button to primary style (accent color) instead of outline
+  • All modals now properly implement responsive design: 1 column mobile, specified columns desktop
 - July 14, 2025. Complete modal system refactoring with unified architecture implemented - COMPLETED
   • Successfully refactored all modals (GalleryFormModal, BoardFormModal, MemberFormModal, CardFormModal) to use unified structure
   • All modals now return consistent { viewPanel, editPanel, headerContent, footerContent } object structure
