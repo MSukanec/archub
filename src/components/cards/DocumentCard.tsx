@@ -32,13 +32,13 @@ type DocumentCardProps = {
 // Get file icon based on file type
 const getFileIcon = (fileType: string) => {
   if (fileType?.startsWith('image/')) {
-    return <FileImage className="h-5 w-5 text-blue-500" />;
+    return <FileImage className="h-5 w-5 text-[var(--accent)]" />;
   } else if (fileType?.includes('pdf')) {
-    return <FileText className="h-5 w-5 text-red-500" />;
+    return <FileText className="h-5 w-5 text-[var(--accent)]" />;
   } else if (fileType?.includes('spreadsheet') || fileType?.includes('excel')) {
-    return <FileSpreadsheet className="h-5 w-5 text-green-500" />;
+    return <FileSpreadsheet className="h-5 w-5 text-[var(--accent)]" />;
   } else {
-    return <File className="h-5 w-5 text-gray-500" />;
+    return <File className="h-5 w-5 text-[var(--accent)]" />;
   }
 };
 
@@ -87,6 +87,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
           onClick: () => onDelete?.(document)
         }
       ]}
+      className="bg-transparent"
     >
       <div className="flex items-center gap-3">
         {/* File icon */}
