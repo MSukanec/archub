@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
+import FormModalBody from '@/components/modal/form/FormModalBody'
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -71,7 +72,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   // Set default values when data loads
   useEffect(() => {
     if (currentUser && !editingMovement) {
-      form.setValue('created_by', currentUser.id)
+      console.log('Setting current user:', currentUser.user.id)
+      form.setValue('created_by', currentUser.user.id)
     }
     if (defaultCurrency && !editingMovement) {
       form.setValue('currency_id', defaultCurrency.id)
@@ -144,9 +146,10 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const isLoading = createMovementMutation.isPending || updateMovementMutation.isPending
 
   const editPanel = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Creador */}
+    <FormModalBody columns={1}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Creador */}
         <FormField
           control={form.control}
           name="created_by"
@@ -330,8 +333,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             </FormItem>
           )}
         />
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </FormModalBody>
   )
 
   const headerContent = (
@@ -353,6 +357,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   return (
     <FormModalLayout
       columns={1}
+      viewPanel={null}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
