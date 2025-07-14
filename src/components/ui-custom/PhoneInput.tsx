@@ -69,17 +69,19 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
               variant="outline"
               disabled={disabled}
               className={cn(
-                "flex h-10 items-center justify-center rounded-l-md rounded-r-none border-r-0 px-3 py-2 min-w-[75px]",
-                "bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-fg)]",
-                "transition-none hover:bg-[var(--input-bg)] hover:border-[var(--input-border)]",
+                "flex items-center justify-center rounded-l-md rounded-r-none border-r-0 min-w-[85px]",
+                "text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground",
+                "transition-all duration-150",
+                "hover:bg-[var(--input-bg)] hover:border-[var(--input-border)]",
                 "focus:bg-[var(--input-bg)] focus:border-[var(--input-border)]",
-                "disabled:cursor-not-allowed disabled:opacity-50"
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent",
+                "disabled:opacity-60 disabled:cursor-not-allowed"
               )}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-base">{selectedCountry.flag}</span>
-                <span className="text-sm font-medium">{selectedCountry.dialCode}</span>
-                <ChevronDown className="h-3 w-3 opacity-50" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs">{selectedCountry.flag}</span>
+                <span className="text-xs font-bold">{selectedCountry.code} {selectedCountry.dialCode}</span>
+                <ChevronDown className="h-3 w-3 opacity-50 ml-0.5" />
               </div>
             </Button>
           </PopoverTrigger>
@@ -97,15 +99,15 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                   type="button"
                   onClick={() => handleCountrySelect(country)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 text-sm text-left",
+                    "w-full flex items-center gap-3 px-3 py-2 text-xs text-left",
                     "hover:bg-[var(--accent-bg)] hover:text-[var(--accent-fg)]",
                     selectedCountry.code === country.code && 
                     "bg-[var(--accent-bg)] text-[var(--accent-fg)]"
                   )}
                 >
-                  <span className="text-base">{country.flag}</span>
-                  <span className="flex-1 font-medium">{country.name}</span>
-                  <span className="text-sm text-[var(--muted-foreground)]">
+                  <span className="text-xs">{country.flag}</span>
+                  <span className="flex-1 font-medium text-xs">{country.name}</span>
+                  <span className="text-xs text-[var(--muted-foreground)]">
                     {country.dialCode}
                   </span>
                 </button>
@@ -124,7 +126,6 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           disabled={disabled}
           className={cn(
             "rounded-l-none border-l-0 flex-1",
-            "bg-[var(--input-bg)] border-[var(--input-border)] text-[var(--input-fg)]",
             className
           )}
         />
