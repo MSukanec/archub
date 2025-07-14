@@ -1,107 +1,67 @@
 import React, { useEffect } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DollarSign } from 'lucide-react'
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
-import FormModalBody from '@/components/modal/form/FormModalBody'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import UserSelector from '@/components/ui-custom/UserSelector'
+import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
-import { useMovementConcepts } from '@/hooks/use-movement-concepts'
-import { useOrganizationCurrencies, useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
+import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 
-const movementSchema = z.object({
-  created_by: z.string().min(1, 'Creador es requerido'),
+const movementFormSchema = z.object({
   movement_date: z.date(),
-  type_id: z.string().min(1, 'Tipo es requerido'),
-  currency_id: z.string().min(1, 'Moneda es requerida'),
-  wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0, 'El monto debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
   description: z.string().optional(),
+  created_by: z.string().min(1, 'Debe seleccionar un creador'),
+  type_id: z.string().min(1, 'Debe seleccionar un tipo'),
+  currency_id: z.string().min(1, 'Debe seleccionar una moneda'),
+  wallet_id: z.string().min(1, 'Debe seleccionar una billetera')
 })
 
-type MovementForm = z.infer<typeof movementSchema>
-
-interface Movement {
-  id: string
-  created_at: string
-  movement_date: string
-  created_by: string
-  description?: string
-  amount: number
-  exchange_rate?: number
-  type_id: string
-  category_id?: string
-  subcategory_id?: string
-  currency_id: string
-  wallet_id: string
-  organization_id: string
-  project_id?: string
-}
+type MovementForm = z.infer<typeof movementFormSchema>
 
 interface MovementFormModalProps {
-  modalData?: {
-    editingMovement?: Movement | null
-  }
+  editingMovement?: any
   onClose: () => void
 }
 
-function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProps) {
-  const editingMovement = modalData?.editingMovement
-  const { data: currentUser } = useCurrentUser()
-  const organizationId = currentUser?.organization?.id
-  const { data: members } = useOrganizationMembers(organizationId)
-  const { data: types } = useMovementConcepts('types')
-  const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
-  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId)
-  const { data: wallets } = useOrganizationWallets(organizationId)
+export default function MovementFormModal({ editingMovement, onClose }: MovementFormModalProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { setPanel } = useModalPanelStore()
+  const { data: currentUser } = useCurrentUser()
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.preferences?.last_organization_id
 
-  // Set panel to edit for new movements, view for editing
-  useEffect(() => {
-    if (!editingMovement) {
-      setPanel('edit')
-    } else {
-      setPanel('view')
-    }
-  }, [editingMovement, setPanel])
+  // Data hooks
+  const { data: members } = useOrganizationMembers(organizationId)
+  const { data: currencies } = useOrganizationCurrencies(organizationId)
+  const { data: wallets } = useOrganizationWallets(organizationId)
+  const { data: movementTypes } = useMovementConcepts('types')
+
+  // Default currency (first one)
+  const defaultCurrency = currencies?.[0]
 
   const form = useForm<MovementForm>({
-    resolver: zodResolver(movementSchema),
+    resolver: zodResolver(movementFormSchema),
     defaultValues: {
       movement_date: new Date(),
       amount: 0,
       exchange_rate: undefined,
       description: '',
-      created_by: currentUser?.id || '',
+      created_by: '',
       type_id: '',
       currency_id: '',
       wallet_id: ''
@@ -123,39 +83,6 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
     }
   }, [currentUser, defaultCurrency, wallets, editingMovement, form])
 
-  // Also set values when form is reset
-  useEffect(() => {
-    if (currentUser && defaultCurrency && !editingMovement) {
-      const defaultWallet = wallets?.find(w => w.is_default)
-      form.reset({
-        movement_date: new Date(),
-        amount: 0,
-        exchange_rate: undefined,
-        description: '',
-        created_by: currentUser.id,
-        type_id: '',
-        currency_id: defaultCurrency.id,
-        wallet_id: defaultWallet?.wallets?.id || ''
-      })
-    }
-  }, [currentUser, defaultCurrency, wallets, editingMovement, form])
-
-  // Set values when editing
-  useEffect(() => {
-    if (editingMovement && members && organizationCurrencies && wallets && types) {
-      form.reset({
-        created_by: editingMovement.created_by,
-        movement_date: new Date(editingMovement.movement_date),
-        type_id: editingMovement.type_id,
-        currency_id: editingMovement.currency_id,
-        wallet_id: editingMovement.wallet_id,
-        amount: editingMovement.amount,
-        exchange_rate: editingMovement.exchange_rate,
-        description: editingMovement.description || '',
-      })
-    }
-  }, [editingMovement, members, organizationCurrencies, wallets, types, form])
-
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
       const response = await fetch('/api/movements', {
@@ -164,6 +91,7 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
         body: JSON.stringify({
           ...data,
           organization_id: organizationId,
+          project_id: userData?.preferences?.last_project_id,
         }),
       })
       if (!response.ok) throw new Error('Error al crear movimiento')
@@ -215,205 +143,199 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
 
   const isLoading = createMovementMutation.isPending || updateMovementMutation.isPending
 
-  const viewPanel = (
-    <div className="p-4">
-      <p className="text-sm text-muted-foreground">Vista de movimiento no implementada</p>
-    </div>
-  )
-
   const editPanel = (
-    <div className="p-6">
-      <Form {...form}>
-        <form 
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4"
-        >
-          {/* Creador */}
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creador</FormLabel>
-                <FormControl>
-                  <UserSelector
-                    users={members || []}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar creador"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Creador */}
+        <FormField
+          control={form.control}
+          name="created_by"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Creador <span className="text-[var(--accent)]">*</span></FormLabel>
+              <FormControl>
+                <UserSelector
+                  users={members?.map(member => ({
+                    id: member.user_id,
+                    full_name: member.full_name,
+                    email: member.email,
+                    avatar_url: member.avatar_url,
+                    first_name: member.full_name.split(' ')[0] || '',
+                    last_name: member.full_name.split(' ').slice(1).join(' ') || ''
+                  })) || []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar creador"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Fecha */}
-          <FormField
-            control={form.control}
-            name="movement_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha del Movimiento</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                    onChange={(e) => field.onChange(new Date(e.target.value + 'T00:00:00'))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Fecha */}
+        <FormField
+          control={form.control}
+          name="movement_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha del Movimiento <span className="text-[var(--accent)]">*</span></FormLabel>
+              <FormControl>
+                <Input 
+                  type="date" 
+                  value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Tipo */}
-          <FormField
-            control={form.control}
-            name="type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo</FormLabel>
+        {/* Tipo */}
+        <FormField
+          control={form.control}
+          name="type_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo <span className="text-[var(--accent)]">*</span></FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {types?.map((type: any) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {movementTypes?.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Moneda */}
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Moneda</FormLabel>
+        {/* Moneda */}
+        <FormField
+          control={form.control}
+          name="currency_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Moneda <span className="text-[var(--accent)]">*</span></FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar moneda" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {organizationCurrencies?.map((orgCurrency: any) => (
-                        <SelectItem key={orgCurrency.id} value={orgCurrency.id}>
-                          {orgCurrency.currency.name} ({orgCurrency.currency.symbol})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar moneda" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {currencies?.map((currency) => (
+                    <SelectItem key={currency.id} value={currency.id}>
+                      {currency.currency.symbol} {currency.currency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Billetera */}
-          <FormField
-            control={form.control}
-            name="wallet_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Billetera</FormLabel>
+        {/* Billetera */}
+        <FormField
+          control={form.control}
+          name="wallet_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Billetera <span className="text-[var(--accent)]">*</span></FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar billetera" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {wallets?.map((wallet: any) => (
-                        <SelectItem key={wallet.id} value={wallet.id}>
-                          {wallet.wallets?.name || wallet.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar billetera" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {wallets?.map((wallet) => (
+                    <SelectItem key={wallet.wallets?.id} value={wallet.wallets?.id || ''}>
+                      {wallet.wallets?.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Monto */}
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Monto</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Monto */}
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Monto <span className="text-[var(--accent)]">*</span></FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  step="0.01"
+                  placeholder="0.00"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Cotización */}
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cotización (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    min="0"
-                    placeholder="1.0000"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Cotización */}
+        <FormField
+          control={form.control}
+          name="exchange_rate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cotización (opcional)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  step="0.01"
+                  placeholder="1.0000"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Descripción */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción (opcional)</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descripción del movimiento..."
-                    {...field}
-                    rows={3}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
-    </div>
+        {/* Descripción */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción (opcional)</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descripción del movimiento..."
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   )
 
   const headerContent = (
-    <FormModalHeader 
+    <FormModalHeader
       title={editingMovement ? "Editar Movimiento" : "Nuevo Movimiento"}
       icon={DollarSign}
     />
@@ -424,24 +346,17 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={editingMovement ? "Actualizar" : "Guardar"}
-      onRightClick={() => form.handleSubmit(onSubmit)()}
+      onRightClick={form.handleSubmit(onSubmit)}
     />
   )
 
   return (
     <FormModalLayout
-      viewPanel={viewPanel}
+      columns={1}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      columns={1}
     />
   )
 }
-
-export function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
-  return MovementFormModalFunction({ modalData, onClose })
-}
-
-export default MovementFormModal
