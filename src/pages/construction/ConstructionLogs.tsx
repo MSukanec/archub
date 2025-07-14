@@ -20,7 +20,9 @@ import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction"
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useSiteLogActivity } from "@/hooks/use-sitelog-activity";
+import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
 import { ActivityChart } from "@/components/charts/ActivityChart";
+import { SiteLogTimelineChart } from "@/components/charts/SiteLogTimelineChart";
 import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -181,6 +183,13 @@ export default function ConstructionLogs() {
   
   // Site log activity data for chart
   const { data: siteLogActivityData = [], isLoading: activityLoading } = useSiteLogActivity(
+    userData?.organization?.id,
+    userData?.preferences?.last_project_id,
+    timePeriod
+  );
+  
+  // Site log timeline data for timeline chart
+  const { data: siteLogTimelineData = [], isLoading: timelineLoading } = useSiteLogTimeline(
     userData?.organization?.id,
     userData?.preferences?.last_project_id,
     timePeriod
@@ -458,6 +467,14 @@ export default function ConstructionLogs() {
               description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
             }
           ]}
+        />
+
+        {/* Timeline Chart */}
+        <SiteLogTimelineChart 
+          data={siteLogTimelineData} 
+          isLoading={timelineLoading}
+          timePeriod={timePeriod}
+          onTimePeriodChange={setTimePeriod}
         />
 
         {/* Activity Chart */}
