@@ -172,7 +172,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const isLoading = createMovementMutation.isPending
 
   // Encontrar datos para display
-  const selectedCurrency = currencies?.find(c => c.currency_id === form.watch('currency_id'))?.currencies
+  const selectedCurrency = currencies?.find(c => c.currency_id === form.watch('currency_id'))?.currency
   const selectedWallet = wallets?.find(w => w.wallet_id === form.watch('wallet_id'))?.wallets
   const selectedCreator = members?.find(m => m.id === form.watch('creator_id'))
   const selectedConcept = concepts?.find(c => c.id === form.watch('type'))
@@ -324,7 +324,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   <SelectContent>
                     {currencies?.map((currency) => (
                       <SelectItem key={currency.currency_id} value={currency.currency_id}>
-                        {currency.currencies.name} ({currency.currencies.symbol})
+                        {currency.currency?.name || 'Sin nombre'} ({currency.currency?.symbol || '$'})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -350,7 +350,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   <SelectContent>
                     {wallets?.map((wallet) => (
                       <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
-                        {wallet.wallets.name}
+                        {wallet.wallets?.name || 'Sin nombre'}
                       </SelectItem>
                     ))}
                   </SelectContent>
