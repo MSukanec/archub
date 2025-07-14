@@ -15,18 +15,18 @@ export function FormModalFooter({
   className,
 }: FormModalFooterProps) {
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className={cn("p-2 border-t border-[var(--card-border)] mt-auto", className)}>
       {children ? (
         children
       ) : (
-        <>
-          <div className="flex items-center gap-2">
+        <div className="flex gap-2 w-full">
+          <div className="w-1/4">
             {leftActions}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="w-3/4">
             {rightActions}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
