@@ -48,9 +48,9 @@ export default function UserSelector({
           <SelectValue placeholder={placeholder}>
             {selectedUser && (
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-4 w-4">
                   <AvatarImage src={selectedUser.avatar_url} />
-                  <AvatarFallback className="text-xs">
+                  <AvatarFallback className="text-[10px]">
                     {selectedUser.full_name?.split(' ').map(n => n[0]).join('') || 
                      selectedUser.first_name?.[0] || 'U'}
                   </AvatarFallback>
@@ -66,9 +66,9 @@ export default function UserSelector({
           {users?.map((user) => (
             <SelectItem key={user.id} value={user.id}>
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-4 w-4">
                   <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback className="text-xs">
+                  <AvatarFallback className="text-[10px]">
                     {user.full_name?.split(' ').map(n => n[0]).join('') || 
                      user.first_name?.[0] || 'U'}
                   </AvatarFallback>
