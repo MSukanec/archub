@@ -89,7 +89,11 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
       }
 
       // Get log IDs for related data
-      const logIds = logsData.map(log => log.id);
+      const logIds = logsData?.map(log => log.id) || [];
+
+      if (logIds.length === 0) {
+        return [];
+      }
 
       // Fetch events separately
       const { data: eventsData, error: eventsError } = await supabase
@@ -651,9 +655,9 @@ export default function ConstructionLogs() {
                                         <Image className="h-6 w-6 text-gray-400" />
                                       </div>
                                       <div className="absolute -bottom-6 left-0 right-0 text-xs text-muted-foreground text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {file.original_name.length > 12 ? 
+                                        {file.original_name && file.original_name.length > 12 ? 
                                           file.original_name.substring(0, 12) + '...' : 
-                                          file.original_name
+                                          file.original_name || 'Sin nombre'
                                         }
                                       </div>
                                     </div>
@@ -661,9 +665,9 @@ export default function ConstructionLogs() {
                                     <div key={index} className="flex items-center gap-2 px-2 py-1 rounded border border-gray-200">
                                       <Video className="h-4 w-4 text-gray-500" />
                                       <span className="text-xs text-muted-foreground">
-                                        {file.original_name.length > 15 ? 
+                                        {file.original_name && file.original_name.length > 15 ? 
                                           file.original_name.substring(0, 15) + '...' : 
-                                          file.original_name
+                                          file.original_name || 'Sin nombre'
                                         }
                                       </span>
                                     </div>
