@@ -63,7 +63,7 @@
   --button-primary-disabled-text: hsl(240, 5%, 65%);
 
   /* Buttons - Secondary */
-  --button-secondary-bg: hsl(0, 0%, 97%);
+  --button-secondary-bg: transparent;
   --button-secondary-text: hsl(76, 100%, 40%);
   --button-secondary-border: hsl(76, 100%, 40%);
   --button-secondary-hover-bg: hsl(76, 100%, 95%);
