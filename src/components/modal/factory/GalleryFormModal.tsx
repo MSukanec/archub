@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -148,23 +149,8 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
 
   if (!open) return null;
 
-  return (
-    <FormModalLayout
-      onClose={handleClose}
-      headerContent={
-        <FormModalHeader
-          title={editingFile ? "Editar Archivo" : "Subir Archivo"}
-        />
-      }
-      footerContent={{
-        leftLabel: "Cancelar",
-        onLeftClick: handleClose,
-        rightLabel: isSubmitting ? "Guardando..." : "Guardar",
-        onRightClick: handleSubmit(onSubmit),
-        rightDisabled: isSubmitting
-      }}
-    >
-      <div className="space-y-6 p-4">
+  const modalContent = (
+    <div className="space-y-6 p-4">
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Title Field */}
@@ -263,6 +249,25 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
           </form>
         </Form>
       </div>
-    </FormModalLayout>
+  );
+
+  return (
+    <FormModalLayout
+      onClose={handleClose}
+      viewPanel={modalContent}
+      headerContent={
+        <FormModalHeader
+          title={editingFile ? "Editar Archivo" : "Subir Archivo"}
+        />
+      }
+      footerContent={
+        <FormModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={handleClose}
+          rightLabel={isSubmitting ? "Guardando..." : "Guardar"}
+          onRightClick={handleSubmit(onSubmit)}
+        />
+      }
+    />
   );
 }
