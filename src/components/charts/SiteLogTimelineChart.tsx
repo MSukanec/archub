@@ -114,7 +114,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
 
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="pt-8">
         {/* Chart area - separated from dates */}
         <div className="h-32">
           {/* Custom timeline visualization */}
@@ -210,7 +210,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
 
         {/* X-axis (dates) - BELOW the chart, perfectly aligned with vertical lines */}
         <div className="relative">
-          <div className="ml-8 flex justify-around pt-2">
+          <div className="ml-8 flex justify-around pt-6">
             {data.map((dayData, index) => (
               <div key={index} className="text-xs text-muted-foreground text-center flex-1">
                 {dayData.date}
@@ -220,7 +220,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
         </div>
         
         {/* Legend with totals */}
-        <div className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-border">
+        <div className="flex flex-wrap gap-4 mt-8 pt-4 border-t border-border">
           {categories.map(({ key, label, icon: Icon, color }) => (
             <div key={key} className="flex items-center gap-2">
               <div 
