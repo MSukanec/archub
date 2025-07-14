@@ -8,6 +8,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -529,7 +530,7 @@ export default function ConstructionLogs() {
                             
                             {/* Fecha y Hora */}
                             <span className="text-sm text-muted-foreground">
-                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
+                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy', { locale: es })} 21:00
                             </span>
 
                             {/* Clima */}
@@ -544,11 +545,12 @@ export default function ConstructionLogs() {
 
                             {/* Creador */}
                             <div className="flex items-center gap-2">
-                              <div className="h-5 w-5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                                <span className="text-xs font-medium text-primary">
+                              <Avatar className="h-5 w-5">
+                                <AvatarImage src={siteLog.creator?.avatar_url} />
+                                <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                   {siteLog.creator?.full_name?.charAt(0) || 'U'}
-                                </span>
-                              </div>
+                                </AvatarFallback>
+                              </Avatar>
                               <span className="text-sm text-muted-foreground">
                                 {siteLog.creator?.full_name || 'Usuario desconocido'}
                               </span>
@@ -621,12 +623,12 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-[hsl(var(--chart-1))]/10 border-[hsl(var(--chart-1))]/30">
+                                  <Card key={index} className="p-2" style={{ backgroundColor: 'hsl(76, 100%, 40%, 0.1)', borderColor: 'hsl(76, 100%, 40%, 0.3)' }}>
                                     <div className="flex items-center gap-2">
                                       {file.file_type?.startsWith('image/') ? (
-                                        <Image className="h-4 w-4 text-[hsl(var(--chart-1))]" />
+                                        <Image className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
                                       ) : (
-                                        <Video className="h-4 w-4 text-[hsl(var(--chart-1))]" />
+                                        <Video className="h-4 w-4" style={{ color: 'hsl(76, 100%, 40%)' }} />
                                       )}
                                       <span className="text-xs text-muted-foreground truncate">
                                         {file.original_name}
