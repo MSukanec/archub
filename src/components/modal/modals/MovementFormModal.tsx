@@ -27,6 +27,8 @@ const movementFormSchema = z.object({
   creator_id: z.string().min(1, 'El creador es requerido'),
   movement_date: z.string().min(1, 'La fecha es requerida'),
   type_id: z.string().min(1, 'El tipo es requerido'),
+  category_id: z.string().optional(),
+  subcategory_id: z.string().optional(),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   wallet_id: z.string().min(1, 'La billetera es requerida'),
   amount: z.number().min(0.01, 'El monto debe ser mayor a 0'),
@@ -51,12 +53,22 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
+  // Estados para la lógica jerárquica
+  const [selectedTypeId, setSelectedTypeId] = React.useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
+
+  // Hooks jerárquicos para categorías y subcategorías
+  const { data: categories } = useMovementConcepts('categories', selectedTypeId)
+  const { data: subcategories } = useMovementConcepts('categories', selectedCategoryId)
+
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
       creator_id: editingMovement?.creator_id || userData?.user?.id || '',
       movement_date: editingMovement?.movement_date || new Date().toISOString().split('T')[0],
       type_id: editingMovement?.type_id || '',
+      category_id: editingMovement?.category_id || '',
+      subcategory_id: editingMovement?.subcategory_id || '',
       currency_id: editingMovement?.currency_id || '',
       wallet_id: editingMovement?.wallet_id || '',
       amount: editingMovement?.amount || 0,
@@ -65,10 +77,40 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   })
 
+  // Efecto para manejar la lógica jerárquica al seleccionar tipo
+  React.useEffect(() => {
+    const typeId = form.watch('type_id')
+    if (typeId !== selectedTypeId) {
+      setSelectedTypeId(typeId)
+      // Reset categoría y subcategoría cuando cambia el tipo
+      if (typeId !== editingMovement?.type_id) {
+        form.setValue('category_id', '')
+        form.setValue('subcategory_id', '')
+        setSelectedCategoryId('')
+      }
+    }
+  }, [form.watch('type_id')])
+
+  // Efecto para manejar la lógica jerárquica al seleccionar categoría
+  React.useEffect(() => {
+    const categoryId = form.watch('category_id')
+    if (categoryId !== selectedCategoryId) {
+      setSelectedCategoryId(categoryId)
+      // Reset subcategoría cuando cambia la categoría
+      if (categoryId !== editingMovement?.category_id) {
+        form.setValue('subcategory_id', '')
+      }
+    }
+  }, [form.watch('category_id')])
+
   React.useEffect(() => {
     if (editingMovement) {
       // Wait for all data to be loaded
       if (!members || !currencies || !wallets || !concepts) return
+      
+      // Set hierarchical states for editing
+      setSelectedTypeId(editingMovement.type_id || '')
+      setSelectedCategoryId(editingMovement.category_id || '')
       
       // Map currency_id and wallet_id to organization-specific IDs
       const matchingCurrency = currencies?.find((c: any) => 
@@ -82,6 +124,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         creator_id: editingMovement.creator_id || userData?.user?.id || '',
         movement_date: editingMovement.movement_date || new Date().toISOString().split('T')[0],
         type_id: editingMovement.type_id || '',
+        category_id: editingMovement.category_id || '',
+        subcategory_id: editingMovement.subcategory_id || '',
         currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
         wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id,
         amount: editingMovement.amount || 0,
@@ -107,6 +151,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         creator_id: currentMember?.id || '',
         movement_date: new Date().toISOString().split('T')[0],
         type_id: '',
+        category_id: '',
+        subcategory_id: '',
         currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.wallet_id || '',
         amount: 0,
@@ -129,7 +175,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           .update({
             creator_id: data.creator_id,
             movement_date: data.movement_date,
-            type: data.type,
+            type_id: data.type_id,
+            category_id: data.category_id || null,
+            subcategory_id: data.subcategory_id || null,
             currency_id: data.currency_id,
             wallet_id: data.wallet_id,
             amount: data.amount,
@@ -151,7 +199,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             project_id: userData.preferences.last_project_id,
             creator_id: data.creator_id,
             movement_date: data.movement_date,
-            type: data.type,
+            type_id: data.type_id,
+            category_id: data.category_id || null,
+            subcategory_id: data.subcategory_id || null,
             currency_id: data.currency_id,
             wallet_id: data.wallet_id,
             amount: data.amount,
@@ -335,7 +385,70 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             )}
           />
 
-          {/* Fila 3: Moneda | Billetera */}
+          {/* Fila 3: Categoría (full width) */}
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría</FormLabel>
+                <Select 
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                    setSelectedCategoryId(value)
+                  }} 
+                  value={field.value}
+                  disabled={!selectedTypeId}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={!selectedTypeId ? "Seleccione primero un tipo" : "Seleccionar categoría..."} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories?.map((category: any) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Fila 4: Subcategoría (full width) */}
+          <FormField
+            control={form.control}
+            name="subcategory_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subcategoría</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  disabled={!selectedCategoryId}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={!selectedCategoryId ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {subcategories?.map((subcategory: any) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Fila 5: Moneda | Billetera */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -388,7 +501,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             />
           </div>
 
-          {/* Fila 4: Monto | Cotización */}
+          {/* Fila 6: Monto | Cotización */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
