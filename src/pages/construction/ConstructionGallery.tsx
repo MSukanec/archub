@@ -27,6 +27,7 @@ import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarCo
 import { useMobile } from '@/hooks/use-mobile';
 
 import { useGlobalModalStore } from '@/components/modal/factory';
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
 import { 
   Images, 
   Filter, 
@@ -77,9 +78,7 @@ export default function ConstructionGallery() {
   
   // Modal states  
   const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
-  const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
   const [fileToDelete, setFileToDelete] = useState<GalleryFile | null>(null);
-
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -159,6 +158,21 @@ export default function ConstructionGallery() {
     enabled: !!projectId && !!userData?.preferences?.last_organization_id
   });
 
+  // Lightbox setup
+  const imageUrls = useMemo(() => 
+    galleryFiles
+      .filter(file => file.file_type === 'image' || file.file_type?.startsWith('image/'))
+      .map(file => file.file_url), 
+    [galleryFiles]
+  );
+  
+  const { 
+    isOpen: isLightboxOpen, 
+    currentIndex, 
+    openLightbox, 
+    closeLightbox
+  } = useImageLightbox(imageUrls);
+
   // Delete mutation
   const deleteFileMutation = useMutation({
     mutationFn: async (fileId: string) => {
@@ -201,7 +215,8 @@ export default function ConstructionGallery() {
       queryClient.removeQueries({ queryKey: ['galleryFiles'] });
       queryClient.refetchQueries({ queryKey: ['galleryFiles'] });
       
-      setSelectedFile(null);
+      // Cerrar lightbox si estaba abierto
+      closeLightbox();
     },
     onError: (error) => {
       console.error('Error deleting file:', error);
@@ -230,7 +245,7 @@ export default function ConstructionGallery() {
           id: 'new-file',
           icon: <Plus className="h-6 w-6" />,
           label: 'Subir',
-          onClick: () => setShowGalleryModal(true),
+          onClick: () => openModal('gallery'),
         },
         slot4: {
           id: 'filters',
@@ -291,8 +306,13 @@ export default function ConstructionGallery() {
   }, [galleryFiles, searchTerm, fileTypeFilter, entryTypeFilter]);
 
   // Functions
-  const openLightbox = (file: GalleryFile) => {
-    setSelectedFile(file);
+  const handleImageClick = (file: GalleryFile) => {
+    if (file.file_type === 'image' || file.file_type?.startsWith('image/')) {
+      const imageIndex = imageUrls.indexOf(file.file_url);
+      if (imageIndex !== -1) {
+        openLightbox(imageIndex);
+      }
+    }
   };
 
   const handleEdit = (file: GalleryFile) => {
@@ -321,18 +341,7 @@ export default function ConstructionGallery() {
     document.body.removeChild(link);
   };
 
-  const navigateImage = (direction: 'prev' | 'next') => {
-    const currentIndex = filteredFiles.findIndex(file => file.id === selectedFile?.id);
-    let newIndex;
-    
-    if (direction === 'prev') {
-      newIndex = currentIndex > 0 ? currentIndex - 1 : filteredFiles.length - 1;
-    } else {
-      newIndex = currentIndex < filteredFiles.length - 1 ? currentIndex + 1 : 0;
-    }
-    
-    setSelectedFile(filteredFiles[newIndex]);
-  };
+
 
   const getEntryTypeLabel = (type: string) => {
     const types: Record<string, string> = {
@@ -531,7 +540,7 @@ export default function ConstructionGallery() {
               <Card 
                 key={file.id} 
                 className="group cursor-pointer overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200"
-                onClick={() => openLightbox(file)}
+                onClick={() => handleImageClick(file)}
               >
                 <div className="aspect-square relative">
                   {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
@@ -592,84 +601,13 @@ export default function ConstructionGallery() {
         )}
       </div>
 
-      {/* Lightbox Modal */}
-      {selectedFile && (
-        <CustomModalLayout
-          open={!!selectedFile}
-          onClose={() => setSelectedFile(null)}
-          children={{
-            header: (
-              <CustomModalHeader
-                title={selectedFile.title || 'Archivo'}
-                description={
-                  <div className="space-y-1">
-                    <div>{`${getEntryTypeLabel(selectedFile.entry_type || 'registro_general')} • ${format(new Date(selectedFile.created_at), 'dd MMM yyyy', { locale: es })}`}</div>
-                    {selectedFile.description && (
-                      <div className="text-sm text-muted-foreground">{selectedFile.description}</div>
-                    )}
-                  </div>
-                }
-                onClose={() => setSelectedFile(null)}
-              />
-            ),
-            body: (
-              <CustomModalBody columns={1} className="p-0">
-                <div className="relative flex items-center justify-center bg-black/5 min-h-[60vh]">
-                  {selectedFile.file_type === 'image' || selectedFile.file_type?.startsWith('image/') ? (
-                    <img 
-                      src={selectedFile.file_url} 
-                      alt={selectedFile.title}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  ) : (
-                    <video 
-                      src={selectedFile.file_url} 
-                      controls 
-                      className="max-w-full max-h-full"
-                    />
-                  )}
-
-                  {/* Navigation */}
-                  {filteredFiles.length > 1 && (
-                    <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="pointer-events-auto"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigateImage('prev');
-                        }}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="pointer-events-auto"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigateImage('next');
-                        }}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CustomModalBody>
-            ),
-            footer: (
-              <CustomModalFooter
-                onCancel={() => setSelectedFile(null)}
-                onSave={() => downloadFile(selectedFile)}
-                cancelText="Cerrar"
-                saveText="Descargar"
-              />
-            ),
-          }}
-        />
-      )}
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={imageUrls}
+        currentIndex={currentIndex}
+        isOpen={isLightboxOpen}
+        onClose={closeLightbox}
+      />
 
       {/* Delete Confirmation Modal */}
       {fileToDelete && (
