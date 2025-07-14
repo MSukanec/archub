@@ -64,18 +64,26 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
-      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
-      created_by: editingMovement?.created_by || userData?.user?.id || '',
-      description: editingMovement?.description || '',
-      amount: editingMovement?.amount || 0,
-      exchange_rate: editingMovement?.exchange_rate || undefined,
-      type_id: editingMovement?.type_id || '',
-      category_id: editingMovement?.category_id || '',
-      subcategory_id: editingMovement?.subcategory_id || '',
-      currency_id: editingMovement?.currency_id || '',
-      wallet_id: editingMovement?.wallet_id || '',
+      movement_date: new Date(),
+      created_by: '',
+      description: '',
+      amount: 0,
+      exchange_rate: undefined,
+      type_id: '',
+      category_id: '',
+      subcategory_id: '',
+      currency_id: '',
+      wallet_id: '',
     }
   })
+
+  // Manejar envío con ENTER
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      form.handleSubmit(onSubmit)()
+    }
+  }
 
   // Efecto para manejar la lógica jerárquica al seleccionar tipo
   React.useEffect(() => {
@@ -120,17 +128,24 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
       )
       
+      console.log('Loading editing movement:', {
+        editingMovement,
+        matchingCurrency: matchingCurrency?.currency_id,
+        matchingWallet: matchingWallet?.wallet_id,
+        created_by: editingMovement.created_by
+      })
+      
       form.reset({
         movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
-        created_by: editingMovement.created_by || userData?.user?.id || '',
+        created_by: editingMovement.created_by || '',
         description: editingMovement.description || '',
         amount: editingMovement.amount || 0,
         exchange_rate: editingMovement.exchange_rate || undefined,
         type_id: editingMovement.type_id || '',
         category_id: editingMovement.category_id || '',
         subcategory_id: editingMovement.subcategory_id || '',
-        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
-        wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id,
+        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
+        wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
       })
       setPanel('view')
     } else {
@@ -306,7 +321,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const editPanel = (
     <div className="space-y-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
           {/* Desktop: Grid Layout, Mobile: Single Column */}
           
           {/* Fila 1: Creador | Fecha */}
