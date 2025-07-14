@@ -1215,14 +1215,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       onLeftClick={onClose}
       rightLabel={editingMovement ? "Actualizar" : "Guardar"}
       onRightClick={isConversion ? conversionForm.handleSubmit(onSubmitConversion) : form.handleSubmit(onSubmit)}
+      rightLoading={isLoading}
     />
   )
 
   return (
-    <FormModalLayout>
-      {headerContent}
-      {editPanel}
-      {footerContent}
-    </FormModalLayout>
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
+    />
   )
 }
