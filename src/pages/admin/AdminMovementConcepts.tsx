@@ -164,12 +164,17 @@ export default function AdminMovementConcepts() {
     ],
     onClearFilters: clearFilters,
     hasActiveFilters,
-    actions: (
-      <Button onClick={handleOpenCreateModal} className="h-8 px-3 text-sm">
-        <Plus className="h-4 w-4 mr-1" />
-        CREAR CONCEPTO
+    actions: [
+      <Button 
+        key="new-concept"
+        onClick={handleOpenCreateModal}
+        size="sm"
+        className="gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Nuevo Concepto
       </Button>
-    )
+    ]
   };
 
   if (isError) {
