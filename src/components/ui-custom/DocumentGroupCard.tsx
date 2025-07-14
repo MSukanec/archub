@@ -12,7 +12,7 @@ import {
   FileText, 
   Calendar, 
   User, 
-  Edit3,
+  RefreshCw,
   Trash2
 } from 'lucide-react';
 
@@ -70,12 +70,13 @@ export function DocumentGroupCard({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log('DocumentGroupCard - onEdit clicked with group:', group);
                   onEdit(group);
                 }}
                 className="h-8 w-8 p-0"
-                title="Editar grupo"
+                title="Actualizar grupo"
               >
-                <Edit3 className="w-4 h-4" />
+                <RefreshCw className="w-4 h-4" />
               </Button>
             )}
             {onDelete && (
