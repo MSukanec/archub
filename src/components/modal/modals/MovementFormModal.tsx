@@ -24,16 +24,16 @@ import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 
 const movementFormSchema = z.object({
-  creator_id: z.string().min(1, 'El creador es requerido'),
-  movement_date: z.string().min(1, 'La fecha es requerida'),
-  type_id: z.string().min(1, 'El tipo es requerido'),
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
-  currency_id: z.string().min(1, 'La moneda es requerida'),
-  wallet_id: z.string().min(1, 'La billetera es requerida'),
-  amount: z.number().min(0.01, 'El monto debe ser mayor a 0'),
-  exchange_rate: z.number().optional(),
-  description: z.string().optional(),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida')
 })
 
 type MovementForm = z.infer<typeof movementFormSchema>
@@ -64,16 +64,16 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
-      creator_id: editingMovement?.creator_id || userData?.user?.id || '',
-      movement_date: editingMovement?.movement_date || new Date().toISOString().split('T')[0],
+      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      created_by: editingMovement?.created_by || userData?.user?.id || '',
+      description: editingMovement?.description || '',
+      amount: editingMovement?.amount || 0,
+      exchange_rate: editingMovement?.exchange_rate || undefined,
       type_id: editingMovement?.type_id || '',
       category_id: editingMovement?.category_id || '',
       subcategory_id: editingMovement?.subcategory_id || '',
       currency_id: editingMovement?.currency_id || '',
       wallet_id: editingMovement?.wallet_id || '',
-      amount: editingMovement?.amount || 0,
-      exchange_rate: editingMovement?.exchange_rate || undefined,
-      description: editingMovement?.description || '',
     }
   })
 
@@ -121,16 +121,16 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       )
       
       form.reset({
-        creator_id: editingMovement.creator_id || userData?.user?.id || '',
-        movement_date: editingMovement.movement_date || new Date().toISOString().split('T')[0],
+        movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+        created_by: editingMovement.created_by || userData?.user?.id || '',
+        description: editingMovement.description || '',
+        amount: editingMovement.amount || 0,
+        exchange_rate: editingMovement.exchange_rate || undefined,
         type_id: editingMovement.type_id || '',
         category_id: editingMovement.category_id || '',
         subcategory_id: editingMovement.subcategory_id || '',
         currency_id: matchingCurrency?.currency_id || editingMovement.currency_id,
         wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id,
-        amount: editingMovement.amount || 0,
-        exchange_rate: editingMovement.exchange_rate || undefined,
-        description: editingMovement.description || '',
       })
       setPanel('view')
     } else {
@@ -148,16 +148,16 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       })
 
       form.reset({
-        creator_id: currentMember?.id || '',
-        movement_date: new Date().toISOString().split('T')[0],
+        movement_date: new Date(),
+        created_by: currentMember?.id || '',
+        description: '',
+        amount: 0,
+        exchange_rate: undefined,
         type_id: '',
         category_id: '',
         subcategory_id: '',
         currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.wallet_id || '',
-        amount: 0,
-        exchange_rate: undefined,
-        description: '',
       })
       setPanel('edit')
     }
@@ -169,50 +169,36 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         throw new Error('Organization ID or Project ID not found')
       }
 
+      const movementData = {
+        ...data,
+        organization_id: userData.organization.id,
+        project_id: userData.preferences.last_project_id,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        category_id: data.category_id || null,
+        subcategory_id: data.subcategory_id || null,
+        exchange_rate: data.exchange_rate || null,
+        description: data.description || null,
+      }
+
       if (editingMovement) {
-        const { data: updatedMovement, error } = await supabase
-          .from('financial_movements')
-          .update({
-            creator_id: data.creator_id,
-            movement_date: data.movement_date,
-            type_id: data.type_id,
-            category_id: data.category_id || null,
-            subcategory_id: data.subcategory_id || null,
-            currency_id: data.currency_id,
-            wallet_id: data.wallet_id,
-            amount: data.amount,
-            exchange_rate: data.exchange_rate || null,
-            description: data.description || null,
-            updated_at: new Date().toISOString(),
-          })
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
           .eq('id', editingMovement.id)
           .select()
           .single()
 
         if (error) throw error
-        return updatedMovement
+        return result
       } else {
-        const { data: newMovement, error } = await supabase
-          .from('financial_movements')
-          .insert({
-            organization_id: userData.organization.id,
-            project_id: userData.preferences.last_project_id,
-            creator_id: data.creator_id,
-            movement_date: data.movement_date,
-            type_id: data.type_id,
-            category_id: data.category_id || null,
-            subcategory_id: data.subcategory_id || null,
-            currency_id: data.currency_id,
-            wallet_id: data.wallet_id,
-            amount: data.amount,
-            exchange_rate: data.exchange_rate || null,
-            description: data.description || null,
-          })
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert(movementData)
           .select()
           .single()
 
         if (error) throw error
-        return newMovement
+        return result
       }
     },
     onSuccess: () => {
@@ -248,7 +234,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   // Encontrar datos para display
   const selectedCurrency = currencies?.find(c => c.currency?.id === form.watch('currency_id'))?.currency
   const selectedWallet = wallets?.find(w => w.wallet_id === form.watch('wallet_id'))?.wallets
-  const selectedCreator = members?.find(m => m.id === form.watch('creator_id'))
+  const selectedCreator = members?.find(m => m.id === form.watch('created_by'))
   const selectedConcept = concepts?.find(c => c.id === form.watch('type_id'))
 
   const viewPanel = editingMovement ? (
@@ -327,7 +313,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="creator_id"
+              name="created_by"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Creador *</FormLabel>
@@ -351,7 +337,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                 <FormItem>
                   <FormLabel>Fecha *</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input
+                      type="date"
+                      value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                      onChange={(e) => {
+                        const localDate = new Date(e.target.value + 'T00:00:00');
+                        field.onChange(localDate);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
