@@ -284,7 +284,12 @@ export default function OrganizationMembers() {
 
                         <div className="flex items-center gap-4">
                           <div className="text-xs text-muted-foreground text-right">
-                            <div>{format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
+                            <div>
+                              {member.joined_at && !isNaN(new Date(member.joined_at).getTime()) 
+                                ? format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })
+                                : 'Fecha no disponible'
+                              }
+                            </div>
                           </div>
 
                           <Badge 
@@ -391,7 +396,12 @@ export default function OrganizationMembers() {
 
                         <div className="flex items-center gap-4">
                           <div className="text-xs text-muted-foreground text-right">
-                            <div>{format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })}</div>
+                            <div>
+                              {guest.joined_at && !isNaN(new Date(guest.joined_at).getTime()) 
+                                ? format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })
+                                : 'Fecha no disponible'
+                              }
+                            </div>
                           </div>
 
                           <Badge variant="secondary">
@@ -477,7 +487,12 @@ export default function OrganizationMembers() {
 
                       <div className="flex items-center gap-4">
                         <div className="text-xs text-muted-foreground text-right">
-                          <div>{format(new Date(invite.created_at), 'MMM dd, yyyy', { locale: es })}</div>
+                          <div>
+                            {invite.created_at && !isNaN(new Date(invite.created_at).getTime()) 
+                              ? format(new Date(invite.created_at), 'MMM dd, yyyy', { locale: es })
+                              : 'Fecha no disponible'
+                            }
+                          </div>
                         </div>
 
                         <div className="flex gap-2">
