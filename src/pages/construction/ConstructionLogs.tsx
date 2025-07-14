@@ -530,7 +530,7 @@ export default function ConstructionLogs() {
                             
                             {/* Fecha y Hora */}
                             <span className="text-sm text-muted-foreground">
-                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy', { locale: es })} 21:00
+                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy HH:mm', { locale: es })}
                             </span>
 
                             {/* Clima */}

@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FileText, CalendarDays, Users, Truck } from 'lucide-react'
+import { FileText, CalendarDays, Users, Truck, Calendar } from 'lucide-react'
 
 interface SiteLogTimelineData {
   date: string
@@ -23,6 +23,7 @@ interface SiteLogTimelineChartProps {
 type TimePeriod = 'days' | 'weeks' | 'months'
 
 export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriodChange }: SiteLogTimelineChartProps) {
+  const [chartContainer, setChartContainer] = useState<HTMLDivElement | null>(null)
   
   const getTimePeriodLabel = (period: TimePeriod) => {
     switch (period) {
@@ -30,6 +31,12 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
       case 'weeks': return 'últimos 7 meses'
       case 'months': return 'últimos 7 trimestres'
       default: return 'período'
+    }
+  }
+
+  const handleScrollToToday = () => {
+    if (chartContainer) {
+      chartContainer.scrollLeft = 0
     }
   }
 
@@ -94,19 +101,31 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
             </p>
           </div>
           
-          {/* Time period selector */}
-          {onTimePeriodChange && (
-            <Select value={timePeriod} onValueChange={onTimePeriodChange}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="days">SEMANAS</SelectItem>
-                <SelectItem value="weeks">MESES</SelectItem>
-                <SelectItem value="months">TRIMESTRES</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+          {/* Time period controls */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleScrollToToday}
+              className="gap-2"
+            >
+              <Calendar className="w-4 h-4" />
+              HOY
+            </Button>
+            
+            {onTimePeriodChange && (
+              <Select value={timePeriod} onValueChange={onTimePeriodChange}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="days">SEMANAS</SelectItem>
+                  <SelectItem value="weeks">MESES</SelectItem>
+                  <SelectItem value="months">TRIMESTRES</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
         
 
@@ -137,20 +156,24 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               })}
             </div>
 
-            {/* Chart area */}
-            <div className="ml-8 h-full relative">
+            {/* Chart area with horizontal scroll */}
+            <div 
+              ref={setChartContainer}
+              className="ml-8 h-full relative overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400" 
+            >
               {/* Horizontal grid lines - exactly aligned with icons */}
-              <div className="absolute inset-0 h-full">
+              <div className="absolute inset-0 h-full" style={{ minWidth: `${Math.max(800, data.length * 120)}px` }}>
                 {displayCategories.map((_, index) => {
                   // Same formula as icons for perfect alignment
                   const topPosition = (index * 100) / (displayCategories.length - 1)
                   return (
                     <div 
                       key={index} 
-                      className="absolute border-b border-dashed opacity-30 w-full" 
+                      className="absolute border-b border-dashed opacity-30" 
                       style={{ 
                         borderColor: 'var(--chart-grid-text)',
-                        top: `${topPosition}%`
+                        top: `${topPosition}%`,
+                        width: '100%'
                       }} 
                     />
                   )
@@ -158,7 +181,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               </div>
               
               {/* Vertical grid lines - from first to last horizontal line */}
-              <div className="absolute inset-0 flex justify-around">
+              <div className="absolute inset-0 flex justify-around" style={{ minWidth: `${Math.max(800, data.length * 120)}px` }}>
                 {data.map((_, index) => (
                   <div 
                     key={index} 
@@ -171,7 +194,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               </div>
 
               {/* Data points - positioned exactly at grid intersections */}
-              <div className="absolute inset-0 flex justify-around">
+              <div className="absolute inset-0 flex justify-around" style={{ minWidth: `${Math.max(800, data.length * 120)}px` }}>
                 {data.map((dayData, dayIndex) => (
                   <div key={dayIndex} className="h-full relative">
                     {displayCategories.map((category, categoryIndex) => {
@@ -206,14 +229,24 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           </div>
         </div>
 
-        {/* X-axis (dates) - BELOW the chart, perfectly aligned with vertical lines */}
+        {/* X-axis (dates) - BELOW the chart, scrolls with content */}
         <div className="relative">
-          <div className="ml-8 flex justify-around pt-6">
-            {data.map((dayData, index) => (
-              <div key={index} className="text-xs text-muted-foreground text-center flex-1">
-                {dayData.date}
-              </div>
-            ))}
+          <div 
+            className="ml-8 overflow-x-auto scrollbar-none"
+            style={{ scrollBehavior: 'smooth' }}
+            onScroll={(e) => {
+              if (chartContainer) {
+                chartContainer.scrollLeft = e.currentTarget.scrollLeft
+              }
+            }}
+          >
+            <div className="flex justify-around pt-6" style={{ minWidth: `${Math.max(800, data.length * 120)}px` }}>
+              {data.map((dayData, index) => (
+                <div key={index} className="text-xs text-muted-foreground text-center flex-1">
+                  {dayData.date}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         
