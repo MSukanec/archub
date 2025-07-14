@@ -87,7 +87,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
           onClick: () => onDelete?.(document)
         }
       ]}
-      className="bg-transparent"
+      className="bg-transparent border border-[var(--input-border)]"
     >
       <div className="flex items-center gap-3">
         {/* File icon */}
