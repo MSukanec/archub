@@ -41,25 +41,29 @@ export function AvatarUploader({
       const img = new Image();
       
       img.onload = () => {
-        // Set canvas size to 400x400 (square)
-        const size = 400;
-        canvas.width = size;
-        canvas.height = size;
+        // Set canvas to fixed 400x400 size
+        const canvasSize = 400;
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
         
         // Fill with white background first (important for JPEGs)
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, size, size);
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
         
-        // Calculate dimensions to crop to square (center crop)
-        const minDimension = Math.min(img.width, img.height);
-        const sourceX = (img.width - minDimension) / 2;
-        const sourceY = (img.height - minDimension) / 2;
+        // Calculate scale to fit the entire image within the canvas, maintaining aspect ratio
+        const scale = Math.min(canvasSize / img.width, canvasSize / img.height);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
         
-        // Draw the image cropped and resized to square
+        // Calculate position to center the scaled image in the canvas
+        const offsetX = (canvasSize - scaledWidth) / 2;
+        const offsetY = (canvasSize - scaledHeight) / 2;
+        
+        // Draw the complete image scaled and centered in the square canvas
         ctx.drawImage(
           img,
-          sourceX, sourceY, minDimension, minDimension,  // source rectangle (square crop)
-          0, 0, size, size  // destination rectangle (canvas)
+          0, 0, img.width, img.height,  // source rectangle (entire image)
+          offsetX, offsetY, scaledWidth, scaledHeight  // destination rectangle (scaled and centered)
         );
         
         // Convert canvas to blob with higher quality
