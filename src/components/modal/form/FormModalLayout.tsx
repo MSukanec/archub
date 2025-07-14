@@ -1,8 +1,8 @@
-import React, { ReactNode } from 'react';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useModalPanelStore } from './modalPanelStore';
+import React, { ReactNode } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useModalPanelStore } from "./modalPanelStore";
 
 interface FormModalLayoutProps {
   viewPanel?: ReactNode;
@@ -27,11 +27,11 @@ export function FormModalLayout({
 
   const getCurrentPanel = () => {
     switch (currentPanel) {
-      case 'view':
+      case "view":
         return viewPanel;
-      case 'edit':
+      case "edit":
         return editPanel;
-      case 'subform':
+      case "subform":
         return subformPanel;
       default:
         return viewPanel;
@@ -40,40 +40,40 @@ export function FormModalLayout({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div 
+      <div
         className={cn(
           "bg-background border border-border shadow-xl",
           "w-full h-full rounded-none", // Mobile: full viewport
           "md:w-auto md:h-auto md:max-w-screen-2xl md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // Desktop: centered with max width
           "flex flex-col",
-          className
+          className,
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <div className="flex-1">
-            {headerContent}
+        {headerContent && (
+          <div className="border-b border-border shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">{headerContent}</div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="h-8 w-8 p-0 m-2"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        )}
 
         {/* Current Panel Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            {getCurrentPanel()}
-          </div>
+          {getCurrentPanel()}
         </div>
 
         {/* Footer */}
         {footerContent && (
-          <div className="p-4 border-t border-border shrink-0">
+          <div className="shrink-0">
             {footerContent}
           </div>
         )}
