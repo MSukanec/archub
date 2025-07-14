@@ -89,7 +89,7 @@ Si se pasa solo rightLabel, ocupa el 100%
 
 
 🔁 ¿CÓMO CREAR UN NUEVO MODAL?
-Crear NombreEntidadModal.tsx dentro de src/components/modal/form/.
+Crear NombreEntidadModal.tsx dentro de src/components/modal/modals/.
 
 Usar FormModalLayout.
 
@@ -101,4 +101,13 @@ Desde cualquier parte de la app, podés abrirlo así:
 
 const { openModal } = useGlobalModalStore();
 openModal("nombreEntidad", { id: 123 });
+
+# En el caso de necesitar componentes para buscar MIEMBROS (tipo creador) usar src/components/ui-custom/UserSelector.tsx.
+
+# En el caso de usar campos de teléfono, usar src/components/ui-custom/PhoneInput.tsx.
+
+# En el caso de que necesitemos la funcionalidad de usar sub-secciones, usar el componente src/components/modal/form/FormSubsectionButton.tsx.
+  
+# En el caso de que te pida REHACER un modal con estas nuevas lógicas, primero ANALIZAR que teníamos antes para replicar las funcionalidades correctamente.
+
 Esta guía es la fuente de verdad del sistema de modales en Archub. Si Replit necesita saber cómo implementar o reemplazar un modal, DEBE seguir esta estructura exacta.

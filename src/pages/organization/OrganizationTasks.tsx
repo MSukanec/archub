@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { NewBoardModal } from '@/modals/tasks/NewBoardModal';
+import { useGlobalModalStore } from '@/components/modal';
 import { NewListModal } from '@/modals/tasks/NewListModal';
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
@@ -20,13 +20,11 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Card } from '@/components/ui/card';
 
 function TasksContent() {
-  const [showNewBoardModal, setShowNewBoardModal] = useState(false);
   const [showNewListModal, setShowNewListModal] = useState(false);
-  const [showEditBoardModal, setShowEditBoardModal] = useState(false);
-  const [editingBoard, setEditingBoard] = useState<any>(null);
   const [selectedCard, setSelectedCard] = useState<any>(null);
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   const { setActions, setShowActionBar } = useMobileActionBar();
+  const { openModal } = useGlobalModalStore();
   
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
@@ -159,7 +157,7 @@ function TasksContent() {
       >
         <Button 
           className="h-8 px-3 text-sm"
-          onClick={() => setShowNewBoardModal(true)}
+          onClick={() => openModal('board', {})}
         >
           <Plus className="h-3 w-3 mr-1" />
           Nuevo Tablero
@@ -181,7 +179,7 @@ function TasksContent() {
         >
           <Button 
             className="h-8 px-3 text-sm"
-            onClick={() => setShowNewBoardModal(true)}
+            onClick={() => openModal("board", {})}
           >
             <Plus className="h-3 w-3 mr-1" />
             Nuevo Tablero
@@ -214,7 +212,7 @@ function TasksContent() {
         >
           <Button 
             className="h-8 px-3 text-sm"
-            onClick={() => setShowNewBoardModal(true)}
+            onClick={() => openModal("board", {})}
           >
             <Plus className="h-3 w-3 mr-1" />
             Nuevo Tablero
@@ -230,16 +228,11 @@ function TasksContent() {
           title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
           action={
-            <Button onClick={() => setShowNewBoardModal(true)} className="h-8 px-3 text-sm">
+            <Button onClick={() => openModal("board", {})} className="h-8 px-3 text-sm">
               <Plus className="h-3 w-3 mr-1" />
               Crear Tablero
             </Button>
           }
-        />
-        
-        <NewBoardModal
-          open={showNewBoardModal}
-          onClose={() => setShowNewBoardModal(false)}
         />
       </Layout>
     );
@@ -361,17 +354,6 @@ function TasksContent() {
       </div>
 
       {/* Modals */}
-      <NewBoardModal
-        open={showNewBoardModal}
-        onClose={() => setShowNewBoardModal(false)}
-      />
-      
-      <NewBoardModal
-        open={showEditBoardModal}
-        onClose={() => setShowEditBoardModal(false)}
-        board={editingBoard}
-        isEditing={true}
-      />
       
       {currentBoardId && (
         <NewListModal

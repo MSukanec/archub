@@ -2,6 +2,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useGlobalModalStore } from './useGlobalModalStore';
 import { MemberFormModal } from '../modals/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
+import { BoardFormModal } from '../modals/BoardFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -12,6 +13,8 @@ export function ModalFactory() {
         return <MemberFormModal editingMember={data?.editingMember} />;
       case 'gallery':
         return <GalleryFormModal />;
+      case 'board':
+        return <BoardFormModal modalData={data} onClose={closeModal} />;
       default:
         return null;
     }
