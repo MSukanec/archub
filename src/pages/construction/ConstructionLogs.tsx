@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -536,7 +537,7 @@ export default function ConstructionLogs() {
                             
                             {/* Fecha y Hora */}
                             <span className="text-sm text-muted-foreground">
-                              {format(new Date(siteLog.log_date), 'dd/MM/yyyy', { locale: es })} 21:00
+                              {format(new Date(siteLog.log_date + 'T00:00:00'), 'dd/MM/yyyy', { locale: es })} 21:00
                             </span>
 
                             {/* Clima */}
@@ -818,6 +819,9 @@ export default function ConstructionLogs() {
         <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0">
           <DialogHeader className="p-4 pb-2">
             <DialogTitle>Vista previa de imagen</DialogTitle>
+            <DialogDescription>
+              Imagen adjunta en la bitácora de construcción
+            </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center p-4 pt-0">
             {selectedImage && (
