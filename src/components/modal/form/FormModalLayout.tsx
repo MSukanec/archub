@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,16 @@ export function FormModalLayout({
   columns = 2,
 }: FormModalLayoutProps) {
   const { currentPanel } = useModalPanelStore();
+
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
 
   const getCurrentPanel = () => {
     switch (currentPanel) {
