@@ -27,6 +27,7 @@ import FormModalBody from '@/components/modal/form/FormModalBody'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
@@ -82,6 +83,16 @@ function MovementFormModalFunction({ modalData, onClose }: MovementFormModalProp
   const { data: wallets } = useOrganizationWallets(organizationId)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setPanel } = useModalPanelStore()
+
+  // Set panel to edit for new movements, view for editing
+  useEffect(() => {
+    if (!editingMovement) {
+      setPanel('edit')
+    } else {
+      setPanel('view')
+    }
+  }, [editingMovement, setPanel])
 
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementSchema),
