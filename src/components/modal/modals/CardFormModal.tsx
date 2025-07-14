@@ -230,26 +230,26 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
     <div className="space-y-4">
       <div>
         <h4 className="font-medium">Título</h4>
-        <p className="text-muted-foreground mt-1">{editingCard?.title || 'Sin título'}</p>
+        <p className="text-muted-foreground mt-1">{card?.title || 'Sin título'}</p>
       </div>
       <div>
         <h4 className="font-medium">Descripción</h4>
-        <p className="text-muted-foreground mt-1">{editingCard?.description || 'Sin descripción'}</p>
+        <p className="text-muted-foreground mt-1">{card?.description || 'Sin descripción'}</p>
       </div>
       <div>
         <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">{editingCard?.creator?.full_name || 'Sin creador'}</p>
+        <p className="text-muted-foreground mt-1">{card?.creator?.full_name || 'Sin creador'}</p>
       </div>
       <div>
         <h4 className="font-medium">Asignado a</h4>
-        <p className="text-muted-foreground mt-1">{editingCard?.assignedUser?.full_name || 'Sin asignar'}</p>
+        <p className="text-muted-foreground mt-1">{card?.assignedUser?.full_name || 'Sin asignar'}</p>
       </div>
       <div>
         <h4 className="font-medium">Fecha límite</h4>
-        <p className="text-muted-foreground mt-1">{editingCard?.due_date || 'Sin fecha límite'}</p>
+        <p className="text-muted-foreground mt-1">{card?.due_date || 'Sin fecha límite'}</p>
       </div>
     </div>
-  ) : null;
+  ) : editPanel;
 
   return (
     <FormModalLayout
