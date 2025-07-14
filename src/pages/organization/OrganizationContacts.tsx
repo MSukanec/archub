@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import CustomTable from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/Table'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Building, Phone, Mail, Share2, UserCheck } from 'lucide-react'
@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { NewContactModal } from '@/modals/contacts/NewContactModal'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
@@ -386,7 +386,7 @@ export default function OrganizationContacts() {
   if (contacts.length === 0 && !searchValue && filterByType === 'all') {
     return (
       <Layout headerProps={headerProps}>
-        <CustomEmptyState
+        <EmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"

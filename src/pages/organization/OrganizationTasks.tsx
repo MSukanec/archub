@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { CustomKanban } from '@/components/ui-custom/CustomKanban';
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
+import { KanbanBox } from '@/components/ui-custom/KanbanBox';
+import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
@@ -201,7 +201,7 @@ function TasksContent() {
     );
   }
 
-  // Empty state with CustomEmptyState
+  // Empty state with EmptyState
   if (boards.length === 0) {
     const emptyHeaderProps = {
       title: "Tareas",
@@ -225,7 +225,7 @@ function TasksContent() {
 
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
-        <CustomEmptyState
+        <EmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
           title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
@@ -346,7 +346,7 @@ function TasksContent() {
         )}
       
         {selectedBoard && (
-          <CustomKanban 
+          <KanbanBox 
             lists={lists}
             cards={cards}
             boardId={currentBoardId || ''}

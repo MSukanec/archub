@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
-import ProjectHeroImage from '@/components/project/ProjectHeroImage';
+import ProjectHeroImage from '@/components/ui-custom/ProjectHeroImage';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';

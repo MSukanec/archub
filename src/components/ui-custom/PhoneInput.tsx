@@ -41,7 +41,7 @@ interface PhoneInputProps {
   className?: string;
 }
 
-export const CustomPhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
+export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
   ({ value, onChange, placeholder = 'Número de teléfono', disabled, className }, ref) => {
     const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default: Argentina
     const [open, setOpen] = useState(false);
@@ -133,4 +133,4 @@ export const CustomPhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
   }
 );
 
-CustomPhoneInput.displayName = 'CustomPhoneInput';
+PhoneInput.displayName = 'PhoneInput';

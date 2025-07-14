@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 
-interface CustomEmptyStateProps {
+interface EmptyStateProps {
   icon?: React.ReactNode;
   title: string;
   description?: string;
@@ -9,13 +9,13 @@ interface CustomEmptyStateProps {
   className?: string;
 }
 
-export function CustomEmptyState({
+export function EmptyState({
   icon,
   title,
   description,
   action,
   className
-}: CustomEmptyStateProps) {
+}: EmptyStateProps) {
   return (
     <div className="w-full flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-0 md:h-full">
       <div className={cn(

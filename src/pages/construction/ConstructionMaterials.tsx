@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
@@ -151,7 +151,7 @@ export default function ConstructionMaterials() {
         />
 
         {filteredMaterials.length === 0 ? (
-          <CustomEmptyState
+          <EmptyState
             icon={<Package className="w-8 h-8 text-muted-foreground" />}
             title="No hay materiales disponibles"
             description="Los materiales aparecerán aquí cuando agregues tareas con materiales a los presupuestos del proyecto"

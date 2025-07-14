@@ -7,7 +7,7 @@ import { Receipt, Edit, Trash2 } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/Table'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -1049,7 +1049,7 @@ export default function FinancesInstallments() {
             />
           </div>
         ) : installments.length === 0 ? (
-          <CustomEmptyState
+          <EmptyState
             title="Aún no hay compromisos registrados"
             description="Comienza registrando el primer compromiso de pago de un cliente al proyecto"
             action={
@@ -1059,7 +1059,7 @@ export default function FinancesInstallments() {
             }
           />
         ) : (
-          <CustomEmptyState
+          <EmptyState
             title="No se encontraron compromisos"
             description="Intenta con otros términos de búsqueda"
           />

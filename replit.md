@@ -119,13 +119,13 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 14, 2025. Component standardization and date input consistency fixes - COMPLETED
-  • Renamed CustomTable.tsx to Table.tsx with function and interface updates for simplified naming convention
-  • Updated all import references across 17+ files using automated bash commands for efficiency
-  • Fixed hardcoded date component in NUEVO PRESUPUESTO modal to use same pattern as NUEVO MOVIMIENTO modal
-  • Replaced Popover/Calendar date picker with Input type="date" for consistency across all modals
-  • Added proper local date parsing to avoid UTC timezone shifts in budget creation
-  • Cleaned up unused imports (Calendar, Popover, format, date-fns) from budget modal
+- July 14, 2025. Major component reorganization and application error fixes - COMPLETED
+  • Renamed multiple components for cleaner naming: CustomTable→Table, CustomEmptyState→EmptyState, CustomPhoneInput→PhoneInput, CustomKanban→KanbanBox, TaskListWithCompleted→KanbanList
+  • Updated all import references across 50+ files using automated bash commands for mass refactoring efficiency
+  • Moved ProjectHeroImage from src/components/project/ to src/components/ui-custom/ and removed empty project directory
+  • Fixed application compilation errors caused by outdated component references and import paths
+  • Resolved hardcoded date component in NUEVO PRESUPUESTO modal using Input type="date" pattern for consistency
+  • Enhanced component organization with simplified naming convention removing "Custom" prefixes throughout codebase
 - July 13, 2025. Enhanced CustomRestricted component and repositioned design button with restrictions - COMPLETED
   • Modified CustomRestricted component to display function names in tooltips (e.g., "Diseño - Función Bloqueada")
   • Added functionName prop to CustomRestricted interface for dynamic tooltip content

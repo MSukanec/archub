@@ -6,7 +6,7 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import ProjectHeroImage from '@/components/project/ProjectHeroImage';
+import ProjectHeroImage from '@/components/ui-custom/ProjectHeroImage';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';

@@ -438,4 +438,4 @@ export function Table<T = any>({
   )
 }
 
-export default CustomTable
+export default Table

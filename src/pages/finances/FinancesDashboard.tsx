@@ -11,7 +11,7 @@ import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -76,7 +76,7 @@ export default function FinancesDashboard() {
   if (!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0)) {
     return (
       <Layout headerProps={headerProps} wide={true}>
-        <CustomEmptyState 
+        <EmptyState 
           icon={<DollarSign className="h-12 w-12" />}
           title="Sin movimientos financieros registrados"
           description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."

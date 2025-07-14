@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useChangelogEntries } from '@/hooks/use-changelog'
 import { NewChangelogEntryModal } from '@/modals/others/NewChangelogEntryModal'
 import { useDeleteChangelogEntry } from '@/hooks/use-changelog'
-import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { ChangelogCard } from '@/components/cards/ChangelogCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { format } from 'date-fns'
@@ -150,7 +150,7 @@ export default function Changelog() {
   if (!entries || entries.length === 0) {
     return (
       <Layout headerProps={headerProps}>
-        <CustomEmptyState
+        <EmptyState
           icon={History as any}
           title="No hay entradas en el changelog"
           description="Aquí aparecerán las novedades y cambios de la plataforma"

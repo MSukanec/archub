@@ -26,7 +26,7 @@ import { useSearchUsers } from "@/hooks/use-search-users";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { CustomPhoneInput } from "@/components/ui-custom/CustomPhoneInput";
+import { PhoneInput } from "@/components/ui-custom/PhoneInput";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -569,7 +569,7 @@ export function NewContactModal({ open, onClose, contact, onSuccess }: NewContac
                     <FormItem>
                       <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
                       <FormControl>
-                        <CustomPhoneInput 
+                        <PhoneInput 
                           value={field.value || ''}
                           onChange={field.onChange}
                           placeholder="Número de teléfono"

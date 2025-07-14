@@ -90,7 +90,7 @@ function TaskCard({ task, onToggleCompleted }: { task: Task; onToggleCompleted: 
   );
 }
 
-export function TaskListWithCompleted({ tasks, onToggleCompleted, isLoading = false }: Props) {
+export function KanbanList({ tasks, onToggleCompleted, isLoading = false }: Props) {
   const [isCompletedOpen, setIsCompletedOpen] = useState(false);
   const activeTasks = tasks.filter(t => !t.is_completed);
   const completedTasks = tasks.filter(t => t.is_completed);

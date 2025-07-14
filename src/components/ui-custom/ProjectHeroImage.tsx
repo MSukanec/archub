@@ -190,7 +190,7 @@ export default function ProjectHeroImage({
           </>
         ) : (
           <>
-            {/* No Image Placeholder - styled like CustomEmptyState */}
+            {/* No Image Placeholder - styled like EmptyState */}
             <div 
               className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-muted-foreground/25 hover:border-[var(--accent)]/50 transition-colors bg-card rounded-lg"
               onClick={() => document.getElementById('hero-image-input')?.click()}
