@@ -1,4 +1,5 @@
 import { useGlobalModalStore } from './useGlobalModalStore';
+import { FormModalLayout } from './FormModalLayout';
 import { MemberFormModal } from '../modals/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
 import { BoardFormModal } from '../modals/BoardFormModal';
@@ -11,20 +12,40 @@ export function ModalFactory() {
 
   if (!open) return null;
 
+  let modalConfig;
+
   switch (type) {
     case 'member':
-      return <MemberFormModal editingMember={data?.editingMember} onClose={closeModal} />;
+      modalConfig = MemberFormModal({ editingMember: data?.editingMember, onClose: closeModal });
+      break;
     case 'gallery':
-      return <GalleryFormModal modalData={data} onClose={closeModal} />;
+      modalConfig = GalleryFormModal({ modalData: data, onClose: closeModal });
+      break;
     case 'board':
-      return <BoardFormModal modalData={data} onClose={closeModal} />;
+      modalConfig = BoardFormModal({ modalData: data, onClose: closeModal });
+      break;
     case 'card':
-      return <CardFormModal modalData={data} onClose={closeModal} />;
+      modalConfig = CardFormModal({ modalData: data, onClose: closeModal });
+      break;
     case 'list':
-      return <ListFormModal modalData={data} onClose={closeModal} />;
+      modalConfig = ListFormModal({ modalData: data, onClose: closeModal });
+      break;
     case 'contact':
-      return <ContactFormModal modalData={data} onClose={closeModal} />;
+      modalConfig = ContactFormModal({ modalData: data, onClose: closeModal });
+      break;
     default:
       return null;
   }
+
+  if (!modalConfig) return null;
+
+  return (
+    <FormModalLayout
+      viewPanel={modalConfig.viewPanel}
+      editPanel={modalConfig.editPanel}
+      headerContent={modalConfig.headerContent}
+      footerContent={modalConfig.footerContent}
+      onClose={closeModal}
+    />
+  );
 }

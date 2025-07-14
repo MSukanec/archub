@@ -267,7 +267,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data' },
       { icon: Users, label: 'Clientes', href: '/project/clients' },
       { icon: FileImage, label: 'Documentación', href: '/project/documentation' },
-      { icon: Images, label: 'Galería', href: '/project/gallery' },
+      { icon: Images, label: 'Galería Multimedia', href: '/project/gallery' },
     ],
     obra: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },

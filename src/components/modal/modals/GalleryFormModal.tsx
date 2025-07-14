@@ -330,7 +330,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const headerContent = (
     <FormModalHeader
-      title={editingFile ? "Editar Archivo" : "Subir Archivo"}
+      title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
       icon={Images}
     />
   );
@@ -345,13 +345,10 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     />
   );
 
-  return (
-    <FormModalLayout
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
-  );
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent
+  };
 }

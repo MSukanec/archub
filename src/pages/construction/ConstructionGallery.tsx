@@ -378,7 +378,7 @@ export default function ConstructionGallery() {
 
   // Header props configuration
   const headerProps = {
-    title: "Galería",
+    title: "Galería Multimedia",
     icon: Images,
     showSearch: true,
     searchValue: searchTerm,
@@ -437,7 +437,7 @@ export default function ConstructionGallery() {
         className="h-8"
       >
         <Plus className="mr-2 h-4 w-4" />
-        Subir Archivo
+        Subir Archivo Multimedia
       </Button>,
     ],
   };
@@ -476,7 +476,7 @@ export default function ConstructionGallery() {
         <div className="space-y-6">
           {/* Feature Introduction */}
           <FeatureIntroduction
-            title="Galería de Archivos"
+            title="Galería Multimedia"
             icon={<Images className="w-6 h-6" />}
             features={[
               {
@@ -509,7 +509,7 @@ export default function ConstructionGallery() {
             action={
               <Button onClick={() => openModal('gallery')}>
                 <Plus className="h-4 w-4 mr-2" />
-                Subir Archivo
+                Subir Archivo Multimedia
               </Button>
             }
           />
@@ -523,7 +523,7 @@ export default function ConstructionGallery() {
       <div className="space-y-6">
         {/* Feature Introduction */}
         <FeatureIntroduction
-          title="Galería de Archivos"
+          title="Galería Multimedia"
           icon={<Images className="w-6 h-6" />}
           features={[
             {
