@@ -12,8 +12,8 @@ export default function FormModalBody({ children, columns = 2 }: FormModalBodyPr
   return (
     <div className="flex-1 overflow-y-auto">
       <div className={cn(
-        "gap-2 p-6 text-sm",
-        columns === 1 ? "flex flex-col" : "grid grid-cols-1 md:grid-cols-2"
+        "gap-4 p-4 text-sm",
+        columns === 1 ? "flex flex-col space-y-4" : "grid grid-cols-1 md:grid-cols-2"
       )}>
         {children}
       </div>
