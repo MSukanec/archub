@@ -525,12 +525,28 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
               
               {/* Add New List Button */}
               <div className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none">
-                <Card className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors mx-3 md:mx-0" style={{ borderColor: 'var(--accent)' }}>
+                <Card className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors mx-3 md:mx-0 relative overflow-hidden" style={{ borderColor: 'hsl(var(--accent))' }}>
+                  {/* Diagonal Hatch Background Pattern */}
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <div 
+                      className="absolute inset-0 opacity-10"
+                      style={{
+                        backgroundImage: `repeating-linear-gradient(
+                          45deg,
+                          hsl(var(--accent)) 0px,
+                          hsl(var(--accent)) 1px,
+                          transparent 1px,
+                          transparent 12px
+                        )`
+                      }}
+                    />
+                  </div>
+                  
                   <Button
                     variant="ghost"
                     onClick={onCreateList}
-                    className="w-full h-12 justify-center hover:text-foreground"
-                    style={{ color: 'var(--accent)' }}
+                    className="w-full h-12 justify-center hover:text-foreground relative z-10"
+                    style={{ color: 'hsl(var(--accent))' }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Añade otra lista
