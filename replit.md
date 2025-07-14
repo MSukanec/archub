@@ -119,14 +119,17 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 14, 2025. Fixed document upload modal icon and table layout issues - COMPLETED
+- July 14, 2025. Fixed document upload modal, mobile cards, and table layout issues - COMPLETED
   • Changed Upload icon to RefreshCw (refresh) icon in document groups for better UX clarity
   • Fixed modal edit flow: groups now properly pass editingGroup parameter to modal
   • Modal correctly shows "Editar Entrega de Documentos" title when editing instead of "Nueva Entrega"
+  • Fixed group/entrega field completion in edit mode by waiting for groups data to load
   • Reduced FormModalBody padding from p-6 to p-4 for better spacing consistency
-  • Fixed table overflow issue in documents view by removing negative margin (-m-6)
-  • Added proper space-y-4 spacing for single-column modal layouts
-  • Enhanced gap spacing from gap-2 to gap-4 for better visual hierarchy
+  • Fixed table overflow issues by removing negative margins and CardContent padding
+  • Created DocumentCard component for mobile view with swipeable actions and optimized layout
+  • Added mobile-specific rendering for documents view with cards instead of table
+  • Enhanced document cards with file icons, status badges, creator info, and file metadata
+  • Table in expanded folder groups now occupies 100% of card space without internal padding
 - July 14, 2025. Modal system simplified to single column layout - COMPLETED
   • Changed ALL modals to use columns={1} for consistent single-column layout
   • ContactFormModal, ProjectFormModal, MemberFormModal, BoardFormModal, CardFormModal, ListFormModal: all use columns={1}

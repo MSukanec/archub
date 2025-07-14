@@ -85,9 +85,13 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     },
   });
 
-  // Load existing group data when editing
+  // Load existing group data when editing (delay until groups are loaded)
   useEffect(() => {
-    if (isEditing && editingGroup && userData?.preferences) {
+    if (isEditing && editingGroup && userData?.preferences && groups.length > 0) {
+      console.log('Setting form with editingGroup:', editingGroup);
+      console.log('Available groups:', groups);
+      setSelectedFolderId(editingGroup.folder_id || '');
+      
       form.reset({
         created_by: editingGroup.created_by || userData.user.id,
         folder_id: editingGroup.folder_id || defaultFolderId || '',
@@ -96,9 +100,8 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         visibility: editingGroup.visibility || 'public',
         group_description: editingGroup.description || '',
       });
-      setSelectedFolderId(editingGroup.folder_id || '');
     }
-  }, [isEditing, editingGroup, userData, form, defaultFolderId, defaultGroupId]);
+  }, [isEditing, editingGroup, userData, form, defaultFolderId, defaultGroupId, groups]);
 
   // Update selectedFolderId when form folder_id changes
   useEffect(() => {

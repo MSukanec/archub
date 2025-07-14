@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { DocumentGroupCard } from '@/components/ui-custom/DocumentGroupCard';
 import { Table } from '@/components/ui-custom/Table';
+import DocumentCard from '@/components/cards/DocumentCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -1022,6 +1023,18 @@ export default function DesignDocumentation() {
             </Button>
           }
         />
+      ) : isMobile ? (
+        <div className="space-y-3">
+          {filteredDocuments.map((document) => (
+            <DocumentCard
+              key={document.id}
+              document={document}
+              onView={(doc) => window.open(doc.file_url, '_blank')}
+              onEdit={(doc) => console.log('Edit document:', doc)}
+              onDelete={(doc) => console.log('Delete document:', doc)}
+            />
+          ))}
+        </div>
       ) : (
         <Table
           columns={documentColumns}
