@@ -205,3 +205,21 @@ export function useDeleteMovementConcept() {
     },
   });
 }
+
+export function useMoveConceptToParent() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ conceptId, newParentId }: { conceptId: string; newParentId: string | null }) => {
+      const { error } = await supabase
+        .from('movement_concepts')
+        .update({ parent_id: newParentId })
+        .eq('id', conceptId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
+    },
+  });
+}
