@@ -7,6 +7,7 @@ import { CardFormModal } from '../modals/CardFormModal';
 import { ListFormModal } from '../modals/ListFormModal';
 import { ContactFormModal } from '../modals/ContactFormModal';
 import { ProjectFormModal } from '../modals/ProjectFormModal';
+import ProjectClientFormModal from '../modals/ProjectClientFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -28,6 +29,8 @@ export function ModalFactory() {
       return <ContactFormModal modalData={data} onClose={closeModal} />;
     case 'project':
       return <ProjectFormModal modalData={data} onClose={closeModal} />;
+    case 'project-client':
+      return <ProjectClientFormModal onClose={closeModal} />;
     default:
       return null;
   }

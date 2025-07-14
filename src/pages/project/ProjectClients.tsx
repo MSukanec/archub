@@ -10,8 +10,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -44,8 +43,7 @@ interface ProjectClient {
 export default function ProjectClients() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const [showAddClientModal, setShowAddClientModal] = useState(false)
-  const [selectedContactId, setSelectedContactId] = useState<string>('')
+  const { openModal } = useGlobalModalStore()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [clientToDelete, setClientToDelete] = useState<ProjectClient | null>(null)
 
@@ -119,45 +117,7 @@ export default function ProjectClients() {
     enabled: !!projectId && !!organizationId && !!supabase
   })
 
-  // Add client mutation
-  const addClientMutation = useMutation({
-    mutationFn: async (contactId: string) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
-      
-      const { data, error } = await supabase
-        .from('project_clients')
-        .insert({
-          project_id: projectId,
-          client_id: contactId,
-          committed_amount: 0,
-          role: 'cliente',
-          is_active: true,
-          notes: '',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
 
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      toast({
-        title: "Cliente agregado",
-        description: "El cliente ha sido agregado al proyecto exitosamente",
-      })
-      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
-      setShowAddClientModal(false)
-      setSelectedContactId('')
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al agregar cliente",
-        description: error.message || "Hubo un problema al agregar el cliente",
-        variant: "destructive",
-      })
-    }
-  })
 
   // Remove client mutation
   const removeClientMutation = useMutation({
@@ -187,10 +147,7 @@ export default function ProjectClients() {
     }
   })
 
-  const handleAddClient = () => {
-    if (!selectedContactId) return
-    addClientMutation.mutate(selectedContactId)
-  }
+
 
   const handleRemoveClient = (client: ProjectClient) => {
     setClientToDelete(client)
@@ -205,59 +162,19 @@ export default function ProjectClients() {
     }
   }
 
-  // Get available contacts (not already clients)
-  const availableContacts = organizationContacts?.filter(contact => 
-    !projectClients?.some(client => client.client_id === contact.id)
-  ) || []
+
 
   const headerProps = {
     title: "Clientes del Proyecto",
     actions: [(
-      <Dialog key="add-client" open={showAddClientModal} onOpenChange={setShowAddClientModal}>
-        <DialogTrigger asChild>
-          <Button className="h-8 px-3 text-sm">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Agregar Cliente
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Agregar Cliente al Proyecto</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Seleccionar Contacto</label>
-              <Select value={selectedContactId} onValueChange={setSelectedContactId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un contacto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableContacts.map(contact => {
-                    const displayName = contact.company_name || 
-                                     `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-                    return (
-                      <SelectItem key={contact.id} value={contact.id}>
-                        {displayName}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleAddClient} 
-                disabled={!selectedContactId || addClientMutation.isPending}
-              >
-                {addClientMutation.isPending ? 'Agregando...' : 'Agregar'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <Button 
+        key="add-client" 
+        className="h-8 px-3 text-sm"
+        onClick={() => openModal('project-client')}
+      >
+        <UserPlus className="w-4 h-4 mr-2" />
+        Agregar Cliente
+      </Button>
     )]
   }
 
