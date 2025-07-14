@@ -80,7 +80,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
             >
               <div className="flex items-center gap-1.5">
                 <span className="text-xs">{selectedCountry.flag}</span>
-                <span className="text-xs font-bold">{selectedCountry.code} {selectedCountry.dialCode}</span>
+                <span className="text-xs font-bold">{selectedCountry.dialCode}</span>
                 <ChevronDown className="h-3 w-3 opacity-50 ml-0.5" />
               </div>
             </Button>
