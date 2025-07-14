@@ -255,7 +255,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     <div className="space-y-4">
       {/* User Linking Section - FULL WIDTH OUTSIDE GRID */}
       <div className="space-y-3">
-        <FormLabel>Vincular usuario existente</FormLabel>
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Vincular usuario existente</label>
         
         {selectedUser || editingContact?.linked_user ? (
           <div className="flex items-center justify-between p-3 border rounded-lg">
