@@ -25,13 +25,8 @@ const {
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { NewGalleryModal } from '@/modals/construction/NewGalleryModal';
-import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
-import { TestFormModal } from '@/components/modal/form/TestFormModal';
-import { OpenMovementButton, useGlobalModalStore } from '@/components/modal/factory';
+
+import { useGlobalModalStore } from '@/components/modal/factory';
 import { 
   Images, 
   Filter, 
@@ -53,29 +48,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// Component for testing ModalFactory
-function GlobalModalTestButtons() {
-  const { openModal } = useGlobalModalStore();
-  
-  return (
-    <div className="flex gap-2">
-      <Button
-        onClick={() => openModal("bitacora", { id: "bit-123", title: "Test Bitácora" })}
-        variant="outline"
-        size="sm"
-      >
-        Bitácora
-      </Button>
-      <Button
-        onClick={() => openModal("contact", { id: "contact-456", name: "Juan Pérez" })}
-        variant="outline" 
-        size="sm"
-      >
-        Contacto
-      </Button>
-    </div>
-  );
-}
+
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -100,13 +73,13 @@ export default function ConstructionGallery() {
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
   const isMobile = useMobile();
+  const { openModal } = useGlobalModalStore();
   
-  // Modal states
-  const [showGalleryModal, setShowGalleryModal] = useState(false);
+  // Modal states  
   const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
   const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
   const [fileToDelete, setFileToDelete] = useState<GalleryFile | null>(null);
-  const [showTestModal, setShowTestModal] = useState(false);
+
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -324,7 +297,7 @@ export default function ConstructionGallery() {
 
   const handleEdit = (file: GalleryFile) => {
     setEditingFile(file);
-    setShowGalleryModal(true);
+    openModal('gallery', { editingFile: file });
   };
 
   const handleDelete = (file: GalleryFile) => {
@@ -376,10 +349,7 @@ export default function ConstructionGallery() {
     return types[type] || type;
   };
 
-  const handleCloseModal = () => {
-    setShowGalleryModal(false);
-    setEditingFile(null);
-  };
+
 
   // Header props configuration
   const headerProps = {
@@ -436,25 +406,15 @@ export default function ConstructionGallery() {
       setEntryTypeFilter('all');
     },
     actions: [
-      <OpenMovementButton key="factory-movement" />,
-      <GlobalModalTestButtons key="factory-test" />,
-      <Button
-        key="test-modal"
-        onClick={() => setShowTestModal(true)}
-        variant="outline"
-        className="h-8"
-      >
-        MODAL
-      </Button>,
       <Button
         key="new-file"
-        onClick={() => setShowGalleryModal(true)}
+        onClick={() => openModal('gallery')}
         className="h-8"
       >
         <Plus className="mr-2 h-4 w-4" />
         Subir Archivo
       </Button>,
-    ].filter(Boolean),
+    ],
   };
 
   if (isLoading) {
@@ -736,18 +696,9 @@ export default function ConstructionGallery() {
         </AlertDialog>
       )}
 
-      {/* Gallery Modal */}
-      <NewGalleryModal
-        open={showGalleryModal}
-        onClose={handleCloseModal}
-        editingFile={editingFile}
-      />
 
-      {/* Test Form Modal */}
-      <TestFormModal
-        open={showTestModal}
-        onClose={() => setShowTestModal(false)}
-      />
+
+
     </Layout>
   );
 }

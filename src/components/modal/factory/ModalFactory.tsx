@@ -1,11 +1,12 @@
 import React from 'react';
-import { TestFormModal } from '@/components/modal/form/TestFormModal';
+import { NewGalleryModal } from '@/modals/construction/NewGalleryModal';
 import { useGlobalModalStore } from './useGlobalModalStore';
 
-// Placeholders for future modals - replace with actual imports when they exist
-const MovementModal = TestFormModal; // Using TestFormModal as placeholder
-const BitacoraModal = TestFormModal; // Using TestFormModal as placeholder  
-const ContactModal = TestFormModal; // Using TestFormModal as placeholder
+// TODO: Replace these placeholders with actual modals when they exist
+const PlaceholderModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => null;
+const MovementModal = PlaceholderModal;
+const BitacoraModal = PlaceholderModal;  
+const ContactModal = PlaceholderModal;
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -19,6 +20,8 @@ export function ModalFactory() {
       return <BitacoraModal open={open} onClose={closeModal} data={data} />;
     case 'contact':
       return <ContactModal open={open} onClose={closeModal} data={data} />;
+    case 'gallery':
+      return <NewGalleryModal open={open} onClose={closeModal} editingFile={data?.editingFile} />;
     default:
       return null;
   }
