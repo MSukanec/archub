@@ -337,7 +337,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
     setCurrentView(menuId);
     setSidebarContext(menuId as any);
-    navigate(defaultRoute);
+    // NO navegar automáticamente al dashboard, solo cambiar vista a submenu
+    // navigate(defaultRoute);
   };
   
   // Función para volver al menu principal
