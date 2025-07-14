@@ -22,7 +22,7 @@ import { useMobile } from '@/hooks/use-mobile';
 import { useDesignDocumentFolders, useCreateDesignDocumentFolder, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups, useDeleteDesignDocumentGroup } from '@/hooks/use-design-document-groups';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
-import { NewDocumentGroupModal } from '@/modals/design/NewDocumentGroupModal';
+
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal';
@@ -76,9 +76,9 @@ export default function DesignDocumentation() {
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const { openModal } = useGlobalModalStore();
-  const [showGroupModal, setShowGroupModal] = useState(false);
 
-  const [editingGroup, setEditingGroup] = useState(null);
+
+
   const [groupToDelete, setGroupToDelete] = useState(null);
   const [subfolderParent, setSubfolderParent] = useState<{id: string; name: string} | null>(null);
   const [editingFolder, setEditingFolder] = useState<any>(null);
@@ -442,18 +442,6 @@ export default function DesignDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEditingGroup(group);
-                      setShowGroupModal(true);
-                    }}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Pencil className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
                       setGroupToDelete(group);
                     }}
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
@@ -513,14 +501,11 @@ export default function DesignDocumentation() {
               <Package className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
               <p className="text-sm text-muted-foreground mb-4">No hay grupos en esta carpeta</p>
               <Button 
-                onClick={() => {
-                  setSelectedFolderId(selectedItem.id);
-                  setShowGroupModal(true);
-                }}
+                onClick={() => openModal('document-upload', { defaultFolderId: selectedItem.id })}
                 size="sm"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primer Grupo
+                <Upload className="h-4 w-4 mr-2" />
+                Nueva Entrega de Documentos
               </Button>
             </div>
           ) : (
@@ -529,10 +514,7 @@ export default function DesignDocumentation() {
                 <DocumentGroupCard 
                   key={group.id}
                   group={group}
-                  onEdit={() => {
-                    setEditingGroup(group);
-                    setShowGroupModal(true);
-                  }}
+                  onEdit={() => {}}
                   onDelete={() => setGroupToDelete(group)}
                   onSelect={() => setSelectedItem({type: 'group', id: group.id, name: group.name})}
                 />
@@ -564,7 +546,7 @@ export default function DesignDocumentation() {
                 size="sm"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Subir Documentos
+                Nueva Entrega de Documentos
               </Button>
             </div>
           ) : (
@@ -715,18 +697,6 @@ export default function DesignDocumentation() {
                     className="h-6 w-6 p-0"
                   >
                     <Upload className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingGroup(group);
-                      setShowGroupModal(true);
-                    }}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Pencil className="w-3 h-3" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -946,28 +916,14 @@ export default function DesignDocumentation() {
           <h3 className="text-lg font-semibold">Grupos de Revisión</h3>
           <Badge variant="secondary">{filteredGroups.length}</Badge>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowGroupModal(true)}
-          className="h-8 px-3"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Entrega
-        </Button>
+
       </div>
 
       {filteredGroups.length === 0 ? (
         <EmptyState
           icon={<Archive className="h-12 w-12 text-muted-foreground" />}
           title="No hay grupos de revisión"
-          description="Crea tu primer grupo para organizar documentos relacionados"
-          action={
-            <Button onClick={() => setShowGroupModal(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Primer Grupo
-            </Button>
-          }
+          description="Los documentos se organizan automáticamente al subirlos"
         />
       ) : (
         <div className="grid gap-4">
@@ -975,10 +931,7 @@ export default function DesignDocumentation() {
             <DocumentGroupCard
               key={group.id}
               group={group}
-              onEdit={(group) => {
-                setEditingGroup(group);
-                setShowGroupModal(true);
-              }}
+              onEdit={(group) => {}}
               onDelete={(group) => setGroupToDelete(group)}
             />
           ))}
@@ -1004,7 +957,7 @@ export default function DesignDocumentation() {
           action={
             <Button onClick={() => openModal('document-upload')} size="sm">
               <Upload className="h-4 w-4 mr-2" />
-              Subir Documentos
+              Nueva Entrega de Documentos
             </Button>
           }
         />
@@ -1024,16 +977,7 @@ export default function DesignDocumentation() {
 
 
 
-      {/* Group Modal */}
-      <NewDocumentGroupModal
-        open={showGroupModal}
-        onClose={() => {
-          setShowGroupModal(false);
-          setEditingGroup(null);
-        }}
-        editingGroup={editingGroup}
-        defaultFolderId={selectedFolderId}
-      />
+
 
 
 

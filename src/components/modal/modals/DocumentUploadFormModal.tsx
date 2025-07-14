@@ -449,7 +449,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
 
   const headerContent = (
     <FormModalHeader
-      title="Subir Documentos"
+      title="Nueva Entrega de Documentos"
       icon={FolderOpen}
     />
   );
@@ -458,7 +458,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isUploading ? "Subiendo..." : "Subir Documentos"}
+      rightLabel={isUploading ? "Subiendo..." : "Nueva Entrega de Documentos"}
       onRightClick={form.handleSubmit(onSubmit)}
       rightLoading={isUploading}
       rightDisabled={selectedFiles.length === 0}
