@@ -778,15 +778,30 @@ export default function DesignDocumentation() {
             {isGroupExpanded && (
               <>
                 <div className="border-t border-border" />
-                <Table
-                  columns={documentColumns}
-                  data={groupDocuments}
-                  emptyState={
-                    <p className="text-sm text-muted-foreground text-center py-2">
+                {groupDocuments.length === 0 ? (
+                  <div className="py-4 px-4">
+                    <p className="text-sm text-muted-foreground text-center">
                       No hay documentos en este grupo
                     </p>
-                  }
-                />
+                  </div>
+                ) : isMobile ? (
+                  <div className="p-3 space-y-3">
+                    {groupDocuments.map((document) => (
+                      <DocumentCard
+                        key={document.id}
+                        document={document}
+                        onView={(doc) => window.open(doc.file_url, '_blank')}
+                        onEdit={(doc) => console.log('Edit document:', doc)}
+                        onDelete={(doc) => console.log('Delete document:', doc)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Table
+                    columns={documentColumns}
+                    data={groupDocuments}
+                  />
+                )}
               </>
             )}
           </Card>
