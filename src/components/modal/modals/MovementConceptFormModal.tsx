@@ -30,12 +30,19 @@ type ConceptFormData = z.infer<typeof conceptSchema>;
 interface MovementConceptFormModalProps {
   modalData?: {
     editingConcept?: any;
+    parentConcept?: {
+      id: string;
+      name: string;
+      parent_id: string | null;
+      is_system: boolean;
+    };
   };
   onClose: () => void;
 }
 
 export default function MovementConceptFormModal({ modalData, onClose }: MovementConceptFormModalProps) {
   const editingConcept = modalData?.editingConcept;
+  const parentConcept = modalData?.parentConcept;
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -55,9 +62,9 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
     resolver: zodResolver(conceptSchema),
     defaultValues: {
       name: editingConcept?.name || '',
-      parent_id: editingConcept?.parent_id || '',
+      parent_id: editingConcept?.parent_id || parentConcept?.id || '',
       view_mode: editingConcept?.view_mode || 'normal',
-      is_system: editingConcept?.is_system || true,
+      is_system: editingConcept?.is_system || parentConcept?.is_system || true,
     },
   });
 
@@ -271,7 +278,11 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
 
   const headerContent = (
     <FormModalHeader
-      title={editingConcept ? 'Editar Concepto de Movimiento' : 'Nuevo Concepto de Movimiento'}
+      title={editingConcept 
+        ? 'Editar Concepto de Movimiento' 
+        : parentConcept 
+          ? `Nuevo Concepto Hijo de "${parentConcept.name}"` 
+          : 'Nuevo Concepto de Movimiento'}
       icon={editingConcept ? Package2 : Plus}
     />
   );

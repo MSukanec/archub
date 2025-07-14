@@ -1,34 +1,16 @@
 import React from 'react';
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-  KeyboardSensor,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { 
   ChevronRight, 
   ChevronDown, 
   Edit, 
   Trash2, 
   Settings, 
-  Users, 
-  GripVertical 
+  Users,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 
 export interface MovementConceptNode {
   id: string;
@@ -39,72 +21,34 @@ export interface MovementConceptNode {
   children?: MovementConceptNode[];
 }
 
-interface DraggableConceptItemProps {
+interface ConceptItemProps {
   concept: MovementConceptNode;
   level: number;
   isExpanded: boolean;
   onToggleExpanded: (conceptId: string) => void;
   onEdit: (concept: MovementConceptNode) => void;
   onDelete: (conceptId: string) => void;
-  isDragOverlay?: boolean;
+  onCreateChild: (parentConcept: MovementConceptNode) => void;
 }
 
-function DraggableConceptItem({
+function ConceptItem({
   concept,
   level,
   isExpanded,
   onToggleExpanded,
   onEdit,
   onDelete,
-  isDragOverlay = false,
-}: DraggableConceptItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: concept.id,
-    data: {
-      type: 'concept',
-      concept,
-    },
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
+  onCreateChild,
+}: ConceptItemProps) {
   const hasChildren = concept.children && concept.children.length > 0;
-  const indentation = level * 24;
 
-  const ItemContent = () => (
+  return (
     <div
-      ref={setNodeRef}
-      style={{ 
-        ...style,
-        marginLeft: `${indentation}px`
-      }}
-      className={`
-        group relative border rounded-lg p-3 transition-all duration-200
-        ${isDragging ? 'opacity-50' : ''}
-        ${isDragOverlay ? 'shadow-xl bg-background border-accent' : 'hover:border-accent/50 bg-card border-border'}
-      `}
+      style={{ marginLeft: `${level * 24}px` }}
+      className="group relative border rounded-lg p-3 transition-all duration-200 hover:border-accent/50 bg-card border-border"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1">
-          {/* Drag Handle */}
-          <div
-            {...attributes}
-            {...listeners}
-            className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-          >
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
-
           {/* Expand/Collapse Button */}
           <Button
             variant="ghost"
@@ -152,7 +96,17 @@ function DraggableConceptItem({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
+            onClick={() => onCreateChild(concept)}
+            title="Crear concepto hijo"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
             onClick={() => onEdit(concept)}
+            title="Editar concepto"
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -161,17 +115,12 @@ function DraggableConceptItem({
             size="sm"
             className="h-8 w-8 p-0 text-destructive hover:text-destructive"
             onClick={() => onDelete(concept.id)}
+            title="Eliminar concepto"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
-    </div>
-  );
-
-  return (
-    <div>
-      <ItemContent />
     </div>
   );
 }
@@ -182,6 +131,7 @@ interface DraggableConceptTreeProps {
   onToggleExpanded: (conceptId: string) => void;
   onEdit: (concept: MovementConceptNode) => void;
   onDelete: (conceptId: string) => void;
+  onCreateChild: (parentConcept: MovementConceptNode) => void;
   onMoveToParent: (conceptId: string, newParentId: string | null) => void;
   level?: number;
 }
@@ -192,119 +142,27 @@ export function DraggableConceptTree({
   onToggleExpanded,
   onEdit,
   onDelete,
+  onCreateChild,
   onMoveToParent,
   level = 0,
 }: DraggableConceptTreeProps) {
-  const [activeId, setActiveId] = React.useState<string | null>(null);
-  const [draggedConcept, setDraggedConcept] = React.useState<MovementConceptNode | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor)
-  );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    setActiveId(active.id as string);
-    
-    // Find the dragged concept
-    const findConcept = (concepts: MovementConceptNode[], id: string): MovementConceptNode | null => {
-      for (const concept of concepts) {
-        if (concept.id === id) {
-          return concept;
-        }
-        if (concept.children) {
-          const found = findConcept(concept.children, id);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    
-    const concept = findConcept(concepts, active.id as string);
-    setDraggedConcept(concept);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) {
-      setActiveId(null);
-      setDraggedConcept(null);
-      return;
-    }
-
-    // Check if we're dropping on a valid target
-    const overId = over.id as string;
-    const activeId = active.id as string;
-
-    // Find the target concept to become new parent
-    const findConcept = (concepts: MovementConceptNode[], id: string): MovementConceptNode | null => {
-      for (const concept of concepts) {
-        if (concept.id === id) {
-          return concept;
-        }
-        if (concept.children) {
-          const found = findConcept(concept.children, id);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const targetConcept = findConcept(concepts, overId);
-    
-    if (targetConcept) {
-      // Don't allow dropping on self or children
-      const isDescendant = (parentId: string, childId: string): boolean => {
-        const parent = findConcept(concepts, parentId);
-        if (!parent || !parent.children) return false;
-        
-        return parent.children.some(child => 
-          child.id === childId || isDescendant(child.id, childId)
-        );
-      };
-
-      if (activeId !== overId && !isDescendant(activeId, overId)) {
-        onMoveToParent(activeId, targetConcept.id);
-      }
-    }
-
-    setActiveId(null);
-    setDraggedConcept(null);
-  };
-
-  const getAllConceptIds = (concepts: MovementConceptNode[]): string[] => {
-    const ids: string[] = [];
-    concepts.forEach(concept => {
-      ids.push(concept.id);
-      if (concept.children) {
-        ids.push(...getAllConceptIds(concept.children));
-      }
-    });
-    return ids;
-  };
-
-  const conceptIds = getAllConceptIds(concepts);
-
-  const renderConcepts = (concepts: MovementConceptNode[], currentLevel: number) => {
+  
+  // Render concepts recursively
+  const renderConcepts = (concepts: MovementConceptNode[], currentLevel: number): React.ReactNode => {
     return concepts.map((concept) => (
       <div key={concept.id}>
-        <DraggableConceptItem
+        <ConceptItem
           concept={concept}
           level={currentLevel}
           isExpanded={expandedConcepts.has(concept.id)}
           onToggleExpanded={onToggleExpanded}
           onEdit={onEdit}
           onDelete={onDelete}
+          onCreateChild={onCreateChild}
         />
         {/* Render children if expanded */}
         {concept.children && concept.children.length > 0 && expandedConcepts.has(concept.id) && (
-          <Collapsible open={expandedConcepts.has(concept.id)}>
+          <Collapsible open={true}>
             <CollapsibleContent className="mt-2">
               <div className="space-y-2">
                 {renderConcepts(concept.children, currentLevel + 1)}
@@ -317,31 +175,8 @@ export function DraggableConceptTree({
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={conceptIds} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2">
-          {renderConcepts(concepts, level)}
-        </div>
-      </SortableContext>
-
-      <DragOverlay>
-        {activeId && draggedConcept ? (
-          <DraggableConceptItem
-            concept={draggedConcept}
-            level={0}
-            isExpanded={false}
-            onToggleExpanded={() => {}}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            isDragOverlay={true}
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+    <div className="space-y-2">
+      {renderConcepts(concepts, level)}
+    </div>
   );
 }

@@ -126,6 +126,17 @@ export default function AdminMovementConcepts() {
     openModal('movement-concept', { editingConcept: concept });
   };
 
+  const handleCreateChildConcept = (parentConcept: MovementConceptNode) => {
+    openModal('movement-concept', { 
+      parentConcept: {
+        id: parentConcept.id,
+        name: parentConcept.name,
+        parent_id: parentConcept.parent_id,
+        is_system: parentConcept.is_system
+      }
+    });
+  };
+
   const handleDeleteConcept = async (conceptId: string) => {
     try {
       await deleteConceptMutation.mutateAsync(conceptId);
@@ -299,6 +310,7 @@ export default function AdminMovementConcepts() {
               handleOpenEditModal(concept);
             }}
             onDelete={(conceptId) => setDeleteConceptId(conceptId)}
+            onCreateChild={handleCreateChildConcept}
             onMoveToParent={handleMoveToParent}
           />
         )}
