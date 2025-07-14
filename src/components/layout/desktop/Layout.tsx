@@ -5,7 +5,10 @@ import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
+import {
+  useSidebarStore,
+  useSecondarySidebarStore,
+} from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { MobileActionBar } from "@/components/layout/mobile/MobileActionBar";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
@@ -31,13 +34,16 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
-  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
-  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
+  const { isDocked: isMainDocked, isHovered: isMainHovered } =
+    useSidebarStore();
+  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } =
+    useSecondarySidebarStore();
   const { activeSidebarSection } = useNavigationStore();
   const { showActionBar } = useMobileActionBar();
   const isMobile = useMobile();
 
-  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
+  const isSecondaryExpanded =
+    isSecondaryDocked || isSecondaryHovered || isMainHovered;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -57,19 +63,22 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   }, [data?.preferences?.theme]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--layout-bg)' }}>
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--layout-bg)" }}
+    >
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
         <SidebarSubmenu />
       </div>
-      
+
       {/* Header starts after sidebars */}
-      <div 
+      <div
         className={`transition-all duration-300 ease-in-out ${
-          isSecondaryExpanded 
+          isSecondaryExpanded
             ? "md:ml-[304px]" // 40px main + 264px secondary
-            : "md:ml-[80px]"  // 40px main + 40px secondary
+            : "md:ml-[80px]" // 40px main + 40px secondary
         } ml-0`}
       >
         <Header {...headerProps} />
@@ -78,14 +87,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 mt-1 pb-12 ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
-          isSecondaryExpanded 
+          isSecondaryExpanded
             ? "md:ml-[304px]" // 40px main + 264px secondary
-            : "md:ml-[80px]"  // 40px main + 40px secondary
+            : "md:ml-[80px]" // 40px main + 40px secondary
         } ml-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
       >
-        <div className={wide ? "" : "max-w-[1440px] mx-auto"}>{children}</div>
+        <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>{children}</div>
       </main>
-      
+
       {/* Mobile Action Bar - Solo visible en mobile */}
       <MobileActionBar />
     </div>
