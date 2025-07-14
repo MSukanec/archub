@@ -345,10 +345,13 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     />
   );
 
-  return {
-    viewPanel,
-    editPanel,
-    headerContent,
-    footerContent
-  };
+  return (
+    <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+    />
+  );
 }

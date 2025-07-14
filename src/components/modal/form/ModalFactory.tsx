@@ -12,40 +12,20 @@ export function ModalFactory() {
 
   if (!open) return null;
 
-  let modalConfig;
-
   switch (type) {
     case 'member':
-      modalConfig = MemberFormModal({ editingMember: data?.editingMember, onClose: closeModal });
-      break;
+      return <MemberFormModal editingMember={data?.editingMember} onClose={closeModal} />;
     case 'gallery':
-      modalConfig = GalleryFormModal({ modalData: data, onClose: closeModal });
-      break;
+      return <GalleryFormModal modalData={data} onClose={closeModal} />;
     case 'board':
-      modalConfig = BoardFormModal({ modalData: data, onClose: closeModal });
-      break;
+      return <BoardFormModal modalData={data} onClose={closeModal} />;
     case 'card':
-      modalConfig = CardFormModal({ modalData: data, onClose: closeModal });
-      break;
+      return <CardFormModal modalData={data} onClose={closeModal} />;
     case 'list':
-      modalConfig = ListFormModal({ modalData: data, onClose: closeModal });
-      break;
+      return <ListFormModal modalData={data} onClose={closeModal} />;
     case 'contact':
-      modalConfig = ContactFormModal({ modalData: data, onClose: closeModal });
-      break;
+      return <ContactFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
-
-  if (!modalConfig) return null;
-
-  return (
-    <FormModalLayout
-      viewPanel={modalConfig.viewPanel}
-      editPanel={modalConfig.editPanel}
-      headerContent={modalConfig.headerContent}
-      footerContent={modalConfig.footerContent}
-      onClose={closeModal}
-    />
-  );
 }

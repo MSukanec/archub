@@ -7,6 +7,7 @@ import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Link, Unlink,
 
 import { FormModalHeader } from "../form/FormModalHeader";
 import { FormModalFooter } from "../form/FormModalFooter";
+import { FormModalLayout } from "../form/FormModalLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -476,10 +477,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     />
   );
 
-  return {
-    viewPanel,
-    editPanel,
-    headerContent,
-    footerContent
-  };
+  return (
+    <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+    />
+  );
 }
