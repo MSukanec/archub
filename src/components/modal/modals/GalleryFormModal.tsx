@@ -7,10 +7,10 @@ import { createClient } from '@supabase/supabase-js';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
-import { CustomModalLayout } from '../legacy/CustomModalLayout';
-import { CustomModalHeader } from '../legacy/CustomModalHeader';
-import { CustomModalBody } from '../legacy/CustomModalBody';
-import { CustomModalFooter } from '../legacy/CustomModalFooter';
+import { FormModalLayout } from '../form/FormModalLayout';
+import { FormModalHeader } from '../form/FormModalHeader';
+import { FormModalFooter } from '../form/FormModalFooter';
+import { useModalPanelStore } from '../form/modalPanelStore';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -46,9 +46,15 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { setPanel } = useModalPanelStore();
   const [files, setFiles] = useState<File[]>([]);
   const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize panel to edit mode when modal opens
+  useEffect(() => {
+    setPanel('edit');
+  }, [setPanel]);
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
@@ -315,30 +321,25 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   );
 
   return (
-    <CustomModalLayout open={true} onClose={handleClose}>
-      {{
-        header: (
-          <CustomModalHeader
-            title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
-            description={editingFile ? "Modifica los detalles del archivo" : "Sube un nuevo archivo multimedia al proyecto"}
-            onClose={handleClose}
-          />
-        ),
-        body: (
-          <CustomModalBody columns={1}>
-            {editPanel}
-          </CustomModalBody>
-        ),
-        footer: (
-          <CustomModalFooter
-            onCancel={handleClose}
-            onSave={form.handleSubmit(onSubmit)}
-            cancelText="Cancelar"
-            saveText={editingFile ? "Actualizar" : "Subir"}
-            isLoading={uploadMutation.isPending}
-          />
-        )
-      }}
-    </CustomModalLayout>
+    <FormModalLayout
+      editPanel={editPanel}
+      onClose={onClose}
+      headerContent={
+        <FormModalHeader
+          title={editingFile ? "Editar Archivo Multimedia" : "Subir Archivo Multimedia"}
+          description={editingFile ? "Modifica los detalles del archivo" : "Sube un nuevo archivo multimedia al proyecto"}
+        />
+      }
+      footerContent={
+        <FormModalFooter
+          onCancel={handleClose}
+          onSave={form.handleSubmit(onSubmit)}
+          cancelText="Cancelar"
+          saveText={editingFile ? "Actualizar" : "Subir"}
+          isLoading={uploadMutation.isPending}
+        />
+      }
+      columns={1}
+    />
   );
 }
