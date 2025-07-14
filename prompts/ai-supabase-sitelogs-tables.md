@@ -50,5 +50,9 @@ TABLA SITE_LOG_FILES:
   {
     "column_name": "file_size",
     "data_type": "bigint"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
   }
 ]

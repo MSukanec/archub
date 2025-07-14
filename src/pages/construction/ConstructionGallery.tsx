@@ -158,7 +158,35 @@ export default function ConstructionGallery() {
     enabled: !!projectId && !!userData?.preferences?.last_organization_id
   });
 
-  // Lightbox setup
+  // Filter files
+  const filteredFiles = useMemo(() => {
+    let filtered = galleryFiles;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(file => 
+        file.file_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // File type filter
+    if (fileTypeFilter !== 'all') {
+      filtered = filtered.filter(file => 
+        fileTypeFilter === 'image'
+          ? file.file_type === 'image' || file.file_type?.startsWith('image/')
+          : file.file_type === 'video' || file.file_type?.startsWith('video/')
+      );
+    }
+
+    // Entry type filter
+    if (entryTypeFilter !== 'all') {
+      filtered = filtered.filter(file => file.entry_type === entryTypeFilter);
+    }
+
+    return filtered;
+  }, [galleryFiles, searchTerm, fileTypeFilter, entryTypeFilter]);
+
+  // Lightbox setup - usar TODAS las imágenes de galleryFiles, no solo las filtradas
   const imageUrls = useMemo(() => 
     galleryFiles
       .filter(file => file.file_type === 'image' || file.file_type?.startsWith('image/'))
@@ -276,34 +304,6 @@ export default function ConstructionGallery() {
       };
     }
   }, [isMobile, setActions, setShowActionBar]);
-
-  // Filter files
-  const filteredFiles = useMemo(() => {
-    let filtered = galleryFiles;
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(file => 
-        file.file_name?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // File type filter
-    if (fileTypeFilter !== 'all') {
-      filtered = filtered.filter(file => 
-        fileTypeFilter === 'image'
-          ? file.file_type === 'image' || file.file_type?.startsWith('image/')
-          : file.file_type === 'video' || file.file_type?.startsWith('video/')
-      );
-    }
-
-    // Entry type filter
-    if (entryTypeFilter !== 'all') {
-      filtered = filtered.filter(file => file.entry_type === entryTypeFilter);
-    }
-
-    return filtered;
-  }, [galleryFiles, searchTerm, fileTypeFilter, entryTypeFilter]);
 
   // Functions
   const handleImageClick = (file: GalleryFile) => {

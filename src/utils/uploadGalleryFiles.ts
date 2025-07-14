@@ -53,6 +53,7 @@ export async function uploadGalleryFiles(
           description: description || null,
           created_by: createdBy, // Use created_by como en la tabla real
           organization_id: organizationId,
+          project_id: projectId, // Agregado project_id
           visibility: 'organization',
           // No site_log_id for independent gallery uploads
         });
