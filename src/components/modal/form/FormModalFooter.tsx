@@ -2,46 +2,51 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 
 interface FormModalFooterProps {
-  leftLabel?: string;      // Texto del botón izquierdo (opcional)
-  onLeftClick?: () => void;
-  rightLabel: string;      // Texto del botón derecho o único
-  onRightClick: () => void;
+  cancelText?: string;
+  submitText: string;
+  onSubmit: () => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
 export function FormModalFooter({
-  leftLabel,
-  onLeftClick,
-  rightLabel,
-  onRightClick,
+  cancelText,
+  submitText,
+  onSubmit,
+  onCancel,
+  isLoading = false,
 }: FormModalFooterProps) {
   return (
     <div className="p-2 border-t border-[var(--card-border)] mt-auto">
       <div className="flex gap-2 w-full">
-        {leftLabel && onLeftClick ? (
+        {cancelText && onCancel ? (
           <>
             <Button
               type="button"
               variant="secondary"
-              onClick={onLeftClick}
+              onClick={onCancel}
               className="w-1/4"
+              disabled={isLoading}
             >
-              {leftLabel}
+              {cancelText}
             </Button>
             <Button
-              type="button"
-              onClick={onRightClick}
+              type="submit"
+              onClick={onSubmit}
               className="w-3/4"
+              disabled={isLoading}
             >
-              {rightLabel}
+              {isLoading ? "Guardando..." : submitText}
             </Button>
           </>
         ) : (
           <Button
-            type="button"
-            onClick={onRightClick}
+            type="submit"
+            onClick={onSubmit}
             className="w-full"
+            disabled={isLoading}
           >
-            {rightLabel}
+            {isLoading ? "Guardando..." : submitText}
           </Button>
         )}
       </div>

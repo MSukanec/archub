@@ -331,17 +331,17 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const headerContent = (
     <FormModalHeader
       title={editingFile ? "Editar Archivo" : "Subir Archivo"}
-      icon={Images}
+      icon={<Images className="h-5 w-5" />}
     />
   );
 
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleClose}
-      rightLabel={editingFile ? "Actualizar" : "Subir"}
-      onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={uploadMutation.isPending}
+      cancelText="Cancelar"
+      onCancel={handleClose}
+      submitText={editingFile ? "Actualizar" : "Subir"}
+      onSubmit={form.handleSubmit(onSubmit)}
+      isLoading={uploadMutation.isPending}
     />
   );
 

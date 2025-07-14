@@ -167,17 +167,17 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   const headerContent = (
     <FormModalHeader
       title={isEditing ? 'Editar Lista' : 'Nueva Lista'}
-      icon={List}
+      icon={<List className="h-5 w-5" />}
     />
   );
 
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleClose}
-      rightLabel={isEditing ? 'Actualizar' : 'Guardar'}
-      onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={createListMutation.isPending || updateListMutation.isPending}
+      cancelText="Cancelar"
+      onCancel={handleClose}
+      submitText={isEditing ? 'Actualizar' : 'Guardar'}
+      onSubmit={form.handleSubmit(onSubmit)}
+      isLoading={createListMutation.isPending || updateListMutation.isPending}
     />
   );
 
