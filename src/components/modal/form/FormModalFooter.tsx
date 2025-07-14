@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from "@/components/ui/button";
 
 interface FormModalFooterProps {
   leftLabel?: string;      // Texto del botón izquierdo (opcional)
@@ -14,30 +15,34 @@ export function FormModalFooter({
   onRightClick,
 }: FormModalFooterProps) {
   return (
-    <div className="p-2 h-10 mt-auto border-t border-[var(--card-border)]">
-      <div className="flex gap-2 w-full h-full">
+    <div className="p-2 border-t border-[var(--card-border)] mt-auto">
+      <div className="flex gap-2 w-full">
         {leftLabel && onLeftClick ? (
           <>
-            <button
+            <Button
+              type="button"
+              variant="secondary"
               onClick={onLeftClick}
-              className="w-1/4 h-full text-xs px-2 rounded bg-background border hover:bg-accent transition-colors"
+              className="w-1/4"
             >
               {leftLabel}
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={onRightClick}
-              className="w-3/4 h-full text-xs px-2 rounded bg-lime-500 text-white hover:bg-lime-600 transition-colors"
+              className="w-3/4"
             >
               {rightLabel}
-            </button>
+            </Button>
           </>
         ) : (
-          <button
+          <Button
+            type="button"
             onClick={onRightClick}
-            className="w-full h-full text-xs px-2 rounded bg-lime-500 text-white hover:bg-lime-600 transition-colors"
+            className="w-full"
           >
             {rightLabel}
-          </button>
+          </Button>
         )}
       </div>
     </div>
