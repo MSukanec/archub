@@ -15,7 +15,7 @@ import {
   MovementConceptAdmin 
 } from '@/hooks/use-movement-concepts-admin';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { NewAdminMovementConceptModal } from '@/modals/admin/NewAdminMovementConceptModal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function AdminMovementConcepts() {
   const { data: userData } = useCurrentUser();
@@ -23,9 +23,8 @@ export default function AdminMovementConcepts() {
   const [expandedConcepts, setExpandedConcepts] = useState<Set<string>>(new Set());
   const [systemFilter, setSystemFilter] = useState<'all' | 'system' | 'user'>('all');
   
-  // Modal states
-  const [isConceptModalOpen, setIsConceptModalOpen] = useState(false);
-  const [editingConcept, setEditingConcept] = useState<MovementConceptAdmin | null>(null);
+  // Global modal store
+  const { openModal } = useGlobalModalStore();
   
   // Delete confirmation states
   const [deleteConceptId, setDeleteConceptId] = useState<string | null>(null);
@@ -117,18 +116,11 @@ export default function AdminMovementConcepts() {
   const filteredConcepts = filterConcepts(concepts);
 
   const handleOpenCreateModal = () => {
-    setEditingConcept(null);
-    setIsConceptModalOpen(true);
+    openModal('movement-concept');
   };
 
   const handleOpenEditModal = (concept: MovementConceptAdmin) => {
-    setEditingConcept(concept);
-    setIsConceptModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsConceptModalOpen(false);
-    setEditingConcept(null);
+    openModal('movement-concept', { editingConcept: concept });
   };
 
   const handleDeleteConcept = async (conceptId: string) => {
@@ -293,13 +285,7 @@ export default function AdminMovementConcepts() {
         )}
       </div>
 
-      {/* Create/Edit Modal */}
-      <NewAdminMovementConceptModal
-        isOpen={isConceptModalOpen}
-        onClose={handleCloseModal}
-        editingConcept={editingConcept}
-        parentConcepts={concepts}
-      />
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteConceptId} onOpenChange={() => setDeleteConceptId(null)}>
