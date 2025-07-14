@@ -10,14 +10,20 @@ export function ModalFactory() {
 
   if (!open) return null;
 
+  // Modales que usan FormModalLayout directamente (legacy)
+  if (type === 'gallery') {
+    return <GalleryFormModal open={open} onClose={closeModal} />;
+  }
+  
+  if (type === 'board') {
+    return <BoardFormModal modalData={data} onClose={closeModal} />;
+  }
+
+  // Modales que usan la nueva estructura (member, card)
   const getModalData = () => {
     switch (type) {
       case 'member':
         return <MemberFormModal editingMember={data?.editingMember} />;
-      case 'gallery':
-        return <GalleryFormModal />;
-      case 'board':
-        return <BoardFormModal modalData={data} onClose={closeModal} />;
       case 'card':
         return <CardFormModal modalData={data} onClose={closeModal} />;
       default:
