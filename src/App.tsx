@@ -119,6 +119,11 @@ function Router() {
             <OrganizationActivity />
           </ProtectedRoute>
         </Route>
+        <Route path="/organization/tasks">
+          <ProtectedRoute>
+            <OrganizationTasks />
+          </ProtectedRoute>
+        </Route>
 
         {/* Projects Routes */}
         <Route path="/projects">
