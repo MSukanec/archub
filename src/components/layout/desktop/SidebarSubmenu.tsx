@@ -103,7 +103,7 @@ export function SidebarSubmenu() {
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },
-      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
+      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
     
     'proyecto': [

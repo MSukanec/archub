@@ -219,6 +219,11 @@ function Router() {
             <FinancesPreferences />
           </ProtectedRoute>
         </Route>
+        <Route path="/organization/preferences">
+          <ProtectedRoute>
+            <FinancesPreferences />
+          </ProtectedRoute>
+        </Route>
 
         {/* Other Routes */}
         <Route path="/tasks">

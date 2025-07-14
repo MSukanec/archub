@@ -6,6 +6,7 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { PhoneInput } from '@/components/ui-custom/PhoneInput';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -68,7 +69,6 @@ export default function OrganizationBasicData() {
 
   // Form states based on actual database structure
   const [organizationName, setOrganizationName] = useState('');
-  const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -84,7 +84,6 @@ export default function OrganizationBasicData() {
   const { isSaving } = useDebouncedAutoSave(
     { 
       name: organizationName,
-      slug,
       description,
       address,
       city,
@@ -111,7 +110,6 @@ export default function OrganizationBasicData() {
 
       // Update organization data in organization_data table
       const organizationDataFields = {
-        slug: dataToSave.slug,
         description: dataToSave.description,
         address: dataToSave.address,
         city: dataToSave.city,
@@ -156,7 +154,6 @@ export default function OrganizationBasicData() {
 
   useEffect(() => {
     if (organizationData) {
-      setSlug(organizationData.slug || '');
       setDescription(organizationData.description || '');
       setAddress(organizationData.address || '');
       setCity(organizationData.city || '');
@@ -237,16 +234,6 @@ export default function OrganizationBasicData() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">Slug (URL amigable)</Label>
-                <Input 
-                  id="slug"
-                  placeholder="Ej: constructora-lopez"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea 
                   id="description"
@@ -279,11 +266,10 @@ export default function OrganizationBasicData() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Teléfono</Label>
-                <Input 
-                  id="phone"
-                  placeholder="Ej: +54 11 1234-5678"
+                <PhoneInput 
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={setPhone}
+                  placeholder="Número de teléfono"
                 />
               </div>
 
