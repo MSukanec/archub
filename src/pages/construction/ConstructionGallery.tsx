@@ -90,12 +90,13 @@ export default function ConstructionGallery() {
     queryKey: ['galleryFiles', projectId, userData?.preferences?.last_organization_id],
     queryFn: async () => {
       console.log('Fetching gallery files for project:', projectId);
+  console.log('Organization ID:', userData?.preferences?.last_organization_id);
       
       if (!supabase || !projectId || !userData?.preferences?.last_organization_id) {
         throw new Error('Missing required data');
       }
 
-      // Get files from site_log_files table joined with site_logs to filter by project
+      // Get files from site_log_files table - both with and without site_log_id
       const { data, error } = await supabase
         .from('site_log_files')
         .select(`
@@ -106,7 +107,9 @@ export default function ConstructionGallery() {
           created_at,
           site_log_id,
           description,
-          site_logs!inner (
+          project_id,
+          organization_id,
+          site_logs (
             id,
             project_id,
             organization_id,
@@ -115,8 +118,8 @@ export default function ConstructionGallery() {
             created_by
           )
         `)
-        .eq('site_logs.project_id', projectId)
-        .eq('site_logs.organization_id', userData.preferences.last_organization_id)
+        .eq('project_id', projectId)
+        .eq('organization_id', userData.preferences.last_organization_id)
         .order('created_at', { ascending: false });
 
       if (error) {
