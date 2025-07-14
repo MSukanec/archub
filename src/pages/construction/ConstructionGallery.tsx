@@ -30,6 +30,7 @@ import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
 import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
 import { CustomModalBody } from '@/components/modal/CustomModalBody';
 import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
+import { TestFormModal } from '@/components/modal/form/TestFormModal';
 import { 
   Images, 
   Filter, 
@@ -80,6 +81,7 @@ export default function ConstructionGallery() {
   const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
   const [selectedFile, setSelectedFile] = useState<GalleryFile | null>(null);
   const [fileToDelete, setFileToDelete] = useState<GalleryFile | null>(null);
+  const [showTestModal, setShowTestModal] = useState(false);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -410,6 +412,14 @@ export default function ConstructionGallery() {
     },
     actions: [
       <Button
+        key="test-modal"
+        onClick={() => setShowTestModal(true)}
+        variant="outline"
+        className="h-8"
+      >
+        MODAL
+      </Button>,
+      <Button
         key="new-file"
         onClick={() => setShowGalleryModal(true)}
         className="h-8"
@@ -704,6 +714,12 @@ export default function ConstructionGallery() {
         open={showGalleryModal}
         onClose={handleCloseModal}
         editingFile={editingFile}
+      />
+
+      {/* Test Form Modal */}
+      <TestFormModal
+        open={showTestModal}
+        onClose={() => setShowTestModal(false)}
       />
     </Layout>
   );
