@@ -86,7 +86,7 @@ interface MovementFormModalProps {
 
 export default function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
   const editingMovement = modalData?.editingMovement
-  const { currentPanel } = useModalPanelStore()
+  const { currentPanel, setPanel } = useModalPanelStore()
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const { data: members } = useOrganizationMembers(organizationId)
@@ -198,6 +198,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           w.id === editingMovement.wallet_id
         )
         
+        setPanel('edit')
+        
         form.reset({
           movement_date: new Date(editingMovement.movement_date),
           created_by: editingMovement.created_by,
@@ -221,6 +223,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     } else {
       // Reset forms for new movement
+      setPanel('edit')
+      
       form.reset({
         movement_date: new Date(),
         amount: 0,
