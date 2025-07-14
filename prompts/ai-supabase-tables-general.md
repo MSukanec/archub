@@ -430,3 +430,64 @@ TABLA ORGANIZATION_ACTIVITY_LOGS:
     "data_type": "jsonb"
   }
 ]
+
+TABLA ORGANIZATION_DATA:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "slug",
+    "data_type": "text"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "address",
+    "data_type": "text"
+  },
+  {
+    "column_name": "city",
+    "data_type": "text"
+  },
+  {
+    "column_name": "state",
+    "data_type": "text"
+  },
+  {
+    "column_name": "country",
+    "data_type": "text"
+  },
+  {
+    "column_name": "postal_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "phone",
+    "data_type": "text"
+  },
+  {
+    "column_name": "email",
+    "data_type": "text"
+  },
+  {
+    "column_name": "website",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tax_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "last_activity_at",
+    "data_type": "timestamp with time zone"
+  }
+]
