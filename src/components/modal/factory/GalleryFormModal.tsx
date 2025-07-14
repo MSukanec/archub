@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,6 +44,7 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<File[]>([]);
   const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
@@ -137,6 +138,10 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleClose = () => {
     reset();
     setFiles([]);
@@ -196,7 +201,10 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Archivos
                   </label>
-                  <div className="border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors">
+                  <div 
+                    onClick={triggerFileInput}
+                    className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
+                  >
                     <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-sm text-muted-foreground mb-2">
                       Haz clic para subir archivos
@@ -205,11 +213,12 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
                       Imágenes y videos son compatibles
                     </p>
                     <input
+                      ref={fileInputRef}
                       type="file"
                       multiple
                       accept="image/*,video/*"
                       onChange={handleFileSelect}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      className="hidden"
                     />
                   </div>
                 </div>
