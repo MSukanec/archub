@@ -1,5 +1,5 @@
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useGlobalModalStore } from './useGlobalModalStore';
+import { FormModalLayout } from './FormModalLayout';
 import { MemberFormModal } from '../modals/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
 import { BoardFormModal } from '../modals/BoardFormModal';
@@ -8,27 +8,47 @@ import { CardFormModal } from '../modals/CardFormModal';
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
 
-  const renderModal = () => {
+  if (!open) return null;
+
+  const getModalComponents = () => {
     switch (type) {
       case 'member':
-        return <MemberFormModal editingMember={data?.editingMember} />;
+        return {
+          content: <MemberFormModal editingMember={data?.editingMember} />,
+          header: undefined,
+          footer: undefined
+        };
       case 'gallery':
-        return <GalleryFormModal />;
+        return {
+          content: <GalleryFormModal />,
+          header: undefined,
+          footer: undefined
+        };
       case 'board':
-        return <BoardFormModal modalData={data} onClose={closeModal} />;
+        return {
+          content: <BoardFormModal modalData={data} onClose={closeModal} />,
+          header: undefined,
+          footer: undefined
+        };
       case 'card':
-        return <CardFormModal modalData={data} onClose={closeModal} />;
+        return {
+          content: <CardFormModal modalData={data} onClose={closeModal} />,
+          header: undefined,
+          footer: undefined
+        };
       default:
-        return null;
+        return { content: null, header: undefined, footer: undefined };
     }
   };
 
+  const { content, header, footer } = getModalComponents();
+
   return (
-    <Dialog open={open} onOpenChange={closeModal}>
-      <DialogContent className="max-w-2xl p-0">
-        <DialogTitle className="sr-only">Modal</DialogTitle>
-        {renderModal()}
-      </DialogContent>
-    </Dialog>
+    <FormModalLayout
+      editPanel={content}
+      headerContent={header}
+      footerContent={footer}
+      onClose={closeModal}
+    />
   );
 }

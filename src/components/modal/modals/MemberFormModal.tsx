@@ -237,13 +237,5 @@ export function MemberFormModal({ editingMember }: MemberModalProps) {
     />
   );
 
-  return (
-    <>
-      {headerContent}
-      <FormModalBody>
-        {editPanel}
-      </FormModalBody>
-      {footerContent}
-    </>
-  );
+  return editPanel;
 }
