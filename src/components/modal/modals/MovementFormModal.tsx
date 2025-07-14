@@ -130,16 +130,19 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     if (typeId !== selectedTypeId) {
       setSelectedTypeId(typeId)
       
-      // Detectar si es conversión por view_mode
+      // Detectar si es conversión por UUID específico
+      const CONVERSION_CONCEPT_ID = '5c0bb8fb-33e4-4390-b125-616484c8a672'
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
-      const isConversionType = selectedConcept?.view_mode === 'conversion'
+      const isConversionType = typeId === CONVERSION_CONCEPT_ID
       
       console.log('Conversion detection:', {
         typeId,
+        CONVERSION_CONCEPT_ID,
         selectedConcept,
-        view_mode: selectedConcept?.view_mode,
         isConversionType,
-        allConcepts: concepts
+        comparison: typeId === CONVERSION_CONCEPT_ID,
+        typeIdType: typeof typeId,
+        uuidType: typeof CONVERSION_CONCEPT_ID
       })
       
       // Si cambió a conversión, preservar creador y fecha
