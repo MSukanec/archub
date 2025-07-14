@@ -3,11 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { FormModalHeader } from "../form/FormModalHeader";
-import { FormModalFooter } from "../form/FormModalFooter";
-import { FormModalLayout } from "../form/FormModalLayout";
-import FormModalBody from "../form/FormModalBody";
-import { useModalPanelStore } from "../form/modalPanelStore";
+import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,7 +59,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   const { data: userData } = useCurrentUser();
   const { data: searchResults = [] } = useSearchUsers(searchTerm);
   const { toast } = useToast();
-  const { setPanel } = useModalPanelStore();
 
   const isEditing = modalData?.isEditing || false;
   const editingContact = modalData?.contact;
@@ -148,8 +143,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   // View Panel (para mostrar datos del contacto cuando no se está editando)
   const viewPanel = (
-    <FormModalBody>
-      <div className="space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16">
           <AvatarImage src={editingContact?.linked_user?.avatar_url} />
@@ -215,15 +209,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           </div>
         </div>
       )}
-      </div>
-    </FormModalBody>
+    </div>
   );
 
   // Edit Panel (formulario)
   const editPanel = (
-    <FormModalBody>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -443,41 +435,30 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             </div>
           )}
         </div>
-        </form>
-      </Form>
-    </FormModalBody>
+      </form>
+    </Form>
   );
 
-  const handleClose = () => {
-    setPanel("view");
-    onClose();
+  const headerContent = {
+    title: isEditing ? "Editar Contacto" : "Nuevo Contacto",
+    icon: <UserPlus className="h-5 w-5" />
   };
 
-  // Set to edit panel for creation or editing
-  useEffect(() => {
-    setPanel(isEditing ? "edit" : "edit"); // Always start in edit mode for contacts
-  }, [isEditing, setPanel]);
+  const footerContent = {
+    cancelText: "Cancelar",
+    submitText: isEditing ? "Actualizar" : "Crear Contacto",
+    onSubmit: form.handleSubmit(onSubmit),
+    isLoading: createContactMutation.isPending
+  };
 
   return (
     <FormModalLayout
+      headerContent={headerContent}
+      footerContent={footerContent}
       viewPanel={viewPanel}
       editPanel={editPanel}
-      onClose={handleClose}
-      headerContent={
-        <FormModalHeader 
-          title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
-          icon={<UserPlus className="h-5 w-5" />}
-        />
-      }
-      footerContent={
-        <FormModalFooter
-          cancelText="Cancelar"
-          submitText={isEditing ? "Actualizar" : "Crear Contacto"}
-          onSubmit={form.handleSubmit(onSubmit)}
-          isLoading={createContactMutation.isPending}
-          onCancel={handleClose}
-        />
-      }
+      onClose={onClose}
+      isEditing={isEditing}
     />
   );
 }

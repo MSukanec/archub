@@ -175,7 +175,7 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   const headerContent = (
     <FormModalHeader
       title={isEditing ? "Editar Tablero" : "Nuevo Tablero de Ideas"}
-      icon={<Kanban className="h-5 w-5" />}
+      icon={Kanban}
       leftActions={
         currentPanel === 'edit' && isEditing ? (
           <button
@@ -192,17 +192,17 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
 
   const footerContent = (
     <FormModalFooter
-      cancelText="Cancelar"
-      onCancel={handleClose}
-      submitText={isEditing ? "Actualizar Tablero" : "Crear Tablero"}
-      onSubmit={() => {
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={isEditing ? "Actualizar Tablero" : "Crear Tablero"}
+      onRightClick={() => {
         if (currentPanel === 'view' && isEditing) {
           setPanel('edit');
         } else {
           form.handleSubmit(onSubmit)();
         }
       }}
-      isLoading={isLoading}
+      rightLoading={isLoading}
     />
   );
 

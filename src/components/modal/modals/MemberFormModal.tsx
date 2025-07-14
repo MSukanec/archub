@@ -225,17 +225,17 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
   const headerContent = (
     <FormModalHeader
       title={editingMember ? 'Editar Miembro' : 'Invitar Miembro'}
-      icon={editingMember ? <Users className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+      icon={editingMember ? Users : UserPlus}
     />
   );
 
   const footerContent = (
     <FormModalFooter
-      cancelText="Cancelar"
-      onCancel={handleClose}
-      submitText={editingMember ? 'Actualizar' : 'Invitar'}
-      onSubmit={form.handleSubmit(handleSubmit)}
-      isLoading={isLoading}
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={editingMember ? 'Actualizar' : 'Invitar'}
+      onRightClick={form.handleSubmit(handleSubmit)}
+      rightLoading={isLoading}
     />
   );
 
