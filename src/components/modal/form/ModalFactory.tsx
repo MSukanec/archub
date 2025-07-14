@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useGlobalModalStore } from './useGlobalModalStore';
 import { MemberFormModal } from '../modals/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
@@ -26,6 +26,7 @@ export function ModalFactory() {
   return (
     <Dialog open={open} onOpenChange={closeModal}>
       <DialogContent className="max-w-2xl p-0">
+        <DialogTitle className="sr-only">Modal</DialogTitle>
         {renderModal()}
       </DialogContent>
     </Dialog>

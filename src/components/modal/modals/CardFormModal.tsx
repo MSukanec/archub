@@ -226,11 +226,12 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   );
 
   return (
-    <FormModalLayout
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={handleClose}
-    />
+    <>
+      {headerContent}
+      <div className="p-4 overflow-y-auto text-sm space-y-4">
+        {editPanel}
+      </div>
+      {footerContent}
+    </>
   );
 }
