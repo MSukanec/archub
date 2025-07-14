@@ -261,7 +261,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="contents">
           {/* Creador */}
           <FormField
             control={form.control}
@@ -309,7 +309,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="col-span-2">
+              <FormItem>
                 <FormLabel>Nombre del proyecto *</FormLabel>
                 <FormControl>
                   <Input placeholder="Nombre del proyecto" {...field} />
@@ -378,7 +378,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             control={form.control}
             name="status"
             render={({ field }) => (
-              <FormItem className="col-span-2">
+              <FormItem>
                 <FormLabel>Estado del proyecto *</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>

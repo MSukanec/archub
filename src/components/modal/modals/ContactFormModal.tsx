@@ -349,7 +349,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="contents">
           <FormField
             control={form.control}
             name="first_name"
@@ -453,7 +453,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             control={form.control}
             name="location"
             render={({ field }) => (
-              <FormItem className="col-span-2">
+              <FormItem>
                 <FormLabel>Ubicación</FormLabel>
                 <FormControl>
                   <Input placeholder="Ciudad, país" {...field} />
@@ -467,7 +467,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             control={form.control}
             name="notes"
             render={({ field }) => (
-              <FormItem className="col-span-2">
+              <FormItem>
                 <FormLabel>Notas</FormLabel>
                 <FormControl>
                   <Textarea 
