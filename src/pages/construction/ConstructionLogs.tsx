@@ -619,7 +619,7 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-gray-50/50 border-gray-200">
+                                  <Card key={index} className="p-2 bg-chart-1/10 border-chart-1/30">
                                     <div className="flex items-center gap-2">
                                       {file.file_type?.startsWith('image/') ? (
                                         <Image className="h-4 w-4 text-blue-600" />
@@ -644,7 +644,7 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.events && Array.isArray(siteLog.events) && siteLog.events.length > 0 ? (
                                 siteLog.events.map((event: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-blue-50/50 border-blue-200">
+                                  <Card key={index} className="p-2 bg-chart-2/10 border-chart-2/30">
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-xs font-medium text-blue-800">
                                         {event.event_type?.name || event.type || 'Evento'}
@@ -665,7 +665,7 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.attendees && Array.isArray(siteLog.attendees) && siteLog.attendees.length > 0 ? (
                                 siteLog.attendees.map((attendee: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-green-50/50 border-green-200">
+                                  <Card key={index} className="p-2 bg-chart-3/10 border-chart-3/30">
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-xs font-medium text-green-800">
                                         {attendee.contact ? 
@@ -694,7 +694,7 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.equipment && siteLog.equipment.length > 0 ? (
                                 siteLog.equipment.map((equipment: any, index: number) => (
-                                  <Card key={index} className="p-2 bg-orange-50/50 border-orange-200">
+                                  <Card key={index} className="p-2 bg-chart-4/10 border-chart-4/30">
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-xs font-medium text-orange-800">
                                         {equipment.equipment?.name || 'Equipo'}

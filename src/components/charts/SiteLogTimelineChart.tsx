@@ -119,7 +119,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           {/* Custom timeline visualization */}
           <div className="relative w-full h-full">
             {/* Y-axis labels - only icons */}
-            <div className="absolute left-0 top-0 h-full flex flex-col justify-between py-4">
+            <div className="absolute left-0 top-0 h-full flex flex-col justify-around py-4">
               {displayCategories.map((category) => (
                 <div key={category.key} className="flex items-center justify-center w-6">
                   <category.icon className="w-4 h-4" style={{ color: category.color }} />
@@ -129,22 +129,22 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
 
             {/* Chart area */}
             <div className="ml-8 h-full relative">
-              {/* Grid lines */}
-              <div className="absolute inset-0 flex flex-col justify-between py-4">
+              {/* Horizontal grid lines - aligned with icons */}
+              <div className="absolute inset-0 flex flex-col justify-around py-4">
                 {displayCategories.map((_, index) => (
-                  <div key={index} className="border-b border-dashed opacity-30" style={{ borderColor: 'var(--chart-grid-text)' }} />
+                  <div key={index} className="border-b border-dashed opacity-30 w-full" style={{ borderColor: 'var(--chart-grid-text)' }} />
                 ))}
               </div>
               
-              {/* Vertical grid lines */}
-              <div className="absolute inset-0 flex justify-between px-4">
+              {/* Vertical grid lines - aligned with dates */}
+              <div className="absolute inset-0 flex justify-around px-0">
                 {data.map((_, index) => (
                   <div key={index} className="border-l border-dashed opacity-30 h-full" style={{ borderColor: 'var(--chart-grid-text)' }} />
                 ))}
               </div>
 
               {/* X-axis (dates) */}
-              <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 pb-2">
+              <div className="absolute bottom-0 left-0 right-0 flex justify-around px-0 pb-2">
                 {data.map((dayData, index) => (
                   <div key={index} className="text-xs text-muted-foreground text-center min-w-0 flex-1">
                     {dayData.date}
@@ -152,34 +152,27 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                 ))}
               </div>
 
-              {/* Data points */}
-              <div className="absolute inset-0 py-4">
-                {data.map((dayData, dayIndex) => {
-                  const leftPosition = data.length === 1 ? 50 : (dayIndex / (data.length - 1)) * 100
-                  return (
-                    <div key={dayIndex} className="absolute top-0 bottom-8" style={{ 
-                      left: `${leftPosition}%`,
-                      transform: 'translateX(-50%)'
-                    }}>
-                    <div className="h-full flex flex-col justify-between">
-                      {displayCategories.map((category) => {
-                        const count = dayData[category.key as keyof SiteLogTimelineData] as number
-                        return (
-                          <div key={category.key} className="flex items-center justify-center">
-                            {count > 0 && (
-                              <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
-                                style={{ backgroundColor: category.color }}
-                              >
-                                {count}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
+              {/* Data points - aligned with grid intersections */}
+              <div className="absolute inset-0 flex justify-around px-0 py-4">
+                {data.map((dayData, dayIndex) => (
+                  <div key={dayIndex} className="flex flex-col justify-around h-full">
+                    {displayCategories.map((category) => {
+                      const count = dayData[category.key as keyof SiteLogTimelineData] as number
+                      return (
+                        <div key={category.key} className="flex items-center justify-center">
+                          {count > 0 && (
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
+                              style={{ backgroundColor: category.color }}
+                            >
+                              {count}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
-                )})}
+                ))}
               </div>
             </div>
           </div>
