@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Table } from '@/components/ui-custom/Table';
-import { EmptySpace } from '@/components/ui-custom/EmptySpace';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { MemberActivityChart } from '@/components/charts/MemberActivityChart';
 
@@ -308,7 +308,7 @@ export default function OrganizationActivity() {
             <p className="text-sm">Cargando actividades...</p>
           </div>
         ) : sortedActivities.length === 0 ? (
-          <EmptySpace
+          <CustomEmptyState
             icon={Activity}
             title="No hay actividades registradas"
             description="Cuando se realicen acciones en la organización, aparecerán aquí."

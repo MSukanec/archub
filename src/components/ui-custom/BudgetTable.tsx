@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, Plus } from 'lucide-react';
 import { Calculator } from 'lucide-react';
-import { EmptySpace } from '@/components/ui-custom/EmptySpace';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 
 interface BudgetTask {
   id: string;
@@ -100,7 +100,7 @@ export function BudgetTable({
 
   if (!budgetTasks || budgetTasks.length === 0) {
     return (
-      <EmptySpace
+      <CustomEmptyState
         icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
         title="No hay tareas en este presupuesto"
         description="Comienza agregando la primera tarea para gestionar los costos y materiales"

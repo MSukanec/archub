@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { EmptySpace } from '@/components/ui-custom/EmptySpace';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { DocumentGroupCard } from '@/components/ui-custom/DocumentGroupCard';
 import { Table } from '@/components/ui-custom/Table';
@@ -854,7 +854,7 @@ export default function DesignDocumentation() {
 
     if (filteredFolders.length === 0) {
       return (
-        <EmptySpace
+        <CustomEmptyState
           icon={<FolderOpen className="h-12 w-12 text-muted-foreground" />}
           title="No hay carpetas"
           description="Crea tu primera carpeta para organizar documentos"
@@ -945,7 +945,7 @@ export default function DesignDocumentation() {
       </div>
 
       {filteredGroups.length === 0 ? (
-        <EmptySpace
+        <CustomEmptyState
           icon={<Archive className="h-12 w-12 text-muted-foreground" />}
           title="No hay grupos de revisión"
           description="Crea tu primer grupo para organizar documentos relacionados"
@@ -984,7 +984,7 @@ export default function DesignDocumentation() {
       </div>
 
       {filteredDocuments.length === 0 ? (
-        <EmptySpace
+        <CustomEmptyState
           icon={<FileText className="h-12 w-12 text-muted-foreground" />}
           title="No hay documentos"
           description="Sube documentos a este grupo para empezar"

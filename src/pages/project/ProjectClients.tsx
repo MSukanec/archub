@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { EmptySpace } from '@/components/ui-custom/EmptySpace'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 
 interface Contact {
   id: string
@@ -380,7 +380,7 @@ export default function ProjectClients() {
           </div>
         ) : (
           /* Full-width Custom Empty State - spans entire width below FeatureIntroduction */
-          <EmptySpace
+          <CustomEmptyState
             icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
             title="No hay clientes agregados"
             description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."

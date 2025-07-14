@@ -7,7 +7,7 @@ import { useDesignSummary, useRecentDesignDocuments, useDesignPhasesWithTasks, u
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
-import { EmptySpace } from '@/components/ui-custom/EmptySpace'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -55,7 +55,7 @@ export default function DesignDashboard() {
   if (!summaryLoading && (!designSummary || (designSummary.totalDocuments === 0 && designSummary.totalPhases === 0 && designSummary.totalTasks === 0))) {
     return (
       <Layout headerProps={headerProps}>
-        <EmptySpace 
+        <CustomEmptyState 
           icon={<Layers className="h-12 w-12" />}
           title="Sin actividad de diseño registrada"
           description="Comienza creando fases de diseño y documentos para ver el resumen completo del proyecto."
@@ -227,7 +227,7 @@ export default function DesignDashboard() {
                   ))}
                 </div>
               ) : (
-                <EmptySpace 
+                <CustomEmptyState 
                   title="Sin fases de diseño"
                   description="Crea fases para organizar el proceso de diseño del proyecto."
                   action={
@@ -278,7 +278,7 @@ export default function DesignDashboard() {
                   ))}
                 </div>
               ) : (
-                <EmptySpace 
+                <CustomEmptyState 
                   title="Sin documentos registrados"
                   description="Sube documentos de diseño para ver la actividad aquí."
                   action={

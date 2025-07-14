@@ -9,7 +9,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { ProjectStatsCards } from '@/components/cards/ProjectStatsCards'
 import { ProjectActivityChart } from '@/components/charts/ProjectActivityChart'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
-import { EmptySpace } from '@/components/ui-custom/EmptySpace'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { Button } from '@/components/ui/button'
 
 export default function ProjectDashboard() {
@@ -44,7 +44,7 @@ export default function ProjectDashboard() {
   if (!currentProject && !statsLoading) {
     return (
       <Layout headerProps={headerProps} wide>
-        <EmptySpace
+        <CustomEmptyState
           title="No hay proyecto seleccionado"
           description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
           action={

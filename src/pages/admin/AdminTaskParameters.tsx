@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Table } from '@/components/ui-custom/Table';
-import { EmptySpace } from '@/components/ui-custom/EmptySpace';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, useTaskParameterOptionGroups, useTaskParameterOptionGroupItems, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { NewTaskParameterModal } from '@/modals/admin/tasks/NewTaskParameterModal';
@@ -204,7 +204,7 @@ export default function AdminTaskParameters() {
 
     if (parameterValues.length === 0) {
       return (
-        <EmptySpace
+        <CustomEmptyState
           icon={<Settings className="w-8 h-8 text-muted-foreground" />}
           title="No hay opciones en este parámetro"
           description="Comienza agregando la primera opción para este parámetro"
@@ -298,7 +298,7 @@ export default function AdminTaskParameters() {
     <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
         {filteredAndSortedParameters.length === 0 ? (
-          <EmptySpace
+          <CustomEmptyState
             icon={<Settings className="w-12 h-12 text-muted-foreground" />}
             title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
             description={searchTerm 

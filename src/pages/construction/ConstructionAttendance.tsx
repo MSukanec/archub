@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
-import { EmptySpace } from '@/components/ui-custom/EmptySpace'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Users, Download, Calendar, CalendarDays, FileText, Clock, BarChart3, Filter } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -352,7 +352,7 @@ export default function ConstructionAttendance() {
             onHideWeekendsChange={setHideWeekends}
           />
         ) : (
-          <EmptySpace
+          <CustomEmptyState
             icon={<Users className="h-12 w-12" />}
             title="Sin personal registrado"
             description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."

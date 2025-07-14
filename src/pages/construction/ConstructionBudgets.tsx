@@ -10,7 +10,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
 // Removed CustomTable import as we now use BudgetTable
-import { EmptySpace } from '@/components/ui-custom/EmptySpace'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
@@ -646,7 +646,7 @@ export default function ConstructionBudgets() {
         />
 
         {filteredBudgets.length === 0 ? (
-          <EmptySpace
+          <CustomEmptyState
             icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
             title={searchValue ? "No se encontraron presupuestos" : "No hay presupuestos creados"}
             description={searchValue 

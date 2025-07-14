@@ -3,7 +3,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { EmptySpace } from '@/components/ui-custom/EmptySpace';
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -480,7 +480,7 @@ export default function ConstructionGallery() {
             ]}
           />
 
-          <EmptySpace
+          <CustomEmptyState
             icon={<Images />}
             title="No hay archivos en la galería"
             description="Sube tu primer archivo para comenzar"
@@ -523,7 +523,7 @@ export default function ConstructionGallery() {
 
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
-          <EmptySpace
+          <CustomEmptyState
             icon={<Filter />}
             title="No se encontraron archivos"
             description="Intenta cambiar los filtros para ver más resultados"

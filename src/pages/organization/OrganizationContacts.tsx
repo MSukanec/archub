@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { NewContactModal } from '@/modals/contacts/NewContactModal'
-import { EmptySpace } from '@/components/ui-custom/EmptySpace'
+import { CustomEmptyState } from '@/components/ui-custom/CustomEmptyState'
 import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
@@ -386,7 +386,7 @@ export default function OrganizationContacts() {
   if (contacts.length === 0 && !searchValue && filterByType === 'all') {
     return (
       <Layout headerProps={headerProps}>
-        <EmptySpace
+        <CustomEmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"
