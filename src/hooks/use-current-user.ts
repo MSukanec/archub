@@ -36,6 +36,13 @@ interface UserData {
     is_active: boolean
     is_system: boolean
     created_at: string
+    plan: {
+      id: string
+      name: string
+      features: Record<string, any>
+      price: number
+      [key: string]: any
+    } | null
     [key: string]: any
   } | null
   organization_preferences: {

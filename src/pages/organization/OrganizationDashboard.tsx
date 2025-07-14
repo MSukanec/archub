@@ -143,16 +143,14 @@ export default function OrganizationDashboard() {
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Crown className="h-4 w-4" />
-                      <Badge variant="outline" className="text-xs">
-                        Plan Pro
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>Organización activa</span>
-                    </div>
+                    {currentOrganization.plan && (
+                      <div className="flex items-center gap-1">
+                        <Crown className="h-4 w-4" />
+                        <Badge variant="outline" className="text-xs">
+                          {currentOrganization.plan.name}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
