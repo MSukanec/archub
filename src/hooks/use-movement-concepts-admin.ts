@@ -28,22 +28,23 @@ export interface UpdateMovementConceptData extends CreateMovementConceptData {
   id: string;
 }
 
-export function useMovementConceptsAdmin(organizationId: string | undefined) {
+export function useMovementConceptsAdmin() {
   return useQuery({
-    queryKey: ['movement-concepts-admin', organizationId],
-    enabled: !!organizationId,
+    queryKey: ['movement-concepts-admin'],
+    enabled: true,
     retry: false,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      if (!supabase || !organizationId) {
-        throw new Error('Supabase client not initialized or organization ID missing');
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
       }
 
-      console.log('🔍 Fetching movement concepts for organization:', organizationId);
+      console.log('🔍 Fetching system movement concepts...');
 
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
         .select('*')
+        .eq('is_system', true)
         .order('name');
 
       console.log('📊 Movement concepts query result:', { concepts, error, count: concepts?.length });

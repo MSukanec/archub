@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { MovementConceptTree } from '@/components/ui-custom/MovementConceptTree';
+import { HierarchicalCategoryTree } from '@/components/ui-custom/HierarchicalCategoryTree';
 
 import { 
   useMovementConceptsAdmin, 
@@ -30,15 +30,14 @@ export default function AdminMovementConcepts() {
   // Delete confirmation states
   const [deleteConceptId, setDeleteConceptId] = useState<string | null>(null);
 
-  const { data: concepts = [], isLoading, error, isError, refetch } = useMovementConceptsAdmin(userData?.organization?.id);
+  const { data: concepts = [], isLoading, error, isError, refetch } = useMovementConceptsAdmin();
   
   // Debug logging
   React.useEffect(() => {
-    console.log('🏢 Current organization ID:', userData?.organization?.id);
-    console.log('📋 Movement concepts data:', concepts);
+    console.log('📋 System movement concepts data:', concepts);
     console.log('⚠️ Movement concepts error:', error);
     console.log('🔄 Is loading:', isLoading);
-  }, [userData?.organization?.id, concepts, error, isLoading]);
+  }, [concepts, error, isLoading]);
   const deleteConceptMutation = useDeleteMovementConcept();
 
   // Calculate statistics
@@ -255,10 +254,25 @@ export default function AdminMovementConcepts() {
             )}
           </div>
         ) : (
-          <MovementConceptTree
-            concepts={filteredConcepts}
-            expandedConcepts={expandedConcepts}
-            onToggleExpand={(conceptId) => {
+          <HierarchicalCategoryTree
+            categories={filteredConcepts.map(concept => ({
+              id: concept.id,
+              name: concept.name,
+              code: concept.view_mode || undefined,
+              children: concept.children?.map(child => ({
+                id: child.id,
+                name: child.name,
+                code: child.view_mode || undefined,
+                children: child.children?.map(grandchild => ({
+                  id: grandchild.id,
+                  name: grandchild.name,
+                  code: grandchild.view_mode || undefined,
+                  children: []
+                })) || []
+              })) || []
+            }))}
+            expandedCategories={expandedConcepts}
+            onToggleExpanded={(conceptId) => {
               const newExpanded = new Set(expandedConcepts);
               if (newExpanded.has(conceptId)) {
                 newExpanded.delete(conceptId);
@@ -267,8 +281,14 @@ export default function AdminMovementConcepts() {
               }
               setExpandedConcepts(newExpanded);
             }}
-            onEdit={handleOpenEditModal}
+            onEdit={(category) => {
+              const concept = concepts.find(c => c.id === category.id) || 
+                            concepts.flatMap(c => c.children || []).find(c => c.id === category.id) ||
+                            concepts.flatMap(c => c.children || []).flatMap(c => c.children || []).find(c => c.id === category.id);
+              if (concept) handleOpenEditModal(concept);
+            }}
             onDelete={(conceptId) => setDeleteConceptId(conceptId)}
+            onTemplate={() => {}} // No needed for movement concepts
           />
         )}
       </div>
