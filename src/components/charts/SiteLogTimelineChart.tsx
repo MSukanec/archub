@@ -222,12 +222,12 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseLeave}
             >
-              {/* Timeline content with fixed width */}
+              {/* Timeline content with table structure */}
               <div 
                 className="relative h-full"
                 style={{ 
-                  minWidth: `${Math.max(data.length * 80, 800)}px`,
-                  width: `${Math.max(data.length * 80, 800)}px`
+                  minWidth: `${Math.max(data.length * 80, 1600)}px`,
+                  width: `${Math.max(data.length * 80, 1600)}px`
                 }}
               >
                 {/* Horizontal grid lines */}
@@ -247,34 +247,28 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                   })}
                 </div>
                 
-                {/* Vertical grid lines */}
-                <div className="absolute inset-0 flex justify-around">
-                  {data.map((_, index) => (
-                    <div 
-                      key={index} 
-                      className="border-l border-dashed opacity-30 h-full" 
-                      style={{ 
-                        borderColor: 'var(--chart-grid-text)'
-                      }} 
-                    />
-                  ))}
-                </div>
-
-                {/* Data points */}
-                <div className="absolute inset-0 flex justify-around">
+                {/* Vertical grid lines and data points with fixed column width */}
+                <div className="absolute inset-0 flex">
                   {data.map((dayData, dayIndex) => (
-                    <div key={dayIndex} className="h-full relative">
+                    <div 
+                      key={dayIndex} 
+                      className="relative border-l border-dashed opacity-30 h-full"
+                      style={{ 
+                        width: '80px',
+                        borderColor: 'var(--chart-grid-text)'
+                      }}
+                    >
+                      {/* Data points for this day */}
                       {displayCategories.map((category, categoryIndex) => {
                         const count = dayData[category.key as keyof SiteLogTimelineData] as number
                         const topPosition = (categoryIndex * 100) / (displayCategories.length - 1)
                         return (
                           <div 
                             key={category.key} 
-                            className="absolute flex items-center justify-center"
+                            className="absolute flex items-center justify-center w-full"
                             style={{ 
                               top: `${topPosition}%`,
-                              left: '50%',
-                              transform: 'translate(-50%, -50%)'
+                              transform: 'translateY(-50%)'
                             }}
                           >
                             {count > 0 && (
@@ -293,14 +287,16 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                 </div>
 
                 {/* X-axis (dates) - scrolls with content */}
-                <div className="absolute top-full pt-4 w-full">
-                  <div className="flex justify-around">
-                    {data.map((dayData, index) => (
-                      <div key={index} className="text-xs text-muted-foreground text-center flex-1">
-                        {dayData.date}
-                      </div>
-                    ))}
-                  </div>
+                <div className="absolute top-full pt-4 w-full flex">
+                  {data.map((dayData, index) => (
+                    <div 
+                      key={index} 
+                      className="text-xs text-muted-foreground text-center"
+                      style={{ width: '80px' }}
+                    >
+                      {dayData.date}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
