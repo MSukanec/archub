@@ -45,10 +45,10 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
 
   // Y-axis categories (from bottom to top in display order)
   const categories = [
-    { key: 'files', label: 'Archivos', icon: FileText, color: '#3b82f6' },
-    { key: 'events', label: 'Eventos', icon: CalendarDays, color: '#10b981' },
-    { key: 'attendees', label: 'Asistencias', icon: Users, color: '#f59e0b' },
-    { key: 'equipment', label: 'Maquinarias', icon: Truck, color: '#8b5cf6' }
+    { key: 'files', label: 'Archivos', icon: FileText, color: 'var(--chart-1)' },
+    { key: 'events', label: 'Eventos', icon: CalendarDays, color: 'var(--chart-2)' },
+    { key: 'attendees', label: 'Asistencias', icon: Users, color: 'var(--chart-3)' },
+    { key: 'equipment', label: 'Maquinarias', icon: Truck, color: 'var(--chart-4)' }
   ]
 
   // Categories in reverse order for display (top to bottom: Maquinarias, Asistencias, Eventos, Archivos)
@@ -111,19 +111,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           )}
         </div>
         
-        {/* Summary badges */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          {categories.map(({ key, label, icon: Icon, color }) => (
-            <Badge
-              key={key}
-              variant="secondary"
-              className="flex items-center gap-1.5 px-2.5 py-1"
-            >
-              <Icon className="w-3 h-3" style={{ color }} />
-              <span className="text-xs">{label}: {totals[key as keyof typeof totals]}</span>
-            </Badge>
-          ))}
-        </div>
+
       </CardHeader>
       
       <CardContent>
@@ -144,7 +132,14 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               {/* Grid lines */}
               <div className="absolute inset-0 flex flex-col justify-between py-4">
                 {displayCategories.map((_, index) => (
-                  <div key={index} className="border-b border-border/30" />
+                  <div key={index} className="border-b border-dashed opacity-30" style={{ borderColor: 'var(--chart-grid-text)' }} />
+                ))}
+              </div>
+              
+              {/* Vertical grid lines */}
+              <div className="absolute inset-0 flex justify-between px-4">
+                {data.map((_, index) => (
+                  <div key={index} className="border-l border-dashed opacity-30 h-full" style={{ borderColor: 'var(--chart-grid-text)' }} />
                 ))}
               </div>
 
@@ -190,7 +185,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
           </div>
         </div>
         
-        {/* Legend */}
+        {/* Legend with totals */}
         <div className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-border">
           {categories.map(({ key, label, icon: Icon, color }) => (
             <div key={key} className="flex items-center gap-2">
@@ -199,7 +194,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                 style={{ backgroundColor: color }}
               />
               <Icon className="w-4 h-4" style={{ color }} />
-              <span className="text-sm text-muted-foreground">{label}</span>
+              <span className="text-sm text-muted-foreground">{label}: {totals[key as keyof typeof totals]}</span>
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth } from 'date-fns'
+import { format, subDays, subWeeks, subMonths, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, getDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 interface SiteLogTimelineData {
@@ -34,17 +34,14 @@ export function useSiteLogTimeline(
       switch (timePeriod) {
         case 'days':
           startDate = subDays(now, 6) // Last 7 days including today
-          dateFormat = 'dd/MM'
           intervals = eachDayOfInterval({ start: startDate, end: now })
           break
         case 'weeks':
           startDate = subWeeks(now, 6) // Last 7 weeks including current week
-          dateFormat = 'dd/MM'
           intervals = eachWeekOfInterval({ start: startDate, end: now }, { weekStartsOn: 1 }) // Monday start
           break
         case 'months':
           startDate = subMonths(now, 6) // Last 7 months including current month
-          dateFormat = 'MMM'
           intervals = eachMonthOfInterval({ start: startDate, end: now })
           break
         default:
@@ -146,13 +143,19 @@ export function useSiteLogTimeline(
         if (timePeriod === 'days') {
           // For days, get logs for that specific day
           const dateKey = format(intervalDate, 'yyyy-MM-dd')
-          formattedDate = format(intervalDate, dateFormat, { locale: es })
+          const dayName = format(intervalDate, 'EEE', { locale: es }).toLowerCase()
+          const dayDate = format(intervalDate, 'dd/MM')
+          formattedDate = `${dayName} ${dayDate}`
           relevantLogs = logsByDate[dateKey] || []
         } else if (timePeriod === 'weeks') {
           // For weeks, get all logs within that week
           const weekStart = startOfWeek(intervalDate, { weekStartsOn: 1 })
           const weekEnd = endOfWeek(intervalDate, { weekStartsOn: 1 })
-          formattedDate = `${format(weekStart, 'dd/MM', { locale: es })}`
+          const startDayName = format(weekStart, 'EEE', { locale: es }).toLowerCase()
+          const endDayName = format(weekEnd, 'EEE', { locale: es }).toLowerCase()
+          const startDate = format(weekStart, 'dd/MM')
+          const endDate = format(weekEnd, 'dd/MM')
+          formattedDate = `${startDayName} ${startDate} a ${endDayName} ${endDate}`
           
           // Find all logs within this week
           relevantLogs = (siteLogs || []).filter(log => {
@@ -163,7 +166,7 @@ export function useSiteLogTimeline(
           // For months, get all logs within that month
           const monthStart = startOfMonth(intervalDate)
           const monthEnd = endOfMonth(intervalDate)
-          formattedDate = format(intervalDate, dateFormat, { locale: es })
+          formattedDate = format(intervalDate, 'MMM yy', { locale: es })
           
           // Find all logs within this month
           relevantLogs = (siteLogs || []).filter(log => {
