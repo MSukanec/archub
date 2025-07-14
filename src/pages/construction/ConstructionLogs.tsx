@@ -621,12 +621,12 @@ export default function ConstructionLogs() {
                             <div className="space-y-2">
                               {siteLog.files && Array.isArray(siteLog.files) && siteLog.files.length > 0 ? (
                                 siteLog.files.map((file: any, index: number) => (
-                                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: 'rgba(168, 85, 247, 0.3)' }}>
+                                  <Card key={index} className="p-2 bg-[hsl(var(--chart-1))]/10 border-[hsl(var(--chart-1))]/30">
                                     <div className="flex items-center gap-2">
                                       {file.file_type?.startsWith('image/') ? (
-                                        <Image className="h-4 w-4" style={{ color: '#a855f7' }} />
+                                        <Image className="h-4 w-4 text-[hsl(var(--chart-1))]" />
                                       ) : (
-                                        <Video className="h-4 w-4" style={{ color: '#a855f7' }} />
+                                        <Video className="h-4 w-4 text-[hsl(var(--chart-1))]" />
                                       )}
                                       <span className="text-xs text-muted-foreground truncate">
                                         {file.original_name}

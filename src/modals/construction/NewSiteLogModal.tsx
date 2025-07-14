@@ -476,8 +476,11 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     onSuccess: () => {
       // Invalidación inmediata y forzada del cache para site-logs
       queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+      queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] })
       queryClient.removeQueries({ queryKey: ['site-logs'] })
+      queryClient.removeQueries({ queryKey: ['sitelog-timeline'] })
       queryClient.refetchQueries({ queryKey: ['site-logs'] })
+      queryClient.refetchQueries({ queryKey: ['sitelog-timeline'] })
       
       // CRÍTICO: Invalidar también el cache de personnel attendance para actualizar timeline
       queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
@@ -492,6 +495,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
       // Actualizar el estado local inmediatamente
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+        queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] })
         queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
         queryClient.invalidateQueries({ queryKey: ['galleryFiles'] })
       }, 100)
@@ -543,8 +547,11 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] })
+      queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] })
       queryClient.removeQueries({ queryKey: ['site-logs'] })
+      queryClient.removeQueries({ queryKey: ['sitelog-timeline'] })
       queryClient.refetchQueries({ queryKey: ['site-logs'] })
+      queryClient.refetchQueries({ queryKey: ['sitelog-timeline'] })
       
       queryClient.invalidateQueries({ queryKey: ['personnel-attendance'] })
       queryClient.removeQueries({ queryKey: ['personnel-attendance'] })
