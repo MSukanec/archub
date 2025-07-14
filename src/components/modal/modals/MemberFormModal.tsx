@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
+import { FormModalLayout } from '../form/FormModalLayout';
 import FormModalBody from '../form/FormModalBody';
 import { useModalPanelStore } from '../form/modalPanelStore';
 import { useGlobalModalStore } from '../form/useGlobalModalStore';
@@ -25,9 +26,10 @@ type MemberFormData = z.infer<typeof memberSchema>;
 
 interface MemberModalProps {
   editingMember?: any;
+  onClose: () => void;
 }
 
-export function MemberFormModal({ editingMember }: MemberModalProps) {
+export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -154,7 +156,7 @@ export function MemberFormModal({ editingMember }: MemberModalProps) {
   const handleClose = () => {
     form.reset();
     setPanel('view');
-    closeModal();
+    onClose();
   };
 
   const handleSubmit = async (data: MemberFormData) => {
@@ -237,9 +239,30 @@ export function MemberFormModal({ editingMember }: MemberModalProps) {
     />
   );
 
-  return {
-    editPanel,
-    headerContent,
-    footerContent
-  };
+  const viewPanel = editingMember ? (
+    <div className="space-y-4">
+      <div>
+        <h4 className="font-medium">Email</h4>
+        <p className="text-muted-foreground mt-1">{editingMember?.email || 'Sin email'}</p>
+      </div>
+      <div>
+        <h4 className="font-medium">Rol</h4>
+        <p className="text-muted-foreground mt-1">{editingMember?.role?.name || 'Sin rol'}</p>
+      </div>
+      <div>
+        <h4 className="font-medium">Estado</h4>
+        <p className="text-muted-foreground mt-1">{editingMember?.status || 'Activo'}</p>
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={handleClose}
+    />
+  );
 }

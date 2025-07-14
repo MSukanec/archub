@@ -1,0 +1,109 @@
+⚠️ IMPORTANTE: Vas a refactorizar todo el sistema de modales para eliminar inconsistencias visuales como dobles bordes, paddings desiguales o headers duplicados. Hay dos sistemas mezclados y vamos a unificar todo bajo el nuevo sistema.
+
+---
+
+🎯 OBJETIVO:
+
+1. Todos los modales deben retornar un objeto con la forma:
+
+```tsx
+{
+  viewPanel: JSX.Element,
+  editPanel: JSX.Element,
+  headerContent: JSX.Element,
+  footerContent: JSX.Element
+}
+El componente ModalFactory.tsx debe centralizar la apertura de modales y renderizar FormModalLayout pasando esos 4 elementos como props.
+
+El archivo FormModalLayout.tsx es el único que debe contener FormModalBody, Header, Footer. Ningún otro archivo debe repetir padding, borde, ni estructura externa del modal.
+
+🛠 PASOS QUE DEBÉS REALIZAR:
+
+1. Refactorizá GalleryFormModal.tsx, BoardFormModal.tsx, MemberFormModal.tsx, CardFormModal.tsx:
+Hacé que todos devuelvan un objeto { viewPanel, editPanel, headerContent, footerContent }.
+
+Eliminá cualquier uso interno de <FormModalLayout> dentro del modal.
+
+Eliminá <FormModalBody>, p-4, space-y-* o border-b internos.
+
+El contenido del modal debe ser crudo y limpio. El padding ya lo agrega FormModalBody.
+
+2. Refactorizá ModalFactory.tsx:
+Eliminá los bloques tipo if (type === 'gallery') return <GalleryFormModal />.
+
+En su lugar, usá un getModalData() con switch(type) para todos los casos (gallery, board, member, card, etc.).
+
+Si el resultado de getModalData() es null o no tiene editPanel, no renderices nada.
+
+Si todo está bien, hacé:
+
+tsx
+Copiar
+Editar
+return (
+  <FormModalLayout
+    viewPanel={modalData.viewPanel}
+    editPanel={modalData.editPanel}
+    headerContent={modalData.headerContent}
+    footerContent={modalData.footerContent}
+    onClose={closeModal}
+  />
+)
+3. Asegurate de que:
+Los headerContent usen siempre <FormModalHeader /> sin border-b duplicado.
+
+El contenido dentro de cada panel (view o edit) NO tenga padding externo.
+
+El único que aplica padding, borde y scroll es FormModalLayout.tsx → no dupliques estilos en los demás.
+
+✅ EJEMPLO DE CÓMO DEBE VERSE GalleryFormModal.tsx AL FINAL:
+
+tsx
+Copiar
+Editar
+export function GalleryFormModal({ modalData, onClose }) {
+  const { isEditing, file } = modalData || {};
+
+  const viewPanel = (
+    <div>
+      <h4 className="font-medium">Título</h4>
+      <p className="text-muted-foreground mt-1">{file?.title || 'Sin título'}</p>
+    </div>
+  );
+
+  const editPanel = (
+    <form className="space-y-4">
+      {/* campos del formulario sin padding general */}
+    </form>
+  );
+
+  return {
+    viewPanel,
+    editPanel,
+    headerContent: (
+      <FormModalHeader
+        title={isEditing ? "Editar Archivo" : "Subir Archivo"}
+        icon={Images}
+      />
+    ),
+    footerContent: (
+      <FormModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        rightLabel={isEditing ? "Actualizar" : "Guardar"}
+        onRightClick={handleSave}
+      />
+    )
+  }
+}
+🧠 ACLARACIÓN FINAL:
+
+NO uses FormModalBody dentro de los paneles.
+
+NO dupliques paddings o bordes.
+
+NO renderices FormModalLayout dentro de los modales individuales.
+
+El único responsable del layout es ModalFactory + FormModalLayout.
+
+📦 Cuando termines, todo el sistema de modales debe ser consistente, visualmente limpio y modular. Gracias!

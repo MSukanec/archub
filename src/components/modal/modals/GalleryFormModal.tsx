@@ -33,12 +33,15 @@ const gallerySchema = z.object({
 type GalleryFormData = z.infer<typeof gallerySchema>;
 
 interface GalleryFormModalProps {
-  open: boolean;
+  modalData?: {
+    editingFile?: any;
+    isEditing?: boolean;
+  };
   onClose: () => void;
-  editingFile?: any;
 }
 
-export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModalProps) {
+export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) {
+  const { editingFile, isEditing = false } = modalData || {};
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -175,159 +178,180 @@ export function GalleryFormModal({ open, onClose, editingFile }: GalleryFormModa
     uploadMutation.mutate(data);
   };
 
-  if (!open || userLoading) return null;
+  if (userLoading) return null;
 
-  const modalContent = (
-    <div className="space-y-6 p-4">
-        <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Creator Field */}
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Creador</FormLabel>
-                  <FormControl>
-                    <UserSelector
-                      users={organizationMembers?.map(member => ({
-                        id: member.user_id,
-                        full_name: member.full_name,
-                        email: member.email,
-                        avatar_url: member.avatar_url,
-                        first_name: member.full_name.split(' ')[0] || '',
-                        last_name: member.full_name.split(' ').slice(1).join(' ') || ''
-                      })) || []}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Seleccionar creador"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+  const viewPanel = editingFile ? (
+    <div className="space-y-4">
+      <div>
+        <h4 className="font-medium">Título</h4>
+        <p className="text-muted-foreground mt-1">{editingFile?.title || 'Sin título'}</p>
+      </div>
+      <div>
+        <h4 className="font-medium">Descripción</h4>
+        <p className="text-muted-foreground mt-1">{editingFile?.description || 'Sin descripción'}</p>
+      </div>
+      <div>
+        <h4 className="font-medium">Creador</h4>
+        <p className="text-muted-foreground mt-1">{editingFile?.creator?.full_name || 'Sin creador'}</p>
+      </div>
+    </div>
+  ) : null;
 
-            {/* File Upload Section */}
-            {!editingFile && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Archivos
-                  </label>
-                  <div 
-                    onClick={triggerFileInput}
-                    className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
-                  >
-                    <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Haz clic para subir archivos
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Imágenes y videos son compatibles
-                    </p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      accept="image/*,video/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
+  const editPanel = (
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Creator Field */}
+        <FormField
+          control={form.control}
+          name="created_by"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Creador</FormLabel>
+              <FormControl>
+                <UserSelector
+                  users={organizationMembers?.map(member => ({
+                    id: member.user_id,
+                    full_name: member.full_name,
+                    email: member.email,
+                    avatar_url: member.avatar_url,
+                    first_name: member.full_name.split(' ')[0] || '',
+                    last_name: member.full_name.split(' ').slice(1).join(' ') || ''
+                  })) || []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar creador"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                {/* Selected Files Display */}
-                {files.length > 0 && (
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-foreground">
-                      Archivos seleccionados ({files.length})
-                    </label>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {files.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <File className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-foreground truncate">
-                              {file.name}
-                            </span>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(index)}
-                            className="h-6 w-6 p-0"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
+        {/* File Upload Section */}
+        {!editingFile && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Archivos
+              </label>
+              <div 
+                onClick={triggerFileInput}
+                className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
+              >
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  Haz clic para subir archivos
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Imágenes y videos son compatibles
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Selected Files Display */}
+            {files.length > 0 && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  Archivos seleccionados ({files.length})
+                </label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <File className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-foreground truncate">
+                          {file.name}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             )}
+          </div>
+        )}
 
-            {/* Title Field */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Título del archivo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {/* Title Field */}
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Título</FormLabel>
+              <FormControl>
+                <Input placeholder="Título del archivo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {/* Description Field */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (Opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descripción del archivo"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </div>
+        {/* Description Field */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción (Opcional)</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descripción del archivo"
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  );
+
+  const headerContent = (
+    <FormModalHeader
+      title={editingFile ? "Editar Archivo" : "Subir Archivo"}
+      icon={Images}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={editingFile ? "Actualizar" : "Subir"}
+      onRightClick={form.handleSubmit(onSubmit)}
+      rightLoading={uploadMutation.isPending}
+    />
   );
 
   return (
     <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
       onClose={handleClose}
-      viewPanel={modalContent}
-      headerContent={
-        <FormModalHeader
-          title={editingFile ? "Editar Archivo" : "Subir Archivo"}
-          icon={Images}
-        />
-      }
-      footerContent={
-        <FormModalFooter
-          leftLabel="Cancelar"
-          onLeftClick={handleClose}
-          rightLabel={isSubmitting ? "Guardando..." : "Guardar"}
-          onRightClick={handleSubmit(onSubmit)}
-        />
-      }
     />
   );
 }

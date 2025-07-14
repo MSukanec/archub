@@ -119,15 +119,16 @@ Archub is a modern construction management platform built with a React frontend 
 
 ```
 Changelog:
-- July 14, 2025. CardFormModal migration to unified modal architecture completed - COMPLETED
-  • Successfully migrated NewCardModal from legacy CustomModal system to new ModalFactory architecture
-  • Replaced FormModalLayout with direct Dialog integration to eliminate overlay conflicts and structural issues
-  • Enhanced modal to use FormModalHeader component for consistent styling across unified modal system
-  • Maintained all original functionality: title, description, creator (auto-set), assigned_to, due_date fields
-  • Integrated UserSelector component for creator and assignee selection with proper avatar display
-  • Fixed modal accessibility with proper DialogTitle and removed duplicate backdrop issues
-  • Updated KanbanBox to use openModal('card') instead of legacy NewCardModal for seamless integration
-  • Modal fully functional within ModalFactory Dialog system with proper form validation and submission
+- July 14, 2025. Complete modal system refactoring with unified architecture implemented - COMPLETED
+  • Successfully refactored all modals (GalleryFormModal, BoardFormModal, MemberFormModal, CardFormModal) to use unified structure
+  • All modals now return consistent { viewPanel, editPanel, headerContent, footerContent } object structure
+  • Eliminated visual inconsistencies: removed double borders, duplicate padding, and conflicting header structures
+  • Updated ModalFactory to centralize modal rendering with FormModalLayout for all modal types
+  • Fixed hooks ordering issues by properly calling modal functions as direct invocations instead of component rendering
+  • Enhanced each modal with proper viewPanel content for read-only viewing mode
+  • Maintained all original functionality while achieving consistent visual appearance across entire modal system
+  • Removed all internal FormModalLayout usage from individual modals - only ModalFactory renders layout now
+  • System now provides clean, modular modal architecture with no redundant styling or structure code
 - July 14, 2025. FormSubsectionButton component creation for modal form navigation - COMPLETED
   • Created new FormSubsectionButton component in src/components/modal/form/ for elegant subform navigation
   • Component features: icon, title, description, hover effects, and animated "+" button on hover
