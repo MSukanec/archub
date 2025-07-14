@@ -115,14 +115,15 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
       </CardHeader>
       
       <CardContent>
-        <div className="h-80">
+        <div className="h-48">
           {/* Custom timeline visualization */}
           <div className="relative w-full h-full">
             {/* Y-axis labels - only icons positioned to match horizontal lines */}
-            <div className="absolute left-0 top-0 h-full pt-3 pb-10">
+            <div className="absolute left-0 top-0 h-full py-4">
               <div className="h-full relative">
                 {displayCategories.map((category, index) => {
-                  const topPosition = (index * 100) / (displayCategories.length - 1)
+                  // Compact spacing - reduce distance between lines by using smaller range
+                  const topPosition = 15 + (index * 70) / (displayCategories.length - 1)
                   return (
                     <div 
                       key={category.key} 
@@ -142,12 +143,12 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
             {/* Chart area */}
             <div className="ml-8 h-full relative">
               {/* Chart content area with proper margins */}
-              <div className="h-full pt-3 pb-10 relative">
-                {/* Horizontal grid lines - positioned at exact icon heights */}
+              <div className="h-full py-4 relative">
+                {/* Horizontal grid lines - positioned at exact icon heights with compact spacing */}
                 <div className="absolute inset-0 h-full">
                   {displayCategories.map((_, index) => {
-                    // Calculate exact position for each horizontal line to match icon positions
-                    const topPosition = (index * 100) / (displayCategories.length - 1)
+                    // Match icon positioning - compact spacing using same formula as icons
+                    const topPosition = 15 + (index * 70) / (displayCategories.length - 1)
                     return (
                       <div 
                         key={index} 
@@ -161,7 +162,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                   })}
                 </div>
                 
-                {/* Vertical grid lines - only within the horizontal grid area */}
+                {/* Vertical grid lines - only within the compact horizontal grid area */}
                 <div className="absolute inset-0 flex justify-around">
                   {data.map((_, index) => (
                     <div 
@@ -169,20 +170,21 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                       className="border-l border-dashed opacity-30" 
                       style={{ 
                         borderColor: 'var(--chart-grid-text)',
-                        height: `${100 * (displayCategories.length - 1) / displayCategories.length}%`,
-                        marginTop: '0%'
+                        height: '70%',
+                        marginTop: '15%'
                       }} 
                     />
                   ))}
                 </div>
 
-                {/* Data points - positioned exactly at grid intersections */}
+                {/* Data points - positioned exactly at compact grid intersections */}
                 <div className="absolute inset-0 flex justify-around">
                   {data.map((dayData, dayIndex) => (
                     <div key={dayIndex} className="h-full relative">
                       {displayCategories.map((category, categoryIndex) => {
                         const count = dayData[category.key as keyof SiteLogTimelineData] as number
-                        const topPosition = (categoryIndex * 100) / (displayCategories.length - 1)
+                        // Use same compact positioning formula as icons and lines
+                        const topPosition = 15 + (categoryIndex * 70) / (displayCategories.length - 1)
                         return (
                           <div 
                             key={category.key} 
@@ -195,7 +197,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
                           >
                             {count > 0 && (
                               <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
+                                className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
                                 style={{ backgroundColor: category.color }}
                               >
                                 {count}
@@ -210,7 +212,7 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
               </div>
 
               {/* X-axis (dates) */}
-              <div className="absolute bottom-0 left-0 right-0 flex justify-around px-0 pb-2">
+              <div className="absolute bottom-0 left-0 right-0 flex justify-around px-0 pb-1">
                 {data.map((dayData, index) => (
                   <div key={index} className="text-xs text-muted-foreground text-center min-w-0">
                     {dayData.date}
