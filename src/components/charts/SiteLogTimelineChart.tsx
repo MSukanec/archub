@@ -115,112 +115,106 @@ export function SiteLogTimelineChart({ data, isLoading, timePeriod, onTimePeriod
       </CardHeader>
       
       <CardContent>
-        <div className="h-48">
+        {/* Chart area - separated from dates */}
+        <div className="h-32">
           {/* Custom timeline visualization */}
           <div className="relative w-full h-full">
-            {/* Y-axis labels - only icons positioned to match horizontal lines */}
-            <div className="absolute left-0 top-0 h-full py-4">
-              <div className="h-full relative">
-                {displayCategories.map((category, index) => {
-                  // Compact spacing - reduce distance between lines by using smaller range
-                  const topPosition = 15 + (index * 70) / (displayCategories.length - 1)
-                  return (
-                    <div 
-                      key={category.key} 
-                      className="absolute flex items-center justify-center w-6"
-                      style={{ 
-                        top: `${topPosition}%`,
-                        transform: 'translateY(-50%)'
-                      }}
-                    >
-                      <category.icon className="w-4 h-4" style={{ color: category.color }} />
-                    </div>
-                  )
-                })}
-              </div>
+            {/* Y-axis labels - icons perfectly aligned with horizontal lines */}
+            <div className="absolute left-0 top-0 h-full">
+              {displayCategories.map((category, index) => {
+                // Perfect alignment: equal spacing across full height
+                const topPosition = (index * 100) / (displayCategories.length - 1)
+                return (
+                  <div 
+                    key={category.key} 
+                    className="absolute flex items-center justify-center w-6"
+                    style={{ 
+                      top: `${topPosition}%`,
+                      transform: 'translateY(-50%)'
+                    }}
+                  >
+                    <category.icon className="w-4 h-4" style={{ color: category.color }} />
+                  </div>
+                )
+              })}
             </div>
 
             {/* Chart area */}
             <div className="ml-8 h-full relative">
-              {/* Chart content area with proper margins */}
-              <div className="h-full py-4 relative">
-                {/* Horizontal grid lines - positioned at exact icon heights with compact spacing */}
-                <div className="absolute inset-0 h-full">
-                  {displayCategories.map((_, index) => {
-                    // Match icon positioning - compact spacing using same formula as icons
-                    const topPosition = 15 + (index * 70) / (displayCategories.length - 1)
-                    return (
-                      <div 
-                        key={index} 
-                        className="absolute border-b border-dashed opacity-30 w-full" 
-                        style={{ 
-                          borderColor: 'var(--chart-grid-text)',
-                          top: `${topPosition}%`
-                        }} 
-                      />
-                    )
-                  })}
-                </div>
-                
-                {/* Vertical grid lines - only within the compact horizontal grid area */}
-                <div className="absolute inset-0 flex justify-around">
-                  {data.map((_, index) => (
+              {/* Horizontal grid lines - exactly aligned with icons */}
+              <div className="absolute inset-0 h-full">
+                {displayCategories.map((_, index) => {
+                  // Same formula as icons for perfect alignment
+                  const topPosition = (index * 100) / (displayCategories.length - 1)
+                  return (
                     <div 
                       key={index} 
-                      className="border-l border-dashed opacity-30" 
+                      className="absolute border-b border-dashed opacity-30 w-full" 
                       style={{ 
                         borderColor: 'var(--chart-grid-text)',
-                        height: '70%',
-                        marginTop: '15%'
+                        top: `${topPosition}%`
                       }} 
                     />
-                  ))}
-                </div>
-
-                {/* Data points - positioned exactly at compact grid intersections */}
-                <div className="absolute inset-0 flex justify-around">
-                  {data.map((dayData, dayIndex) => (
-                    <div key={dayIndex} className="h-full relative">
-                      {displayCategories.map((category, categoryIndex) => {
-                        const count = dayData[category.key as keyof SiteLogTimelineData] as number
-                        // Use same compact positioning formula as icons and lines
-                        const topPosition = 15 + (categoryIndex * 70) / (displayCategories.length - 1)
-                        return (
-                          <div 
-                            key={category.key} 
-                            className="absolute flex items-center justify-center"
-                            style={{ 
-                              top: `${topPosition}%`,
-                              left: '50%',
-                              transform: 'translate(-50%, -50%)'
-                            }}
-                          >
-                            {count > 0 && (
-                              <div
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
-                                style={{ backgroundColor: category.color }}
-                              >
-                                {count}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ))}
-                </div>
+                  )
+                })}
+              </div>
+              
+              {/* Vertical grid lines - from first to last horizontal line */}
+              <div className="absolute inset-0 flex justify-around">
+                {data.map((_, index) => (
+                  <div 
+                    key={index} 
+                    className="border-l border-dashed opacity-30 h-full" 
+                    style={{ 
+                      borderColor: 'var(--chart-grid-text)'
+                    }} 
+                  />
+                ))}
               </div>
 
-              {/* X-axis (dates) */}
-              <div className="absolute bottom-0 left-0 right-0 flex justify-around px-0 pb-1">
-                {data.map((dayData, index) => (
-                  <div key={index} className="text-xs text-muted-foreground text-center min-w-0">
-                    {dayData.date}
+              {/* Data points - positioned exactly at grid intersections */}
+              <div className="absolute inset-0 flex justify-around">
+                {data.map((dayData, dayIndex) => (
+                  <div key={dayIndex} className="h-full relative">
+                    {displayCategories.map((category, categoryIndex) => {
+                      const count = dayData[category.key as keyof SiteLogTimelineData] as number
+                      // Same formula as icons and lines for perfect intersection positioning
+                      const topPosition = (categoryIndex * 100) / (displayCategories.length - 1)
+                      return (
+                        <div 
+                          key={category.key} 
+                          className="absolute flex items-center justify-center"
+                          style={{ 
+                            top: `${topPosition}%`,
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)'
+                          }}
+                        >
+                          {count > 0 && (
+                            <div
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-white"
+                              style={{ backgroundColor: category.color }}
+                            >
+                              {count}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 ))}
               </div>
             </div>
           </div>
+        </div>
+
+        {/* X-axis (dates) - BELOW the chart */}
+        <div className="flex justify-around px-8 pt-2">
+          {data.map((dayData, index) => (
+            <div key={index} className="text-xs text-muted-foreground text-center min-w-0">
+              {dayData.date}
+            </div>
+          ))}
         </div>
         
         {/* Legend with totals */}
