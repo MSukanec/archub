@@ -236,7 +236,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         category_id: '',
         subcategory_id: '',
         currency_id: defaultCurrency?.id || '',
-        wallet_id: ''
+        wallet_id: wallets?.find(w => w.is_default)?.id || ''
       })
       
       conversionForm.reset({
@@ -244,8 +244,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         description: '',
         created_by: currentUser?.user?.id || '',
         from_amount: 0,
-        from_currency_id: '',
-        from_wallet_id: '',
+        from_currency_id: defaultCurrency?.id || '',
+        from_wallet_id: wallets?.find(w => w.is_default)?.id || '',
         to_amount: 0,
         to_currency_id: '',
         to_wallet_id: ''
@@ -1065,58 +1065,120 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       />
                     </div>
 
-                    {/* Moneda y Billetera */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="currency_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Moneda</FormLabel>
-                            <FormControl>
-                              <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar moneda" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {organizationCurrencies?.map((orgCurrency: any) => (
-                                    <SelectItem key={orgCurrency.id} value={orgCurrency.id}>
-                                      {orgCurrency.currency.name} ({orgCurrency.currency.symbol})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    {/* Moneda */}
+                    <FormField
+                      control={form.control}
+                      name="currency_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Moneda</FormLabel>
+                          <FormControl>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar moneda" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {organizationCurrencies?.map((orgCurrency: any) => (
+                                  <SelectItem key={orgCurrency.id} value={orgCurrency.id}>
+                                    {orgCurrency.currency.name} ({orgCurrency.currency.symbol})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                      <FormField
-                        control={form.control}
-                        name="wallet_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Billetera</FormLabel>
-                            <FormControl>
-                              <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar billetera" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {wallets?.map((wallet: any) => (
-                                    <SelectItem key={wallet.id} value={wallet.id}>
-                                      {wallet.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    {/* Billetera */}
+                    <FormField
+                      control={form.control}
+                      name="wallet_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Billetera</FormLabel>
+                          <FormControl>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar billetera" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {wallets?.map((wallet: any) => (
+                                  <SelectItem key={wallet.id} value={wallet.id}>
+                                    {wallet.wallets?.name || wallet.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Monto */}
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Monto</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Cotización */}
+                    <FormField
+                      control={form.control}
+                      name="exchange_rate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cotización (opcional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.0001"
+                              min="0"
+                              placeholder="1.0000"
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Descripción */}
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descripción (opcional)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Descripción del movimiento..."
+                              {...field}
+                              rows={3}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </AccordionContent>
                 </AccordionItem>
 
