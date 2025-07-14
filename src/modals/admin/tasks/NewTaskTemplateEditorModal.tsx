@@ -13,10 +13,10 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/legacy/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/legacy/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/legacy/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/legacy/CustomModalFooter';
 import { TaskTemplate, TaskTemplateParameter, TaskParameter } from '@shared/schema';
 
 interface TaskTemplateEditorModalProps {

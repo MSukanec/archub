@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CustomModalLayout } from '@/components/modal/CustomModalLayout'
-import { CustomModalHeader } from '@/components/modal/CustomModalHeader'
-import { CustomModalBody } from '@/components/modal/CustomModalBody'
-import { CustomModalFooter } from '@/components/modal/CustomModalFooter'
+import { CustomModalLayout } from '@/components/modal/legacy/CustomModalLayout'
+import { CustomModalHeader } from '@/components/modal/legacy/CustomModalHeader'
+import { CustomModalBody } from '@/components/modal/legacy/CustomModalBody'
+import { CustomModalFooter } from '@/components/modal/legacy/CustomModalFooter'
 
 interface Material {
   id: string

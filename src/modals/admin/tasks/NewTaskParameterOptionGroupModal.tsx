@@ -5,10 +5,10 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/legacy/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/legacy/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/legacy/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/legacy/CustomModalFooter';
 
 import { useCreateTaskParameterOptionGroup } from '@/hooks/use-task-parameters-admin';
 

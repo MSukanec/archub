@@ -13,10 +13,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
-import { CustomModalLayout } from '@/components/modal/CustomModalLayout';
-import { CustomModalHeader } from '@/components/modal/CustomModalHeader';
-import { CustomModalBody } from '@/components/modal/CustomModalBody';
-import { CustomModalFooter } from '@/components/modal/CustomModalFooter';
+import { CustomModalLayout } from '@/components/modal/legacy/CustomModalLayout';
+import { CustomModalHeader } from '@/components/modal/legacy/CustomModalHeader';
+import { CustomModalBody } from '@/components/modal/legacy/CustomModalBody';
+import { CustomModalFooter } from '@/components/modal/legacy/CustomModalFooter';
 import { useToast } from '@/hooks/use-toast';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskGroups } from '@/hooks/use-task-parameters-admin';

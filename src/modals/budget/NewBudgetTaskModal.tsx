@@ -3,10 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
-import { CustomModalLayout } from "@/components/modal/CustomModalLayout";
-import { CustomModalHeader } from "@/components/modal/CustomModalHeader";
-import { CustomModalBody } from "@/components/modal/CustomModalBody";
-import { CustomModalFooter } from "@/components/modal/CustomModalFooter";
+import { CustomModalLayout } from "@/components/modal/legacy/CustomModalLayout";
+import { CustomModalHeader } from "@/components/modal/legacy/CustomModalHeader";
+import { CustomModalBody } from "@/components/modal/legacy/CustomModalBody";
+import { CustomModalFooter } from "@/components/modal/legacy/CustomModalFooter";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
