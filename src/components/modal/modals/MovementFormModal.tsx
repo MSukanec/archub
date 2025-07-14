@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import FormModalBody from '@/components/modal/form/FormModalBody'
+
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -146,7 +146,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const isLoading = createMovementMutation.isPending || updateMovementMutation.isPending
 
   const editPanel = (
-    <FormModalBody columns={1}>
+    <div className="space-y-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Creador */}
@@ -335,7 +335,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         />
         </form>
       </Form>
-    </FormModalBody>
+    </div>
   )
 
   const headerContent = (
