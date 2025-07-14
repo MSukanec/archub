@@ -42,9 +42,18 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   const { currentPanel, setPanel } = useModalPanelStore();
   const { closeModal } = useGlobalModalStore();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Query for parent concepts
   const { data: concepts = [] } = useMovementConceptsAdmin();
+
+  // Set panel to edit for new concepts or if there's an editing concept
+  React.useEffect(() => {
+    if (editingConcept) {
+      setPanel('view');
+    } else {
+      setPanel('edit');
+    }
+  }, [editingConcept, setPanel]);
 
   const form = useForm<ConceptFormData>({
     resolver: zodResolver(conceptSchema),
