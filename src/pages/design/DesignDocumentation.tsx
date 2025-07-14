@@ -777,17 +777,15 @@ export default function DesignDocumentation() {
             {isGroupExpanded && (
               <>
                 <div className="border-t border-border" />
-                <CardContent className="py-4">
-                  <Table
-                    columns={documentColumns}
-                    data={groupDocuments}
-                    emptyState={
-                      <p className="text-sm text-muted-foreground text-center py-2">
-                        No hay documentos en este grupo
-                      </p>
-                    }
-                  />
-                </CardContent>
+                <Table
+                  columns={documentColumns}
+                  data={groupDocuments}
+                  emptyState={
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      No hay documentos en este grupo
+                    </p>
+                  }
+                />
               </>
             )}
           </Card>
