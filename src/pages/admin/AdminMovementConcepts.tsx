@@ -31,6 +31,14 @@ export default function AdminMovementConcepts() {
   const [deleteConceptId, setDeleteConceptId] = useState<string | null>(null);
 
   const { data: concepts = [], isLoading, error, isError, refetch } = useMovementConceptsAdmin(userData?.organization?.id);
+  
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🏢 Current organization ID:', userData?.organization?.id);
+    console.log('📋 Movement concepts data:', concepts);
+    console.log('⚠️ Movement concepts error:', error);
+    console.log('🔄 Is loading:', isLoading);
+  }, [userData?.organization?.id, concepts, error, isLoading]);
   const deleteConceptMutation = useDeleteMovementConcept();
 
   // Calculate statistics

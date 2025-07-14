@@ -39,11 +39,15 @@ export function useMovementConceptsAdmin(organizationId: string | undefined) {
         throw new Error('Supabase client not initialized or organization ID missing');
       }
 
+      console.log('🔍 Fetching movement concepts for organization:', organizationId);
+
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
         .select('*')
         .eq('organization_id', organizationId)
         .order('name');
+
+      console.log('📊 Movement concepts query result:', { concepts, error, count: concepts?.length });
 
       if (error) {
         throw error;
