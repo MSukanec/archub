@@ -80,22 +80,9 @@ export default function OrganizationBasicData() {
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
 
-  // Track if we're saving
-  const { isSaving } = useDebouncedAutoSave(
-    { 
-      name: organizationName,
-      description,
-      address,
-      city,
-      state,
-      country,
-      postal_code: postalCode,
-      phone,
-      email,
-      website,
-      tax_id: taxId
-    },
-    async (dataToSave) => {
+  // Auto-save mutation for organization data
+  const saveOrganizationMutation = useMutation({
+    mutationFn: async (dataToSave: any) => {
       if (!organizationId || !supabase) return;
 
       // Update organization name in organizations table
@@ -137,13 +124,40 @@ export default function OrganizationBasicData() {
 
         if (error) throw error;
       }
+    }
+  });
 
-      // Invalidate queries
+  // Auto-save hook with proper configuration
+  const { isSaving } = useDebouncedAutoSave({
+    data: {
+      name: organizationName,
+      description,
+      address,
+      city,
+      state,
+      country,
+      postal_code: postalCode,
+      phone,
+      email,
+      website,
+      tax_id: taxId
+    },
+    saveFn: async (data) => {
+      await saveOrganizationMutation.mutateAsync(data);
+      
+      // Show success toast
+      toast({
+        title: "Datos guardados",
+        description: "Los cambios se han guardado automáticamente",
+      });
+      
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['organization-data', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
     },
-    1000
-  );
+    delay: 750,
+    enabled: !!organizationId
+  });
 
   // Initialize form data when data is loaded
   useEffect(() => {
@@ -397,6 +411,14 @@ export default function OrganizationBasicData() {
             </div>
           </div>
         </div>
+
+        {/* Saving indicator */}
+        {isSaving && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center mt-8">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+            Guardando...
+          </div>
+        )}
       </div>
     </Layout>
   );
