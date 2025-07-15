@@ -102,9 +102,40 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
   const { data: wallets } = useOrganizationWallets(userData?.organization?.id)
   const { data: contacts } = useContacts()
-  const { data: concepts } = useMovementConcepts('types')
+  const { data: conceptsData } = useMovementConcepts('types')
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Asegurar que hay un concepto de aportes para testing
+  React.useEffect(() => {
+    const createAportesConceptIfNeeded = async () => {
+      if (!conceptsData || !userData?.organization?.id) return
+      
+      const aportesExists = conceptsData.find(c => c.view_mode?.trim() === 'aportes')
+      if (!aportesExists) {
+        console.log('Creando concepto de aportes para testing...')
+        const { error } = await supabase
+          .from('movement_concepts')
+          .insert({
+            name: 'Aportes de Socios',
+            view_mode: 'aportes',
+            extra_fields: ['socio_id'],
+            is_system: true,
+            parent_id: null
+          })
+        
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ['movement-concepts'] })
+          console.log('Concepto de aportes creado exitosamente')
+        }
+      }
+    }
+    
+    createAportesConceptIfNeeded()
+  }, [conceptsData, userData?.organization?.id])
+
+  // Mantener compatibilidad con la variable concepts
+  const concepts = conceptsData
 
   // Estados para la lógica jerárquica
   const [selectedTypeId, setSelectedTypeId] = React.useState('')
