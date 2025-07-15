@@ -252,9 +252,9 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   );
 
   const editPanel = (
-    <div className="space-y-4">
-      {/* User Linking Section - FULL WIDTH OUTSIDE GRID */}
-      <div className="space-y-3">
+    <>
+      {/* User Linking Section - FULL WIDTH */}
+      <div className="space-y-3 lg:col-span-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Vincular usuario existente</label>
         
         {selectedUser || editingContact?.linked_user ? (
@@ -487,7 +487,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           />
         </form>
       </Form>
-    </div>
+    </>
   );
 
   const headerContent = (
