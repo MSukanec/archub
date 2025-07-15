@@ -7,6 +7,7 @@ interface MovementConcept {
   parent_id?: string
   view_mode?: string
   extra_fields?: string[]
+  is_system?: boolean
 }
 
 export function useMovementConcepts(type: 'types' | 'categories' | 'parent', parentId?: string) {
@@ -19,7 +20,7 @@ export function useMovementConcepts(type: 'types' | 'categories' | 'parent', par
 
       let query = supabase
         .from('movement_concepts')
-        .select('id, name, parent_id, view_mode, extra_fields')
+        .select('id, name, parent_id, view_mode, extra_fields, is_system')
         .order('name')
 
       if (type === 'types' || type === 'parent') {
