@@ -2,11 +2,10 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
-  DollarSign,
-  Calendar,
   MoreHorizontal,
   Star,
   Trash2,
@@ -36,7 +35,14 @@ interface ModernProjectCardProps {
 export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData, isActiveProject = false }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
   
-
+  // Function to get project initials
+  const getProjectInitials = (name: string): string => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
+  };
 
   return (
     <SwipeableCard
@@ -61,96 +67,137 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         }
       ]}
     >
-      <Card 
-        className="w-full cursor-pointer hover:shadow-lg transition-all duration-200 overflow-hidden"
-        onClick={() => onSelect(project)}
-      >
-        {/* Creator Info - Top */}
-        <div className="flex items-center justify-between p-6 pb-3">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src={project.creator?.avatar_url || ''} />
-              <AvatarFallback className="text-xs">
-                {project.creator?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium text-foreground">{project.creator?.full_name || project.creator?.first_name || 'Usuario'}</p>
-              <p className="text-xs text-muted-foreground">
-                {project.created_at ? format(new Date(project.created_at), 'dd MMM, yyyy', { locale: es }) : ''}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* Active Project Badge - Only show for currently selected project */}
-            {isActiveProject && (
-              <span className="text-xs font-medium px-2 py-1 rounded-full text-white" style={{backgroundColor: 'var(--accent)'}}>
-                ACTIVO
-              </span>
-            )}
-            
-            {/* More Options - Desktop */}
-            <div className="md:block hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center">
-                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(project); }}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edición rápida
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onNavigateToBasicData(project); }}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edición completa
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(project); }} className="text-red-600">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Eliminar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-
-        {/* Project Image/Thumbnail */}
-        <div className="relative h-40 bg-gradient-to-br from-muted/30 to-muted/50 overflow-hidden mx-6 rounded-lg">
+      <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200">
+        {/* HERO SECTION - Imagen completa con avatar y acciones superpuestas */}
+        <div className="relative h-48 w-full">
+          {/* Background Image */}
           {project.project_data?.project_image_url ? (
             <img 
               src={project.project_data.project_image_url} 
               alt={project.name}
-              className="w-full h-full object-cover rounded-lg"
-              key={project.project_data.project_image_url} // Force re-render when URL changes
+              className="w-full h-full object-cover"
+              key={project.project_data.project_image_url}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground/30 rounded-lg">
-              {project.name?.charAt(0)?.toUpperCase() || 'P'}
+            <div 
+              className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80"
+              style={{ backgroundColor: project.color || '#3B82F6' }}
+            >
+              {getProjectInitials(project.name)}
             </div>
           )}
-        </div>
-
-        {/* Project Info - Bottom */}
-        <div className="p-6 pt-3 space-y-2">
-          <h3 className="font-semibold text-foreground text-lg leading-tight">
-            {project.name}
-          </h3>
           
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Estado:</span> {statusConfig.label}
-            </p>
+          {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30" />
+          
+          {/* Project Avatar - Top Left */}
+          <div className="absolute top-4 left-4">
+            <Avatar className="h-12 w-12 border-2 border-white/30 shadow-lg">
+              <AvatarFallback 
+                className="text-white font-bold text-lg"
+                style={{ backgroundColor: project.color || '#3B82F6' }}
+              >
+                {getProjectInitials(project.name)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          
+          {/* Actions Menu - Top Right */}
+          <div className="absolute top-4 right-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 p-0"
+                >
+                  <MoreHorizontal className="w-4 h-4 text-white" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(project); }}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edición rápida
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onNavigateToBasicData(project); }}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edición completa
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(project); }} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
+
+        {/* INFO SECTION - Información del proyecto */}
+        <CardContent className="p-4 space-y-4">
+          {/* Project Name and Active Button */}
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-foreground text-lg leading-tight truncate flex-1 mr-3">
+              {project.name}
+            </h3>
+            
+            {isActiveProject ? (
+              <Button 
+                size="sm"
+                className="text-xs font-medium px-3 py-1 h-7 text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Already active, maybe navigate to dashboard
+                  onSelect(project);
+                }}
+              >
+                ACTIVO
+              </Button>
+            ) : (
+              <Button 
+                variant="outline"
+                size="sm"
+                className="text-xs font-medium px-3 py-1 h-7"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(project);
+                }}
+              >
+                Seleccionar activo
+              </Button>
+            )}
+          </div>
+          
+          {/* Project Details and Member Avatars */}
+          <div className="flex items-end justify-between">
+            {/* Left side - Project details */}
+            <div className="space-y-1 flex-1">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Estado:</span> {statusConfig.label}
+              </p>
+            </div>
+            
+            {/* Right side - Member avatars (only creator for now) */}
+            <div className="flex items-center">
+              {project.creator && (
+                <Avatar className="w-8 h-8 border-2 border-background">
+                  <AvatarImage src={project.creator.avatar_url || ''} />
+                  <AvatarFallback className="text-xs">
+                    {project.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {/* Placeholder for future members count */}
+              <span className="text-xs text-muted-foreground ml-2">(1)</span>
+            </div>
+          </div>
+        </CardContent>
       </Card>
     </SwipeableCard>
   );
