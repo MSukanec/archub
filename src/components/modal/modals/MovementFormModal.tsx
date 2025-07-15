@@ -492,7 +492,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         project_id: userData.preferences.last_project_id,
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
-        conversion_group_id: transferGroupId // Usamos el mismo campo para agrupar transferencias
+        transfer_group_id: transferGroupId // Usar el campo específico para transferencias
       }
 
       // Crear movimiento de egreso (salida de billetera origen)

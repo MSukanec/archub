@@ -228,6 +228,10 @@ TABLA MOVEMENTS:
   {
     "column_name": "exchange_rate",
     "data_type": "numeric"
+  },
+  {
+    "column_name": "transfer_group_id",
+    "data_type": "uuid"
   }
 ]
 
