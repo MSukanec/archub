@@ -214,7 +214,8 @@ export function Sidebar() {
       icon: FolderOpen, 
       label: 'Proyecto', 
       defaultRoute: '/project/dashboard',
-      isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project')
+      isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project'),
+      generalModeRestricted: true
     },
     { 
       id: 'obra', 
@@ -289,7 +290,17 @@ export function Sidebar() {
                       isActive={item.isActive}
                       isExpanded={isExpanded}
                       onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-
+                      variant="main"
+                    />
+                  </CustomRestricted>
+                ) : item.generalModeRestricted ? (
+                  <CustomRestricted reason="general_mode" functionName={item.label}>
+                    <SidebarButton
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      label={item.label}
+                      isActive={item.isActive}
+                      isExpanded={isExpanded}
+                      onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
                       variant="main"
                     />
                   </CustomRestricted>
@@ -300,7 +311,6 @@ export function Sidebar() {
                     isActive={item.isActive}
                     isExpanded={isExpanded}
                     onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-
                     variant="main"
                   />
                 )}

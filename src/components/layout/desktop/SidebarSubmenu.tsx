@@ -134,7 +134,7 @@ export function SidebarSubmenu() {
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
-      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments', requiresProject: true },
+      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments', generalModeRestricted: true },
     ],
 
     'comercializacion': [
@@ -276,6 +276,25 @@ export function SidebarSubmenu() {
                         href="#"
                         isActive={false}
                         onClick={() => {}}
+                        label={item.label}
+                        isExpanded={isSecondarySidebarExpanded}
+                        variant="secondary"
+                      />
+                    </CustomRestricted>
+                  </div>
+                );
+              }
+
+              // Botón con restricción de modo general
+              if (item.generalModeRestricted) {
+                return (
+                  <div key={index} className="mb-[1px]">
+                    <CustomRestricted reason="general_mode" functionName={item.label}>
+                      <SidebarButton
+                        icon={<item.icon className="w-[18px] h-[18px]" />}
+                        href={item.href}
+                        isActive={location === item.href}
+                        onClick={item.onClick}
                         label={item.label}
                         isExpanded={isSecondarySidebarExpanded}
                         variant="secondary"

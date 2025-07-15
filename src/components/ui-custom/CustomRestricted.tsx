@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Lock } from "lucide-react";
+import { Lock, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -11,11 +11,12 @@ import { getRestrictionMessage } from "@/utils/restrictions";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+import { useProjectContext } from "@/stores/projectContext";
 
 interface CustomRestrictedProps {
   feature?: string;
   current?: number;
-  reason?: "coming_soon" | string;
+  reason?: "coming_soon" | "general_mode" | string;
   functionName?: string;
   children: React.ReactNode;
 }
@@ -33,6 +34,9 @@ export function CustomRestricted({
 
   // Datos del usuario para debug
   const { data: userData } = useCurrentUser();
+  
+  // Verificar proyecto seleccionado
+  const { selectedProjectId } = useProjectContext();
 
   // Verificar si el usuario es administrador
   const { isAdmin } = useIsAdmin();
@@ -41,7 +45,13 @@ export function CustomRestricted({
   let isRestricted = false;
   let restrictionKey = "";
 
-  if (reason) {
+  if (reason === "general_mode") {
+    // Verificar si estamos en modo general (sin proyecto seleccionado)
+    if (selectedProjectId === null) {
+      isRestricted = true;
+      restrictionKey = "general_mode";
+    }
+  } else if (reason) {
     // Si hay un reason específico, usar ese
     isRestricted = true;
     restrictionKey = reason;
@@ -126,6 +136,17 @@ export function CustomRestricted({
     setIsPopoverOpen(false);
   };
 
+  // Determinar icono y estilo según el tipo de restricción
+  const isGeneralMode = restrictionKey === "general_mode";
+  const BadgeIcon = isGeneralMode ? Building : Lock;
+  const badgeStyle = isGeneralMode ? {
+    backgroundColor: 'var(--accent)',
+    borderColor: 'var(--accent)'
+  } : {
+    backgroundColor: 'black',
+    borderColor: 'black'
+  };
+
   return (
     <div className="relative w-full">
       {/* Contenido bloqueado - sin efectos hover */}
@@ -133,7 +154,7 @@ export function CustomRestricted({
         {children}
       </div>
 
-      {/* Overlay con candado que activa hover */}
+      {/* Overlay con badge que activa hover */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <div
@@ -141,8 +162,11 @@ export function CustomRestricted({
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div className="bg-black rounded-full p-1.5 shadow-sm border border-black group-hover:shadow-md transition-shadow">
-              <Lock className="h-3 w-3 text-white" />
+            <div 
+              className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
+              style={badgeStyle}
+            >
+              <BadgeIcon className={`h-3 w-3 ${isGeneralMode ? 'text-white' : 'text-white'}`} />
             </div>
           </div>
         </PopoverTrigger>
@@ -163,7 +187,7 @@ export function CustomRestricted({
                 backgroundColor: 'hsl(var(--accent), 0.2)',
               }}
             >
-              <Lock 
+              <BadgeIcon 
                 className="h-3 w-3" 
                 style={{ color: 'hsl(var(--accent))' }}
               />
@@ -173,15 +197,21 @@ export function CustomRestricted({
                 className="font-medium text-sm" 
                 style={{ color: 'hsl(0, 0%, 95%)' }}
               >
-                {functionName ? `${functionName} - Función Bloqueada` : 'Función Bloqueada'}
+                {isGeneralMode 
+                  ? (functionName ? `${functionName} - Requiere Proyecto` : 'Requiere Proyecto')
+                  : (functionName ? `${functionName} - Función Bloqueada` : 'Función Bloqueada')
+                }
               </h4>
               <p 
                 className="text-xs mt-1"
                 style={{ color: 'hsl(0, 0%, 70%)' }}
               >
-                {restriction.message}
+                {isGeneralMode 
+                  ? 'Esta sección está únicamente disponible con un proyecto seleccionado.'
+                  : restriction.message
+                }
               </p>
-              {restriction.actionLabel && restriction.actionUrl && (
+              {!isGeneralMode && restriction.actionLabel && restriction.actionUrl && (
                 <button
                   onClick={handleActionClick}
                   className="text-xs hover:underline mt-1"
