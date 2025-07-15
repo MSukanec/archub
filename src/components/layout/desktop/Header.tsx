@@ -68,10 +68,15 @@ export function Header({
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
   // Estado local para tracking inmediato del proyecto seleccionado
-  const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(selectedProjectId);
+  const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(null);
   
   // Sincronizar estado local con context cuando cambie
   useEffect(() => {
+    console.log('🔥 Header: Syncing local state with context:', { 
+      selectedProjectId, 
+      localSelectedProject,
+      changing: localSelectedProject !== selectedProjectId 
+    });
     setLocalSelectedProject(selectedProjectId);
   }, [selectedProjectId]);
 
@@ -130,15 +135,25 @@ export function Header({
   });
 
   const handleProjectSelect = (projectId: string | null) => {
+    console.log('🔥 Header handleProjectSelect called:', { 
+      projectId, 
+      localSelectedProject, 
+      selectedProjectId,
+      isSame: localSelectedProject === projectId 
+    });
+    
     // Don't change selection if clicking the same project/state
     if (localSelectedProject === projectId) {
+      console.log('🔥 Header: Skipping - same project already selected');
       return;
     }
     
     // Actualizar estado local INMEDIATAMENTE para UI responsiva
+    console.log('🔥 Header: Setting local state to:', projectId);
     setLocalSelectedProject(projectId);
     
     // Luego actualizar context y BD en background
+    console.log('🔥 Header: Setting context to:', projectId);
     setSelectedProject(projectId);
     selectProjectMutation.mutate(projectId);
   };
