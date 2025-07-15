@@ -174,8 +174,8 @@ export function CustomRestricted({
         <PopoverContent
           className="w-64 p-3 shadow-xl rounded-2xl"
           style={{
-            backgroundColor: 'hsl(0, 0%, 10%)',
-            border: '1px solid hsl(0, 0%, 25%)',
+            backgroundColor: isGeneralMode ? 'var(--accent)' : 'hsl(0, 0%, 10%)',
+            border: isGeneralMode ? '1px solid var(--accent)' : '1px solid hsl(0, 0%, 25%)',
             borderRadius: '16px'
           }}
           side="top"
@@ -184,18 +184,18 @@ export function CustomRestricted({
             <div 
               className="rounded-full p-1 flex-shrink-0"
               style={{
-                backgroundColor: 'hsl(var(--accent), 0.2)',
+                backgroundColor: isGeneralMode ? 'rgba(255, 255, 255, 0.2)' : 'hsl(var(--accent), 0.2)',
               }}
             >
               <BadgeIcon 
                 className="h-3 w-3" 
-                style={{ color: 'hsl(var(--accent))' }}
+                style={{ color: isGeneralMode ? 'white' : 'hsl(var(--accent))' }}
               />
             </div>
             <div className="flex-1">
               <h4 
                 className="font-medium text-sm" 
-                style={{ color: 'hsl(0, 0%, 95%)' }}
+                style={{ color: isGeneralMode ? 'white' : 'hsl(0, 0%, 95%)' }}
               >
                 {isGeneralMode 
                   ? (functionName ? `${functionName} - Requiere Proyecto` : 'Requiere Proyecto')
@@ -204,7 +204,7 @@ export function CustomRestricted({
               </h4>
               <p 
                 className="text-xs mt-1"
-                style={{ color: 'hsl(0, 0%, 70%)' }}
+                style={{ color: isGeneralMode ? 'rgba(255, 255, 255, 0.8)' : 'hsl(0, 0%, 70%)' }}
               >
                 {isGeneralMode 
                   ? 'Esta sección está únicamente disponible con un proyecto seleccionado.'
