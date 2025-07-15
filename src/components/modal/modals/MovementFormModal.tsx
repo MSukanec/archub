@@ -1728,7 +1728,40 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             )}
           />
 
-          {/* Fila 5: Moneda | Billetera */}
+          {/* Fila 5: Descripción (full width) */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción (opcional)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Descripción del movimiento..."
+                    rows={3}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Separador y título de sección de movimiento financiero */}
+          <div className="col-span-2">
+            <Separator className="mb-4" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                <DollarSign className="w-4 h-4 text-accent" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Información Financiera</h3>
+                <p className="text-xs text-muted-foreground">Detalles específicos del movimiento financiero</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Fila 6: Moneda | Billetera */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -1781,7 +1814,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             />
           </div>
 
-          {/* Fila 6: Monto | Cotización */}
+          {/* Fila 7: Monto | Cotización */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -1829,25 +1862,6 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
           </div>
-
-          {/* Fila 5: Descripción (full width) */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción (opcional)</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descripción del movimiento..."
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </form>
       </Form>
       )}
