@@ -344,15 +344,18 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         c.currency?.id === editingMovement.currency_id
       )
       const matchingWallet = wallets?.find(w => 
-        w.wallets?.id === editingMovement.wallet_id || w.wallet_id === editingMovement.wallet_id
+        w.wallet_id === editingMovement.wallet_id
       )
       
       console.log('Loading editing movement:', {
-        editingMovement,
+        editingMovement: editingMovement.id,
         viewMode,
-        matchingCurrency: matchingCurrency?.currency_id,
-        matchingWallet: matchingWallet?.wallet_id,
-        created_by: editingMovement.created_by
+        type_id: editingMovement.type_id,
+        category_id: editingMovement.category_id,
+        subcategory_id: editingMovement.subcategory_id,
+        amount: editingMovement.amount,
+        currency_id: editingMovement.currency_id,
+        wallet_id: editingMovement.wallet_id
       })
       
       // Establecer el tipo de formulario según el view_mode
@@ -414,8 +417,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
-          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
         })
       }
       setPanel('edit')
