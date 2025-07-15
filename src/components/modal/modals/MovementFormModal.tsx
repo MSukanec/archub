@@ -41,6 +41,7 @@ const conversionFormSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
   // Campos de origen (egreso)
   currency_id_from: z.string().min(1, 'Moneda origen es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
@@ -60,6 +61,7 @@ const transferFormSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
   // Campos para transferencia interna
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
@@ -290,6 +292,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         defaultWallet: defaultWallet?.wallet_id
       })
 
+      // Reset main form
       form.reset({
         movement_date: new Date(),
         created_by: currentMember?.id || '',
@@ -301,6 +304,33 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         subcategory_id: '',
         currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.wallet_id || '',
+      })
+
+      // Reset conversion form with same defaults
+      conversionForm.reset({
+        movement_date: new Date(),
+        created_by: currentMember?.id || '',
+        description: '',
+        amount_from: 0,
+        amount_to: 0,
+        currency_id_from: defaultOrgCurrency?.currency?.id || '',
+        currency_id_to: defaultOrgCurrency?.currency?.id || '',
+        wallet_id_from: defaultWallet?.wallet_id || '',
+        wallet_id_to: defaultWallet?.wallet_id || '',
+        exchange_rate: undefined,
+        type_id: '',
+      })
+
+      // Reset transfer form with same defaults
+      transferForm.reset({
+        movement_date: new Date(),
+        created_by: currentMember?.id || '',
+        description: '',
+        amount: 0,
+        currency_id: defaultOrgCurrency?.currency?.id || '',
+        wallet_id_from: defaultWallet?.wallet_id || '',
+        wallet_id_to: defaultWallet?.wallet_id || '',
+        type_id: '',
       })
       setPanel('edit')
     }
