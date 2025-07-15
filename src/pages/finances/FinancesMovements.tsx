@@ -210,12 +210,7 @@ export default function Movements() {
   const { selectedProjectId, isGlobalView } = useProjectContext();
   const projectId = selectedProjectId;
 
-  // Debug logging
-  console.log('Movement page state:', {
-    selectedProjectId,
-    isGlobalView,
-    projectId
-  });
+
 
   const { data: movements = [], isLoading } = useMovements(
     organizationId,
@@ -786,8 +781,7 @@ export default function Movements() {
 
   const currencyBalances = calculateBalanceByCurrency();
 
-  // Debug logging for column calculations
-  console.log('Calculating columns - isGeneralMode:', isGeneralMode);
+
 
   const tableColumns = useMemo(() => [
     // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)

@@ -21,12 +21,17 @@ export function ProjectSelector() {
   const { data: projects = [] } = useProjects(userData?.organization?.id)
   const { selectedProjectId, setSelectedProject } = useProjectContext()
 
-  // Initialize project context with user preference if not set
+  // Initialize project context with user preference ONLY on first load
   useEffect(() => {
+    // Only set initial project if context is null AND we haven't explicitly set it to null
     if (selectedProjectId === null && userData?.preferences?.last_project_id) {
-      setSelectedProject(userData.preferences.last_project_id)
+      // Check if this is the initial load by seeing if we have a stored preference
+      const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
+      if (!hasExplicitGeneralSelection) {
+        setSelectedProject(userData.preferences.last_project_id)
+      }
     }
-  }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject])
+  }, [userData?.preferences?.last_project_id])
   
   // Find current project SOLO basado en selectedProjectId, SIN fallback a last_project_id
   const currentProject = selectedProjectId 
@@ -55,6 +60,14 @@ export function ProjectSelector() {
     if (selectedProjectId === projectId) {
       return
     }
+    
+    // Mark when user explicitly selects General mode
+    if (projectId === null) {
+      localStorage.setItem('explicit-general-mode', 'true')
+    } else {
+      localStorage.removeItem('explicit-general-mode')
+    }
+    
     setSelectedProject(projectId)
     updateProjectMutation.mutate(projectId)
   }
