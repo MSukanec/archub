@@ -177,13 +177,10 @@ export function SidebarSubmenu() {
   const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
 
   // Filter menu items based on project requirement
+  // POR AHORA: En "TODOS LOS PROYECTOS" no quiero que desaparezca NINGÚN botón del sidebar
   const filteredSubmenu = currentSubmenu.filter(item => {
-    // Always show separators and items without requiresProject
-    if (item.type === 'separator' || !item.requiresProject) {
-      return true;
-    }
-    // Hide items that require a project when in global view
-    return !isGlobalView;
+    // Mostrar TODOS los elementos - no filtrar nada por ahora
+    return true;
   });
 
   // Get section title and icon

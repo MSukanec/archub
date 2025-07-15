@@ -66,7 +66,7 @@ export function ProjectSelector() {
 
   const displayName = selectedProjectId === null 
     ? "Todos los proyectos"
-    : currentProject?.name || "Seleccionar proyecto"
+    : currentProject?.name || "Todos los proyectos"
 
   const displayIcon = selectedProjectId === null 
     ? <FolderOpen className="w-4 h-4" />

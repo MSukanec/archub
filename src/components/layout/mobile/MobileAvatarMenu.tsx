@@ -172,7 +172,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
               }}
             >
               <span className="truncate text-left text-base">
-                {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Seleccionar proyecto'}
+                {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Todos los proyectos'}
               </span>
               <ChevronDown className={`h-4 w-4 transition-transform ${expandedProjectSelector ? 'rotate-180' : ''}`} />
             </button>

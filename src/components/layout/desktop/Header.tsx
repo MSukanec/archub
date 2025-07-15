@@ -67,12 +67,20 @@ export function Header({
   const { setSidebarContext, currentSidebarContext } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
 
-  // Initialize project context with user preference if not set
+  // Initialize project context - ALWAYS ensure valid state (never undefined/loading)
   useEffect(() => {
-    if (selectedProjectId === null && userData?.preferences?.last_project_id) {
-      setSelectedProject(userData.preferences.last_project_id);
+    // SI HAY un last_project_id válido, úsalo
+    // SI NO HAY ninguno, DEFAULT a "TODOS LOS PROYECTOS" (null)
+    // NUNCA permitir estado "SELECCIONAR PROYECTO"
+    if (userData?.preferences !== undefined) {
+      if (selectedProjectId === null && userData?.preferences?.last_project_id) {
+        setSelectedProject(userData.preferences.last_project_id);
+      } else if (selectedProjectId === null && !userData?.preferences?.last_project_id) {
+        // Asegurar que esté explícitamente en "TODOS LOS PROYECTOS"
+        setSelectedProject(null);
+      }
     }
-  }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject]);
+  }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject, userData?.preferences]);
 
   // Organization selection mutation
   const selectOrganizationMutation = useMutation({
@@ -275,7 +283,7 @@ export function Header({
               >
                 {selectedProjectId === null 
                   ? "Todos los proyectos"
-                  : currentProject?.name || "Seleccionar proyecto"}
+                  : currentProject?.name || "Todos los proyectos"}
               </Button>
             
               <DropdownMenu>
@@ -290,7 +298,7 @@ export function Header({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
                   <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
-                    Seleccionar proyecto...
+                    Cambiar proyecto...
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

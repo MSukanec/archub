@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 15, 2025. CRITICAL UX FIX: Eliminated "SELECCIONAR PROYECTO" state and ensured all sidebar buttons visible in "TODOS LOS PROYECTOS" mode - COMPLETED
+  • Fixed project context initialization to ALWAYS default to "TODOS LOS PROYECTOS" (null) when no project is specifically selected
+  • Eliminated ALL instances of "Seleccionar proyecto" text throughout the application and replaced with "Todos los proyectos"
+  • Modified SidebarSubmenu filtering logic to show ALL menu items when in global view ("TODOS LOS PROYECTOS") mode
+  • Corrected Header desktop project breadcrumb to never show undefined state - always displays valid project name or "Todos los proyectos"
+  • Updated MobileAvatarMenu project selector to default to "Todos los proyectos" instead of "Seleccionar proyecto"
+  • Enhanced ProjectSelector component to handle fallback cases properly with "Todos los proyectos" default
+  • Fixed project initialization useEffect to ensure explicit state management - never allows undefined/loading project states
+  • Application now NEVER shows "SELECCIONAR PROYECTO" state and automatically defaults to "TODOS LOS PROYECTOS" as intended
+  • All sidebar navigation buttons remain visible and functional in global view mode as requested by user
 - July 15, 2025. Complete transfer system integration with proper grouping and visual consistency - COMPLETED
   • Added transfer_group_id field to Movement interface and SQL queries in use-movements.ts
   • Implemented complete transfer grouping logic matching conversion system architecture
