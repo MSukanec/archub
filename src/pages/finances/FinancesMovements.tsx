@@ -763,7 +763,7 @@ export default function Movements() {
         
         // Check if it's a transfer
         const typeName = item.movement_data?.type?.name || "";
-        if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+        if (typeName === "Transferencia Interna") {
           return (
             <span className="text-xs font-medium">
               Transferencia Interna
@@ -800,7 +800,7 @@ export default function Movements() {
         
         // Check if it's a transfer
         const typeName = item.movement_data?.type?.name || "";
-        if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+        if (typeName === "Transferencia Interna") {
           return (
             <div>
               <div className="text-xs font-medium">
@@ -848,7 +848,7 @@ export default function Movements() {
         
         // Check if it's a transfer
         const typeName = item.movement_data?.type?.name || "";
-        if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+        if (typeName === "Transferencia Interna") {
           return (
             <div>
               <div className="text-xs font-medium">
@@ -1164,7 +1164,7 @@ export default function Movements() {
           // Determine if it's a transfer based on type name
           const typeName = item.movement_data?.type?.name || "";
           
-          if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+          if (typeName === "Transferencia Interna" || typeName.toLowerCase().includes("transferencia")) {
             return "movement-row-transfer";
           } else if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
             return "movement-row-income";

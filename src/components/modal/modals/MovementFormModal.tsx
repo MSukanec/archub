@@ -202,11 +202,20 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       setIsConversion(isConversionType)
       setIsTransfer(isTransferType)
       
-      // Sincronizar type_id en todos los formularios
-      if (isConversionType) {
-        conversionForm.setValue('type_id', typeId)
-      } else if (isTransferType) {
-        transferForm.setValue('type_id', typeId)
+      console.log('Type changed:', { typeId, viewMode, isConversionType, isTransferType, selectedConcept })
+      
+      // TEMPORARY FIX: Force correct view_mode detection for known concepts
+      if (selectedConcept?.name === "Conversión") {
+        setIsConversion(true)
+        setIsTransfer(false)
+        console.log('FORCE: Setting conversion mode for Conversión concept')
+      } else if (selectedConcept?.name === "Transferencia Interna") {
+        setIsConversion(false)
+        setIsTransfer(true)
+        console.log('FORCE: Setting transfer mode for Transferencia Interna concept')
+      } else {
+        setIsConversion(isConversionType)
+        setIsTransfer(isTransferType)
       }
       
       // Reset categoría y subcategoría cuando cambia el tipo
