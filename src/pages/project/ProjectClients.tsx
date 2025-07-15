@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Users, Plus, Trash2, UserPlus, Handshake, CreditCard, UserCheck, TrendingUp } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
@@ -13,7 +13,8 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
@@ -47,6 +48,8 @@ export default function ProjectClients() {
   const { openModal } = useGlobalModalStore()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [clientToDelete, setClientToDelete] = useState<ProjectClient | null>(null)
+  const [showAddClientModal, setShowAddClientModal] = useState(false)
+  const [selectedContactId, setSelectedContactId] = useState('')
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
@@ -148,7 +151,57 @@ export default function ProjectClients() {
     }
   })
 
+  // Calculate available contacts (not already added as clients)
+  const availableContacts = useMemo(() => {
+    if (!organizationContacts || !projectClients) return []
+    
+    const existingClientIds = new Set(projectClients.map(pc => pc.client_id))
+    return organizationContacts.filter(contact => !existingClientIds.has(contact.id))
+  }, [organizationContacts, projectClients])
 
+  // Add client mutation
+  const addClientMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      if (!supabase || !projectId || !organizationId) throw new Error('Missing required parameters')
+      
+      const { error } = await supabase
+        .from('project_clients')
+        .insert({
+          project_id: projectId,
+          client_id: contactId,
+          committed_amount: 0,
+          currency_id: userData?.organization?.default_currency_id || '',
+          role: 'Cliente',
+          is_active: true,
+          notes: '',
+          organization_id: organizationId
+        })
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cliente agregado",
+        description: "El cliente ha sido agregado al proyecto exitosamente",
+      })
+      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
+      setShowAddClientModal(false)
+      setSelectedContactId('')
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al agregar cliente",
+        description: error.message || "Hubo un problema al agregar el cliente",
+        variant: "destructive",
+      })
+    }
+  })
+
+  const handleAddClient = () => {
+    if (selectedContactId) {
+      addClientMutation.mutate(selectedContactId)
+    }
+  }
 
   const handleRemoveClient = (client: ProjectClient) => {
     setClientToDelete(client)
