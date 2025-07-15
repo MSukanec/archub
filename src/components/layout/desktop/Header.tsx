@@ -66,6 +66,14 @@ export function Header({
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
   const { setSidebarContext, currentSidebarContext } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
+  
+  // Estado local para tracking inmediato del proyecto seleccionado
+  const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(selectedProjectId);
+  
+  // Sincronizar estado local con context cuando cambie
+  useEffect(() => {
+    setLocalSelectedProject(selectedProjectId);
+  }, [selectedProjectId]);
 
   // Initialize project context - ALWAYS ensure valid state (never undefined/loading)
   useEffect(() => {
@@ -122,15 +130,23 @@ export function Header({
   });
 
   const handleProjectSelect = (projectId: string | null) => {
-    // Update both the project context and user preferences
+    // Don't change selection if clicking the same project/state
+    if (localSelectedProject === projectId) {
+      return;
+    }
+    
+    // Actualizar estado local INMEDIATAMENTE para UI responsiva
+    setLocalSelectedProject(projectId);
+    
+    // Luego actualizar context y BD en background
     setSelectedProject(projectId);
     selectProjectMutation.mutate(projectId);
   };
 
   const currentOrganization = userData?.organization;
-  // Solo usar selectedProjectId del context, NO usar last_project_id como fallback
-  const currentProject = selectedProjectId 
-    ? projects.find(p => p.id === selectedProjectId)
+  // Usar estado local para display inmediato, NO usar last_project_id como fallback
+  const currentProject = localSelectedProject 
+    ? projects.find(p => p.id === localSelectedProject)
     : null;
 
   // Function to get main sidebar section name based on current context
@@ -282,7 +298,7 @@ export function Header({
                   navigate('/project/dashboard');
                 }}
               >
-                {selectedProjectId === null 
+                {localSelectedProject === null 
                   ? "Todos los proyectos"
                   : currentProject?.name || "Todos los proyectos"}
               </Button>
@@ -310,7 +326,7 @@ export function Header({
                       <Folder className="h-4 w-4" />
                       <span className="truncate">Todos los proyectos</span>
                     </div>
-                    {selectedProjectId === null && (
+                    {localSelectedProject === null && (
                       <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                     )}
                   </DropdownMenuItem>
@@ -324,7 +340,7 @@ export function Header({
                         <Folder className="h-4 w-4" />
                         <span className="truncate">{project.name}</span>
                       </div>
-                      {selectedProjectId === project.id && (
+                      {localSelectedProject === project.id && (
                         <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
                       )}
                     </DropdownMenuItem>
