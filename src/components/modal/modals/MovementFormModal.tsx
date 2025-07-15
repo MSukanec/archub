@@ -213,7 +213,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       
       // Detectar view_mode del concepto para cargar el formulario correcto
       const selectedConcept = concepts?.find((concept: any) => concept.id === editingMovement.type_id)
-      const viewMode = selectedConcept?.view_mode ?? "normal"
+      const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
       
       // Map currency_id and wallet_id to organization-specific IDs
       const matchingCurrency = currencies?.find((c: any) => 
@@ -235,6 +235,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       setIsConversion(viewMode === "conversion")
       setIsTransfer(viewMode === "transfer")
       
+      console.log('Edit mode - detected view_mode:', { viewMode, isConversion: viewMode === "conversion", isTransfer: viewMode === "transfer" })
+      
       // Cargar datos en el formulario correcto según el view_mode
       if (viewMode === "conversion") {
         // Para conversiones, necesitamos cargar datos desde el grupo de conversión
@@ -243,6 +245,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
+          type_id: editingMovement.type_id || '',
           currency_id_from: matchingCurrency?.currency_id || editingMovement.currency_id || '',
           wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
           amount_from: editingMovement.amount || 0,
@@ -257,6 +260,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
+          type_id: editingMovement.type_id || '',
           currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
           wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
           wallet_id_to: '',
@@ -277,7 +281,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
         })
       }
-      setPanel('view')
+      setPanel('edit')
     } else {
       // New movement mode - wait for all data to be loaded
       if (!members || !currencies || !wallets) return
