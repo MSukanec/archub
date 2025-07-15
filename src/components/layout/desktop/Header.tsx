@@ -77,20 +77,16 @@ export function Header({
     }
   }, []); // Array vacío = solo una vez en mount
 
-  // Initialize project context - ALWAYS ensure valid state (never undefined/loading)
+  // Initialize project context ONLY on first load - don't override user selections
   useEffect(() => {
-    // SI HAY un last_project_id válido, úsalo
-    // SI NO HAY ninguno, DEFAULT a "TODOS LOS PROYECTOS" (null)
-    // NUNCA permitir estado "SELECCIONAR PROYECTO"
-    if (userData?.preferences !== undefined) {
-      if (selectedProjectId === null && userData?.preferences?.last_project_id) {
+    if (userData?.preferences !== undefined && selectedProjectId === null) {
+      // Only restore if user hasn't explicitly chosen General mode
+      const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
+      if (!hasExplicitGeneralSelection && userData?.preferences?.last_project_id) {
         setSelectedProject(userData.preferences.last_project_id);
-      } else if (selectedProjectId === null && !userData?.preferences?.last_project_id) {
-        // Asegurar que esté explícitamente en "TODOS LOS PROYECTOS"
-        setSelectedProject(null);
       }
     }
-  }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject, userData?.preferences]);
+  }, [userData?.preferences?.last_project_id]); // Remove selectedProjectId from deps to prevent override
 
   // Organization selection mutation
   const selectOrganizationMutation = useMutation({
@@ -135,6 +131,13 @@ export function Header({
     // Don't change selection if clicking the same project/state
     if (localSelectedProject === projectId) {
       return;
+    }
+    
+    // Mark when user explicitly selects General mode
+    if (projectId === null) {
+      localStorage.setItem('explicit-general-mode', 'true')
+    } else {
+      localStorage.removeItem('explicit-general-mode')
     }
     
     // Actualizar estado local INMEDIATAMENTE para UI responsiva

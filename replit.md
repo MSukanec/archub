@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 15, 2025. PROJECT COLUMN IN MOVEMENTS TABLE COMPLETED: Added new "Proyecto" column visible only in General mode with project badges - COMPLETED
+  • Created ProjectBadge component with project.color backgrounds and white text for consistent project identification
+  • Added useProjectsMap hook to fetch projects with colors from database for badge rendering
+  • Implemented conditional column display: "Proyecto" column only appears when in General mode (no project selected)
+  • Fixed critical synchronization bug where useEffect in ProjectSelector.tsx and Header.tsx was auto-restoring projects
+  • Implemented localStorage-based tracking for explicit General mode selection to prevent unwanted project restoration
+  • Enhanced table with project badges showing colored backgrounds (project.color or black fallback) and "General" gray badges
+  • Column displays between checkbox and date, showing proper project attribution for movements in organization-wide view
+  • System now properly switches between project-specific view (no project column) and General view (with project column)
 - July 15, 2025. DELETION MODAL SYSTEM COMPLETED: Created standardized DeleteConfirmationModal following FormModalLayout architecture - COMPLETED
   • Built new DeleteConfirmationModal.tsx in src/components/modal/modals/ following exact modal architecture from README.md
   • Integrated into ModalFactory.tsx with 'delete-confirmation' type and comprehensive data passing system
