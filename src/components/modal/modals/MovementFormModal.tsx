@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card } from '@/components/ui/card'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -135,15 +136,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
       const isConversionType = typeId === CONVERSION_CONCEPT_ID
       
-      console.log('Conversion detection:', {
-        typeId,
-        CONVERSION_CONCEPT_ID,
-        selectedConcept,
-        isConversionType,
-        comparison: typeId === CONVERSION_CONCEPT_ID,
-        typeIdType: typeof typeId,
-        uuidType: typeof CONVERSION_CONCEPT_ID
-      })
+
       
       // Si cambió a conversión, preservar creador y fecha
       if (isConversionType && !isConversion) {
@@ -520,6 +513,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               />
             </div>
 
+            {/* Tipo (readonly para conversión) */}
+            <div>
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo *</label>
+              <div className="mt-1 px-3 py-2 border rounded-md bg-muted">
+                Conversión
+              </div>
+            </div>
+
             {/* Descripción (full width) */}
             <FormField
               control={conversionForm.control}
@@ -538,9 +539,18 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
-            {/* Sección ORIGEN */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground border-b pb-2">💰 Datos de Origen (Egreso)</h3>
+            {/* Card conteniendo las secciones variables */}
+            <Card className="p-4">
+              {/* Sección ORIGEN */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
+                </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <FormField
@@ -616,9 +626,16 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               </div>
             </div>
 
-            {/* Sección DESTINO */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-foreground border-b pb-2">💰 Datos de Destino (Ingreso)</h3>
+              {/* Sección DESTINO */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
+                </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <FormField
@@ -694,27 +711,28 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               </div>
             </div>
 
-            {/* Exchange Rate (opcional) */}
-            <FormField
-              control={conversionForm.control}
-              name="exchange_rate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cotización (opcional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.0001"
-                      min="0"
-                      placeholder="Ej: 1.25"
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              {/* Exchange Rate (opcional) */}
+              <FormField
+                control={conversionForm.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cotización (opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        placeholder="Ej: 1.25"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Card>
           </form>
         </Form>
       ) : (
