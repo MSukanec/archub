@@ -56,8 +56,23 @@ const conversionFormSchema = z.object({
   path: ["currency_id_to"]
 })
 
+const transferFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  // Campos para transferencia interna
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
+  wallet_id_to: z.string().min(1, 'Billetera destino es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0')
+}).refine((data) => data.wallet_id_from !== data.wallet_id_to, {
+  message: "Las billeteras de origen y destino deben ser diferentes",
+  path: ["wallet_id_to"]
+})
+
 type MovementForm = z.infer<typeof movementFormSchema>
 type ConversionForm = z.infer<typeof conversionFormSchema>
+type TransferForm = z.infer<typeof transferFormSchema>
 
 interface MovementFormModalProps {
   editingMovement?: any
@@ -78,8 +93,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const [selectedTypeId, setSelectedTypeId] = React.useState('')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
   
-  // Estado para detectar conversión
+  // Estados para detectar tipo de formulario
   const [isConversion, setIsConversion] = React.useState(false)
+  const [isTransfer, setIsTransfer] = React.useState(false)
 
   // Hooks jerárquicos para categorías y subcategorías
   const { data: categories } = useMovementConcepts('categories', selectedTypeId)
@@ -117,6 +133,19 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   })
 
+  const transferForm = useForm<TransferForm>({
+    resolver: zodResolver(transferFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: '',
+      description: '',
+      currency_id: '',
+      wallet_id_from: '',
+      wallet_id_to: '',
+      amount: 0
+    }
+  })
+
   // Manejar envío con ENTER
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -131,26 +160,38 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     if (typeId !== selectedTypeId) {
       setSelectedTypeId(typeId)
       
-      // Detectar si es conversión por UUID específico
+      // Detectar tipo de formulario por UUID específico
       const CONVERSION_CONCEPT_ID = '5c0bb8fb-33e4-4390-b125-616484c8a672'
+      const TRANSFER_CONCEPT_ID = '2068b936-6a02-4b54-a354-5af447e5b7d9'
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
       const isConversionType = typeId === CONVERSION_CONCEPT_ID
+      const isTransferType = typeId === TRANSFER_CONCEPT_ID
       
 
       
-      // Si cambió a conversión, preservar creador y fecha
-      if (isConversionType && !isConversion) {
-        const currentCreator = form.getValues('created_by')
-        const currentDate = form.getValues('movement_date')
+      // Preservar datos cuando cambiamos entre tipos de formulario
+      if (isConversionType && !isConversion && !isTransfer) {
+        // Cambiar a conversión desde normal o transferencia
+        const currentCreator = isTransfer ? transferForm.getValues('created_by') : form.getValues('created_by')
+        const currentDate = isTransfer ? transferForm.getValues('movement_date') : form.getValues('movement_date')
         conversionForm.setValue('created_by', currentCreator)
         if (currentDate) {
           conversionForm.setValue('movement_date', currentDate)
         }
       }
-      // Si cambió desde conversión, preservar creador y fecha
-      else if (!isConversionType && isConversion) {
-        const currentCreator = conversionForm.getValues('created_by')
-        const currentDate = conversionForm.getValues('movement_date')
+      else if (isTransferType && !isTransfer && !isConversion) {
+        // Cambiar a transferencia desde normal o conversión
+        const currentCreator = isConversion ? conversionForm.getValues('created_by') : form.getValues('created_by')
+        const currentDate = isConversion ? conversionForm.getValues('movement_date') : form.getValues('movement_date')
+        transferForm.setValue('created_by', currentCreator)
+        if (currentDate) {
+          transferForm.setValue('movement_date', currentDate)
+        }
+      }
+      else if (!isConversionType && !isTransferType && (isConversion || isTransfer)) {
+        // Cambiar a normal desde conversión o transferencia
+        const currentCreator = isConversion ? conversionForm.getValues('created_by') : transferForm.getValues('created_by')
+        const currentDate = isConversion ? conversionForm.getValues('movement_date') : transferForm.getValues('movement_date')
         form.setValue('created_by', currentCreator)
         if (currentDate) {
           form.setValue('movement_date', currentDate)
@@ -158,6 +199,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       }
       
       setIsConversion(isConversionType)
+      setIsTransfer(isTransferType)
+      
+      // Sincronizar type_id en todos los formularios
+      if (isConversionType) {
+        conversionForm.setValue('type_id', typeId)
+      } else if (isTransferType) {
+        transferForm.setValue('type_id', typeId)
+      }
       
       // Reset categoría y subcategoría cuando cambia el tipo
       if (typeId !== editingMovement?.type_id) {
@@ -166,7 +215,23 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         setSelectedCategoryId('')
       }
     }
-  }, [form.watch('type_id'), concepts, isConversion])
+  }, [form.watch('type_id'), concepts, isConversion, isTransfer])
+
+  // Efecto para detectar cambios en type_id del formulario de conversión
+  React.useEffect(() => {
+    const typeId = conversionForm.watch('type_id')
+    if (typeId && typeId !== form.getValues('type_id')) {
+      form.setValue('type_id', typeId)
+    }
+  }, [conversionForm.watch('type_id')])
+
+  // Efecto para detectar cambios en type_id del formulario de transferencia
+  React.useEffect(() => {
+    const typeId = transferForm.watch('type_id')
+    if (typeId && typeId !== form.getValues('type_id')) {
+      form.setValue('type_id', typeId)
+    }
+  }, [transferForm.watch('type_id')])
 
   // Efecto para manejar la lógica jerárquica al seleccionar categoría
   React.useEffect(() => {
@@ -377,12 +442,87 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   })
 
+  const createTransferMutation = useMutation({
+    mutationFn: async (data: TransferForm) => {
+      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
+        throw new Error('Organization ID or Project ID not found')
+      }
+
+      // Generar UUID para el grupo de transferencia
+      const transferGroupId = crypto.randomUUID()
+
+      // Buscar tipos de egreso e ingreso
+      const egressType = concepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('egreso')
+      )
+      const ingressType = concepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('ingreso')
+      )
+
+      const baseMovementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences.last_project_id,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        conversion_group_id: transferGroupId // Usamos el mismo campo para agrupar transferencias
+      }
+
+      // Crear movimiento de egreso (salida de billetera origen)
+      const egressData = {
+        ...baseMovementData,
+        description: data.description || 'Transferencia Interna - Salida',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id_from,
+        type_id: egressType?.id || concepts?.find(c => c.name?.toLowerCase() === 'transferencias internas')?.id
+      }
+
+      // Crear movimiento de ingreso (entrada a billetera destino)
+      const ingressData = {
+        ...baseMovementData,
+        description: data.description || 'Transferencia Interna - Entrada',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id_to,
+        type_id: ingressType?.id || concepts?.find(c => c.name?.toLowerCase() === 'transferencias internas')?.id
+      }
+
+      // Insertar ambos movimientos
+      const { data: results, error } = await supabase
+        .from('movements')
+        .insert([egressData, ingressData])
+        .select()
+
+      if (error) throw error
+      return results
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      toast({
+        title: 'Transferencia creada',
+        description: 'La transferencia interna ha sido creada correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al crear la transferencia: ${error.message}`,
+      })
+    }
+  })
+
   const onSubmit = async (data: MovementForm) => {
     await createMovementMutation.mutateAsync(data)
   }
 
   const onSubmitConversion = async (data: ConversionForm) => {
     await createConversionMutation.mutateAsync(data)
+  }
+
+  const onSubmitTransfer = async (data: TransferForm) => {
+    await createTransferMutation.mutateAsync(data)
   }
 
   const handleClose = () => {
@@ -513,13 +653,31 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               />
             </div>
 
-            {/* Tipo (readonly para conversión) */}
-            <div>
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo *</label>
-              <div className="mt-1 px-3 py-2 border rounded-md bg-muted">
-                Conversión
-              </div>
-            </div>
+            {/* Tipo - mantiene interactivo para cambiar */}
+            <FormField
+              control={conversionForm.control}
+              name="type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          {concept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Descripción (full width) */}
             <FormField
@@ -732,6 +890,204 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   </FormItem>
                 )}
               />
+            </Card>
+          </form>
+        </Form>
+      ) : isTransfer ? (
+        // FORMULARIO DE TRANSFERENCIAS INTERNAS
+        <Form {...transferForm}>
+          <form onSubmit={transferForm.handleSubmit(onSubmitTransfer)} className="space-y-4">
+            {/* Fila 1: Creador | Fecha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={transferForm.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Creador *</FormLabel>
+                    <FormControl>
+                      <UserSelector
+                        users={members || []}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Seleccionar creador"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={transferForm.control}
+                name="movement_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const localDate = new Date(e.target.value + 'T00:00:00');
+                          field.onChange(localDate);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Tipo - mantiene interactivo para cambiar */}
+            <FormField
+              control={transferForm.control}
+              name="type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          {concept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Descripción (full width) */}
+            <FormField
+              control={transferForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción de la transferencia..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Card conteniendo las secciones de transferencia */}
+            <Card className="p-4">
+              <div className="space-y-4">
+                {/* Moneda */}
+                <FormField
+                  control={transferForm.control}
+                  name="currency_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Moneda *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {currencies?.map((orgCurrency) => (
+                            <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                              {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Billeteras Origen y Destino */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <FormField
+                    control={transferForm.control}
+                    name="wallet_id_from"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Billetera Origen *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {wallets?.map((wallet) => (
+                              <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                                {wallet.wallets?.name || 'Sin nombre'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={transferForm.control}
+                    name="wallet_id_to"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Billetera Destino *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {wallets?.map((wallet) => (
+                              <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                                {wallet.wallets?.name || 'Sin nombre'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Cantidad */}
+                <FormField
+                  control={transferForm.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cantidad *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </Card>
           </form>
         </Form>
