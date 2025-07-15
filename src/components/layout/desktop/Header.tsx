@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Plus, Filter, X, Search, Building, Folder, Menu } from "lucide-react";
+import { ChevronDown, Plus, Filter, X, Search, Building, Building2, Folder, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -301,8 +301,8 @@ export function Header({
                 }}
               >
                 {localSelectedProject === null 
-                  ? "Todos los proyectos"
-                  : currentProject?.name || "Todos los proyectos"}
+                  ? "General"
+                  : currentProject?.name || "General"}
               </Button>
             
               <DropdownMenu>
@@ -320,18 +320,8 @@ export function Header({
                     Cambiar proyecto...
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleProjectSelect(null)}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Folder className="h-4 w-4" />
-                      <span className="truncate">Todos los proyectos</span>
-                    </div>
-                    {localSelectedProject === null && (
-                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
-                    )}
-                  </DropdownMenuItem>
+                  
+                  {/* Lista de proyectos */}
                   {projects.map((project) => (
                     <DropdownMenuItem
                       key={project.id}
@@ -343,14 +333,26 @@ export function Header({
                         <span className="truncate">{project.name}</span>
                       </div>
                       {localSelectedProject === project.id && (
-                        <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                        <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--accent)' }} />
                       )}
                     </DropdownMenuItem>
                   ))}
+                  
+                  {/* Separador */}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => openModal('project', {})}>
-                    <Folder className="mr-2 h-4 w-4" />
-                    Crear Nuevo Proyecto
+                  
+                  {/* Opción General */}
+                  <DropdownMenuItem
+                    onClick={() => handleProjectSelect(null)}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      <span className="truncate">General</span>
+                    </div>
+                    {localSelectedProject === null && (
+                      <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--accent)' }} />
+                    )}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

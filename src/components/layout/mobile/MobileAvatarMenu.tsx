@@ -178,7 +178,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
               }}
             >
               <span className="truncate text-left text-base">
-                {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'Todos los proyectos'}
+                {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'General'}
               </span>
               <ChevronDown className={`h-4 w-4 transition-transform ${expandedProjectSelector ? 'rotate-180' : ''}`} />
             </button>
@@ -191,13 +191,13 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   borderColor: 'var(--menues-border)'
                 }}
               >
-                {/* Opción "Todos los proyectos" */}
+                {/* Opción "General" */}
                 <button
                   onClick={() => projectMutation.mutate(null)}
                   className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                   style={{ color: 'var(--menues-fg)' }}
                 >
-                  Todos los proyectos
+                  General
                 </button>
                 {projectsData?.map((project: any) => (
                   <button

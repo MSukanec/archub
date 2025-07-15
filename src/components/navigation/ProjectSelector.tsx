@@ -1,10 +1,11 @@
 import React from 'react'
-import { ChevronDown, Folder, FolderOpen } from 'lucide-react'
+import { ChevronDown, Folder, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -58,18 +59,12 @@ export function ProjectSelector() {
     updateProjectMutation.mutate(projectId)
   }
 
-  // All projects options including "Todos los proyectos"
-  const allOptions = [
-    { id: null, name: "Todos los proyectos" },
-    ...projects
-  ]
-
   const displayName = selectedProjectId === null 
-    ? "Todos los proyectos"
-    : currentProject?.name || "Todos los proyectos"
+    ? "General"
+    : currentProject?.name || "General"
 
   const displayIcon = selectedProjectId === null 
-    ? <FolderOpen className="w-4 h-4" />
+    ? <Building2 className="w-4 h-4" />
     : <Folder className="w-4 h-4" />
 
   return (
@@ -85,23 +80,39 @@ export function ProjectSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        {allOptions.map((option) => (
+        {/* Lista de proyectos */}
+        {projects.map((project) => (
           <DropdownMenuItem
-            key={option.id || 'all'}
-            onClick={() => handleProjectSelect(option.id)}
-            className="flex items-center gap-2"
+            key={project.id}
+            onClick={() => handleProjectSelect(project.id)}
+            className="flex items-center justify-between"
           >
-            {option.id === null ? (
-              <FolderOpen className="w-4 h-4" />
-            ) : (
+            <div className="flex items-center gap-2">
               <Folder className="w-4 h-4" />
+              <span className="truncate">{project.name}</span>
+            </div>
+            {selectedProjectId === project.id && (
+              <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
             )}
-            <span className="truncate">{option.name}</span>
-            {(selectedProjectId === null && option.id === null) || (selectedProjectId === option.id) ? (
-              <div className="w-2 h-2 bg-accent rounded-full ml-auto" />
-            ) : null}
           </DropdownMenuItem>
         ))}
+        
+        {/* Separador */}
+        <DropdownMenuSeparator />
+        
+        {/* Opción General */}
+        <DropdownMenuItem
+          onClick={() => handleProjectSelect(null)}
+          className="flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4" />
+            <span className="truncate">General</span>
+          </div>
+          {selectedProjectId === null && (
+            <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+          )}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
