@@ -106,32 +106,45 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Asegurar que hay un concepto de aportes para testing
+  // Eliminar el tipo creado incorrectamente y configurar las categorías existentes
   React.useEffect(() => {
-    const createAportesConceptIfNeeded = async () => {
+    const configureAportesCategories = async () => {
       if (!conceptsData || !userData?.organization?.id) return
       
-      const aportesExists = conceptsData.find(c => c.view_mode?.trim() === 'aportes')
-      if (!aportesExists) {
-        console.log('Creando concepto de aportes para testing...')
-        const { error } = await supabase
+      // Eliminar el tipo incorrecto que creé
+      const incorrectType = conceptsData.find(c => c.name === 'Aportes de Socios')
+      if (incorrectType) {
+        console.log('Eliminando tipo incorrecto...')
+        await supabase
           .from('movement_concepts')
-          .insert({
-            name: 'Aportes de Socios',
-            view_mode: 'aportes',
-            extra_fields: ['socio_id'],
-            is_system: true,
-            parent_id: null
-          })
-        
-        if (!error) {
-          queryClient.invalidateQueries({ queryKey: ['movement-concepts'] })
-          console.log('Concepto de aportes creado exitosamente')
-        }
+          .delete()
+          .eq('id', incorrectType.id)
+      }
+      
+      // Configurar las categorías existentes con view_mode aportes
+      const { error: updateTerceros } = await supabase
+        .from('movement_concepts')
+        .update({ 
+          view_mode: 'aportes',
+          extra_fields: ['cliente_id']
+        })
+        .eq('name', 'Aportes de Terceros')
+      
+      const { error: updatePropios } = await supabase
+        .from('movement_concepts')
+        .update({ 
+          view_mode: 'aportes',
+          extra_fields: ['socio_id']
+        })
+        .eq('name', 'Aportes Propios')
+      
+      if (!updateTerceros && !updatePropios) {
+        queryClient.invalidateQueries({ queryKey: ['movement-concepts'] })
+        console.log('Categorías de aportes configuradas correctamente')
       }
     }
     
-    createAportesConceptIfNeeded()
+    configureAportesCategories()
   }, [conceptsData, userData?.organization?.id])
 
   // Mantener compatibilidad con la variable concepts
@@ -222,7 +235,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     if (typeId && typeId !== selectedTypeId) {
       setSelectedTypeId(typeId)
       
-      // Detectar tipo de formulario por view_mode
+      // Detectar tipo de formulario por view_mode (primero en tipos, luego en categorías)
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
       const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
       const isConversionType = viewMode === "conversion"
@@ -250,6 +263,26 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       }
     }
   }, [form.watch('type_id'), conversionForm.watch('type_id'), transferForm.watch('type_id'), aportesForm.watch('type_id'), concepts, selectedTypeId])
+
+  // Efecto adicional para detectar aportes cuando se selecciona una categoría
+  React.useEffect(() => {
+    const categoryId = form.watch('category_id')
+    if (categoryId && categories) {
+      const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
+      const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
+      const isAportesCategory = viewMode === "aportes"
+      
+      if (isAportesCategory) {
+        console.log('Category with aportes detected:', { categoryId, selectedCategory })
+        setIsAportes(true)
+        setIsConversion(false)
+        setIsTransfer(false)
+        
+        // Sincronizar category_id y type_id en el formulario de aportes
+        aportesForm.setValue('type_id', form.watch('type_id'))
+      }
+    }
+  }, [form.watch('category_id'), categories])
 
 
 
@@ -1352,46 +1385,51 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
-            {/* Selector dinámico (Cliente o Socio) */}
+            {/* Selector dinámico (Cliente o Socio) basado en la categoría seleccionada */}
             <FormField
               control={aportesForm.control}
               name="contact_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {conceptsData?.find(c => c.id === aportesForm.watch('type_id'))?.extra_fields?.[0] === 'cliente_id' ? 'Cliente *' : 'Socio *'}
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={
-                          conceptsData?.find(c => c.id === aportesForm.watch('type_id'))?.extra_fields?.[0] === 'cliente_id' 
-                            ? "Seleccionar cliente" 
-                            : "Seleccionar socio"
-                        } />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {conceptsData?.find(c => c.id === aportesForm.watch('type_id'))?.extra_fields?.[0] === 'cliente_id' ? (
-                        // Mostrar contactos
-                        contacts?.map((contact) => (
-                          <SelectItem key={contact.id} value={contact.id}>
-                            {contact.name} ({contact.email})
-                          </SelectItem>
-                        ))
-                      ) : (
-                        // Mostrar miembros de la organización
-                        members?.map((member) => (
-                          <SelectItem key={member.id} value={member.id}>
-                            {member.first_name} {member.last_name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                // Buscar la categoría seleccionada para obtener extra_fields
+                const selectedCategory = categories?.find(c => c.id === form.watch('category_id'))
+                const extraField = selectedCategory?.extra_fields?.[0]
+                const isClienteSelector = extraField === 'cliente_id'
+                
+                return (
+                  <FormItem>
+                    <FormLabel>
+                      {isClienteSelector ? 'Cliente *' : 'Socio *'}
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            isClienteSelector ? "Seleccionar cliente" : "Seleccionar socio"
+                          } />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {isClienteSelector ? (
+                          // Mostrar contactos para "Aportes de Terceros"
+                          contacts?.map((contact) => (
+                            <SelectItem key={contact.id} value={contact.id}>
+                              {contact.name} ({contact.email})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          // Mostrar miembros para "Aportes Propios"
+                          members?.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.first_name} {member.last_name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
 
             {/* Fila: Moneda | Billetera */}
