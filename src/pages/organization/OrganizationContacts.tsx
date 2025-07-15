@@ -18,17 +18,16 @@ import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('name_asc')
   const [filterByType, setFilterByType] = useState('all')
   const { openModal } = useGlobalModalStore()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [contactToDelete, setContactToDelete] = useState<any>(null)
-  const [showDangerousConfirmation, setShowDangerousConfirmation] = useState(false)
+
+  const { showDeleteConfirmation } = useDeleteConfirmation()
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: contacts = [], isLoading: contactsLoading } = useContacts()
@@ -146,19 +145,23 @@ export default function OrganizationContacts() {
   }, [contacts, searchValue, filterByType, sortBy])
 
   const handleEditContact = (contact: any) => {
-    setEditingContact(contact)
-    setShowEditModal(true)
+    openModal('contact', { 
+      isEditing: true, 
+      editingContact: contact 
+    })
   }
 
   const handleDeleteContact = (contact: any) => {
-    setContactToDelete(contact)
-    setShowDangerousConfirmation(true)
-  }
-
-  const confirmDeleteContact = () => {
-    if (contactToDelete) {
-      deleteContactMutation.mutate(contactToDelete.id)
-    }
+    const contactName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+    
+    showDeleteConfirmation({
+      title: "Eliminar contacto",
+      description: "Esta acción eliminará permanentemente el contacto de la organización y todos sus datos asociados.",
+      itemName: contactName,
+      destructiveActionText: "Eliminar contacto",
+      onConfirm: () => deleteContactMutation.mutate(contact.id),
+      isLoading: deleteContactMutation.isPending
+    })
   }
 
   const handleClearFilters = () => {
@@ -189,8 +192,7 @@ export default function OrganizationContacts() {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
       queryClient.invalidateQueries({ queryKey: ['organization-contacts'] })
       
-      setShowDangerousConfirmation(false)
-      setContactToDelete(null)
+      // Modal se cierra automáticamente
     },
     onError: (error) => {
       toast({
@@ -453,23 +455,7 @@ export default function OrganizationContacts() {
         />
       </div>
 
-      {/* Modales */}
-
-      {/* Modal de confirmación peligrosa para eliminar */}
-      {contactToDelete && (
-        <DangerousConfirmationModal
-          open={showDangerousConfirmation}
-          onClose={() => {
-            setShowDangerousConfirmation(false)
-            setContactToDelete(null)
-          }}
-          onConfirm={confirmDeleteContact}
-          title="Eliminar contacto"
-          description="Esta acción eliminará permanentemente el contacto de la organización y todos sus datos asociados."
-          itemName={contactToDelete.full_name || `${contactToDelete.first_name || ''} ${contactToDelete.last_name || ''}`.trim()}
-          isLoading={deleteContactMutation.isPending}
-        />
-      )}
+      {/* Los modales de confirmación ahora se manejan a través del sistema global */}
     </Layout>
   )
 }

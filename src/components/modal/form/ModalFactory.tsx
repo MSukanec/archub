@@ -12,6 +12,7 @@ import { DocumentUploadFormModal } from '../modals/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/DocumentFolderFormModal';
 import MovementFormModal from '../modals/MovementFormModal';
 import MovementConceptFormModal from '../modals/MovementConceptFormModal';
+import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -43,6 +44,15 @@ export function ModalFactory() {
       return <MovementFormModal modalData={data} onClose={closeModal} />;
     case 'movement-concept':
       return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
+    case 'delete-confirmation':
+      return <DeleteConfirmationModal 
+        title={data?.title || 'Eliminar elemento'}
+        description={data?.description || '¿Estás seguro de que deseas eliminar este elemento?'}
+        itemName={data?.itemName}
+        destructiveActionText={data?.destructiveActionText}
+        onConfirm={data?.onConfirm || (() => {})}
+        isLoading={data?.isLoading || false}
+      />;
     default:
       return null;
   }
