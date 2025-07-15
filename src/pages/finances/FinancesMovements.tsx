@@ -498,7 +498,11 @@ export default function Movements() {
 
     // Separate movements with conversion_group_id from regular movements
     movements.forEach(movement => {
-      if (movement.conversion_group_id) {
+      // Check if it's a transfer movement - transfers should NOT be grouped
+      const typeName = movement.movement_data?.type?.name || "";
+      const isTransfer = typeName === "Transferencia Interna" || typeName.toLowerCase().includes("transferencia");
+      
+      if (movement.conversion_group_id && !isTransfer) {
         if (!conversionGroups.has(movement.conversion_group_id)) {
           conversionGroups.set(movement.conversion_group_id, []);
         }
