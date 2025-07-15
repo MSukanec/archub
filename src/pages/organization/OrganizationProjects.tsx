@@ -165,6 +165,8 @@ export default function OrganizationProjects() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      // Also update project context
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
       toast({
         title: "Proyecto seleccionado",
         description: "El proyecto se ha seleccionado correctamente"
@@ -182,6 +184,42 @@ export default function OrganizationProjects() {
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
     // Only update header, no navigation
+  }
+
+  // Mutation to go to General mode (no project selected)
+  const selectGeneralMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: null })
+        .eq('user_id', userData?.user.id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      // Also update project context
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      toast({
+        title: "Modo General activado",
+        description: "Ahora puedes ver información de toda la organización"
+      })
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo cambiar al modo General",
+        variant: "destructive"
+      })
+    }
+  })
+
+  const handleSelectGeneral = () => {
+    selectGeneralMutation.mutate()
   }
 
   const handleEdit = (project: any) => {
@@ -364,6 +402,51 @@ export default function OrganizationProjects() {
           icon={<Folder className="w-5 h-5" />}
           features={projectFeatures}
         />
+
+        {/* General Mode Card */}
+        <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200 cursor-default">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-12 w-12 border border-black shadow-lg">
+                  <AvatarFallback className="text-black font-bold text-lg bg-gray-200">
+                    G
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-foreground text-lg">General</h3>
+                  <p className="text-sm text-muted-foreground">Ver información de toda la organización</p>
+                </div>
+              </div>
+              
+              {!userData?.preferences?.last_project_id ? (
+                <Button 
+                  size="sm"
+                  className="text-xs font-medium px-3 py-1 h-7 text-white"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Already in General mode, do nothing
+                  }}
+                >
+                  ACTIVO
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="text-xs font-medium px-3 py-1 h-7"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectGeneral();
+                  }}
+                >
+                  Seleccionar activo
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
