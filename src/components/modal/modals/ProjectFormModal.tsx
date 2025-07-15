@@ -28,7 +28,7 @@ const createProjectSchema = z.object({
   project_type_id: z.string().optional(),
   modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
-  color: z.string().default("#ffffff"),
+  color: z.string().optional(),
 });
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
