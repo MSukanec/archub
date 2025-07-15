@@ -893,7 +893,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     <SelectContent>
                       {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
-                          {concept.name}
+                          <div className="flex items-center justify-between w-full">
+                            <span>{concept.name}</span>
+                            {concept.is_system && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                                Sistema
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1190,7 +1197,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     <SelectContent>
                       {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
-                          {concept.name}
+                          <div className="flex items-center justify-between w-full">
+                            <span>{concept.name}</span>
+                            {concept.is_system && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                                Sistema
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1397,7 +1411,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     <SelectContent>
                       {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
-                          {concept.name}
+                          <div className="flex items-center justify-between w-full">
+                            <span>{concept.name}</span>
+                            {concept.is_system && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                                Sistema
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1423,7 +1444,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     <SelectContent>
                       {categories?.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                          <div className="flex items-center justify-between w-full">
+                            <span>{category.name}</span>
+                            {category.is_system && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                                Sistema
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1655,7 +1683,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   <SelectContent>
                     {concepts?.map((concept) => (
                       <SelectItem key={concept.id} value={concept.id}>
-                        {concept.name}
+                        <div className="flex items-center justify-between w-full">
+                          <span>{concept.name}</span>
+                          {concept.is_system && (
+                            <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                              Sistema
+                            </span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1688,7 +1723,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   <SelectContent>
                     {categories?.map((category: any) => (
                       <SelectItem key={category.id} value={category.id}>
-                        {category.name}
+                        <div className="flex items-center justify-between w-full">
+                          <span>{category.name}</span>
+                          {category.is_system && (
+                            <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                              Sistema
+                            </span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1718,7 +1760,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   <SelectContent>
                     {subcategories?.map((subcategory: any) => (
                       <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
+                        <div className="flex items-center justify-between w-full">
+                          <span>{subcategory.name}</span>
+                          {subcategory.is_system && (
+                            <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                              Sistema
+                            </span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
