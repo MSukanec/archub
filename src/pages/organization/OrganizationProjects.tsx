@@ -149,7 +149,7 @@ export default function OrganizationProjects() {
     ]
   }
 
-  // Mutación para seleccionar proyecto
+  // Mutación para seleccionar proyecto  
   const selectProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase) {
@@ -162,11 +162,14 @@ export default function OrganizationProjects() {
         .eq('user_id', userData?.user.id)
       
       if (error) throw error
+      
+      return projectId;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      // Also update project context
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+    onSuccess: (projectId) => {
+      // Force immediate refresh of user data
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.refetchQueries({ queryKey: ['current-user'] });
+      
       toast({
         title: "Proyecto seleccionado",
         description: "El proyecto se ha seleccionado correctamente"
@@ -201,9 +204,10 @@ export default function OrganizationProjects() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      // Also update project context
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      // Force immediate refresh of user data  
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.refetchQueries({ queryKey: ['current-user'] });
+      
       toast({
         title: "Modo General activado",
         description: "Ahora puedes ver información de toda la organización"
