@@ -160,12 +160,11 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     if (typeId !== selectedTypeId) {
       setSelectedTypeId(typeId)
       
-      // Detectar tipo de formulario por UUID específico
-      const CONVERSION_CONCEPT_ID = '5c0bb8fb-33e4-4390-b125-616484c8a672'
-      const TRANSFER_CONCEPT_ID = '20558936-6a90-4944-a334-5af47e5bd7d9'
+      // Detectar tipo de formulario por view_mode
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
-      const isConversionType = typeId === CONVERSION_CONCEPT_ID
-      const isTransferType = typeId === TRANSFER_CONCEPT_ID
+      const viewMode = selectedConcept?.view_mode ?? "normal"
+      const isConversionType = viewMode === "conversion"
+      const isTransferType = viewMode === "transfer"
       
 
       
@@ -256,6 +255,10 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       setSelectedTypeId(editingMovement.type_id || '')
       setSelectedCategoryId(editingMovement.category_id || '')
       
+      // Detectar view_mode del concepto para cargar el formulario correcto
+      const selectedConcept = concepts?.find((concept: any) => concept.id === editingMovement.type_id)
+      const viewMode = selectedConcept?.view_mode ?? "normal"
+      
       // Map currency_id and wallet_id to organization-specific IDs
       const matchingCurrency = currencies?.find((c: any) => 
         c.currency?.id === editingMovement.currency_id
@@ -266,23 +269,58 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       
       console.log('Loading editing movement:', {
         editingMovement,
+        viewMode,
         matchingCurrency: matchingCurrency?.currency_id,
         matchingWallet: matchingWallet?.wallet_id,
         created_by: editingMovement.created_by
       })
       
-      form.reset({
-        movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
-        created_by: editingMovement.created_by || '',
-        description: editingMovement.description || '',
-        amount: editingMovement.amount || 0,
-        exchange_rate: editingMovement.exchange_rate || undefined,
-        type_id: editingMovement.type_id || '',
-        category_id: editingMovement.category_id || '',
-        subcategory_id: editingMovement.subcategory_id || '',
-        currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-        wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
-      })
+      // Establecer el tipo de formulario según el view_mode
+      setIsConversion(viewMode === "conversion")
+      setIsTransfer(viewMode === "transfer")
+      
+      // Cargar datos en el formulario correcto según el view_mode
+      if (viewMode === "conversion") {
+        // Para conversiones, necesitamos cargar datos desde el grupo de conversión
+        // Por ahora, cargaremos datos básicos en el formulario de conversión
+        conversionForm.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          currency_id_from: matchingCurrency?.currency_id || editingMovement.currency_id || '',
+          wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          amount_from: editingMovement.amount || 0,
+          currency_id_to: '',
+          wallet_id_to: '',
+          amount_to: 0,
+          exchange_rate: editingMovement.exchange_rate || undefined
+        })
+      } else if (viewMode === "transfer") {
+        // Para transferencias, cargar datos en formulario de transferencia
+        transferForm.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
+          wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          wallet_id_to: '',
+          amount: editingMovement.amount || 0
+        })
+      } else {
+        // Formulario normal
+        form.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined,
+          type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
+          subcategory_id: editingMovement.subcategory_id || '',
+          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
+          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+        })
+      }
       setPanel('view')
     } else {
       // New movement mode - wait for all data to be loaded
