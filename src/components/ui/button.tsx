@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] hover:bg-[var(--button-primary-hover-bg)] hover:text-[var(--button-primary-hover-text)] rounded-md px-4 py-2",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/80 rounded-md px-4 py-2",
+          "bg-destructive text-[var(--destructive-text)] hover:bg-destructive/80 rounded-md px-4 py-2",
         outline:
           "border border-border bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2",
         secondary:
