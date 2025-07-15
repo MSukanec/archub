@@ -4,7 +4,7 @@ import { LucideIcon } from 'lucide-react';
 
 interface FormModalHeaderProps {
   title?: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon; // Volviendo al patrón original
   leftActions?: ReactNode;
   rightActions?: ReactNode;
   className?: string;

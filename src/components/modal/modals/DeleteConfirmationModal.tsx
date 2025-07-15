@@ -3,7 +3,7 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 import FormModalBody from "@/components/modal/form/FormModalBody"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
-import { AlertTriangle } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 
 interface DeleteConfirmationModalProps {
   title: string
@@ -38,7 +38,7 @@ export default function DeleteConfirmationModal({
         {/* Warning section */}
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 flex-shrink-0">
-            <AlertTriangle className="h-6 w-6 text-destructive" />
+            <Trash2 className="h-6 w-6 text-destructive" />
           </div>
           <div className="flex-1">
             <p className="text-base text-foreground leading-relaxed">
@@ -55,7 +55,7 @@ export default function DeleteConfirmationModal({
         {/* Warning message */}
         <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+            <Trash2 className="h-4 w-4 text-destructive flex-shrink-0" />
             <p className="text-sm text-destructive font-medium">
               Esta acción no se puede deshacer
             </p>
@@ -68,7 +68,7 @@ export default function DeleteConfirmationModal({
   const headerContent = (
     <FormModalHeader 
       title={title}
-      icon={<AlertTriangle className="h-5 w-5 text-destructive" />}
+      icon={Trash2}
     />
   )
 
