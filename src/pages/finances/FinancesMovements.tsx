@@ -48,6 +48,8 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency } from "@/hooks/use-currencies";
+import { useProjectsMap } from "@/hooks/use-projects";
+import { ProjectBadge } from "@/components/ui-custom/ProjectBadge";
 import { getMovementFiles } from "@/lib/storage/uploadMovementFiles";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +57,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
+import { useProjectContext } from "@/stores/projectContext";
 
 interface Movement {
   id: string;
@@ -204,7 +207,8 @@ export default function Movements() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
-  const projectId = userData?.preferences?.last_project_id;
+  const { selectedProjectId } = useProjectContext();
+  const projectId = selectedProjectId;
 
   const { data: movements = [], isLoading } = useMovements(
     organizationId,
@@ -213,6 +217,12 @@ export default function Movements() {
 
   // Get organization's default currency
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  
+  // Get projects map for the project badges (only when in GENERAL mode)
+  const { data: projectsMap = {} } = useProjectsMap(organizationId);
+  
+  // Determine if we're in GENERAL mode (no project selected)
+  const isGeneralMode = !projectId;
 
   // Load file counts for all movements
   useEffect(() => {
@@ -770,6 +780,32 @@ export default function Movements() {
   const currencyBalances = calculateBalanceByCurrency();
 
   const tableColumns = [
+    // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)
+    ...(isGeneralMode ? [{
+      key: "project",
+      label: "Proyecto", 
+      width: "8%",
+      sortable: true,
+      sortType: "string" as const,
+      render: (item: Movement | ConversionGroup) => {
+        // Para grupos de conversión y transferencia, usar el project_id del primer movimiento
+        let itemProjectId: string | null = null;
+        
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) {
+          const group = item as any;
+          itemProjectId = group.movements?.[0]?.project_id || null;
+        } else {
+          itemProjectId = (item as Movement).project_id || null;
+        }
+        
+        return (
+          <ProjectBadge 
+            projectId={itemProjectId}
+            projectsMap={projectsMap}
+          />
+        );
+      },
+    }] : []),
     {
       key: "movement_date",
       label: "Fecha",

@@ -9,6 +9,7 @@ interface Project {
   created_by: string
   organization_id: string
   is_active: boolean
+  color?: string
   project_data?: {
     project_type_id?: string
     modality_id?: string
@@ -201,6 +202,43 @@ export function useProject(projectId: string | undefined) {
       return transformedProject
     },
     enabled: !!projectId && !!supabase,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+// Hook para obtener un mapa de proyectos con colores (usado en la tabla de movimientos en modo GENERAL)
+export function useProjectsMap(organizationId: string | undefined) {
+  return useQuery<Record<string, { id: string; name: string; color: string | null }>>({
+    queryKey: ['projects-map', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) {
+        throw new Error('Organization ID required')
+      }
+
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name, color')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+      
+      if (error) {
+        throw error
+      }
+      
+      // Transform to a map for easy lookup
+      const projectsMap: Record<string, { id: string; name: string; color: string | null }> = {}
+      
+      data?.forEach(project => {
+        projectsMap[project.id] = {
+          id: project.id,
+          name: project.name,
+          color: project.color
+        }
+      })
+      
+      return projectsMap
+    },
+    enabled: !!organizationId && !!supabase,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
