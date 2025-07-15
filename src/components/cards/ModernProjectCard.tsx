@@ -92,7 +92,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           
           {/* Project Avatar - Top Left */}
           <div className="absolute top-4 left-4">
-            <Avatar className="h-12 w-12 border-2 border-black shadow-lg">
+            <Avatar className="h-12 w-12 border border-black shadow-lg">
               <AvatarFallback 
                 className="text-black font-bold text-lg"
                 style={{ backgroundColor: project.color || '#ffffff' }}

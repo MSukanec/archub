@@ -157,10 +157,12 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         } else if (data.project_type_id || data.modality_id) {
           const { error: dataError } = await supabase
             .from('project_data')
-            .insert({
+            .upsert({
               project_id: editingProject.id,
               project_type_id: data.project_type_id || null,
               modality_id: data.modality_id || null,
+            }, {
+              onConflict: 'project_id'
             });
 
           if (dataError) throw dataError;
