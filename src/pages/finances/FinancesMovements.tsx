@@ -869,8 +869,8 @@ export default function Movements() {
         
         if ('is_transfer_group' in item) {
           return (
-            <span className="text-xs font-medium text-violet-600 dark:text-violet-400">
-              TRANSFERENCIAS
+            <span className="text-xs font-medium">
+              Transferencia
             </span>
           );
         }
@@ -905,8 +905,8 @@ export default function Movements() {
         if ('is_transfer_group' in item) {
           return (
             <div>
-              <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
-                TRANSFERENCIAS
+              <div className="text-xs font-medium">
+                Transferencia
               </div>
               <div className="text-xs text-muted-foreground">
                 {item.from_wallet} → {item.to_wallet}
@@ -951,8 +951,8 @@ export default function Movements() {
         if ('is_transfer_group' in item) {
           return (
             <div>
-              <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
-                TRANSFERENCIAS {item.from_wallet} → {item.to_wallet}
+              <div className="text-xs font-medium">
+                Transferencia {item.from_wallet} → {item.to_wallet}
               </div>
               <div className="text-xs text-muted-foreground">
                 {item.description || "Sin descripción"}
@@ -986,7 +986,7 @@ export default function Movements() {
         if ('is_transfer_group' in item) {
           return (
             <div className="text-xs">
-              <div className="text-violet-600 dark:text-violet-400">{item.currency}</div>
+              <div>{item.currency}</div>
             </div>
           );
         }
@@ -1057,10 +1057,10 @@ export default function Movements() {
         if ('is_transfer_group' in item) {
           return (
             <div className="text-xs space-y-1">
-              <div className="font-medium text-violet-600 dark:text-violet-400">
+              <div className="font-medium text-red-600">
                 -${item.amount?.toLocaleString() || "0"}
               </div>
-              <div className="font-medium text-violet-600 dark:text-violet-400">
+              <div className="font-medium text-green-600">
                 +${item.amount?.toLocaleString() || "0"}
               </div>
             </div>
@@ -1124,7 +1124,7 @@ export default function Movements() {
           return (
             <div className="flex items-center justify-center">
               {fileCount > 0 ? (
-                <Paperclip className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <Paperclip className="h-4 w-4 text-accent" />
               ) : null}
             </div>
           );
