@@ -59,19 +59,23 @@ export default function DeleteConfirmationModal({
       const confirmFunction = onConfirm || onDelete
       if (confirmFunction) {
         confirmFunction()
+        closeModal()
       }
     } else if (mode === 'dangerous') {
       if (inputValue.trim() === (itemName || '').trim()) {
         const confirmFunction = onConfirm || onDelete
         if (confirmFunction) {
           confirmFunction()
+          closeModal()
         }
       }
     } else if (mode === 'replace') {
       if (actionType === 'delete' && onDelete) {
         onDelete()
+        closeModal()
       } else if (actionType === 'replace' && onReplace && selectedReplacementId) {
         onReplace(selectedReplacementId)
+        closeModal()
       }
     }
   }
