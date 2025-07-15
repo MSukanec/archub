@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 15, 2025. HERO PROJECT CARDS COMPLETED: Implemented complete modern project card system with color integration and modal fixes - COMPLETED
+  • Fixed project creation/editing modal: resolved "duplicate key" database constraint error using upsert instead of insert
+  • Enhanced project cards with hero-style design: two-section layout with image/avatar top section and project details bottom
+  • Avatar styling: text color changed to black for visibility, border changed to thin elegant style (border instead of border-2)
+  • Project color system: color field controls avatar background, default white (#ffffff), removed dynamic background from card bottom
+  • Improved cache invalidation: simplified query invalidation to prevent unnecessary GET request errors after successful saves
+  • Form validation: simplified color schema to optional field, cleaned data before database submission
+  • Visual consistency: removed glassmorphism effects from avatar, maintained shadow-lg for depth without double borders
 - July 15, 2025. PROJECT COLUMN IN MOVEMENTS TABLE COMPLETED: Added new "Proyecto" column visible only in General mode with project badges - COMPLETED
   • Created ProjectBadge component with project.color backgrounds and white text for consistent project identification
   • Added useProjectsMap hook to fetch projects with colors from database for badge rendering
