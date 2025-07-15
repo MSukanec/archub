@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore"
+import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 import FormModalBody from "@/components/modal/form/FormModalBody"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
@@ -185,10 +186,13 @@ export default function DeleteConfirmationModal({
     />
   )
 
-  return {
-    viewPanel,
-    editPanel,
-    headerContent,
-    footerContent
-  }
+  return (
+    <FormModalLayout
+      columns={1}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={closeModal}
+    />
+  )
 }

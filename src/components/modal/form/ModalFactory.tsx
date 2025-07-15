@@ -46,11 +46,16 @@ export function ModalFactory() {
       return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
+        mode={data?.mode || 'simple'}
         title={data?.title || 'Eliminar elemento'}
         description={data?.description || '¿Estás seguro de que deseas eliminar este elemento?'}
         itemName={data?.itemName}
         destructiveActionText={data?.destructiveActionText}
-        onConfirm={data?.onConfirm || (() => {})}
+        onConfirm={data?.onConfirm}
+        onDelete={data?.onDelete}
+        onReplace={data?.onReplace}
+        replacementOptions={data?.replacementOptions || []}
+        currentCategoryId={data?.currentCategoryId}
         isLoading={data?.isLoading || false}
       />;
     default:
