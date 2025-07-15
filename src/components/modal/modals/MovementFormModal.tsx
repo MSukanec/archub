@@ -1386,7 +1386,11 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       onLeftClick={handleClose}
       rightLabel={
         currentPanel === 'view' && editingMovement ? "Editar" :
-        editingMovement ? "Actualizar" : (isConversion ? "Crear Conversión" : "Guardar")
+        editingMovement ? "Actualizar" : (
+          isConversion ? "Crear Conversión" : 
+          isTransfer ? "Crear Transferencia" : 
+          "Guardar"
+        )
       }
       onRightClick={() => {
         if (currentPanel === 'view' && editingMovement) {
@@ -1394,12 +1398,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         } else {
           if (isConversion) {
             conversionForm.handleSubmit(onSubmitConversion)()
+          } else if (isTransfer) {
+            transferForm.handleSubmit(onSubmitTransfer)()
           } else {
             form.handleSubmit(onSubmit)()
           }
         }
       }}
-      rightLoading={isLoading || createConversionMutation.isPending}
+      rightLoading={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending}
     />
   )
 
