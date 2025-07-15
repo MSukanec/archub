@@ -104,14 +104,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
   const { data: wallets } = useOrganizationWallets(userData?.organization?.id)
   
-  // Debug: Log wallets to see duplicates
-  React.useEffect(() => {
-    if (wallets) {
-      console.log('Wallets loaded:', wallets)
-      console.log('Wallet IDs:', wallets.map(w => w.wallet_id))
-      console.log('Duplicate wallet_ids?', new Set(wallets.map(w => w.wallet_id)).size !== wallets.length)
-    }
-  }, [wallets])
+
   const { data: contacts } = useContacts()
   const { data: projectClients } = useProjectClients(userData?.preferences?.last_project_id)
   const { data: conceptsData } = useMovementConcepts('types')
@@ -1001,7 +994,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                         </FormControl>
                         <SelectContent>
                           {wallets?.map((wallet) => (
-                            <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                            <SelectItem key={wallet.id} value={wallet.wallet_id}>
                               {wallet.wallets?.name || 'Sin nombre'}
                             </SelectItem>
                           ))}
@@ -1086,7 +1079,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                         </FormControl>
                         <SelectContent>
                           {wallets?.map((wallet) => (
-                            <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                            <SelectItem key={wallet.id} value={wallet.wallet_id}>
                               {wallet.wallets?.name || 'Sin nombre'}
                             </SelectItem>
                           ))}
@@ -1297,7 +1290,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                           </FormControl>
                           <SelectContent>
                             {wallets?.map((wallet) => (
-                              <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
                                 {wallet.wallets?.name || 'Sin nombre'}
                               </SelectItem>
                             ))}
@@ -1322,7 +1315,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                           </FormControl>
                           <SelectContent>
                             {wallets?.map((wallet) => (
-                              <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
                                 {wallet.wallets?.name || 'Sin nombre'}
                               </SelectItem>
                             ))}
@@ -1592,7 +1585,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                       </FormControl>
                       <SelectContent>
                         {wallets?.map((wallet) => (
-                          <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                          <SelectItem key={wallet.id} value={wallet.wallet_id}>
                             {wallet.wallets?.name || 'Sin nombre'}
                           </SelectItem>
                         ))}
@@ -1860,7 +1853,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     </FormControl>
                     <SelectContent>
                       {wallets?.map((wallet) => (
-                        <SelectItem key={wallet.wallet_id} value={wallet.wallet_id}>
+                        <SelectItem key={wallet.id} value={wallet.wallet_id}>
                           {wallet.wallets?.name || 'Sin nombre'}
                         </SelectItem>
                       ))}
