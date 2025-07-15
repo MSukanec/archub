@@ -327,9 +327,20 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   }, [form.watch('category_id')])
 
   React.useEffect(() => {
+    console.log('Effect triggered for editingMovement:', {
+      hasEditingMovement: !!editingMovement,
+      hasMembers: !!members,
+      hasCurrencies: !!currencies,
+      hasWallets: !!wallets,
+      hasConcepts: !!concepts
+    })
+    
     if (editingMovement) {
       // Wait for all data to be loaded
-      if (!members || !currencies || !wallets || !concepts) return
+      if (!members || !currencies || !wallets || !concepts) {
+        console.log('Waiting for data to load...')
+        return
+      }
       
       // Set hierarchical states for editing
       setSelectedTypeId(editingMovement.type_id || '')
@@ -1924,7 +1935,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   const headerContent = (
     <FormModalHeader
-      title={editingMovement ? "Movimiento Financiero" : "Nuevo Movimiento"}
+      title={editingMovement ? "Editar Movimiento" : "Nuevo Movimiento"}
       icon={DollarSign}
       leftActions={
         currentPanel === 'edit' && editingMovement ? (
