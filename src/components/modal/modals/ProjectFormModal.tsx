@@ -28,7 +28,7 @@ const createProjectSchema = z.object({
   project_type_id: z.string().optional(),
   modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
-  color: z.string().optional(),
+  color: z.string().default("#ffffff"),
 });
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
@@ -131,7 +131,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             name: data.name,
             status: data.status,
             created_by: data.created_by,
-            color: data.color,
+            color: data.color || "#ffffff",
           })
           .eq('id', editingProject.id);
 
@@ -178,7 +178,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             created_by: data.created_by,
             created_at: new Date(data.created_at).toISOString(),
             is_active: true,
-            color: data.color,
+            color: data.color || "#ffffff",
           })
           .select()
           .single();
