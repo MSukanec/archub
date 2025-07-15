@@ -81,7 +81,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           ) : (
             <div 
               className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80"
-              style={{ backgroundColor: project.color || '#3B82F6' }}
+              style={{ backgroundColor: project.color || '#ffffff' }}
             >
               {getProjectInitials(project.name)}
             </div>
@@ -92,10 +92,10 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           
           {/* Project Avatar - Top Left */}
           <div className="absolute top-4 left-4">
-            <Avatar className="h-12 w-12 border-2 border-white/30 shadow-lg">
+            <Avatar className="h-12 w-12 bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
               <AvatarFallback 
-                className="text-white font-bold text-lg"
-                style={{ backgroundColor: project.color || '#3B82F6' }}
+                className="text-white font-bold text-lg bg-transparent"
+                style={{ backgroundColor: project.color || '#ffffff' }}
               >
                 {getProjectInitials(project.name)}
               </AvatarFallback>
@@ -133,7 +133,10 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         </div>
 
         {/* INFO SECTION - Información del proyecto */}
-        <CardContent className="p-4 space-y-4">
+        <CardContent 
+          className="p-4 space-y-4"
+          style={{ backgroundColor: project.color || '#ffffff' }}
+        >
           {/* Project Name and Active Button */}
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-foreground text-lg leading-tight truncate flex-1 mr-3">

@@ -86,7 +86,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
       project_type_id: editingProject?.project_data?.project_type_id || "",
       modality_id: editingProject?.project_data?.modality_id || "",
       status: editingProject?.status || "active",
-      color: editingProject?.color || "#3B82F6",
+      color: editingProject?.color || "#ffffff",
     }
   });
 
@@ -100,7 +100,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         project_type_id: editingProject.project_data?.project_type_id || "",
         modality_id: editingProject.project_data?.modality_id || "",
         status: editingProject.status,
-        color: editingProject.color || "#3B82F6",
+        color: editingProject.color || "#ffffff",
       });
       setPanel('edit');
     } else if (currentUserMember) {
@@ -111,7 +111,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         project_type_id: "",
         modality_id: "",
         status: "active",
-        color: "#3B82F6",
+        color: "#ffffff",
       });
       setPanel('edit');
     }
@@ -268,10 +268,10 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         <div className="flex items-center gap-2 mt-1">
           <div 
             className="w-4 h-4 rounded border"
-            style={{ backgroundColor: editingProject?.color || '#3B82F6' }}
+            style={{ backgroundColor: editingProject?.color || '#ffffff' }}
           />
           <p className="text-muted-foreground">
-            {editingProject?.color || '#3B82F6'}
+            {editingProject?.color || '#ffffff'}
           </p>
         </div>
       </div>
@@ -428,15 +428,15 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
                   <div className="flex items-center gap-2">
                     <Input
                       type="color"
-                      value={field.value || "#3B82F6"}
+                      value={field.value || "#ffffff"}
                       onChange={field.onChange}
                       className="w-16 h-10 p-1 border rounded"
                     />
                     <Input
                       type="text"
-                      value={field.value || "#3B82F6"}
+                      value={field.value || "#ffffff"}
                       onChange={field.onChange}
-                      placeholder="#3B82F6"
+                      placeholder="#ffffff"
                       className="flex-1"
                     />
                   </div>
