@@ -128,9 +128,10 @@ export function Header({
   };
 
   const currentOrganization = userData?.organization;
+  // Solo usar selectedProjectId del context, NO usar last_project_id como fallback
   const currentProject = selectedProjectId 
     ? projects.find(p => p.id === selectedProjectId)
-    : projects.find(p => p.id === userData?.preferences?.last_project_id);
+    : null;
 
   // Function to get main sidebar section name based on current context
   const getMainSidebarSection = (context: string) => {

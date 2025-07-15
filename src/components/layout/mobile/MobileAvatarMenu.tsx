@@ -7,6 +7,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
+import { useProjectContext } from "@/stores/projectContext";
 
 interface MobileAvatarMenuProps {
   onClose: () => void;
@@ -43,7 +44,10 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   const currentOrganization = userData?.organization;
   const sortedOrganizations = userData?.organizations || [];
   const { data: projectsData } = useProjects(currentOrganization?.id);
-  const effectiveCurrentProject = userData?.preferences?.last_project_id;
+  
+  // Usar project context en lugar de last_project_id directamente
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const effectiveCurrentProject = selectedProjectId;
 
   // Organization selection mutation
   const organizationMutation = useMutation({
@@ -80,7 +84,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
 
   // Project selection mutation
   const projectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
+    mutationFn: async (projectId: string | null) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
       }
@@ -93,7 +97,9 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
       if (error) throw error;
       return projectId;
     },
-    onSuccess: () => {
+    onSuccess: (projectId) => {
+      // Actualizar el project context Y las preferencias
+      setSelectedProject(projectId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedProjectSelector(false);
     }
@@ -185,6 +191,14 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
                   borderColor: 'var(--menues-border)'
                 }}
               >
+                {/* Opción "Todos los proyectos" */}
+                <button
+                  onClick={() => projectMutation.mutate(null)}
+                  className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                  style={{ color: 'var(--menues-fg)' }}
+                >
+                  Todos los proyectos
+                </button>
                 {projectsData?.map((project: any) => (
                   <button
                     key={project.id}

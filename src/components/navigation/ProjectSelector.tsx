@@ -27,10 +27,10 @@ export function ProjectSelector() {
     }
   }, [userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject])
   
-  // Find current project based on selectedProjectId or fallback to user preferences
+  // Find current project SOLO basado en selectedProjectId, SIN fallback a last_project_id
   const currentProject = selectedProjectId 
     ? projects.find(p => p.id === selectedProjectId)
-    : projects.find(p => p.id === userData?.preferences?.last_project_id)
+    : null
 
   // Update user preferences when project changes
   const updateProjectMutation = useMutation({
