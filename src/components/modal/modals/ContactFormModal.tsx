@@ -347,9 +347,10 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         )}
       </div>
 
-      {/* FORM FIELDS IN GRID - 2 COLUMNS */}
+      {/* FORM FIELDS - RESPONSIVE GRID LAYOUT */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
+          {/* Nombre - Apellido */}
           <FormField
             control={form.control}
             name="first_name"
@@ -378,6 +379,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             )}
           />
 
+          {/* Email - Telefono */}
           <FormField
             control={form.control}
             name="email"
@@ -410,11 +412,12 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             )}
           />
 
+          {/* Tipo de Contacto - FULL WIDTH */}
           <FormField
             control={form.control}
             name="contact_type_id"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="lg:col-span-2">
                 <FormLabel>Tipo de contacto</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
@@ -435,6 +438,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             )}
           />
 
+          {/* Empresa - Ubicacion */}
           <FormField
             control={form.control}
             name="company_name"
@@ -463,11 +467,12 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             )}
           />
 
+          {/* Notas - FULL WIDTH */}
           <FormField
             control={form.control}
             name="notes"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="lg:col-span-2">
                 <FormLabel>Notas</FormLabel>
                 <FormControl>
                   <Textarea 
@@ -521,7 +526,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   return (
     <FormModalLayout
-      columns={1}
+      columns={2}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
