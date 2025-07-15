@@ -204,6 +204,9 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-projects'] });
+      // Force refetch projects immediately
+      queryClient.refetchQueries({ queryKey: ['projects'] });
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
         description: isEditing 
@@ -213,9 +216,10 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
       handleClose();
     },
     onError: (error: any) => {
+      console.error('Project mutation error:', error);
       toast({
         title: "Error",
-        description: error.message || "Hubo un error al procesar el proyecto",
+        description: error.message || error.details || "Hubo un error al procesar el proyecto",
         variant: "destructive",
       });
     }
@@ -228,7 +232,18 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
   };
 
   const onSubmit = (data: CreateProjectForm) => {
-    createProjectMutation.mutate(data);
+    console.log('Form data being submitted:', data);
+    
+    // Clean the data before submission
+    const cleanedData = {
+      ...data,
+      project_type_id: data.project_type_id || null,
+      modality_id: data.modality_id || null,
+      color: data.color || "#ffffff"
+    };
+    
+    console.log('Cleaned data:', cleanedData);
+    createProjectMutation.mutate(cleanedData);
   };
 
   const viewPanel = (
