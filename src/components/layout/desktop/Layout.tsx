@@ -73,19 +73,19 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         <SidebarSubmenu />
       </div>
 
-      {/* Header starts after sidebars */}
+      {/* Header starts after sidebars - Fixed in desktop */}
       <div
-        className={`transition-all duration-300 ease-in-out ${
+        className={`transition-all duration-300 ease-in-out md:fixed md:top-0 md:z-40 md:bg-[var(--layout-bg)] ${
           isSecondaryExpanded
-            ? "md:ml-[304px]" // 40px main + 264px secondary
-            : "md:ml-[80px]" // 40px main + 40px secondary
+            ? "md:ml-[304px] md:right-0" // 40px main + 264px secondary
+            : "md:ml-[80px] md:right-0" // 40px main + 40px secondary
         } ml-0`}
       >
         <Header {...headerProps} />
       </div>
 
       <main
-        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 mt-1 pb-12 ${
+        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 mt-1 pb-12 md:pt-20 ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded
             ? "md:ml-[304px]" // 40px main + 264px secondary
