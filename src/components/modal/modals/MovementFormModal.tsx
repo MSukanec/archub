@@ -167,19 +167,12 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       const isConversionType = typeId === CONVERSION_CONCEPT_ID
       const isTransferType = typeId === TRANSFER_CONCEPT_ID
       
-      console.log('🔍 Type detection:', {
-        typeId,
-        CONVERSION_CONCEPT_ID,
-        TRANSFER_CONCEPT_ID,
-        isConversionType,
-        isTransferType,
-        selectedConcept: selectedConcept?.name
-      })
+
       
 
       
       // Preservar datos cuando cambiamos entre tipos de formulario
-      if (isConversionType && !isConversion && !isTransfer) {
+      if (isConversionType && !isConversion) {
         // Cambiar a conversión desde normal o transferencia
         const currentCreator = isTransfer ? transferForm.getValues('created_by') : form.getValues('created_by')
         const currentDate = isTransfer ? transferForm.getValues('movement_date') : form.getValues('movement_date')
@@ -188,7 +181,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
           conversionForm.setValue('movement_date', currentDate)
         }
       }
-      else if (isTransferType && !isTransfer && !isConversion) {
+      else if (isTransferType && !isTransfer) {
         // Cambiar a transferencia desde normal o conversión
         const currentCreator = isConversion ? conversionForm.getValues('created_by') : form.getValues('created_by')
         const currentDate = isConversion ? conversionForm.getValues('movement_date') : form.getValues('movement_date')
@@ -712,11 +705,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             {/* Sección ORIGEN */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
+                <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
                 <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
               </div>
               
@@ -799,11 +790,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
             {/* Sección DESTINO */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
+                <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
                 <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
               </div>
               
@@ -998,6 +987,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
             {/* Línea divisoria */}
             <div className="border-t border-border my-4"></div>
+
+            {/* Título de sección de transferencia interna */}
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L16.586 11H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+              <label className="text-sm font-medium leading-none">Datos de Transferencia Interna</label>
+            </div>
 
             {/* Moneda */}
             <FormField
