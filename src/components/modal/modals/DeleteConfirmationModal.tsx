@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore"
+import { useModalPanelStore } from "@/components/modal/form/modalPanelStore"
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 import FormModalBody from "@/components/modal/form/FormModalBody"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
@@ -44,13 +45,12 @@ export default function DeleteConfirmationModal({
   const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
   const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
 
-  console.log('DeleteConfirmationModal props:', {
-    mode,
-    title,
-    description,
-    itemName,
-    destructiveActionText
-  })
+  // Always set to edit panel since this is a form modal
+  const { setPanel } = useModalPanelStore()
+  
+  useEffect(() => {
+    setPanel('edit')  // Always edit for form modals as per README.md
+  }, [setPanel])
 
   const handleSubmit = () => {
     if (mode === 'simple') {
