@@ -215,11 +215,13 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     resolver: zodResolver(aportesFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.id || '',
       description: '',
+      type_id: '',
+      category_id: '',
       contact_id: '',
-      currency_id: '',
-      wallet_id: '',
+      currency_id: userData?.organization?.default_currency_id || '',
+      wallet_id: userData?.organization?.default_wallet_id || '',
       amount: 0
     }
   })
@@ -267,9 +269,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     }
   }, [form.watch('type_id'), conversionForm.watch('type_id'), transferForm.watch('type_id'), aportesForm.watch('type_id'), concepts, selectedTypeId])
 
-  // Efecto adicional para detectar aportes cuando se selecciona una categoría
+  // Efecto adicional para detectar aportes cuando se selecciona una categoría (desde cualquier formulario)
   React.useEffect(() => {
-    const categoryId = form.watch('category_id')
+    const categoryId = form.watch('category_id') || aportesForm.watch('category_id')
     if (categoryId && categories) {
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
       const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
@@ -283,11 +285,30 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         
         // Sincronizar category_id y type_id en el formulario de aportes
         aportesForm.setValue('type_id', form.watch('type_id'))
+        aportesForm.setValue('category_id', categoryId)
+        
         // Limpiar descripción para evitar UUID
         aportesForm.setValue('description', '')
+        
+        // Establecer valores por defecto (moneda y billetera)
+        const currentMember = members?.find(m => m.user_id === userData?.id)?.id
+        const defaultCurrency = userData?.organization?.default_currency_id
+        const defaultWallet = userData?.organization?.default_wallet_id
+        
+        console.log('Setting defaults:', { currentMember, defaultCurrency, defaultWallet })
+        
+        if (currentMember) {
+          aportesForm.setValue('created_by', currentMember)
+        }
+        if (defaultCurrency) {
+          aportesForm.setValue('currency_id', defaultCurrency)
+        }
+        if (defaultWallet) {
+          aportesForm.setValue('wallet_id', defaultWallet)
+        }
       }
     }
-  }, [form.watch('category_id'), categories])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), categories, members, userData])
 
 
 
@@ -1372,6 +1393,32 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
+            {/* Categoría */}
+            <FormField
+              control={aportesForm.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar categoría" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Descripción (full width) */}
             <FormField
               control={aportesForm.control}
@@ -1381,8 +1428,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Descripción del aporte"
+                      placeholder="Descripción del movimiento..."
                       {...field}
+                      value={field.value || ''} // Asegurar que inicie vacío
                     />
                   </FormControl>
                   <FormMessage />
