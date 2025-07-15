@@ -156,8 +156,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   // Efecto para manejar la lógica jerárquica al seleccionar tipo y detectar conversión
   React.useEffect(() => {
-    const typeId = form.watch('type_id')
-    if (typeId !== selectedTypeId) {
+    const typeId = form.watch('type_id') || conversionForm.watch('type_id') || transferForm.watch('type_id')
+    if (typeId && typeId !== selectedTypeId) {
       setSelectedTypeId(typeId)
       
       // Detectar tipo de formulario por view_mode
@@ -166,57 +166,16 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       const isConversionType = viewMode === "conversion"
       const isTransferType = viewMode === "transfer"
       
-
+      console.log('Type changed:', { typeId, viewMode, isConversionType, isTransferType, selectedConcept })
       
-
-      
-      // Preservar datos cuando cambiamos entre tipos de formulario
-      if (isConversionType && !isConversion) {
-        // Cambiar a conversión desde normal o transferencia
-        const currentCreator = isTransfer ? transferForm.getValues('created_by') : form.getValues('created_by')
-        const currentDate = isTransfer ? transferForm.getValues('movement_date') : form.getValues('movement_date')
-        conversionForm.setValue('created_by', currentCreator)
-        if (currentDate) {
-          conversionForm.setValue('movement_date', currentDate)
-        }
-      }
-      else if (isTransferType && !isTransfer) {
-        // Cambiar a transferencia desde normal o conversión
-        const currentCreator = isConversion ? conversionForm.getValues('created_by') : form.getValues('created_by')
-        const currentDate = isConversion ? conversionForm.getValues('movement_date') : form.getValues('movement_date')
-        transferForm.setValue('created_by', currentCreator)
-        if (currentDate) {
-          transferForm.setValue('movement_date', currentDate)
-        }
-      }
-      else if (!isConversionType && !isTransferType && (isConversion || isTransfer)) {
-        // Cambiar a normal desde conversión o transferencia
-        const currentCreator = isConversion ? conversionForm.getValues('created_by') : transferForm.getValues('created_by')
-        const currentDate = isConversion ? conversionForm.getValues('movement_date') : transferForm.getValues('movement_date')
-        form.setValue('created_by', currentCreator)
-        if (currentDate) {
-          form.setValue('movement_date', currentDate)
-        }
-      }
-      
+      // Cambiar el formulario activo
       setIsConversion(isConversionType)
       setIsTransfer(isTransferType)
       
-      console.log('Type changed:', { typeId, viewMode, isConversionType, isTransferType, selectedConcept })
-      
-      // TEMPORARY FIX: Force correct view_mode detection for known concepts
-      if (selectedConcept?.name === "Conversión") {
-        setIsConversion(true)
-        setIsTransfer(false)
-        console.log('FORCE: Setting conversion mode for Conversión concept')
-      } else if (selectedConcept?.name === "Transferencia Interna") {
-        setIsConversion(false)
-        setIsTransfer(true)
-        console.log('FORCE: Setting transfer mode for Transferencia Interna concept')
-      } else {
-        setIsConversion(isConversionType)
-        setIsTransfer(isTransferType)
-      }
+      // Sincronizar type_id en todos los formularios
+      form.setValue('type_id', typeId)
+      conversionForm.setValue('type_id', typeId)
+      transferForm.setValue('type_id', typeId)
       
       // Reset categoría y subcategoría cuando cambia el tipo
       if (typeId !== editingMovement?.type_id) {
@@ -225,35 +184,9 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         setSelectedCategoryId('')
       }
     }
-  }, [form.watch('type_id'), concepts, isConversion, isTransfer])
+  }, [form.watch('type_id'), conversionForm.watch('type_id'), transferForm.watch('type_id'), concepts, selectedTypeId])
 
-  // Efecto para detectar cambios en type_id del formulario de conversión
-  React.useEffect(() => {
-    const typeId = conversionForm.watch('type_id')
-    if (typeId && typeId !== form.getValues('type_id')) {
-      form.setValue('type_id', typeId)
-      
-      // Detectar el view_mode y actualizar los estados
-      const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
-      const viewMode = selectedConcept?.view_mode ?? "normal"
-      setIsConversion(viewMode === "conversion")
-      setIsTransfer(viewMode === "transfer")
-    }
-  }, [conversionForm.watch('type_id'), concepts])
 
-  // Efecto para detectar cambios en type_id del formulario de transferencia
-  React.useEffect(() => {
-    const typeId = transferForm.watch('type_id')
-    if (typeId && typeId !== form.getValues('type_id')) {
-      form.setValue('type_id', typeId)
-      
-      // Detectar el view_mode y actualizar los estados
-      const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
-      const viewMode = selectedConcept?.view_mode ?? "normal"
-      setIsConversion(viewMode === "conversion")
-      setIsTransfer(viewMode === "transfer")
-    }
-  }, [transferForm.watch('type_id'), concepts])
 
   // Efecto para manejar la lógica jerárquica al seleccionar categoría
   React.useEffect(() => {
