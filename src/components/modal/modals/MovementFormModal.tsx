@@ -162,10 +162,19 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       
       // Detectar tipo de formulario por UUID específico
       const CONVERSION_CONCEPT_ID = '5c0bb8fb-33e4-4390-b125-616484c8a672'
-      const TRANSFER_CONCEPT_ID = '2068b936-6a02-4b54-a354-5af447e5b7d9'
+      const TRANSFER_CONCEPT_ID = '20558936-6a90-4944-a334-5af47e5bd7d9'
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
       const isConversionType = typeId === CONVERSION_CONCEPT_ID
       const isTransferType = typeId === TRANSFER_CONCEPT_ID
+      
+      console.log('🔍 Type detection:', {
+        typeId,
+        CONVERSION_CONCEPT_ID,
+        TRANSFER_CONCEPT_ID,
+        isConversionType,
+        isTransferType,
+        selectedConcept: selectedConcept?.name
+      })
       
 
       
@@ -697,20 +706,22 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
-            {/* Card conteniendo las secciones variables */}
-            <Card className="p-4">
-              {/* Sección ORIGEN */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
-                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
+            {/* Línea divisoria */}
+            <div className="border-t border-border my-4"></div>
+
+            {/* Sección ORIGEN */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
                 </div>
+                <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
+              </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Moneda y Billetera en la misma fila */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <FormField
                   control={conversionForm.control}
                   name="currency_id_from"
@@ -760,42 +771,44 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={conversionForm.control}
-                  name="amount_from"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cantidad Origen *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
+
+              {/* Cantidad en fila separada */}
+              <FormField
+                control={conversionForm.control}
+                name="amount_from"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad Origen *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-              {/* Sección DESTINO */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
+            {/* Sección DESTINO */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
                 </div>
+                <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
+              </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Moneda y Billetera en la misma fila */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <FormField
                   control={conversionForm.control}
                   name="currency_id_to"
@@ -845,31 +858,30 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={conversionForm.control}
-                  name="amount_to"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cantidad Destino *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
-            </div>
 
-              {/* Exchange Rate (opcional) */}
+              {/* Cantidad en fila separada */}
+              <FormField
+                control={conversionForm.control}
+                name="amount_to"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad Destino *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Cotización */}
               <FormField
                 control={conversionForm.control}
                 name="exchange_rate"
@@ -890,7 +902,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   </FormItem>
                 )}
               />
-            </Card>
+            </div>
           </form>
         </Form>
       ) : isTransfer ? (
@@ -984,37 +996,37 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
-            {/* Card conteniendo las secciones de transferencia */}
-            <Card className="p-4">
-              <div className="space-y-4">
-                {/* Moneda */}
-                <FormField
-                  control={transferForm.control}
-                  name="currency_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Moneda *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {currencies?.map((orgCurrency) => (
-                            <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                              {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Línea divisoria */}
+            <div className="border-t border-border my-4"></div>
 
-                {/* Billeteras Origen y Destino */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Moneda */}
+            <FormField
+              control={transferForm.control}
+              name="currency_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Moneda *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {currencies?.map((orgCurrency) => (
+                        <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                          {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Billeteras Origen y Destino */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <FormField
                     control={transferForm.control}
                     name="wallet_id_from"
@@ -1066,29 +1078,27 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                   />
                 </div>
 
-                {/* Cantidad */}
-                <FormField
-                  control={transferForm.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cantidad *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </Card>
+            {/* Cantidad */}
+            <FormField
+              control={transferForm.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cantidad *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
       ) : (
