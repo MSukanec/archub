@@ -93,11 +93,14 @@ type TransferForm = z.infer<typeof transferFormSchema>
 type AportesForm = z.infer<typeof aportesFormSchema>
 
 interface MovementFormModalProps {
-  editingMovement?: any
+  modalData?: {
+    editingMovement?: any
+  }
   onClose: () => void
 }
 
-export default function MovementFormModal({ editingMovement, onClose }: MovementFormModalProps) {
+export default function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
+  const editingMovement = modalData?.editingMovement
   const { currentPanel, setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
   const { data: members } = useOrganizationMembers(userData?.organization?.id)
