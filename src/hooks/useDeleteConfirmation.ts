@@ -6,7 +6,7 @@ interface ReplacementOption {
 }
 
 interface UseDeleteConfirmationOptions {
-  mode?: 'simple' | 'replace'
+  mode?: 'simple' | 'dangerous' | 'replace'
   title: string
   description: string
   itemName?: string

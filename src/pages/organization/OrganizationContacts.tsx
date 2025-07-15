@@ -155,7 +155,7 @@ export default function OrganizationContacts() {
     const contactName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
     
     showDeleteConfirmation({
-      mode: 'simple',
+      mode: 'dangerous',
       title: "Eliminar contacto",
       description: "Esta acción eliminará permanentemente el contacto de la organización y todos sus datos asociados.",
       itemName: contactName,

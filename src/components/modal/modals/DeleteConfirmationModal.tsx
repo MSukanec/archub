@@ -5,9 +5,10 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 import FormModalBody from "@/components/modal/form/FormModalBody"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
-import { Trash2 } from 'lucide-react'
+import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 interface ReplacementOption {
   label: string
@@ -15,7 +16,7 @@ interface ReplacementOption {
 }
 
 interface DeleteConfirmationModalProps {
-  mode?: 'simple' | 'replace'
+  mode?: 'simple' | 'dangerous' | 'replace'
   title: string
   description: string
   itemName?: string
@@ -44,6 +45,7 @@ export default function DeleteConfirmationModal({
   const { closeModal } = useGlobalModalStore()
   const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
   const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
+  const [inputValue, setInputValue] = useState<string>('')
 
   // Always set to edit panel since this is a form modal
   const { setPanel } = useModalPanelStore()
@@ -54,13 +56,18 @@ export default function DeleteConfirmationModal({
 
   const handleSubmit = () => {
     if (mode === 'simple') {
-      // Modo simple: usar onConfirm o onDelete
       const confirmFunction = onConfirm || onDelete
       if (confirmFunction) {
         confirmFunction()
       }
-    } else {
-      // Modo replace
+    } else if (mode === 'dangerous') {
+      if (inputValue.trim() === (itemName || '').trim()) {
+        const confirmFunction = onConfirm || onDelete
+        if (confirmFunction) {
+          confirmFunction()
+        }
+      }
+    } else if (mode === 'replace') {
       if (actionType === 'delete' && onDelete) {
         onDelete()
       } else if (actionType === 'replace' && onReplace && selectedReplacementId) {
@@ -95,16 +102,22 @@ export default function DeleteConfirmationModal({
 
   const isSubmitDisabled = () => {
     if (isLoading) return true
+    
+    if (mode === 'dangerous') {
+      return inputValue.trim() !== (itemName || '').trim()
+    }
+    
     if (mode === 'replace' && actionType === 'replace') {
       return !selectedReplacementId
     }
+    
     return false
   }
 
   const viewPanel = null // No needed for delete confirmation modal
 
   const editPanel = (
-    <FormModalBody>
+    <FormModalBody columns={1}>
       <div className="space-y-6">
         {/* Warning section */}
         <div className="flex items-start gap-4">
@@ -112,7 +125,7 @@ export default function DeleteConfirmationModal({
             <Trash2 className="h-6 w-6 text-destructive" />
           </div>
           <div className="flex-1">
-            <p className="text-base text-foreground leading-relaxed">
+            <p className="text-sm text-foreground leading-relaxed">
               {description}
             </p>
             {itemName && (
@@ -122,6 +135,30 @@ export default function DeleteConfirmationModal({
             )}
           </div>
         </div>
+
+        {/* Dangerous mode input */}
+        {mode === 'dangerous' && itemName && (
+          <div className="space-y-3">
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+                <p className="text-sm text-destructive font-medium">
+                  Esta acción no se puede deshacer
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Para confirmar, escribí el nombre del elemento: <span className="font-medium text-foreground">{itemName}</span>
+              </p>
+            </div>
+            <Input
+              placeholder={`Escribí "${itemName}" para confirmar`}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              className="font-mono"
+              autoFocus
+            />
+          </div>
+        )}
 
         {/* Replace mode controls */}
         {mode === 'replace' && (
@@ -159,18 +196,32 @@ export default function DeleteConfirmationModal({
           </div>
         )}
 
-        {/* Warning message */}
-        <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-          <div className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4 text-destructive flex-shrink-0" />
-            <p className="text-sm text-destructive font-medium">
-              {mode === 'replace' && actionType === 'replace' 
-                ? 'Esta acción reemplazará todos los usos de la categoría actual'
-                : 'Esta acción no se puede deshacer'
-              }
-            </p>
+        {/* Warning message for simple mode */}
+        {mode === 'simple' && (
+          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive font-medium">
+                Esta acción no se puede deshacer
+              </p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Warning message for replace mode */}
+        {mode === 'replace' && (
+          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive font-medium">
+                {actionType === 'replace' 
+                  ? 'Esta acción reemplazará todos los usos de la categoría actual'
+                  : 'Esta acción no se puede deshacer'
+                }
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </FormModalBody>
   )
