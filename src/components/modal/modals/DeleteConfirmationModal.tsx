@@ -44,6 +44,14 @@ export default function DeleteConfirmationModal({
   const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
   const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
 
+  console.log('DeleteConfirmationModal props:', {
+    mode,
+    title,
+    description,
+    itemName,
+    destructiveActionText
+  })
+
   const handleSubmit = () => {
     if (mode === 'simple') {
       // Modo simple: usar onConfirm o onDelete
