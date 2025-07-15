@@ -70,12 +70,12 @@ export function Header({
   // Estado local para tracking inmediato del proyecto seleccionado - NO más sincronización automática
   const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(selectedProjectId);
   
-  // Solo sincronizar una vez en mount inicial si tenemos datos
+  // Sincronizar localSelectedProject con userData cuando cambie desde otras páginas
   useEffect(() => {
-    if (selectedProjectId !== undefined) {
-      setLocalSelectedProject(selectedProjectId);
+    if (userData?.preferences?.last_project_id !== undefined) {
+      setLocalSelectedProject(userData.preferences.last_project_id);
     }
-  }, []); // Array vacío = solo una vez en mount
+  }, [userData?.preferences?.last_project_id]); // Sincronizar cuando cambie last_project_id
 
   // Initialize project context ONLY on first load - don't override user selections
   useEffect(() => {

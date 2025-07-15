@@ -11,10 +11,12 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
     return (
       <Badge 
         variant="secondary"
-        className="text-xs px-2 py-1"
+        className="text-xs px-1 py-0.5"
         style={{
           backgroundColor: 'hsl(0, 0%, 20%)',
           color: 'white',
+          fontSize: '10px',
+          lineHeight: '12px'
         }}
       >
         General
@@ -29,10 +31,12 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
     return (
       <Badge 
         variant="secondary"
-        className="text-xs px-2 py-1"
+        className="text-xs px-1 py-0.5"
         style={{
           backgroundColor: 'hsl(0, 0%, 20%)',
           color: 'white',
+          fontSize: '10px',
+          lineHeight: '12px'
         }}
       >
         Proyecto no encontrado
@@ -51,10 +55,12 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
   return (
     <Badge 
       variant="secondary"
-      className="text-xs px-2 py-1"
+      className="text-xs px-1 py-0.5"
       style={{
         backgroundColor: backgroundColor,
         color: 'white',
+        fontSize: '10px',
+        lineHeight: '12px'
       }}
       title={project.name} // Tooltip con el nombre completo
     >
