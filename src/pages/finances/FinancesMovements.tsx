@@ -544,6 +544,20 @@ export default function Movements() {
     const transferGroups = new Map<string, Movement[]>();
     const regularMovements: Movement[] = [];
 
+    // Debug: Log transfer group IDs found
+    const transferIds = movements.filter(m => m.transfer_group_id).map(m => m.transfer_group_id);
+    if (transferIds.length > 0) {
+      console.log('Transfer group IDs found:', transferIds);
+    }
+    
+    // Debug: Check for transfer descriptions without group IDs
+    const transferDescriptions = movements.filter(m => 
+      m.description?.includes('Transferencia Interna') && !m.transfer_group_id
+    );
+    if (transferDescriptions.length > 0) {
+      console.log('Transfer movements without group ID found:', transferDescriptions.length);
+    }
+
     // Separate movements with group IDs from regular movements
     movements.forEach(movement => {
       if (movement.conversion_group_id) {
@@ -552,6 +566,7 @@ export default function Movements() {
         }
         conversionGroups.get(movement.conversion_group_id)!.push(movement);
       } else if (movement.transfer_group_id) {
+        console.log('Adding transfer movement to group:', movement.transfer_group_id, movement.description);
         if (!transferGroups.has(movement.transfer_group_id)) {
           transferGroups.set(movement.transfer_group_id, []);
         }
@@ -560,6 +575,9 @@ export default function Movements() {
         regularMovements.push(movement);
       }
     });
+
+    console.log('Transfer groups found:', transferGroups.size);
+    console.log('Conversion groups found:', conversionGroups.size);
 
     // Create conversion group objects
     const conversionGroupObjects: ConversionGroup[] = [];
