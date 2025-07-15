@@ -70,15 +70,14 @@ export function Header({
   // Estado local para tracking inmediato del proyecto seleccionado
   const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(null);
   
-  // Sincronizar estado local con context cuando cambie
+  // Solo sincronizar en mount inicial, no en cada cambio
   useEffect(() => {
-    console.log('🔥 Header: Syncing local state with context:', { 
-      selectedProjectId, 
-      localSelectedProject,
-      changing: localSelectedProject !== selectedProjectId 
-    });
-    setLocalSelectedProject(selectedProjectId);
-  }, [selectedProjectId]);
+    // Solo sincronizar si el estado local está en null (estado inicial)
+    if (localSelectedProject === null) {
+      console.log('🔥 Header: Initial sync with context:', selectedProjectId);
+      setLocalSelectedProject(selectedProjectId);
+    }
+  }, [selectedProjectId]); // Solo se ejecuta en mount inicial y cambios externos reales
 
   // Initialize project context - ALWAYS ensure valid state (never undefined/loading)
   useEffect(() => {
