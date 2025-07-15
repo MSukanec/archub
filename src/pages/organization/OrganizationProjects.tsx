@@ -181,8 +181,7 @@ export default function OrganizationProjects() {
 
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
-    // Navigate to project dashboard after selection
-    navigate('/project/dashboard')
+    // Only update header, no navigation
   }
 
   const handleEdit = (project: any) => {

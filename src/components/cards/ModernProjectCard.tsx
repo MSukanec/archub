@@ -67,7 +67,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         }
       ]}
     >
-      <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200">
+      <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200 cursor-default">
         {/* HERO SECTION - Imagen completa con avatar y acciones superpuestas */}
         <div className="relative h-48 w-full">
           {/* Background Image */}
@@ -147,8 +147,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
                 style={{ backgroundColor: 'var(--accent)' }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Already active, maybe navigate to dashboard
-                  onSelect(project);
+                  // Do nothing - just prevent card click
                 }}
               >
                 ACTIVO
