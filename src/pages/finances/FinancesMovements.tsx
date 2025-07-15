@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Paperclip, TrendingUp, FileText, Users, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
@@ -207,8 +207,15 @@ export default function Movements() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
-  const { selectedProjectId } = useProjectContext();
+  const { selectedProjectId, isGlobalView } = useProjectContext();
   const projectId = selectedProjectId;
+
+  // Debug logging
+  console.log('Movement page state:', {
+    selectedProjectId,
+    isGlobalView,
+    projectId
+  });
 
   const { data: movements = [], isLoading } = useMovements(
     organizationId,
@@ -221,8 +228,8 @@ export default function Movements() {
   // Get projects map for the project badges (only when in GENERAL mode)
   const { data: projectsMap = {} } = useProjectsMap(organizationId);
   
-  // Determine if we're in GENERAL mode (no project selected)
-  const isGeneralMode = !projectId;
+  // Use isGlobalView from store instead of deriving from projectId
+  const isGeneralMode = isGlobalView;
 
   // Load file counts for all movements
   useEffect(() => {
@@ -779,7 +786,10 @@ export default function Movements() {
 
   const currencyBalances = calculateBalanceByCurrency();
 
-  const tableColumns = [
+  // Debug logging for column calculations
+  console.log('Calculating columns - isGeneralMode:', isGeneralMode);
+
+  const tableColumns = useMemo(() => [
     // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)
     ...(isGeneralMode ? [{
       key: "project",
@@ -1276,7 +1286,7 @@ export default function Movements() {
         );
       },
     },
-  ];
+  ], [isGeneralMode, projectsMap, movementFileCounts, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete]);
 
   const headerProps = {
     title: "Movimientos",
