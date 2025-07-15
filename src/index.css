@@ -120,6 +120,12 @@
   --chart-negative: hsl(0, 50%, 50%);
   --chart-neutral: hsl(200, 30%, 40%);
 
+  /* Movement border colors */
+  --movement-income-border: hsl(142, 76%, 36%);
+  --movement-expense-border: hsl(0, 72%, 51%);
+  --movement-conversion-border: hsl(217, 91%, 60%);
+  --movement-transfer-border: hsl(262, 83%, 58%);
+
   /* Text */
   --text-default: hsl(240, 10%, 4%);
   --text-muted: hsl(240, 5%, 45%);
@@ -280,6 +286,12 @@
   --chart-negative: #ef4444;
   --chart-neutral: #84cc16;
 
+  /* Movement border colors */
+  --movement-income-border: hsl(142, 76%, 36%);
+  --movement-expense-border: hsl(0, 72%, 51%);
+  --movement-conversion-border: hsl(217, 91%, 60%);
+  --movement-transfer-border: hsl(262, 83%, 58%);
+
   /* Tables */
   --table-header-bg: hsl(0, 0%, 14%);
   --table-header-fg: hsl(0, 0%, 100%);
@@ -331,6 +343,11 @@
 .movement-row-conversion {
   background-color: rgba(59, 130, 246, 0.08) !important;
   border-left: 4px solid rgb(59, 130, 246) !important;
+}
+
+.movement-row-transfer {
+  background-color: rgba(168, 85, 247, 0.08) !important;
+  border-left: 4px solid rgb(168, 85, 247) !important;
 }
 
 /* Avatar styles - aplicar borde de 3px a todos los avatares */

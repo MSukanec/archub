@@ -760,6 +760,17 @@ export default function Movements() {
             </span>
           );
         }
+        
+        // Check if it's a transfer
+        const typeName = item.movement_data?.type?.name || "";
+        if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+          return (
+            <span className="text-xs font-medium">
+              Transferencia Interna
+            </span>
+          );
+        }
+        
         return (
           <span className="text-xs font-medium">
             {item.movement_data?.type?.name || "Sin tipo"}
@@ -786,6 +797,22 @@ export default function Movements() {
             </div>
           );
         }
+        
+        // Check if it's a transfer
+        const typeName = item.movement_data?.type?.name || "";
+        if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+          return (
+            <div>
+              <div className="text-xs font-medium">
+                Transferencia Interna
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {item.movement_data?.wallet?.name || "Principal"}
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div>
             <div className="text-xs font-medium">
@@ -818,6 +845,22 @@ export default function Movements() {
             </div>
           );
         }
+        
+        // Check if it's a transfer
+        const typeName = item.movement_data?.type?.name || "";
+        if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+          return (
+            <div>
+              <div className="text-xs font-medium">
+                Transferencia Interna
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {item.description || "Sin descripción"}
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <span className="text-xs">
             {item.description || "Sin descripción"}
@@ -1117,10 +1160,13 @@ export default function Movements() {
           if ('is_conversion_group' in item) {
             return "movement-row-conversion";
           }
-          // Determine if it's income or expense based on movement type
+          
+          // Determine if it's a transfer based on type name
           const typeName = item.movement_data?.type?.name || "";
           
-          if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
+          if (typeName.toLowerCase().includes("transferencia") || typeName.toLowerCase().includes("transfer")) {
+            return "movement-row-transfer";
+          } else if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
             return "movement-row-income";
           } else if (typeName === "Egresos" || typeName.toLowerCase().includes("egreso")) {
             return "movement-row-expense";

@@ -223,16 +223,28 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
     const typeId = conversionForm.watch('type_id')
     if (typeId && typeId !== form.getValues('type_id')) {
       form.setValue('type_id', typeId)
+      
+      // Detectar el view_mode y actualizar los estados
+      const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
+      const viewMode = selectedConcept?.view_mode ?? "normal"
+      setIsConversion(viewMode === "conversion")
+      setIsTransfer(viewMode === "transfer")
     }
-  }, [conversionForm.watch('type_id')])
+  }, [conversionForm.watch('type_id'), concepts])
 
   // Efecto para detectar cambios en type_id del formulario de transferencia
   React.useEffect(() => {
     const typeId = transferForm.watch('type_id')
     if (typeId && typeId !== form.getValues('type_id')) {
       form.setValue('type_id', typeId)
+      
+      // Detectar el view_mode y actualizar los estados
+      const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
+      const viewMode = selectedConcept?.view_mode ?? "normal"
+      setIsConversion(viewMode === "conversion")
+      setIsTransfer(viewMode === "transfer")
     }
-  }, [transferForm.watch('type_id')])
+  }, [transferForm.watch('type_id'), concepts])
 
   // Efecto para manejar la lógica jerárquica al seleccionar categoría
   React.useEffect(() => {
