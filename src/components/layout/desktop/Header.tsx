@@ -67,17 +67,15 @@ export function Header({
   const { setSidebarContext, currentSidebarContext } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
-  // Estado local para tracking inmediato del proyecto seleccionado
-  const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(null);
+  // Estado local para tracking inmediato del proyecto seleccionado - NO más sincronización automática
+  const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(selectedProjectId);
   
-  // Solo sincronizar en mount inicial, no en cada cambio
+  // Solo sincronizar una vez en mount inicial si tenemos datos
   useEffect(() => {
-    // Solo sincronizar si el estado local está en null (estado inicial)
-    if (localSelectedProject === null) {
-      console.log('🔥 Header: Initial sync with context:', selectedProjectId);
+    if (selectedProjectId !== undefined) {
       setLocalSelectedProject(selectedProjectId);
     }
-  }, [selectedProjectId]); // Solo se ejecuta en mount inicial y cambios externos reales
+  }, []); // Array vacío = solo una vez en mount
 
   // Initialize project context - ALWAYS ensure valid state (never undefined/loading)
   useEffect(() => {
@@ -134,25 +132,15 @@ export function Header({
   });
 
   const handleProjectSelect = (projectId: string | null) => {
-    console.log('🔥 Header handleProjectSelect called:', { 
-      projectId, 
-      localSelectedProject, 
-      selectedProjectId,
-      isSame: localSelectedProject === projectId 
-    });
-    
     // Don't change selection if clicking the same project/state
     if (localSelectedProject === projectId) {
-      console.log('🔥 Header: Skipping - same project already selected');
       return;
     }
     
     // Actualizar estado local INMEDIATAMENTE para UI responsiva
-    console.log('🔥 Header: Setting local state to:', projectId);
     setLocalSelectedProject(projectId);
     
     // Luego actualizar context y BD en background
-    console.log('🔥 Header: Setting context to:', projectId);
     setSelectedProject(projectId);
     selectProjectMutation.mutate(projectId);
   };

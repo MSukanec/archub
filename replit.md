@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 15, 2025. CRITICAL HEADER DOUBLE-CLICK BUG FIXED: Resolved selector requiring two clicks using local state strategy - COMPLETED
+  • Implemented localSelectedProject state for immediate UI updates without waiting for context synchronization
+  • Eliminated problematic useEffect auto-sync that was overriding user selections causing double-click requirement
+  • Fixed condition race between local state and context updates during project selection in dropdown
+  • Header now responds immediately to single click on "Todos los proyectos" option with instant text update
+  • Removed all debugging logs after successful resolution - production-ready code maintained
+  • User can now switch between projects and "Todos los proyectos" with single click as expected
 - July 15, 2025. CRITICAL UX FIX: Eliminated "SELECCIONAR PROYECTO" state and ensured all sidebar buttons visible in "TODOS LOS PROYECTOS" mode - COMPLETED
   • Fixed project context initialization to ALWAYS default to "TODOS LOS PROYECTOS" (null) when no project is specifically selected
   • Eliminated ALL instances of "Seleccionar proyecto" text throughout the application and replaced with "Todos los proyectos"
