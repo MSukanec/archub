@@ -28,6 +28,7 @@ const createProjectSchema = z.object({
   project_type_id: z.string().optional(),
   modality_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
+  color: z.string().optional(),
 });
 
 type CreateProjectForm = z.infer<typeof createProjectSchema>;
@@ -39,6 +40,7 @@ interface Project {
   created_at: string;
   created_by: string;
   organization_id: string;
+  color?: string;
   project_data?: {
     project_type_id?: string;
     modality_id?: string;
@@ -84,6 +86,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
       project_type_id: editingProject?.project_data?.project_type_id || "",
       modality_id: editingProject?.project_data?.modality_id || "",
       status: editingProject?.status || "active",
+      color: editingProject?.color || "#3B82F6",
     }
   });
 
@@ -97,6 +100,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         project_type_id: editingProject.project_data?.project_type_id || "",
         modality_id: editingProject.project_data?.modality_id || "",
         status: editingProject.status,
+        color: editingProject.color || "#3B82F6",
       });
       setPanel('edit');
     } else if (currentUserMember) {
@@ -107,6 +111,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         project_type_id: "",
         modality_id: "",
         status: "active",
+        color: "#3B82F6",
       });
       setPanel('edit');
     }
@@ -126,6 +131,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             name: data.name,
             status: data.status,
             created_by: data.created_by,
+            color: data.color,
           })
           .eq('id', editingProject.id);
 
@@ -172,6 +178,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             created_by: data.created_by,
             created_at: new Date(data.created_at).toISOString(),
             is_active: true,
+            color: data.color,
           })
           .select()
           .single();
@@ -254,6 +261,19 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         <p className="text-muted-foreground mt-1">
           {editingProject?.created_at ? new Date(editingProject.created_at).toLocaleDateString('es-ES') : 'Sin fecha'}
         </p>
+      </div>
+      
+      <div>
+        <h4 className="font-medium">Color del proyecto</h4>
+        <div className="flex items-center gap-2 mt-1">
+          <div 
+            className="w-4 h-4 rounded border"
+            style={{ backgroundColor: editingProject?.color || '#3B82F6' }}
+          />
+          <p className="text-muted-foreground">
+            {editingProject?.color || '#3B82F6'}
+          </p>
+        </div>
       </div>
     </>
   );
@@ -392,6 +412,35 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
                     <SelectItem value="paused">Pausado</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Color */}
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Color del proyecto</FormLabel>
+                <FormControl>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={field.value || "#3B82F6"}
+                      onChange={field.onChange}
+                      className="w-16 h-10 p-1 border rounded"
+                    />
+                    <Input
+                      type="text"
+                      value={field.value || "#3B82F6"}
+                      onChange={field.onChange}
+                      placeholder="#3B82F6"
+                      className="flex-1"
+                    />
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
