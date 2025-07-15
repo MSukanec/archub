@@ -489,14 +489,14 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
-      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
-        throw new Error('Organization ID or Project ID not found')
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
       }
 
       const movementData = {
         ...data,
         organization_id: userData.organization.id,
-        project_id: userData.preferences.last_project_id,
+        project_id: userData.preferences?.last_project_id || null, // Permitir null para movimientos de organización
         movement_date: data.movement_date.toISOString().split('T')[0],
         category_id: data.category_id || null,
         subcategory_id: data.subcategory_id || null,
@@ -546,8 +546,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   const createConversionMutation = useMutation({
     mutationFn: async (data: ConversionForm) => {
-      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
-        throw new Error('Organization ID or Project ID not found')
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
       }
 
       // Generar UUID para el grupo de conversión
@@ -563,7 +563,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
       const baseMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences.last_project_id,
+        project_id: userData.preferences?.last_project_id || null, // Permitir null para conversiones de organización
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         conversion_group_id: conversionGroupId
@@ -619,8 +619,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   const createTransferMutation = useMutation({
     mutationFn: async (data: TransferForm) => {
-      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
-        throw new Error('Organization ID or Project ID not found')
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
       }
 
       // Generar UUID para el grupo de transferencia
@@ -636,7 +636,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
       const baseMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences.last_project_id,
+        project_id: userData.preferences?.last_project_id || null, // Permitir null para transferencias de organización
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         transfer_group_id: transferGroupId // Usar el campo específico para transferencias
@@ -690,13 +690,13 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
   const createAportesMutation = useMutation({
     mutationFn: async (data: AportesForm) => {
-      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
-        throw new Error('Organization ID or Project ID not found')
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
       }
 
       const movementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences.last_project_id,
+        project_id: userData.preferences?.last_project_id || null, // Permitir null para aportes de organización
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         description: data.description || 'Aporte',
