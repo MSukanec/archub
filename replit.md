@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 15, 2025. Fixed MovementFormModal view_mode detection and form switching - COMPLETED
+  • Fixed use-movement-concepts hook to select view_mode field from database
+  • Added .trim() to view_mode values to clean extra characters (\r\n, \t)
+  • Simplified form switching logic for direct changes between conversion/transfer types
+  • Enhanced transfer icon with bidirectional arrows instead of single direction
+  • Modal now correctly detects "conversion" and "transfer" view_modes and switches forms
+  • Users can now change directly between Conversión, Transferencia Interna, and normal types without intermediate steps
+  • Fixed UserSelector component functionality in creator field across all form types
 Changelog:
 - July 14, 2025. Fixed document upload modal, mobile cards, and table layout issues - COMPLETED
   • Changed Upload icon to RefreshCw (refresh) icon in document groups for better UX clarity

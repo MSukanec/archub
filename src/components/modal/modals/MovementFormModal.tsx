@@ -162,7 +162,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
       
       // Detectar tipo de formulario por view_mode
       const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
-      const viewMode = selectedConcept?.view_mode ?? "normal"
+      const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
       const isConversionType = viewMode === "conversion"
       const isTransferType = viewMode === "transfer"
       
@@ -982,8 +982,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
 
             {/* Título de sección de transferencia interna */}
             <div className="flex items-center gap-2 mb-4">
-              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L16.586 11H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
               </svg>
               <label className="text-sm font-medium leading-none">Datos de Transferencia Interna</label>
             </div>
