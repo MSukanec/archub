@@ -118,6 +118,17 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 15, 2025. Complete transfer system integration with proper grouping and visual consistency - COMPLETED
+  • Added transfer_group_id field to Movement interface and SQL queries in use-movements.ts
+  • Implemented complete transfer grouping logic matching conversion system architecture
+  • Fixed transfer group creation with proper UUID generation and database storage
+  • Added transfer group visualization in table with proper styling (no violet text, only violet background)
+  • Enhanced transfer group columns: Type, Category, Description, Currency, Wallet, Amount, Attachments
+  • Transfer groups now display as single rows with -/+ amount indicators like conversions
+  • Maintained visual consistency with conversion groups: same structure, only background color differs
+  • Fixed transfer group editing, deletion, and favorite functionality with proper confirmation dialogs
+  • System now properly groups transfers by transfer_group_id and displays as unified entries
+  • Cleaned up debugging logs for production-ready code quality
 - July 15, 2025. Fixed MovementFormModal view_mode detection and form switching - COMPLETED
   • Fixed use-movement-concepts hook to select view_mode field from database
   • Added .trim() to view_mode values to clean extra characters (\r\n, \t)
