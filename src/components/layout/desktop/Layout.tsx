@@ -75,7 +75,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Header starts after sidebars - Fixed in desktop */}
       <div
-        className={`transition-all duration-300 ease-in-out md:fixed md:top-0 md:left-0 md:right-0 md:z-40 md:bg-[var(--layout-bg)] ${
+        className={`transition-all duration-300 ease-in-out md:fixed md:top-0 md:left-0 md:right-0 md:z-30 md:bg-[var(--layout-bg)] ${
           isSecondaryExpanded
             ? "md:pl-[304px]" // 40px main + 264px secondary
             : "md:pl-[80px]" // 40px main + 40px secondary
