@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -23,6 +24,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 import { useContacts } from '@/hooks/use-contacts'
+import { useProjectClients } from '@/hooks/use-project-clients'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 
 const movementFormSchema = z.object({
@@ -102,6 +104,7 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
   const { data: wallets } = useOrganizationWallets(userData?.organization?.id)
   const { data: contacts } = useContacts()
+  const { data: projectClients } = useProjectClients(userData?.preferences?.last_project_id)
   const { data: conceptsData } = useMovementConcepts('types')
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -280,6 +283,8 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
         
         // Sincronizar category_id y type_id en el formulario de aportes
         aportesForm.setValue('type_id', form.watch('type_id'))
+        // Limpiar descripción para evitar UUID
+        aportesForm.setValue('description', '')
       }
     }
   }, [form.watch('category_id'), categories])
@@ -1385,6 +1390,20 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
+            {/* Separador y título de sección de aportes */}
+            <div className="col-span-2">
+              <Separator className="mb-4" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Información del Aporte</h3>
+                  <p className="text-xs text-muted-foreground">Datos específicos del registro de aporte</p>
+                </div>
+              </div>
+            </div>
+
             {/* Selector dinámico (Cliente o Socio) basado en la categoría seleccionada */}
             <FormField
               control={aportesForm.control}
@@ -1410,10 +1429,11 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
                       </FormControl>
                       <SelectContent>
                         {isClienteSelector ? (
-                          // Mostrar contactos para "Aportes de Terceros"
-                          contacts?.map((contact) => (
-                            <SelectItem key={contact.id} value={contact.id}>
-                              {contact.name} ({contact.email})
+                          // Mostrar clientes del proyecto para "Aportes de Terceros"
+                          projectClients?.map((projectClient) => (
+                            <SelectItem key={projectClient.id} value={projectClient.contact.id}>
+                              {projectClient.contact.full_name || `${projectClient.contact.first_name} ${projectClient.contact.last_name}`}
+                              {projectClient.contact.company_name && ` (${projectClient.contact.company_name})`}
                             </SelectItem>
                           ))
                         ) : (
