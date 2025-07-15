@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { supabase } from '@/lib/supabase'
-import { DollarSign } from 'lucide-react'
+import { DollarSign, ArrowRightLeft, ArrowLeftRight } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -921,8 +921,19 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
-            {/* Línea divisoria */}
-            <div className="border-t border-border my-4"></div>
+            {/* Separador y título de sección de conversión */}
+            <div className="col-span-2">
+              <Separator className="mb-4" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                  <ArrowRightLeft className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Información de la Conversión</h3>
+                  <p className="text-xs text-muted-foreground">Detalles específicos del cambio de moneda</p>
+                </div>
+              </div>
+            </div>
 
             {/* Sección ORIGEN */}
             <div className="space-y-4">
@@ -1207,15 +1218,18 @@ export default function MovementFormModal({ editingMovement, onClose }: Movement
               )}
             />
 
-            {/* Línea divisoria */}
-            <div className="border-t border-border my-4"></div>
-
-            {/* Título de sección de transferencia interna */}
-            <div className="flex items-center gap-2 mb-4">
-              <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
-              <label className="text-sm font-medium leading-none">Datos de Transferencia Interna</label>
+            {/* Separador y título de sección de transferencia */}
+            <div className="col-span-2">
+              <Separator className="mb-4" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                  <ArrowLeftRight className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Información de la Transferencia</h3>
+                  <p className="text-xs text-muted-foreground">Datos específicos del movimiento entre billeteras</p>
+                </div>
+              </div>
             </div>
 
             {/* Moneda */}
