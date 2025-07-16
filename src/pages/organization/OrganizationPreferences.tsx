@@ -503,17 +503,6 @@ export default function OrganizationPreferences() {
 
           {/* Right Column - Concepts Tree */}
           <div className="space-y-4">
-            <div className="flex items-center justify-end">
-              <Button 
-                onClick={handleOpenCreateModal}
-                className="gap-2"
-                size="sm"
-              >
-                <Plus className="h-4 w-4" />
-                Crear Concepto
-              </Button>
-            </div>
-            
             {conceptsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-sm text-muted-foreground">Cargando conceptos...</div>

@@ -6,7 +6,8 @@ import {
   Trash2, 
   Settings, 
   Users,
-  Plus
+  Plus,
+  Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -82,14 +83,14 @@ function ConceptItem({
                 {concept.is_system ? (
                   'Sistema'
                 ) : (
-                  <><Users className="h-3 w-3 mr-1" />Usuario</>
+                  <><Building2 className="h-3 w-3 mr-1" />Organización</>
                 )}
               </Badge>
 
               {/* Children count */}
               {hasChildren && (
                 <Badge variant="outline" className="text-xs">
-                  {concept.children!.length} hijos
+                  {concept.children!.length} elementos
                 </Badge>
               )}
             </div>
