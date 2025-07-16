@@ -268,13 +268,18 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     />
   );
 
-  const footerContent = (
+  const footerContent = isSystemConcept ? (
+    <FormModalFooter
+      rightLabel="Cerrar"
+      onRightClick={closeModal}
+    />
+  ) : (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={closeModal}
-      rightLabel={isSystemConcept ? undefined : (editingConcept ? "Actualizar Concepto" : "Crear Concepto")}
-      onRightClick={isSystemConcept ? undefined : form.handleSubmit(onSubmit)}
-      rightLoading={isPending}
+      rightLabel={editingConcept ? "Actualizar Concepto" : "Crear Concepto"}
+      onRightClick={form.handleSubmit(onSubmit)}
+      showLoadingSpinner={isPending}
     />
   );
 
