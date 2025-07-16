@@ -978,7 +978,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             <FormField
               control={conversionForm.control}
               name="type_id"
-              render={({ field }) => (
+              render={({ field }) => {
+                console.log('Conversion form type_id field value:', field.value)
+                console.log('Available concepts for type:', concepts?.map(c => ({ id: c.id, name: c.name, view_mode: c.view_mode })))
+                return (
                 <FormItem>
                   <FormLabel>Tipo *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
@@ -1006,7 +1009,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   </Select>
                   <FormMessage />
                 </FormItem>
-              )}
+                )
+              }}
             />
 
             {/* Descripción (full width) */}
