@@ -1938,24 +1938,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 const selectedCategory = categories?.find(c => c.id === selectedCategoryId)
                 const categoryName = selectedCategory?.name || ''
                 
-                // Debug: verificar el valor de categoryName
-                console.log('🔍 Debug selector - categoryName:', categoryName, 'selectedCategory:', selectedCategory, 'selectedCategoryId:', selectedCategoryId)
-                
                 // Detectar si es "Aportes de Terceros" para mostrar Cliente
                 const isClienteSelector = categoryName === 'Aportes de Terceros'
                 
-                console.log('🔍 Debug selector - isClienteSelector:', isClienteSelector, 'categoryName === "Aportes de Terceros":', categoryName === 'Aportes de Terceros')
-                
                 // Preparar datos para UserSelector
                 const usersData = isClienteSelector ? (
-                  // Para clientes: usar contacts directamente
-                  contacts?.map((contact) => ({
-                    id: contact.id,
-                    first_name: contact.first_name,
-                    last_name: contact.last_name,
-                    full_name: contact.full_name,
-                    company_name: contact.company_name,
-                    avatar_url: contact.avatar_url
+                  // Para clientes: usar project_clients que son los clientes activos del proyecto
+                  projectClients?.map((projectClient) => ({
+                    id: projectClient.contact.id,
+                    first_name: projectClient.contact.first_name,
+                    last_name: projectClient.contact.last_name,
+                    full_name: projectClient.contact.full_name,
+                    company_name: projectClient.contact.company_name,
+                    avatar_url: projectClient.contact.avatar_url
                   })) || []
                 ) : (
                   // Para socios: usar miembros directamente
