@@ -265,8 +265,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       transferForm.setValue('type_id', typeId)
       aportesForm.setValue('type_id', typeId)
       
-      // Reset categoría y subcategoría cuando cambia el tipo
-      if (typeId !== editingMovement?.type_id) {
+      // Reset categoría y subcategoría cuando cambia el tipo (solo en modo nuevo movimiento)
+      if (!editingMovement && typeId !== selectedTypeId) {
         form.setValue('category_id', '')
         form.setValue('subcategory_id', '')
         setSelectedCategoryId('')
@@ -322,8 +322,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const categoryId = form.watch('category_id')
     if (categoryId !== selectedCategoryId) {
       setSelectedCategoryId(categoryId)
-      // Reset subcategoría cuando cambia la categoría
-      if (categoryId !== editingMovement?.category_id) {
+      // Reset subcategoría cuando cambia la categoría (solo en modo nuevo movimiento)
+      if (!editingMovement && categoryId !== selectedCategoryId) {
         form.setValue('subcategory_id', '')
       }
     }
@@ -422,6 +422,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         })
       } else {
         // Formulario normal
+        console.log('Loading form with categories:', {
+          category_id: editingMovement.category_id,
+          subcategory_id: editingMovement.subcategory_id,
+          type_id: editingMovement.type_id
+        })
+        
         form.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -434,6 +440,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           currency_id: editingMovement.currency_id || '',
           wallet_id: editingMovement.wallet_id || '',
         })
+        
+        // Establecer selectedCategoryId para que las subcategorías se carguen
+        if (editingMovement.category_id) {
+          setSelectedCategoryId(editingMovement.category_id)
+        }
       }
       setPanel('edit')
     } else {
