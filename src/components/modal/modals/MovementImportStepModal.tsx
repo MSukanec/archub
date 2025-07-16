@@ -103,16 +103,18 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
 };
 
 const normalizeValue = (field: string, value: any, valueMap: any, manualMappings: any = {}): any => {
-  if (!value) return null;
+  if (!value || value === '' || value === 'Sin asignar' || value === 'empty-placeholder') {
+    return null;
+  }
   
   const stringValue = String(value).trim();
   const normalized = normalizeText(stringValue);
   
   // Check manual mappings first
   const mappingKey = `${field}_${stringValue}`;
-  if (manualMappings[mappingKey]) {
+  if (manualMappings[mappingKey] !== undefined) {
     // Return null for empty string mappings (Sin asignar)
-    return manualMappings[mappingKey] === '' ? null : manualMappings[mappingKey];
+    return manualMappings[mappingKey] === '' || manualMappings[mappingKey] === 'empty-placeholder' ? null : manualMappings[mappingKey];
   }
   
   // Check direct mapping
@@ -226,6 +228,37 @@ const AVAILABLE_FIELDS = [
   { value: 'exchange_rate', label: 'Cotización' }
 ]
 
+// Smart column mapping - maps Excel headers to field values
+const SMART_COLUMN_MAPPING: { [key: string]: string } = {
+  'descripcion': 'description',
+  'descripción': 'description',
+  'concepto': 'description',
+  'detalle': 'description',
+  'cantidad': 'amount',
+  'monto': 'amount',
+  'importe': 'amount',
+  'total': 'amount',
+  'valor': 'amount',
+  'fecha': 'movement_date',
+  'date': 'movement_date',
+  'tipo': 'type_id',
+  'type': 'type_id',
+  'categoria': 'subcategory_id',
+  'categoría': 'subcategory_id',
+  'subcategoria': 'subcategory_id',
+  'subcategoría': 'subcategory_id',
+  'moneda': 'currency_id',
+  'currency': 'currency_id',
+  'fiat': 'currency_id',
+  'billetera': 'wallet_id',
+  'wallet': 'wallet_id',
+  'cuenta': 'wallet_id',
+  'cotizacion': 'exchange_rate',
+  'cotización': 'exchange_rate',
+  'tasa': 'exchange_rate',
+  'rate': 'exchange_rate'
+}
+
 export default function MovementImportStepModal({ modalData, onClose }: MovementImportStepModalProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [parsedData, setParsedData] = useState<ParsedData | null>(null)
@@ -263,6 +296,28 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       setSelectedCreator(currentUser.user.id)
     }
   }, [currentUser?.user?.id, selectedCreator])
+
+  // Auto-map columns based on header names when data is parsed
+  React.useEffect(() => {
+    if (parsedData && parsedData.headers && Object.keys(columnMapping).length === 0) {
+      const autoMapping: ColumnMapping = {}
+      
+      parsedData.headers.forEach((header, index) => {
+        const normalizedHeader = normalizeText(header)
+        const mappedField = SMART_COLUMN_MAPPING[normalizedHeader]
+        
+        if (mappedField) {
+          autoMapping[index] = mappedField
+          console.log(`🎯 Auto-mapped "${header}" to "${mappedField}"`)
+        }
+      })
+      
+      if (Object.keys(autoMapping).length > 0) {
+        setColumnMapping(autoMapping)
+        console.log('🚀 Auto-mapping applied:', autoMapping)
+      }
+    }
+  }, [parsedData, columnMapping])
 
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
@@ -750,60 +805,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     </div>
   )
 
-  // Auto-mapping intelligence
-  const getSmartMapping = useCallback(() => {
-    if (!parsedData) return {}
-    
-    const mapping: ColumnMapping = {}
-    const headerMappings: { [key: string]: string } = {
-      // Mapeos comunes en español
-      'fecha': 'movement_date',
-      'date': 'movement_date',
-      'descripcion': 'description',
-      'descripción': 'description',
-      'description': 'description',
-      'concepto': 'description',
-      'detalle': 'description',
-      'monto': 'amount',
-      'amount': 'amount',
-      'importe': 'amount',
-      'valor': 'amount',
-      'cantidad': 'amount',
-      'tipo': 'type_id',
-      'type': 'type_id',
-      'categoria': 'category_id',
-      'category': 'category_id',
-      'subcategoria': 'subcategory_id',
-      'subcategory': 'subcategory_id',
-      'moneda': 'currency_id',
-      'currency': 'currency_id',
-      'billetera': 'wallet_id',
-      'wallet': 'wallet_id',
-      'cuenta': 'wallet_id',
-      'cotizacion': 'exchange_rate',
-      'cotización': 'exchange_rate',
-      'exchange': 'exchange_rate',
-      'cambio': 'exchange_rate'
-    }
 
-    parsedData.headers.forEach((header, index) => {
-      const normalizedHeader = normalizeText(header)
-      const mappedField = headerMappings[normalizedHeader]
-      if (mappedField) {
-        mapping[index] = mappedField
-      }
-    })
-
-    return mapping
-  }, [parsedData])
-
-  // Apply smart mapping on data load
-  React.useEffect(() => {
-    if (parsedData && Object.keys(columnMapping).length === 0) {
-      const smartMapping = getSmartMapping()
-      setColumnMapping(smartMapping)
-    }
-  }, [parsedData, getSmartMapping, columnMapping])
 
   // Validation function for field values
   const validateFieldValue = (fieldName: string, value: any) => {
@@ -892,7 +894,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       <div>
         <h3 className="text-lg font-medium mb-2">Mapear columnas del archivo</h3>
         <p className="text-sm text-muted-foreground">
-          Confirma o modifica los mapeos automáticos. Los valores que necesiten mapeo manual aparecerán expandidos.
+          Asigna cada columna del Excel a un campo de movimiento. El sistema detecta automáticamente los mapeos más probables.
         </p>
       </div>
 
@@ -901,178 +903,49 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           {parsedData.headers.map((header, index) => {
             const mappedField = columnMapping[index]
             const sampleValue = parsedData.rows[0]?.[index]
-            const validation = mappedField ? validateFieldValue(mappedField, sampleValue) : null
-            const isValid = validation?.isValid || false
-            const needsMapping = mappedField && !isValid && validation?.available && validation.available.length > 0
             
             return (
               <Card key={index}>
                 <CardContent className="p-4">
-                  {/* Header Row */}
-                  <div className="grid grid-cols-12 gap-4 items-center mb-3">
-                  <div className="col-span-1 text-center">
-                    <Badge variant="outline" className="text-xs font-mono w-8 h-6">{String.fromCharCode(65 + index)}</Badge>
-                  </div>
-                  <div className="col-span-4">
-                    <div className="font-medium text-sm">{header}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {sampleValue && <span className="font-mono bg-gray-50 px-2 py-1 rounded text-xs">{sampleValue}</span>}
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-1 text-center">
+                      <Badge variant="outline" className="text-xs font-mono w-8 h-6">{String.fromCharCode(65 + index)}</Badge>
                     </div>
-                  </div>
-                  <div className="col-span-1 text-center">
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="col-span-4">
-                    <Select 
-                      value={columnMapping[index] || ''} 
-                      onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Seleccionar campo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">No mapear</SelectItem>
-                        {AVAILABLE_FIELDS.map(option => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="col-span-2 text-right">
-                    {isValid && (
-                      <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
-                        ✓ Mapeo confirmado
-                      </Badge>
-                    )}
-                    {needsMapping && (
-                      <Badge variant="destructive" className="bg-orange-100 text-orange-800 text-xs border-orange-200">
-                        ⚠ Requiere mapeo
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* Validation Status */}
-                {mappedField && validation && (
-                  <div className="ml-5 border-l-2 border-gray-200 pl-4">
-                    {isValid ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-green-700 text-sm">
-                          <CheckCircle className="h-4 w-4" />
-                          <span>Mapeado al campo '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}'.</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-green-600 text-xs">
-                          <span>⚫</span>
-                          <span>100% de las filas tienen un valor para esta columna</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-green-600 text-xs">
-                          <span>✓</span>
-                          <span>Todos los valores pasan la validación para este campo</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-orange-700 text-sm">
-                          <AlertCircle className="h-4 w-4" />
-                          <span>100% de las filas tienen un valor para esta columna</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-orange-600 text-xs">
-                          <span>⚠</span>
-                          <span>Los valores requieren mapeo manual (reparar en el siguiente paso)</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Value Mapping Section - Only for problematic fields */}
-                {needsMapping && (
-                  <div className="mt-4 border-t pt-4">
-                    <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700 mb-2">
-                      <div className="col-span-3">Tus valores</div>
-                      <div className="col-span-3">Nuestros valores</div>
-                      <div className="col-span-6"></div>
-                    </div>
-                    
-                    <div className="grid grid-cols-12 gap-4 items-center py-2 bg-gray-50 rounded">
-                      <div className="col-span-3">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="text-sm font-mono">{sampleValue}</span>
-                        </div>
-                      </div>
-                      <div className="col-span-3">
-                        <Select 
-                          value={manualMappings[`${mappedField}_${sampleValue}`] || ''}
-                          onValueChange={(selectedId) => {
-                            const mappingKey = `${mappedField}_${sampleValue}`;
-                            setManualMappings(prev => ({
-                              ...prev,
-                              [mappingKey]: selectedId
-                            }));
-                            
-                            // Find the name for the toast
-                            let selectedName = '';
-                            if (mappedField === 'type_id') {
-                              selectedName = types.find(t => t.id === selectedId)?.name || '';
-                            } else if (mappedField === 'currency_id') {
-                              selectedName = organizationCurrencies?.find(c => c.id === selectedId)?.name || '';
-                            } else if (mappedField === 'wallet_id') {
-                              selectedName = organizationWallets?.find(w => w.id === selectedId)?.name || '';
-                            } else if (mappedField === 'subcategory_id') {
-                              selectedName = categories.find(c => c.id === selectedId)?.name || '';
-                            }
-                            
-                            toast({
-                              title: "Mapeo aplicado",
-                              description: `"${sampleValue}" → "${selectedName}"`
-                            });
-                          }}
-                        >
-                          <SelectTrigger className="h-8">
-                            <SelectValue placeholder="Seleccionar valor" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {validation?.available?.map((value, idx) => {
-                              // Find the ID for this value
-                              let valueId = '';
-                              if (mappedField === 'type_id') {
-                                valueId = types.find(t => t.name === value)?.id || '';
-                              } else if (mappedField === 'currency_id') {
-                                valueId = organizationCurrencies?.find(c => c.name === value)?.id || '';
-                              } else if (mappedField === 'wallet_id') {
-                                valueId = organizationWallets?.find(w => w.name === value)?.id || '';
-                              } else if (mappedField === 'subcategory_id') {
-                                valueId = categories.find(c => c.name === value)?.id || '';
-                              }
-                              
-                              return (
-                                <SelectItem key={idx} value={valueId}>
-                                  {value}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="col-span-4">
-                        {manualMappings[`${mappedField}_${sampleValue}`] && (
-                          <div className="flex items-center gap-2 text-green-700 text-sm">
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Mapeado al campo '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}'.</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="col-span-2 text-right">
-                        <Button size="sm" variant="default" className="text-xs h-6 bg-green-600 hover:bg-green-700">
-                          Confirmar mapeo
-                        </Button>
+                    <div className="col-span-4">
+                      <div className="font-medium text-sm">{header}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Ejemplo: {sampleValue && <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{sampleValue}</span>}
                       </div>
                     </div>
+                    <div className="col-span-1 text-center">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="col-span-4">
+                      <Select 
+                        value={columnMapping[index] || ''} 
+                        onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue placeholder="Seleccionar campo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No mapear</SelectItem>
+                          {AVAILABLE_FIELDS.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-2 text-right">
+                      {mappedField && (
+                        <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
+                          ✓ Mapeado
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                )}
                 </CardContent>
               </Card>
             )
