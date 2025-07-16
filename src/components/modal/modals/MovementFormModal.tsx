@@ -401,15 +401,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   }, [form.watch('category_id')])
 
+  // Efecto solo para cargar movimientos en edición (sin valores por defecto)
   React.useEffect(() => {
-    console.log('Effect triggered for editingMovement:', {
-      hasEditingMovement: !!editingMovement,
-      hasMembers: !!members,
-      hasCurrencies: !!currencies,
-      hasWallets: !!wallets,
-      hasConcepts: !!concepts,
-      hasCategories: !!categories
-    })
+    if (!editingMovement) return
+    
+    console.log('Loading editing movement - ONE TIME ONLY')
     
     if (editingMovement) {
       // Wait for all data to be loaded
@@ -624,77 +620,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setSelectedCategoryId(editingMovement.category_id)
         }
       }
-      setPanel('edit')
-    } else {
-      // New movement mode - wait for all data to be loaded
-      if (!members || !currencies || !wallets) return
-      
-      const currentMember = members?.find(m => m.user_id === userData?.user?.id)
-      const defaultOrgCurrency = currencies?.find((c: any) => c.is_default) || currencies?.[0]
-      const defaultWallet = wallets?.find(w => w.is_default) || wallets?.[0]
-
-      console.log('Setting defaults:', {
-        currentMember: currentMember?.id,
-        defaultCurrency: defaultOrgCurrency?.currency?.id,
-        defaultWallet: defaultWallet?.id
-      })
-
-      // Reset main form
-      form.reset({
-        movement_date: new Date(),
-        created_by: currentMember?.id || '',
-        description: '',
-        amount: 0,
-        exchange_rate: undefined,
-        type_id: '',
-        category_id: '',
-        subcategory_id: '',
-        currency_id: defaultOrgCurrency?.currency?.id || '',
-        wallet_id: defaultWallet?.id || '',
-      })
-
-      // Reset conversion form with same defaults
-      conversionForm.reset({
-        movement_date: new Date(),
-        created_by: currentMember?.id || '',
-        description: '',
-        amount_from: 0,
-        amount_to: 0,
-        currency_id_from: defaultOrgCurrency?.currency?.id || '',
-        currency_id_to: defaultOrgCurrency?.currency?.id || '',
-        wallet_id_from: defaultWallet?.id || '',
-        wallet_id_to: defaultWallet?.id || '',
-        exchange_rate: undefined,
-        type_id: '',
-      })
-
-      // Reset transfer form with same defaults
-      transferForm.reset({
-        movement_date: new Date(),
-        created_by: currentMember?.id || '',
-        description: '',
-        amount: 0,
-        currency_id: defaultOrgCurrency?.currency?.id || '',
-        wallet_id_from: defaultWallet?.id || '',
-        wallet_id_to: defaultWallet?.id || '',
-        type_id: '',
-      })
-
-      // Reset aportes form with same defaults
-      aportesForm.reset({
-        movement_date: new Date(),
-        created_by: currentMember?.id || '',
-        description: '',
-        contact_id: '', // Se establecerá automáticamente según la categoría
-        currency_id: defaultOrgCurrency?.currency?.id || '',
-        wallet_id: defaultWallet?.id || '',
-        amount: 0,
-        exchange_rate: undefined,
-        type_id: '',
-        category_id: '',
-      })
-      setPanel('edit')
     }
+    setPanel('edit')
   }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories])
 
   const createMovementMutation = useMutation({
