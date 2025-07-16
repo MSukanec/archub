@@ -2148,7 +2148,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categoriesWithChildren.map((category: any) => (
+                      {categories?.map((category: any) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -2405,7 +2405,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categoriesWithChildren.map((category: any) => (
+                      {categories?.map((category: any) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -2919,7 +2919,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           }
         }
       }}
-      rightLoading={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending}
+      showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending}
     />
   )
 
