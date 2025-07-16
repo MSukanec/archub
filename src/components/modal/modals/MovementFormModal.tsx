@@ -1935,11 +1935,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               name="contact_id"
               render={({ field }) => {
                 // Buscar la categoría seleccionada para obtener el nombre
-                const selectedCategory = categories?.find(c => c.id === aportesForm.watch('category_id'))
+                const selectedCategory = categories?.find(c => c.id === selectedCategoryId)
                 const categoryName = selectedCategory?.name || ''
+                
+                // Debug: verificar el valor de categoryName
+                console.log('🔍 Debug selector - categoryName:', categoryName, 'selectedCategory:', selectedCategory, 'selectedCategoryId:', selectedCategoryId)
                 
                 // Detectar si es "Aportes de Terceros" para mostrar Cliente
                 const isClienteSelector = categoryName === 'Aportes de Terceros'
+                
+                console.log('🔍 Debug selector - isClienteSelector:', isClienteSelector, 'categoryName === "Aportes de Terceros":', categoryName === 'Aportes de Terceros')
                 
                 // Preparar datos para UserSelector
                 const usersData = isClienteSelector ? (
