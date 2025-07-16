@@ -441,6 +441,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           currency_id: editingMovement.currency_id || '',
           wallet_id: editingMovement.wallet_id || '',
         })
+        
+        // Establecer selectedTypeId para conversiones también
+        if (editingMovement.type_id) {
+          setSelectedTypeId(editingMovement.type_id)
+        }
       } else if (isTransferMovement) {
         // Para transferencias, cargar datos en formulario de transferencia
         transferForm.reset({
@@ -453,6 +458,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           wallet_id_to: '',
           amount: editingMovement.amount || 0
         })
+        
+        // Establecer selectedTypeId para transferencias también
+        if (editingMovement.type_id) {
+          setSelectedTypeId(editingMovement.type_id)
+        }
       } else if (isAportesMovement) {
         // Para aportes, cargar datos en formulario de aportes
         aportesForm.reset({
@@ -465,6 +475,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
           amount: editingMovement.amount || 0
         })
+        
+        // Establecer selectedTypeId para aportes también
+        if (editingMovement.type_id) {
+          setSelectedTypeId(editingMovement.type_id)
+        }
       } else {
         // Formulario normal
         console.log('Loading form with categories:', {
