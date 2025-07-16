@@ -66,7 +66,23 @@ export function ComboBoxMultiSelect({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {/* ComboBox Selector */}
+      {/* Selected badges */}
+      {selectedOptions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedOptions.map((option) => (
+            <Badge
+              key={option.value}
+              className="cursor-pointer bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-destructive hover:text-destructive-foreground transition-colors"
+              onClick={() => handleRemove(option.value)}
+            >
+              {option.label}
+              <X className="ml-1 h-3 w-3" />
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {/* Combobox selector - matching Select trigger exactly */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
@@ -113,22 +129,6 @@ export function ComboBoxMultiSelect({
           </Command>
         </PopoverContent>
       </Popover>
-
-      {/* Selected badges - BELOW the selector */}
-      {selectedOptions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedOptions.map((option) => (
-            <Badge
-              key={option.value}
-              className="cursor-pointer bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-destructive hover:text-destructive-foreground transition-colors"
-              onClick={() => handleRemove(option.value)}
-            >
-              {option.label}
-              <X className="ml-1 h-3 w-3" />
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

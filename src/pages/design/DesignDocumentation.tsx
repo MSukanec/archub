@@ -114,7 +114,7 @@ export default function DesignDocumentation() {
     if (location.includes('/project/')) {
       setSidebarContext('project');
     } else if (location.includes('/design/')) {
-      setSidebarContext('project');
+      setSidebarContext('design');
     }
   }, [location, setSidebarContext]);
 

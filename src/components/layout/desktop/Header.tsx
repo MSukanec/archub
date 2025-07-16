@@ -333,6 +333,7 @@ export function Header({
                       className="flex items-center justify-between text-sm"
                     >
                       <div className="flex items-center gap-2">
+                        <Folder className="h-4 w-4" />
                         <span className="truncate">{project.name}</span>
                       </div>
                       {localSelectedProject === project.id && (
@@ -363,7 +364,7 @@ export function Header({
           </>
 
           {/* Stage Breadcrumb - Show ONLY if in stage context (not project context) */}
-          {['construction', 'finances'].includes(currentSidebarContext) && (
+          {['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
               
@@ -373,12 +374,16 @@ export function Header({
                   className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
                   onClick={() => {
                     // Navigate to current stage dashboard
-                    if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
+                    if (currentSidebarContext === 'design') navigate('/design/dashboard');
+                    else if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
                     else if (currentSidebarContext === 'finances') navigate('/finances/dashboard');
+                    else if (currentSidebarContext === 'commercialization') navigate('/commercialization/dashboard');
                   }}
                 >
+                  {currentSidebarContext === 'design' && 'Diseño'}
                   {currentSidebarContext === 'construction' && 'Obra'}
                   {currentSidebarContext === 'finances' && 'Finanzas'}
+                  {currentSidebarContext === 'commercialization' && 'Comercialización'}
                 </Button>
                 
                 <DropdownMenu>
@@ -398,6 +403,14 @@ export function Header({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
+                        setSidebarContext('design');
+                        navigate('/design/dashboard');
+                      }}
+                    >
+                      Diseño
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
                         setSidebarContext('construction');
                         navigate('/construction/dashboard');
                       }}
@@ -412,13 +425,35 @@ export function Header({
                     >
                       Finanzas
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('commercialization');
+                        navigate('/commercialization/dashboard');
+                      }}
+                    >
+                      Comercialización
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </>
           )}
 
+          {/* Main Sidebar Section - Show for context pages (organization, admin, etc.) */}
+          {mainSidebarSection && !['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
+              <span className="text-sm font-medium text-[var(--menues-fg)]">{mainSidebarSection}</span>
+            </>
+          )}
 
+          {/* Accordion Parent - Show if page is under an accordion */}
+          {accordionParent && (
+            <>
+              <span className="text-[var(--menues-fg)] opacity-70">/</span>
+              <span className="text-sm font-medium text-[var(--menues-fg)]">{accordionParent}</span>
+            </>
+          )}
 
           {/* Page Title - Show if title is provided */}
           {title && (
