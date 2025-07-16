@@ -541,27 +541,52 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       // Detectar el tipo de movimiento por los campos del movimiento
       const isConversionMovement = !!editingMovement.conversion_group_id
       const isTransferMovement = !!editingMovement.transfer_group_id
-      const isAportesMovement = viewMode === "aportes" || categoryViewMode === "aportes"
       
-      // Establecer el tipo de formulario
-      setIsConversion(isConversionMovement)
-      setIsTransfer(isTransferMovement)
-      setIsAportes(isAportesMovement)
+      // Detectar los 3 tipos de aportes basándose en los extra_fields de la categoría
+      const extraFields = selectedCategory?.extra_fields || []
+      const isAportesMovement = categoryViewMode === "aportes" && extraFields.includes('cliente_id') // Aportes de Terceros
+      const isAportesPropriosMovement = categoryViewMode === "aportes" && extraFields.includes('socio_id') && selectedCategory?.name === "Aportes Propios"
+      const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || (extraFields.includes('socio_id') && selectedCategory?.name?.includes('Retiro'))
+      
+      // Reset todos los estados primero
+      setIsConversion(false)
+      setIsTransfer(false)
+      setIsAportes(false)
+      setIsAportesPropios(false)
+      setIsRetirosPropios(false)
+      
+      // Establecer el tipo de formulario correcto
+      if (isConversionMovement) {
+        setIsConversion(true)
+      } else if (isTransferMovement) {
+        setIsTransfer(true)
+      } else if (isAportesMovement) {
+        setIsAportes(true)
+      } else if (isAportesPropriosMovement) {
+        setIsAportesPropios(true)
+      } else if (isRetirosPropriosMovement) {
+        setIsRetirosPropios(true)
+      }
       
       console.log('Edit mode - detected movement type:', { 
+        categoryId: editingMovement.category_id,
+        categoryName: selectedCategory?.name,
         viewMode, 
+        categoryViewMode,
+        extraFields,
         isConversionMovement, 
         isTransferMovement, 
-        isAportesMovement 
+        isAportesMovement,
+        isAportesPropriosMovement,
+        isRetirosPropriosMovement
       })
       
       console.log('Form states after setting:', {
-        isConversion,
-        isTransfer,
-        isAportes,
-        newIsConversion: isConversionMovement,
-        newIsTransfer: isTransferMovement,
-        newIsAportes: isAportesMovement
+        isConversion: isConversionMovement,
+        isTransfer: isTransferMovement,
+        isAportes: isAportesMovement,
+        isAportesPropios: isAportesPropriosMovement,
+        isRetirosPropios: isRetirosPropriosMovement
       })
       
       // Cargar datos en el formulario correcto según el tipo de movimiento
@@ -659,7 +684,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setSelectedTypeId(transferConcept.id)
         }
       } else if (isAportesMovement) {
-        // Para aportes, cargar datos en formulario de aportes
+        // Para aportes de terceros, cargar datos en formulario de aportes
         aportesForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -674,6 +699,44 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         })
         
         // Establecer selectedTypeId para aportes también
+        if (editingMovement.type_id) {
+          setSelectedTypeId(editingMovement.type_id)
+        }
+      } else if (isAportesPropriosMovement) {
+        // Para aportes propios, cargar datos en formulario de aportes propios
+        aportesPropriosForm.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
+          member_id: editingMovement.member_id || '',
+          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
+          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined
+        })
+        
+        // Establecer selectedTypeId para aportes propios también
+        if (editingMovement.type_id) {
+          setSelectedTypeId(editingMovement.type_id)
+        }
+      } else if (isRetirosPropriosMovement) {
+        // Para retiros propios, cargar datos en formulario de retiros propios
+        retirosPropriosForm.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
+          member_id: editingMovement.member_id || '',
+          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
+          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined
+        })
+        
+        // Establecer selectedTypeId para retiros propios también
         if (editingMovement.type_id) {
           setSelectedTypeId(editingMovement.type_id)
         }
