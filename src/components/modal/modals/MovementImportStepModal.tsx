@@ -866,21 +866,20 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     switch (fieldName) {
       case 'type_id':
         const normalizedVal = normalizeValue(fieldName, value, valueMap, manualMappings)
-        // Check if the value was actually mapped to a valid type (INGRESO or EGRESO)
-        const isValidType = normalizedVal === 'INGRESO' || normalizedVal === 'EGRESO'
-        const typeMatch = types.find(t => t.id === normalizedVal || normalizeText(t.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(t.name)))
+        // Check if it's a direct UUID match with types table
+        const typeMatch = types.find(t => t.id === normalizedVal)
+        const isDirectTypeMatch = !!typeMatch
         
-        if (fieldName === 'type_id') {
-          console.log('🔍 Validating type_id:', {
-            originalValue: value,
-            normalizedVal,
-            isValidType,
-            typeMatch: typeMatch?.name
-          });
-        }
+        console.log('🔍 Validating type_id:', {
+          originalValue: value,
+          normalizedVal,
+          isDirectTypeMatch,
+          typeMatch: typeMatch?.name,
+          allTypes: types.map(t => ({ id: t.id, name: t.name }))
+        });
         
         return { 
-          isValid: isValidType, 
+          isValid: isDirectTypeMatch, 
           suggestion: typeMatch?.name,
           available: types.map(t => t.name),
           mappedValue: normalizedVal
@@ -905,10 +904,19 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'subcategory_id':
         const subcategoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
-        const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        // Check if it's a direct UUID match with categories table
+        const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized)
+        const isDirectSubcategoryMatch = !!subcategoryMatch
+
+        console.log('🔍 Validating subcategory_id:', {
+          originalValue: value,
+          subcategoryNormalized,
+          isDirectSubcategoryMatch,
+          subcategoryMatch: subcategoryMatch?.name
+        });
 
         return { 
-          isValid: !!subcategoryNormalized, 
+          isValid: isDirectSubcategoryMatch, 
           suggestion: subcategoryMatch?.name,
           available: categories.map(c => c.name),
           mappedValue: subcategoryNormalized
@@ -1062,10 +1070,15 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       values.forEach(value => {
                         fieldMappings[`${fieldName}_${value}`] = '';
                       });
-                      setManualMappings(prev => ({
-                        ...prev,
-                        ...fieldMappings
-                      }));
+                      setManualMappings(prev => {
+                        const newMappings = {
+                          ...prev,
+                          ...fieldMappings
+                        };
+                        // Force re-render by updating key
+                        setTimeout(() => setManualMappings({ ...newMappings }), 10);
+                        return newMappings;
+                      });
                       toast({
                         title: "Campo completado",
                         description: `Todos los valores de "${fieldLabel}" se asignaron como NULL`
