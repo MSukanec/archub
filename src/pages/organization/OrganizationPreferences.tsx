@@ -24,6 +24,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useOrganizationMovementConcepts, MovementConceptOrganization } from '@/hooks/use-organization-movement-concepts';
 import { useDeleteMovementConcept, useMoveConceptToParent } from '@/hooks/use-movement-concepts-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 
 export default function OrganizationPreferences() {
   const { data: userData } = useCurrentUser();
@@ -47,6 +48,7 @@ export default function OrganizationPreferences() {
 
   // Global modal store
   const { openModal } = useGlobalModalStore();
+  const { showDeleteConfirmation } = useDeleteConfirmation();
 
   // Movement concepts hooks
   const { data: concepts = [], isLoading: conceptsLoading } = useOrganizationMovementConcepts(userData?.organization?.id);
@@ -304,12 +306,45 @@ export default function OrganizationPreferences() {
     });
   };
 
-  const handleDeleteConcept = async (conceptId: string) => {
-    try {
-      await deleteConceptMutation.mutateAsync(conceptId);
-    } catch (error) {
-      console.error('Error deleting concept:', error);
+  const handleDeleteConcept = (conceptId: string) => {
+    // Find the concept to get its name
+    const findConceptInTree = (concepts: MovementConceptOrganization[], id: string): MovementConceptOrganization | null => {
+      for (const concept of concepts) {
+        if (concept.id === id) return concept;
+        if (concept.children) {
+          const found = findConceptInTree(concept.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const concept = findConceptInTree(concepts, conceptId);
+    if (!concept) return;
+
+    // Check if it's a system concept
+    if (concept.is_system) {
+      toast({
+        title: "Eliminación no permitida",
+        description: "Los conceptos del sistema no pueden ser eliminados",
+        variant: "destructive"
+      });
+      return;
     }
+
+    showDeleteConfirmation({
+      title: "Eliminar Concepto",
+      description: `¿Estás seguro de que deseas eliminar el concepto "${concept.name}"? Esta acción no se puede deshacer.`,
+      itemName: concept.name,
+      mode: 'dangerous',
+      onConfirm: async () => {
+        try {
+          await deleteConceptMutation.mutateAsync(conceptId);
+        } catch (error) {
+          console.error('Error deleting concept:', error);
+        }
+      }
+    });
   };
 
   const handleMoveToParent = async (conceptId: string, newParentId: string | null) => {

@@ -192,6 +192,8 @@ export function useDeleteMovementConcept() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] });
+      queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
       toast({
         title: "Concepto eliminado",
         description: "El concepto de movimiento se ha eliminado exitosamente.",
@@ -222,6 +224,8 @@ export function useMoveConceptToParent() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] });
+      queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
     },
   });
 }
