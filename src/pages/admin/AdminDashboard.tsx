@@ -88,7 +88,7 @@ export default function AdminDashboard() {
 
   // Set sidebar context and hide mobile action bar on dashboards
   useEffect(() => {
-    setSidebarContext('admin');
+    setSidebarContext('organization');
     if (isMobile) {
       setShowActionBar(false);
     }
