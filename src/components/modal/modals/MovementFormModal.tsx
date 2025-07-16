@@ -283,67 +283,52 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   }
 
-  // Efecto para manejar la lógica jerárquica al seleccionar tipo y detectar conversión/transfer/aportes
-  React.useEffect(() => {
-    const typeId = form.watch('type_id') || conversionForm.watch('type_id') || transferForm.watch('type_id') || aportesForm.watch('type_id')
+  // Manejar cambio de tipo de manera controlada
+  const handleTypeChange = React.useCallback((newTypeId: string) => {
+    if (!newTypeId || newTypeId === selectedTypeId || !concepts) return
     
-    // Solo procesar si realmente hay un typeId y es diferente del anterior
-    if (!typeId || typeId === selectedTypeId) return
+    console.log('Handling type change:', { newTypeId, selectedTypeId })
     
-    console.log('Type change detected:', { typeId, selectedTypeId, concepts: !!concepts })
+    // Actualizar estado
+    setSelectedTypeId(newTypeId)
     
-    // Actualizar el estado del tipo seleccionado ANTES de hacer cambios
-    setSelectedTypeId(typeId)
-    
-    // Detectar tipo de formulario por view_mode
-    const selectedConcept = concepts?.find((concept: any) => concept.id === typeId)
+    // Detectar formulario
+    const selectedConcept = concepts.find((concept: any) => concept.id === newTypeId)
     const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+    
     const isConversionType = viewMode === "conversion"
     const isTransferType = viewMode === "transfer"
     const isAportesType = viewMode === "aportes"
     
-    console.log('Form type detection:', { typeId, viewMode, isConversionType, isTransferType, isAportesType })
+    console.log('Type detected:', { viewMode, isConversionType, isTransferType, isAportesType })
     
-    // Cambiar el formulario activo
+    // Cambiar formulario
     setIsConversion(isConversionType)
     setIsTransfer(isTransferType)
     setIsAportes(isAportesType)
     
-    // Sincronizar type_id en todos los formularios solo si no estamos editando
+    // Reset solo en nuevo movimiento
     if (!editingMovement) {
-      form.setValue('type_id', typeId)
-      conversionForm.setValue('type_id', typeId)
-      transferForm.setValue('type_id', typeId)
-      aportesForm.setValue('type_id', typeId)
-      
-      // Resetear categorías solo si es necesario
       form.setValue('category_id', '')
       form.setValue('subcategory_id', '')
       setSelectedCategoryId('')
-    }
-    
-    // Para formularios especiales, solo aplicar valores por defecto si es nuevo movimiento
-    if (!editingMovement && (isConversionType || isTransferType || isAportesType)) {
-      // Aplicar solo valores básicos por defecto
-      const defaultDate = new Date()
-      const defaultCreator = userData?.id || ''
       
-      if (isConversionType) {
-        conversionForm.setValue('movement_date', defaultDate)
-        conversionForm.setValue('created_by', defaultCreator)
-      } else if (isTransferType) {
-        transferForm.setValue('movement_date', defaultDate)
-        transferForm.setValue('created_by', defaultCreator)
-        transferForm.setValue('currency_id', userData?.organization?.default_currency_id || '')
-        transferForm.setValue('wallet_id_from', userData?.organization?.default_wallet_id || '')
-      } else if (isAportesType) {
-        aportesForm.setValue('movement_date', defaultDate)
-        aportesForm.setValue('created_by', defaultCreator)
-        aportesForm.setValue('currency_id', userData?.organization?.default_currency_id || '')
-        aportesForm.setValue('wallet_id', userData?.organization?.default_wallet_id || '')
-      }
+      // Sincronizar formularios
+      conversionForm.setValue('type_id', newTypeId)
+      transferForm.setValue('type_id', newTypeId)
+      aportesForm.setValue('type_id', newTypeId)
     }
-  }, [form.watch('type_id'), conversionForm.watch('type_id'), transferForm.watch('type_id'), aportesForm.watch('type_id'), concepts, selectedTypeId, editingMovement, userData])
+  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm])
+  
+  // Escuchar cambios en el tipo
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'type_id' && value.type_id) {
+        handleTypeChange(value.type_id)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, handleTypeChange])
 
   // Efecto adicional para detectar aportes cuando se selecciona una categoría (desde cualquier formulario)
   React.useEffect(() => {
