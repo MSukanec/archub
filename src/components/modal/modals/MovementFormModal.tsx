@@ -263,18 +263,53 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       setIsTransfer(isTransferType)
       setIsAportes(isAportesType)
       
-      // Sincronizar type_id en todos los formularios solo si no estamos editando
-      if (!editingMovement) {
-        form.setValue('type_id', typeId)
-        conversionForm.setValue('type_id', typeId)
-        transferForm.setValue('type_id', typeId)
-        aportesForm.setValue('type_id', typeId)
+      // Sincronizar type_id en todos los formularios (siempre necesario)
+      form.setValue('type_id', typeId)
+      conversionForm.setValue('type_id', typeId)
+      transferForm.setValue('type_id', typeId)
+      aportesForm.setValue('type_id', typeId)
+      
+      // Solo resetear categorías en modo nuevo movimiento Y cuando realmente cambia el tipo
+      if (!editingMovement && typeId !== selectedTypeId) {
+        form.setValue('category_id', '')
+        form.setValue('subcategory_id', '')
+        setSelectedCategoryId('')
+      }
+      
+      // Para formularios especiales (conversión, transferencia, aportes), preservar valores comunes
+      if (isConversionType || isTransferType || isAportesType) {
+        // Preservar valores básicos del formulario principal
+        const currentValues = {
+          movement_date: form.getValues('movement_date'),
+          created_by: form.getValues('created_by'),
+          description: form.getValues('description'),
+          amount: form.getValues('amount'),
+          currency_id: form.getValues('currency_id'),
+          wallet_id: form.getValues('wallet_id'),
+          exchange_rate: form.getValues('exchange_rate')
+        }
         
-        // Reset categoría y subcategoría cuando cambia el tipo (solo en modo nuevo movimiento)
-        if (typeId !== selectedTypeId) {
-          form.setValue('category_id', '')
-          form.setValue('subcategory_id', '')
-          setSelectedCategoryId('')
+        // Aplicar valores preservados al formulario correspondiente
+        if (isConversionType) {
+          conversionForm.setValue('movement_date', currentValues.movement_date)
+          conversionForm.setValue('created_by', currentValues.created_by)
+          conversionForm.setValue('description', currentValues.description)
+          conversionForm.setValue('exchange_rate', currentValues.exchange_rate)
+        } else if (isTransferType) {
+          transferForm.setValue('movement_date', currentValues.movement_date)
+          transferForm.setValue('created_by', currentValues.created_by)
+          transferForm.setValue('description', currentValues.description)
+          transferForm.setValue('amount', currentValues.amount)
+          transferForm.setValue('currency_id', currentValues.currency_id)
+          transferForm.setValue('wallet_id_from', currentValues.wallet_id)
+        } else if (isAportesType) {
+          aportesForm.setValue('movement_date', currentValues.movement_date)
+          aportesForm.setValue('created_by', currentValues.created_by)
+          aportesForm.setValue('description', currentValues.description)
+          aportesForm.setValue('amount', currentValues.amount)
+          aportesForm.setValue('currency_id', currentValues.currency_id)
+          aportesForm.setValue('wallet_id', currentValues.wallet_id)
+          aportesForm.setValue('exchange_rate', currentValues.exchange_rate)
         }
       }
     }
