@@ -110,6 +110,17 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   const stringValue = String(value).trim();
   const normalized = normalizeText(stringValue);
   
+  // Debug logging for type_id specifically
+  if (field === 'type_id') {
+    console.log('🔍 Processing type_id:', {
+      originalValue: value,
+      stringValue,
+      normalized,
+      valueMapForType: valueMap[field],
+      directMatch: valueMap[field] && valueMap[field][normalized]
+    });
+  }
+  
   // Check manual mappings first
   const mappingKey = `${field}_${stringValue}`;
   if (manualMappings[mappingKey] !== undefined) {
@@ -119,6 +130,9 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   
   // Check direct mapping
   if (valueMap[field] && valueMap[field][normalized]) {
+    if (field === 'type_id') {
+      console.log('✅ type_id direct match found:', valueMap[field][normalized]);
+    }
     return valueMap[field][normalized];
   }
   
@@ -1021,11 +1035,33 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             return (
               <Card key={fieldName}>
                 <CardContent className="p-4">
-                <div className="mb-4">
-                  <h4 className="font-medium text-sm mb-1">Campo: {fieldLabel}</h4>
-                  <p className="text-xs text-muted-foreground">
-                    {values.length} valor(es) incompatible(s) encontrado(s)
-                  </p>
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Campo: {fieldLabel}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {values.length} valor(es) incompatible(s) encontrado(s)
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const fieldMappings: { [key: string]: string } = {};
+                      values.forEach(value => {
+                        fieldMappings[`${fieldName}_${value}`] = '';
+                      });
+                      setManualMappings(prev => ({
+                        ...prev,
+                        ...fieldMappings
+                      }));
+                      toast({
+                        title: "Campo completado",
+                        description: `Todos los valores de "${fieldLabel}" se asignaron como NULL`
+                      });
+                    }}
+                  >
+                    PONER TODO NULL
+                  </Button>
                 </div>
 
                 <div className="space-y-4">

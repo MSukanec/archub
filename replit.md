@@ -125,6 +125,8 @@ Archub is a modern construction management platform built with a React frontend 
   • Added comprehensive error logging and validation warnings for debugging problematic data mappings
   • Eliminated "Error de mapeo" failures by implementing silent value omission for unmappable data instead of errors
   • System now successfully imports all Excel rows with proper foreign key relationships and valid data types
+  • Added "PONER TODO NULL" button per field for rapid bulk assignment in step 3 value resolution
+  • Fixed all foreign key mappings: wallet_id and currency_id now use organization table IDs correctly
 - July 16, 2025. EXCEL IMPORT SYSTEM ENHANCEMENTS: Enhanced MovementImportStepModal with automatic value normalization and member selection - COMPLETED
   • Added member selector in step 1 to choose movement creator before column mapping
   • Implemented automatic value normalization: "INGRESOS" → "INGRESO", "EGRESOS" → "EGRESO" 
