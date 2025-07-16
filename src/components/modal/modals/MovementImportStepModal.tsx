@@ -70,7 +70,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     });
   }
 
-  // Add concept mappings
+  // Add concept mappings with aggressive fuzzy matching
   if (concepts?.length) {
     valueMap.subcategory_id = {};
     concepts.forEach(concept => {
@@ -83,6 +83,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
         concept.name.replace(/\s+/g, ''), // Remove spaces: "Mano de Obra" -> "manodeobra"
         concept.name.replace(/[^a-zA-Z0-9]/g, ''), // Remove special chars
         concept.name.replace(/\s+/g, '').toLowerCase(), // Combined
+        concept.name.replace(/de|del|la|el|y|e/gi, '').replace(/\s+/g, ''), // Remove common words
       ];
       
       variations.forEach(variation => {
@@ -111,18 +112,30 @@ const normalizeValue = (field: string, value: any, valueMap: any): any => {
   // Try fuzzy matching for field mappings
   if (valueMap[field]) {
     const fieldMap = valueMap[field];
+    
+    // First try exact matches and substring matches
     for (const [key, mappedValue] of Object.entries(fieldMap)) {
-      // Check if the normalized value is contained in the key or vice versa
       if (normalized.includes(key) || key.includes(normalized)) {
         return mappedValue;
       }
-      // Try partial matching for better results
+    }
+    
+    // Then try similarity matching with lower threshold for better matching
+    let bestMatch = null;
+    let bestSimilarity = 0;
+    
+    for (const [key, mappedValue] of Object.entries(fieldMap)) {
       if (key.length > 3 && normalized.length > 3) {
         const similarity = calculateSimilarity(normalized, key);
-        if (similarity > 0.7) { // 70% similarity threshold
-          return mappedValue;
+        if (similarity > bestSimilarity && similarity > 0.6) { // Lowered to 60%
+          bestSimilarity = similarity;
+          bestMatch = mappedValue;
         }
       }
+    }
+    
+    if (bestMatch) {
+      return bestMatch;
     }
   }
   
@@ -490,6 +503,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     movement[fieldName] = normalizedValue
                     hasValidData = true
                   }
+                  // Don't set unmappable values to avoid UUID errors - just skip them
                 } else if (value) {
                   movement[fieldName] = value
                   hasValidData = true
@@ -503,6 +517,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       })
       .filter(Boolean) // Remove null movements
 
+    console.log(`Enviando ${processedMovements.length} movimientos válidos al servidor`);
+    console.log('Primer movimiento procesado:', processedMovements[0]);
     importMutation.mutate(processedMovements)
   }
 
