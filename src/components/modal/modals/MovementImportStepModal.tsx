@@ -231,6 +231,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [dropzoneKey, setDropzoneKey] = useState(0)
   const [selectedCreator, setSelectedCreator] = useState<string>('')
   const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
+  const [incompatibleValues, setIncompatibleValues] = useState<{ [key: string]: string[] }>({})
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -427,6 +428,35 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     return errors.length === 0
   }
 
+  // Función para analizar valores incompatibles
+  const analyzeIncompatibleValues = () => {
+    const incompatible: { [key: string]: string[] } = {}
+    
+    if (!parsedData) return incompatible
+    
+    // Analizar cada fila del archivo
+    parsedData.rows.forEach(row => {
+      Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
+        if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+          const value = row[parseInt(columnIndex)]
+          if (value) {
+            const validation = validateFieldValue(fieldName, value)
+            if (!validation.isValid) {
+              if (!incompatible[fieldName]) {
+                incompatible[fieldName] = []
+              }
+              if (!incompatible[fieldName].includes(value)) {
+                incompatible[fieldName].push(value)
+              }
+            }
+          }
+        }
+      })
+    })
+    
+    return incompatible
+  }
+
   // Import mutation
   const importMutation = useMutation({
     mutationFn: async (movements: any[]) => {
@@ -590,9 +620,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Step configurations
   const stepConfig: StepModalConfig = {
     currentStep,
-    totalSteps: 3,
-    stepTitle: currentStep === 1 ? 'Seleccionar archivo' : 
+    totalSteps: 4,
+    stepTitle: currentStep === 1 ? 'Seleccionar archivo y creador' : 
                currentStep === 2 ? 'Mapear columnas' : 
+               currentStep === 3 ? 'Resolver valores incompatibles' :
                'Vista previa e importar'
   }
 
@@ -627,9 +658,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           nextAction: {
             label: 'Siguiente',
             onClick: () => {
-              if (validateMapping()) {
-                setCurrentStep(3)
-              }
+              // Analizar valores incompatibles
+              const incompatible = analyzeIncompatibleValues()
+              setIncompatibleValues(incompatible)
+              setCurrentStep(3)
             },
             disabled: Object.keys(columnMapping).length === 0
           }
@@ -640,6 +672,19 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           previousAction: {
             label: 'Anterior',
             onClick: () => setCurrentStep(2)
+          },
+          nextAction: {
+            label: 'Siguiente',
+            onClick: () => setCurrentStep(4),
+            disabled: false
+          }
+        }
+      case 4:
+        return {
+          cancelAction: baseCancel,
+          previousAction: {
+            label: 'Anterior',
+            onClick: () => setCurrentStep(3)
           },
           submitAction: {
             label: 'Importar',
@@ -873,12 +918,12 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                   <div className="col-span-2 text-right">
                     {isValid && (
                       <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
-                        ✓ Confirmed mapping
+                        ✓ Mapeo confirmado
                       </Badge>
                     )}
                     {needsMapping && (
                       <Badge variant="destructive" className="bg-orange-100 text-orange-800 text-xs border-orange-200">
-                        ⚠ Needs mapping
+                        ⚠ Requiere mapeo
                       </Badge>
                     )}
                   </div>
@@ -891,26 +936,26 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-green-700 text-sm">
                           <CheckCircle className="h-4 w-4" />
-                          <span>Matched to the '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}' field.</span>
+                          <span>Mapeado al campo '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}'.</span>
                         </div>
                         <div className="flex items-center gap-2 text-green-600 text-xs">
                           <span>⚫</span>
-                          <span>100% of your rows have a value for this column</span>
+                          <span>100% de las filas tienen un valor para esta columna</span>
                         </div>
                         <div className="flex items-center gap-2 text-green-600 text-xs">
                           <span>✓</span>
-                          <span>All values pass validation for this field</span>
+                          <span>Todos los valores pasan la validación para este campo</span>
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-orange-700 text-sm">
                           <AlertCircle className="h-4 w-4" />
-                          <span>100% of your rows have a value for this column</span>
+                          <span>100% de las filas tienen un valor para esta columna</span>
                         </div>
                         <div className="flex items-center gap-2 text-orange-600 text-xs">
                           <span>⚠</span>
-                          <span>Values need manual mapping (repair on next step)</span>
+                          <span>Los valores requieren mapeo manual (reparar en el siguiente paso)</span>
                         </div>
                       </div>
                     )}
@@ -921,8 +966,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                 {needsMapping && (
                   <div className="mt-4 border-t pt-4">
                     <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700 mb-2">
-                      <div className="col-span-3">Your values</div>
-                      <div className="col-span-3">Our values</div>
+                      <div className="col-span-3">Tus valores</div>
+                      <div className="col-span-3">Nuestros valores</div>
                       <div className="col-span-6"></div>
                     </div>
                     
@@ -991,13 +1036,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         {manualMappings[`${mappedField}_${sampleValue}`] && (
                           <div className="flex items-center gap-2 text-green-700 text-sm">
                             <CheckCircle className="h-4 w-4" />
-                            <span>Matched to the '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}' field.</span>
+                            <span>Mapeado al campo '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}'.</span>
                           </div>
                         )}
                       </div>
                       <div className="col-span-2 text-right">
                         <Button size="sm" variant="default" className="text-xs h-6 bg-green-600 hover:bg-green-700">
-                          Confirm mapping
+                          Confirmar mapeo
                         </Button>
                       </div>
                     </div>
@@ -1012,6 +1057,148 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   )
 
   const renderStep3 = () => {
+    if (Object.keys(incompatibleValues).length === 0) {
+      return (
+        <div className="space-y-6">
+          <div className="text-center py-8">
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">¡Todos los valores son compatibles!</h3>
+            <p className="text-sm text-muted-foreground">
+              No se encontraron valores que requieran mapeo manual. Puedes continuar a la vista previa.
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Resolver valores incompatibles</h3>
+          <p className="text-sm text-muted-foreground">
+            Los siguientes valores de tu archivo no coinciden con los datos existentes en Archub. Mapéalos manualmente o déjalos sin asignar.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          {Object.entries(incompatibleValues).map(([fieldName, values]) => {
+            const fieldLabel = AVAILABLE_FIELDS.find(f => f.value === fieldName)?.label || fieldName
+            return (
+              <div key={fieldName} className="border rounded-lg p-4">
+                <div className="mb-4">
+                  <h4 className="font-medium text-sm mb-1">Campo: {fieldLabel}</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {values.length} valor(es) incompatible(s) encontrado(s)
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {values.map((value, index) => {
+                    const mappingKey = `${fieldName}_${value}`
+                    const validation = validateFieldValue(fieldName, value)
+                    
+                    return (
+                      <div key={index} className="grid grid-cols-12 gap-4 items-center p-3 bg-gray-50 rounded">
+                        <div className="col-span-4">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-orange-500" />
+                            <span className="font-mono text-sm">{value}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Valor de tu archivo
+                          </p>
+                        </div>
+                        
+                        <div className="col-span-1 text-center">
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        
+                        <div className="col-span-5">
+                          <Select 
+                            value={manualMappings[mappingKey] || ''}
+                            onValueChange={(selectedId) => {
+                              setManualMappings(prev => ({
+                                ...prev,
+                                [mappingKey]: selectedId
+                              }));
+                              
+                              // Find the name for the toast
+                              let selectedName = '';
+                              if (fieldName === 'type_id') {
+                                selectedName = types.find(t => t.id === selectedId)?.name || '';
+                              } else if (fieldName === 'currency_id') {
+                                selectedName = organizationCurrencies?.find(c => c.id === selectedId)?.name || '';
+                              } else if (fieldName === 'wallet_id') {
+                                selectedName = organizationWallets?.find(w => w.id === selectedId)?.name || '';
+                              } else if (fieldName === 'subcategory_id') {
+                                selectedName = categories.find(c => c.id === selectedId)?.name || '';
+                              }
+                              
+                              toast({
+                                title: "Mapeo aplicado",
+                                description: `"${value}" → "${selectedName}"`
+                              });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar valor o dejar sin asignar" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Sin asignar (NULL)</SelectItem>
+                              {validation?.available?.map((availableValue, idx) => {
+                                // Find the ID for this value
+                                let valueId = '';
+                                if (fieldName === 'type_id') {
+                                  valueId = types.find(t => t.name === availableValue)?.id || '';
+                                } else if (fieldName === 'currency_id') {
+                                  valueId = organizationCurrencies?.find(c => c.name === availableValue)?.id || '';
+                                } else if (fieldName === 'wallet_id') {
+                                  valueId = organizationWallets?.find(w => w.name === availableValue)?.id || '';
+                                } else if (fieldName === 'subcategory_id') {
+                                  valueId = categories.find(c => c.name === availableValue)?.id || '';
+                                }
+                                
+                                return (
+                                  <SelectItem key={idx} value={valueId}>
+                                    {availableValue}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="col-span-2">
+                          {manualMappings[mappingKey] ? (
+                            <div className="flex items-center gap-1 text-green-700 text-xs">
+                              <CheckCircle className="h-3 w-3" />
+                              <span>Mapeado</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Sin mapear</span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Importante:</strong> Los valores sin mapear se importarán como NULL en la base de datos. 
+            Esto significa que esos campos estarán vacíos y podrás completarlos manualmente después de la importación.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
+  const renderStep4 = () => {
     // Check for normalized values to show preview
     const normalizedValues = new Set<string>()
     
@@ -1162,6 +1349,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         return renderStep2()
       case 3:
         return renderStep3()
+      case 4:
+        return renderStep4()
       default:
         return renderStep1()
     }
