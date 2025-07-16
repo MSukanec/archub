@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
 import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw } from 'lucide-react'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -602,31 +603,42 @@ export default function MovementImportModal({ modalData, onClose }: MovementImpo
 
   const footerProps = getFooterProps()
 
-  return {
-    viewPanel: (
-      <div className="p-6">
-        <p className="text-muted-foreground">Vista previa no disponible</p>
-      </div>
-    ),
-    editPanel: (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto">
-          {renderStepContent()}
+  return (
+    <FormModalLayout 
+      headerContent={
+        <div className="px-6 py-4 border-b border-[var(--card-border)]">
+          <h2 className="text-lg font-semibold text-foreground">Importar Movimientos</h2>
+          <p className="text-sm text-muted-foreground">Paso {currentStep} de 3</p>
         </div>
-      </div>
-    ),
-    headerContent: {
-      title: "Importar Movimientos",
-      description: `Paso ${currentStep} de 3`
-    },
-    footerContent: {
-      cancelText: footerProps.cancelText,
-      submitText: footerProps.submitText,
-      showSubmit: footerProps.showSubmit,
-      onCancel: footerProps.onCancel,
-      onSubmit: footerProps.onSubmit,
-      loading: footerProps.loading,
-      disabled: footerProps.disabled
-    }
-  }
+      }
+      footerContent={
+        <div className="px-6 py-4 border-t border-[var(--card-border)] bg-[var(--card-bg)] flex justify-end gap-3">
+          <Button 
+            variant="outline" 
+            onClick={footerProps.onCancel}
+          >
+            {footerProps.cancelText}
+          </Button>
+          {footerProps.showSubmit && (
+            <Button 
+              onClick={footerProps.onSubmit}
+              disabled={footerProps.disabled}
+              loading={footerProps.loading}
+            >
+              {footerProps.submitText}
+            </Button>
+          )}
+        </div>
+      }
+      onClose={onClose}
+      columns={1}
+      editPanel={
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto">
+            {renderStepContent()}
+          </div>
+        </div>
+      }
+    />
+  )
 }
