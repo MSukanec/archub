@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 interface MobileAvatarMenuProps {
   onClose: () => void;
@@ -47,6 +48,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
   
   // Usar project context en lugar de last_project_id directamente
   const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const { setActiveSidebarSection } = useNavigationStore();
   const effectiveCurrentProject = selectedProjectId;
 
   // Organization selection mutation
@@ -79,6 +81,9 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedOrgSelector(false);
+      setActiveSidebarSection('organizacion');
+      navigate('/organization/dashboard');
+      onClose();
     }
   });
 

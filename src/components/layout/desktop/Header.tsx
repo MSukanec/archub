@@ -64,7 +64,7 @@ export function Header({
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
-  const { setSidebarContext, currentSidebarContext } = useNavigationStore();
+  const { setSidebarContext, currentSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
   // Estado local para tracking inmediato del proyecto seleccionado - NO más sincronización automática
@@ -271,6 +271,7 @@ export function Header({
                     onClick={() => {
                       selectOrganizationMutation.mutate(org.id);
                       setSidebarContext('organization');
+                      setActiveSidebarSection('organizacion');
                       navigate('/organization/dashboard');
                     }}
                     className="flex items-center justify-between text-sm"

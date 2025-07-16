@@ -57,7 +57,7 @@ interface MobileMenuProps {
 export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { currentSidebarContext, setSidebarContext } = useNavigationStore();
+  const { currentSidebarContext, setSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
 
   // Bloquear scroll del body cuando el menú está abierto
@@ -108,6 +108,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedOrgSelector(false);
       setSidebarContext('organization');
+      setActiveSidebarSection('organizacion');
       navigate('/organization/dashboard');
     }
   });

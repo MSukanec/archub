@@ -14,6 +14,6 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   currentSidebarContext: 'organization',
   setSidebarContext: (context: SidebarContext) => set({ currentSidebarContext: context }),
   // Estado para la columna lateral derecha - default to organization summary
-  activeSidebarSection: '/organization/dashboard',
+  activeSidebarSection: 'organizacion',
   setActiveSidebarSection: (section: string | null) => set({ activeSidebarSection: section }),
 }))
