@@ -887,20 +887,20 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'currency_id':
         const currencyNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
-        const currencyMatch = organizationCurrencies?.find(c => c.id === currencyNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        const currencyMatch = organizationCurrencies?.find(c => c.currency.id === currencyNormalized || normalizeText(c.currency.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.currency.name)))
         return { 
           isValid: !!currencyNormalized, 
-          suggestion: currencyMatch?.name,
-          available: organizationCurrencies?.map(c => c.name) || [],
+          suggestion: currencyMatch?.currency?.name,
+          available: organizationCurrencies?.map(c => c.currency.name) || [],
           mappedValue: currencyNormalized
         }
       case 'wallet_id':
         const walletNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
-        const walletMatch = organizationWallets?.find(w => w.id === walletNormalized || normalizeText(w.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.name)))
+        const walletMatch = organizationWallets?.find(w => w.wallets.id === walletNormalized || normalizeText(w.wallets.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.wallets.name)))
         return { 
           isValid: !!walletNormalized, 
-          suggestion: walletMatch?.name,
-          available: organizationWallets?.map(w => w.name) || [],
+          suggestion: walletMatch?.wallets?.name,
+          available: organizationWallets?.map(w => w.wallets.name) || [],
           mappedValue: walletNormalized
         }
       case 'subcategory_id':
@@ -926,10 +926,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         options = types.map(t => ({ id: t.id, name: t.name }))
         break
       case 'currency_id':
-        options = (organizationCurrencies || []).map(c => ({ id: c.id, name: c.currency?.name || c.name }))
+        options = (organizationCurrencies || []).map(c => ({ id: c.currency.id, name: c.currency.name }))
         break
       case 'wallet_id':
-        options = (organizationWallets || []).map(w => ({ id: w.id, name: w.wallets?.name || w.name }))
+        options = (organizationWallets || []).map(w => ({ id: w.wallets.id, name: w.wallets.name }))
         break
       case 'subcategory_id':
         options = categories.map(c => ({ id: c.id, name: c.name }))
@@ -1099,6 +1099,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         
                         <div className="col-span-5">
                           <Select 
+                            key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}`}
                             value={manualMappings[mappingKey] || ''}
                             onValueChange={(selectedId) => {
                               setManualMappings(prev => ({
@@ -1111,9 +1112,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                               if (fieldName === 'type_id') {
                                 selectedName = types.find(t => t.id === selectedId)?.name || '';
                               } else if (fieldName === 'currency_id') {
-                                selectedName = organizationCurrencies?.find(c => c.id === selectedId)?.currency?.name || organizationCurrencies?.find(c => c.id === selectedId)?.name || '';
+                                selectedName = organizationCurrencies?.find(c => c.currency.id === selectedId)?.currency?.name || '';
                               } else if (fieldName === 'wallet_id') {
-                                selectedName = organizationWallets?.find(w => w.id === selectedId)?.wallets?.name || organizationWallets?.find(w => w.id === selectedId)?.name || '';
+                                selectedName = organizationWallets?.find(w => w.wallets.id === selectedId)?.wallets?.name || '';
                               } else if (fieldName === 'subcategory_id') {
                                 selectedName = categories.find(c => c.id === selectedId)?.name || '';
                               }
