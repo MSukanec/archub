@@ -159,8 +159,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const concepts = conceptsData
 
   // Estados para la lógica jerárquica
-  const [selectedTypeId, setSelectedTypeId] = React.useState('')
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
+  const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
   
   // Estados para detectar tipo de formulario
   const [isConversion, setIsConversion] = React.useState(false)
@@ -441,7 +441,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           wallet_id: editingMovement.wallet_id || '',
         })
         
-        // Establecer selectedCategoryId para que las subcategorías se carguen
+        // Establecer selectedTypeId y selectedCategoryId para que las opciones se carguen
+        if (editingMovement.type_id) {
+          setSelectedTypeId(editingMovement.type_id)
+        }
         if (editingMovement.category_id) {
           setSelectedCategoryId(editingMovement.category_id)
         }
