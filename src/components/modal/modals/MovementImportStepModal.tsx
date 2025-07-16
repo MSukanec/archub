@@ -76,6 +76,20 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     concepts.forEach(concept => {
       const normalized = normalizeText(concept.name);
       valueMap.subcategory_id[normalized] = concept.id;
+      
+      // Add common variations
+      const variations = [
+        concept.name.toLowerCase(),
+        concept.name.replace(/\s+/g, ''),
+        concept.name.replace(/[aeiou]/gi, ''), // Remove vowels for fuzzy matching
+      ];
+      
+      variations.forEach(variation => {
+        const varNormalized = normalizeText(variation);
+        if (varNormalized !== normalized) {
+          valueMap.subcategory_id[varNormalized] = concept.id;
+        }
+      });
     });
   }
 
@@ -83,10 +97,29 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
 };
 
 const normalizeValue = (field: string, value: any, valueMap: any): any => {
-  if (!value || typeof value !== 'string') return value;
+  if (!value) return null;
   
-  const normalized = normalizeText(value);
-  return valueMap[field]?.[normalized] || value;
+  const stringValue = String(value).trim();
+  const normalized = normalizeText(stringValue);
+  
+  // Check direct mapping first
+  if (valueMap[field] && valueMap[field][normalized]) {
+    return valueMap[field][normalized];
+  }
+  
+  // Try fuzzy matching for field mappings
+  if (valueMap[field]) {
+    const fieldMap = valueMap[field];
+    for (const [key, mappedValue] of Object.entries(fieldMap)) {
+      // Check if the normalized value is contained in the key or vice versa
+      if (normalized.includes(key) || key.includes(normalized)) {
+        return mappedValue;
+      }
+    }
+  }
+  
+  // Return null for unmappable values to avoid UUID errors
+  return null;
 };
 
 interface MovementImportStepModalProps {
@@ -353,52 +386,76 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       ? selectedRowsArray.map(index => parsedData.rows[index])
       : parsedData.rows
 
-    const processedMovements = rowsToProcess.map((row) => {
-      const movement: any = {
-        description: 'Movimiento importado',
-        amount: 0,
-        movement_date: new Date().toISOString().split('T')[0],
-        organization_id: currentUser.organization.id,
-        project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
-        created_by: selectedCreator || currentUser.user?.id,
-        is_favorite: false
-      }
-
-      // Map columns to movement fields
-      Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
-        if (fieldName && row[parseInt(columnIndex)] !== undefined) {
-          const value = row[parseInt(columnIndex)]
-          
-          switch (fieldName) {
-            case 'movement_date':
-              if (typeof value === 'number' && value > 40000) {
-                const excelEpoch = new Date(1900, 0, 1)
-                const jsDate = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000)
-                movement.movement_date = jsDate.toISOString().split('T')[0]
-              } else if (value) {
-                movement.movement_date = value
-              }
-              break
-            case 'amount':
-              movement.amount = parseFloat(value) || 0
-              break
-            case 'exchange_rate':
-              movement.exchange_rate = parseFloat(value) || 1
-              break
-            default:
-              // Apply value normalization for specific fields
-              if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
-                const normalizedValue = normalizeValue(fieldName, value, valueMap)
-                movement[fieldName] = normalizedValue
-              } else {
-                movement[fieldName] = value
-              }
-          }
+    const processedMovements = rowsToProcess
+      .map((row) => {
+        const movement: any = {
+          description: 'Movimiento importado',
+          amount: 0,
+          movement_date: new Date().toISOString().split('T')[0],
+          organization_id: currentUser.organization.id,
+          project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
+          created_by: selectedCreator || currentUser.user?.id,
+          is_favorite: false
         }
-      })
 
-      return movement
-    })
+        let hasValidData = false
+
+        // Map columns to movement fields
+        Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
+          if (fieldName && row[parseInt(columnIndex)] !== undefined) {
+            const value = row[parseInt(columnIndex)]
+            
+            switch (fieldName) {
+              case 'movement_date':
+                if (typeof value === 'number' && value > 40000) {
+                  const excelEpoch = new Date(1900, 0, 1)
+                  const jsDate = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000)
+                  movement.movement_date = jsDate.toISOString().split('T')[0]
+                  hasValidData = true
+                } else if (value) {
+                  movement.movement_date = value
+                  hasValidData = true
+                }
+                break
+              case 'amount':
+                const parsedAmount = parseFloat(value)
+                if (!isNaN(parsedAmount)) {
+                  movement.amount = parsedAmount
+                  hasValidData = true
+                }
+                break
+              case 'exchange_rate':
+                const parsedRate = parseFloat(value)
+                if (!isNaN(parsedRate)) {
+                  movement.exchange_rate = parsedRate
+                }
+                break
+              case 'description':
+                if (value && String(value).trim()) {
+                  movement.description = String(value).trim()
+                  hasValidData = true
+                }
+                break
+              default:
+                // Apply value normalization for specific fields
+                if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+                  const normalizedValue = normalizeValue(fieldName, value, valueMap)
+                  if (normalizedValue) {
+                    movement[fieldName] = normalizedValue
+                    hasValidData = true
+                  }
+                } else if (value) {
+                  movement[fieldName] = value
+                  hasValidData = true
+                }
+            }
+          }
+        })
+
+        // Only return movement if it has valid mappable data
+        return hasValidData ? movement : null
+      })
+      .filter(Boolean) // Remove null movements
 
     importMutation.mutate(processedMovements)
   }
@@ -586,32 +643,40 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     
     switch (fieldName) {
       case 'type_id':
-        const typeMatch = types.find(t => normalizeText(t.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(t.name)))
+        const normalizedVal = normalizeValue(fieldName, value, valueMap)
+        const typeMatch = types.find(t => t.id === normalizedVal || normalizeText(t.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(t.name)))
         return { 
-          isValid: !!typeMatch, 
+          isValid: !!normalizedVal, 
           suggestion: typeMatch?.name,
-          available: types.map(t => t.name)
+          available: types.map(t => t.name),
+          mappedValue: normalizedVal
         }
       case 'currency_id':
-        const currencyMatch = organizationCurrencies?.find(c => normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        const currencyNormalized = normalizeValue(fieldName, value, valueMap)
+        const currencyMatch = organizationCurrencies?.find(c => c.id === currencyNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
         return { 
-          isValid: !!currencyMatch, 
+          isValid: !!currencyNormalized, 
           suggestion: currencyMatch?.name,
-          available: organizationCurrencies?.map(c => c.name) || []
+          available: organizationCurrencies?.map(c => c.name) || [],
+          mappedValue: currencyNormalized
         }
       case 'wallet_id':
-        const walletMatch = organizationWallets?.find(w => normalizeText(w.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.name)))
+        const walletNormalized = normalizeValue(fieldName, value, valueMap)
+        const walletMatch = organizationWallets?.find(w => w.id === walletNormalized || normalizeText(w.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.name)))
         return { 
-          isValid: !!walletMatch, 
+          isValid: !!walletNormalized, 
           suggestion: walletMatch?.name,
-          available: organizationWallets?.map(w => w.name) || []
+          available: organizationWallets?.map(w => w.name) || [],
+          mappedValue: walletNormalized
         }
       case 'subcategory_id':
-        const subcategoryMatch = categories.find(c => normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        const subcategoryNormalized = normalizeValue(fieldName, value, valueMap)
+        const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
         return { 
-          isValid: !!subcategoryMatch, 
+          isValid: !!subcategoryNormalized, 
           suggestion: subcategoryMatch?.name,
-          available: categories.map(c => c.name)
+          available: categories.map(c => c.name),
+          mappedValue: subcategoryNormalized
         }
       default:
         return { isValid: true, suggestion: null }
@@ -687,6 +752,12 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       {!validation.isValid && validation.suggestion && (
                         <p className="text-xs text-muted-foreground mb-2">
                           Sugerencia: <span className="font-medium">{validation.suggestion}</span>
+                        </p>
+                      )}
+                      
+                      {validation.isValid && validation.mappedValue && (
+                        <p className="text-xs text-green-600 mb-2">
+                          Mapeado a: <span className="font-medium">{validation.suggestion || validation.mappedValue}</span>
                         </p>
                       )}
                       
