@@ -278,7 +278,7 @@ export function Header({
                   >
                     <span className="truncate">{org.name}</span>
                     {org.id === userData?.preferences?.last_organization_id && (
-                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                      <div className="h-2 w-2 rounded-full bg-[var(--accent)] flex-shrink-0" />
                     )}
                   </DropdownMenuItem>
                 ))}
