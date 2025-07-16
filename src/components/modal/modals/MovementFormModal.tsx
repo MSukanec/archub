@@ -410,12 +410,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // Buscar el movimiento par (entrada/salida) en el grupo de conversión
         console.log('Loading conversion group for editing:', editingMovement.conversion_group_id)
         
+        // Buscar el concepto "Conversión" para asignar el type_id correcto
+        const conversionConcept = concepts?.find((concept: any) => 
+          concept.view_mode?.trim() === "conversion"
+        )
+        
         // Cargar datos del movimiento actual en el formulario de conversión
         const conversionData = {
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
-          type_id: editingMovement.type_id || '',
+          type_id: conversionConcept?.id || editingMovement.type_id || '', // Usar el ID del concepto "Conversión"
           currency_id_from: matchingCurrency?.currency_id || editingMovement.currency_id || '',
           wallet_id_from: matchingWallet?.id || '',
           amount_from: editingMovement.amount || 0,
@@ -435,7 +440,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
-          type_id: editingMovement.type_id || '',
+          type_id: conversionConcept?.id || editingMovement.type_id || '', // Usar el ID del concepto "Conversión"
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
           currency_id: editingMovement.currency_id || '',
@@ -443,16 +448,21 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         })
         
         // Establecer selectedTypeId para conversiones también
-        if (editingMovement.type_id) {
-          setSelectedTypeId(editingMovement.type_id)
+        if (conversionConcept?.id) {
+          setSelectedTypeId(conversionConcept.id)
         }
       } else if (isTransferMovement) {
+        // Buscar el concepto "Transferencia Interna" para asignar el type_id correcto
+        const transferConcept = concepts?.find((concept: any) => 
+          concept.view_mode?.trim() === "transfer"
+        )
+        
         // Para transferencias, cargar datos en formulario de transferencia
         transferForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
-          type_id: editingMovement.type_id || '',
+          type_id: transferConcept?.id || editingMovement.type_id || '', // Usar el ID del concepto "Transferencia Interna"
           currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
           wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
           wallet_id_to: '',
@@ -460,8 +470,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         })
         
         // Establecer selectedTypeId para transferencias también
-        if (editingMovement.type_id) {
-          setSelectedTypeId(editingMovement.type_id)
+        if (transferConcept?.id) {
+          setSelectedTypeId(transferConcept.id)
         }
       } else if (isAportesMovement) {
         // Para aportes, cargar datos en formulario de aportes
