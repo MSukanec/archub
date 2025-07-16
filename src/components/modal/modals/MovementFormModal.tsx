@@ -1934,21 +1934,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               control={aportesForm.control}
               name="contact_id"
               render={({ field }) => {
-                // Buscar la categoría seleccionada para obtener extra_fields
+                // Buscar la categoría seleccionada para obtener el nombre
                 const selectedCategory = categories?.find(c => c.id === aportesForm.watch('category_id'))
-                const extraField = selectedCategory?.extra_fields?.[0]
-                const isClienteSelector = extraField === 'cliente_id'
+                const categoryName = selectedCategory?.name || ''
+                
+                // Detectar si es "Aportes de Terceros" para mostrar Cliente
+                const isClienteSelector = categoryName === 'Aportes de Terceros'
                 
                 // Preparar datos para UserSelector
                 const usersData = isClienteSelector ? (
-                  // Para clientes: convertir projectClients a formato UserSelector
-                  projectClients?.map((projectClient) => ({
-                    id: projectClient.contact.id,
-                    first_name: projectClient.contact.first_name,
-                    last_name: projectClient.contact.last_name,
-                    full_name: projectClient.contact.full_name,
-                    company_name: projectClient.contact.company_name,
-                    avatar_url: projectClient.contact.avatar_url
+                  // Para clientes: usar contacts directamente
+                  contacts?.map((contact) => ({
+                    id: contact.id,
+                    first_name: contact.first_name,
+                    last_name: contact.last_name,
+                    full_name: contact.full_name,
+                    company_name: contact.company_name,
+                    avatar_url: contact.avatar_url
                   })) || []
                 ) : (
                   // Para socios: usar miembros directamente
