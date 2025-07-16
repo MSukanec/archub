@@ -263,17 +263,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       setIsTransfer(isTransferType)
       setIsAportes(isAportesType)
       
-      // Sincronizar type_id en todos los formularios
-      form.setValue('type_id', typeId)
-      conversionForm.setValue('type_id', typeId)
-      transferForm.setValue('type_id', typeId)
-      aportesForm.setValue('type_id', typeId)
-      
-      // Reset categoría y subcategoría cuando cambia el tipo (solo en modo nuevo movimiento)
-      if (!editingMovement && typeId !== selectedTypeId) {
-        form.setValue('category_id', '')
-        form.setValue('subcategory_id', '')
-        setSelectedCategoryId('')
+      // Sincronizar type_id en todos los formularios solo si no estamos editando
+      if (!editingMovement) {
+        form.setValue('type_id', typeId)
+        conversionForm.setValue('type_id', typeId)
+        transferForm.setValue('type_id', typeId)
+        aportesForm.setValue('type_id', typeId)
+        
+        // Reset categoría y subcategoría cuando cambia el tipo (solo en modo nuevo movimiento)
+        if (typeId !== selectedTypeId) {
+          form.setValue('category_id', '')
+          form.setValue('subcategory_id', '')
+          setSelectedCategoryId('')
+        }
       }
     }
   }, [form.watch('type_id'), conversionForm.watch('type_id'), transferForm.watch('type_id'), aportesForm.watch('type_id'), concepts, selectedTypeId])
@@ -292,36 +294,39 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         setIsConversion(false)
         setIsTransfer(false)
         
-        // Sincronizar category_id y type_id en el formulario de aportes
-        aportesForm.setValue('type_id', form.watch('type_id'))
-        aportesForm.setValue('category_id', categoryId)
-        
-        // Limpiar descripción para evitar UUID
-        aportesForm.setValue('description', '')
-        
-        // Establecer valores por defecto (moneda y billetera)
-        const currentMember = members?.find(m => m.user_id === userData?.id)?.id
-        const defaultCurrency = userData?.organization?.default_currency_id
-        const defaultWallet = userData?.organization?.default_wallet_id
-        
-        console.log('Setting defaults:', { currentMember, defaultCurrency, defaultWallet })
-        
-        if (currentMember) {
-          aportesForm.setValue('created_by', currentMember)
-        }
-        if (defaultCurrency) {
-          aportesForm.setValue('currency_id', defaultCurrency)
-        }
-        if (defaultWallet) {
-          aportesForm.setValue('wallet_id', defaultWallet)
-        }
-        
-        // Para "Aportes Propios", preseleccionar el usuario actual
-        if (selectedCategory?.name === 'Aportes Propios' && currentMember) {
-          aportesForm.setValue('contact_id', currentMember)
-        } else if (selectedCategory?.name === 'Aportes de Terceros') {
-          // Para "Aportes de Terceros", limpiar la selección
-          aportesForm.setValue('contact_id', '')
+        // Solo sincronizar valores en modo nuevo movimiento
+        if (!editingMovement) {
+          // Sincronizar category_id y type_id en el formulario de aportes
+          aportesForm.setValue('type_id', form.watch('type_id'))
+          aportesForm.setValue('category_id', categoryId)
+          
+          // Limpiar descripción para evitar UUID
+          aportesForm.setValue('description', '')
+          
+          // Establecer valores por defecto (moneda y billetera)
+          const currentMember = members?.find(m => m.user_id === userData?.id)?.id
+          const defaultCurrency = userData?.organization?.default_currency_id
+          const defaultWallet = userData?.organization?.default_wallet_id
+          
+          console.log('Setting defaults:', { currentMember, defaultCurrency, defaultWallet })
+          
+          if (currentMember) {
+            aportesForm.setValue('created_by', currentMember)
+          }
+          if (defaultCurrency) {
+            aportesForm.setValue('currency_id', defaultCurrency)
+          }
+          if (defaultWallet) {
+            aportesForm.setValue('wallet_id', defaultWallet)
+          }
+          
+          // Para "Aportes Propios", preseleccionar el usuario actual
+          if (selectedCategory?.name === 'Aportes Propios' && currentMember) {
+            aportesForm.setValue('contact_id', currentMember)
+          } else if (selectedCategory?.name === 'Aportes de Terceros') {
+            // Para "Aportes de Terceros", limpiar la selección
+            aportesForm.setValue('contact_id', '')
+          }
         }
       } else {
         // Si no es una categoría de aportes, permitir regresar al formulario normal
