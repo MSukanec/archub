@@ -20,8 +20,8 @@ import { useMovementConceptsAdmin } from '@/hooks/use-movement-concepts-admin';
 
 const conceptSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
+  description: z.string().optional(),
   parent_id: z.string().optional(),
-  view_mode: z.string().optional(),
   is_system: z.boolean().default(false),
 });
 
@@ -62,8 +62,8 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
     resolver: zodResolver(conceptSchema),
     defaultValues: {
       name: editingConcept?.name || '',
+      description: editingConcept?.description || '',
       parent_id: editingConcept?.parent_id || parentConcept?.id || '',
-      view_mode: editingConcept?.view_mode || 'normal',
       is_system: editingConcept?.is_system || parentConcept?.is_system || true,
     },
   });
@@ -74,8 +74,8 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
         .from('movement_concepts')
         .insert([{
           name: conceptData.name,
+          description: conceptData.description || null,
           parent_id: conceptData.parent_id || null,
-          view_mode: conceptData.view_mode,
           is_system: conceptData.is_system,
           organization_id: conceptData.is_system ? null : userData?.preferences?.last_organization_id,
         }])
@@ -109,8 +109,8 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
         .from('movement_concepts')
         .update({
           name: conceptData.name,
+          description: conceptData.description || null,
           parent_id: conceptData.parent_id || null,
-          view_mode: conceptData.view_mode,
           is_system: conceptData.is_system,
         })
         .eq('id', editingConcept.id)
@@ -201,6 +201,23 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
 
         <FormField
           control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Descripción del concepto (opcional)"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="parent_id"
           render={({ field }) => (
             <FormItem>
@@ -220,29 +237,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
                       </span>
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="view_mode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Modo de Vista</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar modo de vista" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="expanded">Expandido</SelectItem>
-                  <SelectItem value="collapsed">Colapsado</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
