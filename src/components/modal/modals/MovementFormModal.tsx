@@ -935,9 +935,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     </>
   ) : null
 
+  // Determinar qué tipo de formulario mostrar basado en el movimiento editado
+  const isEditingConversion = editingMovement && !!editingMovement.conversion_group_id
+  const isEditingTransfer = editingMovement && !!editingMovement.transfer_group_id
+  const isEditingAportes = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes"
+
   const editPanel = (
     <div className="space-y-4">
-      {isConversion ? (
+      {(isConversion || isEditingConversion) ? (
         // FORMULARIO DE CONVERSIÓN
         <Form {...conversionForm}>
           <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
@@ -1241,7 +1246,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </div>
           </form>
         </Form>
-      ) : isTransfer ? (
+      ) : (isTransfer || isEditingTransfer) ? (
         // FORMULARIO DE TRANSFERENCIAS INTERNAS
         <Form {...transferForm}>
           <form onSubmit={transferForm.handleSubmit(onSubmitTransfer)} className="space-y-4">
@@ -1455,7 +1460,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
-      ) : isAportes ? (
+      ) : (isAportes || isEditingAportes) ? (
         // FORMULARIO DE APORTES
         <Form {...aportesForm}>
           <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
