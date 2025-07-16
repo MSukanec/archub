@@ -170,10 +170,10 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
 
         return editingProject;
       } else {
-        // Create new project
+        // Create new project using upsert to handle any potential conflicts
         const { data: newProject, error: projectError } = await supabase
           .from('projects')
-          .insert({
+          .upsert({
             organization_id: organizationId,
             name: data.name,
             status: data.status,
@@ -181,6 +181,8 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             created_at: new Date(data.created_at).toISOString(),
             is_active: true,
             color: data.color || "#ffffff",
+          }, {
+            onConflict: 'id'
           })
           .select()
           .single();
@@ -191,10 +193,12 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         if (data.project_type_id || data.modality_id) {
           const { error: dataError } = await supabase
             .from('project_data')
-            .insert({
+            .upsert({
               project_id: newProject.id,
               project_type_id: data.project_type_id || null,
               modality_id: data.modality_id || null,
+            }, {
+              onConflict: 'project_id'
             });
 
           if (dataError) throw dataError;
