@@ -185,109 +185,20 @@ export default function OrganizationMovementConceptFormModal({ modalData, onClos
   return (
     <FormModalLayout>
       <FormModalHeader 
-        title={editingConcept 
-          ? `${isSystemConcept ? 'Ver' : 'Editar'} Concepto` 
-          : 'Nuevo Concepto'
-        }
+        title="Nuevo Concepto"
         icon={Tag}
       />
 
       <FormModalBody columns={1}>
-        {isSystemConcept && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Los conceptos del sistema no pueden ser modificados. Solo puedes ver su información.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Concepto *</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="Ej: Gastos de oficina"
-                      disabled={isSystemConcept}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="Descripción opcional del concepto"
-                      disabled={isSystemConcept}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="parent_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Concepto Padre</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    value={field.value}
-                    disabled={isSystemConcept || !!parentConcept}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar concepto padre (opcional)" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="">Sin concepto padre</SelectItem>
-                      {availableParentConcepts.map((concept) => (
-                        <SelectItem key={concept.id} value={concept.id}>
-                          {concept.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {parentConcept && (
-              <Alert>
-                <Package2 className="h-4 w-4" />
-                <AlertDescription>
-                  Este concepto será creado como hijo de: <strong>{parentConcept.name}</strong>
-                </AlertDescription>
-              </Alert>
-            )}
-          </form>
-        </Form>
+        <div className="p-4">
+          <p>Test modal content</p>
+        </div>
       </FormModalBody>
 
       <FormModalFooter
         cancelText="Cancelar"
-        submitText={isSystemConcept ? null : (isPending ? 'Guardando...' : (editingConcept ? 'Actualizar' : 'Crear'))}
-        onSubmit={isSystemConcept ? undefined : form.handleSubmit(onSubmit)}
-        isLoading={isPending}
-        disabled={isPending || isSystemConcept}
+        submitText="Crear"
+        onSubmit={() => console.log('Submit clicked')}
       />
     </FormModalLayout>
   );
