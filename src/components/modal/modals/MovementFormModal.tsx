@@ -369,20 +369,36 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         subcategory_id: editingMovement.subcategory_id,
         amount: editingMovement.amount,
         currency_id: editingMovement.currency_id,
-        wallet_id: editingMovement.wallet_id
+        wallet_id: editingMovement.wallet_id,
+        conversion_group_id: editingMovement.conversion_group_id,
+        transfer_group_id: editingMovement.transfer_group_id
       })
       
-      // Establecer el tipo de formulario según el view_mode
-      setIsConversion(viewMode === "conversion")
-      setIsTransfer(viewMode === "transfer")
-      setIsAportes(viewMode === "aportes")
+      // Detectar el tipo de movimiento por los campos del movimiento
+      const isConversionMovement = !!editingMovement.conversion_group_id
+      const isTransferMovement = !!editingMovement.transfer_group_id
+      const isAportesMovement = viewMode === "aportes"
       
-      console.log('Edit mode - detected view_mode:', { viewMode, isConversion: viewMode === "conversion", isTransfer: viewMode === "transfer", isAportes: viewMode === "aportes" })
+      // Establecer el tipo de formulario
+      setIsConversion(isConversionMovement)
+      setIsTransfer(isTransferMovement)
+      setIsAportes(isAportesMovement)
       
-      // Cargar datos en el formulario correcto según el view_mode
-      if (viewMode === "conversion") {
+      console.log('Edit mode - detected movement type:', { 
+        viewMode, 
+        isConversionMovement, 
+        isTransferMovement, 
+        isAportesMovement 
+      })
+      
+      // Cargar datos en el formulario correcto según el tipo de movimiento
+      if (isConversionMovement) {
         // Para conversiones, necesitamos cargar datos desde el grupo de conversión
-        // Por ahora, cargaremos datos básicos en el formulario de conversión
+        // Buscar el movimiento par (entrada/salida) en el grupo de conversión
+        console.log('Loading conversion group for editing:', editingMovement.conversion_group_id)
+        
+        // TODO: Aquí necesitaríamos cargar todos los movimientos del grupo de conversión
+        // Por ahora, cargaremos datos básicos del movimiento actual
         conversionForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -396,7 +412,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           amount_to: 0,
           exchange_rate: editingMovement.exchange_rate || undefined
         })
-      } else if (viewMode === "transfer") {
+      } else if (isTransferMovement) {
         // Para transferencias, cargar datos en formulario de transferencia
         transferForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
@@ -408,7 +424,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           wallet_id_to: '',
           amount: editingMovement.amount || 0
         })
-      } else if (viewMode === "aportes") {
+      } else if (isAportesMovement) {
         // Para aportes, cargar datos en formulario de aportes
         aportesForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
