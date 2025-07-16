@@ -24,7 +24,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useMovementConceptsAdmin, useDeleteMovementConcept, useMoveConceptToParent, MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-export default function FinancesPreferences() {
+export default function OrganizationPreferences() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { data: allCurrencies } = useCurrencies();
@@ -52,79 +52,58 @@ export default function FinancesPreferences() {
   const deleteConceptMutation = useDeleteMovementConcept();
   const moveConceptMutation = useMoveConceptToParent();
 
-  // Set sidebar context on component mount
+  // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('organizacion');
   }, [setSidebarContext]);
 
-  // Load existing organization preferences
-  const { data: preferences } = useQuery({
-    queryKey: ['organization-preferences', userData?.organization?.id],
-    queryFn: async () => {
-      if (!userData?.organization?.id) return null;
-      
-      const { data, error } = await supabase
-        .from('organization_preferences')
-        .select('*')
-        .eq('organization_id', userData.organization.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      return data;
-    },
-    enabled: !!userData?.organization?.id,
-  });
-
-  // Initialize form with existing data
+  // Initialize form values from organization data
   useEffect(() => {
-    if (organizationCurrencies && organizationWallets) {
-      // Find default currency
-      const defaultCurrencyRecord = organizationCurrencies.find(oc => 
-        oc.currency && preferences?.default_currency_id === oc.currency.id
-      );
-      if (defaultCurrencyRecord) {
-        setDefaultCurrency(defaultCurrencyRecord.currency.id);
+    if (organizationCurrencies?.length) {
+      const defaultCur = organizationCurrencies.find(c => c.is_default);
+      const secondaryCurs = organizationCurrencies.filter(c => !c.is_default);
+      
+      if (defaultCur) {
+        setDefaultCurrency(defaultCur.currency_id);
       }
-
-      // Find default wallet - same logic as currencies
-      const defaultWalletRecord = organizationWallets.find(ow => ow.is_default);
-      if (defaultWalletRecord?.wallets) {
-        setDefaultWallet(defaultWalletRecord.wallets.id);
-      }
-
-      // Set secondary currencies (all except default)
-      const secondaryCurrencyIds = organizationCurrencies
-        .filter(oc => oc.currency && oc.currency.id !== defaultCurrency)
-        .map(oc => oc.currency.id);
-      setSecondaryCurrencies(secondaryCurrencyIds);
-
-      // Set secondary wallets - same logic as currencies
-      const secondaryWalletIds = organizationWallets
-        .filter(ow => !ow.is_default && ow.wallets)
-        .map(ow => ow.wallets!.id);
-      setSecondaryWallets(secondaryWalletIds);
+      setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
     }
-  }, [organizationCurrencies, organizationWallets, preferences, defaultCurrency]);
+  }, [organizationCurrencies]);
+
+  useEffect(() => {
+    if (organizationWallets?.length) {
+      const defaultWal = organizationWallets.find(w => w.is_default);
+      const secondaryWals = organizationWallets.filter(w => !w.is_default);
+      
+      if (defaultWal) {
+        setDefaultWallet(defaultWal.wallet_id);
+      }
+      setSecondaryWallets(secondaryWals.map(w => w.wallet_id));
+    }
+  }, [organizationWallets]);
 
   // Save default currency mutation
   const saveDefaultCurrencyMutation = useMutation({
     mutationFn: async (currencyId: string) => {
       if (!userData?.organization?.id) throw new Error('No organization found');
 
+      // First, remove default from all currencies
+      await supabase
+        .from('organization_currencies')
+        .update({ is_default: false })
+        .eq('organization_id', userData.organization.id);
+
+      // Then set the new default
       const { error } = await supabase
-        .from('organization_preferences')
-        .upsert({
-          organization_id: userData.organization.id,
-          default_currency_id: currencyId,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'organization_id' });
+        .from('organization_currencies')
+        .update({ is_default: true })
+        .eq('organization_id', userData.organization.id)
+        .eq('currency_id', currencyId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-preferences'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-currencies'] });
       toast({ title: "Moneda por defecto actualizada", description: "Los cambios se han guardado correctamente." });
     },
   });
@@ -306,15 +285,15 @@ export default function FinancesPreferences() {
   const stats = calculateStats(concepts);
 
   const handleOpenCreateModal = () => {
-    openModal('movement-concept');
+    openModal('organization-movement-concept');
   };
 
   const handleOpenEditModal = (concept: MovementConceptAdmin) => {
-    openModal('movement-concept', { editingConcept: concept });
+    openModal('organization-movement-concept', { editingConcept: concept });
   };
 
   const handleCreateChildConcept = (parentConcept: MovementConceptNode) => {
-    openModal('movement-concept', { 
+    openModal('organization-movement-concept', { 
       parentConcept: {
         id: parentConcept.id,
         name: parentConcept.name,
@@ -341,7 +320,15 @@ export default function FinancesPreferences() {
   };
 
   return (
-    <Layout headerProps={{ title: "Preferencias" }}>
+    <Layout 
+      showSidebar 
+      wide={false}
+      headerProps={{
+        title: "Preferencias",
+        showBackButton: false,
+        description: "Configuración de preferencias de la organización"
+      }}
+    >
       <div className="max-w-4xl mx-auto space-y-8">
         <FeatureIntroduction
           icon={<Coins className="h-5 w-5" />}
@@ -358,12 +345,12 @@ export default function FinancesPreferences() {
               description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
             },
             {
-              icon: <Coins className="h-4 w-4" />,
-              title: "Opciones de Movimientos",
-              description: "Personalizar las opciones disponibles al crear nuevos movimientos"
+              icon: <Package2 className="h-4 w-4" />,
+              title: "Conceptos de Finanzas",
+              description: "Administrar los conceptos disponibles para categorizar movimientos financieros"
             },
             {
-              icon: <Coins className="h-4 w-4" />,
+              icon: <Settings className="h-4 w-4" />,
               title: "Preferencias Globales",
               description: "Administrar las preferencias globales que afectan a todos los proyectos"
             }
@@ -555,7 +542,7 @@ export default function FinancesPreferences() {
                 <DraggableConceptTree
                   concepts={concepts}
                   expandedConcepts={expandedConcepts}
-                  onToggleExpand={(conceptId: string) => {
+                  onToggleExpanded={(conceptId: string) => {
                     setExpandedConcepts(prev => {
                       const newSet = new Set(prev);
                       if (newSet.has(conceptId)) {

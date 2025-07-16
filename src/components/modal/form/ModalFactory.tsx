@@ -13,6 +13,7 @@ import { DocumentUploadFormModal } from '../modals/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/DocumentFolderFormModal';
 import MovementFormModal from '../modals/MovementFormModal';
 import MovementConceptFormModal from '../modals/MovementConceptFormModal';
+import { OrganizationMovementConceptFormModal } from '../modals/OrganizationMovementConceptFormModal';
 import MovementImportModal from '../modals/MovementImportModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 
@@ -46,6 +47,11 @@ export function ModalFactory() {
       return <MovementFormModal modalData={data} onClose={closeModal} />;
     case 'movement-concept':
       return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
+    case 'organization-movement-concept':
+      return <OrganizationMovementConceptFormModal 
+        editingConcept={data?.editingConcept}
+        parentConcept={data?.parentConcept}
+      />;
     case 'movement-import':
       return <MovementImportModal modalData={data} onClose={closeModal} />;
     case 'delete-confirmation':

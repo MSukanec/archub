@@ -30,7 +30,7 @@ import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import FinancesMovements from "@/pages/finances/FinancesMovements";
 import FinancesInstallments from "@/pages/finances/FinancesInstallments";
 
-import FinancesPreferences from "@/pages/finances/FinancesPreferences";
+import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionAttendance from "@/pages/construction/ConstructionAttendance";
@@ -220,14 +220,9 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/finances/preferences">
-          <ProtectedRoute>
-            <FinancesPreferences />
-          </ProtectedRoute>
-        </Route>
         <Route path="/organization/preferences">
           <ProtectedRoute>
-            <FinancesPreferences />
+            <OrganizationPreferences />
           </ProtectedRoute>
         </Route>
 
