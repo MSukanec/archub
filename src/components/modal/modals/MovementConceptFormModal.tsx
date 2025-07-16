@@ -9,6 +9,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { FormModalLayout } from '../form/FormModalLayout';
 import { FormModalHeader } from '../form/FormModalHeader';
 import { FormModalFooter } from '../form/FormModalFooter';
+import FormModalBody from '../form/FormModalBody';
 import { useModalPanelStore } from '../form/modalPanelStore';
 import { useGlobalModalStore } from '../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -192,8 +193,9 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   const parentOptions = getParentOptions(concepts);
 
   const editPanel = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+    <FormModalBody columns={1}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -256,9 +258,9 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
           )}
         />
 
-
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </FormModalBody>
   );
 
   const headerContent = (
@@ -274,11 +276,11 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
 
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
+      cancelText="Cancelar"
+      submitText={editingConcept ? 'Actualizar' : 'Crear'}
       onLeftClick={handleClose}
-      rightLabel={editingConcept ? 'Actualizar' : 'Crear'}
-      onRightClick={form.handleSubmit(handleSubmit)}
-      rightLoading={isLoading}
+      onSubmit={form.handleSubmit(handleSubmit)}
+      showLoadingSpinner={isLoading}
     />
   );
 
