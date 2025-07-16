@@ -448,120 +448,78 @@ export default function OrganizationPreferences() {
         <div className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Conceptos de Finanzas Section */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Package2 className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Conceptos de Finanzas</h2>
-              <HelpPopover 
-                title="Conceptos de Finanzas"
-                description="Administra los conceptos disponibles para categorizar tus movimientos financieros. Los conceptos del sistema son predeterminados, mientras que puedes crear conceptos personalizados para tu organización."
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Gestiona los conceptos disponibles para categorizar movimientos financieros
-            </p>
-          </div>
-
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Package2 className="h-4 w-4" />
-                  Total de Conceptos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalConcepts}</div>
-                <p className="text-xs text-muted-foreground">
-                  Conceptos disponibles
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Sistema
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.systemConcepts}</div>
-                <p className="text-xs text-muted-foreground">
-                  Conceptos predeterminados
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Personalizados
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.userConcepts}</div>
-                <p className="text-xs text-muted-foreground">
-                  Conceptos de la organización
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Action Button */}
-          <div className="flex justify-between items-center">
-            <Button 
-              onClick={handleOpenCreateModal}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Crear Concepto
-            </Button>
-          </div>
-
-          {/* Concepts Tree */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Conceptos de Movimientos</CardTitle>
-              <CardDescription>
-                Estructura jerárquica de conceptos disponibles para categorizar movimientos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {conceptsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
-                </div>
-              ) : concepts.length === 0 ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
-                </div>
-              ) : (
-                <DraggableConceptTree
-                  concepts={concepts}
-                  expandedConcepts={expandedConcepts}
-                  onToggleExpanded={(conceptId: string) => {
-                    setExpandedConcepts(prev => {
-                      const newSet = new Set(prev);
-                      if (newSet.has(conceptId)) {
-                        newSet.delete(conceptId);
-                      } else {
-                        newSet.add(conceptId);
-                      }
-                      return newSet;
-                    });
-                  }}
-                  onEdit={handleOpenEditModal}
-                  onDelete={handleDeleteConcept}
-                  onCreateChild={handleCreateChildConcept}
-                  onMove={handleMoveToParent}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Description */}
+          <div className="lg:col-span-4 space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Package2 className="h-5 w-5 text-[var(--accent)]" />
+                <h2 className="text-lg font-semibold">Conceptos de Finanzas</h2>
+                <HelpPopover 
+                  title="Conceptos de Finanzas"
+                  description="Administra los conceptos disponibles para categorizar tus movimientos financieros. Los conceptos del sistema son predeterminados, mientras que puedes crear conceptos personalizados para tu organización."
                 />
-              )}
-            </CardContent>
-          </Card>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Gestiona los conceptos disponibles para categorizar movimientos financieros. Los conceptos del sistema no pueden ser modificados, pero puedes crear conceptos personalizados para tu organización.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column - Concepts Tree */}
+          <div className="lg:col-span-8">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base">Conceptos de Movimientos</CardTitle>
+                    <CardDescription>
+                      Estructura jerárquica de conceptos disponibles para categorizar movimientos
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    onClick={handleOpenCreateModal}
+                    className="gap-2"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Crear Concepto
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {conceptsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
+                  </div>
+                ) : concepts.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
+                  </div>
+                ) : (
+                  <DraggableConceptTree
+                    concepts={concepts}
+                    expandedConcepts={expandedConcepts}
+                    onToggleExpanded={(conceptId: string) => {
+                      setExpandedConcepts(prev => {
+                        const newSet = new Set(prev);
+                        if (newSet.has(conceptId)) {
+                          newSet.delete(conceptId);
+                        } else {
+                          newSet.add(conceptId);
+                        }
+                        return newSet;
+                      });
+                    }}
+                    onEdit={handleOpenEditModal}
+                    onDelete={handleDeleteConcept}
+                    onCreateChild={handleCreateChildConcept}
+                    onMove={handleMoveToParent}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>

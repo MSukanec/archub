@@ -106,6 +106,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       return result[0];
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] });
       queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
       queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
       toast({
@@ -143,6 +144,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       return result[0];
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] });
       queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
       queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
       toast({
