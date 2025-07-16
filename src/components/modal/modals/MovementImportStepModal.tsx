@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useMovementConcepts } from '@/hooks/use-movement-concepts'
+import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
@@ -239,7 +239,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Data hooks
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
-  const { data: movementConcepts } = useMovementConcepts()
+  const { data: movementConcepts } = useOrganizationMovementConcepts(organizationId)
   const { data: organizationCurrencies } = useOrganizationCurrencies()
   const { data: organizationWallets } = useOrganizationWallets()
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
@@ -262,6 +262,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
   const categories = movementConcepts?.filter(c => c.parent_id && movementConcepts.find(parent => parent.id === c.parent_id && !parent.parent_id)) || []
+  
+
   
   // Create value mapping for normalization
   const valueMap = createValueMap(movementConcepts || [], organizationCurrencies || [], organizationWallets || [])
@@ -620,11 +622,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Step configurations
   const stepConfig: StepModalConfig = {
     currentStep,
-    totalSteps: 4,
+    totalSteps: 3,
     stepTitle: currentStep === 1 ? 'Seleccionar archivo y creador' : 
                currentStep === 2 ? 'Mapear columnas' : 
-               currentStep === 3 ? 'Resolver valores incompatibles' :
-               'Vista previa e importar'
+               'Resolver valores incompatibles e importar'
   }
 
   const getFooterConfig = (): StepModalFooterConfig => {
@@ -672,19 +673,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           previousAction: {
             label: 'Anterior',
             onClick: () => setCurrentStep(2)
-          },
-          nextAction: {
-            label: 'Siguiente',
-            onClick: () => setCurrentStep(4),
-            disabled: false
-          }
-        }
-      case 4:
-        return {
-          cancelAction: baseCancel,
-          previousAction: {
-            label: 'Anterior',
-            onClick: () => setCurrentStep(3)
           },
           submitAction: {
             label: 'Importar',
@@ -845,13 +833,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       case 'subcategory_id':
         const subcategoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
         const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
-        console.log('SUBCATEGORY VALIDATION:', {
-          fieldName,
-          value,
-          subcategoryNormalized,
-          categoriesCount: categories.length,
-          available: categories.map(c => c.name)
-        });
+
         return { 
           isValid: !!subcategoryNormalized, 
           suggestion: subcategoryMatch?.name,
@@ -860,6 +842,22 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       default:
         return { isValid: true, suggestion: null }
+    }
+  }
+
+  // Helper function to get available options for each field type
+  const getAvailableOptionsForField = (fieldName: string) => {
+    switch (fieldName) {
+      case 'type_id':
+        return types.map(t => ({ id: t.id, name: t.name }))
+      case 'currency_id':
+        return (organizationCurrencies || []).map(c => ({ id: c.id, name: c.name }))
+      case 'wallet_id':
+        return (organizationWallets || []).map(w => ({ id: w.id, name: w.name }))
+      case 'subcategory_id':
+        return categories.map(c => ({ id: c.id, name: c.name }))
+      default:
+        return []
     }
   }
 
@@ -882,9 +880,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             const needsMapping = mappedField && !isValid && validation?.available && validation.available.length > 0
             
             return (
-              <div key={index} className="border rounded-lg p-4 bg-white">
-                {/* Header Row */}
-                <div className="grid grid-cols-12 gap-4 items-center mb-3">
+              <Card key={index}>
+                <CardContent className="p-4">
+                  {/* Header Row */}
+                  <div className="grid grid-cols-12 gap-4 items-center mb-3">
                   <div className="col-span-1 text-center">
                     <Badge variant="outline" className="text-xs font-mono w-8 h-6">{String.fromCharCode(65 + index)}</Badge>
                   </div>
@@ -1048,7 +1047,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     </div>
                   </div>
                 )}
-              </div>
+                </CardContent>
+              </Card>
             )
           })}
         </div>
@@ -1084,7 +1084,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           {Object.entries(incompatibleValues).map(([fieldName, values]) => {
             const fieldLabel = AVAILABLE_FIELDS.find(f => f.value === fieldName)?.label || fieldName
             return (
-              <div key={fieldName} className="border rounded-lg p-4">
+              <Card key={fieldName}>
+                <CardContent className="p-4">
                 <div className="mb-4">
                   <h4 className="font-medium text-sm mb-1">Campo: {fieldLabel}</h4>
                   <p className="text-xs text-muted-foreground">
@@ -1145,25 +1146,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="">Sin asignar (NULL)</SelectItem>
-                              {validation?.available?.map((availableValue, idx) => {
-                                // Find the ID for this value
-                                let valueId = '';
-                                if (fieldName === 'type_id') {
-                                  valueId = types.find(t => t.name === availableValue)?.id || '';
-                                } else if (fieldName === 'currency_id') {
-                                  valueId = organizationCurrencies?.find(c => c.name === availableValue)?.id || '';
-                                } else if (fieldName === 'wallet_id') {
-                                  valueId = organizationWallets?.find(w => w.name === availableValue)?.id || '';
-                                } else if (fieldName === 'subcategory_id') {
-                                  valueId = categories.find(c => c.name === availableValue)?.id || '';
-                                }
-                                
-                                return (
-                                  <SelectItem key={idx} value={valueId}>
-                                    {availableValue}
-                                  </SelectItem>
-                                );
-                              })}
+                              {getAvailableOptionsForField(fieldName).map((option, idx) => (
+                                <SelectItem key={idx} value={option.id}>
+                                  {option.name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1182,7 +1169,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     )
                   })}
                 </div>
-              </div>
+                </CardContent>
+              </Card>
             )
           })}
         </div>
@@ -1349,8 +1337,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         return renderStep2()
       case 3:
         return renderStep3()
-      case 4:
-        return renderStep4()
       default:
         return renderStep1()
     }
