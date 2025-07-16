@@ -37,19 +37,41 @@ const normalizeText = (text: string): string => {
 
 // Value mapping configurations
 const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
-  const valueMap: { [key: string]: { [key: string]: string } } = {
-    type_id: {
-      'ingreso': 'INGRESO',
-      'ingresos': 'INGRESO',
-      'entrada': 'INGRESO',
-      'cobro': 'INGRESO',
-      'egreso': 'EGRESO', 
-      'egresos': 'EGRESO',
-      'salida': 'EGRESO',
-      'gasto': 'EGRESO',
-      'pago': 'EGRESO'
-    }
-  };
+  const valueMap: { [key: string]: { [key: string]: string } } = {};
+
+  // Add type mappings with proper UUIDs (only from parent concepts)
+  const types = concepts?.filter(c => !c.parent_id) || [];
+  if (types?.length) {
+    valueMap.type_id = {};
+    types.forEach(type => {
+      const normalized = normalizeText(type.name);
+      valueMap.type_id[normalized] = type.id;
+      
+      // Add common variations for types
+      const typeVariations = [
+        type.name.toLowerCase(),
+        type.name.replace(/\s+/g, ''),
+        // Specific type mappings
+        ...(type.name.toLowerCase().includes('ingreso') ? ['ingreso', 'ingresos', 'entrada', 'cobro'] : []),
+        ...(type.name.toLowerCase().includes('egreso') ? ['egreso', 'egresos', 'salida', 'gasto', 'pago'] : []),
+        ...(type.name.toLowerCase().includes('conversion') ? ['conversion', 'cambio', 'intercambio'] : []),
+        ...(type.name.toLowerCase().includes('transferencia') ? ['transferencia', 'transfer', 'traslado'] : [])
+      ];
+      
+      typeVariations.forEach(variation => {
+        const varNormalized = normalizeText(variation);
+        if (varNormalized !== normalized && varNormalized.length > 2) {
+          valueMap.type_id[varNormalized] = type.id;
+        }
+      });
+    });
+    
+    console.log('🔧 Type mappings created:', {
+      typesFound: types.length,
+      typeNames: types.map(t => t.name),
+      mappingKeys: Object.keys(valueMap.type_id).slice(0, 10)
+    });
+  }
 
   // Add currency mappings
   if (currencies?.length) {
@@ -74,26 +96,34 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     });
   }
 
-  // Add concept mappings with aggressive fuzzy matching
-  if (concepts?.length) {
+  // CRITICAL FIX: Extract ONLY subcategories (children) for subcategory mapping
+  const allSubcategories = concepts?.flatMap(concept => concept.children || []) || [];
+  console.log('🔧 Subcategories for mapping:', {
+    totalConcepts: concepts?.length || 0,
+    subcategoriesFound: allSubcategories.length,
+    subcategoryNames: allSubcategories.map(s => s.name).slice(0, 5)
+  });
+
+  // Add subcategory mappings with aggressive fuzzy matching (ONLY children, not parents)
+  if (allSubcategories?.length) {
     valueMap.subcategory_id = {};
-    concepts.forEach(concept => {
-      const normalized = normalizeText(concept.name);
-      valueMap.subcategory_id[normalized] = concept.id;
+    allSubcategories.forEach(subcategory => {
+      const normalized = normalizeText(subcategory.name);
+      valueMap.subcategory_id[normalized] = subcategory.id;
       
       // Add common variations for better fuzzy matching
       const variations = [
-        concept.name.toLowerCase(),
-        concept.name.replace(/\s+/g, ''), // Remove spaces: "Mano de Obra" -> "manodeobra"
-        concept.name.replace(/[^a-zA-Z0-9]/g, ''), // Remove special chars
-        concept.name.replace(/\s+/g, '').toLowerCase(), // Combined
-        concept.name.replace(/de|del|la|el|y|e/gi, '').replace(/\s+/g, ''), // Remove common words
+        subcategory.name.toLowerCase(),
+        subcategory.name.replace(/\s+/g, ''), // Remove spaces: "Mano de Obra" -> "manodeobra"
+        subcategory.name.replace(/[^a-zA-Z0-9]/g, ''), // Remove special chars
+        subcategory.name.replace(/\s+/g, '').toLowerCase(), // Combined
+        subcategory.name.replace(/de|del|la|el|y|e/gi, '').replace(/\s+/g, ''), // Remove common words
       ];
       
       variations.forEach(variation => {
         const varNormalized = normalizeText(variation);
         if (varNormalized !== normalized && varNormalized.length > 2) {
-          valueMap.subcategory_id[varNormalized] = concept.id;
+          valueMap.subcategory_id[varNormalized] = subcategory.id;
         }
       });
     });
@@ -362,6 +392,16 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   
   // Create value mapping for normalization
   const valueMap = createValueMap(movementConcepts || [], organizationCurrencies || [], organizationWallets || [])
+  
+  // Debug valueMap construction
+  console.log('🔧 ValueMap constructed:', {
+    type_id: Object.keys(valueMap.type_id || {}).length,
+    subcategory_id: Object.keys(valueMap.subcategory_id || {}).length,
+    currency_id: Object.keys(valueMap.currency_id || {}).length,
+    wallet_id: Object.keys(valueMap.wallet_id || {}).length,
+    subcategory_sample: Object.keys(valueMap.subcategory_id || {}).slice(0, 5),
+    concepts_received: movementConcepts?.length || 0
+  })
 
   // Reset modal state
   const resetModal = () => {
