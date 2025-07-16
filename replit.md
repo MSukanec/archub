@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 16, 2025. MODAL STRUCTURE FIXES AND UI CONSISTENCY: Fixed critical modal structure issues and improved UI consistency - COMPLETED
+  • Fixed PhoneInput component: reduced country code "+54" text size from text-sm to text-xs to match placeholder consistency
+  • Removed icon from ACTIVIDAD breadcrumb: page now shows clean "Actividad" title without icon clutter
+  • Fixed DeleteConfirmationModal structure: corrected to follow BoardFormModal pattern exactly with proper object structure
+  • Modal now returns { viewPanel, editPanel, headerContent, footerContent } props to FormModalLayout instead of JSX
+  • Updated modal README.md with clear structure guidelines and common error prevention
+  • Eliminated hardcoded FormModalBody wrapper - FormModalLayout handles all internal layout automatically
+  • All modals now follow unified architecture: BoardFormModal.tsx is the mandatory reference pattern
 - July 15, 2025. HERO PROJECT CARDS COMPLETED: Implemented complete modern project card system with color integration and modal fixes - COMPLETED
   • Fixed project creation/editing modal: resolved "duplicate key" database constraint error using upsert instead of insert
   • Enhanced project cards with hero-style design: two-section layout with image/avatar top section and project details bottom

@@ -10,39 +10,74 @@ En su lugar se usa FormModalLayout con sus secciones internas bien definidas.
 📁 Ubicación del archivo
 Guardar el nuevo archivo en: src/components/modal/modals
 
-🧱 Estructura mínima del archivo de modal
+🧱 Estructura correcta del archivo de modal
 
-import { FormModalLayout } from "@/components/form/modal/FormModalLayout"
-import { FormModalBody } from "@/components/form/modal/FormModalBody"
-import { FormModalFooter } from "@/components/form/modal/FormModalFooter"
-import { FormModalHeader } from "@/components/form/modal/FormModalHeader"
+**IMPORTANTE**: Los modales deben seguir exactamente la estructura de BoardFormModal.tsx
 
-export default function MemberFormModal() {
+```typescript
+import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
+import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
+import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
+
+export function MemberFormModal({ modalData, onClose }) {
+  // Lógica del modal aquí...
+
+  const viewPanel = (
+    // Contenido para modo vista (solo lectura)
+    <div>Contenido de vista</div>
+  );
+
+  const editPanel = (
+    // Contenido para modo edición/creación
+    <div>Contenido de edición</div>
+  );
+
+  const headerContent = (
+    <FormModalHeader 
+      title="Invitar Miembro"
+      icon={UserPlus}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel="Invitar"
+      onRightClick={() => {/* función de submit */}}
+    />
+  );
+
   return (
-    <FormModalLayout>
-      <FormModalHeader title="Invitar Miembro" />
-
-      <FormModalBody>
-        {/* Aquí van los campos del formulario */}
-      </FormModalBody>
-
-      <FormModalFooter
-        cancelText="Cancelar"
-        submitText="Invitar"
-        onSubmit={() => {}} // reemplazar con la función real
-      />
-    </FormModalLayout>
-  )
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
+    />
+  );
 }
+```
 
 ✅ Estilos y comportamiento
 
-✓ Todos los contenidos deben ir dentro de FormModalBody, con scroll interno si el contenido es largo.
-✓ Los botones de acción deben ir siempre en FormModalFooter.
-✓ Modal debe seguir patrón exacto de ContactFormModal
-✓ Devvolver JSX con FormModalLayout en lugar de objeto
-✓ Usa headerContent y footerContent como componentes JSX
-✓ Implementa navegación entre view/edit panels
+**ESTRUCTURA OBLIGATORIA:**
+✓ Modal debe devolver FormModalLayout con props: viewPanel, editPanel, headerContent, footerContent
+✓ FormModalLayout recibe estos objetos como props y maneja el layout interno automáticamente
+✓ NUNCA usar JSX directo como <FormModalLayout><FormModalHeader>... - esto está PROHIBIDO
+✓ Seguir exactamente el patrón de BoardFormModal.tsx - es el modelo de referencia OBLIGATORIO
+✓ viewPanel: contenido de solo lectura (puede ser null si no aplica)
+✓ editPanel: contenido de edición/creación con formularios (sin FormModalBody wrapper)
+✓ headerContent: FormModalHeader con título e icono
+✓ footerContent: FormModalFooter con botones de acción
+
+**ERRORES COMUNES A EVITAR:**
+✗ NO usar <FormModalLayout><FormModalHeader>... - estructura JSX directa
+✗ NO envolver editPanel en FormModalBody - FormModalLayout ya lo hace
+✗ NO devolver JSX directo - siempre usar la estructura de objetos como props
+✗ NO seguir patrones antiguos de CustomModal - usar solo FormModalLayout
 
 🔁 En ModalFactory.tsx
 Asegurate de registrar correctamente el nuevo modal en ModalFactory.tsx. Por ejemplo:
