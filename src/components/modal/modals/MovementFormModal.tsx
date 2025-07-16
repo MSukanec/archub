@@ -345,7 +345,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         return
       }
       
-      // Set hierarchical states for editing
+      // Set hierarchical states for editing - CRITICAL for field loading
+      console.log('Setting hierarchical states:', {
+        type_id: editingMovement.type_id,
+        category_id: editingMovement.category_id
+      })
       setSelectedTypeId(editingMovement.type_id || '')
       setSelectedCategoryId(editingMovement.category_id || '')
       
@@ -414,6 +418,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         
         console.log('Loading conversion form data:', conversionData)
         conversionForm.reset(conversionData)
+        
+        // CRITICAL: También cargar en el formulario normal para que los campos superiores aparezcan
+        form.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined,
+          type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
+          subcategory_id: editingMovement.subcategory_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
+        })
       } else if (isTransferMovement) {
         // Para transferencias, cargar datos en formulario de transferencia
         transferForm.reset({

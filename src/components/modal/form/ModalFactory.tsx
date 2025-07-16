@@ -1,5 +1,6 @@
 import { useGlobalModalStore } from './useGlobalModalStore';
 import { FormModalLayout } from './FormModalLayout';
+import { Button } from '@/components/ui/button';
 import { MemberFormModal } from '../modals/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
 import { BoardFormModal } from '../modals/BoardFormModal';
@@ -45,8 +46,42 @@ export function ModalFactory() {
       return <MovementFormModal modalData={data} onClose={closeModal} />;
     case 'movement-concept':
       return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
-    case 'movement-import':
-      return <MovementImportModal modalData={data} onClose={closeModal} />;
+    case 'movement-import': {
+      const modalResult = MovementImportModal({ modalData: data, onClose: closeModal });
+      return (
+        <FormModalLayout 
+          headerContent={
+            <div className="px-6 py-4 border-b border-[var(--card-border)]">
+              <h2 className="text-lg font-semibold text-foreground">{modalResult.headerContent.title}</h2>
+              <p className="text-sm text-muted-foreground">{modalResult.headerContent.description}</p>
+            </div>
+          }
+          footerContent={
+            <div className="px-6 py-4 border-t border-[var(--card-border)] bg-[var(--card-bg)] flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={modalResult.footerContent.onCancel}
+              >
+                {modalResult.footerContent.cancelText}
+              </Button>
+              {modalResult.footerContent.showSubmit && (
+                <Button 
+                  onClick={modalResult.footerContent.onSubmit}
+                  disabled={modalResult.footerContent.disabled}
+                  loading={modalResult.footerContent.loading}
+                >
+                  {modalResult.footerContent.submitText}
+                </Button>
+              )}
+            </div>
+          }
+          onClose={closeModal}
+          columns={1}
+        >
+          {modalResult.editPanel}
+        </FormModalLayout>
+      );
+    }
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
         mode={data?.mode || 'simple'}

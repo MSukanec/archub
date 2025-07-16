@@ -4,9 +4,6 @@ import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
 import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw } from 'lucide-react'
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -605,26 +602,31 @@ export default function MovementImportModal({ modalData, onClose }: MovementImpo
 
   const footerProps = getFooterProps()
 
-  return (
-    <FormModalLayout>
-      <FormModalHeader 
-        title="Importar Movimientos"
-        description={`Paso ${currentStep} de 3`}
-      />
-
-      <div className="flex-1 p-6 overflow-y-auto">
-        {renderStepContent()}
+  return {
+    viewPanel: (
+      <div className="p-6">
+        <p className="text-muted-foreground">Vista previa no disponible</p>
       </div>
-
-      <FormModalFooter
-        cancelText={footerProps.cancelText}
-        submitText={footerProps.submitText}
-        showSubmit={footerProps.showSubmit}
-        onCancel={footerProps.onCancel}
-        onSubmit={footerProps.onSubmit}
-        loading={footerProps.loading}
-        disabled={footerProps.disabled}
-      />
-    </FormModalLayout>
-  )
+    ),
+    editPanel: (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto">
+          {renderStepContent()}
+        </div>
+      </div>
+    ),
+    headerContent: {
+      title: "Importar Movimientos",
+      description: `Paso ${currentStep} de 3`
+    },
+    footerContent: {
+      cancelText: footerProps.cancelText,
+      submitText: footerProps.submitText,
+      showSubmit: footerProps.showSubmit,
+      onCancel: footerProps.onCancel,
+      onSubmit: footerProps.onSubmit,
+      loading: footerProps.loading,
+      disabled: footerProps.disabled
+    }
+  }
 }
