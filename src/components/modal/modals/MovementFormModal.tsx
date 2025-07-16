@@ -397,21 +397,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // Buscar el movimiento par (entrada/salida) en el grupo de conversión
         console.log('Loading conversion group for editing:', editingMovement.conversion_group_id)
         
-        // TODO: Aquí necesitaríamos cargar todos los movimientos del grupo de conversión
-        // Por ahora, cargaremos datos básicos del movimiento actual
-        conversionForm.reset({
+        // Cargar datos del movimiento actual en el formulario de conversión
+        const conversionData = {
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
           type_id: editingMovement.type_id || '',
           currency_id_from: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-          wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          wallet_id_from: matchingWallet?.id || '',
           amount_from: editingMovement.amount || 0,
           currency_id_to: '',
           wallet_id_to: '',
           amount_to: 0,
           exchange_rate: editingMovement.exchange_rate || undefined
-        })
+        }
+        
+        console.log('Loading conversion form data:', conversionData)
+        conversionForm.reset(conversionData)
       } else if (isTransferMovement) {
         // Para transferencias, cargar datos en formulario de transferencia
         transferForm.reset({
