@@ -152,6 +152,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     avatar_url: member.avatar_url
   }))
   
+  // Debug logs
+  console.log('Organization ID:', organizationId)
+  console.log('Organization Members:', organizationMembers)
+  console.log('Converted Users:', users)
+  
   // Set default creator when data loads
   React.useEffect(() => {
     if (!selectedCreator && currentUser?.user?.id) {
@@ -505,7 +510,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         <UserSelector
           users={users}
           value={selectedCreator}
-          onValueChange={setSelectedCreator}
+          onChange={setSelectedCreator}
           placeholder="Seleccionar miembro de la organización"
         />
       </div>
