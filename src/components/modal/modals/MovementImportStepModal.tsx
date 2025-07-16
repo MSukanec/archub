@@ -102,6 +102,12 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
   return valueMap;
 };
 
+// UUID validation helper
+const isValidUUID = (value: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
+};
+
 const normalizeValue = (field: string, value: any, valueMap: any, manualMappings: any = {}): any => {
   if (!value || value === '' || value === 'Sin asignar' || value === 'empty-placeholder') {
     return null;
@@ -110,13 +116,13 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   const stringValue = String(value).trim();
   const normalized = normalizeText(stringValue);
   
-  // Debug logging for type_id specifically
-  if (field === 'type_id') {
-    console.log('🔍 Processing type_id:', {
+  // Debug logging for UUID fields
+  if (['type_id', 'subcategory_id'].includes(field)) {
+    console.log(`🔍 Processing ${field}:`, {
       originalValue: value,
       stringValue,
       normalized,
-      valueMapForType: valueMap[field],
+      valueMapForField: valueMap[field],
       directMatch: valueMap[field] && valueMap[field][normalized]
     });
   }
@@ -130,8 +136,8 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   
   // Check direct mapping
   if (valueMap[field] && valueMap[field][normalized]) {
-    if (field === 'type_id') {
-      console.log('✅ type_id direct match found:', valueMap[field][normalized]);
+    if (['type_id', 'subcategory_id'].includes(field)) {
+      console.log(`✅ ${field} direct match found:`, valueMap[field][normalized]);
     }
     return valueMap[field][normalized];
   }
@@ -162,7 +168,19 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
     }
     
     if (bestMatch) {
+      if (['type_id', 'subcategory_id'].includes(field)) {
+        console.log(`✅ ${field} fuzzy match found:`, bestMatch);
+      }
       return bestMatch;
+    }
+  }
+  
+  // CRITICAL: For UUID fields, never return non-UUID values
+  // This prevents database constraint errors
+  if (['type_id', 'subcategory_id', 'currency_id', 'wallet_id'].includes(field)) {
+    if (!isValidUUID(stringValue)) {
+      console.warn(`⚠️ ${field} could not be mapped to UUID for value:`, stringValue);
+      return null; // This will force it to appear in step 3 as incompatible
     }
   }
   
