@@ -107,7 +107,8 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   // Check manual mappings first
   const mappingKey = `${field}_${stringValue}`;
   if (manualMappings[mappingKey]) {
-    return manualMappings[mappingKey];
+    // Return null for empty string mappings (Sin asignar)
+    return manualMappings[mappingKey] === '' ? null : manualMappings[mappingKey];
   }
   
   // Check direct mapping
@@ -847,18 +848,35 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Helper function to get available options for each field type
   const getAvailableOptionsForField = (fieldName: string) => {
+    let options = []
     switch (fieldName) {
       case 'type_id':
-        return types.map(t => ({ id: t.id, name: t.name }))
+        options = types.map(t => ({ id: t.id, name: t.name }))
+        break
       case 'currency_id':
-        return (organizationCurrencies || []).map(c => ({ id: c.id, name: c.name }))
+        options = (organizationCurrencies || []).map(c => ({ id: c.id, name: c.name }))
+        break
       case 'wallet_id':
-        return (organizationWallets || []).map(w => ({ id: w.id, name: w.name }))
+        options = (organizationWallets || []).map(w => ({ id: w.id, name: w.name }))
+        break
       case 'subcategory_id':
-        return categories.map(c => ({ id: c.id, name: c.name }))
+        options = categories.map(c => ({ id: c.id, name: c.name }))
+        break
       default:
-        return []
+        options = []
     }
+    
+    console.log(`🎯 Options for ${fieldName}:`, { 
+      fieldName, 
+      count: options.length, 
+      options: options.slice(0, 3),
+      types: types.length,
+      categories: categories.length,
+      currencies: organizationCurrencies?.length || 0,
+      wallets: organizationWallets?.length || 0
+    })
+    
+    return options
   }
 
   const renderStep2 = () => (
