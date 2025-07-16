@@ -5,6 +5,7 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
+import FormModalBody from "@/components/modal/form/FormModalBody"
 import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -121,7 +122,7 @@ export default function DeleteConfirmationModal({
   const viewPanel = null // No needed for delete confirmation modal
 
   const editPanel = (
-    <>
+    <FormModalBody columns={1}>
       <div className="space-y-6">
         {/* Warning section */}
         <div className="flex items-start gap-4">
@@ -227,7 +228,7 @@ export default function DeleteConfirmationModal({
           </div>
         )}
       </div>
-    </>
+    </FormModalBody>
   )
 
   const headerContent = (
