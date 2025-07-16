@@ -54,17 +54,21 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
   // Add currency mappings
   if (currencies?.length) {
     valueMap.currency_id = {};
-    currencies.forEach(currency => {
+    currencies.forEach(orgCurrency => {
+      const currency = orgCurrency.currency || orgCurrency;
       const normalized = normalizeText(currency.name);
       valueMap.currency_id[normalized] = currency.id;
-      valueMap.currency_id[normalizeText(currency.code)] = currency.id;
+      if (currency.code) {
+        valueMap.currency_id[normalizeText(currency.code)] = currency.id;
+      }
     });
   }
 
   // Add wallet mappings
   if (wallets?.length) {
     valueMap.wallet_id = {};
-    wallets.forEach(wallet => {
+    wallets.forEach(orgWallet => {
+      const wallet = orgWallet.wallets || orgWallet;
       const normalized = normalizeText(wallet.name);
       valueMap.wallet_id[normalized] = wallet.id;
     });
@@ -858,10 +862,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         options = types.map(t => ({ id: t.id, name: t.name }))
         break
       case 'currency_id':
-        options = (organizationCurrencies || []).map(c => ({ id: c.id, name: c.name }))
+        options = (organizationCurrencies || []).map(c => ({ id: c.currency.id, name: c.currency.name }))
         break
       case 'wallet_id':
-        options = (organizationWallets || []).map(w => ({ id: w.id, name: w.name }))
+        options = (organizationWallets || []).map(w => ({ id: w.wallets.id, name: w.wallets.name }))
         break
       case 'subcategory_id':
         options = categories.map(c => ({ id: c.id, name: c.name }))
