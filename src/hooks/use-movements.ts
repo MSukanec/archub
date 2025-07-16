@@ -162,10 +162,16 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           .select('id, name, code, symbol')
           .in('id', [...new Set(data.map(m => m.currency_id).filter(Boolean))]),
         
-        // Get wallets
+        // Get wallets through organization_wallets
         supabase
-          .from('wallets')
-          .select('id, name')
+          .from('organization_wallets')
+          .select(`
+            id,
+            wallets (
+              id,
+              name
+            )
+          `)
           .in('id', [...new Set(data.map(m => m.wallet_id).filter(Boolean))])
       ]);
 
@@ -201,8 +207,11 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       });
 
       const walletsMap = new Map();
-      walletsResult.data?.forEach(wallet => {
-        walletsMap.set(wallet.id, wallet);
+      walletsResult.data?.forEach(orgWallet => {
+        walletsMap.set(orgWallet.id, {
+          id: orgWallet.wallets?.id,
+          name: orgWallet.wallets?.name
+        });
       });
 
       // Transform the data with related information
