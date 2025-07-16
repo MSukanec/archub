@@ -141,7 +141,6 @@ export default function OrganizationActivity() {
   // Header props
   const headerProps = {
     title: 'Actividad',
-    icon: <Activity className="w-5 h-5 text-[var(--accent)]" />,
     searchValue,
     onSearchChange: setSearchValue,
     searchPlaceholder: 'Buscar actividades...',
