@@ -395,6 +395,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         isAportesMovement 
       })
       
+      console.log('Form states after setting:', {
+        isConversion,
+        isTransfer,
+        isAportes,
+        newIsConversion: isConversionMovement,
+        newIsTransfer: isTransferMovement,
+        newIsAportes: isAportesMovement
+      })
+      
       // Cargar datos en el formulario correcto según el tipo de movimiento
       if (isConversionMovement) {
         // Para conversiones, necesitamos cargar datos desde el grupo de conversión
@@ -964,7 +973,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
+                      {concepts?.filter((concept: any) => 
+                        !concept.parent_id && (concept.view_mode?.trim() === "conversion" || concept.view_mode?.trim() === "normal")
+                      ).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
                           <div className="flex items-center justify-between w-full">
                             <span>{concept.name}</span>
