@@ -20,7 +20,7 @@ interface Option {
   label: string;
 }
 
-interface MultiComboBoxProps {
+interface ComboBoxMultiSelectProps {
   options: Option[];
   values: string[];
   onValuesChange: (values: string[]) => void;
@@ -32,7 +32,7 @@ interface MultiComboBoxProps {
   maxHeight?: string;
 }
 
-export function MultiComboBox({
+export function ComboBoxMultiSelect({
   options,
   values,
   onValuesChange,
@@ -42,7 +42,7 @@ export function MultiComboBox({
   disabled = false,
   className,
   maxHeight = "max-h-64"
-}: MultiComboBoxProps) {
+}: ComboBoxMultiSelectProps) {
   const [open, setOpen] = useState(false);
 
   // Safety checks to prevent undefined errors
@@ -72,8 +72,7 @@ export function MultiComboBox({
           {selectedOptions.map((option) => (
             <Badge
               key={option.value}
-              variant="secondary"
-              className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+              className="cursor-pointer bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-destructive hover:text-destructive-foreground transition-colors"
               onClick={() => handleRemove(option.value)}
             >
               {option.label}

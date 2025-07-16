@@ -46,7 +46,7 @@ function ConceptItem({
   return (
     <div
       style={{ marginLeft: `${level * 24}px` }}
-      className="group relative border rounded-lg p-3 transition-all duration-200 hover:border-accent/50 bg-card border-border"
+      className="group relative border rounded-lg p-3 transition-all duration-200 hover:border-accent/50 bg-[var(--card-bg)] border-[var(--card-border)]"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1">

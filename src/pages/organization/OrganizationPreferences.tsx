@@ -5,7 +5,7 @@ import { Coins, Package2, Plus, Settings, CheckCircle, XCircle, Filter, Search }
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MultiComboBox } from '@/components/ui-custom/MultiComboBox';
+import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Button } from '@/components/ui/button';
@@ -358,7 +358,7 @@ export default function OrganizationPreferences() {
   return (
     <Layout 
       showSidebar 
-      wide={true}
+      wide={false}
       headerProps={{
         title: "Preferencias",
         showBackButton: false,
@@ -434,7 +434,7 @@ export default function OrganizationPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-                <MultiComboBox
+                <ComboBoxMultiSelect
                   options={availableSecondaryCurrencies.map(currency => ({
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
@@ -464,7 +464,7 @@ export default function OrganizationPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
-                <MultiComboBox
+                <ComboBoxMultiSelect
                   options={availableSecondaryWallets.map(wallet => ({
                     value: wallet.id,
                     label: wallet.name
