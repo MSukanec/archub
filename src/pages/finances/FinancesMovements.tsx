@@ -1225,7 +1225,7 @@ export default function Movements() {
     customFilters,
     onClearFilters: handleClearFilters,
     actions: [
-      selectedMovements.length > 0 && (
+      ...(selectedMovements.length > 0 ? [
         <Button
           key="delete-selected"
           variant="ghost"
@@ -1236,7 +1236,7 @@ export default function Movements() {
         >
           <Trash2 className="h-4 w-4" />
         </Button>
-      ),
+      ] : []),
       <Button
         key="import-movements"
         variant="outline"
@@ -1254,7 +1254,7 @@ export default function Movements() {
         <Plus className="mr-2 h-4 w-4" />
         Nuevo movimiento
       </Button>,
-    ].filter(Boolean),
+    ],
   };
 
   return (
