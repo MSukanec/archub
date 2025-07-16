@@ -152,11 +152,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     avatar_url: member.avatar_url
   }))
   
-  // Debug logs
-  console.log('Organization ID:', organizationId)
-  console.log('Organization Members:', organizationMembers)
-  console.log('Converted Users:', users)
-  
   // Set default creator when data loads
   React.useEffect(() => {
     if (!selectedCreator && currentUser?.user?.id) {
@@ -218,7 +213,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             rows: rows,
             fileName: file.name
           })
-          setCurrentStep(2)
         }
       } else {
         // CSV processing
@@ -244,7 +238,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                 rows: rows,
                 fileName: file.name
               })
-              setCurrentStep(2)
             }
           },
           header: false,
@@ -479,6 +472,16 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Step content renderers
   const renderStep1 = () => (
     <div className="space-y-6">
+      <div className="space-y-3">
+        <Label>Creador de los movimientos</Label>
+        <UserSelector
+          users={users}
+          value={selectedCreator}
+          onChange={setSelectedCreator}
+          placeholder="Seleccionar miembro de la organización"
+        />
+      </div>
+
       {!parsedData && (
         <div
           {...getRootProps()}
@@ -504,16 +507,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           </AlertDescription>
         </Alert>
       )}
-
-      <div className="space-y-3">
-        <Label>Creador de los movimientos</Label>
-        <UserSelector
-          users={users}
-          value={selectedCreator}
-          onChange={setSelectedCreator}
-          placeholder="Seleccionar miembro de la organización"
-        />
-      </div>
 
       <Alert>
         <AlertCircle className="h-4 w-4" />
