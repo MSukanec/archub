@@ -45,7 +45,7 @@ export function useMovementConceptsAdmin() {
 
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
-        .select('*')
+        .select('id, name, description, parent_id, organization_id, is_system, view_mode, extra_fields, created_at, updated_at')
         .eq('is_system', true)
         .order('name');
 

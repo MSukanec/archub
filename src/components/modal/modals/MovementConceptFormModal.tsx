@@ -58,6 +58,18 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
     setPanel('edit');
   }, [setPanel]);
 
+  // Reset form when editing concept changes
+  React.useEffect(() => {
+    if (editingConcept) {
+      form.reset({
+        name: editingConcept.name || '',
+        description: editingConcept.description || '',
+        parent_id: editingConcept.parent_id || '',
+        is_system: editingConcept.is_system || false,
+      });
+    }
+  }, [editingConcept, form]);
+
   const form = useForm<ConceptFormData>({
     resolver: zodResolver(conceptSchema),
     defaultValues: {
@@ -201,23 +213,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
 
         <FormField
           control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Descripción del concepto (opcional)"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="parent_id"
           render={({ field }) => (
             <FormItem>
@@ -239,6 +234,23 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Descripción del concepto (opcional)"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
