@@ -207,10 +207,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(transferFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.id || '',
       description: '',
-      currency_id: '',
-      wallet_id_from: '',
+      type_id: '',
+      currency_id: userData?.organization?.default_currency_id || '',
+      wallet_id_from: userData?.organization?.default_wallet_id || '',
       wallet_id_to: '',
       amount: 0
     }
