@@ -21,7 +21,8 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import { useMovementConceptsAdmin, useDeleteMovementConcept, useMoveConceptToParent, MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin';
+import { useOrganizationMovementConcepts, MovementConceptOrganization } from '@/hooks/use-organization-movement-concepts';
+import { useDeleteMovementConcept, useMoveConceptToParent } from '@/hooks/use-movement-concepts-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function OrganizationPreferences() {
@@ -48,7 +49,7 @@ export default function OrganizationPreferences() {
   const { openModal } = useGlobalModalStore();
 
   // Movement concepts hooks
-  const { data: concepts = [], isLoading: conceptsLoading } = useMovementConceptsAdmin();
+  const { data: concepts = [], isLoading: conceptsLoading } = useOrganizationMovementConcepts(userData?.organization?.id);
   const deleteConceptMutation = useDeleteMovementConcept();
   const moveConceptMutation = useMoveConceptToParent();
 
@@ -253,12 +254,12 @@ export default function OrganizationPreferences() {
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
   // Movement concepts functions
-  const calculateStats = (concepts: MovementConceptAdmin[]) => {
+  const calculateStats = (concepts: MovementConceptOrganization[]) => {
     let totalConcepts = 0;
     let systemConcepts = 0;
     let userConcepts = 0;
 
-    const countRecursive = (concepts: MovementConceptAdmin[]) => {
+    const countRecursive = (concepts: MovementConceptOrganization[]) => {
       concepts.forEach(concept => {
         totalConcepts++;
         
@@ -288,7 +289,7 @@ export default function OrganizationPreferences() {
     openModal('organization-movement-concept');
   };
 
-  const handleOpenEditModal = (concept: MovementConceptAdmin) => {
+  const handleOpenEditModal = (concept: MovementConceptOrganization) => {
     openModal('organization-movement-concept', { editingConcept: concept });
   };
 
