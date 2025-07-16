@@ -277,18 +277,21 @@ export default function AdminMovementConcepts() {
             concepts={filteredConcepts.map(concept => ({
               id: concept.id,
               name: concept.name,
+              description: concept.description,
               parent_id: concept.parent_id,
               is_system: concept.is_system,
               view_mode: concept.view_mode || undefined,
               children: concept.children?.map(child => ({
                 id: child.id,
                 name: child.name,
+                description: child.description,
                 parent_id: child.parent_id,
                 is_system: child.is_system,
                 view_mode: child.view_mode || undefined,
                 children: child.children?.map(grandchild => ({
                   id: grandchild.id,
                   name: grandchild.name,
+                  description: grandchild.description,
                   parent_id: grandchild.parent_id,
                   is_system: grandchild.is_system,
                   view_mode: grandchild.view_mode || undefined,

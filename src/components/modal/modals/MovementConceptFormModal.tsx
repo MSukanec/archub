@@ -22,7 +22,7 @@ const conceptSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   parent_id: z.string().optional(),
-  is_system: z.boolean().default(false),
+  is_system: z.boolean().default(true),
 });
 
 type ConceptFormData = z.infer<typeof conceptSchema>;
@@ -59,7 +59,7 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       name: editingConcept?.name || '',
       description: editingConcept?.description || '',
       parent_id: editingConcept?.parent_id || parentConcept?.id || '',
-      is_system: editingConcept?.is_system || parentConcept?.is_system || true,
+      is_system: true, // Siempre true para admin
     },
   });
 
@@ -75,7 +75,7 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
         name: editingConcept.name || '',
         description: editingConcept.description || '',
         parent_id: editingConcept.parent_id || '',
-        is_system: editingConcept.is_system || false,
+        is_system: true, // Siempre true para admin
       });
     }
   }, [editingConcept, form]);
@@ -256,28 +256,7 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="is_system"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">
-                  Concepto del Sistema
-                </FormLabel>
-                <div className="text-sm text-muted-foreground">
-                  Los conceptos del sistema están disponibles para todas las organizaciones
-                </div>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+
       </form>
     </Form>
   );
