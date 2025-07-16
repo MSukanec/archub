@@ -1695,42 +1695,40 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               name="contact_id"
               render={({ field }) => {
                 // Buscar la categoría seleccionada para obtener extra_fields
-                const selectedCategory = categories?.find(c => c.id === form.watch('category_id'))
+                const selectedCategory = categories?.find(c => c.id === aportesForm.watch('category_id'))
                 const extraField = selectedCategory?.extra_fields?.[0]
                 const isClienteSelector = extraField === 'cliente_id'
+                
+                // Preparar datos para UserSelector
+                const usersData = isClienteSelector ? (
+                  // Para clientes: convertir projectClients a formato UserSelector
+                  projectClients?.map((projectClient) => ({
+                    id: projectClient.contact.id,
+                    first_name: projectClient.contact.first_name,
+                    last_name: projectClient.contact.last_name,
+                    full_name: projectClient.contact.full_name,
+                    company_name: projectClient.contact.company_name,
+                    avatar_url: projectClient.contact.avatar_url
+                  })) || []
+                ) : (
+                  // Para socios: usar miembros directamente
+                  members || []
+                )
                 
                 return (
                   <FormItem>
                     <FormLabel>
                       {isClienteSelector ? 'Cliente *' : 'Socio *'}
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={
-                            isClienteSelector ? "Seleccionar cliente" : "Seleccionar socio"
-                          } />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isClienteSelector ? (
-                          // Mostrar clientes del proyecto para "Aportes de Terceros"
-                          projectClients?.map((projectClient) => (
-                            <SelectItem key={projectClient.id} value={projectClient.contact.id}>
-                              {projectClient.contact.full_name || `${projectClient.contact.first_name} ${projectClient.contact.last_name}`}
-                              {projectClient.contact.company_name && ` (${projectClient.contact.company_name})`}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          // Mostrar miembros para "Aportes Propios"
-                          members?.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>
-                              {member.first_name} {member.last_name}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <UserSelector
+                        users={usersData}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={isClienteSelector ? "Seleccionar cliente" : "Seleccionar socio"}
+                        showCompany={isClienteSelector} // Mostrar empresa solo para clientes
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )

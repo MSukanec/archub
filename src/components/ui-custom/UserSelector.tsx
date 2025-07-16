@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 
 interface User {
   id: string;
-  full_name: string;
-  email: string;
+  full_name?: string;
+  email?: string;
   avatar_url?: string;
   first_name?: string;
   last_name?: string;
+  company_name?: string;
 }
 
 interface UserSelectorProps {
@@ -21,6 +22,7 @@ interface UserSelectorProps {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  showCompany?: boolean;
 }
 
 export default function UserSelector({
@@ -31,9 +33,15 @@ export default function UserSelector({
   placeholder = "Seleccionar usuario",
   required = false,
   disabled = false,
-  className = ""
+  className = "",
+  showCompany = false
 }: UserSelectorProps) {
   const selectedUser = users?.find(user => user.id === value);
+
+  const getUserDisplayName = (user: User) => {
+    const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    return showCompany && user.company_name ? `${fullName} (${user.company_name})` : fullName;
+  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -56,7 +64,7 @@ export default function UserSelector({
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm">
-                  {selectedUser.full_name || `${selectedUser.first_name || ''} ${selectedUser.last_name || ''}`.trim()}
+                  {getUserDisplayName(selectedUser)}
                 </span>
               </div>
             )}
@@ -74,7 +82,7 @@ export default function UserSelector({
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm">
-                  {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
+                  {getUserDisplayName(user)}
                 </span>
               </div>
             </SelectItem>
