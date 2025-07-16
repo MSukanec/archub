@@ -284,6 +284,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [selectedCreator, setSelectedCreator] = useState<string>('')
   const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
   const [incompatibleValues, setIncompatibleValues] = useState<{ [key: string]: string[] }>({})
+  // Force re-render counter for the problematic selectors
+  const [renderCounter, setRenderCounter] = useState(0)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -886,18 +888,22 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'currency_id':
         const currencyNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
-        const currencyMatch = organizationCurrencies?.find(c => c.currency.id === currencyNormalized || normalizeText(c.currency.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.currency.name)))
+        // Check if it's a direct UUID match with organization currencies
+        const currencyMatch = organizationCurrencies?.find(c => c.currency.id === currencyNormalized)
+        const isDirectCurrencyMatch = !!currencyMatch
         return { 
-          isValid: !!currencyNormalized, 
+          isValid: isDirectCurrencyMatch, 
           suggestion: currencyMatch?.currency?.name,
           available: organizationCurrencies?.map(c => c.currency.name) || [],
           mappedValue: currencyNormalized
         }
       case 'wallet_id':
         const walletNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
-        const walletMatch = organizationWallets?.find(w => w.wallets.id === walletNormalized || normalizeText(w.wallets.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.wallets.name)))
+        // Check if it's a direct UUID match with organization wallets
+        const walletMatch = organizationWallets?.find(w => w.wallets.id === walletNormalized)
+        const isDirectWalletMatch = !!walletMatch
         return { 
-          isValid: !!walletNormalized, 
+          isValid: isDirectWalletMatch, 
           suggestion: walletMatch?.wallets?.name,
           available: organizationWallets?.map(w => w.wallets.name) || [],
           mappedValue: walletNormalized
@@ -1075,8 +1081,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                           ...prev,
                           ...fieldMappings
                         };
-                        // Force re-render by updating key
-                        setTimeout(() => setManualMappings({ ...newMappings }), 10);
+                        // Force re-render by incrementing render counter
+                        setTimeout(() => {
+                          setRenderCounter(prev => prev + 1);
+                          setManualMappings({ ...newMappings });
+                        }, 10);
                         return newMappings;
                       });
                       toast({
@@ -1112,7 +1121,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         
                         <div className="col-span-5">
                           <Select 
-                            key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}`}
+                            key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
                             value={manualMappings[mappingKey] || ''}
                             onValueChange={(selectedId) => {
                               setManualMappings(prev => ({

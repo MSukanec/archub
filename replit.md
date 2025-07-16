@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 16, 2025. EXCEL IMPORT UI AND VALIDATION FINAL FIXES: Fixed "PONER TODO NULL" button and validation detection for incompatible values - COMPLETED
+  • Fixed "PONER TODO NULL" button by implementing renderCounter state to force complete UI re-render of Select components
+  • Corrected validation logic for all fields (type_id, subcategory_id, currency_id, wallet_id) to require direct UUID matches instead of fuzzy matching
+  • Enhanced Select component key with renderCounter: `${mappingKey}-${value}-${renderCounter}` for guaranteed re-render
+  • Fixed currency_id and wallet_id validation to use direct table UUID matches (c.currency.id, w.wallets.id) for consistency
+  • Added comprehensive debugging logs for validation flow to troubleshoot edge cases
+  • "MovSalida"/"MovEntrada" now correctly detected as incompatible for type_id mapping in step 3
+  • "ManoDeObra" and similar categories now properly detected as incompatible for subcategory_id mapping in step 3
+  • Button functionality: click → increment renderCounter → update mappings → selectors visually reset to "Seleccionar valor"
 - July 16, 2025. EXCEL IMPORT SYSTEM FINAL CORRECTIONS: Fixed critical UUID validation and foreign key constraint issues - COMPLETED
   • Fixed created_by foreign key error: system now properly maps user_id to organization_member.id for database integrity
   • Enhanced UUID validation with strict regex checking before database submission to prevent constraint violations
