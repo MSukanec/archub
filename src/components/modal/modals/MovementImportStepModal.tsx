@@ -23,6 +23,71 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
+// Value normalization utilities
+const normalizeText = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .trim()
+    .replace(/\s+/g, ' '); // Normalize spaces
+};
+
+// Value mapping configurations
+const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
+  const valueMap: { [key: string]: { [key: string]: string } } = {
+    type_id: {
+      'ingreso': 'INGRESO',
+      'ingresos': 'INGRESO',
+      'entrada': 'INGRESO',
+      'cobro': 'INGRESO',
+      'egreso': 'EGRESO', 
+      'egresos': 'EGRESO',
+      'salida': 'EGRESO',
+      'gasto': 'EGRESO',
+      'pago': 'EGRESO'
+    }
+  };
+
+  // Add currency mappings
+  if (currencies?.length) {
+    valueMap.currency_id = {};
+    currencies.forEach(currency => {
+      const normalized = normalizeText(currency.name);
+      valueMap.currency_id[normalized] = currency.id;
+      valueMap.currency_id[normalizeText(currency.code)] = currency.id;
+    });
+  }
+
+  // Add wallet mappings
+  if (wallets?.length) {
+    valueMap.wallet_id = {};
+    wallets.forEach(wallet => {
+      const normalized = normalizeText(wallet.name);
+      valueMap.wallet_id[normalized] = wallet.id;
+    });
+  }
+
+  // Add concept mappings
+  if (concepts?.length) {
+    valueMap.subcategory_id = {};
+    concepts.forEach(concept => {
+      const normalized = normalizeText(concept.name);
+      valueMap.subcategory_id[normalized] = concept.id;
+    });
+  }
+
+  return valueMap;
+};
+
+const normalizeValue = (field: string, value: any, valueMap: any): any => {
+  if (!value || typeof value !== 'string') return value;
+  
+  const normalized = normalizeText(value);
+  return valueMap[field]?.[normalized] || value;
+};
+
 interface MovementImportStepModalProps {
   modalData?: any
   onClose: () => void
@@ -49,11 +114,11 @@ const AVAILABLE_FIELDS = [
   { value: 'movement_date', label: 'Fecha' },
   { value: 'description', label: 'Descripción' },
   { value: 'amount', label: 'Cantidad' },
-  { value: 'currency', label: 'Moneda' },
-  { value: 'wallet', label: 'Billetera' },
-  { value: 'type', label: 'Tipo' },
-  { value: 'category', label: 'Categoría' },
-  { value: 'subcategory', label: 'Subcategoría' },
+  { value: 'currency_id', label: 'Moneda' },
+  { value: 'wallet_id', label: 'Billetera' },
+  { value: 'type_id', label: 'Tipo' },
+  { value: 'category_id', label: 'Categoría' },
+  { value: 'subcategory_id', label: 'Subcategoría' },
   { value: 'exchange_rate', label: 'Cotización' }
 ]
 
@@ -79,6 +144,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
   const categories = movementConcepts?.filter(c => c.parent_id && movementConcepts.find(parent => parent.id === c.parent_id && !parent.parent_id)) || []
+  
+  // Create value mapping for normalization
+  const valueMap = createValueMap(movementConcepts || [], organizationCurrencies || [], organizationWallets || [])
 
   // Reset modal state
   const resetModal = () => {
@@ -209,17 +277,37 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Import mutation
   const importMutation = useMutation({
     mutationFn: async (movements: any[]) => {
-      const response = await fetch('/api/movements/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ movements })
-      })
-      
-      if (!response.ok) {
-        throw new Error('Error importing movements')
+      try {
+        // Clean and validate movements data before sending
+        const cleanedMovements = movements.map(movement => {
+          const cleaned: any = {}
+          
+          // Only include defined and non-empty values
+          Object.entries(movement).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+              cleaned[key] = value
+            }
+          })
+          
+          return cleaned
+        })
+
+        const response = await fetch('/api/movements/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ movements: cleanedMovements })
+        })
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Error ${response.status}: ${errorText}`)
+        }
+        
+        return response.json()
+      } catch (error) {
+        console.error('Import mutation error:', error)
+        throw error
       }
-      
-      return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
@@ -231,10 +319,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     },
     onError: (error) => {
       console.error('Import error:', error)
+      const errorMessage = error?.message || "Error al importar los movimientos."
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Error al importar los movimientos."
+        description: errorMessage
       })
     }
   })
@@ -281,7 +370,14 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
               movement.exchange_rate = parseFloat(value) || 1
               break
             default:
-              movement[fieldName] = value
+              // Apply value normalization for specific fields
+              if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+                const normalizedValue = normalizeValue(fieldName, value, valueMap)
+                console.log(`Normalizing ${fieldName}: "${value}" → "${normalizedValue}"`)
+                movement[fieldName] = normalizedValue
+              } else {
+                movement[fieldName] = value
+              }
           }
         }
       })
@@ -443,14 +539,51 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     </div>
   )
 
-  const renderStep3 = () => (
-    <div className="p-6 space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Vista previa</h3>
-        <p className="text-sm text-muted-foreground">
-          Revisa los datos antes de importar. Puedes seleccionar filas específicas.
-        </p>
-      </div>
+  const renderStep3 = () => {
+    // Check for normalized values to show preview
+    const normalizedValues = new Set<string>()
+    
+    if (parsedData) {
+      parsedData.rows.slice(0, 10).forEach((row) => {
+        Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
+          if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+            const value = row[parseInt(columnIndex)]
+            if (value) {
+              const normalizedValue = normalizeValue(fieldName, value, valueMap)
+              if (normalizedValue !== value) {
+                normalizedValues.add(`${fieldName}: "${value}" → "${normalizedValue}"`)
+              }
+            }
+          }
+        })
+      })
+    }
+
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Vista previa</h3>
+          <p className="text-sm text-muted-foreground">
+            Revisa los datos antes de importar. Puedes seleccionar filas específicas.
+          </p>
+        </div>
+
+        {normalizedValues.size > 0 && (
+          <Alert>
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="font-medium mb-2">Valores normalizados automáticamente:</div>
+              <div className="text-xs space-y-1">
+                {Array.from(normalizedValues).slice(0, 5).map((mapping, index) => (
+                  <div key={index} className="text-muted-foreground">{mapping}</div>
+                ))}
+                {normalizedValues.size > 5 && (
+                  <div className="text-muted-foreground">...y {normalizedValues.size - 5} más</div>
+                )}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
       {parsedData && (
         <div className="space-y-4">
@@ -546,7 +679,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         </div>
       )}
     </div>
-  )
+    )
+  }
 
   const getCurrentStepContent = () => {
     switch (currentStep) {
