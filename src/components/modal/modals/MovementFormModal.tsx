@@ -892,6 +892,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         contact_id: data.contact_id // Este campo guardará cliente_id o socio_id
       }
 
+      console.log('Movement data to be inserted:', movementData)
+
       const { data: result, error } = await supabase
         .from('movements')
         .insert([movementData])
@@ -934,7 +936,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   }
 
   const onSubmitAportes = async (data: AportesForm) => {
-    console.log('Saving aportes wallet_id:', data.wallet_id)
+    console.log('Saving aportes data:', {
+      wallet_id: data.wallet_id,
+      contact_id: data.contact_id,
+      category_id: data.category_id,
+      type_id: data.type_id,
+      amount: data.amount,
+      currency_id: data.currency_id
+    })
     await createAportesMutation.mutateAsync(data)
   }
 
@@ -1683,8 +1692,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   <DollarSign className="w-4 h-4 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-foreground">Información del Aporte</h3>
-                  <p className="text-xs text-muted-foreground">Datos específicos del registro de aporte</p>
+                  <h3 className="text-sm font-medium text-foreground">Información del Aporte/Retiro</h3>
+                  <p className="text-xs text-muted-foreground">Datos específicos del registro de aporte/retiro</p>
                 </div>
               </div>
             </div>
