@@ -458,14 +458,19 @@ export function Header({
                   else if (currentSidebarContext === 'admin') navigate('/admin/dashboard');
                 }}
               >
-                {currentSidebarContext === 'organization' ? 'Organización' : ''}
-                {currentSidebarContext === 'project' ? 'Proyecto' : ''}
-                {currentSidebarContext === 'design' ? 'Diseño' : ''}
-                {currentSidebarContext === 'construction' ? 'Obra' : ''}
-                {currentSidebarContext === 'finances' ? 'Finanzas' : ''}
-                {currentSidebarContext === 'commercialization' ? 'Comercialización' : ''}
-                {currentSidebarContext === 'postsale' ? 'Post-Venta' : ''}
-                {currentSidebarContext === 'admin' ? 'Administración' : ''}
+{(() => {
+                  switch (currentSidebarContext) {
+                    case 'organization': return 'Organización';
+                    case 'project': return 'Proyecto';
+                    case 'design': return 'Diseño';
+                    case 'construction': return 'Obra';
+                    case 'finances': return 'Finanzas';
+                    case 'commercialization': return 'Comercialización';
+                    case 'postsale': return 'Post-Venta';
+                    case 'admin': return 'Administración';
+                    default: return 'Sección';
+                  }
+                })()}
               </Button>
               
               <DropdownMenu>
