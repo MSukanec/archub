@@ -82,7 +82,35 @@ const aportesFormSchema = z.object({
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
   // Campos para aportes
-  contact_id: z.string().min(1, 'Selección es requerida'),
+  contact_id: z.string().min(1, 'Cliente es requerido'),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional()
+})
+
+const aportesPropriosFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
+  category_id: z.string().min(1, 'Categoría es requerida'),
+  // Campos para aportes propios
+  member_id: z.string().min(1, 'Socio es requerido'),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional()
+})
+
+const retirosPropriosFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
+  category_id: z.string().min(1, 'Categoría es requerida'),
+  // Campos para retiros propios
+  member_id: z.string().min(1, 'Socio es requerido'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -93,6 +121,8 @@ type MovementForm = z.infer<typeof movementFormSchema>
 type ConversionForm = z.infer<typeof conversionFormSchema>
 type TransferForm = z.infer<typeof transferFormSchema>
 type AportesForm = z.infer<typeof aportesFormSchema>
+type AportesPropriosForm = z.infer<typeof aportesPropriosFormSchema>
+type RetirosPropriosForm = z.infer<typeof retirosPropriosFormSchema>
 
 interface MovementFormModalProps {
   modalData?: {
@@ -184,6 +214,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [isConversion, setIsConversion] = React.useState(false)
   const [isTransfer, setIsTransfer] = React.useState(false)
   const [isAportes, setIsAportes] = React.useState(false)
+  const [isAportesPropios, setIsAportesPropios] = React.useState(false)
+  const [isRetirosPropios, setIsRetirosPropios] = React.useState(false)
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
@@ -275,6 +307,38 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   })
 
+  const aportesPropriosForm = useForm<AportesPropriosForm>({
+    resolver: zodResolver(aportesPropriosFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: userData?.id || '',
+      description: '',
+      type_id: '',
+      category_id: '',
+      member_id: '',
+      currency_id: userData?.organization?.default_currency_id || '',
+      wallet_id: userData?.organization?.default_wallet_id || '',
+      amount: 0,
+      exchange_rate: undefined
+    }
+  })
+
+  const retirosPropriosForm = useForm<RetirosPropriosForm>({
+    resolver: zodResolver(retirosPropriosFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: userData?.id || '',
+      description: '',
+      type_id: '',
+      category_id: '',
+      member_id: '',
+      currency_id: userData?.organization?.default_currency_id || '',
+      wallet_id: userData?.organization?.default_wallet_id || '',
+      amount: 0,
+      exchange_rate: undefined
+    }
+  })
+
   // Manejar envío con ENTER
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -330,62 +394,84 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     return () => subscription.unsubscribe()
   }, [form, handleTypeChange])
 
-  // Efecto adicional para detectar aportes cuando se selecciona una categoría (desde cualquier formulario)
+  // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
   React.useEffect(() => {
-    const categoryId = form.watch('category_id') || aportesForm.watch('category_id')
+    const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id')
     if (categoryId && categories) {
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
       const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
-      const isAportesCategory = viewMode === "aportes"
       
-      if (isAportesCategory) {
-        console.log('Category with aportes detected:', { categoryId, selectedCategory })
-        setIsAportes(true)
+      console.log('Category with aportes detected:', { categoryId, selectedCategory })
+      
+      // Detectar el tipo específico de aportes
+      const isAportesCategory = viewMode === "aportes"
+      const isAportesPropiosCategory = viewMode === "aportes_propios"
+      const isRetirosPropiosCategory = viewMode === "retiros_propios"
+      
+      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory) {
+        // Reset todos los estados
+        setIsAportes(false)
+        setIsAportesPropios(false)
+        setIsRetirosPropios(false)
         setIsConversion(false)
         setIsTransfer(false)
         
+        // Establecer el estado correcto
+        if (isAportesCategory) {
+          setIsAportes(true)
+        } else if (isAportesPropiosCategory) {
+          setIsAportesPropios(true)
+        } else if (isRetirosPropiosCategory) {
+          setIsRetirosPropios(true)
+        }
+        
         // Solo sincronizar valores en modo nuevo movimiento
         if (!editingMovement) {
-          // Sincronizar category_id y type_id en el formulario de aportes
-          aportesForm.setValue('type_id', form.watch('type_id'))
-          aportesForm.setValue('category_id', categoryId)
-          
-          // Limpiar descripción para evitar UUID
-          aportesForm.setValue('description', '')
-          
-          // Establecer valores por defecto (moneda y billetera)
           const currentMember = members?.find(m => m.user_id === userData?.id)?.id
           const defaultCurrency = userData?.organization?.default_currency_id
           const defaultWallet = userData?.organization?.default_wallet_id
           
-          console.log('Setting defaults:', { currentMember, defaultCurrency, defaultWallet })
+          console.log('Setting defaults:', { viewMode, currentMember, defaultCurrency, defaultWallet })
           
-          if (currentMember) {
-            aportesForm.setValue('created_by', currentMember)
-          }
-          if (defaultCurrency) {
-            aportesForm.setValue('currency_id', defaultCurrency)
-          }
-          if (defaultWallet) {
-            aportesForm.setValue('wallet_id', defaultWallet)
-          }
-          
-          // Para "Aportes Propios", preseleccionar el usuario actual
-          if (selectedCategory?.name === 'Aportes Propios' && currentMember) {
-            aportesForm.setValue('contact_id', currentMember)
-          } else if (selectedCategory?.name === 'Aportes de Terceros') {
-            // Para "Aportes de Terceros", limpiar la selección
-            aportesForm.setValue('contact_id', '')
+          if (isAportesCategory) {
+            // APORTES: Cliente + Cotización
+            aportesForm.setValue('type_id', form.watch('type_id'))
+            aportesForm.setValue('category_id', categoryId)
+            aportesForm.setValue('description', '')
+            if (currentMember) aportesForm.setValue('created_by', currentMember)
+            if (defaultCurrency) aportesForm.setValue('currency_id', defaultCurrency)
+            if (defaultWallet) aportesForm.setValue('wallet_id', defaultWallet)
+            aportesForm.setValue('contact_id', '') // Limpiar cliente
+          } else if (isAportesPropiosCategory) {
+            // APORTES PROPIOS: Socio + Cotización
+            aportesPropriosForm.setValue('type_id', form.watch('type_id'))
+            aportesPropriosForm.setValue('category_id', categoryId)
+            aportesPropriosForm.setValue('description', '')
+            if (currentMember) aportesPropriosForm.setValue('created_by', currentMember)
+            if (defaultCurrency) aportesPropriosForm.setValue('currency_id', defaultCurrency)
+            if (defaultWallet) aportesPropriosForm.setValue('wallet_id', defaultWallet)
+            aportesPropriosForm.setValue('member_id', '') // Limpiar socio
+          } else if (isRetirosPropiosCategory) {
+            // RETIROS PROPIOS: Socio + Cotización
+            retirosPropriosForm.setValue('type_id', form.watch('type_id'))
+            retirosPropriosForm.setValue('category_id', categoryId)
+            retirosPropriosForm.setValue('description', '')
+            if (currentMember) retirosPropriosForm.setValue('created_by', currentMember)
+            if (defaultCurrency) retirosPropriosForm.setValue('currency_id', defaultCurrency)
+            if (defaultWallet) retirosPropriosForm.setValue('wallet_id', defaultWallet)
+            retirosPropriosForm.setValue('member_id', '') // Limpiar socio
           }
         }
       } else {
         // Si no es una categoría de aportes, permitir regresar al formulario normal
-        if (isAportes) {
+        if (isAportes || isAportesPropios || isRetirosPropios) {
           setIsAportes(false)
+          setIsAportesPropios(false)
+          setIsRetirosPropios(false)
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), categories, members, userData, isAportes])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios])
 
 
 
@@ -940,6 +1026,100 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     await createTransferMutation.mutateAsync(data)
   }
 
+  const createAportesPropriosMutation = useMutation({
+    mutationFn: async (data: AportesPropriosForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      const movementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences?.last_project_id || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Aporte Propio',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id,
+        type_id: data.type_id,
+        category_id: data.category_id,
+        member_id: data.member_id, // Campo específico para socio
+        exchange_rate: data.exchange_rate || null
+      }
+
+      const { data: result, error } = await supabase
+        .from('movements')
+        .insert([movementData])
+        .select()
+        .single()
+
+      if (error) throw error
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      toast({
+        title: 'Aporte Propio registrado',
+        description: 'El aporte propio ha sido registrado correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al registrar el aporte propio: ${error.message}`,
+      })
+    }
+  })
+
+  const createRetirosPropriosMutation = useMutation({
+    mutationFn: async (data: RetirosPropriosForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      const movementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences?.last_project_id || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Retiro Propio',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id,
+        type_id: data.type_id,
+        category_id: data.category_id,
+        member_id: data.member_id, // Campo específico para socio
+        exchange_rate: data.exchange_rate || null
+      }
+
+      const { data: result, error } = await supabase
+        .from('movements')
+        .insert([movementData])
+        .select()
+        .single()
+
+      if (error) throw error
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      toast({
+        title: 'Retiro Propio registrado',
+        description: 'El retiro propio ha sido registrado correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al registrar el retiro propio: ${error.message}`,
+      })
+    }
+  })
+
   const onSubmitAportes = async (data: AportesForm) => {
     console.log('Saving aportes data:', {
       wallet_id: data.wallet_id,
@@ -950,6 +1130,30 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       currency_id: data.currency_id
     })
     await createAportesMutation.mutateAsync(data)
+  }
+
+  const onSubmitAportesPropios = async (data: AportesPropriosForm) => {
+    console.log('Saving aportes propios data:', {
+      wallet_id: data.wallet_id,
+      member_id: data.member_id,
+      category_id: data.category_id,
+      type_id: data.type_id,
+      amount: data.amount,
+      currency_id: data.currency_id
+    })
+    await createAportesPropriosMutation.mutateAsync(data)
+  }
+
+  const onSubmitRetirosPropios = async (data: RetirosPropriosForm) => {
+    console.log('Saving retiros propios data:', {
+      wallet_id: data.wallet_id,
+      member_id: data.member_id,
+      category_id: data.category_id,
+      type_id: data.type_id,
+      amount: data.amount,
+      currency_id: data.currency_id
+    })
+    await createRetirosPropriosMutation.mutateAsync(data)
   }
 
   const handleClose = () => {
@@ -1035,6 +1239,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isEditingConversion = editingMovement && !!editingMovement.conversion_group_id
   const isEditingTransfer = editingMovement && !!editingMovement.transfer_group_id
   const isEditingAportes = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes"
+  const isEditingAportesPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes_propios"
+  const isEditingRetirosPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "retiros_propios"
 
   const editPanel = (
     <div className="space-y-4">
@@ -1848,6 +2054,520 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </div>
           </form>
         </Form>
+      ) : (isAportesPropios || isEditingAportesPropios) ? (
+        // FORMULARIO DE APORTES PROPIOS
+        <Form {...aportesPropriosForm}>
+          <form onSubmit={aportesPropriosForm.handleSubmit(onSubmitAportesPropios)} className="space-y-4">
+            {/* Fila 1: Creador | Fecha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={aportesPropriosForm.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Creador *</FormLabel>
+                    <FormControl>
+                      <UserSelector
+                        users={members || []}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Seleccionar creador"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={aportesPropriosForm.control}
+                name="movement_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const localDate = new Date(e.target.value + 'T00:00:00');
+                          field.onChange(localDate);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Fila 2: Tipo (full width) */}
+            <FormField
+              control={aportesPropriosForm.control}
+              name="type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept) => (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{concept.name}</span>
+                            {concept.is_system && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                                Sistema
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fila 3: Categoría (full width) */}
+            <FormField
+              control={aportesPropriosForm.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar categoría..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categoriesWithChildren.map((category: any) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fila 4: Descripción (full width) */}
+            <FormField
+              control={aportesPropriosForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Describir el aporte propio..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Separador y título de sección de aportes propios */}
+            <div className="col-span-2">
+              <Separator className="mb-4" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Información del Aporte Propio</h3>
+                  <p className="text-xs text-muted-foreground">Datos específicos del aporte de socio</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Socio */}
+            <FormField
+              control={aportesPropriosForm.control}
+              name="member_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Socio *</FormLabel>
+                  <FormControl>
+                    <UserSelector
+                      users={members || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Seleccionar socio"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fila: Moneda | Billetera */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={aportesPropriosForm.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moneda *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies?.map((currency) => (
+                          <SelectItem key={currency.currency_id} value={currency.currency_id}>
+                            {currency.currency?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={aportesPropriosForm.control}
+                name="wallet_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Billetera *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {wallets?.map((wallet) => (
+                          <SelectItem key={wallet.id} value={wallet.id}>
+                            {wallet.wallets?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Fila: Cantidad | Cotización */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={aportesPropriosForm.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={aportesPropriosForm.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cotización (opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        placeholder="Ej: 1.0000"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </form>
+        </Form>
+      ) : (isRetirosPropios || isEditingRetirosPropios) ? (
+        // FORMULARIO DE RETIROS PROPIOS
+        <Form {...retirosPropriosForm}>
+          <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
+            {/* Fila 1: Creador | Fecha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={retirosPropriosForm.control}
+                name="created_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Creador *</FormLabel>
+                    <FormControl>
+                      <UserSelector
+                        users={members || []}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Seleccionar creador"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={retirosPropriosForm.control}
+                name="movement_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const localDate = new Date(e.target.value + 'T00:00:00');
+                          field.onChange(localDate);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Fila 2: Tipo (full width) */}
+            <FormField
+              control={retirosPropriosForm.control}
+              name="type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept) => (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{concept.name}</span>
+                            {concept.is_system && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                                Sistema
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fila 3: Categoría (full width) */}
+            <FormField
+              control={retirosPropriosForm.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar categoría..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categoriesWithChildren.map((category: any) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fila 4: Descripción (full width) */}
+            <FormField
+              control={retirosPropriosForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Describir el retiro propio..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Separador y título de sección de retiros propios */}
+            <div className="col-span-2">
+              <Separator className="mb-4" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Información del Retiro Propio</h3>
+                  <p className="text-xs text-muted-foreground">Datos específicos del retiro de socio</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Socio */}
+            <FormField
+              control={retirosPropriosForm.control}
+              name="member_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Socio *</FormLabel>
+                  <FormControl>
+                    <UserSelector
+                      users={members || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Seleccionar socio"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Fila: Moneda | Billetera */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={retirosPropriosForm.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moneda *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies?.map((currency) => (
+                          <SelectItem key={currency.currency_id} value={currency.currency_id}>
+                            {currency.currency?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={retirosPropriosForm.control}
+                name="wallet_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Billetera *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {wallets?.map((wallet) => (
+                          <SelectItem key={wallet.id} value={wallet.id}>
+                            {wallet.wallets?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Fila: Cantidad | Cotización */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={retirosPropriosForm.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={retirosPropriosForm.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cotización (opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        placeholder="Ej: 1.0000"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </form>
+        </Form>
       ) : (
         // FORMULARIO NORMAL
         <Form {...form}>
@@ -2175,6 +2895,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           isConversion ? "Crear Conversión" : 
           isTransfer ? "Crear Transferencia" : 
           isAportes ? "Registrar Aporte" :
+          isAportesPropios ? "Registrar Aporte Propio" :
+          isRetirosPropios ? "Registrar Retiro Propio" :
           "Guardar"
         )
       }
@@ -2188,12 +2910,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             transferForm.handleSubmit(onSubmitTransfer)()
           } else if (isAportes) {
             aportesForm.handleSubmit(onSubmitAportes)()
+          } else if (isAportesPropios) {
+            aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
+          } else if (isRetirosPropios) {
+            retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
           } else {
             form.handleSubmit(onSubmit)()
           }
         }
       }}
-      rightLoading={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending}
+      rightLoading={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending}
     />
   )
 
