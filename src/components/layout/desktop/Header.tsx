@@ -333,7 +333,6 @@ export function Header({
                       className="flex items-center justify-between text-sm"
                     >
                       <div className="flex items-center gap-2">
-                        <Folder className="h-4 w-4" />
                         <span className="truncate">{project.name}</span>
                       </div>
                       {localSelectedProject === project.id && (
@@ -459,14 +458,14 @@ export function Header({
                   else if (currentSidebarContext === 'admin') navigate('/admin/dashboard');
                 }}
               >
-                {currentSidebarContext === 'organization' && 'Organización'}
-                {currentSidebarContext === 'project' && 'Proyecto'}
-                {currentSidebarContext === 'design' && 'Diseño'}
-                {currentSidebarContext === 'construction' && 'Obra'}
-                {currentSidebarContext === 'finances' && 'Finanzas'}
-                {currentSidebarContext === 'commercialization' && 'Comercialización'}
-                {currentSidebarContext === 'postsale' && 'Post-Venta'}
-                {currentSidebarContext === 'admin' && 'Administración'}
+                {currentSidebarContext === 'organization' ? 'Organización' : ''}
+                {currentSidebarContext === 'project' ? 'Proyecto' : ''}
+                {currentSidebarContext === 'design' ? 'Diseño' : ''}
+                {currentSidebarContext === 'construction' ? 'Obra' : ''}
+                {currentSidebarContext === 'finances' ? 'Finanzas' : ''}
+                {currentSidebarContext === 'commercialization' ? 'Comercialización' : ''}
+                {currentSidebarContext === 'postsale' ? 'Post-Venta' : ''}
+                {currentSidebarContext === 'admin' ? 'Administración' : ''}
               </Button>
               
               <DropdownMenu>
@@ -546,17 +545,7 @@ export function Header({
                       Post-Venta
                     </CustomRestricted>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSidebarContext('admin');
-                      navigate('/admin/dashboard');
-                    }}
-                  >
-                    <CustomRestricted functionName="Administración">
-                      Administración
-                    </CustomRestricted>
-                  </DropdownMenuItem>
+
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
