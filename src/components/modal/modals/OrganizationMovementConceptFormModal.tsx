@@ -63,7 +63,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     },
   });
 
-  // Always show edit panel
+  // Always show edit panel since this modal doesn't have view
   React.useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
@@ -171,43 +171,29 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       return;
     }
 
+    // Add parent_id automatically from parentConcept
+    const formData = {
+      ...data,
+      parent_id: parentConcept?.id || editingConcept?.parent_id || null
+    };
+
     if (editingConcept) {
-      updateMutation.mutate(data);
+      updateMutation.mutate(formData);
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(formData);
     }
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
   const isSystemConcept = editingConcept?.is_system;
 
-  const viewPanel = editingConcept ? (
-    <>
-      <div>
-        <h4 className="font-medium">Nombre</h4>
-        <p className="text-muted-foreground mt-1">{editingConcept.name}</p>
-      </div>
-      
-      {editingConcept.description && (
-        <div>
-          <h4 className="font-medium">Descripción</h4>
-          <p className="text-muted-foreground mt-1">{editingConcept.description}</p>
-        </div>
-      )}
-      
-      <div>
-        <h4 className="font-medium">Tipo</h4>
-        <p className="text-muted-foreground mt-1">
-          {editingConcept.is_system ? 'Concepto del Sistema' : 'Concepto de la Organización'}
-        </p>
-      </div>
-    </>
-  ) : null;
+  // No view panel needed for this modal
+  const viewPanel = null;
 
   const editPanel = (
     <>
       {isSystemConcept && (
-        <div className="lg:col-span-2">
+        <div>
           <Alert className="border-red-200 bg-red-50">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -219,6 +205,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
+          {/* Nombre del Concepto */}
           <FormField
             control={form.control}
             name="name"
@@ -237,6 +224,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
             )}
           />
 
+          {/* Descripción */}
           <FormField
             control={form.control}
             name="description"
@@ -255,38 +243,9 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="parent_id"
-            render={({ field }) => (
-              <FormItem className="lg:col-span-2">
-                <FormLabel>Concepto Padre</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value}
-                  disabled={isSystemConcept || !!parentConcept}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar concepto padre (opcional)" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">Sin concepto padre</SelectItem>
-                    {availableParentConcepts.map((concept) => (
-                      <SelectItem key={concept.id} value={concept.id}>
-                        {concept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+          {/* Info about parent concept */}
           {parentConcept && (
-            <div className="lg:col-span-2">
+            <div>
               <Alert>
                 <Package2 className="h-4 w-4" />
                 <AlertDescription>
@@ -306,17 +265,6 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
         ? `${isSystemConcept ? 'Ver' : 'Editar'} Concepto` 
         : 'Nuevo Concepto'}
       icon={Tag}
-      leftActions={
-        currentPanel === 'edit' && editingConcept ? (
-          <button
-            type="button"
-            onClick={() => setPanel('view')}
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Volver
-          </button>
-        ) : undefined
-      }
     />
   );
 
@@ -324,21 +272,15 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={closeModal}
-      rightLabel={isSystemConcept ? null : (isPending ? 'Guardando...' : (editingConcept ? 'Actualizar' : 'Crear'))}
-      onRightClick={() => {
-        if (currentPanel === 'view' && editingConcept) {
-          setPanel('edit');
-        } else if (!isSystemConcept) {
-          form.handleSubmit(onSubmit)();
-        }
-      }}
+      rightLabel={isSystemConcept ? undefined : (editingConcept ? "Actualizar Concepto" : "Crear Concepto")}
+      onRightClick={isSystemConcept ? undefined : form.handleSubmit(onSubmit)}
       rightLoading={isPending}
     />
   );
 
   return (
     <FormModalLayout
-      columns={2}
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
