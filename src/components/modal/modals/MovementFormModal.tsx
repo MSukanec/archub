@@ -1903,8 +1903,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   <DollarSign className="w-4 h-4 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-foreground">Información del Aporte/Retiro</h3>
-                  <p className="text-xs text-muted-foreground">Datos específicos del registro de aporte/retiro</p>
+                  <h3 className="text-sm font-medium text-foreground">Información del Aporte de Terceros</h3>
+                  <p className="text-xs text-muted-foreground">Datos específicos del aporte de cliente</p>
                 </div>
               </div>
             </div>
@@ -2166,11 +2166,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
+                  <FormLabel>Descripción (opcional)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Describir el aporte propio..."
+                    <Textarea
+                      placeholder="Descripción del movimiento..."
+                      rows={3}
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -2423,11 +2425,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
+                  <FormLabel>Descripción (opcional)</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Describir el retiro propio..."
+                    <Textarea
+                      placeholder="Descripción del movimiento..."
+                      rows={3}
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
