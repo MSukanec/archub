@@ -53,6 +53,16 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   // Query for parent concepts
   const { data: concepts = [] } = useMovementConceptsAdmin();
 
+  const form = useForm<ConceptFormData>({
+    resolver: zodResolver(conceptSchema),
+    defaultValues: {
+      name: editingConcept?.name || '',
+      description: editingConcept?.description || '',
+      parent_id: editingConcept?.parent_id || parentConcept?.id || '',
+      is_system: editingConcept?.is_system || parentConcept?.is_system || true,
+    },
+  });
+
   // Always show edit panel for both creating and editing
   React.useEffect(() => {
     setPanel('edit');
@@ -69,16 +79,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       });
     }
   }, [editingConcept, form]);
-
-  const form = useForm<ConceptFormData>({
-    resolver: zodResolver(conceptSchema),
-    defaultValues: {
-      name: editingConcept?.name || '',
-      description: editingConcept?.description || '',
-      parent_id: editingConcept?.parent_id || parentConcept?.id || '',
-      is_system: editingConcept?.is_system || parentConcept?.is_system || true,
-    },
-  });
 
   const createConceptMutation = useMutation({
     mutationFn: async (conceptData: ConceptFormData) => {

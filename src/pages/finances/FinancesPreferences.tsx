@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Coins } from 'lucide-react';
+import { Coins, Package2, Plus, Settings, CheckCircle, XCircle, Filter, Search } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MultiComboBox } from '@/components/ui-custom/MultiComboBox';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { DraggableConceptTree, MovementConceptNode } from '@/components/ui-custom/DraggableConceptTree';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -17,6 +21,8 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
+import { useMovementConceptsAdmin, useDeleteMovementConcept, useMoveConceptToParent, MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function FinancesPreferences() {
   const { data: userData } = useCurrentUser();
@@ -32,6 +38,19 @@ export default function FinancesPreferences() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
+
+  // Movement concepts states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedConcepts, setExpandedConcepts] = useState<Set<string>>(new Set());
+  const [systemFilter, setSystemFilter] = useState<'all' | 'system' | 'user'>('all');
+
+  // Global modal store
+  const { openModal } = useGlobalModalStore();
+
+  // Movement concepts hooks
+  const { data: concepts = [], isLoading: conceptsLoading } = useMovementConceptsAdmin();
+  const deleteConceptMutation = useDeleteMovementConcept();
+  const moveConceptMutation = useMoveConceptToParent();
 
   // Set sidebar context on component mount
   useEffect(() => {
@@ -254,6 +273,73 @@ export default function FinancesPreferences() {
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
+  // Movement concepts functions
+  const calculateStats = (concepts: MovementConceptAdmin[]) => {
+    let totalConcepts = 0;
+    let systemConcepts = 0;
+    let userConcepts = 0;
+
+    const countRecursive = (concepts: MovementConceptAdmin[]) => {
+      concepts.forEach(concept => {
+        totalConcepts++;
+        
+        if (concept.is_system) {
+          systemConcepts++;
+        } else {
+          userConcepts++;
+        }
+        
+        if (concept.children && concept.children.length > 0) {
+          countRecursive(concept.children);
+        }
+      });
+    };
+
+    countRecursive(concepts);
+    return { 
+      totalConcepts, 
+      systemConcepts, 
+      userConcepts 
+    };
+  };
+
+  const stats = calculateStats(concepts);
+
+  const handleOpenCreateModal = () => {
+    openModal('movement-concept');
+  };
+
+  const handleOpenEditModal = (concept: MovementConceptAdmin) => {
+    openModal('movement-concept', { editingConcept: concept });
+  };
+
+  const handleCreateChildConcept = (parentConcept: MovementConceptNode) => {
+    openModal('movement-concept', { 
+      parentConcept: {
+        id: parentConcept.id,
+        name: parentConcept.name,
+        parent_id: parentConcept.parent_id,
+        is_system: parentConcept.is_system
+      }
+    });
+  };
+
+  const handleDeleteConcept = async (conceptId: string) => {
+    try {
+      await deleteConceptMutation.mutateAsync(conceptId);
+    } catch (error) {
+      console.error('Error deleting concept:', error);
+    }
+  };
+
+  const handleMoveToParent = async (conceptId: string, newParentId: string | null) => {
+    try {
+      await moveConceptMutation.mutateAsync({ conceptId, newParentId });
+    } catch (error) {
+      console.error('Error moving concept:', error);
+    }
+  };
+
   return (
     <Layout headerProps={{ title: "Preferencias" }}>
       <div className="max-w-4xl mx-auto space-y-8">
@@ -368,6 +454,126 @@ export default function FinancesPreferences() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Section Divider */}
+        <div className="border-t border-[var(--section-divider)] my-8" />
+
+        {/* Conceptos de Finanzas Section */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Package2 className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Conceptos de Finanzas</h2>
+              <HelpPopover 
+                title="Conceptos de Finanzas"
+                description="Administra los conceptos disponibles para categorizar tus movimientos financieros. Los conceptos del sistema son predeterminados, mientras que puedes crear conceptos personalizados para tu organización."
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Gestiona los conceptos disponibles para categorizar movimientos financieros
+            </p>
+          </div>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Package2 className="h-4 w-4" />
+                  Total de Conceptos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalConcepts}</div>
+                <p className="text-xs text-muted-foreground">
+                  Conceptos disponibles
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Sistema
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.systemConcepts}</div>
+                <p className="text-xs text-muted-foreground">
+                  Conceptos predeterminados
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Personalizados
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.userConcepts}</div>
+                <p className="text-xs text-muted-foreground">
+                  Conceptos de la organización
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Action Button */}
+          <div className="flex justify-between items-center">
+            <Button 
+              onClick={handleOpenCreateModal}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Crear Concepto
+            </Button>
+          </div>
+
+          {/* Concepts Tree */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Conceptos de Movimientos</CardTitle>
+              <CardDescription>
+                Estructura jerárquica de conceptos disponibles para categorizar movimientos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {conceptsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
+                </div>
+              ) : concepts.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
+                </div>
+              ) : (
+                <DraggableConceptTree
+                  concepts={concepts}
+                  expandedConcepts={expandedConcepts}
+                  onToggleExpand={(conceptId: string) => {
+                    setExpandedConcepts(prev => {
+                      const newSet = new Set(prev);
+                      if (newSet.has(conceptId)) {
+                        newSet.delete(conceptId);
+                      } else {
+                        newSet.add(conceptId);
+                      }
+                      return newSet;
+                    });
+                  }}
+                  onEdit={handleOpenEditModal}
+                  onDelete={handleDeleteConcept}
+                  onCreateChild={handleCreateChildConcept}
+                  onMove={handleMoveToParent}
+                />
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </Layout>
