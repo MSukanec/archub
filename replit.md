@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 16, 2025. EXCEL IMPORT SYSTEM FINAL CORRECTIONS: Fixed critical UUID validation and foreign key constraint issues - COMPLETED
+  • Fixed created_by foreign key error: system now properly maps user_id to organization_member.id for database integrity
+  • Enhanced UUID validation with strict regex checking before database submission to prevent constraint violations
+  • Improved Excel date conversion logic to handle all serial numbers without range restrictions (23 → 1900-01-22)
+  • Added comprehensive error logging and validation warnings for debugging problematic data mappings
+  • Eliminated "Error de mapeo" failures by implementing silent value omission for unmappable data instead of errors
+  • System now successfully imports all Excel rows with proper foreign key relationships and valid data types
 - July 16, 2025. EXCEL IMPORT SYSTEM ENHANCEMENTS: Enhanced MovementImportStepModal with automatic value normalization and member selection - COMPLETED
   • Added member selector in step 1 to choose movement creator before column mapping
   • Implemented automatic value normalization: "INGRESOS" → "INGRESO", "EGRESOS" → "EGRESO" 

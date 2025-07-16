@@ -578,6 +578,20 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const handleImport = async () => {
     if (!parsedData || !currentUser?.organization?.id) return
     
+    // Find the correct organization_member.id based on the selected creator user_id
+    const selectedMember = organizationMembers.find(member => member.user_id === selectedCreator)
+    if (!selectedMember) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo encontrar el miembro de la organización para el creador seleccionado."
+      })
+      return
+    }
+    
+    console.log('Selected creator user_id:', selectedCreator)
+    console.log('Found organization member:', selectedMember)
+    
     const selectedRowsArray = Array.from(selectedRows)
     const rowsToProcess = selectedRowsArray.length > 0 
       ? selectedRowsArray.map(index => parsedData.rows[index])
@@ -591,7 +605,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           movement_date: new Date().toISOString().split('T')[0],
           organization_id: currentUser.organization.id,
           project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
-          created_by: selectedCreator || currentUser.user?.id,
+          created_by: selectedMember.id, // Use organization_member.id instead of user.id
           is_favorite: false
         }
 
