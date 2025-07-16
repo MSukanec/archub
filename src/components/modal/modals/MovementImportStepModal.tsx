@@ -57,9 +57,9 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     currencies.forEach(orgCurrency => {
       const currency = orgCurrency.currency || orgCurrency;
       const normalized = normalizeText(currency.name);
-      valueMap.currency_id[normalized] = currency.id;
+      valueMap.currency_id[normalized] = orgCurrency.id; // Use organization_currency.id instead of currency.id
       if (currency.code) {
-        valueMap.currency_id[normalizeText(currency.code)] = currency.id;
+        valueMap.currency_id[normalizeText(currency.code)] = orgCurrency.id; // Use organization_currency.id instead of currency.id
       }
     });
   }
@@ -70,7 +70,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     wallets.forEach(orgWallet => {
       const wallet = orgWallet.wallets || orgWallet;
       const normalized = normalizeText(wallet.name);
-      valueMap.wallet_id[normalized] = wallet.id;
+      valueMap.wallet_id[normalized] = orgWallet.id; // Use organization_wallet.id instead of wallet.id
     });
   }
 
@@ -591,6 +591,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     
     console.log('Selected creator user_id:', selectedCreator)
     console.log('Found organization member:', selectedMember)
+    console.log('ValueMap created:', valueMap)
     
     const selectedRowsArray = Array.from(selectedRows)
     const rowsToProcess = selectedRowsArray.length > 0 
