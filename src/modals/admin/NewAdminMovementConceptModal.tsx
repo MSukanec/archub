@@ -36,9 +36,9 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 
 const movementConceptSchema = z.object({
   name: z.string().min(1, 'Nombre es requerido'),
+  description: z.string().optional(),
   parent_id: z.string().optional(),
   is_system: z.boolean().default(false),
-  view_mode: z.string().default('types'),
 });
 
 type MovementConceptForm = z.infer<typeof movementConceptSchema>;
@@ -67,9 +67,9 @@ export function NewAdminMovementConceptModal({
     resolver: zodResolver(movementConceptSchema),
     defaultValues: {
       name: editingConcept?.name || '',
+      description: editingConcept?.description || '',
       parent_id: editingConcept?.parent_id || '',
       is_system: editingConcept?.is_system || false,
-      view_mode: editingConcept?.view_mode || 'types',
     },
   });
 
@@ -78,16 +78,16 @@ export function NewAdminMovementConceptModal({
       if (editingConcept) {
         form.reset({
           name: editingConcept.name,
+          description: editingConcept.description || '',
           parent_id: editingConcept.parent_id || '',
           is_system: editingConcept.is_system,
-          view_mode: editingConcept.view_mode,
         });
       } else {
         form.reset({
           name: '',
+          description: '',
           parent_id: '',
           is_system: false,
-          view_mode: 'types',
         });
       }
     }
@@ -167,9 +167,23 @@ export function NewAdminMovementConceptModal({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre *</FormLabel>
+                  <FormLabel>Nombre del Concepto</FormLabel>
                   <FormControl>
                     <Input placeholder="Nombre del concepto" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Descripción del concepto (opcional)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -195,29 +209,6 @@ export function NewAdminMovementConceptModal({
                           {'—'.repeat(concept.level)} {concept.name}
                         </SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="view_mode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Modo de Vista</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar modo..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="types">Tipos</SelectItem>
-                      <SelectItem value="categories">Categorías</SelectItem>
-                      <SelectItem value="subcategories">Subcategorías</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

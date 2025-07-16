@@ -15,6 +15,7 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 export interface MovementConceptNode {
   id: string;
   name: string;
+  description?: string;
   parent_id: string | null;
   is_system: boolean;
   view_mode?: string;
@@ -69,23 +70,32 @@ function ConceptItem({
           </Button>
 
           {/* Concept Name and Info */}
-          <div className="flex items-center gap-2 flex-1">
-            <h4 className="font-medium text-foreground">{concept.name}</h4>
-            
-            {/* System/User Badge */}
-            <Badge variant={concept.is_system ? "default" : "secondary"} className="text-xs">
-              {concept.is_system ? (
-                <><Settings className="h-3 w-3 mr-1" />Sistema</>
-              ) : (
-                <><Users className="h-3 w-3 mr-1" />Usuario</>
-              )}
-            </Badge>
-
-            {/* Children count */}
-            {hasChildren && (
-              <Badge variant="outline" className="text-xs">
-                {concept.children!.length} hijos
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium text-foreground">{concept.name}</h4>
+              
+              {/* System/User Badge */}
+              <Badge variant={concept.is_system ? "default" : "secondary"} className="text-xs">
+                {concept.is_system ? (
+                  <><Settings className="h-3 w-3 mr-1" />Sistema</>
+                ) : (
+                  <><Users className="h-3 w-3 mr-1" />Usuario</>
+                )}
               </Badge>
+
+              {/* Children count */}
+              {hasChildren && (
+                <Badge variant="outline" className="text-xs">
+                  {concept.children!.length} hijos
+                </Badge>
+              )}
+            </div>
+            
+            {/* Description - small text below name */}
+            {concept.description && (
+              <p className="text-xs text-muted-foreground mt-1 leading-tight">
+                {concept.description}
+              </p>
             )}
           </div>
         </div>

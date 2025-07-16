@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 export interface MovementConceptAdmin {
   id: string;
   name: string;
+  description?: string;
   parent_id: string | null;
   organization_id: string;
   is_system: boolean;
@@ -17,6 +18,7 @@ export interface MovementConceptAdmin {
 
 export interface CreateMovementConceptData {
   name: string;
+  description?: string;
   parent_id?: string | null;
   organization_id: string;
   is_system?: boolean;
