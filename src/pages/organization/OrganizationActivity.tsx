@@ -284,11 +284,14 @@ export default function OrganizationActivity() {
           </div>
         ) : sortedActivities.length === 0 ? (
           <EmptyState
-            icon={Activity}
+            icon={<Activity className="h-12 w-12" />}
             title="No hay actividades registradas"
             description="Cuando se realicen acciones en la organización, aparecerán aquí."
-            actionLabel="Ver movimientos"
-            actionOnClick={() => navigate('/finances/movements')}
+            action={
+              <Button onClick={() => navigate('/finances/movements')}>
+                Ver movimientos
+              </Button>
+            }
           />
         ) : (
           <Table
