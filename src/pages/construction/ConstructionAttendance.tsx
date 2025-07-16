@@ -5,6 +5,8 @@ import { useState, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useNavigationStore } from '@/stores/navigationStore'
+import { useEffect } from 'react'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -162,6 +164,12 @@ export default function ConstructionAttendance() {
     userData?.organization?.id
   )
   const { data: contactTypes = [] } = useContactTypes()
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [])
 
   const { workers, attendance } = useMemo(() => {
     return transformAttendanceData(attendanceData, selectedContactType || undefined)

@@ -23,6 +23,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
 import { SiteLogTimelineChart } from "@/components/charts/SiteLogTimelineChart";
+import { useNavigationStore } from '@/stores/navigationStore';
 import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -184,6 +185,12 @@ export default function ConstructionLogs() {
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   );
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [])
   
   // Site log timeline data for timeline chart
   const { data: siteLogTimelineData = [], isLoading: timelineLoading } = useSiteLogTimeline(

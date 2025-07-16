@@ -5,6 +5,8 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
+import { useNavigationStore } from '@/stores/navigationStore'
+import { useEffect } from 'react'
 import { Package, Search, Calculator, Boxes, BarChart3, Layers } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -17,6 +19,12 @@ export default function ConstructionMaterials() {
   const { data: materials = [], isLoading: materialsLoading } = useConstructionMaterials(
     userData?.preferences?.last_project_id || ''
   )
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [])
 
   // Filter and sort materials
   const filteredMaterials = materials

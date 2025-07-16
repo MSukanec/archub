@@ -2,8 +2,17 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building, FileText, Users, Package, Calculator, Clock } from 'lucide-react'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { useNavigationStore } from '@/stores/navigationStore'
+import { useEffect } from 'react'
 
 export default function ConstructionDashboard() {
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [])
+
   const headerProps = {
     title: "Resumen de Obra",
     showSearch: false,

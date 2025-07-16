@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
+import { useNavigationStore } from '@/stores/navigationStore'
 // Removed CustomTable import as we now use BudgetTable
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -168,6 +169,12 @@ export default function ConstructionBudgets() {
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [])
 
   // Quick task search hook con filtros
   const { data: quickTasks = [], isLoading: quickTasksLoading } = useTaskSearch(

@@ -439,11 +439,107 @@ export function Header({
             </>
           )}
 
-          {/* Main Sidebar Section - Show for context pages (organization, admin, etc.) */}
+          {/* Main Sidebar Section - Show for context pages (organization, admin, etc.) with dropdown */}
           {mainSidebarSection && !['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (
             <>
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
-              <span className="text-sm font-medium text-[var(--menues-fg)]">{mainSidebarSection}</span>
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
+                  onClick={() => {
+                    // Navigate to current section dashboard
+                    if (currentSidebarContext === 'organization') navigate('/organization/dashboard');
+                    else if (currentSidebarContext === 'admin') navigate('/admin/dashboard');
+                    else if (currentSidebarContext === 'data') navigate('/data/dashboard');
+                    else if (currentSidebarContext === 'postsale') navigate('/postsale/dashboard');
+                  }}
+                >
+                  {mainSidebarSection}
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-6 p-0 hover:bg-transparent"
+                    >
+                      <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64">
+                    <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                      Seleccionar etapa...
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('organization');
+                        navigate('/organization/dashboard');
+                      }}
+                    >
+                      Organización
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('design');
+                        navigate('/design/dashboard');
+                      }}
+                    >
+                      Diseño
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('construction');
+                        navigate('/construction/dashboard');
+                      }}
+                    >
+                      Obra
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('finances');
+                        navigate('/finances/dashboard');
+                      }}
+                    >
+                      Finanzas
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('commercialization');
+                        navigate('/commercialization/dashboard');
+                      }}
+                    >
+                      Comercialización
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('data');
+                        navigate('/data/dashboard');
+                      }}
+                    >
+                      Datos Básicos
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('admin');
+                        navigate('/admin/dashboard');
+                      }}
+                    >
+                      Administración
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSidebarContext('postsale');
+                        navigate('/postsale/dashboard');
+                      }}
+                    >
+                      Post-Venta
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </>
           )}
 
