@@ -386,7 +386,44 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       })
     }
     
+    if (mappedFields.length === 0) {
+      errors.push({
+        row: 0,
+        column: 'mapping',
+        message: 'Debes mapear al menos una columna'
+      })
+    }
+    
+    // Check if there are any unmapped values that need manual mapping
+    const hasUnmappedValues = Object.keys(columnMapping).some(columnIndex => {
+      const mappedField = columnMapping[columnIndex]
+      if (!mappedField || !parsedData?.rows) return false
+      
+      const sampleValue = parsedData.rows[0]?.[parseInt(columnIndex)]
+      if (!sampleValue) return false
+      
+      const validation = validateFieldValue(mappedField, sampleValue)
+      return !validation.isValid && validation.available && validation.available.length > 0
+    })
+    
+    if (hasUnmappedValues) {
+      errors.push({
+        row: 0,
+        column: 'mapping',
+        message: 'Hay valores que requieren mapeo manual. Revisa las secciones marcadas con "🔧 REVISAR MAPEO" y haz clic en los valores disponibles.'
+      })
+    }
+    
     setValidationErrors(errors)
+    
+    if (errors.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Error de validación",
+        description: `${errors.length} error(es) encontrado(s). Revisa el mapeo.`
+      })
+    }
+    
     return errors.length === 0
   }
 
@@ -859,15 +896,16 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       )}
                       
                       {!validation.isValid && validation.available && validation.available.length > 0 && (
-                        <div className="text-xs space-y-2">
-                          <p className="text-muted-foreground">Valores disponibles en Archub:</p>
-                          <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
+                        <div className="text-xs space-y-2 mt-2 p-3 bg-orange-50 border border-orange-200 rounded">
+                          <p className="text-orange-700 font-medium">🔧 REVISAR MAPEO: Valores disponibles en Archub</p>
+                          <p className="text-orange-600 text-xs">Haz clic en cualquier valor para mapear "{sampleValue}":</p>
+                          <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
                             {validation.available.map((value, idx) => (
                               <Button
                                 key={idx}
                                 variant="outline" 
                                 size="sm"
-                                className="h-7 text-xs justify-start"
+                                className="h-8 text-xs justify-start bg-white hover:bg-orange-100 border-orange-300"
                                 onClick={() => {
                                   const mappingKey = `${mappedField}_${sampleValue}`;
                                   
@@ -900,13 +938,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                                   }
                                 }}
                               >
-                                {value}
+                                ▶ {value}
                               </Button>
                             ))}
                           </div>
-                          {validation.available.length > 8 && (
-                            <p className="text-xs text-muted-foreground">
-                              Y {validation.available.length - 8} opciones más...
+                          {validation.available.length > 6 && (
+                            <p className="text-xs text-orange-600">
+                              Y {validation.available.length - 6} opciones más...
                             </p>
                           )}
                         </div>
