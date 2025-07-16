@@ -62,22 +62,16 @@ export default function OrganizationPreferences() {
 
   // Initialize form values from organization data
   useEffect(() => {
-    console.log('allCurrencies:', allCurrencies);
-    console.log('organizationCurrencies:', organizationCurrencies);
-    
     if (organizationCurrencies?.length) {
       const defaultCur = organizationCurrencies.find(c => c.is_default);
       const secondaryCurs = organizationCurrencies.filter(c => !c.is_default);
-      
-      console.log('defaultCur:', defaultCur);
-      console.log('secondaryCurs:', secondaryCurs);
       
       if (defaultCur) {
         setDefaultCurrency(defaultCur.currency_id);
       }
       setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
     }
-  }, [organizationCurrencies, allCurrencies]);
+  }, [organizationCurrencies]);
 
   useEffect(() => {
     if (organizationWallets?.length) {
@@ -364,14 +358,14 @@ export default function OrganizationPreferences() {
   return (
     <Layout 
       showSidebar 
-      wide={false}
+      wide={true}
       headerProps={{
         title: "Preferencias",
         showBackButton: false,
         description: "Configuración de preferencias de la organización"
       }}
     >
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="space-y-8">
         <FeatureIntroduction
           icon={<Coins className="h-5 w-5" />}
           title="Preferencias de la Organización"
@@ -489,9 +483,9 @@ export default function OrganizationPreferences() {
         <div className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Conceptos de Finanzas Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Description */}
-          <div className="lg:col-span-4 space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Package2 className="h-5 w-5 text-[var(--accent)]" />
@@ -508,58 +502,47 @@ export default function OrganizationPreferences() {
           </div>
 
           {/* Right Column - Concepts Tree */}
-          <div className="lg:col-span-8">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base">Conceptos de Movimientos</CardTitle>
-                    <CardDescription>
-                      Estructura jerárquica de conceptos disponibles para categorizar movimientos
-                    </CardDescription>
-                  </div>
-                  <Button 
-                    onClick={handleOpenCreateModal}
-                    className="gap-2"
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Crear Concepto
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {conceptsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
-                  </div>
-                ) : concepts.length === 0 ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
-                  </div>
-                ) : (
-                  <DraggableConceptTree
-                    concepts={concepts}
-                    expandedConcepts={expandedConcepts}
-                    onToggleExpanded={(conceptId: string) => {
-                      setExpandedConcepts(prev => {
-                        const newSet = new Set(prev);
-                        if (newSet.has(conceptId)) {
-                          newSet.delete(conceptId);
-                        } else {
-                          newSet.add(conceptId);
-                        }
-                        return newSet;
-                      });
-                    }}
-                    onEdit={handleOpenEditModal}
-                    onDelete={handleDeleteConcept}
-                    onCreateChild={handleCreateChildConcept}
-                    onMove={handleMoveToParent}
-                  />
-                )}
-              </CardContent>
-            </Card>
+          <div className="space-y-4">
+            <div className="flex items-center justify-end">
+              <Button 
+                onClick={handleOpenCreateModal}
+                className="gap-2"
+                size="sm"
+              >
+                <Plus className="h-4 w-4" />
+                Crear Concepto
+              </Button>
+            </div>
+            
+            {conceptsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
+              </div>
+            ) : concepts.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
+              </div>
+            ) : (
+              <DraggableConceptTree
+                concepts={concepts}
+                expandedConcepts={expandedConcepts}
+                onToggleExpanded={(conceptId: string) => {
+                  setExpandedConcepts(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(conceptId)) {
+                      newSet.delete(conceptId);
+                    } else {
+                      newSet.add(conceptId);
+                    }
+                    return newSet;
+                  });
+                }}
+                onEdit={handleOpenEditModal}
+                onDelete={handleDeleteConcept}
+                onCreateChild={handleCreateChildConcept}
+                onMove={handleMoveToParent}
+              />
+            )}
           </div>
         </div>
       </div>
