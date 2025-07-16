@@ -447,7 +447,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       console.log('Setting defaults:', {
         currentMember: currentMember?.id,
         defaultCurrency: defaultOrgCurrency?.currency?.id,
-        defaultWallet: defaultWallet?.wallet_id
+        defaultWallet: defaultWallet?.id
       })
 
       // Reset main form
@@ -461,7 +461,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         category_id: '',
         subcategory_id: '',
         currency_id: defaultOrgCurrency?.currency?.id || '',
-        wallet_id: defaultWallet?.wallet_id || '',
+        wallet_id: defaultWallet?.id || '',
       })
 
       // Reset conversion form with same defaults
@@ -473,8 +473,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         amount_to: 0,
         currency_id_from: defaultOrgCurrency?.currency?.id || '',
         currency_id_to: defaultOrgCurrency?.currency?.id || '',
-        wallet_id_from: defaultWallet?.wallet_id || '',
-        wallet_id_to: defaultWallet?.wallet_id || '',
+        wallet_id_from: defaultWallet?.id || '',
+        wallet_id_to: defaultWallet?.id || '',
         exchange_rate: undefined,
         type_id: '',
       })
@@ -486,8 +486,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         description: '',
         amount: 0,
         currency_id: defaultOrgCurrency?.currency?.id || '',
-        wallet_id_from: defaultWallet?.wallet_id || '',
-        wallet_id_to: defaultWallet?.wallet_id || '',
+        wallet_id_from: defaultWallet?.id || '',
+        wallet_id_to: defaultWallet?.id || '',
         type_id: '',
       })
 
@@ -498,7 +498,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         description: '',
         contact_id: '',
         currency_id: defaultOrgCurrency?.currency?.id || '',
-        wallet_id: defaultWallet?.wallet_id || '',
+        wallet_id: defaultWallet?.id || '',
         amount: 0,
         type_id: '',
       })
@@ -753,18 +753,22 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
 
   const onSubmit = async (data: MovementForm) => {
+    console.log('Saving wallet_id:', data.wallet_id)
     await createMovementMutation.mutateAsync(data)
   }
 
   const onSubmitConversion = async (data: ConversionForm) => {
+    console.log('Saving conversion wallet_id_from:', data.wallet_id_from, 'wallet_id_to:', data.wallet_id_to)
     await createConversionMutation.mutateAsync(data)
   }
 
   const onSubmitTransfer = async (data: TransferForm) => {
+    console.log('Saving transfer wallet_id_from:', data.wallet_id_from, 'wallet_id_to:', data.wallet_id_to)
     await createTransferMutation.mutateAsync(data)
   }
 
   const onSubmitAportes = async (data: AportesForm) => {
+    console.log('Saving aportes wallet_id:', data.wallet_id)
     await createAportesMutation.mutateAsync(data)
   }
 
@@ -777,7 +781,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Encontrar datos para display
   const selectedCurrency = currencies?.find(c => c.currency?.id === form.watch('currency_id'))?.currency
-  const selectedWallet = wallets?.find(w => w.wallet_id === form.watch('wallet_id'))?.wallets
+  const selectedWallet = wallets?.find(w => w.id === form.watch('wallet_id'))?.wallets
   const selectedCreator = members?.find(m => m.id === form.watch('created_by'))
   const selectedConcept = concepts?.find(c => c.id === form.watch('type_id'))
 
@@ -1011,7 +1015,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                         </FormControl>
                         <SelectContent>
                           {wallets?.map((wallet) => (
-                            <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                            <SelectItem key={wallet.id} value={wallet.id}>
                               {wallet.wallets?.name || 'Sin nombre'}
                             </SelectItem>
                           ))}
@@ -1096,7 +1100,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                         </FormControl>
                         <SelectContent>
                           {wallets?.map((wallet) => (
-                            <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                            <SelectItem key={wallet.id} value={wallet.id}>
                               {wallet.wallets?.name || 'Sin nombre'}
                             </SelectItem>
                           ))}
@@ -1307,7 +1311,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                           </FormControl>
                           <SelectContent>
                             {wallets?.map((wallet) => (
-                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                              <SelectItem key={wallet.id} value={wallet.id}>
                                 {wallet.wallets?.name || 'Sin nombre'}
                               </SelectItem>
                             ))}
@@ -1332,7 +1336,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                           </FormControl>
                           <SelectContent>
                             {wallets?.map((wallet) => (
-                              <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                              <SelectItem key={wallet.id} value={wallet.id}>
                                 {wallet.wallets?.name || 'Sin nombre'}
                               </SelectItem>
                             ))}
@@ -1602,7 +1606,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </FormControl>
                       <SelectContent>
                         {wallets?.map((wallet) => (
-                          <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                          <SelectItem key={wallet.id} value={wallet.id}>
                             {wallet.wallets?.name || 'Sin nombre'}
                           </SelectItem>
                         ))}
@@ -1870,7 +1874,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                     </FormControl>
                     <SelectContent>
                       {wallets?.map((wallet) => (
-                        <SelectItem key={wallet.id} value={wallet.wallet_id}>
+                        <SelectItem key={wallet.id} value={wallet.id}>
                           {wallet.wallets?.name || 'Sin nombre'}
                         </SelectItem>
                       ))}
