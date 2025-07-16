@@ -439,21 +439,128 @@ export function Header({
             </>
           )}
 
-          {/* Main Sidebar Section - Show for context pages (organization, admin, etc.) */}
-          {mainSidebarSection && !['design', 'construction', 'finances', 'commercialization'].includes(currentSidebarContext) && (
-            <>
-              <span className="text-[var(--menues-fg)] opacity-70">/</span>
-              <span className="text-sm font-medium text-[var(--menues-fg)]">{mainSidebarSection}</span>
-            </>
-          )}
-
-          {/* Accordion Parent - Show if page is under an accordion */}
-          {accordionParent && (
-            <>
-              <span className="text-[var(--menues-fg)] opacity-70">/</span>
-              <span className="text-sm font-medium text-[var(--menues-fg)]">{accordionParent}</span>
-            </>
-          )}
+          {/* Section Navigation - Always show between PROJECT and PAGE */}
+          <>
+            <span className="text-[var(--menues-fg)] opacity-70">/</span>
+            
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
+                onClick={() => {
+                  // Navigate to current section dashboard
+                  if (currentSidebarContext === 'organization') navigate('/organization/dashboard');
+                  else if (currentSidebarContext === 'project') navigate('/project/dashboard');
+                  else if (currentSidebarContext === 'design') navigate('/design/dashboard');
+                  else if (currentSidebarContext === 'construction') navigate('/construction/dashboard');
+                  else if (currentSidebarContext === 'finances') navigate('/finances/dashboard');
+                  else if (currentSidebarContext === 'commercialization') navigate('/commercialization/dashboard');
+                  else if (currentSidebarContext === 'postsale') navigate('/postsale/dashboard');
+                  else if (currentSidebarContext === 'admin') navigate('/admin/dashboard');
+                }}
+              >
+                {currentSidebarContext === 'organization' && 'Organización'}
+                {currentSidebarContext === 'project' && 'Proyecto'}
+                {currentSidebarContext === 'design' && 'Diseño'}
+                {currentSidebarContext === 'construction' && 'Obra'}
+                {currentSidebarContext === 'finances' && 'Finanzas'}
+                {currentSidebarContext === 'commercialization' && 'Comercialización'}
+                {currentSidebarContext === 'postsale' && 'Post-Venta'}
+                {currentSidebarContext === 'admin' && 'Administración'}
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-6 p-0 hover:bg-transparent"
+                  >
+                    <ChevronDown className="h-3 w-3 text-[var(--menues-fg)]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <div className="px-2 py-1.5 text-xs text-[var(--menues-fg)] opacity-70 font-medium">
+                    Seleccionar sección...
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('organization');
+                      navigate('/organization/dashboard');
+                    }}
+                  >
+                    Organización
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('project');
+                      navigate('/project/dashboard');
+                    }}
+                  >
+                    Proyecto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('design');
+                      navigate('/design/dashboard');
+                    }}
+                  >
+                    <CustomRestricted functionName="Diseño">
+                      Diseño
+                    </CustomRestricted>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('construction');
+                      navigate('/construction/dashboard');
+                    }}
+                  >
+                    Obra
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('finances');
+                      navigate('/finances/dashboard');
+                    }}
+                  >
+                    Finanzas
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('commercialization');
+                      navigate('/commercialization/dashboard');
+                    }}
+                  >
+                    <CustomRestricted functionName="Comercialización">
+                      Comercialización
+                    </CustomRestricted>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('postsale');
+                      navigate('/postsale/dashboard');
+                    }}
+                  >
+                    <CustomRestricted functionName="Post-Venta">
+                      Post-Venta
+                    </CustomRestricted>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSidebarContext('admin');
+                      navigate('/admin/dashboard');
+                    }}
+                  >
+                    <CustomRestricted functionName="Administración">
+                      Administración
+                    </CustomRestricted>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </>
 
           {/* Page Title - Show if title is provided */}
           {title && (
