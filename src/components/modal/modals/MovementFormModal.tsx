@@ -22,7 +22,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
-import { useMovementConcepts } from '@/hooks/use-movement-concepts'
+import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useContacts } from '@/hooks/use-contacts'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
@@ -112,17 +112,30 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const { data: contacts } = useContacts()
   const { data: projectClients } = useProjectClients(userData?.preferences?.last_project_id)
-  const { data: conceptsData } = useMovementConcepts('types')
+  const { data: organizationConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
   // Eliminar el tipo creado incorrectamente y configurar las categorías existentes
   React.useEffect(() => {
     const configureAportesCategories = async () => {
-      if (!conceptsData || !userData?.organization?.id) return
+      if (!organizationConcepts || !userData?.organization?.id) return
+      
+      // Aplanar la estructura jerárquica para buscar conceptos
+      const flattenConcepts = (concepts: any[]): any[] => {
+        return concepts.reduce((acc, concept) => {
+          acc.push(concept)
+          if (concept.children && concept.children.length > 0) {
+            acc.push(...flattenConcepts(concept.children))
+          }
+          return acc
+        }, [])
+      }
+      
+      const allConcepts = flattenConcepts(organizationConcepts)
       
       // Eliminar el tipo incorrecto que creé
-      const incorrectType = conceptsData.find(c => c.name === 'Aportes de Socios')
+      const incorrectType = allConcepts.find(c => c.name === 'Aportes de Socios')
       if (incorrectType) {
         console.log('Eliminando tipo incorrecto...')
         await supabase
@@ -149,16 +162,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         .eq('name', 'Aportes Propios')
       
       if (!updateTerceros && !updatePropios) {
-        queryClient.invalidateQueries({ queryKey: ['movement-concepts'] })
+        queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] })
         console.log('Categorías de aportes configuradas correctamente')
       }
     }
     
     configureAportesCategories()
-  }, [conceptsData, userData?.organization?.id])
+  }, [organizationConcepts, userData?.organization?.id])
 
-  // Mantener compatibilidad con la variable concepts
-  const concepts = conceptsData
+  // Aplanar la estructura jerárquica para obtener solo los tipos (conceptos padre)
+  const concepts = React.useMemo(() => {
+    if (!organizationConcepts) return []
+    return organizationConcepts.filter(concept => concept.parent_id === null)
+  }, [organizationConcepts])
 
   // Estados para la lógica jerárquica
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
@@ -169,9 +185,33 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [isTransfer, setIsTransfer] = React.useState(false)
   const [isAportes, setIsAportes] = React.useState(false)
 
-  // Hooks jerárquicos para categorías y subcategorías
-  const { data: categories } = useMovementConcepts('categories', selectedTypeId)
-  const { data: subcategories } = useMovementConcepts('categories', selectedCategoryId)
+  // Obtener categorías y subcategorías de la estructura jerárquica de organización
+  const categories = React.useMemo(() => {
+    if (!organizationConcepts || !selectedTypeId) return []
+    
+    // Aplanar la estructura para buscar el tipo seleccionado
+    const flattenConcepts = (concepts: any[]): any[] => {
+      return concepts.reduce((acc, concept) => {
+        acc.push(concept)
+        if (concept.children && concept.children.length > 0) {
+          acc.push(...flattenConcepts(concept.children))
+        }
+        return acc
+      }, [])
+    }
+    
+    const allConcepts = flattenConcepts(organizationConcepts)
+    const selectedType = allConcepts.find(concept => concept.id === selectedTypeId)
+    
+    return selectedType?.children || []
+  }, [organizationConcepts, selectedTypeId])
+
+  const subcategories = React.useMemo(() => {
+    if (!selectedCategoryId || !categories) return []
+    
+    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId)
+    return selectedCategory?.children || []
+  }, [categories, selectedCategoryId])
 
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementFormSchema),
