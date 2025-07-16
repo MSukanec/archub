@@ -866,9 +866,21 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     switch (fieldName) {
       case 'type_id':
         const normalizedVal = normalizeValue(fieldName, value, valueMap, manualMappings)
+        // Check if the value was actually mapped to a valid type (INGRESO or EGRESO)
+        const isValidType = normalizedVal === 'INGRESO' || normalizedVal === 'EGRESO'
         const typeMatch = types.find(t => t.id === normalizedVal || normalizeText(t.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(t.name)))
+        
+        if (fieldName === 'type_id') {
+          console.log('🔍 Validating type_id:', {
+            originalValue: value,
+            normalizedVal,
+            isValidType,
+            typeMatch: typeMatch?.name
+          });
+        }
+        
         return { 
-          isValid: !!normalizedVal, 
+          isValid: isValidType, 
           suggestion: typeMatch?.name,
           available: types.map(t => t.name),
           mappedValue: normalizedVal
@@ -914,10 +926,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         options = types.map(t => ({ id: t.id, name: t.name }))
         break
       case 'currency_id':
-        options = (organizationCurrencies || []).map(c => ({ id: c.currency.id, name: c.currency.name }))
+        options = (organizationCurrencies || []).map(c => ({ id: c.id, name: c.currency?.name || c.name }))
         break
       case 'wallet_id':
-        options = (organizationWallets || []).map(w => ({ id: w.wallets.id, name: w.wallets.name }))
+        options = (organizationWallets || []).map(w => ({ id: w.id, name: w.wallets?.name || w.name }))
         break
       case 'subcategory_id':
         options = categories.map(c => ({ id: c.id, name: c.name }))
@@ -1099,9 +1111,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                               if (fieldName === 'type_id') {
                                 selectedName = types.find(t => t.id === selectedId)?.name || '';
                               } else if (fieldName === 'currency_id') {
-                                selectedName = organizationCurrencies?.find(c => c.id === selectedId)?.name || '';
+                                selectedName = organizationCurrencies?.find(c => c.id === selectedId)?.currency?.name || organizationCurrencies?.find(c => c.id === selectedId)?.name || '';
                               } else if (fieldName === 'wallet_id') {
-                                selectedName = organizationWallets?.find(w => w.id === selectedId)?.name || '';
+                                selectedName = organizationWallets?.find(w => w.id === selectedId)?.wallets?.name || organizationWallets?.find(w => w.id === selectedId)?.name || '';
                               } else if (fieldName === 'subcategory_id') {
                                 selectedName = categories.find(c => c.id === selectedId)?.name || '';
                               }
