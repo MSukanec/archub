@@ -278,6 +278,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk movements import endpoint
+  app.post("/api/movements/bulk", async (req, res) => {
+    try {
+      const { movements } = req.body;
+
+      if (!movements || !Array.isArray(movements)) {
+        return res.status(400).json({ error: "Missing or invalid movements array" });
+      }
+
+      console.log('Received bulk movements:', movements.length);
+
+      const { data, error } = await supabase
+        .from('movements')
+        .insert(movements)
+        .select();
+
+      if (error) {
+        console.error("Error inserting bulk movements:", error);
+        return res.status(500).json({ error: "Failed to insert movements", details: error.message });
+      }
+
+      console.log('Successfully inserted movements:', data?.length);
+      res.json({ success: true, insertedCount: data?.length || 0, data });
+    } catch (error) {
+      console.error("Error in bulk movements endpoint:", error);
+      res.status(500).json({ error: "Failed to process bulk movements" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
