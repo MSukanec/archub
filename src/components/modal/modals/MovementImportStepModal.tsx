@@ -740,18 +740,15 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                 if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
                   const normalizedValue = normalizeValue(fieldName, value, valueMap, manualMappings)
                   
-                  // Validate that normalized value is a proper UUID or null
-                  if (normalizedValue && typeof normalizedValue === 'string') {
-                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-                    if (uuidRegex.test(normalizedValue)) {
-                      movement[fieldName] = normalizedValue
-                      hasValidData = true
-                    } else {
-                      console.warn(`Skipping invalid UUID for ${fieldName}: "${normalizedValue}" from value: "${value}"`)
-                      // Don't set invalid UUIDs - just skip them
-                    }
+                  // ONLY set the field if we got a valid UUID
+                  if (normalizedValue && typeof normalizedValue === 'string' && isValidUUID(normalizedValue)) {
+                    movement[fieldName] = normalizedValue
+                    hasValidData = true
+                    console.log(`✅ ${fieldName} mapped successfully: ${value} → ${normalizedValue}`)
+                  } else {
+                    console.warn(`⚠️ ${fieldName} SKIPPED - no valid mapping for: "${value}"`)
+                    // CRITICAL: Never set non-UUID values - they should appear in step 3
                   }
-                  // Don't set unmappable values to avoid UUID errors - just skip them
                 } else if (value) {
                   movement[fieldName] = value
                   hasValidData = true
