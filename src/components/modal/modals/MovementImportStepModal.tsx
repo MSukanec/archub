@@ -98,13 +98,19 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
   return valueMap;
 };
 
-const normalizeValue = (field: string, value: any, valueMap: any): any => {
+const normalizeValue = (field: string, value: any, valueMap: any, manualMappings: any = {}): any => {
   if (!value) return null;
   
   const stringValue = String(value).trim();
   const normalized = normalizeText(stringValue);
   
-  // Check direct mapping first
+  // Check manual mappings first
+  const mappingKey = `${field}_${stringValue}`;
+  if (manualMappings[mappingKey]) {
+    return manualMappings[mappingKey];
+  }
+  
+  // Check direct mapping
   if (valueMap[field] && valueMap[field][normalized]) {
     return valueMap[field][normalized];
   }
@@ -224,6 +230,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [dropzoneKey, setDropzoneKey] = useState(0)
   const [selectedCreator, setSelectedCreator] = useState<string>('')
+  const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -267,6 +274,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     setIsProcessing(false)
     setSelectedRows(new Set())
     setDropzoneKey(prev => prev + 1)
+    setManualMappings({})
   }
 
   // File processing
@@ -498,7 +506,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
               default:
                 // Apply value normalization for specific fields
                 if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
-                  const normalizedValue = normalizeValue(fieldName, value, valueMap)
+                  const normalizedValue = normalizeValue(fieldName, value, valueMap, manualMappings)
                   if (normalizedValue) {
                     movement[fieldName] = normalizedValue
                     hasValidData = true
@@ -517,8 +525,28 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       })
       .filter(Boolean) // Remove null movements
 
+    // Log detailed info about what's being sent
     console.log(`Enviando ${processedMovements.length} movimientos válidos al servidor`);
     console.log('Primer movimiento procesado:', processedMovements[0]);
+    
+    // Check for any remaining text values in UUID fields
+    const badMovements = processedMovements.filter(m => 
+      (m.type_id && typeof m.type_id === 'string' && !m.type_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.currency_id && typeof m.currency_id === 'string' && !m.currency_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.wallet_id && typeof m.wallet_id === 'string' && !m.wallet_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.subcategory_id && typeof m.subcategory_id === 'string' && !m.subcategory_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i))
+    );
+    
+    if (badMovements.length > 0) {
+      console.log('Movimientos con valores no UUID encontrados:', badMovements);
+      toast({
+        variant: "destructive",
+        title: "Error de mapeo",
+        description: `${badMovements.length} movimientos tienen valores no mapeados que causan errores. Revisa el mapeo en el paso 2.`
+      });
+      return;
+    }
+    
     importMutation.mutate(processedMovements)
   }
 
@@ -556,6 +584,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
               setCurrentStep(1)
               setParsedData(null)
               setColumnMapping({})
+              setManualMappings({})
             }
           },
           nextAction: {
@@ -705,7 +734,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     
     switch (fieldName) {
       case 'type_id':
-        const normalizedVal = normalizeValue(fieldName, value, valueMap)
+        const normalizedVal = normalizeValue(fieldName, value, valueMap, manualMappings)
         const typeMatch = types.find(t => t.id === normalizedVal || normalizeText(t.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(t.name)))
         return { 
           isValid: !!normalizedVal, 
@@ -714,7 +743,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           mappedValue: normalizedVal
         }
       case 'currency_id':
-        const currencyNormalized = normalizeValue(fieldName, value, valueMap)
+        const currencyNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
         const currencyMatch = organizationCurrencies?.find(c => c.id === currencyNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
         return { 
           isValid: !!currencyNormalized, 
@@ -723,7 +752,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           mappedValue: currencyNormalized
         }
       case 'wallet_id':
-        const walletNormalized = normalizeValue(fieldName, value, valueMap)
+        const walletNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
         const walletMatch = organizationWallets?.find(w => w.id === walletNormalized || normalizeText(w.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.name)))
         return { 
           isValid: !!walletNormalized, 
@@ -732,7 +761,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           mappedValue: walletNormalized
         }
       case 'subcategory_id':
-        const subcategoryNormalized = normalizeValue(fieldName, value, valueMap)
+        const subcategoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
         const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
         return { 
           isValid: !!subcategoryNormalized, 
@@ -819,7 +848,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       
                       {validation.isValid && validation.mappedValue && (
                         <p className="text-xs text-green-600 mb-2">
-                          Mapeado a: <span className="font-medium">{validation.suggestion || validation.mappedValue}</span>
+                          ✓ Mapeado a: <span className="font-medium">{validation.suggestion || validation.mappedValue}</span>
+                        </p>
+                      )}
+                      
+                      {manualMappings[`${mappedField}_${sampleValue}`] && (
+                        <p className="text-xs text-blue-600 mb-2">
+                          🔗 Mapeo manual aplicado
                         </p>
                       )}
                       
@@ -834,11 +869,35 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                                 size="sm"
                                 className="h-7 text-xs justify-start"
                                 onClick={() => {
-                                  // Auto-map this value by updating the sample data temporarily for re-validation
-                                  toast({
-                                    title: "Mapeo sugerido",
-                                    description: `"${sampleValue}" se mapeará a "${value}"`
-                                  });
+                                  const mappingKey = `${mappedField}_${sampleValue}`;
+                                  
+                                  // Find the ID for this value
+                                  let targetId = null;
+                                  if (mappedField === 'type_id') {
+                                    const match = types.find(t => t.name === value);
+                                    targetId = match?.id;
+                                  } else if (mappedField === 'currency_id') {
+                                    const match = organizationCurrencies?.find(c => c.name === value);
+                                    targetId = match?.id;
+                                  } else if (mappedField === 'wallet_id') {
+                                    const match = organizationWallets?.find(w => w.name === value);
+                                    targetId = match?.id;
+                                  } else if (mappedField === 'subcategory_id') {
+                                    const match = categories.find(c => c.name === value);
+                                    targetId = match?.id;
+                                  }
+                                  
+                                  if (targetId) {
+                                    setManualMappings(prev => ({
+                                      ...prev,
+                                      [mappingKey]: targetId
+                                    }));
+                                    
+                                    toast({
+                                      title: "Mapeo aplicado",
+                                      description: `"${sampleValue}" ahora se mapea a "${value}"`
+                                    });
+                                  }
                                 }}
                               >
                                 {value}
