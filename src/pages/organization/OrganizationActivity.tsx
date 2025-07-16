@@ -14,11 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { ActivityChart } from '@/components/charts/ActivityChart';
-
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useUserActivity } from '@/hooks/use-user-activity';
-import { useOrganizationActivityLogs, getActivityDisplayInfo } from '@/hooks/use-organization-activity-logs';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
@@ -29,28 +25,9 @@ export default function OrganizationActivity() {
   const [timePeriod, setTimePeriod] = useState<'week' | 'month' | 'year'>('week');
   const organizationId = userData?.preferences?.last_organization_id;
 
-  // User activity data for chart
-  const { data: userActivityData = [], isLoading: userActivityLoading } = useUserActivity(organizationId, timePeriod);
-
-  // Fetch activity logs from the new centralized table
-  const { data: activityLogs = [], isLoading } = useOrganizationActivityLogs(organizationId);
-
-  // Transform activity logs for display
-  const activities = activityLogs.map(log => {
-    const displayInfo = getActivityDisplayInfo(log);
-    return {
-      id: log.id,
-      type: log.action.split('_')[0], // Extract type from action (create_movement -> create)
-      type_label: displayInfo.label,
-      title: displayInfo.title,
-      description: displayInfo.description,
-      created_at: log.created_at,
-      author: log.user || { full_name: 'Usuario', avatar_url: null },
-      action: log.action,
-      target_table: log.target_table,
-      metadata: log.metadata
-    };
-  });
+  // Placeholder activities data - will be implemented with proper data later
+  const activities: any[] = []
+  const isLoading = false
 
   // Filter and sort activities
   const filteredActivities = activities.filter(activity => {
@@ -293,13 +270,11 @@ export default function OrganizationActivity() {
           ]}
         />
 
-        {/* Activity Chart */}
-        <ActivityChart 
-          data={userActivityData} 
-          isLoading={userActivityLoading}
-          timePeriod={timePeriod}
-          onTimePeriodChange={setTimePeriod}
-        />
+        {/* Activity Chart - Currently disabled */}
+        <div className="text-center py-8 text-muted-foreground">
+          <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
+          <p className="text-sm">Gráfico de actividad en desarrollo</p>
+        </div>
 
         {/* Activity Table */}
         {isLoading ? (
