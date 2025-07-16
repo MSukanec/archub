@@ -14,6 +14,8 @@ interface FormModalLayoutProps {
   footerContent?: ReactNode;
   className?: string;
   columns?: number;
+  // Nueva prop para modales de pasos
+  stepContent?: ReactNode;
 }
 
 export function FormModalLayout({
@@ -25,6 +27,7 @@ export function FormModalLayout({
   footerContent,
   className,
   columns = 2,
+  stepContent,
 }: FormModalLayoutProps) {
   const { currentPanel } = useModalPanelStore();
 
@@ -39,6 +42,11 @@ export function FormModalLayout({
   }, []);
 
   const getCurrentPanel = () => {
+    // Si stepContent está definido, úsalo en lugar de las lógicas de panel
+    if (stepContent) {
+      return stepContent;
+    }
+    
     switch (currentPanel) {
       case "view":
         return viewPanel;

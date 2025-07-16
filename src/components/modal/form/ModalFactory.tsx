@@ -15,6 +15,7 @@ import MovementFormModal from '../modals/MovementFormModal';
 import MovementConceptFormModal from '../modals/MovementConceptFormModal';
 import { OrganizationMovementConceptFormModal } from '../modals/OrganizationMovementConceptFormModal';
 import MovementImportModal from '../modals/MovementImportModal';
+import MovementImportStepModal from '../modals/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 
 export function ModalFactory() {
@@ -50,7 +51,7 @@ export function ModalFactory() {
     case 'organization-movement-concept':
       return <OrganizationMovementConceptFormModal modalData={data} onClose={closeModal} />;
     case 'movement-import':
-      return <MovementImportModal modalData={data} onClose={closeModal} />;
+      return <MovementImportStepModal modalData={data} onClose={closeModal} />;
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
         mode={data?.mode || 'simple'}

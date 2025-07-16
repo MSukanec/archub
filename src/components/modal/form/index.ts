@@ -1,6 +1,8 @@
 export { FormModalLayout } from './FormModalLayout';
 export { FormModalHeader } from './FormModalHeader';
 export { FormModalFooter } from './FormModalFooter';
+export { FormModalStepHeader } from './FormModalStepHeader';
+export { FormModalStepFooter } from './FormModalStepFooter';
 export { FormSubsectionButton } from './FormSubsectionButton';
 export { useModalPanelStore } from './modalPanelStore';
 export { useGlobalModalStore } from './useGlobalModalStore';
