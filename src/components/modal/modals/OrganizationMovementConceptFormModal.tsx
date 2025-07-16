@@ -20,6 +20,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreateMovementConcept, useUpdateMovementConcept, MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin';
+import { FormModalLayout } from '../form/FormModalLayout';
 
 // Schema for form validation
 const formSchema = z.object({
@@ -30,19 +31,25 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface OrganizationMovementConceptFormModalProps {
-  editingConcept?: MovementConceptAdmin;
-  parentConcept?: {
-    id: string;
-    name: string;
-    parent_id: string | null;
-    is_system: boolean;
+  modalData?: {
+    editingConcept?: MovementConceptAdmin;
+    parentConcept?: {
+      id: string;
+      name: string;
+      parent_id: string | null;
+      is_system: boolean;
+    };
   };
+  onClose: () => void;
 }
 
 export function OrganizationMovementConceptFormModal({
-  editingConcept,
-  parentConcept
+  modalData,
+  onClose
 }: OrganizationMovementConceptFormModalProps) {
+  const editingConcept = modalData?.editingConcept;
+  const parentConcept = modalData?.parentConcept;
+  
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   
@@ -74,19 +81,9 @@ export function OrganizationMovementConceptFormModal({
   const onSubmit = async (data: FormData) => {
     if (!userData?.organization?.id) {
       toast({
-        title: 'Error',
-        description: 'No se encontró la organización',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Check if editing a system concept (not allowed)
-    if (editingConcept?.is_system) {
-      toast({
-        title: 'No permitido',
-        description: 'No puedes modificar conceptos del sistema',
-        variant: 'destructive'
+        title: "Error",
+        description: "No se pudo obtener la información de la organización",
+        variant: "destructive"
       });
       return;
     }
@@ -96,11 +93,12 @@ export function OrganizationMovementConceptFormModal({
         await updateMutation.mutateAsync({
           id: editingConcept.id,
           name: data.name,
-          parent_id: data.parent_id || null
+          parent_id: data.parent_id || null,
+          organization_id: userData.organization.id
         });
         toast({
-          title: 'Concepto actualizado',
-          description: 'El concepto se ha actualizado correctamente'
+          title: "Concepto actualizado",
+          description: "El concepto se ha actualizado correctamente"
         });
       } else {
         await createMutation.mutateAsync({
@@ -110,23 +108,21 @@ export function OrganizationMovementConceptFormModal({
           is_system: false
         });
         toast({
-          title: 'Concepto creado',
-          description: 'El concepto se ha creado correctamente'
+          title: "Concepto creado",
+          description: "El nuevo concepto se ha creado correctamente"
         });
       }
+      onClose();
     } catch (error) {
-      console.error('Error:', error);
       toast({
-        title: 'Error',
-        description: 'Ocurrió un error al procesar la solicitud',
-        variant: 'destructive'
+        title: "Error",
+        description: editingConcept ? "Error al actualizar el concepto" : "Error al crear el concepto",
+        variant: "destructive"
       });
     }
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
-
-  // Show warning for system concepts
   const isSystemConcept = editingConcept?.is_system;
 
   const viewPanel = (
@@ -259,10 +255,15 @@ export function OrganizationMovementConceptFormModal({
     </div>
   );
 
-  return {
-    viewPanel,
-    editPanel,
-    headerContent,
-    footerContent
-  };
+  return (
+    <FormModalLayout 
+      columns={1}
+      isOpen={true}
+      onClose={onClose}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+    />
+  );
 }

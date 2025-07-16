@@ -48,21 +48,7 @@ export function ModalFactory() {
     case 'movement-concept':
       return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
     case 'organization-movement-concept':
-      const orgModalContent = OrganizationMovementConceptFormModal({
-        editingConcept: data?.editingConcept,
-        parentConcept: data?.parentConcept
-      });
-      return (
-        <FormModalLayout 
-          columns={1}
-          isOpen={true}
-          onClose={closeModal}
-          headerContent={orgModalContent.headerContent}
-          footerContent={orgModalContent.footerContent}
-          viewPanel={orgModalContent.viewPanel}
-          editPanel={orgModalContent.editPanel}
-        />
-      );
+      return <OrganizationMovementConceptFormModal modalData={data} onClose={closeModal} />;
     case 'movement-import':
       return <MovementImportModal modalData={data} onClose={closeModal} />;
     case 'delete-confirmation':
