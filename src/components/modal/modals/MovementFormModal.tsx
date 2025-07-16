@@ -349,6 +349,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
   React.useEffect(() => {
+    // NO ejecutar este efecto cuando estamos editando un movimiento
+    if (editingMovement) return
+    
     const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id')
     if (categoryId && categories) {
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
@@ -428,7 +431,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, editingMovement])
 
 
 
