@@ -43,7 +43,7 @@ import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
 
-import ImportMovementsModal from "@/modals/finances/ImportMovementsModal";
+
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
@@ -130,7 +130,7 @@ interface ConversionGroup {
 
 export default function Movements() {
   const [searchValue, setSearchValue] = useState("");
-  const [showImportModal, setShowImportModal] = useState(false);
+
   const { openModal } = useGlobalModalStore();
   const [deletingMovement, setDeletingMovement] = useState<Movement | null>(
     null,
@@ -444,73 +444,7 @@ export default function Movements() {
     }
   };
 
-  // Handle imported movements
-  const handleImportMovements = async (importedMovements: any[]) => {
-    try {
-      console.log('Importing movements:', importedMovements);
-      
-      // Transform imported data to match our movement structure
-      const processedMovements = importedMovements.map(movement => {
-        // Convert Excel date serial number to proper date if needed
-        let movementDate = movement.movement_date;
-        if (typeof movementDate === 'number' && movementDate > 40000) {
-          // Excel date serial number to JavaScript date
-          const excelEpoch = new Date(1900, 0, 1);
-          const jsDate = new Date(excelEpoch.getTime() + (movementDate - 2) * 24 * 60 * 60 * 1000);
-          movementDate = jsDate.toISOString().split('T')[0];
-        }
-        
-        // Basic field mapping with proper validation
-        const processedMovement = {
-          description: movement.description || 'Movimiento importado',
-          amount: parseFloat(movement.amount) || 0,
-          movement_date: movementDate,
-          organization_id: movement.organization_id || userData?.preferences?.last_organization_id,
-          project_id: movement.project_id || userData?.preferences?.last_project_id,
-          created_by: userData?.id,
-          // Remove empty IDs to avoid UUID errors
-          ...(movement.type_id && movement.type_id.trim() && { type_id: movement.type_id }),
-          ...(movement.category_id && movement.category_id.trim() && { category_id: movement.category_id }),
-          ...(movement.subcategory_id && movement.subcategory_id.trim() && { subcategory_id: movement.subcategory_id }),
-          ...(movement.currency_id && movement.currency_id.trim() && { currency_id: movement.currency_id }),
-          ...(movement.wallet_id && movement.wallet_id.trim() && { wallet_id: movement.wallet_id }),
-          ...(movement.exchange_rate && { exchange_rate: parseFloat(movement.exchange_rate) }),
-          is_favorite: false,
-        };
-        
-        return processedMovement;
-      });
-      
-      // Batch insert movements
-      for (const movement of processedMovements) {
-        const { error } = await supabase
-          .from('movements')
-          .insert([movement]);
-        
-        if (error) {
-          console.error('Error inserting movement:', error);
-          throw error;
-        }
-      }
-      
-      // Refresh the movements data
-      queryClient.invalidateQueries({ queryKey: ['movements'] });
-      
-      toast({
-        title: "Movimientos importados",
-        description: `Se importaron ${processedMovements.length} movimientos correctamente.`,
-      });
-      
-      setShowImportModal(false);
-    } catch (error) {
-      console.error('Error importing movements:', error);
-      toast({
-        title: "Error al importar",
-        description: "Hubo un error al importar los movimientos. Revisa los datos e intenta nuevamente.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   const confirmDelete = () => {
     if (deletingMovement) {
@@ -1306,7 +1240,7 @@ export default function Movements() {
       <Button
         key="import-movements"
         variant="outline"
-        onClick={() => setShowImportModal(true)}
+        onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
         className="h-8"
       >
         <Upload className="mr-2 h-4 w-4" />
@@ -1459,12 +1393,7 @@ export default function Movements() {
 
       {/* Modal Factory will handle the movement modal */}
 
-      {/* Import Movements Modal */}
-      <ImportMovementsModal
-        open={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onImport={handleImportMovements}
-      />
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
