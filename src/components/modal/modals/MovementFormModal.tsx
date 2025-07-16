@@ -315,6 +315,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         if (defaultWallet) {
           aportesForm.setValue('wallet_id', defaultWallet)
         }
+        
+        // Para "Aportes Propios", preseleccionar el usuario actual
+        if (selectedCategory?.name === 'Aportes Propios' && currentMember) {
+          aportesForm.setValue('contact_id', currentMember)
+        } else if (selectedCategory?.name === 'Aportes de Terceros') {
+          // Para "Aportes de Terceros", limpiar la selección
+          aportesForm.setValue('contact_id', '')
+        }
       } else {
         // Si no es una categoría de aportes, permitir regresar al formulario normal
         if (isAportes) {
@@ -614,11 +622,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         movement_date: new Date(),
         created_by: currentMember?.id || '',
         description: '',
-        contact_id: '',
+        contact_id: '', // Se establecerá automáticamente según la categoría
         currency_id: defaultOrgCurrency?.currency?.id || '',
         wallet_id: defaultWallet?.id || '',
         amount: 0,
+        exchange_rate: undefined,
         type_id: '',
+        category_id: '',
       })
       setPanel('edit')
     }
