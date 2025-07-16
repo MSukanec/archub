@@ -389,7 +389,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
               // Apply value normalization for specific fields
               if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
                 const normalizedValue = normalizeValue(fieldName, value, valueMap)
-                console.log(`Normalizing ${fieldName}: "${value}" → "${normalizedValue}"`)
                 movement[fieldName] = normalizedValue
               } else {
                 movement[fieldName] = value
@@ -524,57 +523,196 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     </div>
   )
 
+  // Auto-mapping intelligence
+  const getSmartMapping = useCallback(() => {
+    if (!parsedData) return {}
+    
+    const mapping: ColumnMapping = {}
+    const headerMappings: { [key: string]: string } = {
+      // Mapeos comunes en español
+      'fecha': 'movement_date',
+      'date': 'movement_date',
+      'descripcion': 'description',
+      'descripción': 'description',
+      'description': 'description',
+      'concepto': 'description',
+      'detalle': 'description',
+      'monto': 'amount',
+      'amount': 'amount',
+      'importe': 'amount',
+      'valor': 'amount',
+      'cantidad': 'amount',
+      'tipo': 'type_id',
+      'type': 'type_id',
+      'categoria': 'category_id',
+      'category': 'category_id',
+      'subcategoria': 'subcategory_id',
+      'subcategory': 'subcategory_id',
+      'moneda': 'currency_id',
+      'currency': 'currency_id',
+      'billetera': 'wallet_id',
+      'wallet': 'wallet_id',
+      'cuenta': 'wallet_id',
+      'cotizacion': 'exchange_rate',
+      'cotización': 'exchange_rate',
+      'exchange': 'exchange_rate',
+      'cambio': 'exchange_rate'
+    }
+
+    parsedData.headers.forEach((header, index) => {
+      const normalizedHeader = normalizeText(header)
+      const mappedField = headerMappings[normalizedHeader]
+      if (mappedField) {
+        mapping[index] = mappedField
+      }
+    })
+
+    return mapping
+  }, [parsedData])
+
+  // Apply smart mapping on data load
+  React.useEffect(() => {
+    if (parsedData && Object.keys(columnMapping).length === 0) {
+      const smartMapping = getSmartMapping()
+      setColumnMapping(smartMapping)
+    }
+  }, [parsedData, getSmartMapping, columnMapping])
+
+  // Validation function for field values
+  const validateFieldValue = (fieldName: string, value: any) => {
+    if (!value) return { isValid: true, suggestion: null }
+
+    const normalizedValue = normalizeText(String(value))
+    
+    switch (fieldName) {
+      case 'type_id':
+        const typeMatch = types.find(t => normalizeText(t.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(t.name)))
+        return { 
+          isValid: !!typeMatch, 
+          suggestion: typeMatch?.name,
+          available: types.map(t => t.name)
+        }
+      case 'currency_id':
+        const currencyMatch = organizationCurrencies?.find(c => normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        return { 
+          isValid: !!currencyMatch, 
+          suggestion: currencyMatch?.name,
+          available: organizationCurrencies?.map(c => c.name) || []
+        }
+      case 'wallet_id':
+        const walletMatch = organizationWallets?.find(w => normalizeText(w.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(w.name)))
+        return { 
+          isValid: !!walletMatch, 
+          suggestion: walletMatch?.name,
+          available: organizationWallets?.map(w => w.name) || []
+        }
+      case 'subcategory_id':
+        const subcategoryMatch = categories.find(c => normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        return { 
+          isValid: !!subcategoryMatch, 
+          suggestion: subcategoryMatch?.name,
+          available: categories.map(c => c.name)
+        }
+      default:
+        return { isValid: true, suggestion: null }
+    }
+  }
+
   const renderStep2 = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-2">Mapear columnas</h3>
+        <h3 className="text-lg font-medium mb-2">Mapear columnas del archivo</h3>
         <p className="text-sm text-muted-foreground">
-          Asigna cada columna del archivo a un campo de movimiento
+          Hemos pre-mapeado automáticamente las columnas reconocibles. Revisa y ajusta según sea necesario.
         </p>
       </div>
 
       {parsedData && (
         <div className="space-y-4">
           <div className="grid gap-4">
-            {parsedData.headers.map((header, index) => (
-              <div key={index} className="grid grid-cols-2 gap-4 items-center">
-                <Label className="font-medium">
-                  {header}
-                </Label>
-                <Select
-                  value={columnMapping[index.toString()] || ''}
-                  onValueChange={(value) => {
-                    setColumnMapping(prev => ({
-                      ...prev,
-                      [index.toString()]: value
-                    }))
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar campo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {AVAILABLE_FIELDS.map((field) => (
-                      <SelectItem key={field.value} value={field.value}>
-                        {field.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
+            {parsedData.headers.map((header, index) => {
+              const mappedField = columnMapping[index]
+              const sampleValue = parsedData.rows[0]?.[index]
+              const validation = mappedField ? validateFieldValue(mappedField, sampleValue) : null
+              
+              return (
+                <div key={index} className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">Excel</Badge>
+                        <Label className="text-sm font-medium">{header}</Label>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Ejemplo: <span className="font-mono">{sampleValue || 'N/A'}</span>
+                      </p>
+                    </div>
+                    <div className="flex-1 ml-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="text-xs">Archub</Badge>
+                        <span className="text-xs text-muted-foreground">Campo destino</span>
+                      </div>
+                      <Select 
+                        value={columnMapping[index] || ''} 
+                        onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar campo de Archub" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No mapear</SelectItem>
+                          {AVAILABLE_FIELDS.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {mappedField && validation && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-md">
+                      <div className="flex items-center gap-2 mb-2">
+                        {validation.isValid ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-orange-500" />
+                        )}
+                        <span className="text-xs font-medium">
+                          {validation.isValid ? 'Mapeo válido' : 'Revisar mapeo'}
+                        </span>
+                      </div>
+                      
+                      {!validation.isValid && validation.suggestion && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Sugerencia: <span className="font-medium">{validation.suggestion}</span>
+                        </p>
+                      )}
+                      
+                      {!validation.isValid && validation.available && (
+                        <div className="text-xs">
+                          <p className="text-muted-foreground mb-1">Valores disponibles en Archub:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {validation.available.slice(0, 6).map(value => (
+                              <Badge key={value} variant="outline" className="text-xs">
+                                {value}
+                              </Badge>
+                            ))}
+                            {validation.available.length > 6 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{validation.available.length - 6} más
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
-
-          {validationErrors.length > 0 && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {validationErrors.map((error, index) => (
-                  <div key={index}>{error.message}</div>
-                ))}
-              </AlertDescription>
-            </Alert>
-          )}
         </div>
       )}
     </div>
