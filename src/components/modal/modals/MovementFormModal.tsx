@@ -622,42 +622,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     }
     setPanel('edit')
-  }, [editingMovement?.id]) // Solo ejecutar cuando cambie el ID del movimiento a editar
-  
-  // Efecto para establecer valores por defecto en NUEVO movimiento
-  React.useEffect(() => {
-    if (editingMovement || !members || !currencies || !wallets) return
-    
-    const currentMember = members?.find(m => m.user_id === userData?.id)?.id
-    const defaultCurrency = userData?.organization?.default_currency_id
-    const defaultWallet = userData?.organization?.default_wallet_id
-    
-    console.log('Setting defaults for new movement:', { currentMember, defaultCurrency, defaultWallet })
-    
-    // Establecer valores por defecto si no tienen valor
-    if (currentMember && !form.getValues('created_by')) {
-      form.setValue('created_by', currentMember)
-      conversionForm.setValue('created_by', currentMember)
-      transferForm.setValue('created_by', currentMember)
-      aportesForm.setValue('created_by', currentMember)
-    }
-    
-    if (defaultCurrency && !form.getValues('currency_id')) {
-      form.setValue('currency_id', defaultCurrency)
-      transferForm.setValue('currency_id', defaultCurrency)
-      aportesForm.setValue('currency_id', defaultCurrency)
-      conversionForm.setValue('source_currency_id', defaultCurrency)
-      conversionForm.setValue('destination_currency_id', defaultCurrency)
-    }
-    
-    if (defaultWallet && !form.getValues('wallet_id')) {
-      form.setValue('wallet_id', defaultWallet)
-      transferForm.setValue('wallet_id_from', defaultWallet)
-      aportesForm.setValue('wallet_id', defaultWallet)
-      conversionForm.setValue('source_wallet_id', defaultWallet)
-      conversionForm.setValue('destination_wallet_id', defaultWallet)
-    }
-  }, [members?.length, currencies?.length, wallets?.length]) // Solo cuando carguen los datos iniciales
+  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
