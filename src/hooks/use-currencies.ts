@@ -9,6 +9,11 @@ export interface Currency {
 }
 
 export interface OrganizationCurrency {
+  id: string
+  organization_id: string
+  currency_id: string
+  is_default: boolean
+  is_active: boolean
   currency: Currency
 }
 
@@ -36,9 +41,15 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
       const { data, error } = await supabase
         .from('organization_currencies')
         .select(`
+          id,
+          organization_id,
+          currency_id,
+          is_default,
+          is_active,
           currency:currencies(*)
         `)
         .eq('organization_id', organizationId)
+        .order('is_default', { ascending: false })
       
       if (error) throw error
       return data as OrganizationCurrency[]

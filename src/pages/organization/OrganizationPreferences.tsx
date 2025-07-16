@@ -62,16 +62,22 @@ export default function OrganizationPreferences() {
 
   // Initialize form values from organization data
   useEffect(() => {
+    console.log('allCurrencies:', allCurrencies);
+    console.log('organizationCurrencies:', organizationCurrencies);
+    
     if (organizationCurrencies?.length) {
       const defaultCur = organizationCurrencies.find(c => c.is_default);
       const secondaryCurs = organizationCurrencies.filter(c => !c.is_default);
+      
+      console.log('defaultCur:', defaultCur);
+      console.log('secondaryCurs:', secondaryCurs);
       
       if (defaultCur) {
         setDefaultCurrency(defaultCur.currency_id);
       }
       setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
     }
-  }, [organizationCurrencies]);
+  }, [organizationCurrencies, allCurrencies]);
 
   useEffect(() => {
     if (organizationWallets?.length) {
