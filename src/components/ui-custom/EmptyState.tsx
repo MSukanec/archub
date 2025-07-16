@@ -6,6 +6,7 @@ interface EmptyStateProps {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  customContent?: React.ReactNode;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export function EmptyState({
   title,
   description,
   action,
+  customContent,
   className
 }: EmptyStateProps) {
   return (
@@ -105,6 +107,13 @@ export function EmptyState({
                 }}
               ></div>
             </div>
+          </div>
+        )}
+
+        {/* Custom Content - before main content */}
+        {customContent && (
+          <div className="relative z-10 w-full">
+            {customContent}
           </div>
         )}
 
