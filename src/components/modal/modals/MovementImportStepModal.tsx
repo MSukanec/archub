@@ -241,8 +241,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const { data: movementConcepts } = useOrganizationMovementConcepts(organizationId)
-  const { data: organizationCurrencies } = useOrganizationCurrencies()
-  const { data: organizationWallets } = useOrganizationWallets()
+  const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
+  const { data: organizationWallets } = useOrganizationWallets(organizationId)
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
   
   // Convert members to users format for UserSelector
@@ -262,7 +262,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
-  const categories = movementConcepts?.filter(c => c.parent_id && movementConcepts.find(parent => parent.id === c.parent_id && !parent.parent_id)) || []
+  // Get ALL concepts with parent_id (subcategories) - flatten the structure
+  const categories = movementConcepts?.flatMap(concept => concept.children || []) || []
   
 
   
@@ -700,34 +701,37 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         />
       </div>
 
-      {!parsedData && (
-        <div
-          {...getRootProps()}
-          className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-            isDragActive ? "border-blue-400 bg-blue-50 dark:bg-blue-950" : "border-muted-foreground/25 hover:border-muted-foreground/50"
-          )}
-        >
-          <input {...getInputProps()} />
-          <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-          <p className="text-sm font-medium">Haz clic o arrastra un archivo</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Formatos soportados: .xlsx, .xls, .csv
-          </p>
-        </div>
-      )}
+      <div className="space-y-3">
+        <Label>Archivo de movimientos</Label>
+        {!parsedData && (
+          <div
+            {...getRootProps()}
+            className={cn(
+              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+              isDragActive ? "border-blue-400 bg-blue-50 dark:bg-blue-950" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+            )}
+          >
+            <input {...getInputProps()} />
+            <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+            <p className="text-sm font-medium">Haz clic o arrastra un archivo</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Formatos soportados: .xlsx, .xls, .csv
+            </p>
+          </div>
+        )}
 
-      {parsedData && (
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            Archivo cargado: {parsedData.fileName} ({parsedData.rows.length} filas)
-          </AlertDescription>
-        </Alert>
-      )}
+        {parsedData && (
+          <Alert>
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>
+              Archivo cargado: {parsedData.fileName} ({parsedData.rows.length} filas)
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
 
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
+      <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+        <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertDescription>
           El archivo debe tener una fila de encabezados en la primera línea
         </AlertDescription>
