@@ -352,12 +352,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       hasMembers: !!members,
       hasCurrencies: !!currencies,
       hasWallets: !!wallets,
-      hasConcepts: !!concepts
+      hasConcepts: !!concepts,
+      hasCategories: !!categories
     })
     
     if (editingMovement) {
       // Wait for all data to be loaded
-      if (!members || !currencies || !wallets || !concepts) {
+      if (!members || !currencies || !wallets || !concepts || !categories) {
         console.log('Waiting for data to load...')
         return
       }
@@ -374,6 +375,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const selectedConcept = concepts?.find((concept: any) => concept.id === editingMovement.type_id)
       const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
       
+      // También verificar la categoría para detectar aportes
+      const selectedCategory = categories?.find((category: any) => category.id === editingMovement.category_id)
+      const categoryViewMode = (selectedCategory?.view_mode ?? "normal").trim()
+      
       // Map currency_id and wallet_id to organization-specific IDs
       const matchingCurrency = currencies?.find((c: any) => 
         c.currency?.id === editingMovement.currency_id
@@ -385,6 +390,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       console.log('Loading editing movement:', {
         editingMovement: editingMovement.id,
         viewMode,
+        categoryViewMode,
         type_id: editingMovement.type_id,
         category_id: editingMovement.category_id,
         subcategory_id: editingMovement.subcategory_id,
@@ -398,7 +404,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       // Detectar el tipo de movimiento por los campos del movimiento
       const isConversionMovement = !!editingMovement.conversion_group_id
       const isTransferMovement = !!editingMovement.transfer_group_id
-      const isAportesMovement = viewMode === "aportes"
+      const isAportesMovement = viewMode === "aportes" || categoryViewMode === "aportes"
       
       // Establecer el tipo de formulario
       setIsConversion(isConversionMovement)
@@ -634,7 +640,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       })
       setPanel('edit')
     }
-  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts])
+  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
