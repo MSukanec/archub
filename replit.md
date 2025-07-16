@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 16, 2025. MOVEMENT FORM FIELDS COMPLETELY FIXED: Resolved disabled/empty fields issue in all financial movement modals - COMPLETED
+  • Fixed critical bug where Currency, Wallet, Amount, and Exchange Rate fields were disabled/empty due to incorrect property naming
+  • Root cause: organization_preferences uses 'default_currency' and 'default_wallet' (not 'default_currency_id' and 'default_wallet_id')
+  • Applied fix to all three form types: Aportes, Aportes Propios, and Retiros Propios with proper default value initialization
+  • Corrected userData?.id to userData?.user?.id for consistency across all form handling
+  • All fields now properly initialize with default values from organization preferences or fallback to first available option
+  • Removed debugging console.log statements for clean production code
+  • Fields now function correctly: users can select currencies, wallets, enter amounts, and exchange rates in all movement forms
 - July 16, 2025. EXCEL IMPORT UI AND VALIDATION FINAL FIXES: Fixed "PONER TODO NULL" button and validation detection for incompatible values - COMPLETED
   • Fixed "PONER TODO NULL" button by implementing renderCounter state to force complete UI re-render of Select components
   • Corrected validation logic for all fields (type_id, subcategory_id, currency_id, wallet_id) to require direct UUID matches instead of fuzzy matching

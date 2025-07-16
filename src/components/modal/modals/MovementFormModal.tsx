@@ -253,8 +253,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       contact_id: '',
-      currency_id: userData?.organization?.default_currency_id || '',
-      wallet_id: userData?.organization?.default_wallet_id || '',
+      currency_id: userData?.organization_preferences?.default_currency || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -269,8 +269,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       member_id: '',
-      currency_id: userData?.organization?.default_currency_id || '',
-      wallet_id: userData?.organization?.default_wallet_id || '',
+      currency_id: userData?.organization_preferences?.default_currency || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -285,8 +285,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       member_id: '',
-      currency_id: userData?.organization?.default_currency_id || '',
-      wallet_id: userData?.organization?.default_wallet_id || '',
+      currency_id: userData?.organization_preferences?.default_currency || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -380,11 +380,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         
         // Solo sincronizar valores en modo nuevo movimiento
         if (!editingMovement) {
-          const currentMember = members?.find(m => m.user_id === userData?.id)?.id
-          const defaultCurrency = userData?.organization?.default_currency_id
-          const defaultWallet = userData?.organization?.default_wallet_id
+          const currentMember = members?.find(m => m.user_id === userData?.user?.id)?.id
           
-          console.log('Setting defaults:', { viewMode, currentMember, defaultCurrency, defaultWallet })
+          // Obtener los valores por defecto desde organization_preferences o usar el primero disponible
+          const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
+          const defaultWallet = userData?.organization_preferences?.default_wallet || wallets?.[0]?.id
+          
+
           
           if (isAportesCategory) {
             // APORTES: Cliente + Cotización
@@ -413,6 +415,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             if (defaultCurrency) retirosPropriosForm.setValue('currency_id', defaultCurrency)
             if (defaultWallet) retirosPropriosForm.setValue('wallet_id', defaultWallet)
             retirosPropriosForm.setValue('member_id', '') // Limpiar socio
+            retirosPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
+
           }
         }
       } else {
