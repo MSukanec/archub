@@ -355,15 +355,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Step content renderers
   const renderStep1 = () => (
     <div className="p-6 space-y-6">
-      <div className="text-center space-y-4">
-        <Upload className="h-12 w-12 text-muted-foreground mx-auto" />
-        <div>
-          <h3 className="text-lg font-medium">Seleccionar archivo</h3>
-          <p className="text-sm text-muted-foreground">
-            Arrastra y suelta un archivo Excel (.xlsx, .xls) o CSV, o haz clic para seleccionar
-          </p>
-        </div>
-      </div>
 
       <div
         {...getRootProps()}
@@ -590,6 +581,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       footerContent={footerContent}
       stepContent={getCurrentStepContent()}
       onClose={onClose}
+      columns={1}
       className="md:min-w-[800px] md:max-w-[1000px]"
     />
   )

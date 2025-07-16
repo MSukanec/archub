@@ -16,7 +16,7 @@ export function FormModalStepHeader({
   className = ""
 }: FormModalStepHeaderProps) {
   return (
-    <div className={`px-6 py-4 border-b border-[var(--card-border)] ${className}`}>
+    <div className={`px-4 py-3 border-b border-[var(--card-border)] ${className}`}>
       <div className="flex items-center gap-3">
         {Icon && (
           <Icon className="h-5 w-5 text-[var(--accent)]" />
