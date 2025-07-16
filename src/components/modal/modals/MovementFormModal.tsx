@@ -988,14 +988,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {concepts?.filter((concept: any) => 
-                        !concept.parent_id && (
-                          concept.view_mode?.trim() === "conversion" || 
-                          concept.view_mode?.trim() === "normal" || 
-                          concept.view_mode === null ||
-                          concept.view_mode === undefined
-                        )
-                      ).map((concept: any) => (
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
                           <div className="flex items-center justify-between w-full">
                             <span>{concept.name}</span>
@@ -1299,14 +1292,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {concepts?.filter((concept: any) => 
-                        !concept.parent_id && (
-                          concept.view_mode?.trim() === "transfer" || 
-                          concept.view_mode?.trim() === "normal" || 
-                          concept.view_mode === null ||
-                          concept.view_mode === undefined
-                        )
-                      ).map((concept: any) => (
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
                           <div className="flex items-center justify-between w-full">
                             <span>{concept.name}</span>
@@ -1520,14 +1506,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {concepts?.filter((concept: any) => 
-                        !concept.parent_id && (
-                          concept.view_mode?.trim() === "aportes" || 
-                          concept.view_mode?.trim() === "normal" || 
-                          concept.view_mode === null ||
-                          concept.view_mode === undefined
-                        )
-                      ).map((concept: any) => (
+                      {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
                         <SelectItem key={concept.id} value={concept.id}>
                           <div className="flex items-center justify-between w-full">
                             <span>{concept.name}</span>
@@ -1799,13 +1778,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {concepts?.filter((concept: any) => 
-                      !concept.parent_id && (
-                        concept.view_mode?.trim() === "normal" || 
-                        concept.view_mode === null ||
-                        concept.view_mode === undefined
-                      )
-                    ).map((concept) => (
+                    {concepts?.filter((concept: any) => !concept.parent_id).map((concept) => (
                       <SelectItem key={concept.id} value={concept.id}>
                         <div className="flex items-center justify-between w-full">
                           <span>{concept.name}</span>
