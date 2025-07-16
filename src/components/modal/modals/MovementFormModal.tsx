@@ -281,7 +281,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(transferFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       currency_id: userData?.organization?.default_currency_id || '',
@@ -295,7 +295,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       category_id: '',
@@ -311,7 +311,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       category_id: '',
@@ -327,7 +327,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(retirosPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       category_id: '',
