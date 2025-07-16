@@ -75,9 +75,12 @@ function ConceptItem({
               <h4 className="font-medium text-foreground">{concept.name}</h4>
               
               {/* System/User Badge */}
-              <Badge variant={concept.is_system ? "default" : "secondary"} className="text-xs">
+              <Badge 
+                variant={concept.is_system ? "default" : "secondary"} 
+                className={`text-xs ${concept.is_system ? 'bg-[var(--accent)] text-[var(--accent-foreground)] border-[var(--accent)]' : ''}`}
+              >
                 {concept.is_system ? (
-                  <><Settings className="h-3 w-3 mr-1" />Sistema</>
+                  'Sistema'
                 ) : (
                   <><Users className="h-3 w-3 mr-1" />Usuario</>
                 )}
