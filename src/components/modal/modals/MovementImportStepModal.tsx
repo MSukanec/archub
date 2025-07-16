@@ -800,6 +800,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       case 'subcategory_id':
         const subcategoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
         const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized || normalizeText(c.name).includes(normalizedValue) || normalizedValue.includes(normalizeText(c.name)))
+        console.log('SUBCATEGORY VALIDATION:', {
+          fieldName,
+          value,
+          subcategoryNormalized,
+          categoriesCount: categories.length,
+          available: categories.map(c => c.name)
+        });
         return { 
           isValid: !!subcategoryNormalized, 
           suggestion: subcategoryMatch?.name,
@@ -893,6 +900,15 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         <p className="text-xs text-blue-600 mb-2">
                           🔗 Mapeo manual aplicado
                         </p>
+                      )}
+                      
+                      {!validation.isValid && (
+                        <div className="text-xs bg-red-50 border border-red-200 p-2 rounded mb-2">
+                          <p>DEBUG - validation.available: {JSON.stringify(validation.available)}</p>
+                          <p>DEBUG - validation.available.length: {validation.available?.length}</p>
+                          <p>DEBUG - mappedField: {mappedField}</p>
+                          <p>DEBUG - sampleValue: {sampleValue}</p>
+                        </div>
                       )}
                       
                       {!validation.isValid && validation.available && validation.available.length > 0 && (
