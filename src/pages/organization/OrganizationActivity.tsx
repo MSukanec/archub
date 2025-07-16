@@ -270,29 +270,31 @@ export default function OrganizationActivity() {
           ]}
         />
 
-        {/* Activity Chart - Currently disabled */}
-        <div className="text-center py-8 text-muted-foreground">
-          <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">Gráfico de actividad en desarrollo</p>
-        </div>
-
-        {/* Activity Table */}
+        {/* Activity Chart and Table */}
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">
             <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
             <p className="text-sm">Cargando actividades...</p>
           </div>
         ) : sortedActivities.length === 0 ? (
-          <EmptyState
-            icon={<Activity className="h-12 w-12" />}
-            title="No hay actividades registradas"
-            description="Cuando se realicen acciones en la organización, aparecerán aquí."
-            action={
-              <Button onClick={() => navigate('/finances/movements')}>
-                Ver movimientos
-              </Button>
-            }
-          />
+          <div className="space-y-6">
+            {/* Activity Chart - Currently disabled */}
+            <div className="text-center py-8 text-muted-foreground">
+              <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="text-sm">Gráfico de actividad en desarrollo</p>
+            </div>
+            
+            <EmptyState
+              icon={<Activity className="h-12 w-12" />}
+              title="No hay actividades registradas"
+              description="Cuando se realicen acciones en la organización, aparecerán aquí."
+              action={
+                <Button onClick={() => navigate('/finances/movements')}>
+                  Ver movimientos
+                </Button>
+              }
+            />
+          </div>
         ) : (
           <Table
             data={sortedActivities}
