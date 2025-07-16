@@ -268,7 +268,7 @@ export default function OrganizationBasicData() {
 
   // Set sidebar context
   useEffect(() => {
-    setSidebarContext('organizacion');
+    setSidebarContext('organization');
   }, [setSidebarContext]);
 
   return (

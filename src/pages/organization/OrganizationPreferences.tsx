@@ -57,7 +57,7 @@ export default function OrganizationPreferences() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('organizacion');
+    setSidebarContext('organization');
   }, [setSidebarContext]);
 
   // Initialize form values from organization data
