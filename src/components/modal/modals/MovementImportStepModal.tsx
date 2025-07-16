@@ -21,6 +21,7 @@ import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
+import UserSelector from '@/components/ui-custom/UserSelector'
 import { cn } from '@/lib/utils'
 
 // Value normalization utilities
@@ -130,16 +131,33 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [isProcessing, setIsProcessing] = useState(false)
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [dropzoneKey, setDropzoneKey] = useState(0)
+  const [selectedCreator, setSelectedCreator] = useState<string>('')
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
   
   // Data hooks
   const { data: currentUser } = useCurrentUser()
+  const organizationId = currentUser?.organization?.id
   const { data: movementConcepts } = useMovementConcepts()
   const { data: organizationCurrencies } = useOrganizationCurrencies()
   const { data: organizationWallets } = useOrganizationWallets()
-  const { data: organizationMembers } = useOrganizationMembers()
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
+  
+  // Convert members to users format for UserSelector
+  const users = organizationMembers.map(member => ({
+    id: member.user_id,
+    full_name: member.full_name || member.email || 'Usuario',
+    email: member.email || '',
+    avatar_url: member.avatar_url
+  }))
+  
+  // Set default creator when data loads
+  React.useEffect(() => {
+    if (!selectedCreator && currentUser?.user?.id) {
+      setSelectedCreator(currentUser.user.id)
+    }
+  }, [currentUser?.user?.id, selectedCreator])
 
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
@@ -344,7 +362,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         movement_date: new Date().toISOString().split('T')[0],
         organization_id: currentUser.organization.id,
         project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
-        created_by: currentUser.user?.id,
+        created_by: selectedCreator || currentUser.user?.id,
         is_favorite: false
       }
 
@@ -406,7 +424,12 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     switch (currentStep) {
       case 1:
         return {
-          cancelAction: baseCancel
+          cancelAction: baseCancel,
+          nextAction: {
+            label: 'Siguiente',
+            onClick: () => setCurrentStep(2),
+            disabled: !parsedData || !selectedCreator
+          }
         }
       case 2:
         return {
@@ -450,21 +473,41 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Step content renderers
   const renderStep1 = () => (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
+      {!parsedData && (
+        <div
+          {...getRootProps()}
+          className={cn(
+            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+            isDragActive ? "border-blue-400 bg-blue-50 dark:bg-blue-950" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+          )}
+        >
+          <input {...getInputProps()} />
+          <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+          <p className="text-sm font-medium">Haz clic o arrastra un archivo</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Formatos soportados: .xlsx, .xls, .csv
+          </p>
+        </div>
+      )}
 
-      <div
-        {...getRootProps()}
-        className={cn(
-          "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-          isDragActive ? "border-blue-400 bg-blue-50 dark:bg-blue-950" : "border-muted-foreground/25 hover:border-muted-foreground/50"
-        )}
-      >
-        <input {...getInputProps()} />
-        <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-        <p className="text-sm font-medium">Haz clic o arrastra un archivo</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Formatos soportados: .xlsx, .xls, .csv
-        </p>
+      {parsedData && (
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Archivo cargado: {parsedData.fileName} ({parsedData.rows.length} filas)
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="space-y-3">
+        <Label>Creador de los movimientos</Label>
+        <UserSelector
+          users={users}
+          value={selectedCreator}
+          onValueChange={setSelectedCreator}
+          placeholder="Seleccionar miembro de la organización"
+        />
       </div>
 
       <Alert>
@@ -484,7 +527,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   )
 
   const renderStep2 = () => (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium mb-2">Mapear columnas</h3>
         <p className="text-sm text-muted-foreground">
@@ -560,7 +603,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     }
 
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <div>
           <h3 className="text-lg font-medium mb-2">Vista previa</h3>
           <p className="text-sm text-muted-foreground">

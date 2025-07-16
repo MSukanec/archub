@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 16, 2025. EXCEL IMPORT SYSTEM ENHANCEMENTS: Enhanced MovementImportStepModal with automatic value normalization and member selection - COMPLETED
+  • Added member selector in step 1 to choose movement creator before column mapping
+  • Implemented automatic value normalization: "INGRESOS" → "INGRESO", "EGRESOS" → "EGRESO" 
+  • Enhanced text normalization to handle accents, extra spaces, and case conversion
+  • Fixed modal body padding to match CardFormModal.tsx exactly (removed p-6, uses FormModalLayout)
+  • Added fuzzy matching for concepts, currencies, wallets, and member names
+  • Corrected JSON serialization errors with better data cleaning before API calls
+  • System now requires both file upload and creator selection before proceeding to column mapping
 - July 16, 2025. MODAL STRUCTURE FIXES AND UI CONSISTENCY: Fixed critical modal structure issues and improved UI consistency - COMPLETED
   • Fixed PhoneInput component: reduced country code "+54" text size from text-sm to text-xs to match placeholder consistency
   • Removed icon from ACTIVIDAD breadcrumb: page now shows clean "Actividad" title without icon clutter
