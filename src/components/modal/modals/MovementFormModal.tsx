@@ -312,9 +312,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         if (defaultWallet) {
           aportesForm.setValue('wallet_id', defaultWallet)
         }
+      } else {
+        // Si no es una categoría de aportes, permitir regresar al formulario normal
+        if (isAportes) {
+          setIsAportes(false)
+        }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), categories, members, userData])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), categories, members, userData, isAportes])
 
 
 
@@ -1656,10 +1661,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
+                  <FormLabel>Descripción (opcional)</FormLabel>
                   <FormControl>
-                    <Input
+                    <Textarea
                       placeholder="Descripción del movimiento..."
+                      rows={3}
                       {...field}
                       value={field.value || ''} // Asegurar que inicie vacío
                     />
