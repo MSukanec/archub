@@ -13,7 +13,7 @@ import { DocumentUploadFormModal } from '../modals/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/DocumentFolderFormModal';
 import MovementFormModal from '../modals/MovementFormModal';
 import MovementConceptFormModal from '../modals/MovementConceptFormModal';
-import { OrganizationMovementConceptFormModal } from '../modals/OrganizationMovementConceptFormModal';
+import OrganizationMovementConceptFormModal from '../modals/OrganizationMovementConceptFormModal';
 import MovementImportModal from '../modals/MovementImportModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 

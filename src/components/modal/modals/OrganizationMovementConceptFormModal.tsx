@@ -1,38 +1,36 @@
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEffect } from 'react';
-import { Tag, Plus, Folder } from 'lucide-react';
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useCreateMovementConcept, useUpdateMovementConcept, MovementConceptAdmin } from '@/hooks/use-movement-concepts-admin';
 import { FormModalLayout } from '../form/FormModalLayout';
+import { FormModalHeader } from '../form/FormModalHeader';
+import { FormModalFooter } from '../form/FormModalFooter';
+import FormModalBody from '../form/FormModalBody';
+import { useModalPanelStore } from '../form/modalPanelStore';
+import { useGlobalModalStore } from '../form/useGlobalModalStore';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Package2, Plus, Tag, AlertTriangle } from 'lucide-react';
+import { useMovementConceptsAdmin } from '@/hooks/use-movement-concepts-admin';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-// Schema for form validation
-const formSchema = z.object({
+const conceptSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  parent_id: z.string().optional()
+  description: z.string().optional(),
+  parent_id: z.string().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type ConceptFormData = z.infer<typeof conceptSchema>;
 
 interface OrganizationMovementConceptFormModalProps {
   modalData?: {
-    editingConcept?: MovementConceptAdmin;
+    editingConcept?: any;
     parentConcept?: {
       id: string;
       name: string;
@@ -43,227 +41,254 @@ interface OrganizationMovementConceptFormModalProps {
   onClose: () => void;
 }
 
-export function OrganizationMovementConceptFormModal({
-  modalData,
-  onClose
-}: OrganizationMovementConceptFormModalProps) {
+export default function OrganizationMovementConceptFormModal({ modalData, onClose }: OrganizationMovementConceptFormModalProps) {
   const editingConcept = modalData?.editingConcept;
   const parentConcept = modalData?.parentConcept;
-  
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  
-  const createMutation = useCreateMovementConcept();
-  const updateMutation = useUpdateMovementConcept();
+  const queryClient = useQueryClient();
+  const { currentPanel, setPanel } = useModalPanelStore();
+  const { closeModal } = useGlobalModalStore();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  // Query for parent concepts - only non-system concepts for organization
+  const { data: allConcepts = [] } = useMovementConceptsAdmin();
+  const availableParentConcepts = allConcepts.filter(concept => !concept.is_system);
+
+  const form = useForm<ConceptFormData>({
+    resolver: zodResolver(conceptSchema),
     defaultValues: {
       name: editingConcept?.name || '',
-      parent_id: editingConcept?.parent_id || parentConcept?.id || undefined
-    }
+      description: editingConcept?.description || '',
+      parent_id: editingConcept?.parent_id || parentConcept?.id || '',
+    },
   });
 
-  useEffect(() => {
+  // Always show edit panel
+  React.useEffect(() => {
+    setPanel('edit');
+  }, [setPanel]);
+
+  // Reset form when editing concept changes
+  React.useEffect(() => {
     if (editingConcept) {
       form.reset({
-        name: editingConcept.name,
-        parent_id: editingConcept.parent_id || undefined
+        name: editingConcept.name || '',
+        description: editingConcept.description || '',
+        parent_id: editingConcept.parent_id || '',
       });
     } else if (parentConcept) {
       form.reset({
         name: '',
-        parent_id: parentConcept.id
+        description: '',
+        parent_id: parentConcept.id,
       });
     }
   }, [editingConcept, parentConcept, form]);
 
-  const onSubmit = async (data: FormData) => {
-    if (!userData?.organization?.id) {
+  const createMutation = useMutation({
+    mutationFn: async (data: ConceptFormData) => {
+      if (!userData?.organization?.id) {
+        throw new Error('No organization found');
+      }
+
+      const { data: result, error } = await supabase
+        .from('movement_concepts')
+        .insert([{
+          name: data.name,
+          description: data.description,
+          parent_id: data.parent_id || null,
+          organization_id: userData.organization.id,
+          is_system: false,
+        }])
+        .select();
+
+      if (error) throw error;
+      return result[0];
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
+      toast({
+        title: "Concepto creado",
+        description: "El nuevo concepto se ha creado correctamente"
+      });
+      closeModal();
+    },
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "No se pudo obtener la información de la organización",
+        description: "Error al crear el concepto",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: ConceptFormData) => {
+      if (!editingConcept?.id) {
+        throw new Error('No concept ID found');
+      }
+
+      const { data: result, error } = await supabase
+        .from('movement_concepts')
+        .update({
+          name: data.name,
+          description: data.description,
+          parent_id: data.parent_id || null,
+        })
+        .eq('id', editingConcept.id)
+        .select();
+
+      if (error) throw error;
+      return result[0];
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
+      toast({
+        title: "Concepto actualizado",
+        description: "El concepto se ha actualizado correctamente"
+      });
+      closeModal();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Error al actualizar el concepto",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const onSubmit = (data: ConceptFormData) => {
+    // Prevent editing system concepts
+    if (editingConcept?.is_system) {
+      toast({
+        title: "Edición no permitida",
+        description: "Los conceptos del sistema no pueden ser modificados",
         variant: "destructive"
       });
       return;
     }
 
-    try {
-      if (editingConcept) {
-        await updateMutation.mutateAsync({
-          id: editingConcept.id,
-          name: data.name,
-          parent_id: data.parent_id || null,
-          organization_id: userData.organization.id
-        });
-        toast({
-          title: "Concepto actualizado",
-          description: "El concepto se ha actualizado correctamente"
-        });
-      } else {
-        await createMutation.mutateAsync({
-          name: data.name,
-          parent_id: data.parent_id || null,
-          organization_id: userData.organization.id,
-          is_system: false
-        });
-        toast({
-          title: "Concepto creado",
-          description: "El nuevo concepto se ha creado correctamente"
-        });
-      }
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: editingConcept ? "Error al actualizar el concepto" : "Error al crear el concepto",
-        variant: "destructive"
-      });
+    if (editingConcept) {
+      updateMutation.mutate(data);
+    } else {
+      createMutation.mutate(data);
     }
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
   const isSystemConcept = editingConcept?.is_system;
 
-  const viewPanel = (
-    <div className="space-y-6">
-      {isSystemConcept && (
-        <Card className="border-orange-200 bg-orange-50/50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-800">
-              <Tag className="h-4 w-4" />
-              <span className="text-sm font-medium">Concepto del Sistema</span>
-            </div>
-            <p className="text-sm text-orange-700 mt-1">
-              Este es un concepto predeterminado del sistema que no puede ser modificado.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-4">
-        <div>
-          <h3 className="font-medium mb-2">Información del Concepto</h3>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Nombre</label>
-              <p className="text-sm">{editingConcept?.name || 'Nuevo concepto'}</p>
-            </div>
-            
-            {parentConcept && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Concepto Padre</label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Folder className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{parentConcept.name}</span>
-                </div>
-              </div>
-            )}
-
-            {editingConcept && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Tipo</label>
-                <div className="mt-1">
-                  <Badge variant={editingConcept.is_system ? "secondary" : "default"}>
-                    {editingConcept.is_system ? 'Sistema' : 'Personalizado'}
-                  </Badge>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const editPanel = (
-    <div className="space-y-6">
-      {isSystemConcept && (
-        <Card className="border-red-200 bg-red-50/50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-800">
-              <Tag className="h-4 w-4" />
-              <span className="text-sm font-medium">Edición No Permitida</span>
-            </div>
-            <p className="text-sm text-red-700 mt-1">
-              Los conceptos del sistema no pueden ser modificados. Solo puedes editar conceptos personalizados de tu organización.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del Concepto *</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    placeholder="Ej: Gastos de oficina"
-                    disabled={isSystemConcept}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {parentConcept && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Concepto Padre</label>
-              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
-                <Folder className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{parentConcept.name}</span>
-                <Badge variant="outline" className="text-xs">
-                  {parentConcept.is_system ? 'Sistema' : 'Personalizado'}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </form>
-      </Form>
-    </div>
-  );
-
-  const headerContent = (
-    <div className="flex items-center gap-2">
-      <Tag className="h-5 w-5" />
-      <span>
-        {editingConcept 
+  return (
+    <FormModalLayout>
+      <FormModalHeader 
+        title={editingConcept 
           ? `${isSystemConcept ? 'Ver' : 'Editar'} Concepto` 
           : 'Nuevo Concepto'
         }
-      </span>
-    </div>
-  );
+        icon={Tag}
+      />
 
-  const footerContent = (
-    <div className="flex items-center gap-2">
-      {!isSystemConcept && (
-        <Button 
-          type="submit" 
-          disabled={isPending}
-          onClick={form.handleSubmit(onSubmit)}
-        >
-          {isPending ? 'Guardando...' : (editingConcept ? 'Actualizar' : 'Crear')}
-        </Button>
-      )}
-    </div>
-  );
+      <FormModalBody columns={1}>
+        {isSystemConcept && (
+          <Alert className="border-red-200 bg-red-50">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Los conceptos del sistema no pueden ser modificados. Solo puedes ver su información.
+            </AlertDescription>
+          </Alert>
+        )}
 
-  return (
-    <FormModalLayout 
-      columns={1}
-      isOpen={true}
-      onClose={onClose}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-    />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre del Concepto *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Ej: Gastos de oficina"
+                      disabled={isSystemConcept}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Descripción opcional del concepto"
+                      disabled={isSystemConcept}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="parent_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Concepto Padre</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                    disabled={isSystemConcept || !!parentConcept}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar concepto padre (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin concepto padre</SelectItem>
+                      {availableParentConcepts.map((concept) => (
+                        <SelectItem key={concept.id} value={concept.id}>
+                          {concept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {parentConcept && (
+              <Alert>
+                <Package2 className="h-4 w-4" />
+                <AlertDescription>
+                  Este concepto será creado como hijo de: <strong>{parentConcept.name}</strong>
+                </AlertDescription>
+              </Alert>
+            )}
+          </form>
+        </Form>
+      </FormModalBody>
+
+      <FormModalFooter
+        cancelText="Cancelar"
+        submitText={isSystemConcept ? null : (isPending ? 'Guardando...' : (editingConcept ? 'Actualizar' : 'Crear'))}
+        onSubmit={isSystemConcept ? undefined : form.handleSubmit(onSubmit)}
+        isLoading={isPending}
+        disabled={isPending || isSystemConcept}
+      />
+    </FormModalLayout>
   );
 }
