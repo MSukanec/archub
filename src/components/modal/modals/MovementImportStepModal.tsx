@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
-import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw } from 'lucide-react'
+import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw, ChevronRight } from 'lucide-react'
 import { FormModalLayout, FormModalStepHeader, FormModalStepFooter } from '@/components/modal/form'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 import { Button } from '@/components/ui/button'
@@ -823,154 +823,189 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       <div>
         <h3 className="text-lg font-medium mb-2">Mapear columnas del archivo</h3>
         <p className="text-sm text-muted-foreground">
-          Hemos pre-mapeado automáticamente las columnas reconocibles. Revisa y ajusta según sea necesario.
+          Confirma o modifica los mapeos automáticos. Los valores que necesiten mapeo manual aparecerán expandidos.
         </p>
       </div>
 
       {parsedData && (
         <div className="space-y-4">
-          <div className="grid gap-4">
-            {parsedData.headers.map((header, index) => {
-              const mappedField = columnMapping[index]
-              const sampleValue = parsedData.rows[0]?.[index]
-              const validation = mappedField ? validateFieldValue(mappedField, sampleValue) : null
-              
-              return (
-                <div key={index} className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">Excel</Badge>
-                        <Label className="text-sm font-medium">{header}</Label>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Ejemplo: <span className="font-mono">{sampleValue || 'N/A'}</span>
-                      </p>
-                    </div>
-                    <div className="flex-1 ml-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="text-xs">Archub</Badge>
-                        <span className="text-xs text-muted-foreground">Campo destino</span>
-                      </div>
-                      <Select 
-                        value={columnMapping[index] || ''} 
-                        onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar campo de Archub" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">No mapear</SelectItem>
-                          {AVAILABLE_FIELDS.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+          {parsedData.headers.map((header, index) => {
+            const mappedField = columnMapping[index]
+            const sampleValue = parsedData.rows[0]?.[index]
+            const validation = mappedField ? validateFieldValue(mappedField, sampleValue) : null
+            const isValid = validation?.isValid || false
+            const needsMapping = mappedField && !isValid && validation?.available && validation.available.length > 0
+            
+            return (
+              <div key={index} className="border rounded-lg p-4 bg-white">
+                {/* Header Row */}
+                <div className="grid grid-cols-12 gap-4 items-center mb-3">
+                  <div className="col-span-1 text-center">
+                    <Badge variant="outline" className="text-xs font-mono w-8 h-6">{String.fromCharCode(65 + index)}</Badge>
+                  </div>
+                  <div className="col-span-4">
+                    <div className="font-medium text-sm">{header}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {sampleValue && <span className="font-mono bg-gray-50 px-2 py-1 rounded text-xs">{sampleValue}</span>}
                     </div>
                   </div>
-                  
-                  {mappedField && validation && (
-                    <div className="mt-3 p-3 bg-muted/50 rounded-md">
-                      <div className="flex items-center gap-2 mb-2">
-                        {validation.isValid ? (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4 text-orange-500" />
-                        )}
-                        <span className="text-xs font-medium">
-                          {validation.isValid ? 'Mapeo válido' : 'Revisar mapeo'}
-                        </span>
-                      </div>
-                      
-                      {!validation.isValid && validation.suggestion && (
-                        <p className="text-xs text-muted-foreground mb-2">
-                          Sugerencia: <span className="font-medium">{validation.suggestion}</span>
-                        </p>
-                      )}
-                      
-                      {validation.isValid && validation.mappedValue && (
-                        <p className="text-xs text-green-600 mb-2">
-                          ✓ Mapeado a: <span className="font-medium">{validation.suggestion || validation.mappedValue}</span>
-                        </p>
-                      )}
-                      
-                      {manualMappings[`${mappedField}_${sampleValue}`] && (
-                        <p className="text-xs text-blue-600 mb-2">
-                          🔗 Mapeo manual aplicado
-                        </p>
-                      )}
-                      
-                      {!validation.isValid && (
-                        <div className="text-xs bg-red-50 border border-red-200 p-2 rounded mb-2">
-                          <p>DEBUG - validation.available: {JSON.stringify(validation.available)}</p>
-                          <p>DEBUG - validation.available.length: {validation.available?.length}</p>
-                          <p>DEBUG - mappedField: {mappedField}</p>
-                          <p>DEBUG - sampleValue: {sampleValue}</p>
-                        </div>
-                      )}
-                      
-                      {!validation.isValid && validation.available && validation.available.length > 0 && (
-                        <div className="text-xs space-y-2 mt-2 p-3 bg-orange-50 border border-orange-200 rounded">
-                          <p className="text-orange-700 font-medium">🔧 REVISAR MAPEO: Valores disponibles en Archub</p>
-                          <p className="text-orange-600 text-xs">Haz clic en cualquier valor para mapear "{sampleValue}":</p>
-                          <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
-                            {validation.available.map((value, idx) => (
-                              <Button
-                                key={idx}
-                                variant="outline" 
-                                size="sm"
-                                className="h-8 text-xs justify-start bg-white hover:bg-orange-100 border-orange-300"
-                                onClick={() => {
-                                  const mappingKey = `${mappedField}_${sampleValue}`;
-                                  
-                                  // Find the ID for this value
-                                  let targetId = null;
-                                  if (mappedField === 'type_id') {
-                                    const match = types.find(t => t.name === value);
-                                    targetId = match?.id;
-                                  } else if (mappedField === 'currency_id') {
-                                    const match = organizationCurrencies?.find(c => c.name === value);
-                                    targetId = match?.id;
-                                  } else if (mappedField === 'wallet_id') {
-                                    const match = organizationWallets?.find(w => w.name === value);
-                                    targetId = match?.id;
-                                  } else if (mappedField === 'subcategory_id') {
-                                    const match = categories.find(c => c.name === value);
-                                    targetId = match?.id;
-                                  }
-                                  
-                                  if (targetId) {
-                                    setManualMappings(prev => ({
-                                      ...prev,
-                                      [mappingKey]: targetId
-                                    }));
-                                    
-                                    toast({
-                                      title: "Mapeo aplicado",
-                                      description: `"${sampleValue}" ahora se mapea a "${value}"`
-                                    });
-                                  }
-                                }}
-                              >
-                                ▶ {value}
-                              </Button>
-                            ))}
-                          </div>
-                          {validation.available.length > 6 && (
-                            <p className="text-xs text-orange-600">
-                              Y {validation.available.length - 6} opciones más...
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="col-span-1 text-center">
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="col-span-4">
+                    <Select 
+                      value={columnMapping[index] || ''} 
+                      onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Seleccionar campo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No mapear</SelectItem>
+                        {AVAILABLE_FIELDS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2 text-right">
+                    {isValid && (
+                      <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
+                        ✓ Confirmed mapping
+                      </Badge>
+                    )}
+                    {needsMapping && (
+                      <Badge variant="destructive" className="bg-orange-100 text-orange-800 text-xs border-orange-200">
+                        ⚠ Needs mapping
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-              )
-            })}
-          </div>
+
+                {/* Validation Status */}
+                {mappedField && validation && (
+                  <div className="ml-5 border-l-2 border-gray-200 pl-4">
+                    {isValid ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-green-700 text-sm">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Matched to the '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}' field.</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-green-600 text-xs">
+                          <span>⚫</span>
+                          <span>100% of your rows have a value for this column</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-green-600 text-xs">
+                          <span>✓</span>
+                          <span>All values pass validation for this field</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-orange-700 text-sm">
+                          <AlertCircle className="h-4 w-4" />
+                          <span>100% of your rows have a value for this column</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-orange-600 text-xs">
+                          <span>⚠</span>
+                          <span>Values need manual mapping (repair on next step)</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Value Mapping Section - Only for problematic fields */}
+                {needsMapping && (
+                  <div className="mt-4 border-t pt-4">
+                    <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700 mb-2">
+                      <div className="col-span-3">Your values</div>
+                      <div className="col-span-3">Our values</div>
+                      <div className="col-span-6"></div>
+                    </div>
+                    
+                    <div className="grid grid-cols-12 gap-4 items-center py-2 bg-gray-50 rounded">
+                      <div className="col-span-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span className="text-sm font-mono">{sampleValue}</span>
+                        </div>
+                      </div>
+                      <div className="col-span-3">
+                        <Select 
+                          value={manualMappings[`${mappedField}_${sampleValue}`] || ''}
+                          onValueChange={(selectedId) => {
+                            const mappingKey = `${mappedField}_${sampleValue}`;
+                            setManualMappings(prev => ({
+                              ...prev,
+                              [mappingKey]: selectedId
+                            }));
+                            
+                            // Find the name for the toast
+                            let selectedName = '';
+                            if (mappedField === 'type_id') {
+                              selectedName = types.find(t => t.id === selectedId)?.name || '';
+                            } else if (mappedField === 'currency_id') {
+                              selectedName = organizationCurrencies?.find(c => c.id === selectedId)?.name || '';
+                            } else if (mappedField === 'wallet_id') {
+                              selectedName = organizationWallets?.find(w => w.id === selectedId)?.name || '';
+                            } else if (mappedField === 'subcategory_id') {
+                              selectedName = categories.find(c => c.id === selectedId)?.name || '';
+                            }
+                            
+                            toast({
+                              title: "Mapeo aplicado",
+                              description: `"${sampleValue}" → "${selectedName}"`
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Seleccionar valor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {validation?.available?.map((value, idx) => {
+                              // Find the ID for this value
+                              let valueId = '';
+                              if (mappedField === 'type_id') {
+                                valueId = types.find(t => t.name === value)?.id || '';
+                              } else if (mappedField === 'currency_id') {
+                                valueId = organizationCurrencies?.find(c => c.name === value)?.id || '';
+                              } else if (mappedField === 'wallet_id') {
+                                valueId = organizationWallets?.find(w => w.name === value)?.id || '';
+                              } else if (mappedField === 'subcategory_id') {
+                                valueId = categories.find(c => c.name === value)?.id || '';
+                              }
+                              
+                              return (
+                                <SelectItem key={idx} value={valueId}>
+                                  {value}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-4">
+                        {manualMappings[`${mappedField}_${sampleValue}`] && (
+                          <div className="flex items-center gap-2 text-green-700 text-sm">
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Matched to the '{AVAILABLE_FIELDS.find(f => f.value === mappedField)?.label}' field.</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="col-span-2 text-right">
+                        <Button size="sm" variant="default" className="text-xs h-6 bg-green-600 hover:bg-green-700">
+                          Confirm mapping
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
