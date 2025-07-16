@@ -604,14 +604,27 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             
             switch (fieldName) {
               case 'movement_date':
-                if (typeof value === 'number' && value > 40000) {
+                if (typeof value === 'number') {
+                  // Handle Excel date serial numbers
                   const excelEpoch = new Date(1900, 0, 1)
                   const jsDate = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000)
                   movement.movement_date = jsDate.toISOString().split('T')[0]
                   hasValidData = true
-                } else if (value) {
-                  movement.movement_date = value
-                  hasValidData = true
+                  console.log(`Converted Excel date ${value} to ${movement.movement_date}`)
+                } else if (value && typeof value === 'string') {
+                  // Handle string dates
+                  const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+                  if (dateRegex.test(value)) {
+                    movement.movement_date = value
+                    hasValidData = true
+                  } else {
+                    // Try to parse other date formats
+                    const parsedDate = new Date(value)
+                    if (!isNaN(parsedDate.getTime())) {
+                      movement.movement_date = parsedDate.toISOString().split('T')[0]
+                      hasValidData = true
+                    }
+                  }
                 }
                 break
               case 'amount':
@@ -637,9 +650,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                 // Apply value normalization for specific fields
                 if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
                   const normalizedValue = normalizeValue(fieldName, value, valueMap, manualMappings)
-                  if (normalizedValue) {
-                    movement[fieldName] = normalizedValue
-                    hasValidData = true
+                  
+                  // Validate that normalized value is a proper UUID or null
+                  if (normalizedValue && typeof normalizedValue === 'string') {
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                    if (uuidRegex.test(normalizedValue)) {
+                      movement[fieldName] = normalizedValue
+                      hasValidData = true
+                    } else {
+                      console.warn(`Skipping invalid UUID for ${fieldName}: "${normalizedValue}" from value: "${value}"`)
+                      // Don't set invalid UUIDs - just skip them
+                    }
                   }
                   // Don't set unmappable values to avoid UUID errors - just skip them
                 } else if (value) {
