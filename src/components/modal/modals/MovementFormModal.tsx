@@ -146,58 +146,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  // Eliminar el tipo creado incorrectamente y configurar las categorías existentes
+  // LOG: Categorías de aportes ya configuradas - NO modificar base de datos
   React.useEffect(() => {
-    const configureAportesCategories = async () => {
-      if (!organizationConcepts || !userData?.organization?.id) return
-      
-      // Aplanar la estructura jerárquica para buscar conceptos
-      const flattenConcepts = (concepts: any[]): any[] => {
-        return concepts.reduce((acc, concept) => {
-          acc.push(concept)
-          if (concept.children && concept.children.length > 0) {
-            acc.push(...flattenConcepts(concept.children))
-          }
-          return acc
-        }, [])
-      }
-      
-      const allConcepts = flattenConcepts(organizationConcepts)
-      
-      // Eliminar el tipo incorrecto que creé
-      const incorrectType = allConcepts.find(c => c.name === 'Aportes de Socios')
-      if (incorrectType) {
-        console.log('Eliminando tipo incorrecto...')
-        await supabase
-          .from('movement_concepts')
-          .delete()
-          .eq('id', incorrectType.id)
-      }
-      
-      // Configurar las categorías existentes con view_mode aportes
-      const { error: updateTerceros } = await supabase
-        .from('movement_concepts')
-        .update({ 
-          view_mode: 'aportes',
-          extra_fields: ['cliente_id']
-        })
-        .eq('name', 'Aportes de Terceros')
-      
-      const { error: updatePropios } = await supabase
-        .from('movement_concepts')
-        .update({ 
-          view_mode: 'aportes',
-          extra_fields: ['socio_id']
-        })
-        .eq('name', 'Aportes Propios')
-      
-      if (!updateTerceros && !updatePropios) {
-        queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] })
-        console.log('Categorías de aportes configuradas correctamente')
-      }
+    if (organizationConcepts && userData?.organization?.id) {
+      console.log('Categorías de aportes configuradas correctamente')
     }
-    
-    configureAportesCategories()
   }, [organizationConcepts, userData?.organization?.id])
 
   // Aplanar la estructura jerárquica para obtener solo los tipos (conceptos padre)
