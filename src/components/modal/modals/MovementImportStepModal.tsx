@@ -77,16 +77,17 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       const normalized = normalizeText(concept.name);
       valueMap.subcategory_id[normalized] = concept.id;
       
-      // Add common variations
+      // Add common variations for better fuzzy matching
       const variations = [
         concept.name.toLowerCase(),
-        concept.name.replace(/\s+/g, ''),
-        concept.name.replace(/[aeiou]/gi, ''), // Remove vowels for fuzzy matching
+        concept.name.replace(/\s+/g, ''), // Remove spaces: "Mano de Obra" -> "manodeobra"
+        concept.name.replace(/[^a-zA-Z0-9]/g, ''), // Remove special chars
+        concept.name.replace(/\s+/g, '').toLowerCase(), // Combined
       ];
       
       variations.forEach(variation => {
         const varNormalized = normalizeText(variation);
-        if (varNormalized !== normalized) {
+        if (varNormalized !== normalized && varNormalized.length > 2) {
           valueMap.subcategory_id[varNormalized] = concept.id;
         }
       });
@@ -115,11 +116,57 @@ const normalizeValue = (field: string, value: any, valueMap: any): any => {
       if (normalized.includes(key) || key.includes(normalized)) {
         return mappedValue;
       }
+      // Try partial matching for better results
+      if (key.length > 3 && normalized.length > 3) {
+        const similarity = calculateSimilarity(normalized, key);
+        if (similarity > 0.7) { // 70% similarity threshold
+          return mappedValue;
+        }
+      }
     }
   }
   
   // Return null for unmappable values to avoid UUID errors
   return null;
+};
+
+// Simple similarity calculation for fuzzy matching
+const calculateSimilarity = (str1: string, str2: string): number => {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+  
+  if (longer.length === 0) return 1.0;
+  
+  const editDistance = levenshteinDistance(longer, shorter);
+  return (longer.length - editDistance) / longer.length;
+};
+
+const levenshteinDistance = (str1: string, str2: string): number => {
+  const matrix = [];
+  
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i];
+  }
+  
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j;
+  }
+  
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  
+  return matrix[str2.length][str1.length];
 };
 
 interface MovementImportStepModalProps {
@@ -144,7 +191,6 @@ interface ValidationError {
 }
 
 const AVAILABLE_FIELDS = [
-  { value: '', label: 'No mapear' },
   { value: 'movement_date', label: 'Fecha' },
   { value: 'description', label: 'Descripción' },
   { value: 'amount', label: 'Cantidad' },
@@ -761,21 +807,33 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         </p>
                       )}
                       
-                      {!validation.isValid && validation.available && (
-                        <div className="text-xs">
-                          <p className="text-muted-foreground mb-1">Valores disponibles en Archub:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {validation.available.slice(0, 6).map(value => (
-                              <Badge key={value} variant="outline" className="text-xs">
+                      {!validation.isValid && validation.available && validation.available.length > 0 && (
+                        <div className="text-xs space-y-2">
+                          <p className="text-muted-foreground">Valores disponibles en Archub:</p>
+                          <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
+                            {validation.available.map((value, idx) => (
+                              <Button
+                                key={idx}
+                                variant="outline" 
+                                size="sm"
+                                className="h-7 text-xs justify-start"
+                                onClick={() => {
+                                  // Auto-map this value by updating the sample data temporarily for re-validation
+                                  toast({
+                                    title: "Mapeo sugerido",
+                                    description: `"${sampleValue}" se mapeará a "${value}"`
+                                  });
+                                }}
+                              >
                                 {value}
-                              </Badge>
+                              </Button>
                             ))}
-                            {validation.available.length > 6 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{validation.available.length - 6} más
-                              </Badge>
-                            )}
                           </div>
+                          {validation.available.length > 8 && (
+                            <p className="text-xs text-muted-foreground">
+                              Y {validation.available.length - 8} opciones más...
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
