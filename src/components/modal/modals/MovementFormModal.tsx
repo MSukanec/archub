@@ -80,11 +80,13 @@ const aportesFormSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
+  category_id: z.string().min(1, 'Categoría es requerida'),
   // Campos para aportes
   contact_id: z.string().min(1, 'Selección es requerida'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
-  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0')
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional()
 })
 
 type MovementForm = z.infer<typeof movementFormSchema>
@@ -228,7 +230,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       contact_id: '',
       currency_id: userData?.organization?.default_currency_id || '',
       wallet_id: userData?.organization?.default_wallet_id || '',
-      amount: 0
+      amount: 0,
+      exchange_rate: undefined
     }
   })
 
@@ -889,7 +892,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         currency_id: data.currency_id,
         wallet_id: data.wallet_id,
         type_id: data.type_id,
-        contact_id: data.contact_id // Este campo guardará cliente_id o socio_id
+        category_id: data.category_id,
+        contact_id: data.contact_id, // Este campo guardará cliente_id o socio_id
+        exchange_rate: data.exchange_rate || null // Agregar cotización opcional
       }
 
       console.log('Movement data to be inserted:', movementData)
@@ -1797,27 +1802,50 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               />
             </div>
 
-            {/* Cantidad */}
-            <FormField
-              control={aportesForm.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cantidad *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Fila: Cantidad | Cotización */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={aportesForm.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={aportesForm.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cotización (opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        placeholder="Ej: 1.0000"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       ) : (
