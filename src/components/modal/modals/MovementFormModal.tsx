@@ -522,10 +522,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
           type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
           contact_id: editingMovement.contact_id || '',
           currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
           wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
-          amount: editingMovement.amount || 0
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined
         })
         
         // Establecer selectedTypeId para aportes también

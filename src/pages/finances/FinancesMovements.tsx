@@ -185,6 +185,7 @@ export default function Movements() {
             setFilterByType("all");
             setFilterByCategory("all");
             setFilterByFavorites("all");
+            setFilterByScope("all");
           },
         }
       });
@@ -203,6 +204,7 @@ export default function Movements() {
   const [filterByType, setFilterByType] = useState("all");
   const [filterByCategory, setFilterByCategory] = useState("all");
   const [filterByFavorites, setFilterByFavorites] = useState("all");
+  const [filterByScope, setFilterByScope] = useState("all");
 
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -610,9 +612,14 @@ export default function Movements() {
       const matchesFavorites =
         filterByFavorites === "all" ||
         (filterByFavorites === "favorites" && movement.is_favorite);
+      
+      const matchesScope =
+        filterByScope === "all" ||
+        (filterByScope === "organization" && !movement.project_id) ||
+        (filterByScope === "project" && movement.project_id);
 
       return (
-        matchesSearch && matchesType && matchesCategory && matchesFavorites
+        matchesSearch && matchesType && matchesCategory && matchesFavorites && matchesScope
       );
     });
 
@@ -664,6 +671,22 @@ export default function Movements() {
 
       <div>
         <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por alcance
+        </Label>
+        <Select value={filterByScope} onValueChange={setFilterByScope}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todos los movimientos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los movimientos</SelectItem>
+            <SelectItem value="organization">Solo organizacionales</SelectItem>
+            <SelectItem value="project">Solo de proyectos</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por favoritos
         </Label>
         <Select value={filterByFavorites} onValueChange={setFilterByFavorites}>
@@ -683,6 +706,7 @@ export default function Movements() {
     setFilterByType("all");
     setFilterByCategory("all");
     setFilterByFavorites("all");
+    setFilterByScope("all");
     setSearchValue("");
   };
 
