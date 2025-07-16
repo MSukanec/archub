@@ -32,7 +32,7 @@ export function useOrganizationMovementConcepts(organizationId: string | undefin
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
         .select('id, name, description, parent_id, organization_id, is_system, view_mode, extra_fields, created_at, updated_at')
-        .or(`is_system.eq.true,organization_id.eq.${organizationId}`)
+        .or(`and(is_system.eq.true,organization_id.is.null),organization_id.eq.${organizationId}`)
         .order('name');
 
       console.log('📊 Organization movement concepts query result:', { 
