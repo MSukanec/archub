@@ -162,6 +162,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     return organizationConcepts.filter(concept => concept.parent_id === null)
   }, [organizationConcepts])
 
+  const loadingReady = !!(members && currencies && wallets && concepts)
+
   // Estados para la lógica jerárquica
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
@@ -603,12 +605,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           }
           
           console.log('Loading conversion form data:', conversionData)
+          if (!loadingReady) return
           conversionForm.reset(conversionData)
         }
         
         loadConversionGroup()
         
         // CRITICAL: También cargar en el formulario normal para que los campos superiores aparezcan
+        if (!loadingReady) return
         form.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -633,6 +637,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         )
         
         // Para transferencias, cargar datos en formulario de transferencia
+        if (!loadingReady) return
         transferForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -650,6 +655,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       } else if (isAportesMovement) {
         // Para aportes de terceros, cargar datos en formulario de aportes
+        if (!loadingReady) return
         aportesForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -669,6 +675,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       } else if (isAportesPropriosMovement) {
         // Para aportes propios, cargar datos en formulario de aportes propios
+        if (!loadingReady) return
         aportesPropriosForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -688,6 +695,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       } else if (isRetirosPropriosMovement) {
         // Para retiros propios, cargar datos en formulario de retiros propios
+        if (!loadingReady) return
         retirosPropriosForm.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
@@ -713,6 +721,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           type_id: editingMovement.type_id
         })
         
+        if (!loadingReady) return
         form.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
