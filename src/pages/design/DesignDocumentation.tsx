@@ -173,6 +173,7 @@ export default function DesignDocumentation() {
 
   const handleDeleteDocument = (document: any) => {
     showDeleteConfirmation({
+                        mode: 'dangerous',
       title: "Eliminar Documento",
       description: "Esta acción eliminará permanentemente el documento del sistema.",
       itemName: document.name,
@@ -452,6 +453,7 @@ export default function DesignDocumentation() {
                   onClick={(e) => {
                     e.stopPropagation();
                     showDeleteConfirmation({
+                        mode: 'dangerous',
                       title: "Eliminar Carpeta",
                       description: "Esta acción eliminará permanentemente la carpeta y todos sus grupos documentales asociados.",
                       itemName: folder.name,
@@ -496,6 +498,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       showDeleteConfirmation({
+                        mode: 'dangerous',
                         title: "Eliminar Grupo Documental",
                         description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
                         itemName: group.name,
@@ -574,6 +577,7 @@ export default function DesignDocumentation() {
                   group={group}
                   onEdit={() => {}}
                   onDelete={() => showDeleteConfirmation({
+                        mode: 'dangerous',
                 title: "Eliminar Grupo Documental",
                 description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
                 itemName: group.name,
@@ -812,6 +816,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       showDeleteConfirmation({
+                        mode: 'dangerous',
                         title: "Eliminar Grupo Documental",
                         description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
                         itemName: group.name,
@@ -925,6 +930,7 @@ export default function DesignDocumentation() {
                     onClick={(e) => {
                       e.stopPropagation();
                       showDeleteConfirmation({
+                        mode: 'dangerous',
                         title: "Eliminar Carpeta",
                         description: "Esta acción eliminará permanentemente la carpeta y todos sus grupos documentales asociados.",
                         itemName: folder.name,
@@ -1066,6 +1072,7 @@ export default function DesignDocumentation() {
                 openModal('document-upload', { editingGroup: group });
               }}
               onDelete={(group) => showDeleteConfirmation({
+                        mode: 'dangerous',
                 title: "Eliminar Grupo Documental",
                 description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
                 itemName: group.name,

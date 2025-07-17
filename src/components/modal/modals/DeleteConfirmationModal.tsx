@@ -238,13 +238,13 @@ export default function DeleteConfirmationModal({
 
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
+      cancelText="Cancelar"
       onLeftClick={handleCancel}
-      rightLabel={getSubmitButtonText()}
-      onRightClick={handleSubmit}
-      rightVariant="destructive"
-      rightDisabled={isSubmitDisabled()}
-      rightLoading={isLoading}
+      submitText={getSubmitButtonText()}
+      onSubmit={handleSubmit}
+      submitVariant="destructive"
+      submitDisabled={isSubmitDisabled()}
+      showLoadingSpinner={isLoading}
     />
   );
 
