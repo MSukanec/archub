@@ -270,18 +270,19 @@ function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
   ) : null;
 
   const editPanel = (
-    <div className="space-y-4">
-      {!loadingReady ? (
-        <div className="text-center py-8">
-          <div className="text-muted-foreground">Cargando formulario...</div>
-        </div>
-      ) : (
-        <>
-          {/* Selector de tipo de movimiento - Solo para nuevos movimientos */}
-          {!editingMovement && (
-            <div className="mb-6">
-              <FormLabel className="text-base font-medium mb-3 block">Tipo de Movimiento</FormLabel>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+    <Form {...form}>
+      <div className="space-y-4">
+        {!loadingReady ? (
+          <div className="text-center py-8">
+            <div className="text-muted-foreground">Cargando formulario...</div>
+          </div>
+        ) : (
+          <>
+            {/* Selector de tipo de movimiento - Solo para nuevos movimientos */}
+            {!editingMovement && (
+              <div className="mb-6">
+                <label className="text-base font-medium mb-3 block">Tipo de Movimiento</label>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                 <Button
                   type="button"
                   variant={movementType === 'normal' ? 'default' : 'outline'}
@@ -318,12 +319,11 @@ function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
                     <div className="text-xs text-muted-foreground">Entre billeteras</div>
                   </div>
                 </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Formulario principal */}
-          <Form {...form}>
+            {/* Formulario principal */}
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Fila 1: Creador | Fecha */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
