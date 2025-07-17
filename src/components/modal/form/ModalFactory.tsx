@@ -18,6 +18,7 @@ import MovementImportModal from '../modals/MovementImportModal';
 import MovementImportStepModal from '../modals/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/BudgetFormModal';
+import { OrganizationFormModal } from '../modals/OrganizationFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -55,6 +56,8 @@ export function ModalFactory() {
       return <MovementImportStepModal modalData={data} onClose={closeModal} />;
     case 'budget':
       return <BudgetFormModal modalData={data} onClose={closeModal} />;
+    case 'organization':
+      return <OrganizationFormModal modalData={data} onClose={closeModal} />;
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
         mode={data?.mode || 'simple'}

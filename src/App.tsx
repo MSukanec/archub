@@ -41,6 +41,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignTimeline from "@/pages/design/DesignTimeline";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import OrganizationTasks from "@/pages/organization/OrganizationTasks";
+import OrganizationManagement from "@/pages/organization/OrganizationList";
 
 import Profile from "@/pages/others/Profile";
 import Onboarding from "@/pages/Onboarding";
@@ -122,6 +123,11 @@ function Router() {
         <Route path="/organization/tasks">
           <ProtectedRoute>
             <OrganizationTasks />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/organizaciones">
+          <ProtectedRoute>
+            <OrganizationManagement />
           </ProtectedRoute>
         </Route>
 

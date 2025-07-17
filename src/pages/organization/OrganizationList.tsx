@@ -17,8 +17,8 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
-import { NewOrganizationModal } from '@/modals/NewOrganizationModal'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 // Componente para una sola tarjeta de organización
 function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete }: {
@@ -150,16 +150,15 @@ export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
-  const [editingOrganization, setEditingOrganization] = useState<any>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [organizationToDelete, setOrganizationToDelete] = useState<any>(null)
-  const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
   const [, navigate] = useLocation()
+  const { openModal } = useGlobalModalStore()
 
   // Set sidebar context to 'organizations' when page loads
   useEffect(() => {
@@ -263,8 +262,10 @@ export default function OrganizationManagement() {
   }
 
   const handleEdit = (organization: any) => {
-    setEditingOrganization(organization)
-    setShowNewOrganizationModal(true)
+    openModal('organization', {
+      open: true,
+      editingOrganization: organization
+    })
   }
 
   const handleDeleteClick = (organization: any) => {
@@ -327,7 +328,7 @@ export default function OrganizationManagement() {
       <Button 
         key="new-organization"
         className="h-8 px-3 text-sm"
-        onClick={() => setShowNewOrganizationModal(true)}
+        onClick={() => openModal('organization', { open: true })}
       >
         <Plus className="w-4 h-4 mr-2" />
         Nueva Organización
@@ -452,16 +453,6 @@ export default function OrganizationManagement() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        {/* Modal de nueva/editar organización */}
-        <NewOrganizationModal
-          open={showNewOrganizationModal}
-          onClose={() => {
-            setShowNewOrganizationModal(false)
-            setEditingOrganization(null)
-          }}
-          editingOrganization={editingOrganization}
-        />
       </div>
     </Layout>
   )
