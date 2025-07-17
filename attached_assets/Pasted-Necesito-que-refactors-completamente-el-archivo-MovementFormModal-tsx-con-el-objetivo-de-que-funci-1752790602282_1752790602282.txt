@@ -1,0 +1,84 @@
+Necesito que refactors completamente el archivo `MovementFormModal.tsx` con el objetivo de que funcione 100% estable y sin errores. El archivo ya está muy bien estructurado, pero quiero dejarlo impecable. A continuación te paso las mejoras clave que tenés que aplicar paso a paso. Importante: mantené toda la lógica funcional existente, no simplifiques ni elimines nada crítico.
+
+## OBJETIVO GENERAL:
+Corregir problemas de reseteo de campos, efectos múltiples innecesarios, sincronización inconsistente de estado y mejorar la claridad del tipo de formulario activo. Este modal es crítico para la app, así que debe quedar perfectamente robusto.
+
+---
+
+## CAMBIOS APLICAR
+
+### 1. Reemplazar los múltiples estados booleanos (`isConversion`, `isTransfer`, etc.)
+Cambiá todos esos estados por un solo estado llamado:
+
+```ts
+const [movementType, setMovementType] = useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
+Y donde antes usabas:
+
+ts
+Copiar
+Editar
+setIsConversion(true)
+reemplazalo por:
+
+ts
+Copiar
+Editar
+setMovementType('conversion')
+Usá esta variable para renderizar condicionalmente los formularios.
+
+2. Reemplazar todos los watch() con callbacks por useEffect controlado
+En lugar de:
+
+ts
+Copiar
+Editar
+const subscription = form.watch((value, { name }) => {
+  if (name === 'type_id') handleTypeChange(value.type_id)
+})
+Reemplazalo por:
+
+ts
+Copiar
+Editar
+const typeId = form.watch('type_id')
+useEffect(() => {
+  if (typeId) handleTypeChange(typeId)
+}, [typeId])
+Lo mismo para category_id.
+
+3. Validar que las llamadas a reset() ocurran solo cuando todos los datos hayan cargado
+Definí un booleano:
+
+ts
+Copiar
+Editar
+const loadingReady = !!(members && currencies && wallets && organizationConcepts)
+Y usalo en todos los useEffect que hacen .reset() o .setValue() para evitar que se ejecuten si todavía no cargaron los datos.
+
+4. Siempre resetear subcategory_id cuando cambie category_id
+En vez de condicionar con selectedCategoryId, hacé algo simple como:
+
+ts
+Copiar
+Editar
+useEffect(() => {
+  form.setValue('subcategory_id', '')
+}, [form.watch('category_id')])
+5. Mejora general del orden y claridad
+Mantené todas las mutaciones como están.
+
+No cambies los esquemas zod, pero asegurate de que cada formulario siga funcionando con .reset() cuando corresponde.
+
+No elimines el modo viewPanel, pero podés dejarlo al final.
+
+Validá que selectedTypeId y selectedCategoryId sigan actualizándose correctamente desde movementType.
+
+ACLARACIONES
+No borres ningún tipo de formulario ni lógica de mutación (createMovementMutation, createConversionMutation, etc.).
+
+Podés modularizar las funciones loadConversionGroup, etc. si es necesario para claridad.
+
+No cambies los nombres de los formularios (form, conversionForm, etc.), solo asegurate que estén bien sincronizados con el nuevo movementType.
+
+OUTPUT FINAL
+Devolveme el archivo completo y corregido MovementFormModal.tsx con todas las mejoras aplicadas.

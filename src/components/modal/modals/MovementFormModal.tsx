@@ -163,12 +163,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
   
-  // Estados para detectar tipo de formulario
-  const [isConversion, setIsConversion] = React.useState(false)
-  const [isTransfer, setIsTransfer] = React.useState(false)
-  const [isAportes, setIsAportes] = React.useState(false)
-  const [isAportesPropios, setIsAportesPropios] = React.useState(false)
-  const [isRetirosPropios, setIsRetirosPropios] = React.useState(false)
+  // Estado único para el tipo de formulario
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
+  
+  // Verificar que todos los datos estén cargados
+  const loadingReady = !!(members && currencies && wallets && organizationConcepts)
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
@@ -302,7 +301,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Manejar cambio de tipo de manera controlada
   const handleTypeChange = React.useCallback((newTypeId: string) => {
-    if (!newTypeId || newTypeId === selectedTypeId || !concepts) return
+    if (!newTypeId || newTypeId === selectedTypeId || !concepts || !loadingReady) return
     
     console.log('Handling type change:', { newTypeId, selectedTypeId })
     
@@ -319,10 +318,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     
     console.log('Type detected:', { viewMode, isConversionType, isTransferType, isAportesType })
     
-    // Cambiar formulario
-    setIsConversion(isConversionType)
-    setIsTransfer(isTransferType)
-    setIsAportes(isAportesType)
+    // Cambiar formulario usando movementType
+    if (isConversionType) {
+      setMovementType('conversion')
+    } else if (isTransferType) {
+      setMovementType('transfer')
+    } else if (isAportesType) {
+      setMovementType('aportes')
+    } else {
+      setMovementType('normal')
+    }
     
     // Reset solo en nuevo movimiento
     if (!editingMovement) {
@@ -335,24 +340,22 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       transferForm.setValue('type_id', newTypeId)
       aportesForm.setValue('type_id', newTypeId)
     }
-  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm])
+  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, loadingReady])
   
-  // Escuchar cambios en el tipo
+  // Escuchar cambios en el tipo usando useEffect
+  const typeId = form.watch('type_id')
   React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === 'type_id' && value.type_id) {
-        handleTypeChange(value.type_id)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [form, handleTypeChange])
+    if (typeId && loadingReady) {
+      handleTypeChange(typeId)
+    }
+  }, [typeId, handleTypeChange, loadingReady])
 
   // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
+  const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id')
   React.useEffect(() => {
-    // NO ejecutar este efecto cuando estamos editando un movimiento
-    if (editingMovement) return
+    // NO ejecutar este efecto cuando estamos editando un movimiento o si no hay datos cargados
+    if (editingMovement || !loadingReady) return
     
-    const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id')
     if (categoryId && categories) {
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
       const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
@@ -365,20 +368,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
       
       if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory) {
-        // Reset todos los estados
-        setIsAportes(false)
-        setIsAportesPropios(false)
-        setIsRetirosPropios(false)
-        setIsConversion(false)
-        setIsTransfer(false)
-        
-        // Establecer el estado correcto
+        // Establecer el estado correcto usando movementType
         if (isAportesCategory) {
-          setIsAportes(true)
+          setMovementType('aportes')
         } else if (isAportesPropiosCategory) {
-          setIsAportesPropios(true)
+          setMovementType('aportes_propios')
         } else if (isRetirosPropiosCategory) {
-          setIsRetirosPropios(true)
+          setMovementType('retiros_propios')
         }
         
         // Solo sincronizar valores en modo nuevo movimiento
@@ -434,38 +430,36 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       } else {
         // Si no es una categoría de aportes, permitir regresar al formulario normal
-        if (isAportes || isAportesPropios || isRetirosPropios) {
-          setIsAportes(false)
-          setIsAportesPropios(false)
-          setIsRetirosPropios(false)
+        if (movementType === 'aportes' || movementType === 'aportes_propios' || movementType === 'retiros_propios') {
+          setMovementType('normal')
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, editingMovement, currencies, wallets])
+  }, [categoryId, categories, members, userData, movementType, editingMovement, currencies, wallets, loadingReady])
 
 
 
   // Efecto para manejar la lógica jerárquica al seleccionar categoría
+  const watchedCategoryId = form.watch('category_id')
   React.useEffect(() => {
-    const categoryId = form.watch('category_id')
-    if (categoryId !== selectedCategoryId) {
-      setSelectedCategoryId(categoryId)
+    if (watchedCategoryId !== selectedCategoryId) {
+      setSelectedCategoryId(watchedCategoryId)
       // Reset subcategoría cuando cambia la categoría (solo en modo nuevo movimiento)
-      if (!editingMovement && categoryId !== selectedCategoryId) {
+      if (!editingMovement && loadingReady) {
         form.setValue('subcategory_id', '')
       }
     }
-  }, [form.watch('category_id')])
+  }, [watchedCategoryId, selectedCategoryId, editingMovement, loadingReady, form])
 
   // Efecto solo para cargar movimientos en edición (sin valores por defecto)
   React.useEffect(() => {
-    if (!editingMovement) return
+    if (!editingMovement || !loadingReady) return
     
     console.log('Loading editing movement - ONE TIME ONLY')
     
     if (editingMovement) {
       // Wait for all data to be loaded
-      if (!members || !currencies || !wallets || !concepts || !categories) {
+      if (!loadingReady) {
         console.log('Waiting for data to load...')
         return
       }
@@ -518,24 +512,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesPropriosMovement = categoryViewMode === "aportes" && extraFields.includes('socio_id') && selectedCategory?.name === "Aportes Propios"
       const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || (extraFields.includes('socio_id') && selectedCategory?.name?.includes('Retiro'))
       
-      // Reset todos los estados primero
-      setIsConversion(false)
-      setIsTransfer(false)
-      setIsAportes(false)
-      setIsAportesPropios(false)
-      setIsRetirosPropios(false)
-      
-      // Establecer el tipo de formulario correcto
+      // Establecer el tipo de formulario correcto usando movementType
       if (isConversionMovement) {
-        setIsConversion(true)
+        setMovementType('conversion')
       } else if (isTransferMovement) {
-        setIsTransfer(true)
+        setMovementType('transfer')
       } else if (isAportesMovement) {
-        setIsAportes(true)
+        setMovementType('aportes')
       } else if (isAportesPropriosMovement) {
-        setIsAportesPropios(true)
+        setMovementType('aportes_propios')
       } else if (isRetirosPropriosMovement) {
-        setIsRetirosPropios(true)
+        setMovementType('retiros_propios')
+      } else {
+        setMovementType('normal')
       }
       
       console.log('Edit mode - detected movement type:', { 
@@ -551,13 +540,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         isRetirosPropriosMovement
       })
       
-      console.log('Form states after setting:', {
-        isConversion: isConversionMovement,
-        isTransfer: isTransferMovement,
-        isAportes: isAportesMovement,
-        isAportesPropios: isAportesPropriosMovement,
-        isRetirosPropios: isRetirosPropriosMovement
-      })
+
       
       // Cargar datos en el formulario correcto según el tipo de movimiento
       if (isConversionMovement) {
@@ -1277,7 +1260,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const editPanel = (
     <div className="space-y-4">
-      {(isConversion || isEditingConversion) ? (
+      {(movementType === 'conversion' || isEditingConversion) ? (
         // FORMULARIO DE CONVERSIÓN
         <Form {...conversionForm}>
           <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
@@ -1581,7 +1564,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </div>
           </form>
         </Form>
-      ) : (isTransfer || isEditingTransfer) ? (
+      ) : (movementType === 'transfer' || isEditingTransfer) ? (
         // FORMULARIO DE TRANSFERENCIAS INTERNAS
         <Form {...transferForm}>
           <form onSubmit={transferForm.handleSubmit(onSubmitTransfer)} className="space-y-4">
@@ -1795,7 +1778,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
-      ) : (isAportes || isEditingAportes) ? (
+      ) : (movementType === 'aportes' || isEditingAportes) ? (
         // FORMULARIO DE APORTES
         <Form {...aportesForm}>
           <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
@@ -2089,7 +2072,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </div>
           </form>
         </Form>
-      ) : (isAportesPropios || isEditingAportesPropios) ? (
+      ) : (movementType === 'aportes_propios' || isEditingAportesPropios) ? (
         // FORMULARIO DE APORTES PROPIOS
         <Form {...aportesPropriosForm}>
           <form onSubmit={aportesPropriosForm.handleSubmit(onSubmitAportesPropios)} className="space-y-4">
@@ -2348,7 +2331,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </div>
           </form>
         </Form>
-      ) : (isRetirosPropios || isEditingRetirosPropios) ? (
+      ) : (movementType === 'retiros_propios' || isEditingRetirosPropios) ? (
         // FORMULARIO DE RETIROS PROPIOS
         <Form {...retirosPropriosForm}>
           <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
@@ -2931,11 +2914,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       rightLabel={
         currentPanel === 'view' && editingMovement ? "Editar" :
         editingMovement ? "Actualizar" : (
-          isConversion ? "Crear Conversión" : 
-          isTransfer ? "Crear Transferencia" : 
-          isAportes ? "Registrar Aporte" :
-          isAportesPropios ? "Registrar Aporte Propio" :
-          isRetirosPropios ? "Registrar Retiro Propio" :
+          movementType === 'conversion' ? "Crear Conversión" : 
+          movementType === 'transfer' ? "Crear Transferencia" : 
+          movementType === 'aportes' ? "Registrar Aporte" :
+          movementType === 'aportes_propios' ? "Registrar Aporte Propio" :
+          movementType === 'retiros_propios' ? "Registrar Retiro Propio" :
           "Guardar"
         )
       }
@@ -2943,15 +2926,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         if (currentPanel === 'view' && editingMovement) {
           setPanel('edit')
         } else {
-          if (isConversion) {
+          if (movementType === 'conversion') {
             conversionForm.handleSubmit(onSubmitConversion)()
-          } else if (isTransfer) {
+          } else if (movementType === 'transfer') {
             transferForm.handleSubmit(onSubmitTransfer)()
-          } else if (isAportes) {
+          } else if (movementType === 'aportes') {
             aportesForm.handleSubmit(onSubmitAportes)()
-          } else if (isAportesPropios) {
+          } else if (movementType === 'aportes_propios') {
             aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
-          } else if (isRetirosPropios) {
+          } else if (movementType === 'retiros_propios') {
             retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
           } else {
             form.handleSubmit(onSubmit)()
