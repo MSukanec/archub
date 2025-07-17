@@ -166,12 +166,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
   
-  // Estados para detectar tipo de formulario
-  const [isConversion, setIsConversion] = React.useState(false)
-  const [isTransfer, setIsTransfer] = React.useState(false)
-  const [isAportes, setIsAportes] = React.useState(false)
-  const [isAportesPropios, setIsAportesPropios] = React.useState(false)
-  const [isRetirosPropios, setIsRetirosPropios] = React.useState(false)
+  // Estado centralizado para el tipo de movimiento
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
+
+  // Variables derivadas para compatibilidad
+  const isConversion = movementType === 'conversion'
+  const isTransfer = movementType === 'transfer'
+  const isAportes = movementType === 'aportes'
+  const isAportesPropios = movementType === 'aportes_propios'
+  const isRetirosPropios = movementType === 'retiros_propios'
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
@@ -323,9 +326,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     console.log('Type detected:', { viewMode, isConversionType, isTransferType, isAportesType })
     
     // Cambiar formulario
-    setIsConversion(isConversionType)
-    setIsTransfer(isTransferType)
-    setIsAportes(isAportesType)
+    if (isConversionType) {
+      setMovementType('conversion')
+    } else if (isTransferType) {
+      setMovementType('transfer')
+    } else if (isAportesType) {
+      setMovementType('aportes')
+    } else {
+      setMovementType('normal')
+    }
     
     // Reset solo en nuevo movimiento
     if (!editingMovement) {
@@ -368,20 +377,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
       
       if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory) {
-        // Reset todos los estados
-        setIsAportes(false)
-        setIsAportesPropios(false)
-        setIsRetirosPropios(false)
-        setIsConversion(false)
-        setIsTransfer(false)
-        
         // Establecer el estado correcto
         if (isAportesCategory) {
-          setIsAportes(true)
+          setMovementType('aportes')
         } else if (isAportesPropiosCategory) {
-          setIsAportesPropios(true)
+          setMovementType('aportes_propios')
         } else if (isRetirosPropiosCategory) {
-          setIsRetirosPropios(true)
+          setMovementType('retiros_propios')
         }
         
         // Solo sincronizar valores en modo nuevo movimiento
@@ -438,9 +440,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       } else {
         // Si no es una categoría de aportes, permitir regresar al formulario normal
         if (isAportes || isAportesPropios || isRetirosPropios) {
-          setIsAportes(false)
-          setIsAportesPropios(false)
-          setIsRetirosPropios(false)
+          setMovementType('normal')
         }
       }
     }
@@ -521,24 +521,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesPropriosMovement = categoryViewMode === "aportes" && extraFields.includes('socio_id') && selectedCategory?.name === "Aportes Propios"
       const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || (extraFields.includes('socio_id') && selectedCategory?.name?.includes('Retiro'))
       
-      // Reset todos los estados primero
-      setIsConversion(false)
-      setIsTransfer(false)
-      setIsAportes(false)
-      setIsAportesPropios(false)
-      setIsRetirosPropios(false)
-      
       // Establecer el tipo de formulario correcto
       if (isConversionMovement) {
-        setIsConversion(true)
+        setMovementType('conversion')
       } else if (isTransferMovement) {
-        setIsTransfer(true)
+        setMovementType('transfer')
       } else if (isAportesMovement) {
-        setIsAportes(true)
+        setMovementType('aportes')
       } else if (isAportesPropriosMovement) {
-        setIsAportesPropios(true)
+        setMovementType('aportes_propios')
       } else if (isRetirosPropriosMovement) {
-        setIsRetirosPropios(true)
+        setMovementType('retiros_propios')
+      } else {
+        setMovementType('normal')
       }
       
       console.log('Edit mode - detected movement type:', { 
