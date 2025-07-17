@@ -26,7 +26,7 @@ import { useDesignDocuments } from '@/hooks/use-design-documents';
 
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal';
+import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 import { 
   FileText, 
   FolderOpen,
@@ -53,16 +53,7 @@ import {
   Eye,
   Download
 } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+
 
 type ViewMode = 'folders' | 'documents';
 
@@ -82,12 +73,10 @@ export default function DesignDocumentation() {
 
 
 
-  const [groupToDelete, setGroupToDelete] = useState(null);
   const [subfolderParent, setSubfolderParent] = useState<{id: string; name: string} | null>(null);
   const [editingFolder, setEditingFolder] = useState<any>(null);
-  const [folderToDelete, setFolderToDelete] = useState<any>(null);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{type: 'folder' | 'group'; id: string; name: string} | null>(null);
+  const { showDeleteConfirmation } = useDeleteConfirmation();
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([]);
   const { toast } = useToast();
@@ -183,10 +172,17 @@ export default function DesignDocumentation() {
   };
 
   const handleDeleteDocument = (document: any) => {
-    // TODO: Implementar eliminación de documento
-    toast({
-      title: "Funcionalidad pendiente",
-      description: "La eliminación de documentos será implementada próximamente",
+    showDeleteConfirmation({
+      title: "Eliminar Documento",
+      description: "Esta acción eliminará permanentemente el documento del sistema.",
+      itemName: document.name,
+      onConfirm: () => {
+        // TODO: Implementar eliminación de documento
+        toast({
+          title: "Funcionalidad pendiente",
+          description: "La eliminación de documentos será implementada próximamente",
+        });
+      },
     });
   };
 
@@ -320,47 +316,40 @@ export default function DesignDocumentation() {
     setBreadcrumbs([]);
   };
 
-  const handleDeleteFolder = () => {
-    if (folderToDelete) {
-      deleteFolderMutation.mutate(folderToDelete.id, {
-        onSuccess: () => {
-          toast({
-            title: "Éxito",
-            description: "Carpeta eliminada correctamente",
-          });
-          setFolderToDelete(null);
-          setShowDeleteConfirmation(false);
-        },
-        onError: (error) => {
-          toast({
-            title: "Error",
-            description: "No se pudo eliminar la carpeta",
-            variant: "destructive",
-          });
-        },
-      });
-    }
+  const handleDeleteFolder = (folderId: string) => {
+    deleteFolderMutation.mutate(folderId, {
+      onSuccess: () => {
+        toast({
+          title: "Éxito",
+          description: "Carpeta eliminada correctamente",
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar la carpeta",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
-  const handleDeleteGroup = () => {
-    if (groupToDelete) {
-      deleteGroupMutation.mutate(groupToDelete.id, {
-        onSuccess: () => {
-          toast({
-            title: "Éxito",
-            description: `Grupo "${groupToDelete.name}" eliminado correctamente`,
-          });
-          setGroupToDelete(null);
-        },
-        onError: (error) => {
-          toast({
-            title: "Error",
-            description: "No se pudo eliminar el grupo",
-            variant: "destructive",
-          });
-        },
-      });
-    }
+  const handleDeleteGroup = (groupId: string, groupName: string) => {
+    deleteGroupMutation.mutate(groupId, {
+      onSuccess: () => {
+        toast({
+          title: "Éxito",
+          description: `Grupo "${groupName}" eliminado correctamente`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar el grupo",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   // Mobile Action Bar setup
@@ -462,8 +451,12 @@ export default function DesignDocumentation() {
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setFolderToDelete(folder);
-                    setShowDeleteConfirmation(true);
+                    showDeleteConfirmation({
+                      title: "Eliminar Carpeta",
+                      description: "Esta acción eliminará permanentemente la carpeta y todos sus grupos documentales asociados.",
+                      itemName: folder.name,
+                      onConfirm: () => handleDeleteFolder(folder.id),
+                    });
                   }}
                   className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                 >
@@ -502,7 +495,12 @@ export default function DesignDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setGroupToDelete(group);
+                      showDeleteConfirmation({
+                        title: "Eliminar Grupo Documental",
+                        description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
+                        itemName: group.name,
+                        onConfirm: () => handleDeleteGroup(group.id, group.name),
+                      });
                     }}
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                   >
@@ -575,7 +573,12 @@ export default function DesignDocumentation() {
                   key={group.id}
                   group={group}
                   onEdit={() => {}}
-                  onDelete={() => setGroupToDelete(group)}
+                  onDelete={() => showDeleteConfirmation({
+                title: "Eliminar Grupo Documental",
+                description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
+                itemName: group.name,
+                onConfirm: () => handleDeleteGroup(group.id, group.name),
+              })}
                   onSelect={() => setSelectedItem({type: 'group', id: group.id, name: group.name})}
                 />
               ))}
@@ -808,7 +811,12 @@ export default function DesignDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setGroupToDelete(group);
+                      showDeleteConfirmation({
+                        title: "Eliminar Grupo Documental",
+                        description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
+                        itemName: group.name,
+                        onConfirm: () => handleDeleteGroup(group.id, group.name),
+                      });
                     }}
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                   >
@@ -916,8 +924,12 @@ export default function DesignDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setFolderToDelete(folder);
-                      setShowDeleteConfirmation(true);
+                      showDeleteConfirmation({
+                        title: "Eliminar Carpeta",
+                        description: "Esta acción eliminará permanentemente la carpeta y todos sus grupos documentales asociados.",
+                        itemName: folder.name,
+                        onConfirm: () => handleDeleteFolder(folder.id),
+                      });
                     }}
                     className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                   >
@@ -1053,7 +1065,12 @@ export default function DesignDocumentation() {
                 console.log('Opening modal with group:', group);
                 openModal('document-upload', { editingGroup: group });
               }}
-              onDelete={(group) => setGroupToDelete(group)}
+              onDelete={(group) => showDeleteConfirmation({
+                title: "Eliminar Grupo Documental",
+                description: "Esta acción eliminará permanentemente el grupo y todos sus documentos asociados.",
+                itemName: group.name,
+                onConfirm: () => handleDeleteGroup(group.id, group.name),
+              })}
             />
           ))}
         </div>
@@ -1114,36 +1131,9 @@ export default function DesignDocumentation() {
 
 
 
-      {/* Delete Group Confirmation */}
-      <AlertDialog open={!!groupToDelete} onOpenChange={(open) => !open && setGroupToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar grupo documental?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El grupo "{groupToDelete?.name}" será eliminado permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteGroup}>
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
-      {/* Delete Folder Confirmation */}
-      <DangerousConfirmationModal
-        open={showDeleteConfirmation}
-        onClose={() => {
-          setShowDeleteConfirmation(false);
-          setFolderToDelete(null);
-        }}
-        onConfirm={() => handleDeleteFolder()}
-        itemName={folderToDelete?.name || ''}
-        itemType="carpeta"
-        warningMessage="Esta acción eliminará permanentemente la carpeta y todos sus grupos documentales asociados."
-      />
+
+
     </Layout>
   );
 }
