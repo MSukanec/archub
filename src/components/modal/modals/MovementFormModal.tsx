@@ -350,14 +350,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm])
   
   // Escuchar cambios en el tipo
+  const typeId = form.watch('type_id')
+
   React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === 'type_id' && value.type_id) {
-        handleTypeChange(value.type_id)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [form, handleTypeChange])
+    if (typeId) {
+      handleTypeChange(typeId)
+    }
+  }, [typeId])
 
   // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
   React.useEffect(() => {
