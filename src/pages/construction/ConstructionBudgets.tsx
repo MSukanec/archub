@@ -27,6 +27,7 @@ import { useUnits } from '@/hooks/use-units'
 import { TaskSearchCombo } from '@/components/ui-custom/TaskSearchCombo'
 import { Input } from '@/components/ui/input'
 import { CreateGeneratedTaskUserModal } from '@/modals/user/CreateGeneratedTaskUserModal'
+import { validateUserDataForDatabaseOperation, logDatabaseOperation } from '@/utils/databaseSafety'
 
 
 // Hook para obtener valores de parámetros con expression_template
@@ -290,16 +291,45 @@ export default function ConstructionBudgets() {
   // Mutación para actualizar last_budget_id en user_preferences
   const updateBudgetPreferenceMutation = useMutation({
     mutationFn: async (budgetId: string) => {
-      if (!userData?.preferences?.id) {
-        throw new Error('No user preferences ID available');
+      // ENHANCED SAFETY CHECK: Use central validation system
+      const safetyCheck = validateUserDataForDatabaseOperation(userData);
+      
+      if (!safetyCheck.isValid) {
+        console.error('🚨 DATABASE OPERATION BLOCKED:', safetyCheck.error);
+        logDatabaseOperation('UPDATE_BLOCKED', 'user_preferences', userData?.user?.id, {
+          reason: safetyCheck.error,
+          attemptedBudgetId: budgetId,
+          safetyDetails: safetyCheck.details
+        });
+        throw new Error(`Database operation blocked for safety: ${safetyCheck.error}`);
       }
+      
+      // Log the operation for audit trail
+      logDatabaseOperation('UPDATE', 'user_preferences', userData.user.id, {
+        field: 'last_budget_id',
+        newValue: budgetId,
+        preferencesId: userData.preferences.id
+      });
+      
+      console.log('✅ Safely updating budget preference for user:', userData.user.id, 'with preferences ID:', userData.preferences.id);
       
       const { error } = await supabase
         .from('user_preferences')
         .update({ last_budget_id: budgetId })
-        .eq('id', userData.preferences.id);
+        .eq('id', userData.preferences.id)
+        .eq('user_id', userData.user.id); // DOUBLE SAFETY: Also check user_id
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database error updating budget preference:', error);
+        logDatabaseOperation('UPDATE_ERROR', 'user_preferences', userData.user.id, {
+          error: error.message,
+          budgetId,
+          preferencesId: userData.preferences.id
+        });
+        throw error;
+      }
+      
+      console.log('✅ Budget preference update successful');
       return budgetId;
     },
     onSuccess: (budgetId) => {
