@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 17, 2025. MOVEMENT MODAL LOADING STATE FIX: Fixed modal opening empty on first attempt - COMPLETED
+  • Fixed MovementFormModal showing only Cancel/Save buttons on first open, working correctly on second open
+  • Root cause: Modal rendered before async data (members, currencies, wallets, concepts) finished loading
+  • Added comprehensive loading state checking with isLoading flags from all data hooks
+  • Added loading UI with spinner and "Cargando datos del formulario..." message while data loads
+  • Modal now waits for all critical data (userData, members, currencies, wallets, organizationConcepts) before rendering form
+  • Enhanced user experience with proper loading states instead of empty modal content
 - July 17, 2025. HEADER ORGANIZATION NAME SYNC FIX: Fixed real-time header updates when organization name changes - COMPLETED
   • Fixed header not updating organization name in real-time when changed in DATOS BÁSICOS page
   • Root cause: Missing 'current-user' query invalidation in OrganizationBasicData auto-save function

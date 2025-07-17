@@ -134,17 +134,54 @@ interface MovementFormModalProps {
 export default function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
   const editingMovement = modalData?.editingMovement
   const { currentPanel, setPanel } = useModalPanelStore()
-  const { data: userData } = useCurrentUser()
-  const { data: members } = useOrganizationMembers(userData?.organization?.id)
-  const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
-  const { data: wallets } = useOrganizationWallets(userData?.organization?.id)
+  const { data: userData, isLoading: isUserDataLoading } = useCurrentUser()
+  const { data: members, isLoading: isMembersLoading } = useOrganizationMembers(userData?.organization?.id)
+  const { data: currencies, isLoading: isCurrenciesLoading } = useOrganizationCurrencies(userData?.organization?.id)
+  const { data: wallets, isLoading: isWalletsLoading } = useOrganizationWallets(userData?.organization?.id)
   
 
-  const { data: contacts } = useContacts()
-  const { data: projectClients } = useProjectClients(userData?.preferences?.last_project_id)
-  const { data: organizationConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
+  const { data: contacts, isLoading: isContactsLoading } = useContacts()
+  const { data: projectClients, isLoading: isProjectClientsLoading } = useProjectClients(userData?.preferences?.last_project_id)
+  const { data: organizationConcepts, isLoading: isOrganizationConceptsLoading } = useOrganizationMovementConcepts(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Verificar si todos los datos críticos están cargados
+  const isDataLoading = isUserDataLoading || isMembersLoading || isCurrenciesLoading || isWalletsLoading || isOrganizationConceptsLoading
+  
+  // Si los datos aún están cargando, mostrar un estado de carga
+  if (isDataLoading || !userData || !members || !currencies || !wallets || !organizationConcepts) {
+    return (
+      <FormModalLayout
+        columns={1}
+        viewPanel={
+          <div className="flex items-center justify-center h-48">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              <p className="text-sm text-muted-foreground">Cargando datos del formulario...</p>
+            </div>
+          </div>
+        }
+        editPanel={null}
+        headerContent={
+          <FormModalHeader
+            title="Nuevo Movimiento"
+            icon={DollarSign}
+          />
+        }
+        footerContent={
+          <FormModalFooter
+            leftLabel="Cancelar"
+            onLeftClick={onClose}
+            rightLabel="Cargando..."
+            onRightClick={() => {}}
+            showLoadingSpinner={true}
+          />
+        }
+        onClose={onClose}
+      />
+    )
+  }
 
   // LOG: Categorías de aportes ya configuradas - NO modificar base de datos
   React.useEffect(() => {
