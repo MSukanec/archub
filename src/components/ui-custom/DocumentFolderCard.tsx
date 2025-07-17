@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
-import { UpdateDocumentVersionModal } from '@/modals/design/UpdateDocumentVersionModal';
+
 import { 
   FolderOpen,
   Download, 
@@ -100,7 +100,7 @@ export function DocumentFolderCard({
   onDelete 
 }: DocumentFolderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -275,12 +275,7 @@ export function DocumentFolderCard({
         )}
       </CardContent>
       
-      {/* Update Version Modal */}
-      <UpdateDocumentVersionModal
-        open={showUpdateModal}
-        onClose={() => setShowUpdateModal(false)}
-        latestDocument={latestDocument}
-      />
+      {/* Update Version Modal - TO BE IMPLEMENTED */}
     </Card>
   );
 }

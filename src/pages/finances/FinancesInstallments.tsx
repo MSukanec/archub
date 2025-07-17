@@ -14,8 +14,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
-import { NewInstallmentModal } from '@/modals/finances/NewInstallmentModal'
-import { EditClientCommitmentModal } from '@/modals/finances/EditClientCommitmentModal'
+import { NewInstallmentModal } from '@/modals/NewInstallmentModal'
+import { EditClientCommitmentModal } from '@/modals/EditClientCommitmentModal'
 import { useToast } from '@/hooks/use-toast'
 import ClientSummaryCard from "@/components/cards/ClientSummaryCard";
 import CurrencyDetailCard from "@/components/cards/CurrencyDetailCard";

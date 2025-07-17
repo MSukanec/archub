@@ -18,7 +18,7 @@ import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
-import { NewOrganizationModal } from "@/modals/organization/NewOrganizationModal";
+import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { MobileMenu } from "../mobile/MobileMenu";
 import { useMobileMenuStore } from "../mobile/useMobileMenuStore";

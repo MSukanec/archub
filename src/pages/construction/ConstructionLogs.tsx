@@ -24,7 +24,7 @@ import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
 import { SiteLogTimelineChart } from "@/components/charts/SiteLogTimelineChart";
 import { useNavigationStore } from '@/stores/navigationStore';
-import { NewSiteLogModal } from "@/modals/construction/NewSiteLogModal";
+import { NewSiteLogModal } from "@/modals/NewSiteLogModal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useMobile } from "@/hooks/use-mobile";

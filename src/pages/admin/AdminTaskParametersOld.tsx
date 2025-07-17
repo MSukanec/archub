@@ -15,8 +15,8 @@ import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
-import { NewTaskParameterModal } from '@/modals/tasks/NewTaskParameterModal';
-import { NewTaskParameterOptionModal } from '@/modals/tasks/NewTaskParameterOptionModal';
+import { NewTaskParameterModal } from '@/modals/admin/tasks/NewTaskParameterModal';
+import { NewTaskParameterOptionModal } from '@/modals/admin/tasks/NewTaskParameterOptionModal';
 import { TaskParameterEditorModal } from '@/modals/admin/tasks/TaskParameterEditorModal';
 
 export default function AdminTaskParameters() {

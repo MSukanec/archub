@@ -6,8 +6,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDesignProjectPhases, useGanttPhasesWithTasks } from '@/hooks/use-design-phases';
 import { useProject } from '@/hooks/use-projects';
 import { Gantt } from '@/components/gantt';
-import { NewPhaseModal } from '@/modals/design/NewPhaseModal';
-import { NewPhaseTaskModal } from '@/modals/design/NewPhaseTaskModal';
+import { NewPhaseModal } from '@/modals/NewPhaseModal';
+import { NewPhaseTaskModal } from '@/modals/NewPhaseTaskModal';
 
 export default function DesignTimeline() {
   const [searchValue, setSearchValue] = useState("");

@@ -16,7 +16,7 @@ import { Plus, Trash2, Package } from "lucide-react";
 import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from "@/hooks/use-task-search";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 import { useDebugTasks } from "@/hooks/use-debug-tasks";
-import { CreateGeneratedTaskUserModal } from "@/modals/user/CreateGeneratedTaskUserModal";
+import { CreateGeneratedTaskUserModal } from "@/modals/CreateGeneratedTaskUserModal";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
 
