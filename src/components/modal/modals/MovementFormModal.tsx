@@ -448,16 +448,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
 
   // Efecto para manejar la lógica jerárquica al seleccionar categoría
-  React.useEffect(() => {
-    const categoryId = form.watch('category_id')
-    if (categoryId !== selectedCategoryId) {
-      setSelectedCategoryId(categoryId)
-    }
-  }, [form.watch('category_id')])
+  const categoryId = form.watch('category_id')
 
   React.useEffect(() => {
+    setSelectedCategoryId(categoryId)
     form.setValue('subcategory_id', '')
-  }, [form.watch('category_id')])
+  }, [categoryId])
 
   // Efecto solo para cargar movimientos en edición (sin valores por defecto)
   React.useEffect(() => {
