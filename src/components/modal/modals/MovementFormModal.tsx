@@ -168,6 +168,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Verificar que todos los datos estén cargados
   const loadingReady = !!(members && currencies && wallets && organizationConcepts)
+  
+  // Debug: verificar estado de carga
+  React.useEffect(() => {
+    console.log('Loading state:', {
+      members: !!members,
+      currencies: !!currencies,
+      wallets: !!wallets,
+      organizationConcepts: !!organizationConcepts,
+      loadingReady,
+      movementType
+    })
+  }, [members, currencies, wallets, organizationConcepts, loadingReady, movementType])
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
