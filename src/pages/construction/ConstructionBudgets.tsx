@@ -14,7 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
-import { NewBudgetModal } from '@/modals/budget/NewBudgetModal'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import NewBudgetTaskModal from '@/modals/budget/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
@@ -149,8 +149,7 @@ interface BudgetTask {
 export default function ConstructionBudgets() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
-  const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false)
-  const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
+
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
   const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
@@ -170,6 +169,7 @@ export default function ConstructionBudgets() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
+  const { openModal } = useGlobalModalStore()
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -499,7 +499,7 @@ export default function ConstructionBudgets() {
     <Button 
       key="new-budget"
       className="h-8 px-3 text-sm"
-      onClick={() => setNewBudgetModalOpen(true)}
+      onClick={() => openModal('budget', {})}
     >
       <Plus className="w-4 h-4 mr-2" />
       Nuevo Presupuesto
@@ -662,7 +662,7 @@ export default function ConstructionBudgets() {
             }
             action={
               !searchValue && (
-                <Button onClick={() => setNewBudgetModalOpen(true)}>
+                <Button onClick={() => openModal('budget', {})}>
                   <Plus className="w-4 h-4 mr-2" />
                   Crear Primer Presupuesto
                 </Button>
@@ -738,8 +738,7 @@ export default function ConstructionBudgets() {
                         className="h-8 w-8 p-0"
                         onClick={() => {
                           if (selectedBudget) {
-                            setEditingBudget(selectedBudget)
-                            setNewBudgetModalOpen(true)
+                            openModal('budget', { budget: selectedBudget })
                           }
                         }}
                         disabled={!selectedBudget}
@@ -835,18 +834,7 @@ export default function ConstructionBudgets() {
         )}
       </div>
 
-      {/* New Budget Modal */}
-      {newBudgetModalOpen && (
-        <NewBudgetModal
-          open={newBudgetModalOpen}
-          onClose={() => {
-            setNewBudgetModalOpen(false)
-            setEditingBudget(null)
-          }}
-          editingBudget={editingBudget}
-          onSuccess={(budgetId) => setSelectedBudgetId(budgetId)}
-        />
-      )}
+
 
       {/* Budget Task Modal */}
       {budgetTaskModalOpen && (
