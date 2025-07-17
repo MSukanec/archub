@@ -18,6 +18,7 @@ import {
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader"
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter"
+import { useModalPanelStore } from "@/components/modal/form/modalPanelStore"
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -50,6 +51,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setPanel } = useModalPanelStore()
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -63,12 +65,14 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       form.reset({
         name: editingOrganization.name,
       })
+      setPanel('view') // Para edición, comenzar en vista
     } else if (open) {
       form.reset({
         name: '',
       })
+      setPanel('edit') // Para creación, comenzar en edición
     }
-  }, [editingOrganization, open, form])
+  }, [editingOrganization, open, form, setPanel])
 
   const organizationMutation = useMutation({
     mutationFn: async (formData: OrganizationFormData) => {
