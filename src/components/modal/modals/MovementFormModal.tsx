@@ -451,8 +451,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const categoryId = form.watch('category_id')
 
   React.useEffect(() => {
+    if (!editingMovement || categoryId !== selectedCategoryId) {
+      form.setValue('subcategory_id', '')
+    }
     setSelectedCategoryId(categoryId)
-    form.setValue('subcategory_id', '')
   }, [categoryId])
 
   // Efecto solo para cargar movimientos en edición (sin valores por defecto)
