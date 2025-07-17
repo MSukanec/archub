@@ -41,7 +41,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignTimeline from "@/pages/design/DesignTimeline";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 import OrganizationTasks from "@/pages/organization/OrganizationTasks";
-import Changelog from "@/pages/others/Changelog";
+
 import Profile from "@/pages/others/Profile";
 import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/others/SelectMode";
@@ -227,11 +227,6 @@ function Router() {
         </Route>
 
         {/* Other Routes */}
-        <Route path="/changelog">
-          <ProtectedRoute>
-            <Changelog />
-          </ProtectedRoute>
-        </Route>
         <Route path="/profile">
           <ProtectedRoute>
             <Profile />
