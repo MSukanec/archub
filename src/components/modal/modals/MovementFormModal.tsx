@@ -1260,7 +1260,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const editPanel = (
     <div className="space-y-4">
-      {(movementType === 'conversion' || isEditingConversion) ? (
+      {!loadingReady ? (
+        <div className="text-center py-8">
+          <div className="text-muted-foreground">Cargando formulario...</div>
+        </div>
+      ) : (movementType === 'conversion' || isEditingConversion) ? (
         // FORMULARIO DE CONVERSIÓN
         <Form {...conversionForm}>
           <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
