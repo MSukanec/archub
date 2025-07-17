@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 17, 2025. HOOKS CLEANUP: Removed duplicate use-movements-with-logging.ts file - COMPLETED
+  • Eliminated redundant use-movements-with-logging.ts hook that duplicated use-movements.ts functionality
+  • Added activity logging integration note to use-movements.ts as optional debug comment
+  • No active imports found - cleanup completed without breaking changes
+  • Simplified codebase by removing 275 lines of duplicate CRUD operations for movements
+  • Activity logging can be integrated into existing use-movements.ts mutations when needed
 - July 17, 2025. MOVEMENT MODAL LOADING STATE FIX: Fixed modal opening empty on first attempt - COMPLETED
   • Fixed MovementFormModal showing only Cancel/Save buttons on first open, working correctly on second open
   • Root cause: Modal rendered before async data (members, currencies, wallets, concepts) finished loading

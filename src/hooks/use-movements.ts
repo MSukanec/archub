@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
+// NOTE: For activity logging integration, import logActivity from '@/utils/logActivity'
+// and add logging calls in mutation onSuccess handlers as needed
+
 interface Movement {
   id: string
   description: string
