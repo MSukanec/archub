@@ -1,0 +1,338 @@
+import { UseFormReturn } from 'react-hook-form'
+import { ArrowRightLeft } from 'lucide-react'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import UserSelector from '@/components/ui-custom/UserSelector'
+
+// Definir el tipo para el formulario de conversión basado en el schema del archivo principal
+interface ConversionForm {
+  movement_date: Date
+  created_by: string
+  description?: string
+  type_id: string
+  currency_id_from: string
+  wallet_id_from: string
+  amount_from: number
+  currency_id_to: string
+  wallet_id_to: string
+  amount_to: number
+  exchange_rate?: number
+}
+
+interface Props {
+  form: UseFormReturn<ConversionForm>
+  currencies: any[]
+  wallets: any[]
+  members: any[]
+  concepts: any[]
+}
+
+export function ConversionFields({ form, currencies, wallets, members, concepts }: Props) {
+  return (
+    <Form {...form}>
+      <form className="space-y-4">
+        {/* Fila 1: Creador | Fecha */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="created_by"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Creador *</FormLabel>
+                <FormControl>
+                  <UserSelector
+                    users={members || []}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar creador"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="movement_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                    onChange={(e) => {
+                      const localDate = new Date(e.target.value + 'T00:00:00');
+                      field.onChange(localDate);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Tipo - mantiene interactivo para cambiar */}
+        <FormField
+          control={form.control}
+          name="type_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
+                    <SelectItem key={concept.id} value={concept.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{concept.name}</span>
+                        {concept.is_system && (
+                          <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                            Sistema
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Descripción (full width) */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción de la conversión..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Separador y título de sección de conversión */}
+        <div className="col-span-2">
+          <Separator className="mb-4" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <ArrowRightLeft className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Información de la Conversión</h3>
+              <p className="text-xs text-muted-foreground">Detalles específicos del cambio de moneda</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección ORIGEN */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+            <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
+          </div>
+          
+          {/* Moneda y Billetera en la misma fila */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="currency_id_from"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Moneda Origen *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {currencies?.map((orgCurrency) => (
+                        <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                          {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="wallet_id_from"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billetera Origen *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {wallets?.map((wallet) => (
+                        <SelectItem key={wallet.id} value={wallet.id}>
+                          {wallet.wallets?.name || 'Sin nombre'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Cantidad en fila separada */}
+          <FormField
+            control={form.control}
+            name="amount_from"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cantidad Origen *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Sección DESTINO */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+            <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
+          </div>
+          
+          {/* Moneda y Billetera en la misma fila */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="currency_id_to"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Moneda Destino *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {currencies?.map((orgCurrency) => (
+                        <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                          {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="wallet_id_to"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billetera Destino *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {wallets?.map((wallet) => (
+                        <SelectItem key={wallet.id} value={wallet.id}>
+                          {wallet.wallets?.name || 'Sin nombre'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Cantidad en fila separada */}
+          <FormField
+            control={form.control}
+            name="amount_to"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cantidad Destino *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Cotización */}
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cotización (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    min="0"
+                    placeholder="Ej: 1.25"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </form>
+    </Form>
+  )
+}
