@@ -147,11 +147,9 @@ export default function MovementImportStepModal({ modalData, onClose }) {
 
 ### Para modales tradicionales:
 ✗ NO usar <FormModalLayout><FormModalHeader>... - estructura JSX directa
-✗ NO envolver editPanel en FormModalBody - FormModalLayout ya lo hace internamente
+✗ NO envolver editPanel en FormModalBody - FormModalLayout ya lo hace
 ✗ NO devolver JSX directo - siempre usar la estructura de objetos como props
 ✗ NO seguir patrones antiguos de CustomModal - usar solo FormModalLayout
-✗ NO usar FormModalBody directamente en editPanel - FormModalLayout maneja el layout automáticamente
-✗ NO usar <div className="p-6"> u otros contenedores con padding - FormModalLayout ya incluye padding apropiado
 
 ### Para modales de pasos:
 ✗ NO usar viewPanel/editPanel con stepContent - son mutuamente excluyentes
