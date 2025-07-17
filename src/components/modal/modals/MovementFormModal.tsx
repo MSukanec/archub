@@ -148,40 +148,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Verificar si todos los datos críticos están cargados
   const isDataLoading = isUserDataLoading || isMembersLoading || isCurrenciesLoading || isWalletsLoading || isOrganizationConceptsLoading
-  
-  // Si los datos aún están cargando, mostrar un estado de carga
-  if (isDataLoading || !userData || !members || !currencies || !wallets || !organizationConcepts) {
-    return (
-      <FormModalLayout
-        columns={1}
-        viewPanel={
-          <div className="flex items-center justify-center h-48">
-            <div className="text-center">
-              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-sm text-muted-foreground">Cargando datos del formulario...</p>
-            </div>
-          </div>
-        }
-        editPanel={null}
-        headerContent={
-          <FormModalHeader
-            title="Nuevo Movimiento"
-            icon={DollarSign}
-          />
-        }
-        footerContent={
-          <FormModalFooter
-            leftLabel="Cancelar"
-            onLeftClick={onClose}
-            rightLabel="Cargando..."
-            onRightClick={() => {}}
-            showLoadingSpinner={true}
-          />
-        }
-        onClose={onClose}
-      />
-    )
-  }
 
   // LOG: Categorías de aportes ya configuradas - NO modificar base de datos
   React.useEffect(() => {
@@ -2998,6 +2964,46 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending}
     />
   )
+
+  // Si los datos aún están cargando, mostrar estado de carga
+  if (isDataLoading || !userData || !members || !currencies || !wallets || !organizationConcepts) {
+    const loadingViewPanel = (
+      <div className="flex items-center justify-center h-48">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Cargando datos del formulario...</p>
+        </div>
+      </div>
+    )
+
+    const loadingHeaderContent = (
+      <FormModalHeader
+        title="Nuevo Movimiento"
+        icon={DollarSign}
+      />
+    )
+
+    const loadingFooterContent = (
+      <FormModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        rightLabel="Cargando..."
+        onRightClick={() => {}}
+        showLoadingSpinner={true}
+      />
+    )
+
+    return (
+      <FormModalLayout
+        columns={1}
+        viewPanel={loadingViewPanel}
+        editPanel={null}
+        headerContent={loadingHeaderContent}
+        footerContent={loadingFooterContent}
+        onClose={onClose}
+      />
+    )
+  }
 
   return (
     <FormModalLayout
