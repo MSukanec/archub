@@ -1198,6 +1198,28 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     onClose()
   }
 
+  const handleConfirm = () => {
+    switch (movementType) {
+      case 'conversion':
+        conversionForm.handleSubmit(onSubmitConversion)()
+        break
+      case 'transfer':
+        transferForm.handleSubmit(onSubmitTransfer)()
+        break
+      case 'aportes':
+        aportesForm.handleSubmit(onSubmitAportes)()
+        break
+      case 'aportes_propios':
+        aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
+        break
+      case 'retiros_propios':
+        retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
+        break
+      default:
+        form.handleSubmit(onSubmit)()
+    }
+  }
+
   const isLoading = createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending
 
   // Encontrar datos para display
@@ -2947,19 +2969,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         if (currentPanel === 'view' && editingMovement) {
           setPanel('edit')
         } else {
-          if (isConversion) {
-            conversionForm.handleSubmit(onSubmitConversion)()
-          } else if (isTransfer) {
-            transferForm.handleSubmit(onSubmitTransfer)()
-          } else if (isAportes) {
-            aportesForm.handleSubmit(onSubmitAportes)()
-          } else if (isAportesPropios) {
-            aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
-          } else if (isRetirosPropios) {
-            retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
-          } else {
-            form.handleSubmit(onSubmit)()
-          }
+          handleConfirm()
         }
       }}
       showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending}
