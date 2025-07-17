@@ -248,13 +248,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       category_id: '',
       contact_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || '',
+      currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -264,13 +264,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       category_id: '',
       member_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || '',
+      currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -280,13 +280,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(retirosPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       category_id: '',
       member_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || '',
+      currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -411,6 +411,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             aportesPropriosForm.setValue('member_id', '') // Limpiar socio
           } else if (isRetirosPropiosCategory) {
             // RETIROS PROPIOS: Socio + Cotización
+            console.log('Initializing retiros propios form with values:', {
+              typeId: form.watch('type_id'),
+              categoryId,
+              currentMember,
+              defaultCurrency,
+              defaultWallet,
+              currencies: currencies?.slice(0, 2),
+              wallets: wallets?.slice(0, 2)
+            })
+            
             retirosPropriosForm.setValue('type_id', form.watch('type_id'))
             retirosPropriosForm.setValue('category_id', categoryId)
             retirosPropriosForm.setValue('description', '')
@@ -431,7 +441,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, editingMovement])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, editingMovement, currencies, wallets])
 
 
 
