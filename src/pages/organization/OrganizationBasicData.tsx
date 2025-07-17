@@ -187,6 +187,7 @@ export default function OrganizationBasicData() {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['organization-data', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
     delay: 750,
     enabled: !!organizationId

@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 17, 2025. HEADER ORGANIZATION NAME SYNC FIX: Fixed real-time header updates when organization name changes - COMPLETED
+  • Fixed header not updating organization name in real-time when changed in DATOS BÁSICOS page
+  • Root cause: Missing 'current-user' query invalidation in OrganizationBasicData auto-save function
+  • Added queryClient.invalidateQueries({ queryKey: ['current-user'] }) to auto-save callback
+  • Header now immediately reflects organization name changes without requiring page refresh (F5)
+  • Enhanced cache synchronization between organization basic data page and header display
 - July 17, 2025. CRITICAL DATABASE SAFETY SYSTEM IMPLEMENTED: Created comprehensive safety checks to prevent accidental data loss - COMPLETED
   • Identified root cause of user_preferences deletion: missing safety validations in database operations could theoretically cause issues
   • Created src/utils/databaseSafety.ts with comprehensive validation system for all database operations
