@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
@@ -150,8 +150,7 @@ export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [organizationToDelete, setOrganizationToDelete] = useState<any>(null)
+
   
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
@@ -257,6 +256,33 @@ export default function OrganizationManagement() {
     }
   })
 
+  const deleteOrganizationMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      const { error } = await supabase
+        .from('organizations')
+        .delete()
+        .eq('id', organizationId)
+
+      if (error) {
+        throw new Error('No se pudo eliminar la organización')
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Organización eliminada",
+        description: "La organización se ha eliminado correctamente"
+      })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar la organización",
+        variant: "destructive"
+      })
+    }
+  })
+
   const handleSelectOrganization = (organizationId: string) => {
     selectOrganizationMutation.mutate(organizationId)
   }
@@ -269,8 +295,15 @@ export default function OrganizationManagement() {
   }
 
   const handleDeleteClick = (organization: any) => {
-    setOrganizationToDelete(organization)
-    setDeleteDialogOpen(true)
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: '¿Eliminar organización?',
+      description: `Esta acción eliminará permanentemente la organización "${organization.name}". Esta acción no se puede deshacer.`,
+      itemName: organization.name,
+      destructiveActionText: 'Eliminar Organización',
+      onConfirm: () => deleteOrganizationMutation.mutate(organization.id),
+      isLoading: deleteOrganizationMutation.isPending
+    })
   }
 
   const clearFilters = () => {
@@ -428,31 +461,7 @@ export default function OrganizationManagement() {
           </Card>
         )}
 
-        {/* Diálogo de confirmación para eliminar */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar organización?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción eliminará permanentemente la organización "{organizationToDelete?.name}". 
-                Esta acción no se puede deshacer.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction 
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => {
-                  // TODO: Implementar eliminación
-                  setDeleteDialogOpen(false)
-                  setOrganizationToDelete(null)
-                }}
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+
       </div>
     </Layout>
   )

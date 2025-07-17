@@ -18,7 +18,6 @@ import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
-import { NewOrganizationModal } from "@/modals/NewOrganizationModal";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { MobileMenu } from "../mobile/MobileMenu";
 import { useMobileMenuStore } from "../mobile/useMobileMenuStore";
@@ -54,7 +53,7 @@ export function Header({
   onClearFilters,
   actions = [],
 }: HeaderProps = {}) {
-  const [showNewOrganizationModal, setShowNewOrganizationModal] = useState(false);
+
   const isMobile = useMobile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
@@ -679,16 +678,6 @@ export function Header({
         </div>
       </div>
     </header>
-
-    {/* New Organization Modal */}
-    {showNewOrganizationModal && (
-      <NewOrganizationModal
-        open={showNewOrganizationModal}
-        onClose={() => setShowNewOrganizationModal(false)}
-      />
-    )}
-
-
 
     {/* Mobile Menu */}
     {isMobileMenuOpen && <MobileMenu onClose={closeMenu} isOpen={isMobileMenuOpen} />}
