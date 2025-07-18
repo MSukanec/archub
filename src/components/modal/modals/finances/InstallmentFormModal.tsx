@@ -24,6 +24,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
@@ -55,6 +56,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setPanel } = useModalPanelStore()
 
   const form = useForm<InstallmentForm>({
     resolver: zodResolver(installmentSchema),
@@ -75,6 +77,15 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: members } = useOrganizationMembers(organizationId)
   const { data: projectClients } = useProjectClients(projectId)
   const { data: wallets } = useOrganizationWallets(organizationId)
+
+  // Inicializar panel en modo edit para nuevos compromisos
+  React.useEffect(() => {
+    if (editingInstallment) {
+      setPanel('view')
+    } else {
+      setPanel('edit')
+    }
+  }, [editingInstallment, setPanel])
 
   // Cargar datos del movimiento en edición
   React.useEffect(() => {
