@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
 import CustomRestricted from "@/components/ui-custom/CustomRestricted";
@@ -64,6 +64,7 @@ export function Sidebar() {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
+  const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
   // Sync sidebar state with user preferences
   useEffect(() => {
@@ -114,6 +115,8 @@ export function Sidebar() {
   const handleDockToggle = () => {
     const newDocked = !isDocked;
     setDocked(newDocked);
+    // Update secondary sidebar store to trigger visual changes
+    setSecondarySidebarDocked(newDocked);
     savePreferencesMutation.mutate({ sidebar_docked: newDocked });
   };
   
