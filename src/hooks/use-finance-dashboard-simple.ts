@@ -503,31 +503,31 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           return []
         }
 
-        // Get unique subcategory IDs
-        const subcategoryIds = Array.from(new Set(movements.map(m => m.subcategory_id).filter(Boolean)))
+        // Get unique category IDs
+        const categoryIds = Array.from(new Set(movements.map(m => m.category_id).filter(Boolean)))
         
-        // Get movement concepts (subcategories)
-        const { data: subcategories } = await supabase
+        // Get movement concepts (categories)
+        const { data: categories } = await supabase
           .from('movement_concepts')
           .select('id, name')
-          .in('id', subcategoryIds)
+          .in('id', categoryIds)
 
         // Create lookup map
-        const subcategoriesMap = new Map()
-        subcategories?.forEach(subcategory => {
-          subcategoriesMap.set(subcategory.id, subcategory.name)
+        const categoriesMap = new Map()
+        categories?.forEach(category => {
+          categoriesMap.set(category.id, category.name)
         })
 
         // Group by category and sum amounts
         const categoryTotals = new Map<string, number>()
         let totalExpenses = 0
 
-        // Process expense movements by subcategory
+        // Process expense movements by category
         movements.forEach((movement: any) => {
-          const subcategoryName = subcategoriesMap.get(movement.subcategory_id) || 'Sin Categoría'
+          const categoryName = categoriesMap.get(movement.category_id) || 'Sin Categoría'
           const amount = Math.abs(movement.amount) // Convert to positive for display
           
-          categoryTotals.set(subcategoryName, (categoryTotals.get(subcategoryName) || 0) + amount)
+          categoryTotals.set(categoryName, (categoryTotals.get(categoryName) || 0) + amount)
           totalExpenses += amount
         })
 

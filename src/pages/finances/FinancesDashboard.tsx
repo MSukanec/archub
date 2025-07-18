@@ -111,8 +111,8 @@ export default function FinancesDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card>
-              <CardContent className="p-4 md:p-6">
+            <Card className="h-full">
+              <CardContent className="p-4 md:p-6 h-full flex flex-col">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
                   {/* Mobile Layout: Icon left, title right */}
                   <div className="flex md:hidden items-center gap-3 w-full">
