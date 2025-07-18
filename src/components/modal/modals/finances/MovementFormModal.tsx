@@ -1718,6 +1718,33 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 aportesPropriosForm.setValue('category_id', value) 
                 retirosPropriosForm.setValue('category_id', value)
                 setSelectedCategoryId(value)
+                
+                // CRITICAL: Detectar tipo de aportes en modo edición también
+                if (editingMovement && categories) {
+                  const selectedCategory = categories.find((cat: any) => cat.id === value)
+                  const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
+                  
+                  console.log('Detecting category type in edit mode:', { value, categoryName: selectedCategory?.name, viewMode })
+                  
+                  // Detectar el tipo específico de aportes
+                  const isAportesCategory = viewMode === "aportes"
+                  const isAportesPropiosCategory = viewMode === "aportes_propios"
+                  const isRetirosPropiosCategory = viewMode === "retiros_propios"
+                  
+                  if (isAportesCategory) {
+                    console.log('Switching to APORTES form in edit mode')
+                    setMovementType('aportes')
+                  } else if (isAportesPropiosCategory) {
+                    console.log('Switching to APORTES PROPIOS form in edit mode')
+                    setMovementType('aportes_propios')
+                  } else if (isRetirosPropiosCategory) {
+                    console.log('Switching to RETIROS PROPIOS form in edit mode')
+                    setMovementType('retiros_propios')
+                  } else {
+                    console.log('Switching to NORMAL form in edit mode')
+                    setMovementType('normal')
+                  }
+                }
               }} 
               value={form.watch('category_id')}
               disabled={!form.watch('type_id')}
