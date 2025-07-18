@@ -118,6 +118,18 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. MAJOR FILE REORGANIZATION COMPLETED: Successfully reorganized pages and modal files into logical directory structures - COMPLETED
+  • Moved DesignDocumentation.tsx to ProjectDocumentation.tsx in src/pages/project/ directory
+  • Moved BoardFormModal.tsx to src/components/modal/modals/organizations/ directory
+  • Moved BudgetFormModal.tsx to src/components/modal/modals/construction/ directory  
+  • Moved DocumentUploadFormModal.tsx and DocumentFolderFormModal.tsx to src/components/modal/modals/project/ directory
+  • Updated App.tsx routing: /project/documentation now uses ProjectDocumentation component
+  • Updated ModalFactory.tsx imports to reflect new organized file paths
+  • Fixed all relative import paths in moved modal files to use correct directory structure
+  • DesignTimeline.tsx remains accessible from DISEÑO > Cronograma sidebar navigation
+  • Removed original duplicate files after successful reorganization
+  • Enhanced project organization: pages and modals now logically grouped by domain (project, organizations, construction)
+  • All existing functionality maintained while improving overall codebase structure and developer experience
 - July 18, 2025. ADMIN BYPASS FOR RESTRICTED COMPONENTS: Modified CustomRestricted component to allow full admin access to all restricted features - COMPLETED
   • Administrators now bypass ALL restrictions except "general_mode" (project context requirements)
   • "general_mode" restrictions still apply to admins since they're contextual, not permission-based

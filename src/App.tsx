@@ -39,7 +39,7 @@ import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import ConstructionGallery from "@/pages/construction/ConstructionGallery";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignTimeline from "@/pages/design/DesignTimeline";
-import DesignDocumentation from "@/pages/design/DesignDocumentation";
+import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
 import OrganizationTasks from "@/pages/organization/OrganizationTasks";
 import OrganizationManagement from "@/pages/organization/OrganizationList";
 
@@ -154,7 +154,7 @@ function Router() {
         </Route>
         <Route path="/project/documentation">
           <ProtectedRoute>
-            <DesignDocumentation />
+            <ProjectDocumentation />
           </ProtectedRoute>
         </Route>
         <Route path="/project/gallery">
