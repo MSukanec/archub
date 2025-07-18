@@ -406,11 +406,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   useEffect(() => {
     // Add a small delay to ensure DOM is updated
     setTimeout(() => {
-      const modalElement = document.querySelector('[data-modal-content]') || document.querySelector('.fixed.inset-0');
-      if (modalElement) {
+      const modalElement = document.querySelector('[data-modal-content]') || 
+                          document.querySelector('.overflow-auto') || 
+                          document.querySelector('.max-h-\\[90vh\\]') ||
+                          document.querySelector('.flex.flex-col') ||
+                          window;
+      if (modalElement && modalElement.scrollTo) {
         modalElement.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (modalElement === window) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    }, 100);
+    }, 150);
   }, [currentStep])
 
   // Filtrar conceptos por tipo
@@ -429,6 +435,56 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       }
     }
     return 'Sin categoría padre';
+  }
+
+  // Function to get hierarchy info for field display
+  const getFieldHierarchyInfo = (fieldName: string, value: string): string => {
+    if (fieldName === 'subcategory_id') {
+      // For subcategories, check if this value exists in our current subcategories
+      const existingSubcategory = categories.find(sub => 
+        normalizeText(sub.name) === normalizeText(value)
+      )
+      
+      if (existingSubcategory) {
+        const parentName = findParentCategoryName(existingSubcategory.id)
+        return `${parentName} > ${value}`
+      }
+      
+      // If not found, check if it looks like it belongs to a specific parent type
+      // by looking at similar subcategories patterns
+      const normalizedValue = normalizeText(value)
+      
+      // Try to find a parent based on common patterns or existing similar subcategories
+      for (const type of types) {
+        if (type.children && type.children.length > 0) {
+          // Check if any existing subcategory in this type might be similar
+          const hasSimilarSubcategory = type.children.some(child => {
+            const childName = normalizeText(child.name)
+            return normalizedValue.includes(childName.split(' ')[0]) || 
+                   childName.includes(normalizedValue.split(' ')[0])
+          })
+          
+          if (hasSimilarSubcategory) {
+            return `${type.name} > ${value}`
+          }
+        }
+      }
+      
+      // If no pattern found, just show the value
+      return value
+    } else if (fieldName === 'category_id') {
+      // For categories, check if they're subcategories that belong to a parent
+      for (const type of types) {
+        if (type.children?.some(child => normalizeText(child.name) === normalizeText(value))) {
+          return `${type.name} > ${value}`
+        }
+      }
+      
+      // If it's a main category, just show the value
+      return value
+    }
+    
+    return value
   }
   
 
@@ -1371,26 +1427,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         <div className="col-span-4">
                           <div className="flex items-center gap-2">
                             <AlertCircle className="h-4 w-4 text-orange-500" />
-                            <span className="font-mono text-sm">{value}</span>
+                            <span className="font-mono text-sm">{getFieldHierarchyInfo(fieldName, value)}</span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            {fieldName === 'subcategory_id' ? (
-                              <div className="flex flex-col">
-                                <span>Valor de tu archivo</span>
-                                <span className="text-[10px] text-muted-foreground/80">
-                                  ↳ Se creará como subcategoría
-                                </span>
-                              </div>
-                            ) : fieldName === 'category_id' ? (
-                              <div className="flex flex-col">
-                                <span>Valor de tu archivo</span>
-                                <span className="text-[10px] text-muted-foreground/80">
-                                  ↳ Se creará como categoría principal
-                                </span>
-                              </div>
-                            ) : (
-                              'Valor de tu archivo'
-                            )}
+                            Valor de tu archivo
                           </div>
                         </div>
                         

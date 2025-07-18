@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. EXCEL IMPORT STEP 3 UX ENHANCEMENTS: Enhanced user experience with improved scroll behavior and hierarchical value display - COMPLETED
+  • Fixed scroll positioning to properly scroll to modal start instead of subcategory field when entering Step 3
+  • Enhanced hierarchy visualization to show complete context: "Egreso > Cuotas" instead of just "Cuotas" 
+  • Eliminated confusing descriptive text "Valor de tu archivo, se creará como subcategoría" for cleaner interface
+  • Implemented intelligent hierarchy detection for categories and subcategories with parent type information
+  • Added comprehensive scroll selector targeting for different modal layouts and window fallbacks
+  • Improved visual clarity by showing full category path context in unmapped values display
 - July 18, 2025. EXCEL IMPORT STEP 3 REVOLUTIONIZED: Implemented complete inline category/subcategory creation system during Excel import process - COMPLETED
   • Added hierarchical display showing parent-child relationships: subcategories now display "Calefacción ↳ Materiales" format
   • Implemented inline category creation: "Crear categoría [nombre]" buttons for creating new categories directly during import
