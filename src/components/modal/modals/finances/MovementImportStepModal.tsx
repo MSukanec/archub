@@ -1207,15 +1207,12 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const fieldMappings: { [key: string]: string } = {};
+                      const newMappings = { ...manualMappings };
                       values.forEach(value => {
-                        fieldMappings[`${fieldName}_${value}`] = '';
+                        const mappingKey = `${fieldName}_${value}`;
+                        newMappings[mappingKey] = '';
                       });
-                      setManualMappings(prev => ({
-                        ...prev,
-                        ...fieldMappings
-                      }));
-                      setRenderCounter(prev => prev + 1);
+                      setManualMappings(newMappings);
                       toast({
                         title: "Campo completado",
                         description: `Todos los valores de "${fieldLabel}" se asignaron como NULL`
@@ -1293,10 +1290,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         </div>
                         
                         <div className="col-span-2">
-                          {manualMappings[mappingKey] ? (
+                          {manualMappings[mappingKey] !== undefined ? (
                             <div className="flex items-center gap-1 text-green-700 text-xs">
                               <CheckCircle className="h-3 w-3" />
-                              <span>Mapeado</span>
+                              <span>{manualMappings[mappingKey] === '' ? 'NULL' : 'Mapeado'}</span>
                             </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">Sin mapear</span>
