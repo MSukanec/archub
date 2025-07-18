@@ -477,8 +477,40 @@ export default function FinancesInstallments() {
   }
 
   const handleDelete = (installment: Installment) => {
-    // TODO: Implement delete functionality
-    console.log('Delete installment:', installment.id)
+    const contactName = installment.contact 
+      ? (installment.contact.company_name || `${installment.contact.first_name} ${installment.contact.last_name}`)
+      : 'Sin contacto'
+    
+    openModal('delete-confirmation', {
+      title: 'Eliminar Compromiso',
+      message: `¿Estás seguro de que deseas eliminar el compromiso de pago de ${contactName}?`,
+      itemName: `${contactName} - ${installment.currency?.symbol || '$'}${installment.amount}`,
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('movements')
+            .delete()
+            .eq('id', installment.id)
+
+          if (error) throw error
+
+          toast({
+            title: 'Compromiso eliminado',
+            description: 'El compromiso de pago ha sido eliminado correctamente',
+          })
+
+          // Refrescar datos
+          queryClient.invalidateQueries({ queryKey: ['installments'] })
+          queryClient.invalidateQueries({ queryKey: ['movements'] })
+        } catch (error: any) {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: `Error al eliminar el compromiso: ${error.message}`,
+          })
+        }
+      }
+    })
   }
 
   const handleCardClick = (installment: Installment) => {

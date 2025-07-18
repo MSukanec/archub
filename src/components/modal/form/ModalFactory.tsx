@@ -61,9 +61,9 @@ export function ModalFactory() {
       return <OrganizationFormModal modalData={data} onClose={closeModal} />;
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
-        mode={data?.mode || 'simple'}
+        mode={data?.mode || 'dangerous'}
         title={data?.title || 'Eliminar elemento'}
-        description={data?.description || '¿Estás seguro de que deseas eliminar este elemento?'}
+        description={data?.message || data?.description || '¿Estás seguro de que deseas eliminar este elemento?'}
         itemName={data?.itemName}
         destructiveActionText={data?.destructiveActionText}
         onConfirm={data?.onConfirm}
