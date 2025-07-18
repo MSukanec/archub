@@ -21,21 +21,16 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useProjectClients } from '@/hooks/use-project-clients'
-import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
-import UserSelector from '@/components/ui-custom/UserSelector'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
-  created_by: z.string().min(1, 'Creador es requerido'),
   contact_id: z.string().min(1, 'Cliente es requerido'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
-  wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   description: z.string().optional(),
   exchange_rate: z.number().optional(),
@@ -63,10 +58,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     resolver: zodResolver(installmentSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
       contact_id: '',
       currency_id: '',
-      wallet_id: '',
       amount: 0,
       description: '',
       exchange_rate: undefined,
@@ -75,12 +68,10 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
-  const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
   const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
-  const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   
   // Loading state for all necessary data
-  const isLoading = currenciesLoading || membersLoading || clientsLoading || walletsLoading
+  const isLoading = currenciesLoading || clientsLoading
 
   // Inicializar panel en modo edit para nuevos compromisos
   React.useEffect(() => {
@@ -93,32 +84,27 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   // Cargar datos del movimiento en edición
   React.useEffect(() => {
-    if (editingInstallment && members && currencies && wallets) {
+    if (editingInstallment && currencies) {
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
       form.reset({
         movement_date: installmentDate,
-        created_by: editingInstallment.created_by || '',
         contact_id: editingInstallment.contact_id || '',
         currency_id: editingInstallment.currency_id || '',
-        wallet_id: editingInstallment.wallet_id || '',
         amount: editingInstallment.amount || 0,
         description: editingInstallment.description || '',
         exchange_rate: editingInstallment.exchange_rate || undefined,
       })
     }
-  }, [editingInstallment, form, members, currencies, wallets])
+  }, [editingInstallment, form, currencies])
 
-  // Inicializar creador por defecto
+  // Inicializar valores por defecto
   React.useEffect(() => {
-    if (!editingInstallment && members && userData?.user?.id) {
-      const currentMember = members.find(m => m.user_id === userData.user.id)
-      
-      if (currentMember?.id) {
-        form.setValue('created_by', currentMember.id)
-      }
+    if (!editingInstallment && currencies?.length > 0) {
+      // Usar la primera moneda disponible por defecto
+      form.setValue('currency_id', currencies[0].id)
     }
-  }, [members, userData?.user?.id, editingInstallment, form])
+  }, [currencies, editingInstallment, form])
 
   // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
@@ -148,14 +134,38 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         conceptId = ingresosConcept?.id
       }
 
+      // Buscar el member del usuario actual
+      const { data: currentMember } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', userData.organization.id)
+        .eq('user_id', userData.user.id)
+        .single()
+
+      if (!currentMember) {
+        throw new Error('Usuario no encontrado en la organización')
+      }
+
+      // Usar la billetera por defecto
+      const { data: defaultWallet } = await supabase
+        .from('organization_wallets')
+        .select('id')
+        .eq('organization_id', userData.organization.id)
+        .eq('is_default', true)
+        .single()
+
+      if (!defaultWallet) {
+        throw new Error('No se encontró billetera por defecto')
+      }
+
       const movementData = {
         organization_id: userData.organization.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: data.created_by,
+        created_by: currentMember.id,
         contact_id: data.contact_id,
         currency_id: data.currency_id,
-        wallet_id: data.wallet_id,
+        wallet_id: defaultWallet.id,
         amount: data.amount,
         description: data.description || null,
         exchange_rate: data.exchange_rate || null,
@@ -265,46 +275,24 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Fila 1: Creador y Fecha */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Creador *</label>
-              <UserSelector
-                users={members?.map(member => ({
-                  id: member.id,
-                  full_name: member.full_name || member.email || 'Usuario sin nombre',
-                  email: member.email || '',
-                  avatar_url: member.avatar_url || '',
-                  user_id: member.user_id || ''
-                })) || []}
-                value={form.watch('created_by')}
-                onChange={(value) => form.setValue('created_by', value)}
-                placeholder="Seleccionar creador"
-                emptyMessage="No hay miembros disponibles"
-              />
-              {form.formState.errors.created_by && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.created_by.message}
-                </p>
-              )}
-            </div>
-
-          <FormField
-            control={form.control}
-            name="movement_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha *</FormLabel>
-                <FormControl>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            placeholder="Seleccionar fecha"
-                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
-                            className="pl-10"
-                            readOnly
+          {/* Fila 1: Fecha */}
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="movement_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha *</FormLabel>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Seleccionar fecha"
+                              value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                              className="pl-10"
+                              readOnly
                           />
                           <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         </div>
@@ -330,30 +318,32 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         </div>
 
         {/* Fila 2: Cliente */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Cliente *</label>
-          <UserSelector
-            users={projectClients?.map(client => ({
-              id: client.contact_id,
-              full_name: client.contact.full_name || client.contact.company_name || `${client.contact.first_name || ''} ${client.contact.last_name || ''}`.trim(),
-              email: '',
-              avatar_url: '',
-              first_name: client.contact.first_name,
-              last_name: client.contact.last_name
-            })).sort((a, b) => a.full_name.localeCompare(b.full_name)) || []}
-            value={form.watch('contact_id')}
-            onChange={(value) => form.setValue('contact_id', value)}
-            placeholder="Seleccionar cliente"
-            emptyMessage="No hay clientes disponibles"
-          />
-          {form.formState.errors.contact_id && (
-            <p className="text-sm text-red-500">
-              {form.formState.errors.contact_id.message}
-            </p>
+        <FormField
+          control={form.control}
+          name="contact_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cliente *</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projectClients?.map(client => (
+                      <SelectItem key={client.contact_id} value={client.contact_id}>
+                        {client.contact.full_name || client.contact.company_name || `${client.contact.first_name || ''} ${client.contact.last_name || ''}`.trim()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
+        />
 
-        {/* Fila 3: Moneda y Billetera */}
+        {/* Fila 3: Moneda y Monto */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -382,34 +372,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
           <FormField
             control={form.control}
-            name="wallet_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Billetera *</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar billetera" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {wallets?.map((wallet) => (
-                        <SelectItem key={wallet.id} value={wallet.id}>
-                          {wallet.wallets?.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Fila 4: Monto y Cotización */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
@@ -417,7 +379,10 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                 <FormControl>
                   <Input
                     type="number"
+                    step="0.01"
+                    min="0"
                     placeholder="0.00"
+                    {...field}
                     value={field.value || ''}
                     onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
@@ -426,26 +391,28 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cotización (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Ej: 1.0000"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
+
+        {/* Fila 4: Cotización */}
+        <FormField
+          control={form.control}
+          name="exchange_rate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cotización (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  placeholder="Ej: 1.0000"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Fila 5: Descripción */}
         <FormField

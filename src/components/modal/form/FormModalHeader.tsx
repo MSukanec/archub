@@ -18,7 +18,7 @@ export function FormModalHeader({
   className,
 }: FormModalHeaderProps) {
   return (
-    <div className={cn("px-4 py-3 flex items-center justify-between border-b border-[var(--card-border)] min-h-[56px]", className)}>
+    <div className={cn("px-2 py-2 flex items-center justify-between border-b border-[var(--card-border)] min-h-[56px]", className)}>
       <div className="flex items-center gap-2">
         {leftActions}
         {title && (

@@ -744,8 +744,8 @@ export default function FinancesInstallments() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                setEditingClientCommitment(item)
-                setShowEditCommitmentModal(true)
+                // TODO: Open edit commitment modal
+                console.log('Edit commitment for client:', item.contact?.first_name)
               }}
               className="h-8 w-8 p-0"
             >
