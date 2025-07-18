@@ -1064,66 +1064,77 @@ export default function FinancesInstallments() {
           ]}
         />
 
-        {/* Contact Summary Table (New simplified table) */}
-        {clientSummary.length > 0 && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">Resumen por Cliente</h3>
-              <p className="text-sm text-muted-foreground">Resumen general por cliente con monto total y aporte dolarizado</p>
-            </div>
-            <Table
-              data={clientSummary}
-              columns={contactSummaryColumns}
-              defaultSort={{ key: 'contacto', direction: 'asc' }}
-              renderCard={(item) => (
-                <ClientSummaryCard 
-                  item={item} 
-                  allCurrencies={allCurrencies}
+        {/* Show content only if there are installments */}
+        {installments.length > 0 ? (
+          <>
+            {/* Contact Summary Table (New simplified table) */}
+            {clientSummary.length > 0 && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Resumen por Cliente</h3>
+                  <p className="text-sm text-muted-foreground">Resumen general por cliente con monto total y aporte dolarizado</p>
+                </div>
+                <Table
+                  data={clientSummary}
+                  columns={contactSummaryColumns}
+                  defaultSort={{ key: 'contacto', direction: 'asc' }}
+                  renderCard={(item) => (
+                    <ClientSummaryCard 
+                      item={item} 
+                      allCurrencies={allCurrencies}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
-        )}
+              </div>
+            )}
 
-        {/* Detailed Summary Table by Currency */}
-        {clientSummary.length > 0 && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">Detalle por Moneda</h3>
-              <p className="text-sm text-muted-foreground">Totales detallados por cliente, moneda y billetera</p>
-            </div>
-            <Table
-              data={clientSummary}
-              columns={summaryColumns}
-              defaultSort={{ key: 'contacto', direction: 'asc' }}
-              renderCard={(item) => (
-                <CurrencyDetailCard item={item} />
-              )}
-            />
-          </div>
-        )}
-
-        {/* Detailed Table */}
-        {filteredInstallments.length > 0 ? (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">Detalle de Compromisos</h3>
-              <p className="text-sm text-muted-foreground">Todos los compromisos de pago registrados en el proyecto</p>
-            </div>
-            <Table
-              data={filteredInstallments}
-              columns={detailColumns}
-              defaultSort={{ key: 'movement_date', direction: 'desc' }}
-              renderCard={(item) => (
-                <InstallmentDetailCard 
-                  item={item}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
+            {/* Detailed Summary Table by Currency */}
+            {clientSummary.length > 0 && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Detalle por Moneda</h3>
+                  <p className="text-sm text-muted-foreground">Totales detallados por cliente, moneda y billetera</p>
+                </div>
+                <Table
+                  data={clientSummary}
+                  columns={summaryColumns}
+                  defaultSort={{ key: 'contacto', direction: 'asc' }}
+                  renderCard={(item) => (
+                    <CurrencyDetailCard item={item} />
+                  )}
                 />
-              )}
-            />
-          </div>
-        ) : installments.length === 0 ? (
+              </div>
+            )}
+
+            {/* Detailed Table */}
+            {filteredInstallments.length > 0 ? (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Detalle de Compromisos</h3>
+                  <p className="text-sm text-muted-foreground">Todos los compromisos de pago registrados en el proyecto</p>
+                </div>
+                <Table
+                  data={filteredInstallments}
+                  columns={detailColumns}
+                  defaultSort={{ key: 'movement_date', direction: 'desc' }}
+                  renderCard={(item) => (
+                    <InstallmentDetailCard 
+                      item={item}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  )}
+                />
+              </div>
+            ) : (
+              <EmptyState
+                title="No se encontraron compromisos"
+                description="Intenta con otros términos de búsqueda"
+              />
+            )}
+          </>
+        ) : (
+          /* EmptyState takes full available space when no installments exist */
           <EmptyState
             title="Aún no hay compromisos registrados"
             description="Comienza registrando el primer compromiso de pago de un cliente al proyecto"
@@ -1132,11 +1143,6 @@ export default function FinancesInstallments() {
                 Agregar Primer Compromiso
               </Button>
             }
-          />
-        ) : (
-          <EmptyState
-            title="No se encontraron compromisos"
-            description="Intenta con otros términos de búsqueda"
           />
         )}
 
