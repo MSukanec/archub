@@ -651,6 +651,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       
       // Detectar los 3 tipos de aportes basándose en los extra_fields de la categoría
       const extraFields = selectedCategory?.extra_fields || []
+      console.log('Category detection details:', {
+        categoryName: selectedCategory?.name,
+        categoryViewMode,
+        extraFields,
+        selectedCategoryId: selectedCategory?.id,
+        editingCategoryId: editingMovement.category_id
+      })
+      
       const isAportesMovement = categoryViewMode === "aportes" && extraFields.includes('cliente_id') // Aportes de Terceros
       const isAportesPropriosMovement = categoryViewMode === "aportes" && extraFields.includes('socio_id') && selectedCategory?.name === "Aportes Propios"
       const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || (extraFields.includes('socio_id') && selectedCategory?.name?.includes('Retiro'))
