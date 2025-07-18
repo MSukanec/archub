@@ -419,12 +419,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     
     const currentMember = members.find(m => m.user_id === userData.user.id)
     const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
-    const defaultWallet = userData?.organization_preferences?.default_wallet || wallets?.[0]?.id
+    
+    // Encontrar la billetera por defecto correcta
+    const defaultWalletRelation = userData?.organization_preferences?.default_wallet 
+    const defaultWalletObject = wallets?.find(w => w.id === defaultWalletRelation)
+    const defaultWallet = defaultWalletObject?.id || wallets?.[0]?.id
     
     console.log('Initializing default values:', {
       currentMember: currentMember?.id,
       defaultCurrency,
+      defaultWalletRelation,
       defaultWallet,
+      walletsAvailable: wallets?.length,
       hasOrgPreferences: !!userData?.organization_preferences
     })
     
