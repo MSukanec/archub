@@ -38,7 +38,7 @@ import { Table } from "@/components/ui-custom/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { FinancialCards } from "@/components/ui-custom/FinancialCards";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
-import { DangerousConfirmationModal } from "@/components/ui-custom/DangerousConfirmationModal";
+
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
@@ -133,9 +133,7 @@ export default function Movements() {
   const [searchValue, setSearchValue] = useState("");
 
   const { openModal } = useGlobalModalStore();
-  const [deletingMovement, setDeletingMovement] = useState<Movement | null>(
-    null,
-  );
+
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [movementFileCounts, setMovementFileCounts] = useState<Record<string, number>>({});
@@ -400,29 +398,53 @@ export default function Movements() {
   };
 
   const handleDelete = (movement: Movement) => {
-    setDeletingMovement(movement);
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar movimiento',
+      description: 'Esta acción no se puede deshacer. El movimiento será eliminado permanentemente.',
+      itemName: movement.description,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => deleteMovementMutation.mutate(movement),
+      isLoading: deleteMovementMutation.isPending
+    });
   };
 
   const handleDeleteConversion = (conversionGroup: ConversionGroup) => {
-    // Use the first movement as the deleting movement but mark it as a conversion deletion
     const firstMovement = conversionGroup.movements[0];
     const movementWithConversionData = {
       ...firstMovement,
       _isConversionDeletion: true,
       _conversionData: conversionGroup
     };
-    setDeletingMovement(movementWithConversionData as any);
+    
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar conversión completa',
+      description: 'Esta acción no se puede deshacer. La conversión completa (ambos movimientos) será eliminada permanentemente.',
+      itemName: conversionGroup.description,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => deleteMovementMutation.mutate(movementWithConversionData as any),
+      isLoading: deleteMovementMutation.isPending
+    });
   };
 
   const handleDeleteTransfer = (transferGroup: TransferGroup) => {
-    // Use the first movement as the deleting movement but mark it as a transfer deletion
     const firstMovement = transferGroup.movements[0];
     const movementWithTransferData = {
       ...firstMovement,
       _isTransferDeletion: true,
       _transferData: transferGroup
     };
-    setDeletingMovement(movementWithTransferData as any);
+    
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar transferencia completa',
+      description: 'Esta acción no se puede deshacer. La transferencia completa (ambos movimientos) será eliminada permanentemente.',
+      itemName: transferGroup.description,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => deleteMovementMutation.mutate(movementWithTransferData as any),
+      isLoading: deleteMovementMutation.isPending
+    });
   };
 
   const handleToggleFavorite = async (movement: Movement) => {
@@ -449,11 +471,7 @@ export default function Movements() {
 
 
 
-  const confirmDelete = () => {
-    if (deletingMovement) {
-      deleteMovementMutation.mutate(deletingMovement);
-    }
-  };
+
 
   const handleDeleteSelected = () => {
     if (selectedMovements.length > 0) {
@@ -1430,28 +1448,7 @@ export default function Movements() {
 
 
 
-      {/* Delete Confirmation Modal */}
-      <DangerousConfirmationModal
-        isOpen={!!deletingMovement}
-        onClose={() => setDeletingMovement(null)}
-        onConfirm={confirmDelete}
-        title={
-          (deletingMovement as any)?._isConversionDeletion 
-            ? "¿Eliminar conversión completa?" 
-            : (deletingMovement as any)?._isTransferDeletion
-              ? "¿Eliminar transferencia completa?"
-              : "¿Eliminar movimiento?"
-        }
-        message={
-          (deletingMovement as any)?._isConversionDeletion 
-            ? "Esta acción no se puede deshacer. La conversión completa (ambos movimientos) será eliminada permanentemente."
-            : (deletingMovement as any)?._isTransferDeletion
-              ? "Esta acción no se puede deshacer. La transferencia completa (ambos movimientos) será eliminada permanentemente."
-              : "Esta acción no se puede deshacer. El movimiento será eliminado permanentemente."
-        }
-        itemName={deletingMovement?.description || ""}
-        loading={deleteMovementMutation.isPending}
-      />
+
 
       {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog
