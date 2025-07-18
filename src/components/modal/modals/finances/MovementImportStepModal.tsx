@@ -405,36 +405,58 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Scroll to top when entering step 3
   useEffect(() => {
     if (currentStep === 3) {
-      // Try multiple selectors to find the modal container, prioritizing modal-specific ones
+      // More aggressive scroll approach with multiple attempts
       setTimeout(() => {
-        const scrollSelectors = [
+        // Try all possible scroll containers at once
+        const allScrollSelectors = [
           '[role="dialog"] [data-radix-scroll-area-viewport]',
           '[data-radix-dialog-content] [data-radix-scroll-area-viewport]', 
           '[data-radix-scroll-area-viewport]',
           '[role="dialog"] .overflow-y-auto',
           '[role="dialog"]',
           '.overflow-y-auto',
-          '.max-h-\\[90vh\\]'
+          '.max-h-\\[90vh\\]',
+          '[data-modal-content]',
+          '.modal-content',
+          '[class*="overflow"]'
         ]
         
-        let scrolled = false
-        for (const selector of scrollSelectors) {
-          const scrollContainer = document.querySelector(selector)
-          if (scrollContainer) {
-            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
-            console.log(`✅ Scrolled to top using selector: ${selector}`)
-            scrolled = true
-            break
-          }
-        }
+        // Scroll ALL possible containers to ensure we hit the right one
+        let scrolledContainers = 0
+        allScrollSelectors.forEach(selector => {
+          const containers = document.querySelectorAll(selector)
+          containers.forEach(container => {
+            if (container && container.scrollTo) {
+              container.scrollTo({ top: 0, behavior: 'instant' }) // Use instant for immediate effect
+              scrolledContainers++
+            }
+          })
+        })
         
-        // If no modal container found, scroll the document
-        if (!scrolled) {
+        // Force scroll document as well
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+        window.scrollTo({ top: 0, behavior: 'instant' })
+        
+        console.log(`✅ Aggressively scrolled ${scrolledContainers} containers to top`)
+        
+        // Second attempt after a brief moment to catch dynamic content
+        setTimeout(() => {
+          allScrollSelectors.forEach(selector => {
+            const containers = document.querySelectorAll(selector)
+            containers.forEach(container => {
+              if (container && container.scrollTo) {
+                container.scrollTop = 0 // Direct property assignment
+                container.scrollTo(0, 0) // Alternative method
+              }
+            })
+          })
           document.documentElement.scrollTop = 0
           document.body.scrollTop = 0
-          console.log(`✅ Scrolled document to top as fallback`)
-        }
-      }, 200) // Increased delay to ensure step 3 content is rendered
+          console.log(`🔄 Second scroll attempt completed`)
+        }, 100)
+        
+      }, 100) // Reduced initial delay
     }
   }, [currentStep])
 
