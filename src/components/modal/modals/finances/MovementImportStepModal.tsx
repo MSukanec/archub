@@ -179,16 +179,7 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   const stringValue = String(value).trim();
   const normalized = normalizeText(stringValue);
   
-  // Debug logging for UUID fields
-  if (['type_id', 'category_id', 'subcategory_id'].includes(field)) {
-    console.log(`🔍 Processing ${field}:`, {
-      originalValue: value,
-      stringValue,
-      normalized,
-      valueMapForField: valueMap[field],
-      directMatch: valueMap[field] && valueMap[field][normalized]
-    });
-  }
+
   
   // Check manual mappings first
   const mappingKey = `${field}_${stringValue}`;
@@ -199,9 +190,6 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   
   // Check direct mapping
   if (valueMap[field] && valueMap[field][normalized]) {
-    if (['type_id', 'category_id', 'subcategory_id'].includes(field)) {
-      console.log(`✅ ${field} direct match found:`, valueMap[field][normalized]);
-    }
     return valueMap[field][normalized];
   }
   
@@ -231,9 +219,6 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
     }
     
     if (bestMatch) {
-      if (['type_id', 'subcategory_id'].includes(field)) {
-        console.log(`✅ ${field} fuzzy match found:`, bestMatch);
-      }
       return bestMatch;
     }
   }
@@ -1006,12 +991,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         const categoryMatch = categories.find(c => c.id === categoryNormalized)
         const isDirectCategoryMatch = !!categoryMatch
 
-        console.log('🔍 Validating category_id:', {
-          originalValue: value,
-          categoryNormalized,
-          isDirectCategoryMatch,
-          categoryMatch: categoryMatch?.name
-        });
+
 
         return { 
           isValid: isDirectCategoryMatch, 
@@ -1026,12 +1006,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         const subcategoryMatch = allSubcategoriesForValidation.find(s => s.id === subcategoryNormalized)
         const isDirectSubcategoryMatch = !!subcategoryMatch
 
-        console.log('🔍 Validating subcategory_id:', {
-          originalValue: value,
-          subcategoryNormalized,
-          isDirectSubcategoryMatch,
-          subcategoryMatch: subcategoryMatch?.name
-        });
+
 
         return { 
           isValid: isDirectSubcategoryMatch, 
@@ -1058,7 +1033,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         options = (organizationCurrencies || []).map(c => ({ id: c.currency.id, name: c.currency.name }))
         break
       case 'wallet_id':
-        options = (organizationWallets || []).map(w => ({ id: w.wallets.id, name: w.wallets.name }))
+        options = (organizationWallets || []).map(w => ({ id: w.id, name: w.wallets.name }))
         break
       case 'subcategory_id':
         const allSubcategoriesForOptions = categories?.flatMap(cat => cat.children || []) || []
@@ -1068,15 +1043,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         options = []
     }
     
-    console.log(`🎯 Options for ${fieldName}:`, { 
-      fieldName, 
-      count: options.length, 
-      options: options.slice(0, 3),
-      types: types.length,
-      categories: categories.length,
-      currencies: organizationCurrencies?.length || 0,
-      wallets: organizationWallets?.length || 0
-    })
+
     
     return options
   }
