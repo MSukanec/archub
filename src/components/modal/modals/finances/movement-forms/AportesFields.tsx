@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { DollarSign } from "lucide-react"
 import UserSelector from "@/components/ui-custom/UserSelector"
-import { useProjectClients } from "@/hooks/use-project-clients"
 import { useCurrentUser } from "@/hooks/use-current-user"
 
 interface Props {
@@ -17,33 +16,13 @@ interface Props {
   wallets: any[]
   members: any[]
   concepts: any[]
+  projectClients?: any[]
 }
 
-export function AportesFields({ form, currencies, wallets, members, concepts }: Props) {
+export function AportesFields({ form, currencies, wallets, members, concepts, projectClients }: Props) {
   const { userData } = useCurrentUser()
   
-  // Esperar a que userData esté completamente cargado
-  const projectId = userData?.preferences?.last_project_id
-  const organizationId = userData?.organization?.id
-  const shouldFetchClients = !!projectId && !!organizationId
-  
-  const { data: projectClients } = useProjectClients(projectId || '', {
-    enabled: shouldFetchClients
-  })
-  
-  // DEBUG: Ver datos de clientes
-  console.log('AportesFields DEBUG:', {
-    projectId,
-    organizationId,
-    shouldFetchClients,
-    projectClients: projectClients,
-    clientsCount: projectClients?.length || 0,
-    clientsData: projectClients?.map((pc) => ({
-      id: pc.contact.id,
-      name: pc.contact.full_name,
-      company: pc.contact.company_name
-    }))
-  })
+
   
   // Estados para la lógica jerárquica
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(form.watch('category_id') || '')

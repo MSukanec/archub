@@ -1839,6 +1839,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets}
               members={members}
               concepts={concepts}
+              projectClients={projectClients}
             />
           </form>
         </Form>
