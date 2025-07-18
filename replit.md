@@ -118,6 +118,23 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. RETIROSPROPIOSFIELDS COMPONENT EXTRACTION COMPLETED: Successfully extracted complete retiros propios form to reusable component - COMPLETED
+  • Created src/components/modal/modals/movement-forms/RetirosPropiosFields.tsx component with complete retiros propios form functionality (~230 lines)
+  • Modularized retiros propios form: MovementFormModal now uses <RetirosPropiosFields/> component instead of inline JSX
+  • Enhanced component architecture: following ConversionFields, TransferFields, AportesFields, and AportesPropiosFields pattern for consistent modal form structure
+  • Component interface: RetirosPropiosFields accepts form, currencies, wallets, members, concepts props
+  • Retiros propios form includes: creator/date fields, type/category selectors, description at the end, dynamic socio selector, currency/wallet fields, amount/exchange rate
+  • Fixed UserSelector import consistency: uses default import from UserSelector component for proper module resolution
+  • Maintained all existing functionality while achieving modular architecture for better code maintainability
+  • All movement form types now use dedicated modular components: ConversionFields, TransferFields, AportesFields, AportesPropiosFields, RetirosPropiosFields
+- July 18, 2025. APORTESPROPIOSFIELDS COMPONENT EXTRACTION COMPLETED: Successfully extracted complete aportes propios form to reusable component - COMPLETED
+  • Created src/components/modal/modals/movement-forms/AportesPropiosFields.tsx component with complete aportes propios form functionality (~230 lines)
+  • Modularized aportes propios form: MovementFormModal now uses <AportesPropiosFields/> component instead of inline JSX
+  • Enhanced component architecture: following ConversionFields, TransferFields, and AportesFields pattern for consistent modal form structure
+  • Component interface: AportesPropiosFields accepts form, currencies, wallets, members, concepts props
+  • Aportes propios form includes: creator/date fields, type/category selectors, description at the end, dynamic socio selector, currency/wallet fields, amount/exchange rate
+  • Fixed UserSelector import issue: changed from named to default import for proper module resolution
+  • Maintained all existing functionality while achieving modular architecture for better code maintainability
 - July 18, 2025. APORTESFIELDS COMPONENT EXTRACTION COMPLETED: Successfully extracted complete aportes form to reusable component - COMPLETED
   • Created src/components/modal/modals/movement-forms/AportesFields.tsx component with complete aportes form functionality (~290 lines)
   • Modularized aportes form: MovementFormModal now uses <AportesFields/> component instead of inline JSX
