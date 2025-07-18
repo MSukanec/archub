@@ -29,6 +29,12 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
     organizationId: userData?.organization?.id,
     projectClients: projectClients,
     clientsCount: projectClients?.length || 0,
+    hookEnabled: {
+      hasProjectId: !!userData?.preferences?.last_project_id,
+      hasOrganizationId: !!userData?.organization?.id,
+      hasSupabase: !!userData && !!userData.organization,
+      shouldExecute: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
+    },
     clientsData: projectClients?.map((pc) => ({
       id: pc.contact.id,
       name: pc.contact.first_name + ' ' + pc.contact.last_name,

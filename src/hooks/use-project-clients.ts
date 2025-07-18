@@ -69,6 +69,12 @@ export function useProjectClients(projectId?: string) {
       
       return data || []
     },
-    enabled: !!projectId && !!organizationId && !!supabase
+    enabled: !!projectId && !!organizationId && !!supabase,
+    onError: (error) => {
+      console.error('useProjectClients - Hook error:', error)
+    },
+    onSuccess: (data) => {
+      console.log('useProjectClients - Hook success:', data?.length || 0, 'clients loaded')
+    }
   })
 }
