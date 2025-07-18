@@ -1371,7 +1371,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       {/* Campos centralizados: Creador y Fecha */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Creador *
           </label>
           <UserSelector
@@ -1391,7 +1391,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Fecha *
           </label>
           <Input
@@ -1413,7 +1413,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       {/* Selector de tipo de movimiento - CENTRALIZADO */}
       <div className="space-y-2">
-        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Tipo de movimiento *
         </label>
         <Select onValueChange={(value) => {

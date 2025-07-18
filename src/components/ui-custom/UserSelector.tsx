@@ -1,6 +1,5 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 
 interface User {
@@ -56,36 +55,18 @@ export default function UserSelector({
         <SelectTrigger>
           <SelectValue placeholder={placeholder}>
             {selectedUser && (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={selectedUser.avatar_url} />
-                  <AvatarFallback className="text-[10px]">
-                    {selectedUser.full_name?.split(' ').map(n => n[0]).join('') || 
-                     selectedUser.first_name?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">
-                  {getUserDisplayName(selectedUser)}
-                </span>
-              </div>
+              <span className="text-sm">
+                {getUserDisplayName(selectedUser)}
+              </span>
             )}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {users?.map((user) => (
             <SelectItem key={user.id} value={user.id}>
-              <div className="flex items-center gap-2">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback className="text-[10px]">
-                    {user.full_name?.split(' ').map(n => n[0]).join('') || 
-                     user.first_name?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">
-                  {getUserDisplayName(user)}
-                </span>
-              </div>
+              <span className="text-sm">
+                {getUserDisplayName(user)}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
