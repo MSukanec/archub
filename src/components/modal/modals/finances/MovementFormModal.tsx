@@ -1532,24 +1532,53 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   }
 
   const handleConfirm = () => {
-    switch (movementType) {
-      case 'conversion':
-        conversionForm.handleSubmit(onSubmitConversion)()
-        break
-      case 'transfer':
-        transferForm.handleSubmit(onSubmitTransfer)()
-        break
-      case 'aportes':
-        aportesForm.handleSubmit(onSubmitAportes)()
-        break
-      case 'aportes_propios':
-        aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
-        break
-      case 'retiros_propios':
-        retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
-        break
-      default:
-        form.handleSubmit(onSubmit)()
+    // Detectar tipo de movimiento basándose en la categoría ACTUAL seleccionada
+    const currentCategoryId = form.watch('category_id')
+    const currentCategory = categories?.find((cat: any) => cat.id === currentCategoryId)
+    const currentCategoryViewMode = (currentCategory?.view_mode ?? "normal").trim()
+    const currentExtraFields = currentCategory?.extra_fields || []
+    
+    // Detectar tipo actual basándose en la categoría seleccionada
+    const isCurrentAportes = currentCategoryViewMode === "aportes" && currentExtraFields.includes('cliente_id')
+    const isCurrentAportesPropios = currentCategoryViewMode === "aportes" && currentExtraFields.includes('socio_id') && currentCategory?.name === "Aportes Propios"
+    const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || (currentExtraFields.includes('socio_id') && currentCategory?.name?.includes('Retiro'))
+    
+    console.log('handleConfirm - detecting current movement type:', {
+      currentCategoryId,
+      currentCategoryName: currentCategory?.name,
+      currentCategoryViewMode,
+      currentExtraFields,
+      isCurrentAportes,
+      isCurrentAportesPropios,
+      isCurrentRetirosPropios,
+      originalMovementType: movementType
+    })
+    
+    // Usar el tipo detectado basándose en la categoría actual
+    if (isCurrentAportes) {
+      console.log('Submitting as aportes form')
+      aportesForm.handleSubmit(onSubmitAportes)()
+    } else if (isCurrentAportesPropios) {
+      console.log('Submitting as aportes propios form')
+      aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
+    } else if (isCurrentRetirosPropios) {
+      console.log('Submitting as retiros propios form')
+      retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
+    } else {
+      // Usar el movementType original para casos como conversión/transferencia
+      switch (movementType) {
+        case 'conversion':
+          console.log('Submitting as conversion form')
+          conversionForm.handleSubmit(onSubmitConversion)()
+          break
+        case 'transfer':
+          console.log('Submitting as transfer form')
+          transferForm.handleSubmit(onSubmitTransfer)()
+          break
+        default:
+          console.log('Submitting as normal form')
+          form.handleSubmit(onSubmit)()
+      }
     }
   }
 
