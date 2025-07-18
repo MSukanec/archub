@@ -13,8 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
 import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
@@ -48,8 +47,7 @@ export default function ProjectClients() {
   const { openModal } = useGlobalModalStore()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [clientToDelete, setClientToDelete] = useState<ProjectClient | null>(null)
-  const [showAddClientModal, setShowAddClientModal] = useState(false)
-  const [selectedContactId, setSelectedContactId] = useState('')
+
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
@@ -185,8 +183,6 @@ export default function ProjectClients() {
         description: "El cliente ha sido agregado al proyecto exitosamente",
       })
       queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
-      setShowAddClientModal(false)
-      setSelectedContactId('')
     },
     onError: (error: any) => {
       toast({
@@ -197,11 +193,7 @@ export default function ProjectClients() {
     }
   })
 
-  const handleAddClient = () => {
-    if (selectedContactId) {
-      addClientMutation.mutate(selectedContactId)
-    }
-  }
+
 
   const handleRemoveClient = (client: ProjectClient) => {
     setClientToDelete(client)
@@ -356,51 +348,10 @@ export default function ProjectClients() {
             title="No hay clientes agregados"
             description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
             action={
-              <Dialog open={showAddClientModal} onOpenChange={setShowAddClientModal}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Agregar Primer Cliente
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Agregar Cliente al Proyecto</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Seleccionar Contacto</label>
-                      <Select value={selectedContactId} onValueChange={setSelectedContactId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un contacto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableContacts.map(contact => {
-                            const displayName = contact.company_name || 
-                                             `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-                            return (
-                              <SelectItem key={contact.id} value={contact.id}>
-                                {displayName}
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setShowAddClientModal(false)}>
-                        Cancelar
-                      </Button>
-                      <Button 
-                        onClick={handleAddClient} 
-                        disabled={!selectedContactId || addClientMutation.isPending}
-                      >
-                        {addClientMutation.isPending ? 'Agregando...' : 'Agregar'}
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button onClick={() => openModal('project-client')}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Agregar Primer Cliente
+              </Button>
             }
           />
         )}
