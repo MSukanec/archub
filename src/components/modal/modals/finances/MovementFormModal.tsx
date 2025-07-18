@@ -330,7 +330,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Manejar cambio de tipo de manera controlada
   const handleTypeChange = React.useCallback((newTypeId: string) => {
-    if (!newTypeId || newTypeId === selectedTypeId || !concepts) return
+    if (!newTypeId || !concepts) return
     
     console.log('Handling type change:', { newTypeId, selectedTypeId })
     
@@ -358,20 +358,21 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       setMovementType('normal')
     }
     
-    // Reset solo en nuevo movimiento
+    // Sincronizar type_id en TODOS los formularios siempre (tanto edición como creación)
+    form.setValue('type_id', newTypeId)
+    conversionForm.setValue('type_id', newTypeId)
+    transferForm.setValue('type_id', newTypeId)
+    aportesForm.setValue('type_id', newTypeId)
+    aportesPropriosForm.setValue('type_id', newTypeId)
+    retirosPropriosForm.setValue('type_id', newTypeId)
+    
+    // Reset de categorías solo en nuevo movimiento
     if (!editingMovement) {
       form.setValue('category_id', '')
       form.setValue('subcategory_id', '')
       setSelectedCategoryId('')
-      
-      // Sincronizar TODOS los formularios
-      conversionForm.setValue('type_id', newTypeId)
-      transferForm.setValue('type_id', newTypeId)
-      aportesForm.setValue('type_id', newTypeId)
-      aportesPropriosForm.setValue('type_id', newTypeId)
-      retirosPropriosForm.setValue('type_id', newTypeId)
     }
-  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm])
+  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
   
   // Escuchar cambios en el tipo de TODOS los formularios
   const typeId = form.watch('type_id')
