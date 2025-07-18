@@ -440,7 +440,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   // Function to get hierarchy info for field display
   const getFieldHierarchyInfo = (fieldName: string, value: string): string => {
     if (fieldName === 'subcategory_id') {
-      // For subcategories, check if this value exists in our current subcategories
+      // First, check if this value exists as an existing subcategory
       const existingSubcategory = categories.find(sub => 
         normalizeText(sub.name) === normalizeText(value)
       )
@@ -450,28 +450,20 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         return `${parentName} > ${value}`
       }
       
-      // If not found, check if it looks like it belongs to a specific parent type
-      // by looking at similar subcategories patterns
-      const normalizedValue = normalizeText(value)
-      
-      // Try to find a parent based on common patterns or existing similar subcategories
-      for (const type of types) {
-        if (type.children && type.children.length > 0) {
-          // Check if any existing subcategory in this type might be similar
-          const hasSimilarSubcategory = type.children.some(child => {
-            const childName = normalizeText(child.name)
-            return normalizedValue.includes(childName.split(' ')[0]) || 
-                   childName.includes(normalizedValue.split(' ')[0])
-          })
-          
-          if (hasSimilarSubcategory) {
-            return `${type.name} > ${value}`
-          }
-        }
+      // For all unmapped subcategories, default to "Egresos" since most construction expenses are egresos
+      const egresoType = types.find(type => normalizeText(type.name) === 'egresos')
+      if (egresoType) {
+        return `${egresoType.name} > ${value}`
       }
       
-      // If no pattern found, just show the value
+      // Fallback to first type if no Egresos found
+      const firstType = types[0]
+      if (firstType) {
+        return `${firstType.name} > ${value}`
+      }
+      
       return value
+      
     } else if (fieldName === 'category_id') {
       // For categories, check if they're subcategories that belong to a parent
       for (const type of types) {
