@@ -98,41 +98,6 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
 
   return (
     <>
-      {/* Categoría */}
-      <FormField
-        control={form.control}
-        name="category_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Categoría *</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar categoría" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {categories?.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{category.name}</span>
-                      {category.is_system && (
-                        <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                          Sistema
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-
-
       {/* Separador y título de sección de aportes */}
       <div className="col-span-2">
         <Separator className="mb-4" />

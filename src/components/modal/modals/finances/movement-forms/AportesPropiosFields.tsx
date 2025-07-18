@@ -35,32 +35,6 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
 
   return (
     <>
-      {/* Categoría */}
-      <FormField
-        control={form.control}
-        name="category_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Categoría *</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar categoría..." />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {categories?.map((category: any) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
       {/* Separador y título de sección de aportes propios */}
       <div className="col-span-2">
         <Separator className="mb-4" />
