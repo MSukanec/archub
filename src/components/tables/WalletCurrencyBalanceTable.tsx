@@ -46,8 +46,8 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
     return (
       <div className="space-y-3">
         <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
-          <span>Billetera</span>
           <span>Moneda</span>
+          <span>Billetera</span>
           <span>Balance</span>
           <span>Estado</span>
         </div>
@@ -78,8 +78,8 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
     <div className="space-y-3">
       {/* Header */}
       <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
-        <span>Billetera</span>
         <span>Moneda</span>
+        <span>Billetera</span>
         <span>Balance</span>
         <span>Estado</span>
       </div>
@@ -88,16 +88,16 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
       <div className="space-y-2 max-h-[240px] overflow-y-auto">
         {data.map((item, index) => (
           <div key={`${item.wallet}-${item.currency}-${index}`} className="grid grid-cols-4 gap-4 text-sm items-center py-2">
-            {/* Billetera */}
-            <div className="flex items-center gap-2">
-              <Wallet2 className="h-4 w-4 text-muted-foreground" />
-              <span className="truncate">{item.wallet}</span>
-            </div>
-
             {/* Moneda */}
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="font-mono">{item.currency}</span>
+            </div>
+
+            {/* Billetera */}
+            <div className="flex items-center gap-2">
+              <Wallet2 className="h-4 w-4 text-muted-foreground" />
+              <span className="truncate">{item.wallet}</span>
             </div>
 
             {/* Balance */}

@@ -631,6 +631,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: "Éxito",
         description: `${selectedRows.size > 0 ? selectedRows.size : parsedData?.rows.length || 0} movimientos importados correctamente.`

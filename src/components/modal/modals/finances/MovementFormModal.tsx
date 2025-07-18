@@ -1046,6 +1046,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: editingMovement ? 'Movimiento actualizado' : 'Movimiento creado',
         description: editingMovement 
@@ -1172,6 +1175,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: editingMovement ? 'Conversión actualizada' : 'Conversión creada',
         description: editingMovement 
@@ -1245,6 +1251,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: 'Transferencia creada',
         description: 'La transferencia interna ha sido creada correctamente',
@@ -1294,6 +1303,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: 'Aporte registrado',
         description: 'El aporte ha sido registrado correctamente',

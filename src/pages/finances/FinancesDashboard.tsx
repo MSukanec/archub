@@ -523,7 +523,23 @@ export default function FinancesDashboard() {
 
 
 
-        {/* Segunda fila: Balances por Billetera y Moneda (100% ancho) */}
+        {/* Segunda fila: Flujo Financiero Mensual (100% ancho) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Flujo Financiero Mensual
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Ingresos, egresos y flujo neto del período seleccionado
+            </p>
+          </CardHeader>
+          <CardContent className="pb-2">
+            <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
+          </CardContent>
+        </Card>
+
+        {/* Tercera fila: Balances por Billetera y Moneda (100% ancho) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -539,7 +555,7 @@ export default function FinancesDashboard() {
           </CardContent>
         </Card>
 
-        {/* Tercera fila: 3 columnas - Egresos por Categoría, Este Mes, Movimientos Recientes */}
+        {/* Cuarta fila: 3 columnas - Egresos por Categoría, Este Mes, Movimientos Recientes */}
         <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
           {/* Gráfico de Egresos por Categoría */}
           <Card>
