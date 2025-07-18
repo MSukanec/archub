@@ -1244,20 +1244,36 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         exchange_rate: data.exchange_rate || null
       }
 
-      const { data: result, error } = await supabase
-        .from('movements')
-        .insert([movementData])
-        .select()
-        .single()
+      // Si estamos editando, actualizar el movimiento existente
+      if (editingMovement?.id) {
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
 
-      if (error) throw error
-      return result
+        if (error) throw error
+        return result
+      } else {
+        // Si estamos creando, insertar nuevo movimiento
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert([movementData])
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       toast({
-        title: 'Aporte Propio registrado',
-        description: 'El aporte propio ha sido registrado correctamente',
+        title: editingMovement ? 'Aporte Propio actualizado' : 'Aporte Propio registrado',
+        description: editingMovement 
+          ? 'El aporte propio ha sido actualizado correctamente'
+          : 'El aporte propio ha sido registrado correctamente',
       })
       onClose()
     },
@@ -1265,7 +1281,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al registrar el aporte propio: ${error.message}`,
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el aporte propio: ${error.message}`,
       })
     }
   })
@@ -1291,20 +1307,36 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         exchange_rate: data.exchange_rate || null
       }
 
-      const { data: result, error } = await supabase
-        .from('movements')
-        .insert([movementData])
-        .select()
-        .single()
+      // Si estamos editando, actualizar el movimiento existente
+      if (editingMovement?.id) {
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
 
-      if (error) throw error
-      return result
+        if (error) throw error
+        return result
+      } else {
+        // Si estamos creando, insertar nuevo movimiento
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert([movementData])
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       toast({
-        title: 'Retiro Propio registrado',
-        description: 'El retiro propio ha sido registrado correctamente',
+        title: editingMovement ? 'Retiro Propio actualizado' : 'Retiro Propio registrado',
+        description: editingMovement 
+          ? 'El retiro propio ha sido actualizado correctamente'
+          : 'El retiro propio ha sido registrado correctamente',
       })
       onClose()
     },
@@ -1312,7 +1344,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al registrar el retiro propio: ${error.message}`,
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el retiro propio: ${error.message}`,
       })
     }
   })

@@ -19,6 +19,8 @@ interface Movement {
   subcategory_id?: string
   currency_id: string
   wallet_id: string
+  member_id?: string
+  contact_id?: string
   is_favorite?: boolean
   conversion_group_id?: string
   transfer_group_id?: string
@@ -84,6 +86,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           subcategory_id,
           currency_id,
           wallet_id,
+          member_id,
+          contact_id,
           file_url,
           is_conversion,
           is_favorite,
