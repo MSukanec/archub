@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. TRANSFER EDITING FIELDS PRESELECTION FIXED: Resolved critical bug in transfer editing where creator, type, and destination wallet fields appeared empty - COMPLETED
+  • Fixed transfer group loading logic: implemented complete transfer group data loading similar to conversions
+  • Creator, Movement Type, and Destination Wallet fields now populate correctly when editing existing transfers
+  • Added proper transfer group query with wallet relation mapping using w.id for correct organization_wallets lookup
+  • Transfer editing workflow fully functional: all fields (creator, type, wallets) load automatically with existing values
+  • Centralized field loading in both transferForm and main form for consistent UI behavior across all transfer editing operations
 - July 18, 2025. CONVERSION EDITING WALLET PRESELECTION FIXED: Resolved critical bug in conversion editing where wallet fields appeared empty - COMPLETED
   • Fixed wallet lookup logic in conversion group loading: changed w.wallet_id to w.id for correct billeteras relation matching
   • ConversionFields now properly displays preselected wallet_id_from and wallet_id_to when editing existing conversions

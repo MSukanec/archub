@@ -675,22 +675,68 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setSelectedTypeId(conversionConcept.id)
         }
       } else if (isTransferMovement) {
+        // Para transferencias, cargar el grupo completo
+        
         // Buscar el concepto "Transferencia Interna" para asignar el type_id correcto
         const transferConcept = concepts?.find((concept: any) => 
           concept.view_mode?.trim() === "transfer"
         )
         
-        // Para transferencias, cargar datos en formulario de transferencia
+        // Función para cargar los datos del grupo de transferencia
+        const loadTransferGroup = async () => {
+          const { data: groupMovements, error: groupError } = await supabase
+            .from('movements')
+            .select('*')
+            .eq('transfer_group_id', editingMovement.transfer_group_id)
+            .order('amount', { ascending: false })
+          
+          if (groupError) {
+            console.error('Error loading transfer group:', groupError)
+            return
+          }
+          
+          // Identificar movimientos de egreso e ingreso
+          const egressMovement = groupMovements?.[0]
+          const ingressMovement = groupMovements?.[1]
+          
+
+          
+          // Buscar las billeteras correspondientes en la relación organizacion_wallets
+          const egressWallet = wallets?.find(w => w.id === egressMovement?.wallet_id)
+          const ingressWallet = wallets?.find(w => w.id === ingressMovement?.wallet_id)
+          
+          // Cargar datos del grupo de transferencia en el formulario
+          const transferData = {
+            movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+            created_by: editingMovement.created_by || '',
+            description: editingMovement.description || '',
+            type_id: transferConcept?.id || editingMovement.type_id || '',
+            currency_id: egressMovement?.currency_id || '',
+            wallet_id_from: egressWallet?.id || '',
+            wallet_id_to: ingressWallet?.id || '',
+            amount: egressMovement?.amount || 0
+          }
+          
+
+          if (!loadingReady) return
+          transferForm.reset(transferData)
+        }
+        
+        loadTransferGroup()
+        
+        // CRITICAL: También cargar en el formulario normal para que los campos superiores aparezcan
         if (!loadingReady) return
-        transferForm.reset({
+        form.reset({
           movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
           created_by: editingMovement.created_by || '',
           description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined,
           type_id: transferConcept?.id || editingMovement.type_id || '', // Usar el ID del concepto "Transferencia Interna"
-          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-          wallet_id_from: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
-          wallet_id_to: '',
-          amount: editingMovement.amount || 0
+          category_id: editingMovement.category_id || '',
+          subcategory_id: editingMovement.subcategory_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
         })
         
         // Establecer selectedTypeId para transferencias también
