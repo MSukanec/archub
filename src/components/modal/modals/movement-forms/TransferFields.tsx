@@ -1,6 +1,6 @@
 import { UseFormReturn } from 'react-hook-form'
 import { ArrowLeftRight } from 'lucide-react'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -29,8 +29,7 @@ interface Props {
 
 export function TransferFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
-    <Form {...form}>
-      <form className="space-y-4">
+    <div className="space-y-4">
         {/* Fila 1: Creador | Fecha */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
@@ -239,7 +238,6 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
             </FormItem>
           )}
         />
-      </form>
-    </Form>
+    </div>
   )
 }
