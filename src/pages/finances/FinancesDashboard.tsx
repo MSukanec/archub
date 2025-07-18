@@ -523,8 +523,24 @@ export default function FinancesDashboard() {
 
 
 
-        {/* Tercera fila: 4 columnas - Egresos por Categoría, Balance por Billetera, Este Mes, Movimientos Recientes */}
-        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
+        {/* Segunda fila: Balances por Billetera y Moneda (100% ancho) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Balances por Billetera y Moneda
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Resumen detallado de saldos organizados por billetera y moneda
+            </p>
+          </CardHeader>
+          <CardContent>
+            <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
+          </CardContent>
+        </Card>
+
+        {/* Tercera fila: 3 columnas - Egresos por Categoría, Este Mes, Movimientos Recientes */}
+        <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
           {/* Gráfico de Egresos por Categoría */}
           <Card>
             <CardHeader>
@@ -538,22 +554,6 @@ export default function FinancesDashboard() {
             </CardHeader>
             <CardContent className="pb-2">
               <ExpensesByCategoryChart data={expensesByCategory || []} isLoading={categoriesLoading} />
-            </CardContent>
-          </Card>
-
-          {/* Balances por Billetera y Moneda */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Balances por Billetera y Moneda
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Resumen detallado de saldos organizados por billetera y moneda
-              </p>
-            </CardHeader>
-            <CardContent>
-              <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
             </CardContent>
           </Card>
 
@@ -817,21 +817,7 @@ export default function FinancesDashboard() {
           </Card>
         </div>
 
-        {/* Balances Detallados */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Balances por Billetera y Moneda
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Resumen detallado de saldos organizados por billetera y moneda
-            </p>
-          </CardHeader>
-          <CardContent>
-            <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
-          </CardContent>
-        </Card>
+
 
 
       </div>

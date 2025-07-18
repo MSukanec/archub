@@ -79,17 +79,30 @@ export function useWalletCurrencyBalances(
         const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
 
-        // Fetch related data in parallel
+        console.log('Wallet IDs from movements:', walletIds)
+        console.log('Currency IDs from movements:', currencyIds)
+        console.log('Type IDs from movements:', typeIds)
+
+        // Fetch related data in parallel - usar organization_wallets para obtener los nombres de billeteras
         const [walletsResult, currenciesResult, conceptsResult] = await Promise.all([
-          supabase.from('wallets').select('id, name').in('id', walletIds),
+          supabase
+            .from('organization_wallets')
+            .select('id, wallets(name)')
+            .in('id', walletIds),
           supabase.from('currencies').select('id, name').in('id', currencyIds),
           supabase.from('movement_concepts').select('id, name').in('id', typeIds)
         ])
 
+        console.log('Wallets fetched from organization_wallets:', walletsResult.data)
+        console.log('Currencies fetched:', currenciesResult.data)
+        console.log('Concepts fetched:', conceptsResult.data)
+
         // Create lookup maps
         const walletsMap = new Map()
-        walletsResult.data?.forEach(wallet => {
-          walletsMap.set(wallet.id, wallet.name)
+        walletsResult.data?.forEach(orgWallet => {
+          // Acceder al nombre de la billetera desde la relación anidada
+          const walletName = orgWallet.wallets?.name || 'Sin nombre'
+          walletsMap.set(orgWallet.id, walletName)
         })
 
         const currenciesMap = new Map()
