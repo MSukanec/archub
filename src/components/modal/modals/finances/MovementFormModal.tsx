@@ -178,6 +178,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Estado centralizado para el tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
+  
+  // Flag para evitar recargar datos cuando el usuario está cambiando el tipo manualmente
+  const [isUserChangingType, setIsUserChangingType] = React.useState(false)
 
   // Variables derivadas para compatibilidad
   const isConversion = movementType === 'conversion'
@@ -334,6 +337,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     
     console.log('Handling type change:', { newTypeId, selectedTypeId })
     
+    // Marcar que el usuario está cambiando el tipo manualmente
+    setIsUserChangingType(true)
+    
     // Actualizar estado
     setSelectedTypeId(newTypeId)
     
@@ -372,6 +378,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       form.setValue('subcategory_id', '')
       setSelectedCategoryId('')
     }
+    
+    // Reset del flag después de un breve delay
+    setTimeout(() => setIsUserChangingType(false), 100)
   }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
   
   // Escuchar cambios en el tipo de TODOS los formularios
@@ -614,7 +623,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Efecto solo para cargar movimientos en edición (sin valores por defecto)
   React.useEffect(() => {
-    if (!editingMovement) return
+    if (!editingMovement || isUserChangingType) return
     
     console.log('Loading editing movement - ONE TIME ONLY')
     
@@ -984,7 +993,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     }
     setPanel('edit')
-  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories])
+  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories, isUserChangingType])
 
   // Efecto para inicializar el campo created_by cuando members esté disponible
   React.useEffect(() => {
