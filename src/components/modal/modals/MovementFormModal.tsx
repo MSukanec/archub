@@ -174,10 +174,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Estado centralizado para el tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
 
-  // Estados centralizados para campos compartidos entre todos los formularios
-  const [sharedCreatedBy, setSharedCreatedBy] = React.useState('')
-  const [sharedMovementDate, setSharedMovementDate] = React.useState(new Date())
-
   // Variables derivadas para compatibilidad
   const isConversion = movementType === 'conversion'
   const isTransfer = movementType === 'transfer'
@@ -306,28 +302,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       exchange_rate: undefined
     }
   })
-
-  // Función para sincronizar el creador en todos los formularios
-  const updateSharedCreatedBy = React.useCallback((createdBy: string) => {
-    setSharedCreatedBy(createdBy)
-    form.setValue('created_by', createdBy)
-    conversionForm.setValue('created_by', createdBy)
-    transferForm.setValue('created_by', createdBy)
-    aportesForm.setValue('created_by', createdBy)
-    aportesPropriosForm.setValue('created_by', createdBy)
-    retirosPropriosForm.setValue('created_by', createdBy)
-  }, [form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
-
-  // Función para sincronizar la fecha en todos los formularios
-  const updateSharedMovementDate = React.useCallback((date: Date) => {
-    setSharedMovementDate(date)
-    form.setValue('movement_date', date)
-    conversionForm.setValue('movement_date', date)
-    transferForm.setValue('movement_date', date)
-    aportesForm.setValue('movement_date', date)
-    aportesPropriosForm.setValue('movement_date', date)
-    retirosPropriosForm.setValue('movement_date', date)
-  }, [form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
 
   // Manejar envío con ENTER
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -819,14 +793,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const currentMember = members.find(m => m.user_id === userData.user.id)
       
       if (currentMember?.id) {
-        // Usar la función compartida para sincronizar en todos los formularios
-        updateSharedCreatedBy(currentMember.id)
-        // También inicializar member_id para aportes y retiros propios
+        // Inicializar created_by en todos los formularios
+        form.setValue('created_by', currentMember.id)
+        conversionForm.setValue('created_by', currentMember.id)
+        transferForm.setValue('created_by', currentMember.id)
+        aportesForm.setValue('created_by', currentMember.id)
+        aportesPropriosForm.setValue('created_by', currentMember.id)
         aportesPropriosForm.setValue('member_id', currentMember.id)
+        retirosPropriosForm.setValue('created_by', currentMember.id)
         retirosPropriosForm.setValue('member_id', currentMember.id)
       }
     }
-  }, [members, userData?.user?.id, editingMovement, updateSharedCreatedBy, aportesPropriosForm, retirosPropriosForm])
+  }, [members, userData?.user?.id, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
@@ -1394,8 +1372,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             wallets={wallets} 
             members={members}
             concepts={concepts}
-            onCreatedByChange={updateSharedCreatedBy}
-            onMovementDateChange={updateSharedMovementDate}
           />
         </Form>
       ) : (isTransfer || isEditingTransfer) ? (
@@ -1406,8 +1382,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             wallets={wallets}
             members={members}
             concepts={concepts}
-            onCreatedByChange={updateSharedCreatedBy}
-            onMovementDateChange={updateSharedMovementDate}
           />
         </Form>
       ) : (isAportes || isEditingAportes) ? (
@@ -1419,8 +1393,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets}
               members={members}
               concepts={concepts}
-              onCreatedByChange={updateSharedCreatedBy}
-              onMovementDateChange={updateSharedMovementDate}
             />
           </form>
         </Form>

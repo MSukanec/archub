@@ -28,11 +28,9 @@ interface Props {
   wallets: any[]
   members: any[]
   concepts: any[]
-  onCreatedByChange?: (value: string) => void
-  onMovementDateChange?: (value: Date) => void
 }
 
-export function ConversionFields({ form, currencies, wallets, members, concepts, onCreatedByChange, onMovementDateChange }: Props) {
+export function ConversionFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
     <div className="space-y-4">
         {/* Fila 1: Creador | Fecha */}
@@ -47,10 +45,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
                   <UserSelector
                     users={members || []}
                     value={field.value}
-                    onChange={(value) => {
-                      field.onChange(value)
-                      onCreatedByChange?.(value)
-                    }}
+                    onChange={field.onChange}
                     placeholder="Seleccionar creador"
                   />
                 </FormControl>
@@ -72,7 +67,6 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
                     onChange={(e) => {
                       const localDate = new Date(e.target.value + 'T00:00:00');
                       field.onChange(localDate);
-                      onMovementDateChange?.(localDate);
                     }}
                   />
                 </FormControl>
