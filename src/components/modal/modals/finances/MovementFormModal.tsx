@@ -211,6 +211,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     return selectedCategory?.children || []
   }, [categories, selectedCategoryId])
 
+  // Lógica dinámica para mostrar campos de categoría/subcategoría
+  const shouldShowCategoryFields = React.useMemo(() => {
+    // Solo mostrar si hay categorías disponibles para el tipo seleccionado
+    return categories && categories.length > 0
+  }, [categories])
+
+  const shouldShowSubcategoryFields = React.useMemo(() => {
+    // Solo mostrar si hay subcategorías disponibles para la categoría seleccionada
+    return subcategories && subcategories.length > 0
+  }, [subcategories])
+
   const form = useForm<MovementForm>({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
@@ -1579,8 +1590,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         </Select>
       </div>
 
-      {/* Campos de Categoría y Subcategoría - SOLO para movimientos normales y aportes (NO conversión/transferencia) */}
-      {!isConversion && !isTransfer && !isEditingConversion && !isEditingTransfer && (
+      {/* Campos de Categoría y Subcategoría - Mostrar solo cuando hay categorías disponibles */}
+      {shouldShowCategoryFields && (
         <div className="grid grid-cols-1 gap-4">
           {/* Categoría */}
           <div className="space-y-2">
@@ -1619,41 +1630,43 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </Select>
           </div>
 
-          {/* Subcategoría */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Subcategoría
-            </label>
-            <Select 
-              onValueChange={(value) => {
-                // Actualizar todos los formularios
-                form.setValue('subcategory_id', value)
-                aportesForm.setValue('subcategory_id', value)
-                aportesPropriosForm.setValue('subcategory_id', value)
-                retirosPropriosForm.setValue('subcategory_id', value)
-              }} 
-              value={form.watch('subcategory_id')}
-              disabled={!selectedCategoryId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={!selectedCategoryId ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
-              </SelectTrigger>
-              <SelectContent>
-                {subcategories?.map((subcategory: any) => (
-                  <SelectItem key={subcategory.id} value={subcategory.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{subcategory.name}</span>
-                      {subcategory.is_system && (
-                        <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                          Sistema
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Subcategoría - Mostrar solo cuando hay subcategorías disponibles */}
+          {shouldShowSubcategoryFields && (
+            <div className="space-y-2">
+              <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Subcategoría
+              </label>
+              <Select 
+                onValueChange={(value) => {
+                  // Actualizar todos los formularios
+                  form.setValue('subcategory_id', value)
+                  aportesForm.setValue('subcategory_id', value)
+                  aportesPropriosForm.setValue('subcategory_id', value)
+                  retirosPropriosForm.setValue('subcategory_id', value)
+                }} 
+                value={form.watch('subcategory_id')}
+                disabled={!selectedCategoryId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={!selectedCategoryId ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {subcategories?.map((subcategory: any) => (
+                    <SelectItem key={subcategory.id} value={subcategory.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{subcategory.name}</span>
+                        {subcategory.is_system && (
+                          <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
+                            Sistema
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
       )}
       
