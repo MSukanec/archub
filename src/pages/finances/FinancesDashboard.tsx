@@ -4,9 +4,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building, Wallet, Clock } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
+import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
 import { WalletBalanceChart } from '@/components/charts/WalletBalanceChart'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
+import { WalletCurrencyBalanceTable } from '@/components/tables/WalletCurrencyBalanceTable'
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -39,6 +41,7 @@ export default function FinancesDashboard() {
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, projectId, timePeriod)
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId, timePeriod)
   const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId, timePeriod)
+  const { data: walletCurrencyBalances, isLoading: walletCurrencyLoading } = useWalletCurrencyBalances(organizationId, projectId, timePeriod)
   const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5, timePeriod)
   const { data: expensesByCategory, isLoading: categoriesLoading } = useExpensesByCategory(organizationId, projectId, timePeriod)
   
@@ -538,19 +541,19 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
-          {/* Balance por Billetera */}
+          {/* Balances por Billetera y Moneda */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                Balance por Billetera
+                <DollarSign className="h-5 w-5" />
+                Balances por Billetera y Moneda
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Distribución de balances entre billeteras activas
+                Resumen detallado de saldos organizados por billetera y moneda
               </p>
             </CardHeader>
             <CardContent>
-              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
+              <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
             </CardContent>
           </Card>
 
@@ -693,19 +696,19 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
 
-          {/* Balance por Billetera - Mobile */}
+          {/* Balances por Billetera y Moneda - Mobile */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                Balance por Billetera
+                <DollarSign className="h-5 w-5" />
+                Balances por Billetera y Moneda
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Distribución de balances entre billeteras activas
+                Resumen detallado de saldos organizados por billetera y moneda
               </p>
             </CardHeader>
             <CardContent>
-              <WalletBalanceChart data={walletBalances || []} isLoading={walletsLoading} />
+              <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
             </CardContent>
           </Card>
 
@@ -826,80 +829,7 @@ export default function FinancesDashboard() {
             </p>
           </CardHeader>
           <CardContent>
-            {walletsLoading ? (
-              <div className="text-sm text-muted-foreground">Cargando balances...</div>
-            ) : walletBalances && walletBalances.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Billetera</th>
-                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Moneda</th>
-                      <th className="text-right py-3 px-4 font-medium text-sm text-muted-foreground">Balance</th>
-                      <th className="text-right py-3 px-4 font-medium text-sm text-muted-foreground">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {walletBalances.map((walletBalance: any, index: number) => {
-                      const balance = walletBalance.balance || 0;
-                      const isPositive = balance > 0;
-                      const isNegative = balance < 0;
-                      
-                      return (
-                        <tr key={index} className="border-b last:border-0">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center space-x-2">
-                              <CreditCard className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium text-sm">{walletBalance.wallet}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="text-sm text-muted-foreground">ARS</span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <span className="font-medium text-sm" style={getBalanceColor(balance)}>
-                              {formatCurrency(Math.abs(balance))}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end">
-                              {isPositive && (
-                                <div className="flex items-center space-x-1" style={{ color: 'var(--chart-positive)' }}>
-                                  <TrendingUp className="h-3 w-3" />
-                                  <span className="text-xs font-medium">Positivo</span>
-                                </div>
-                              )}
-                              {isNegative && (
-                                <div className="flex items-center space-x-1" style={{ color: 'var(--chart-negative)' }}>
-                                  <TrendingDown className="h-3 w-3" />
-                                  <span className="text-xs font-medium">Negativo</span>
-                                </div>
-                              )}
-                              {balance === 0 && (
-                                <span className="text-xs font-medium" style={{ color: 'var(--chart-neutral)' }}>Neutral</span>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <CreditCard className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground mb-3">
-                  No hay balances para mostrar
-                </p>
-                <Link 
-                  href="/finances/movements"
-                  className="inline-flex items-center px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                >
-                  Crear Primer Movimiento
-                </Link>
-              </div>
-            )}
+            <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
           </CardContent>
         </Card>
 
