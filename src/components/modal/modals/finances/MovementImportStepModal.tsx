@@ -550,25 +550,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       })
     }
     
-    // Check if there are any unmapped values that need manual mapping
-    const hasUnmappedValues = Object.keys(columnMapping).some(columnIndex => {
-      const mappedField = columnMapping[columnIndex]
-      if (!mappedField || !parsedData?.rows) return false
-      
-      const sampleValue = parsedData.rows[0]?.[parseInt(columnIndex)]
-      if (!sampleValue) return false
-      
-      const validation = validateFieldValue(mappedField, sampleValue)
-      return !validation.isValid && validation.available && validation.available.length > 0
-    })
-    
-    if (hasUnmappedValues) {
-      errors.push({
-        row: 0,
-        column: 'mapping',
-        message: 'Hay valores que requieren mapeo manual. Revisa las secciones marcadas con "🔧 REVISAR MAPEO" y haz clic en los valores disponibles.'
-      })
-    }
+    // Note: We allow advancing to step 3 even with unmapped values
+    // The step 3 will handle manual mapping for values that couldn't be auto-mapped
     
     setValidationErrors(errors)
     
@@ -945,17 +928,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     switch (fieldName) {
       case 'type_id':
         const normalizedVal = normalizeValue(fieldName, value, valueMap, manualMappings)
+        if (!normalizedVal || !isValidUUID(normalizedVal)) {
+          return { 
+            isValid: false, 
+            suggestion: null,
+            available: types.map(t => t.name),
+            mappedValue: normalizedVal
+          }
+        }
         // Check if it's a direct UUID match with types table
         const typeMatch = types.find(t => t.id === normalizedVal)
         const isDirectTypeMatch = !!typeMatch
-        
-        console.log('🔍 Validating type_id:', {
-          originalValue: value,
-          normalizedVal,
-          isDirectTypeMatch,
-          typeMatch: typeMatch?.name,
-          allTypes: types.map(t => ({ id: t.id, name: t.name }))
-        });
         
         return { 
           isValid: isDirectTypeMatch, 
@@ -965,6 +948,14 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'currency_id':
         const currencyNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
+        if (!currencyNormalized || !isValidUUID(currencyNormalized)) {
+          return { 
+            isValid: false, 
+            suggestion: null,
+            available: organizationCurrencies?.map(c => c.currency.name) || [],
+            mappedValue: currencyNormalized
+          }
+        }
         // Check if it's a direct UUID match with organization currencies
         const currencyMatch = organizationCurrencies?.find(c => c.currency.id === currencyNormalized)
         const isDirectCurrencyMatch = !!currencyMatch
@@ -976,8 +967,16 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'wallet_id':
         const walletNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
+        if (!walletNormalized || !isValidUUID(walletNormalized)) {
+          return { 
+            isValid: false, 
+            suggestion: null,
+            available: organizationWallets?.map(w => w.wallets.name) || [],
+            mappedValue: walletNormalized
+          }
+        }
         // Check if it's a direct UUID match with organization wallets
-        const walletMatch = organizationWallets?.find(w => w.wallets.id === walletNormalized)
+        const walletMatch = organizationWallets?.find(w => w.id === walletNormalized)
         const isDirectWalletMatch = !!walletMatch
         return { 
           isValid: isDirectWalletMatch, 
@@ -987,12 +986,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'category_id':
         const categoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
+        if (!categoryNormalized || !isValidUUID(categoryNormalized)) {
+          return { 
+            isValid: false, 
+            suggestion: null,
+            available: categories.map(c => c.name),
+            mappedValue: categoryNormalized
+          }
+        }
         // Check if it's a direct UUID match with categories table (intermediate level)
         const categoryMatch = categories.find(c => c.id === categoryNormalized)
         const isDirectCategoryMatch = !!categoryMatch
-
-
-
         return { 
           isValid: isDirectCategoryMatch, 
           suggestion: categoryMatch?.name,
@@ -1001,13 +1005,19 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         }
       case 'subcategory_id':
         const subcategoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
+        if (!subcategoryNormalized || !isValidUUID(subcategoryNormalized)) {
+          const allSubcategoriesForValidation = categories?.flatMap(cat => cat.children || []) || []
+          return { 
+            isValid: false, 
+            suggestion: null,
+            available: allSubcategoriesForValidation.map(s => s.name),
+            mappedValue: subcategoryNormalized
+          }
+        }
         // Check if it's a direct UUID match with subcategories table (deepest level)
         const allSubcategoriesForValidation = categories?.flatMap(cat => cat.children || []) || []
         const subcategoryMatch = allSubcategoriesForValidation.find(s => s.id === subcategoryNormalized)
         const isDirectSubcategoryMatch = !!subcategoryMatch
-
-
-
         return { 
           isValid: isDirectSubcategoryMatch, 
           suggestion: subcategoryMatch?.name,
