@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
+import { supabase } from '@/lib/supabase'
 
 interface Contact {
   id: string
@@ -26,7 +26,7 @@ export interface ProjectClient {
   contact: Contact
 }
 
-export function useProjectClients(projectId?: string) {
+export function useProjectClients(projectId?: string, options?: { enabled?: boolean }) {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
 
@@ -69,7 +69,7 @@ export function useProjectClients(projectId?: string) {
       
       return data || []
     },
-    enabled: !!projectId && !!organizationId && !!supabase,
+    enabled: options?.enabled !== false && !!projectId && !!organizationId && !!supabase,
     onError: (error) => {
       console.error('useProjectClients - Hook error:', error)
     },

@@ -21,7 +21,15 @@ interface Props {
 
 export function AportesFields({ form, currencies, wallets, members, concepts }: Props) {
   const { userData } = useCurrentUser()
-  const { data: projectClients } = useProjectClients(userData?.preferences?.last_project_id || '')
+  
+  // Esperar a que userData esté completamente cargado
+  const projectId = userData?.preferences?.last_project_id
+  const organizationId = userData?.organization?.id
+  const shouldFetchClients = !!projectId && !!organizationId
+  
+  const { data: projectClients } = useProjectClients(projectId || '', {
+    enabled: shouldFetchClients
+  })
   
   // DEBUG: Ver datos de clientes
   console.log('AportesFields DEBUG:', {
