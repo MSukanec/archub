@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. DESIGN SUBMENU CLEANUP AND TOAST NOTIFICATIONS COMPLETED: Enhanced sidebar UX with proper feedback and streamlined design navigation - COMPLETED
+  • Added toast notifications for both dock and theme buttons in sidebar footer with descriptive messages
+  • Dock toggle shows "Sidebar anclado/desanclado" with explanation of behavior
+  • Theme toggle shows "Tema oscuro/claro activado" with applied theme confirmation
+  • Removed "DATOS" and "PREFERENCIAS DE DISEÑO" buttons from design submenu as requested
+  • Enabled CRONOGRAMA button access to /design/timeline route by removing 'coming_soon' restriction
+  • Updated both desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx for consistency
+  • Design submenu now contains only: Resumen de Diseño, Cronograma, Tablero, Cómputo
+  • Enhanced user feedback system provides immediate visual confirmation of all sidebar actions
 - July 18, 2025. PLAN COMPONENT REPOSITIONED AND SIDEBAR FIXES COMPLETED: Successfully integrated Plan component as regular menu item and confirmed dock functionality - COMPLETED
   • Moved Plan component from sidebar footer to appear as regular menu item after PREFERENCIAS in organization submenu
   • Fixed Plan component text colors: title now displays in white, "Plan actual:" uses sidebar secondary text color variables

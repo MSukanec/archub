@@ -118,11 +118,9 @@ export function SidebarSubmenu() {
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: 'coming_soon', requiresProject: true },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', requiresProject: true },
       { icon: Layout, label: 'Tablero', href: '/design/board', restricted: 'coming_soon', requiresProject: true },
       { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon', requiresProject: true },
-      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: 'coming_soon', requiresProject: true },
-      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: 'coming_soon', requiresProject: true },
     ],
 
     'obra': [

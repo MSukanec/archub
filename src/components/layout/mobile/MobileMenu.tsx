@@ -284,11 +284,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     diseno: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', restricted: true },
+      { icon: Calendar, label: 'Cronograma', href: '/design/timeline' },
       { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
       { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
-      { icon: FileCode, label: 'Datos', href: '/design/data', restricted: true },
-      { icon: History, label: 'Preferencias de Diseño', href: '/design/preferences', restricted: true },
     ],
     comercializacion: [
       { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
