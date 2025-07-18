@@ -74,6 +74,66 @@ export function Sidebar() {
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection } = useNavigationStore();
   const queryClient = useQueryClient();
   
+  // Theme state
+  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  // Initialize theme from user preferences
+  useEffect(() => {
+    const currentTheme = userData?.preferences?.theme || 'light';
+    setTheme(currentTheme);
+    setIsDark(currentTheme === 'dark');
+    
+    // Apply theme to document
+    const rootElement = document.documentElement;
+    if (currentTheme === 'dark') {
+      rootElement.classList.add('dark');
+    } else {
+      rootElement.classList.remove('dark');
+    }
+  }, [userData?.preferences?.theme]);
+  
+  // Save preferences mutation
+  const savePreferencesMutation = useMutation({
+    mutationFn: async (preferences: { sidebar_docked?: boolean; theme?: 'light' | 'dark' }) => {
+      if (!userData?.user?.id) throw new Error('User not found');
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update(preferences)
+        .eq('user_id', userData.user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
+  
+  // Handle dock toggle
+  const handleDockToggle = () => {
+    const newDocked = !isDocked;
+    setDocked(newDocked);
+    savePreferencesMutation.mutate({ sidebar_docked: newDocked });
+  };
+  
+  // Handle theme toggle
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    setIsDark(newTheme === 'dark');
+    
+    // Apply theme to document immediately
+    const rootElement = document.documentElement;
+    if (newTheme === 'dark') {
+      rootElement.classList.add('dark');
+    } else {
+      rootElement.classList.remove('dark');
+    }
+    
+    savePreferencesMutation.mutate({ theme: newTheme });
+  };
+  
   // Estado para acordeones - solo uno abierto a la vez
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
     const saved = localStorage.getItem('sidebar-accordion');
@@ -334,6 +394,29 @@ export function Sidebar() {
               variant="main"
             />
           )}
+          
+          {/* Settings buttons */}
+          <div className="flex flex-col gap-[2px] mb-[2px]">
+            {/* Dock/Undock button */}
+            <SidebarButton
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleDockToggle}
+              variant="main"
+            />
+            
+            {/* Theme toggle button */}
+            <SidebarButton
+              icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+              label={isDark ? "Modo Claro" : "Modo Oscuro"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleThemeToggle}
+              variant="main"
+            />
+          </div>
           
           {/* Profile */}
           <SidebarButton
