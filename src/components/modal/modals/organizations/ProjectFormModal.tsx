@@ -5,10 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FolderPlus, Calendar, User, Building2, Settings, MapPin } from "lucide-react";
 
-import { FormModalLayout } from "../form/FormModalLayout";
-import { FormModalHeader } from "../form/FormModalHeader";
-import { FormModalFooter } from "../form/FormModalFooter";
-import { useModalPanelStore } from "../form/modalPanelStore";
+import { FormModalLayout } from "../../form/FormModalLayout";
+import { FormModalHeader } from "../../form/FormModalHeader";
+import { FormModalFooter } from "../../form/FormModalFooter";
+import { useModalPanelStore } from "../../form/modalPanelStore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

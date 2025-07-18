@@ -1,24 +1,24 @@
 import { useGlobalModalStore } from './useGlobalModalStore';
 import { FormModalLayout } from './FormModalLayout';
 import { Button } from '@/components/ui/button';
-import { MemberFormModal } from '../modals/MemberFormModal';
+import { MemberFormModal } from '../modals/organizations/MemberFormModal';
 import { GalleryFormModal } from '../modals/GalleryFormModal';
 import { BoardFormModal } from '../modals/BoardFormModal';
-import { CardFormModal } from '../modals/CardFormModal';
-import { ListFormModal } from '../modals/ListFormModal';
-import { ContactFormModal } from '../modals/ContactFormModal';
-import { ProjectFormModal } from '../modals/ProjectFormModal';
+import { CardFormModal } from '../modals/organizations/CardFormModal';
+import { ListFormModal } from '../modals/organizations/ListFormModal';
+import { ContactFormModal } from '../modals/organizations/ContactFormModal';
+import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
 import ProjectClientFormModal from '../modals/ProjectClientFormModal';
 import { DocumentUploadFormModal } from '../modals/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/DocumentFolderFormModal';
 import MovementFormModal from '../modals/finances/MovementFormModal';
 import MovementConceptFormModal from '../modals/MovementConceptFormModal';
-import { OrganizationMovementConceptFormModal } from '../modals/OrganizationMovementConceptFormModal';
+import { OrganizationMovementConceptFormModal } from '../modals/organizations/OrganizationMovementConceptFormModal';
 import MovementImportModal from '../modals/MovementImportModal';
 import MovementImportStepModal from '../modals/finances/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/BudgetFormModal';
-import { OrganizationFormModal } from '../modals/OrganizationFormModal';
+import { OrganizationFormModal } from '../modals/organizations/OrganizationFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();

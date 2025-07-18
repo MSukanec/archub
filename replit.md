@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. MODAL FILES REORGANIZATION COMPLETED: Successfully reorganized all modal files into logical directory structures - COMPLETED
+  • Created src/components/modal/modals/organizations/ directory for organization-related modals
+  • Moved ContactFormModal, CardFormModal, ListFormModal, MemberFormModal, OrganizationFormModal, OrganizationMovementConceptFormModal, ProjectFormModal to organizations/
+  • Created src/components/modal/modals/finances/ directory for finance-related modals  
+  • Moved MovementFormModal, MovementImportStepModal, and movement-forms/ directory to finances/
+  • Updated all import references in ModalFactory.tsx to use new organized file paths
+  • Enhanced project organization: modals now logically grouped by domain (organizations, finances) for better maintainability
+  • Maintained all existing modal functionality while improving overall codebase structure and developer experience
 - July 18, 2025. RETIROSPROPIOSFIELDS COMPONENT EXTRACTION COMPLETED: Successfully extracted complete retiros propios form to reusable component - COMPLETED
   • Created src/components/modal/modals/movement-forms/RetirosPropiosFields.tsx component with complete retiros propios form functionality (~230 lines)
   • Modularized retiros propios form: MovementFormModal now uses <RetirosPropiosFields/> component instead of inline JSX
