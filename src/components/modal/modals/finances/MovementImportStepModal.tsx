@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
@@ -23,6 +23,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
 
 // Value normalization utilities
 const normalizeText = (text: string): string => {
@@ -401,10 +402,34 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     }
   }, [parsedData, columnMapping])
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    // Add a small delay to ensure DOM is updated
+    setTimeout(() => {
+      const modalElement = document.querySelector('[data-modal-content]') || document.querySelector('.fixed.inset-0');
+      if (modalElement) {
+        modalElement.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
+  }, [currentStep])
+
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
   // Get ALL concepts with parent_id (subcategories) - flatten the structure
   const categories = movementConcepts?.flatMap(concept => concept.children || []) || []
+
+  // Function to find parent category name for a subcategory
+  const findParentCategoryName = (subcategoryId: string): string => {
+    for (const concept of movementConcepts || []) {
+      if (concept.children) {
+        const foundSubcategory = concept.children.find(child => child.id === subcategoryId);
+        if (foundSubcategory) {
+          return concept.name;
+        }
+      }
+    }
+    return 'Sin categoría padre';
+  }
   
 
   
@@ -1348,9 +1373,25 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                             <AlertCircle className="h-4 w-4 text-orange-500" />
                             <span className="font-mono text-sm">{value}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Valor de tu archivo
-                          </p>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {fieldName === 'subcategory_id' ? (
+                              <div className="flex flex-col">
+                                <span>Valor de tu archivo</span>
+                                <span className="text-[10px] text-muted-foreground/80">
+                                  ↳ Se creará como subcategoría
+                                </span>
+                              </div>
+                            ) : fieldName === 'category_id' ? (
+                              <div className="flex flex-col">
+                                <span>Valor de tu archivo</span>
+                                <span className="text-[10px] text-muted-foreground/80">
+                                  ↳ Se creará como categoría principal
+                                </span>
+                              </div>
+                            ) : (
+                              'Valor de tu archivo'
+                            )}
+                          </div>
                         </div>
                         
                         <div className="col-span-1 text-center">
@@ -1446,6 +1487,58 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             Esto significa que esos campos estarán vacíos y podrás completarlos manualmente después de la importación.
           </AlertDescription>
         </Alert>
+
+        {/* Dialog for selecting parent category when creating subcategory */}
+        {showSubcategoryDialog && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-medium mb-4">Seleccionar categoría padre</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                La subcategoría "{pendingSubcategoryName}" necesita una categoría padre.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label>Categoría padre</Label>
+                  <Select 
+                    value={selectedParentCategory} 
+                    onValueChange={setSelectedParentCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría padre" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {types.map(type => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowSubcategoryDialog(false)
+                      setPendingSubcategoryName('')
+                      setSelectedParentCategory('')
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={createSubcategoryWithParent}
+                    disabled={!selectedParentCategory}
+                  >
+                    Crear subcategoría
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }

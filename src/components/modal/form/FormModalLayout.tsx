@@ -64,11 +64,12 @@ export function FormModalLayout({
       className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
     >
       <div
+        data-modal-content
         className={cn(
           "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl",
           "w-full h-full rounded-none", // Mobile: full viewport
           "md:w-auto md:h-auto md:min-w-[600px] md:max-w-screen-2xl md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // Desktop: centered with max width
-          "flex flex-col",
+          "flex flex-col overflow-auto",
           className,
         )}
         onClick={(e) => e.stopPropagation()}
