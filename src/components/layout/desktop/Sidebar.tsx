@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+import { useToast } from "@/hooks/use-toast";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,7 @@ export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
+  const { toast } = useToast();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
@@ -118,6 +120,12 @@ export function Sidebar() {
     // Update secondary sidebar store to trigger visual changes
     setSecondarySidebarDocked(newDocked);
     savePreferencesMutation.mutate({ sidebar_docked: newDocked });
+    
+    // Show toast notification
+    toast({
+      title: newDocked ? "Sidebar anclado" : "Sidebar desanclado",
+      description: newDocked ? "El sidebar permanecerá siempre visible" : "El sidebar se ocultará automáticamente",
+    });
   };
   
   // Handle theme toggle
@@ -135,6 +143,12 @@ export function Sidebar() {
     }
     
     savePreferencesMutation.mutate({ theme: newTheme });
+    
+    // Show toast notification
+    toast({
+      title: `Tema ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`,
+      description: `La aplicación ahora utiliza el tema ${newTheme === 'dark' ? 'oscuro' : 'claro'}`,
+    });
   };
   
   // Estado para acordeones - solo uno abierto a la vez
