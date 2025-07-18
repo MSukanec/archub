@@ -39,7 +39,10 @@ export function CustomRestricted({
   const { selectedProjectId } = useProjectContext();
 
   // Verificar si el usuario es administrador
-  const { isAdmin } = useIsAdmin();
+  const isAdmin = useIsAdmin();
+  
+  // Debug logs
+  console.log('CustomRestricted - Admin status:', { isAdmin, reason, functionName });
 
   // Determinar si está restringido
   let isRestricted = false;
