@@ -491,7 +491,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     <FormModalLayout
       columns={1}
       viewPanel={viewPanel}
-      editPanel={editPanel}
+      editPanel={editPanel()}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}

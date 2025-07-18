@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { EditClientCommitmentModal } from '@/modals/EditClientCommitmentModal'
+
 import { useToast } from '@/hooks/use-toast'
 import ClientSummaryCard from "@/components/cards/ClientSummaryCard";
 import CurrencyDetailCard from "@/components/cards/CurrencyDetailCard";
@@ -84,8 +84,7 @@ export default function FinancesInstallments() {
   const { data: userData } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
   const { openModal } = useGlobalModalStore()
-  const [showEditCommitmentModal, setShowEditCommitmentModal] = useState(false)
-  const [editingClientCommitment, setEditingClientCommitment] = useState<any>(null)
+
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -493,10 +492,7 @@ export default function FinancesInstallments() {
     })
   }
 
-  const handleCloseEditCommitmentModal = () => {
-    setShowEditCommitmentModal(false)
-    setEditingClientCommitment(null)
-  }
+
 
   // Create contact summary table (simplified)
   const contactSummaryColumns = [
@@ -1071,14 +1067,7 @@ export default function FinancesInstallments() {
 
       </div>
 
-      {/* Modals */}
-      <EditClientCommitmentModal
-        open={showEditCommitmentModal}
-        onClose={handleCloseEditCommitmentModal}
-        clientData={editingClientCommitment}
-        organizationId={organizationId || ''}
-        projectId={projectId || ''}
-      />
+      {/* Modals handled by ModalFactory */}
     </Layout>
   )
 }
