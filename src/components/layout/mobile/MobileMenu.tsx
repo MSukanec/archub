@@ -48,6 +48,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
 import CustomRestricted from "@/components/ui-custom/CustomRestricted";
+import { useProjectContext } from "@/stores/projectContext";
 
 interface MobileMenuProps {
   onClose: () => void;
@@ -59,6 +60,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
+  const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
+  const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -74,7 +77,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const currentOrganization = userData?.organization;
   const sortedOrganizations = userData?.organizations || [];
   const { data: projectsData } = useProjects(currentOrganization?.id);
-  const effectiveCurrentProject = userData?.preferences?.last_project_id;
+  
+  // Usar project context en lugar de last_project_id directamente
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const effectiveCurrentProject = selectedProjectId;
   const isAdmin = useIsAdmin();
 
   // Organization selection mutation
@@ -115,7 +121,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   // Project selection mutation
   const projectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
+    mutationFn: async (projectId: string | null) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
       }
@@ -128,7 +134,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       if (error) throw error;
       return projectId;
     },
-    onSuccess: () => {
+    onSuccess: (projectId) => {
+      // Actualizar el project context Y las preferencias
+      setSelectedProject(projectId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedProjectSelector(false);
     }
@@ -449,6 +457,97 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               )}
             </nav>
           )}
+        </div>
+
+        {/* Organization and Project Selectors - Fixed at bottom */}
+        <div className="px-4 pb-4 space-y-3 border-t border-[var(--card-border)] pt-4">
+          {/* Organization Selector */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
+              Organización
+            </label>
+            <div className="relative">
+              <button
+                onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
+                className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+              >
+                <Building className="h-5 w-5" />
+                <span className="truncate flex-1">
+                  {currentOrganization?.name || 'Seleccionar organización'}
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${expandedOrgSelector ? 'rotate-180' : ''}`} />
+              </button>
+
+              {expandedOrgSelector && (
+                <div 
+                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  style={{ 
+                    backgroundColor: 'var(--menues-bg)',
+                    borderColor: 'var(--menues-border)'
+                  }}
+                >
+                  {sortedOrganizations.map((org: any) => (
+                    <button
+                      key={org.id}
+                      onClick={() => organizationMutation.mutate(org.id)}
+                      className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                      style={{ color: 'var(--menues-fg)' }}
+                    >
+                      {org.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Project Selector */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
+              Proyecto
+            </label>
+            <div className="relative">
+              <button
+                onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+                className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+              >
+                <FolderOpen className="h-5 w-5" />
+                <span className="truncate flex-1">
+                  {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'General'}
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${expandedProjectSelector ? 'rotate-180' : ''}`} />
+              </button>
+
+              {expandedProjectSelector && (
+                <div 
+                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  style={{ 
+                    backgroundColor: 'var(--menues-bg)',
+                    borderColor: 'var(--menues-border)'
+                  }}
+                >
+                  {/* Opción "General" */}
+                  <button
+                    onClick={() => projectMutation.mutate(null)}
+                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                    style={{ color: 'var(--menues-fg)' }}
+                  >
+                    General
+                  </button>
+                  {projectsData?.map((project: any) => (
+                    <button
+                      key={project.id}
+                      onClick={() => projectMutation.mutate(project.id)}
+                      className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                      style={{ color: 'var(--menues-fg)' }}
+                    >
+                      {project.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

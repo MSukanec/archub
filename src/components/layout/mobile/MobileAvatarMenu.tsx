@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLocation } from "wouter";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { useProjects } from "@/hooks/use-projects";
-import { useProjectContext } from "@/stores/projectContext";
-import { useNavigationStore } from "@/stores/navigationStore";
 
 interface MobileAvatarMenuProps {
   onClose: () => void;
@@ -18,8 +13,6 @@ interface MobileAvatarMenuProps {
 export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.ReactPortal {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
-  const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
   // Function to check if a button is active based on current location
   const isButtonActive = (href: string) => {
@@ -39,76 +32,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
     };
   }, []);
 
-  const queryClient = useQueryClient();
 
-  // Obtener organizaciones y proyectos
-  const currentOrganization = userData?.organization;
-  const sortedOrganizations = userData?.organizations || [];
-  const { data: projectsData } = useProjects(currentOrganization?.id);
-  
-  // Usar project context en lugar de last_project_id directamente
-  const { selectedProjectId, setSelectedProject } = useProjectContext();
-  const { setActiveSidebarSection } = useNavigationStore();
-  const effectiveCurrentProject = selectedProjectId;
-
-  // Organization selection mutation
-  const organizationMutation = useMutation({
-    mutationFn: async (organizationId: string) => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('No user preferences available');
-      }
-
-      // Obtener el primer proyecto de la nueva organización
-      const { data: projectsData } = await supabase
-        .from('projects')
-        .select('id')
-        .eq('organization_id', organizationId)
-        .limit(1);
-
-      const firstProjectId = projectsData?.[0]?.id || null;
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ 
-          last_organization_id: organizationId,
-          last_project_id: firstProjectId 
-        })
-        .eq('id', userData.preferences.id);
-
-      if (error) throw error;
-      return organizationId;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      setExpandedOrgSelector(false);
-      setActiveSidebarSection('organizacion');
-      navigate('/organization/dashboard');
-      onClose();
-    }
-  });
-
-  // Project selection mutation
-  const projectMutation = useMutation({
-    mutationFn: async (projectId: string | null) => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('No user preferences available');
-      }
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('id', userData.preferences.id);
-
-      if (error) throw error;
-      return projectId;
-    },
-    onSuccess: (projectId) => {
-      // Actualizar el project context Y las preferencias
-      setSelectedProject(projectId);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      setExpandedProjectSelector(false);
-    }
-  });
 
   const handleNavigation = (href: string) => {
     navigate(href);
@@ -123,101 +47,7 @@ export function MobileAvatarMenu({ onClose }: MobileAvatarMenuProps): React.Reac
         style={{ backgroundColor: 'var(--menues-bg)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Organization Selector */}
-        <div className="space-y-1">
-          <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
-            Organización
-          </label>
-          <div className="relative">
-            <button
-              onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-              className="w-full h-15 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
-              style={{ 
-                borderColor: 'var(--menues-border)',
-                backgroundColor: 'var(--menues-bg)',
-                color: 'var(--menues-fg)'
-              }}
-            >
-              <span className="truncate text-left text-base">
-                {currentOrganization?.name || 'Seleccionar organización'}
-              </span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${expandedOrgSelector ? 'rotate-180' : ''}`} />
-            </button>
 
-            {expandedOrgSelector && (
-              <div 
-                className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
-                style={{ 
-                  backgroundColor: 'var(--menues-bg)',
-                  borderColor: 'var(--menues-border)'
-                }}
-              >
-                {sortedOrganizations.map((org: any) => (
-                  <button
-                    key={org.id}
-                    onClick={() => organizationMutation.mutate(org.id)}
-                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-                    style={{ color: 'var(--menues-fg)' }}
-                  >
-                    {org.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Project Selector */}
-        <div className="space-y-1">
-          <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
-            Proyecto
-          </label>
-          <div className="relative">
-            <button
-              onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-              className="w-full h-15 px-2 rounded-lg border flex items-center justify-between transition-colors hover:bg-[var(--menues-hover-bg)]"
-              style={{ 
-                borderColor: 'var(--menues-border)',
-                backgroundColor: 'var(--menues-bg)',
-                color: 'var(--menues-fg)'
-              }}
-            >
-              <span className="truncate text-left text-base">
-                {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'General'}
-              </span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${expandedProjectSelector ? 'rotate-180' : ''}`} />
-            </button>
-
-            {expandedProjectSelector && (
-              <div 
-                className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
-                style={{ 
-                  backgroundColor: 'var(--menues-bg)',
-                  borderColor: 'var(--menues-border)'
-                }}
-              >
-                {/* Opción "General" */}
-                <button
-                  onClick={() => projectMutation.mutate(null)}
-                  className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-                  style={{ color: 'var(--menues-fg)' }}
-                >
-                  General
-                </button>
-                {projectsData?.map((project: any) => (
-                  <button
-                    key={project.id}
-                    onClick={() => projectMutation.mutate(project.id)}
-                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-                    style={{ color: 'var(--menues-fg)' }}
-                  >
-                    {project.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* User Profile Button - Full width */}
         <div className="pt-2">
