@@ -23,6 +23,13 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
   const { userData } = useCurrentUser()
   const { data: projectClients } = useProjectClients(userData?.preferences?.last_project_id || '')
   
+  // DEBUG: Ver datos de clientes
+  console.log('AportesFields DEBUG:', {
+    projectId: userData?.preferences?.last_project_id,
+    projectClients: projectClients,
+    clientsCount: projectClients?.length || 0
+  })
+  
   // Estados para la lógica jerárquica
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(form.watch('category_id') || '')
   const [initialized, setInitialized] = React.useState(false)
