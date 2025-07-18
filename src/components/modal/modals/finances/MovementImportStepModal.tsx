@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
-import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw, ChevronRight } from 'lucide-react'
+import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw, ChevronRight, ArrowRight } from 'lucide-react'
 import { FormModalLayout, FormModalStepHeader, FormModalStepFooter } from '@/components/modal/form'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 import { Button } from '@/components/ui/button'
@@ -1063,42 +1063,57 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       <div>
         <h3 className="text-lg font-medium mb-2">Mapear columnas del archivo</h3>
         <p className="text-sm text-muted-foreground">
-          Asigna cada columna del Excel a un campo de movimiento. El sistema detecta automáticamente los mapeos más probables.
+          Vincula las columnas de tu archivo Excel con los campos de Archub. Solo mapeo de columnas, el mapeo de valores será en el siguiente paso.
         </p>
       </div>
 
       {parsedData && (
         <div className="space-y-4">
+          {/* Encabezados explicativos */}
+          <div className="grid grid-cols-12 gap-4 items-center mb-2 px-4">
+            <div className="col-span-1"></div>
+            <div className="col-span-4">
+              <div className="text-sm font-medium text-primary">TU ARCHIVO EXCEL</div>
+              <div className="text-xs text-muted-foreground">Columnas encontradas</div>
+            </div>
+            <div className="col-span-1"></div>
+            <div className="col-span-4">
+              <div className="text-sm font-medium text-primary">CAMPOS DE ARCHUB</div>
+              <div className="text-xs text-muted-foreground">Selecciona el campo correspondiente</div>
+            </div>
+            <div className="col-span-2"></div>
+          </div>
+
           {parsedData.headers.map((header, index) => {
             const mappedField = columnMapping[index]
             const sampleValue = parsedData.rows[0]?.[index]
             
             return (
-              <Card key={index}>
+              <Card key={index} className="hover:shadow-sm transition-shadow">
                 <CardContent className="p-4">
                   <div className="grid grid-cols-12 gap-4 items-center">
                     <div className="col-span-1 text-center">
-                      <Badge variant="outline" className="text-xs font-mono w-8 h-6">{String.fromCharCode(65 + index)}</Badge>
+                      <Badge variant="outline" className="text-xs font-mono w-8 h-6 font-bold">{String.fromCharCode(65 + index)}</Badge>
                     </div>
                     <div className="col-span-4">
-                      <div className="font-medium text-sm">{header}</div>
+                      <div className="font-medium text-sm text-foreground">{header}</div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        Ejemplo: {sampleValue && <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{sampleValue}</span>}
+                        Ejemplo: {sampleValue && <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{String(sampleValue).substring(0, 20)}{String(sampleValue).length > 20 ? '...' : ''}</span>}
                       </div>
                     </div>
                     <div className="col-span-1 text-center">
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="col-span-4">
                       <Select 
                         value={columnMapping[index] || ''} 
                         onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
                       >
-                        <SelectTrigger className="h-8">
-                          <SelectValue placeholder="Seleccionar campo" />
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Seleccionar campo de Archub" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No mapear</SelectItem>
+                          <SelectItem value="">No mapear esta columna</SelectItem>
                           {AVAILABLE_FIELDS.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
@@ -1108,9 +1123,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       </Select>
                     </div>
                     <div className="col-span-2 text-right">
-                      {mappedField && (
+                      {mappedField ? (
                         <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
-                          ✓ Mapeado
+                          ✓ Vinculado
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          Sin vincular
                         </Badge>
                       )}
                     </div>
