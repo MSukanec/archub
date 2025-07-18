@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. CENTRALIZED TYPE SELECTION SYSTEM COMPLETED: Successfully implemented single type selector at modal start with dynamic form switching - COMPLETED
+  • Created centralized type_id selector at the beginning of MovementFormModal.tsx for all movement types
+  • Removed type_id fields from all movement form components (AportesFields, AportesPropiosFields, RetirosPropiosFields, ConversionFields, TransferFields)
+  • Implemented dynamic form switching based on concept's view_mode: conversion, transfer, aportes, aportes_propios, retiros_propios
+  • Single selector updates all form instances simultaneously and changes visible form based on selected concept
+  • Eliminated user confusion by removing redundant type selectors that had no effect in sub-forms
+  • Enhanced UX: users can now seamlessly switch between different movement types from one central location
 - July 18, 2025. MODAL FILES REORGANIZATION COMPLETED: Successfully reorganized all modal files into logical directory structures - COMPLETED
   • Created src/components/modal/modals/organizations/ directory for organization-related modals
   • Moved ContactFormModal, CardFormModal, ListFormModal, MemberFormModal, OrganizationFormModal, OrganizationMovementConceptFormModal, ProjectFormModal to organizations/
