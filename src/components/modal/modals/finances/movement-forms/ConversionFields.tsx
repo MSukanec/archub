@@ -28,9 +28,10 @@ interface Props {
   wallets: any[]
   members: any[]
   concepts: any[]
+  movement?: any
 }
 
-export function ConversionFields({ form, currencies, wallets, members, concepts }: Props) {
+export function ConversionFields({ form, currencies, wallets, members, concepts, movement }: Props) {
   return (
     <div className="space-y-4">
         {/* Separador y título de sección de conversión */}

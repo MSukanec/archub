@@ -630,8 +630,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           console.log('Conversion group movements:', { egressMovement, ingressMovement })
           
           // Buscar las billeteras correspondientes en la relación organizacion_wallets
-          const egressWallet = wallets?.find(w => w.wallet_id === egressMovement?.wallet_id)
-          const ingressWallet = wallets?.find(w => w.wallet_id === ingressMovement?.wallet_id)
+          const egressWallet = wallets?.find(w => w.id === egressMovement?.wallet_id)
+          const ingressWallet = wallets?.find(w => w.id === ingressMovement?.wallet_id)
           
           // Cargar datos del grupo de conversión en el formulario
           const conversionData = {
@@ -1460,6 +1460,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             wallets={wallets} 
             members={members}
             concepts={concepts}
+            movement={editingMovement}
           />
         </Form>
       ) : (isTransfer || isEditingTransfer) ? (

@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. CONVERSION EDITING WALLET PRESELECTION FIXED: Resolved critical bug in conversion editing where wallet fields appeared empty - COMPLETED
+  • Fixed wallet lookup logic in conversion group loading: changed w.wallet_id to w.id for correct billeteras relation matching
+  • ConversionFields now properly displays preselected wallet_id_from and wallet_id_to when editing existing conversions
+  • Eliminated unnecessary useEffect in ConversionFields component as values load correctly from MovementFormModal
+  • System now correctly maps movement wallet_id to organization_wallets relation for proper dropdown population
+  • Conversion editing workflow fully functional: wallet origin and destination fields populate automatically with existing values
 - July 18, 2025. CENTRALIZED MOVEMENT FORM FIELDS SYSTEM COMPLETED: Successfully implemented complete centralized field system for MovementFormModal.tsx - COMPLETED
   • Moved Creador, Fecha, and Tipo de movimiento fields to centralized location at top of modal
   • Implemented proper hierarchical order: Creador → Fecha → Tipo de movimiento
