@@ -25,6 +25,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
+import UserSelector from '@/components/ui-custom/UserSelector'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
@@ -73,10 +74,13 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   })
 
   // Hooks para obtener datos
-  const { data: currencies } = useOrganizationCurrencies(organizationId)
-  const { data: members } = useOrganizationMembers(organizationId)
-  const { data: projectClients } = useProjectClients(projectId)
-  const { data: wallets } = useOrganizationWallets(organizationId)
+  const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
+  const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
+  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
+  const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
+  
+  // Loading state for all necessary data
+  const isLoading = currenciesLoading || membersLoading || clientsLoading || walletsLoading
 
   // Inicializar panel en modo edit para nuevos compromisos
   React.useEffect(() => {
@@ -109,6 +113,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   React.useEffect(() => {
     if (!editingInstallment && members && userData?.user?.id) {
       const currentMember = members.find(m => m.user_id === userData.user.id)
+      
       if (currentMember?.id) {
         form.setValue('created_by', currentMember.id)
       }
@@ -245,49 +250,44 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   ) : null
 
   // Panel de edición
-  const editPanel = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Fila 1: Creador y Fecha */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creador *</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar creador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {members?.map((member) => {
-                        const user = member.users
-                        const displayName = user?.full_name || user?.email || 'Usuario sin nombre'
-                        const initials = user?.full_name 
-                          ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-                          : user?.email?.[0]?.toUpperCase() || 'U'
-                        
-                        return (
-                          <SelectItem key={member.id} value={member.id}>
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={user?.avatar_url || ''} />
-                                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm">{displayName}</span>
-                            </div>
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+  const editPanel = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-4">
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+            <p className="text-sm text-muted-foreground mt-2">Cargando datos del formulario...</p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Fila 1: Creador y Fecha */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Creador *</label>
+              <UserSelector
+                users={members?.map(member => ({
+                  id: member.id,
+                  full_name: member.full_name || member.email || 'Usuario sin nombre',
+                  email: member.email || '',
+                  avatar_url: member.avatar_url || '',
+                  user_id: member.user_id || ''
+                })) || []}
+                value={form.watch('created_by')}
+                onChange={(value) => form.setValue('created_by', value)}
+                placeholder="Seleccionar creador"
+                emptyMessage="No hay miembros disponibles"
+              />
+              {form.formState.errors.created_by && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.created_by.message}
+                </p>
+              )}
+            </div>
 
           <FormField
             control={form.control}
@@ -330,38 +330,28 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         </div>
 
         {/* Fila 2: Cliente */}
-        <FormField
-          control={form.control}
-          name="contact_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cliente *</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projectClients?.map((client) => (
-                      <SelectItem key={client.contact_id} value={client.contact_id}>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="text-xs">
-                              {client.contact.first_name?.[0]}
-                              {client.contact.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm">{client.contact.full_name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Cliente *</label>
+          <UserSelector
+            users={projectClients?.map(client => ({
+              id: client.contact_id,
+              full_name: client.contact.full_name || client.contact.company_name || `${client.contact.first_name || ''} ${client.contact.last_name || ''}`.trim(),
+              email: '',
+              avatar_url: '',
+              first_name: client.contact.first_name,
+              last_name: client.contact.last_name
+            })).sort((a, b) => a.full_name.localeCompare(b.full_name)) || []}
+            value={form.watch('contact_id')}
+            onChange={(value) => form.setValue('contact_id', value)}
+            placeholder="Seleccionar cliente"
+            emptyMessage="No hay clientes disponibles"
+          />
+          {form.formState.errors.contact_id && (
+            <p className="text-sm text-red-500">
+              {form.formState.errors.contact_id.message}
+            </p>
           )}
-        />
+        </div>
 
         {/* Fila 3: Moneda y Billetera */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -378,8 +368,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                     </SelectTrigger>
                     <SelectContent>
                       {currencies?.map((currency) => (
-                        <SelectItem key={currency.currency_id} value={currency.currency_id}>
-                          {currency.currency?.name} ({currency.currency?.code})
+                        <SelectItem key={currency.id} value={currency.id}>
+                          {currency.name} ({currency.code})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -477,7 +467,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         />
       </form>
     </Form>
-  )
+    )
+  }
 
   const headerContent = (
     <FormModalHeader
