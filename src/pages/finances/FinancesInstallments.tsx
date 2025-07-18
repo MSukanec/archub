@@ -776,12 +776,67 @@ export default function FinancesInstallments() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                // TODO: Open edit commitment modal
+                // Open edit commitment modal - this would require developing a commitment editing modal
+                // For now, we'll just show a message since this edits the commitment amount, not individual installments
                 console.log('Edit commitment for client:', item.contact?.first_name)
               }}
               className="h-8 w-8 p-0"
             >
               <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const contactName = item.contact 
+                  ? (item.contact.company_name || `${item.contact.first_name} ${item.contact.last_name}`)
+                  : 'Sin contacto'
+                
+                openModal('delete-confirmation', {
+                  title: 'Eliminar Cliente del Proyecto',
+                  message: `¿Estás seguro de que deseas eliminar a ${contactName} del proyecto? Esto también eliminará todos sus compromisos asociados.`,
+                  itemName: contactName,
+                  onConfirm: async () => {
+                    try {
+                      // First delete all installments for this client
+                      const clientInstallments = installments.filter(installment => installment.contact_id === item.contact_id)
+                      
+                      for (const installment of clientInstallments) {
+                        await supabase
+                          .from('movements')
+                          .delete()
+                          .eq('id', installment.id)
+                      }
+
+                      // Then remove client from project
+                      await supabase
+                        .from('project_clients')
+                        .delete()
+                        .eq('client_id', item.contact_id)
+                        .eq('project_id', projectId)
+
+                      toast({
+                        title: 'Cliente eliminado',
+                        description: 'El cliente y sus compromisos han sido eliminados del proyecto',
+                      })
+
+                      // Refrescar datos
+                      queryClient.invalidateQueries({ queryKey: ['project-clients'] })
+                      queryClient.invalidateQueries({ queryKey: ['installments'] })
+                      queryClient.invalidateQueries({ queryKey: ['movements'] })
+                    } catch (error: any) {
+                      toast({
+                        variant: 'destructive',
+                        title: 'Error',
+                        description: `Error al eliminar el cliente: ${error.message}`,
+                      })
+                    }
+                  }
+                })
+              }}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         )
@@ -851,12 +906,12 @@ export default function FinancesInstallments() {
     return [...baseColumns, ...currencyColumns]
   }, [availableCurrencies])
 
-  // Detailed table columns (Fecha, Contacto, Moneda, Billetera, Monto, Cotización, Acciones)
+  // Detailed table columns (Fecha, Contacto, Moneda, Billetera, Monto, Cotización)
   const detailColumns = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "14.3%",
+      width: "16.7%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Installment) => {
@@ -871,7 +926,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "14.3%",
+      width: "16.7%",
       render: (item: Installment) => {
         if (!item.contact) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -904,7 +959,7 @@ export default function FinancesInstallments() {
     {
       key: "currency",
       label: "Moneda",
-      width: "14.3%",
+      width: "16.7%",
       render: (item: Installment) => (
         <Badge variant="outline" className="text-xs">
           {item.currency?.code || 'N/A'}
@@ -914,7 +969,7 @@ export default function FinancesInstallments() {
     {
       key: "wallet",
       label: "Billetera",
-      width: "14.3%",
+      width: "16.7%",
       render: (item: Installment) => (
         <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
       )
@@ -922,7 +977,7 @@ export default function FinancesInstallments() {
     {
       key: "amount",
       label: "Monto",
-      width: "14.3%",
+      width: "16.65%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -937,7 +992,7 @@ export default function FinancesInstallments() {
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "14.3%",
+      width: "16.65%",
       sortable: true,
       sortType: "number" as const,
       render: (item: Installment) => {
@@ -953,31 +1008,7 @@ export default function FinancesInstallments() {
         )
       }
     },
-    {
-      key: "actions",
-      label: "Acciones",
-      width: "14.3%",
-      render: (item: Installment) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(item)}
-            className="h-8 w-8 p-0"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(item)}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
-    }
+
   ]
 
   const headerProps = {
