@@ -506,21 +506,98 @@ export default function FinancesDashboard() {
 
         {/* Mobile Layout - Cards apiladas verticalmente */}
         <div className="md:hidden space-y-4">
-          {/* Balances por Billetera y Moneda - Mobile */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Balances por Billetera y Moneda
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Resumen detallado de saldos organizados por billetera y moneda
-              </p>
-            </CardHeader>
-            <CardContent>
-              <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
-            </CardContent>
-          </Card>
+          {/* Métricas - Mobile */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Card de Ingresos */}
+            <Card className="relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={incomeTrend} 
+                    color="var(--chart-positive)" 
+                    isLoading={flowLoading} 
+                  />
+                </div>
+                
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
+                  <span className="text-sm text-muted-foreground">
+                    Ingresos
+                  </span>
+                </div>
+                
+                {/* Amount - smaller size like reference */}
+                <div className="text-lg font-bold" style={{ color: 'var(--chart-positive)' }}>
+                  {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Card de Egresos */}
+            <Card className="relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={expensesTrend} 
+                    color="var(--chart-negative)" 
+                    isLoading={flowLoading} 
+                  />
+                </div>
+                
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
+                  <span className="text-sm text-muted-foreground">
+                    Egresos
+                  </span>
+                </div>
+                
+                {/* Amount - smaller size like reference */}
+                <div className="text-lg font-bold" style={{ color: 'var(--chart-negative)' }}>
+                  {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Card de Balance */}
+            <Card className="col-span-2 relative overflow-hidden">
+              <CardContent className="p-4 h-full flex flex-col">
+                {/* Mini Chart */}
+                <div className="mb-4">
+                  <MiniTrendChart 
+                    data={balanceTrend} 
+                    color="var(--chart-neutral)" 
+                    isLoading={flowLoading} 
+                  />
+                </div>
+                
+                {/* Spacer to push content down */}
+                <div className="flex-1"></div>
+                
+                {/* Icon and Title Section - positioned lower */}
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4" style={{ color: 'var(--chart-neutral)' }} />
+                  <span className="text-sm text-muted-foreground">
+                    Balance General
+                  </span>
+                </div>
+                
+                {/* Amount - smaller size like reference */}
+                <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
+                  {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Flujo Financiero Mensual - Mobile */}
           <Card>

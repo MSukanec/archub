@@ -45,15 +45,13 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
+        <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
           <span>Moneda</span>
           <span>Billetera</span>
           <span>Balance</span>
-          <span>Estado</span>
         </div>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="grid grid-cols-4 gap-4 text-sm animate-pulse">
-            <div className="h-4 bg-gray-200 rounded"></div>
+          <div key={i} className="grid grid-cols-3 gap-4 text-sm animate-pulse">
             <div className="h-4 bg-gray-200 rounded"></div>
             <div className="h-4 bg-gray-200 rounded"></div>
             <div className="h-4 bg-gray-200 rounded"></div>
@@ -74,24 +72,44 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
     )
   }
 
+  // Helper function to get currency code (ARS, USD, etc.)
+  const getCurrencyCode = (currencyName: string) => {
+    const currencyMap: { [key: string]: string } = {
+      'peso argentino': 'ARS',
+      'pesos argentinos': 'ARS',
+      'peso': 'ARS',
+      'pesos': 'ARS',
+      'dólar estadounidense': 'USD',
+      'dolares estadounidenses': 'USD',
+      'dólar': 'USD',
+      'dólares': 'USD',
+      'dollar': 'USD',
+      'dollars': 'USD',
+      'euro': 'EUR',
+      'euros': 'EUR'
+    }
+    
+    const normalized = currencyName.toLowerCase().trim()
+    return currencyMap[normalized] || currencyName.toUpperCase().substring(0, 3)
+  }
+
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
+      <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
         <span>Moneda</span>
         <span>Billetera</span>
         <span>Balance</span>
-        <span>Estado</span>
       </div>
 
       {/* Data rows */}
       <div className="space-y-2 max-h-[240px] overflow-y-auto">
         {data.map((item, index) => (
-          <div key={`${item.wallet}-${item.currency}-${index}`} className="grid grid-cols-4 gap-4 text-sm items-center py-2">
+          <div key={`${item.wallet}-${item.currency}-${index}`} className="grid grid-cols-3 gap-4 text-sm items-center py-2">
             {/* Moneda */}
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-mono">{item.currency}</span>
+              <span className="font-mono font-semibold">{getCurrencyCode(item.currency)}</span>
             </div>
 
             {/* Billetera */}
@@ -103,16 +121,6 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
             {/* Balance */}
             <div className={`font-semibold ${getBalanceColor(item.balance)}`}>
               {formatCurrency(item.balance)}
-            </div>
-
-            {/* Estado */}
-            <div>
-              <Badge 
-                variant="outline" 
-                className={`text-xs ${getStateColor(item.state)}`}
-              >
-                {item.state}
-              </Badge>
             </div>
           </div>
         ))}
