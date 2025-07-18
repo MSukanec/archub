@@ -1172,7 +1172,26 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         </div>
 
         <div className="space-y-6">
-          {Object.entries(incompatibleValues).map(([fieldName, values]) => {
+          {Object.entries(incompatibleValues)
+            .sort(([fieldNameA], [fieldNameB]) => {
+              // Order according to movement table: CATEGORIA > SUBCATEGORIA > MONEDA > BILLETERA
+              const order = ['category_id', 'subcategory_id', 'currency_id', 'wallet_id', 'type_id'];
+              const indexA = order.indexOf(fieldNameA);
+              const indexB = order.indexOf(fieldNameB);
+              
+              // If both fields are in the order list, sort by their position
+              if (indexA !== -1 && indexB !== -1) {
+                return indexA - indexB;
+              }
+              
+              // If only one field is in the order list, it comes first
+              if (indexA !== -1) return -1;
+              if (indexB !== -1) return 1;
+              
+              // If neither field is in the order list, sort alphabetically
+              return fieldNameA.localeCompare(fieldNameB);
+            })
+            .map(([fieldName, values]) => {
             const fieldLabel = AVAILABLE_FIELDS.find(f => f.value === fieldName)?.label || fieldName
             return (
               <Card key={fieldName}>
@@ -1190,20 +1209,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     onClick={() => {
                       const fieldMappings: { [key: string]: string } = {};
                       values.forEach(value => {
-                        fieldMappings[`${fieldName}_${value}`] = 'empty-placeholder';
+                        fieldMappings[`${fieldName}_${value}`] = '';
                       });
-                      setManualMappings(prev => {
-                        const newMappings = {
-                          ...prev,
-                          ...fieldMappings
-                        };
-                        // Force re-render by incrementing render counter
-                        setTimeout(() => {
-                          setRenderCounter(prev => prev + 1);
-                          setManualMappings({ ...newMappings });
-                        }, 10);
-                        return newMappings;
-                      });
+                      setManualMappings(prev => ({
+                        ...prev,
+                        ...fieldMappings
+                      }));
+                      setRenderCounter(prev => prev + 1);
                       toast({
                         title: "Campo completado",
                         description: `Todos los valores de "${fieldLabel}" se asignaron como NULL`
@@ -1238,7 +1250,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         <div className="col-span-5">
                           <Select 
                             key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
-                            value={manualMappings[mappingKey] === 'empty-placeholder' ? '' : manualMappings[mappingKey] || ''}
+                            value={manualMappings[mappingKey] || ''}
                             onValueChange={(selectedId) => {
                               setManualMappings(prev => ({
                                 ...prev,
@@ -1281,7 +1293,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         </div>
                         
                         <div className="col-span-2">
-                          {manualMappings[mappingKey] && manualMappings[mappingKey] !== 'empty-placeholder' ? (
+                          {manualMappings[mappingKey] ? (
                             <div className="flex items-center gap-1 text-green-700 text-xs">
                               <CheckCircle className="h-3 w-3" />
                               <span>Mapeado</span>
