@@ -14,7 +14,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
-
+import { NewInstallmentModal } from '@/modals/NewInstallmentModal'
 import { EditClientCommitmentModal } from '@/modals/EditClientCommitmentModal'
 import { useToast } from '@/hooks/use-toast'
 import ClientSummaryCard from "@/components/cards/ClientSummaryCard";
@@ -83,6 +83,7 @@ interface InstallmentSummary {
 export default function FinancesInstallments() {
   const { data: userData } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
+  const [showModal, setShowModal] = useState(false)
   const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null)
   const [showEditCommitmentModal, setShowEditCommitmentModal] = useState(false)
   const [editingClientCommitment, setEditingClientCommitment] = useState<any>(null)
@@ -470,18 +471,22 @@ export default function FinancesInstallments() {
   })
 
   const handleEdit = (installment: Installment) => {
-    // NOTE: Installment editing is now handled through the Movements page
-    console.log('Edit installment:', installment.id)
-    // Could redirect to movements page with this specific movement
+    setEditingInstallment(installment)
+    setShowModal(true)
   }
 
   const handleDelete = (installment: Installment) => {
-    // NOTE: Installment deletion is now handled through the Movements page
+    // TODO: Implement delete functionality
     console.log('Delete installment:', installment.id)
   }
 
   const handleCardClick = (installment: Installment) => {
     handleEdit(installment)
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setEditingInstallment(null)
   }
 
   const handleCloseEditCommitmentModal = () => {
@@ -948,7 +953,15 @@ export default function FinancesInstallments() {
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    actions: []
+    actions: [(
+      <Button 
+        key="add-installment"
+        className="h-8 px-3 text-sm"
+        onClick={() => setShowModal(true)}
+      >
+        Agregar Compromiso
+      </Button>
+    )]
   }
 
   if (isLoading) {
@@ -967,9 +980,9 @@ export default function FinancesInstallments() {
         {/* Feature Introduction */}
         <FeatureIntroduction
           icon={<Receipt className="h-6 w-6" />}
-          title="Visualización de Compromisos de Pago"
+          title="Gestión de Compromisos de Pago"
           features={[
-            { icon: <Receipt className="h-4 w-4" />, title: "Compromisos Detallados", description: "Visualización de compromisos financieros registrados como movimientos con categoría 'Cuotas'" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Compromisos Detallados", description: "Registro detallado de compromisos financieros de clientes e inversores" },
             { icon: <Receipt className="h-4 w-4" />, title: "Multi-moneda", description: "Seguimiento de aportes y pagos con múltiples monedas y cotizaciones" },
             { icon: <Receipt className="h-4 w-4" />, title: "Análisis USD", description: "Cálculo automático de equivalencias en USD para análisis financiero" },
             { icon: <Receipt className="h-4 w-4" />, title: "Resúmenes", description: "Resúmenes por cliente con porcentajes de cumplimiento y montos restantes" }
@@ -1038,7 +1051,12 @@ export default function FinancesInstallments() {
         ) : installments.length === 0 ? (
           <EmptyState
             title="Aún no hay compromisos registrados"
-            description="Los compromisos de pago se gestionan ahora desde la página de Movimientos utilizando la categoría 'Cuotas'"
+            description="Comienza registrando el primer compromiso de pago de un cliente al proyecto"
+            action={
+              <Button onClick={() => setShowModal(true)} className="mt-4">
+                Agregar Primer Compromiso
+              </Button>
+            }
           />
         ) : (
           <EmptyState
@@ -1050,6 +1068,14 @@ export default function FinancesInstallments() {
       </div>
 
       {/* Modals */}
+      <NewInstallmentModal
+        open={showModal}
+        onClose={handleCloseModal}
+        editingInstallment={editingInstallment}
+        organizationId={organizationId || ''}
+        projectId={projectId || ''}
+      />
+
       <EditClientCommitmentModal
         open={showEditCommitmentModal}
         onClose={handleCloseEditCommitmentModal}

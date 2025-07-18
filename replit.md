@@ -118,16 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 18, 2025. DUPLICATE COMMITMENT CREATION FUNCTIONALITY COMPLETELY ELIMINATED: Streamlined financial contributions management exclusively through movement system - COMPLETED
-  • Removed "Nuevo Aporte" button and creation modal from FinancesInstallments.tsx (Compromisos de Pago page)
-  • Eliminated showModal state management and all related modal functions (handleNewInstallment, handleCloseModal, setShowModal)
-  • Removed NewInstallmentModal import and modal rendering from FinancesInstallments page
-  • Updated empty state description to direct users to Movements page with "Cuotas" category for commitment creation
-  • Changed FeatureIntroduction title from "Gestión de Compromisos de Pago" to "Visualización de Compromisos de Pago" 
-  • Updated feature descriptions to reflect page is now view-only, with creation handled through unified movement system
-  • Removed "Agregar Compromiso" button from header actions array - page now has clean view-only interface
-  • All financial contributions (aportes, cuotas, commitments) now managed exclusively through MovementFormModal with proper category selection
-  • Achieved complete elimination of duplicate functionality as requested - single source of truth for financial movement creation
 - July 18, 2025. FINANCES DASHBOARD LAYOUT COMPLETELY REORGANIZED: Fixed dashboard structure to match user specifications exactly - COMPLETED
   • Reorganized all dashboard rows to exact specification: 1) TÍTULO+MOVIMIENTOS → 2) BALANCES POR BILLETERA Y MONEDA → 3) MÉTRICAS+FLUJO FINANCIERO → 4) EGRESOS+ESTE MES+RECIENTES
   • Eliminated duplicate "Flujo Financiero Mensual" chart that was appearing twice causing layout confusion
