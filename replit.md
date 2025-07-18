@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. COMPLETE ADMIN PRIVILEGE SYSTEM IMPLEMENTED: Successfully deployed comprehensive admin bypass system for all restricted features - COMPLETED
+  • Created useAdminPermissions hook with Supabase admin_users table query and 5-minute cache optimization
+  • Enhanced CustomRestricted component with real-time admin detection and intelligent bypass logic
+  • Admin users now have complete access to all "coming_soon" features (Diseño, Comercialización, Post-Venta)
+  • Maintained "general_mode" restrictions for project context requirements that apply to all users
+  • Implemented loading state handling to prevent initial rendering blocks during admin verification
+  • System confirmed working: admin user successfully navigated to /design/dashboard proving bypass functionality
+  • Added visual distinction: admin access shows green success indicators instead of restriction warnings
+  • Cleaned up all debugging logs for production-ready implementation
 - July 18, 2025. ADMIN BYPASS FOR RESTRICTED COMPONENTS: Modified CustomRestricted component to allow full admin access to all restricted features - COMPLETED
   • Administrators now bypass ALL restrictions except "general_mode" (project context requirements)
   • "general_mode" restrictions still apply to admins since they're contextual, not permission-based
