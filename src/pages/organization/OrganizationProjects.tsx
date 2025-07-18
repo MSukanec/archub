@@ -24,7 +24,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
+
 
 export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
@@ -32,8 +32,7 @@ export default function OrganizationProjects() {
   const [filterByStatus, setFilterByStatus] = useState('all')
 
 
-  const [projectToDelete, setProjectToDelete] = useState<any>(null)
-  const [showDangerousConfirmation, setShowDangerousConfirmation] = useState(false)
+
   const { openModal } = useGlobalModalStore()
   const [isMobile, setIsMobile] = useState(false)
   
@@ -231,8 +230,15 @@ export default function OrganizationProjects() {
   }
 
   const handleDeleteClick = (project: any) => {
-    setProjectToDelete(project)
-    setShowDangerousConfirmation(true)
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar proyecto',
+      description: 'Esta acción eliminará permanentemente el proyecto y todos sus datos asociados (diseño, obra, finanzas, etc.).',
+      itemName: project.name,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => deleteProjectMutation.mutate(project.id),
+      isLoading: deleteProjectMutation.isPending
+    });
   }
 
   // Function to navigate to basic data after setting project as active
@@ -291,8 +297,7 @@ export default function OrganizationProjects() {
         description: "El proyecto se ha eliminado correctamente"
       })
       
-      setShowDangerousConfirmation(false)
-      setProjectToDelete(null)
+
     },
     onError: (error: any) => {
       toast({
@@ -515,21 +520,7 @@ export default function OrganizationProjects() {
 
 
 
-    {/* Modal de confirmación peligrosa para eliminar */}
-    {projectToDelete && (
-      <DangerousConfirmationModal
-        open={showDangerousConfirmation}
-        onClose={() => {
-          setShowDangerousConfirmation(false)
-          setProjectToDelete(null)
-        }}
-        onConfirm={() => deleteProjectMutation.mutate(projectToDelete.id)}
-        title="Eliminar proyecto"
-        description="Esta acción eliminará permanentemente el proyecto y todos sus datos asociados (diseño, obra, finanzas, etc.)."
-        itemName={projectToDelete.name}
-        isLoading={deleteProjectMutation.isPending}
-      />
-    )}
+
   </>
   )
 }

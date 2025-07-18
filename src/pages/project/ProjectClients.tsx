@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
-import { DangerousConfirmationModal } from '@/components/ui-custom/DangerousConfirmationModal'
+
 
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -45,8 +45,7 @@ export default function ProjectClients() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [clientToDelete, setClientToDelete] = useState<ProjectClient | null>(null)
+
 
 
   const projectId = userData?.preferences?.last_project_id
@@ -196,17 +195,18 @@ export default function ProjectClients() {
 
 
   const handleRemoveClient = (client: ProjectClient) => {
-    setClientToDelete(client)
-    setShowDeleteModal(true)
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar cliente del proyecto',
+      description: 'Esta acción eliminará permanentemente el cliente del proyecto. Se perderán todos los datos asociados como compromisos financieros y notas.',
+      itemName: client.contact.full_name || `${client.contact.first_name} ${client.contact.last_name}`,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => removeClientMutation.mutate(client.id),
+      isLoading: removeClientMutation.isPending
+    });
   }
 
-  const confirmRemoveClient = () => {
-    if (clientToDelete) {
-      removeClientMutation.mutate(clientToDelete.id)
-      setShowDeleteModal(false)
-      setClientToDelete(null)
-    }
-  }
+
 
 
 
@@ -357,25 +357,7 @@ export default function ProjectClients() {
         )}
       </div>
       
-      {/* Dangerous Confirmation Modal */}
-      {clientToDelete && (
-        <DangerousConfirmationModal
-          isOpen={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false)
-            setClientToDelete(null)
-          }}
-          onConfirm={confirmRemoveClient}
-          title="Remover Cliente del Proyecto"
-          description="Vas a remover este cliente del proyecto. Esta acción no se puede deshacer y el cliente perderá el acceso a toda la información del proyecto."
-          confirmationText={
-            clientToDelete.contact?.company_name || 
-            `${clientToDelete.contact?.first_name || ''} ${clientToDelete.contact?.last_name || ''}`.trim()
-          }
-          buttonText="Remover Cliente"
-          isLoading={removeClientMutation.isPending}
-        />
-      )}
+
     </Layout>
   )
 }

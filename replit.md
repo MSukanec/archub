@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. COMPLETE ELIMINATION OF DANGEROUSCONFIRMATIONMODAL SYSTEM: Successfully removed legacy dangerous modal system and unified all delete operations - COMPLETED
+  • Eliminated DangerousConfirmationModal.tsx file completely from codebase after successful migration
+  • Replaced all dangerous delete operations in FinancesMovements.tsx, OrganizationProjects.tsx, ProjectClients.tsx, and OrganizationMembers.tsx
+  • All delete confirmations now use unified ModalFactory system with 'delete-confirmation' type and proper modal architecture
+  • Removed all imports, state variables, JSX references, and confirmation functions related to old dangerous modal system  
+  • Enhanced delete operations with consistent destructive styling, proper loading states, and unified user experience
+  • System maintains all security with proper name confirmation while using established FormModalLayout architecture
+  • All delete operations follow consistent pattern: openModal('delete-confirmation') with proper data passing for title, description, itemName, onConfirm
 - July 18, 2025. DESIGN SUBMENU CLEANUP AND TOAST NOTIFICATIONS COMPLETED: Enhanced sidebar UX with proper feedback and streamlined design navigation - COMPLETED
   • Added toast notifications for both dock and theme buttons in sidebar footer with descriptive messages
   • Dock toggle shows "Sidebar anclado/desanclado" with explanation of behavior

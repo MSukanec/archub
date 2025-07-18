@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
-import { DangerousConfirmationModal } from "@/components/ui-custom/DangerousConfirmationModal";
+
 import { MemberCard } from "@/components/cards/MemberCard";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -58,7 +58,7 @@ export default function OrganizationMembers() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
-  const [memberToDelete, setMemberToDelete] = useState<any>(null);
+
   const isMobile = useMobile();
 
   const organizationId = userData?.organization?.id;
@@ -138,14 +138,18 @@ export default function OrganizationMembers() {
   });
 
   const handleDeleteMember = (member: any) => {
-    setMemberToDelete(member);
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar miembro',
+      description: 'Esta acción eliminará permanentemente el miembro de la organización. Perderá acceso a todos los proyectos y datos.',
+      itemName: member.user_data?.full_name || member.email || 'Miembro',
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => removeMemberMutation.mutate(member.id),
+      isLoading: removeMemberMutation.isPending
+    });
   };
 
-  const confirmDeleteMember = () => {
-    if (memberToDelete) {
-      removeMemberMutation.mutate(memberToDelete.id);
-    }
-  };
+
 
   const resendInviteMutation = useMutation({
     mutationFn: async (inviteId: string) => {
@@ -532,17 +536,7 @@ export default function OrganizationMembers() {
 
 
 
-        {/* Delete Member Confirmation Modal */}
-        <DangerousConfirmationModal
-          open={!!memberToDelete}
-          onClose={() => setMemberToDelete(null)}
-          onConfirm={confirmDeleteMember}
-          title="Eliminar miembro"
-          description="Esta acción eliminará permanentemente al miembro de la organización. No se puede deshacer."
-          confirmText="Eliminar miembro"
-          itemName={memberToDelete?.users?.full_name || memberToDelete?.users?.email || ''}
-          isLoading={removeMemberMutation.isPending}
-        />
+
     </Layout>
   );
 }
