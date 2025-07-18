@@ -233,8 +233,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       subcategory_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || '',
+      currency_id: '',
+      wallet_id: '',
     }
   })
 
@@ -261,8 +261,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       created_by: '',
       description: '',
       type_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || '',
-      wallet_id_from: userData?.organization_preferences?.default_wallet || '',
+      currency_id: '',
+      wallet_id_from: '',
       wallet_id_to: '',
       amount: 0
     }
