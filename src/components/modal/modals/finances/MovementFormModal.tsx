@@ -392,40 +392,40 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const retirosPropriosTypeId = retirosPropriosForm.watch('type_id')
 
   React.useEffect(() => {
-    if (typeId) {
+    if (typeId && !isUserChangingType) {
       handleTypeChange(typeId)
     }
-  }, [typeId])
+  }, [typeId, isUserChangingType])
 
   React.useEffect(() => {
-    if (conversionTypeId && movementType === 'conversion') {
+    if (conversionTypeId && movementType === 'conversion' && !isUserChangingType) {
       handleTypeChange(conversionTypeId)
     }
-  }, [conversionTypeId, movementType])
+  }, [conversionTypeId, movementType, isUserChangingType])
 
   React.useEffect(() => {
-    if (transferTypeId && movementType === 'transfer') {
+    if (transferTypeId && movementType === 'transfer' && !isUserChangingType) {
       handleTypeChange(transferTypeId)
     }
-  }, [transferTypeId, movementType])
+  }, [transferTypeId, movementType, isUserChangingType])
 
   React.useEffect(() => {
-    if (aportesTypeId && movementType === 'aportes') {
+    if (aportesTypeId && movementType === 'aportes' && !isUserChangingType) {
       handleTypeChange(aportesTypeId)
     }
-  }, [aportesTypeId, movementType])
+  }, [aportesTypeId, movementType, isUserChangingType])
 
   React.useEffect(() => {
-    if (aportesPropriosTypeId && movementType === 'aportes_propios') {
+    if (aportesPropriosTypeId && movementType === 'aportes_propios' && !isUserChangingType) {
       handleTypeChange(aportesPropriosTypeId)
     }
-  }, [aportesPropriosTypeId, movementType])
+  }, [aportesPropriosTypeId, movementType, isUserChangingType])
 
   React.useEffect(() => {
-    if (retirosPropriosTypeId && movementType === 'retiros_propios') {
+    if (retirosPropriosTypeId && movementType === 'retiros_propios' && !isUserChangingType) {
       handleTypeChange(retirosPropriosTypeId)
     }
-  }, [retirosPropriosTypeId, movementType])
+  }, [retirosPropriosTypeId, movementType, isUserChangingType])
 
   // Inicializar valores por defecto cuando los datos estén listos
   React.useEffect(() => {
@@ -1706,6 +1706,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           Tipo de movimiento *
         </label>
         <Select onValueChange={(value) => {
+          console.log('🚨 MANUAL TYPE CHANGE FROM UI:', { from: form.watch('type_id'), to: value })
+          setIsUserChangingType(true)
+          
           // Actualizar todos los formularios
           form.setValue('type_id', value)
           conversionForm.setValue('type_id', value)
@@ -1714,12 +1717,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           aportesPropriosForm.setValue('type_id', value)
           retirosPropriosForm.setValue('type_id', value)
           
-          // Actualizar movementType basado en view_mode
-          const selected = concepts?.find(c => c.id === value)
-          if (selected?.view_mode) {
-            const viewMode = selected.view_mode.trim()
-            setMovementType(viewMode as any)
-          }
+          // Cambiar el formulario usando handleTypeChange
+          handleTypeChange(value)
         }} value={form.watch('type_id')}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar tipo..." />
