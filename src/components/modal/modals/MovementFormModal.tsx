@@ -347,21 +347,58 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       form.setValue('subcategory_id', '')
       setSelectedCategoryId('')
       
-      // Sincronizar formularios
+      // Sincronizar TODOS los formularios
       conversionForm.setValue('type_id', newTypeId)
       transferForm.setValue('type_id', newTypeId)
       aportesForm.setValue('type_id', newTypeId)
+      aportesPropriosForm.setValue('type_id', newTypeId)
+      retirosPropriosForm.setValue('type_id', newTypeId)
     }
   }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm])
   
-  // Escuchar cambios en el tipo
+  // Escuchar cambios en el tipo de TODOS los formularios
   const typeId = form.watch('type_id')
+  const conversionTypeId = conversionForm.watch('type_id')
+  const transferTypeId = transferForm.watch('type_id')
+  const aportesTypeId = aportesForm.watch('type_id')
+  const aportesPropriosTypeId = aportesPropriosForm.watch('type_id')
+  const retirosPropriosTypeId = retirosPropriosForm.watch('type_id')
 
   React.useEffect(() => {
     if (typeId) {
       handleTypeChange(typeId)
     }
   }, [typeId])
+
+  React.useEffect(() => {
+    if (conversionTypeId && movementType === 'conversion') {
+      handleTypeChange(conversionTypeId)
+    }
+  }, [conversionTypeId, movementType])
+
+  React.useEffect(() => {
+    if (transferTypeId && movementType === 'transfer') {
+      handleTypeChange(transferTypeId)
+    }
+  }, [transferTypeId, movementType])
+
+  React.useEffect(() => {
+    if (aportesTypeId && movementType === 'aportes') {
+      handleTypeChange(aportesTypeId)
+    }
+  }, [aportesTypeId, movementType])
+
+  React.useEffect(() => {
+    if (aportesPropriosTypeId && movementType === 'aportes_propios') {
+      handleTypeChange(aportesPropriosTypeId)
+    }
+  }, [aportesPropriosTypeId, movementType])
+
+  React.useEffect(() => {
+    if (retirosPropriosTypeId && movementType === 'retiros_propios') {
+      handleTypeChange(retirosPropriosTypeId)
+    }
+  }, [retirosPropriosTypeId, movementType])
 
   // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
   React.useEffect(() => {
