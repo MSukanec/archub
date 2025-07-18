@@ -87,45 +87,8 @@ export function CustomRestricted({
   // "general_mode" sigue siendo aplicable incluso para admins porque es una restricción de contexto, no de permisos
   if (isAdmin && reason !== "general_mode") {
     return (
-      <div className="relative w-full">
+      <div className="relative w-full" title={`Esta función está ${reason === "coming_soon" ? "en desarrollo" : "restringida"} pero tienes acceso como administrador`}>
         {children}
-        
-        {/* Indicador visual para admin que muestra que tienen acceso especial */}
-        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger asChild>
-            <div
-              className="absolute top-2 right-2 flex items-center justify-center cursor-pointer group"
-              onMouseEnter={() => setIsPopoverOpen(true)}
-              onMouseLeave={() => setIsPopoverOpen(false)}
-            >
-              <div className="bg-accent rounded-full p-1 shadow-sm border border-accent group-hover:shadow-md transition-shadow">
-                <Lock className="h-2 w-2 text-white" />
-              </div>
-            </div>
-          </PopoverTrigger>
-
-          <PopoverContent
-            className="w-60 p-3 bg-[var(--card-bg)] border shadow-lg"
-            side="top"
-          >
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <div className="bg-accent/10 rounded-full p-1 flex-shrink-0">
-                  <Lock className="h-3 w-3 text-accent" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-xs">Acceso de Administrador</h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {reason === "coming_soon" 
-                      ? "Esta función está en desarrollo. Tienes acceso como administrador."
-                      : "Esta función está restringida para usuarios normales. Tienes acceso como administrador."
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
       </div>
     );
   }
