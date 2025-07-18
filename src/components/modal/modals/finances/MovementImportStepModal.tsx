@@ -402,21 +402,40 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     }
   }, [parsedData, columnMapping])
 
-  // Scroll to top when step changes
+  // Scroll to top when entering step 3
   useEffect(() => {
-    // Add a small delay to ensure DOM is updated
-    setTimeout(() => {
-      const modalElement = document.querySelector('[data-modal-content]') || 
-                          document.querySelector('.overflow-auto') || 
-                          document.querySelector('.max-h-\\[90vh\\]') ||
-                          document.querySelector('.flex.flex-col') ||
-                          window;
-      if (modalElement && modalElement.scrollTo) {
-        modalElement.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (modalElement === window) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 150);
+    if (currentStep === 3) {
+      // Try multiple selectors to find the modal container, prioritizing modal-specific ones
+      setTimeout(() => {
+        const scrollSelectors = [
+          '[role="dialog"] [data-radix-scroll-area-viewport]',
+          '[data-radix-dialog-content] [data-radix-scroll-area-viewport]', 
+          '[data-radix-scroll-area-viewport]',
+          '[role="dialog"] .overflow-y-auto',
+          '[role="dialog"]',
+          '.overflow-y-auto',
+          '.max-h-\\[90vh\\]'
+        ]
+        
+        let scrolled = false
+        for (const selector of scrollSelectors) {
+          const scrollContainer = document.querySelector(selector)
+          if (scrollContainer) {
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
+            console.log(`✅ Scrolled to top using selector: ${selector}`)
+            scrolled = true
+            break
+          }
+        }
+        
+        // If no modal container found, scroll the document
+        if (!scrolled) {
+          document.documentElement.scrollTop = 0
+          document.body.scrollTop = 0
+          console.log(`✅ Scrolled document to top as fallback`)
+        }
+      }, 200) // Increased delay to ensure step 3 content is rendered
+    }
   }, [currentStep])
 
   // Filtrar conceptos por tipo
@@ -1450,6 +1469,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         newMappings[mappingKey] = '';
                       });
                       setManualMappings(newMappings);
+                      // Force re-render of all Select components
+                      setRenderCounter(prev => prev + 1);
                       toast({
                         title: "Campo completado",
                         description: `Todos los valores de "${fieldLabel}" se asignaron como NULL`
@@ -1473,7 +1494,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                             <span className="font-mono text-sm">{getFieldHierarchyInfo(fieldName, value)}</span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            Valor de tu archivo
+                            {fieldName === 'category_id' ? 'Tipo de Archub > Valor de tu archivo' : 
+                             fieldName === 'subcategory_id' ? 'Categoría de Archub > Valor de tu archivo' :
+                             'Valor de tu archivo'}
                           </div>
                         </div>
                         
