@@ -25,6 +25,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
   
   // Estados para la lógica jerárquica
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(form.watch('category_id') || '')
+  const [initialized, setInitialized] = React.useState(false)
   
   // Obtener categorías basadas en el tipo seleccionado
   const selectedTypeId = form.watch('type_id')
@@ -33,17 +34,19 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
     return concepts.filter((concept: any) => concept.parent_id === selectedTypeId)
   }, [selectedTypeId, concepts])
 
-  // Efecto para inicializar valores por defecto cuando están disponibles los datos
+  // Efecto para inicializar valores por defecto SOLO UNA VEZ cuando están disponibles los datos
   React.useEffect(() => {
-    if (!currencies || !wallets || !members) return
+    if (!currencies || !wallets || !members || initialized) return
     
     const currentValues = form.getValues()
+    let hasChanges = false
     
     // Inicializar billetera por defecto si no hay una seleccionada
     if (!currentValues.wallet_id && wallets.length > 0) {
       const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
       if (defaultWallet) {
         form.setValue('wallet_id', defaultWallet.id)
+        hasChanges = true
       }
     }
     
@@ -52,6 +55,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
       const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
       if (defaultCurrency) {
         form.setValue('currency_id', defaultCurrency.currency_id)
+        hasChanges = true
       }
     }
     
@@ -60,9 +64,15 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
       const currentMember = members.find(m => m.user_id === userData?.user?.id)
       if (currentMember) {
         form.setValue('created_by', currentMember.id)
+        hasChanges = true
       }
     }
-  }, [currencies, wallets, members, userData?.user?.id, form])
+    
+    // Marcar como inicializado para evitar futuros resets
+    if (hasChanges) {
+      setInitialized(true)
+    }
+  }, [currencies, wallets, members, userData?.user?.id, form, initialized])
 
   // Efecto para actualizar selectedCategoryId cuando cambia category_id en el form
   React.useEffect(() => {
@@ -73,6 +83,18 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
     })
     return () => subscription.unsubscribe()
   }, [form])
+  
+  // Efecto para mantener el valor de categoría cuando las categorías se cargan
+  React.useEffect(() => {
+    const currentCategoryId = form.getValues('category_id')
+    if (currentCategoryId && categories.length > 0) {
+      // Verificar si la categoría actual está en la lista de categorías disponibles
+      const categoryExists = categories.find(cat => cat.id === currentCategoryId)
+      if (categoryExists) {
+        setSelectedCategoryId(currentCategoryId)
+      }
+    }
+  }, [categories, form])
 
   return (
     <>
