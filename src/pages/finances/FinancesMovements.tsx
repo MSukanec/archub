@@ -1337,6 +1337,16 @@ export default function Movements() {
           
           // For regular movements, determine type
           const typeName = item.movement_data?.type?.name || "";
+          const categoryName = item.movement_data?.category?.name || "";
+          
+          // Check for APORTES PROPIOS and RETIROS PROPIOS based on category name
+          if (categoryName.toLowerCase().includes("aportes propios") || 
+              categoryName.toLowerCase().includes("aportes_propios")) {
+            return "movement-row-aportes-propios";
+          } else if (categoryName.toLowerCase().includes("retiros propios") || 
+                     categoryName.toLowerCase().includes("retiros_propios")) {
+            return "movement-row-retiros-propios";
+          }
           
           if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
             return "movement-row-income";
