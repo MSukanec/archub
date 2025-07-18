@@ -439,24 +439,28 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Function to get hierarchy info for field display
   const getFieldHierarchyInfo = (fieldName: string, value: string): string => {
-    if (fieldName === 'subcategory_id') {
-      // First, check if this value exists as an existing subcategory
-      const existingSubcategory = categories.find(sub => 
-        normalizeText(sub.name) === normalizeText(value)
+    if (fieldName === 'category_id') {
+      // For categories, they should show which TYPE (parent) they belong to
+      // Categories are middle-level: TYPE > CATEGORY
+      
+      // First check if this value exists as an existing category (subcategory in our data structure)
+      const existingCategory = categories.find(cat => 
+        normalizeText(cat.name) === normalizeText(value)
       )
       
-      if (existingSubcategory) {
-        const parentName = findParentCategoryName(existingSubcategory.id)
-        return `${parentName} > ${value}`
+      if (existingCategory) {
+        const parentTypeName = findParentCategoryName(existingCategory.id)
+        return `${parentTypeName} > ${value}`
       }
       
-      // For all unmapped subcategories, default to "Egresos" since most construction expenses are egresos
+      // If not found, try to infer the parent type
+      // For construction expenses, most categories belong to "Egresos"
       const egresoType = types.find(type => normalizeText(type.name) === 'egresos')
       if (egresoType) {
         return `${egresoType.name} > ${value}`
       }
       
-      // Fallback to first type if no Egresos found
+      // Fallback to first type
       const firstType = types[0]
       if (firstType) {
         return `${firstType.name} > ${value}`
@@ -464,15 +468,62 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       
       return value
       
-    } else if (fieldName === 'category_id') {
-      // For categories, check if they're subcategories that belong to a parent
-      for (const type of types) {
-        if (type.children?.some(child => normalizeText(child.name) === normalizeText(value))) {
-          return `${type.name} > ${value}`
+    } else if (fieldName === 'subcategory_id') {
+      // For subcategories, they should show which CATEGORY (parent) they belong to
+      // Subcategories are lowest level: CATEGORY > SUBCATEGORY
+      
+      // First, check if this value exists as an existing subcategory
+      const existingSubcategory = categories.find(sub => 
+        normalizeText(sub.name) === normalizeText(value)
+      )
+      
+      if (existingSubcategory) {
+        const parentCategoryName = findParentCategoryName(existingSubcategory.id)
+        return `${parentCategoryName} > ${value}`
+      }
+      
+      // If not found, try to infer which category it might belong to
+      // For construction, try to match with existing categories like "Materiales", "Mano de Obra", etc.
+      const categoryKeywords = [
+        { keywords: ['calefaccion', 'gas', 'electricidad', 'agua', 'sanitario'], category: 'Materiales' },
+        { keywords: ['ingeniero', 'arquitecto', 'profesional'], category: 'Mano de Obra' },
+        { keywords: ['uf', 'cuota', 'impuesto', 'colegio'], category: 'Indirectos' }
+      ]
+      
+      const normalizedValue = normalizeText(value).toLowerCase()
+      
+      for (const keywordGroup of categoryKeywords) {
+        const matchesKeyword = keywordGroup.keywords.some(keyword => 
+          normalizedValue.includes(keyword)
+        )
+        
+        if (matchesKeyword) {
+          // Check if this category exists in our data
+          const matchingCategory = categories.find(cat => 
+            normalizeText(cat.name) === normalizeText(keywordGroup.category)
+          )
+          
+          if (matchingCategory) {
+            return `${keywordGroup.category} > ${value}`
+          }
         }
       }
       
-      // If it's a main category, just show the value
+      // Default fallback - use "Materiales" as most construction items are materials
+      const materialesCategory = categories.find(cat => 
+        normalizeText(cat.name) === 'materiales'
+      )
+      
+      if (materialesCategory) {
+        return `Materiales > ${value}`
+      }
+      
+      // Final fallback - use first available category
+      const firstCategory = categories[0]
+      if (firstCategory) {
+        return `${firstCategory.name} > ${value}`
+      }
+      
       return value
     }
     
