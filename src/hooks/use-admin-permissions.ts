@@ -38,14 +38,6 @@ export function useIsAdmin(): boolean {
   const { data } = useAdminPermissions()
   const { data: userData } = useCurrentUser()
   
-  // Debug logs
-  console.log('useIsAdmin - checking admin status:', { 
-    email: userData?.user?.email, 
-    isTemporalAdmin: userData?.user?.email === "archub@archub.com",
-    dataIsAdmin: data?.isAdmin,
-    finalResult: userData?.user?.email === "archub@archub.com" ? true : (data?.isAdmin || false)
-  })
-  
   // Temporal: hacer que el usuario archub@archub.com sea admin para testing
   if (userData?.user?.email === "archub@archub.com") {
     return true
