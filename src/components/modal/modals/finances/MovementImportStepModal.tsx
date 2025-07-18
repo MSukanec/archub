@@ -20,6 +20,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjects } from '@/hooks/use-projects'
 import { useToast } from '@/hooks/use-toast'
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { cn } from '@/lib/utils'
@@ -349,6 +350,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [dropzoneKey, setDropzoneKey] = useState(0)
   const [selectedCreator, setSelectedCreator] = useState<string>('')
+  const [selectedProject, setSelectedProject] = useState<string>('')
   const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
   const [incompatibleValues, setIncompatibleValues] = useState<{ [key: string]: string[] }>({})
   // Force re-render counter for the problematic selectors
@@ -364,6 +366,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
   const { data: organizationWallets } = useOrganizationWallets(organizationId)
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
+  const { data: organizationProjects = [] } = useProjects(organizationId)
   
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
@@ -379,6 +382,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       setSelectedCreator(currentUser.user.id)
     }
   }, [currentUser?.user?.id, selectedCreator])
+
+  // Set default project when data loads
+  React.useEffect(() => {
+    if (!selectedProject && currentUser?.preferences?.last_project_id) {
+      setSelectedProject(currentUser.preferences.last_project_id)
+    }
+  }, [currentUser?.preferences?.last_project_id, selectedProject])
 
   // Auto-map columns based on header names when data is parsed
   React.useEffect(() => {
@@ -963,7 +973,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           amount: 0,
           movement_date: new Date().toISOString().split('T')[0],
           organization_id: currentUser.organization.id,
-          project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
+          project_id: selectedProject || modalData?.projectId || currentUser.preferences?.last_project_id,
           created_by: selectedMember.id, // Use organization_member.id instead of user.id
           is_favorite: false
         }
@@ -1094,7 +1104,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           nextAction: {
             label: 'Siguiente',
             onClick: () => setCurrentStep(2),
-            disabled: !parsedData || !selectedCreator
+            disabled: !parsedData || !selectedCreator || !selectedProject
           }
         }
       case 2:
@@ -1150,6 +1160,37 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           onChange={setSelectedCreator}
           placeholder="Seleccionar miembro de la organización"
         />
+      </div>
+
+      <div className="space-y-3">
+        <Label>Proyecto de destino</Label>
+        <Select 
+          value={selectedProject} 
+          onValueChange={setSelectedProject}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar proyecto" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                <span>General</span>
+              </div>
+            </SelectItem>
+            {organizationProjects?.map((project) => (
+              <SelectItem key={project.id} value={project.id}>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: project.color || '#000000' }}
+                  ></div>
+                  <span>{project.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-3">
