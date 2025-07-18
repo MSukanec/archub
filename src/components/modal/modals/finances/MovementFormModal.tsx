@@ -1368,6 +1368,47 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const editPanel = (
     <div className="space-y-4">
+      {/* Selector de tipo de movimiento - CENTRALIZADO */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Tipo de movimiento
+        </label>
+        <Select onValueChange={(value) => {
+          // Actualizar todos los formularios
+          form.setValue('type_id', value)
+          conversionForm.setValue('type_id', value)
+          transferForm.setValue('type_id', value)
+          aportesForm.setValue('type_id', value)
+          aportesPropriosForm.setValue('type_id', value)
+          retirosPropriosForm.setValue('type_id', value)
+          
+          // Actualizar movementType basado en view_mode
+          const selected = concepts?.find(c => c.id === value)
+          if (selected?.view_mode) {
+            const viewMode = selected.view_mode.trim()
+            setMovementType(viewMode as any)
+          }
+        }} value={form.watch('type_id')}>
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar tipo..." />
+          </SelectTrigger>
+          <SelectContent>
+            {concepts?.map((concept) => (
+              <SelectItem key={concept.id} value={concept.id}>
+                <div className="flex items-center justify-between w-full">
+                  <span>{concept.name}</span>
+                  {concept.is_system && (
+                    <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
+                      Sistema
+                    </span>
+                  )}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
       {(isConversion || isEditingConversion) ? (
         <Form {...conversionForm}>
           <ConversionFields 
