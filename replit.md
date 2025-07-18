@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. CRITICAL SECURITY ISSUE RESOLVED: Fixed navigation logic preventing access to wrong project context in "GENERAL" mode - COMPLETED
+  • Identified and resolved critical security flaw where clicking "General" breadcrumb was navigating to /project/dashboard instead of organization context
+  • Fixed Header.tsx navigation logic to properly handle General mode: clicks now navigate to /organization/projects for organizational overview
+  • Enhanced project-specific navigation: only navigate to /project/dashboard when user has specific project selected (not in General mode)
+  • Eliminated potential data exposure risk where General mode users could inadvertently access project-specific pages without proper context
+  • System now correctly separates organizational view (General mode) from project-specific view with appropriate navigation targets
+  • Enhanced user experience: General mode properly redirects to organization-level pages, maintaining proper data isolation and security boundaries
 - July 18, 2025. COMPLETE ELIMINATION OF DANGEROUSCONFIRMATIONMODAL SYSTEM: Successfully removed legacy dangerous modal system and unified all delete operations - COMPLETED
   • Eliminated DangerousConfirmationModal.tsx file completely from codebase after successful migration
   • Replaced all dangerous delete operations in FinancesMovements.tsx, OrganizationProjects.tsx, ProjectClients.tsx, and OrganizationMembers.tsx

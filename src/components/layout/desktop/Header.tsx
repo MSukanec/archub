@@ -299,8 +299,15 @@ export function Header({
                 variant="ghost"
                 className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
                 onClick={() => {
-                  setSidebarContext('project');
-                  navigate('/project/dashboard');
+                  if (localSelectedProject === null) {
+                    // En modo General, ir a la página de proyectos de la organización
+                    setSidebarContext('organization');
+                    navigate('/organization/projects');
+                  } else {
+                    // En proyecto específico, ir al dashboard del proyecto
+                    setSidebarContext('project');
+                    navigate('/project/dashboard');
+                  }
                 }}
               >
                 {localSelectedProject === null 
