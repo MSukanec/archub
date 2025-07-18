@@ -23,10 +23,15 @@ export default function Plan({ isExpanded }: PlanProps) {
             userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
           )}>
             <div className="flex items-center gap-2 mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.05s_forwards]">
-              <div className="w-5 h-5 rounded-full border-2 bg-white flex items-center justify-center transition-all duration-150">
-                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className={cn("w-3 h-3 text-[var(--accent)]")} />}
-                {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-blue-500" />}
-                {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-purple-500" />}
+              <div className={cn(
+                "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-150",
+                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
+                userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
+                userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
+              )}>
+                {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-3 h-3 text-white" />}
+                {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-white" />}
+                {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-white" />}
               </div>
               <span className="text-xs font-medium text-[var(--secondary-sidebar-fg)]">Plan actual:</span>
             </div>
@@ -64,14 +69,14 @@ export default function Plan({ isExpanded }: PlanProps) {
           </div>
         ) : (
           <div className={cn(
-            "w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
-            (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
-            userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
-            userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
+            "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
+            (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
+            userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
+            userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
           )}>
-            {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--accent)] transition-all duration-150" />}
-            {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-blue-500 transition-all duration-150" />}
-            {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-purple-500 transition-all duration-150" />}
+            {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-white transition-all duration-150" />}
+            {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-white transition-all duration-150" />}
+            {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-white transition-all duration-150" />}
           </div>
         )}
       </div>
