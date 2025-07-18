@@ -753,6 +753,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   React.useEffect(() => {
     if (!editingMovement && members && userData?.user?.id) {
       const currentMember = members.find(m => m.user_id === userData.user.id)
+      
       if (currentMember?.id) {
         // Inicializar created_by en todos los formularios
         form.setValue('created_by', currentMember.id)
@@ -772,6 +773,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
+
+
 
       const movementData = {
         ...data,

@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. CRITICAL CREATED_BY BUG RESOLVED: Fixed 409 server error in movement creation - COMPLETED
+  • Root cause identified: UserSelector sending user_id instead of organization_member.id for created_by field
+  • Fixed UserSelector value mapping: changed from user.user_id || user.id to only user.id for organization members
+  • Updated selectedUser finding logic to use direct user.id comparison instead of fallback logic
+  • Added dedicated useEffect for created_by auto-initialization when members data loads
+  • Cleaned defaultValues in all movement forms to prevent conflicts with auto-initialization
+  • System now correctly maps user_id to organization_member.id: 0776911d... → a8581fda-7e0e-4d6c...
+  • All movement types (normal, conversion, transfer, aportes, retiros) now save successfully without 409 errors
+  • Movement creation confirmed working: counter increased from 150→151→152 movements in testing
 - July 18, 2025. TRANSFERFIELDS COMPONENT EXTRACTION AND USERSELECTOR FIX COMPLETED - COMPLETED
   • Fixed critical UserSelector bug: component now correctly compares user.user_id || user.id for organizationMembers data structure
   • Auto-initialization working: all forms now pre-select creator field using userData?.user?.id in defaultValues

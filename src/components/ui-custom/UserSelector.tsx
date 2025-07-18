@@ -37,7 +37,7 @@ export default function UserSelector({
   className = "",
   showCompany = false
 }: UserSelectorProps) {
-  const selectedUser = users?.find(user => (user.user_id || user.id) === value);
+  const selectedUser = users?.find(user => user.id === value);
 
   const getUserDisplayName = (user: User) => {
     const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
@@ -73,7 +73,7 @@ export default function UserSelector({
         </SelectTrigger>
         <SelectContent>
           {users?.map((user) => (
-            <SelectItem key={user.id} value={user.user_id || user.id}>
+            <SelectItem key={user.id} value={user.id}>
               <div className="flex items-center gap-2">
                 <Avatar className="h-4 w-4">
                   <AvatarImage src={user.avatar_url} />
