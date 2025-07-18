@@ -1491,12 +1491,38 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         <div className="col-span-4">
                           <div className="flex items-center gap-2">
                             <AlertCircle className="h-4 w-4 text-orange-500" />
-                            <span className="font-mono text-sm">{getFieldHierarchyInfo(fieldName, value)}</span>
+                            <span className="font-mono text-sm">
+                              {(() => {
+                                const hierarchyText = getFieldHierarchyInfo(fieldName, value)
+                                const parts = hierarchyText.split(' > ')
+                                
+                                if (parts.length === 2) {
+                                  return (
+                                    <>
+                                      <span className="text-green-600 font-medium">{parts[0]} &gt;</span>
+                                      <span className="text-orange-600 ml-1">{parts[1]}</span>
+                                    </>
+                                  )
+                                }
+                                
+                                return <span className="text-orange-600">{hierarchyText}</span>
+                              })()}
+                            </span>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {fieldName === 'category_id' ? 'Tipo de Archub > Valor de tu archivo' : 
-                             fieldName === 'subcategory_id' ? 'Categoría de Archub > Valor de tu archivo' :
-                             'Valor de tu archivo'}
+                          <div className="text-xs mt-1">
+                            {fieldName === 'category_id' ? (
+                              <span>
+                                <span className="text-green-600 font-medium">Tipo de Archub &gt;</span>
+                                <span className="text-muted-foreground ml-1">Valor de tu archivo</span>
+                              </span>
+                            ) : fieldName === 'subcategory_id' ? (
+                              <span>
+                                <span className="text-green-600 font-medium">Categoría de Archub &gt;</span>
+                                <span className="text-muted-foreground ml-1">Valor de tu archivo</span>
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">Valor de tu archivo</span>
+                            )}
                           </div>
                         </div>
                         
