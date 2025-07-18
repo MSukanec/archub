@@ -776,9 +776,21 @@ export default function FinancesInstallments() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                // Open edit commitment modal - this would require developing a commitment editing modal
-                // For now, we'll just show a message since this edits the commitment amount, not individual installments
-                console.log('Edit commitment for client:', item.contact?.first_name)
+                // Open edit commitment modal using the installment modal
+                // We'll edit the first installment for this client as a way to edit the commitment
+                const clientInstallments = installments.filter(installment => installment.contact_id === item.contact_id)
+                if (clientInstallments.length > 0) {
+                  const firstInstallment = clientInstallments[0]
+                  openModal('installment', {
+                    installment: firstInstallment,
+                    onSave: (data: any) => {
+                      // Handle save - this will be handled by the modal
+                      console.log('Saving installment:', data)
+                    }
+                  })
+                } else {
+                  console.log('No installments found for client:', item.contact?.first_name)
+                }
               }}
               className="h-8 w-8 p-0"
             >
