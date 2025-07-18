@@ -454,11 +454,33 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
     
     if (defaultWallet) {
-      if (!form.watch('wallet_id')) form.setValue('wallet_id', defaultWallet)
-      if (!transferForm.watch('wallet_id_from')) transferForm.setValue('wallet_id_from', defaultWallet)
-      if (!aportesForm.watch('wallet_id')) aportesForm.setValue('wallet_id', defaultWallet)
-      if (!aportesPropriosForm.watch('wallet_id')) aportesPropriosForm.setValue('wallet_id', defaultWallet)
-      if (!retirosPropriosForm.watch('wallet_id')) retirosPropriosForm.setValue('wallet_id', defaultWallet)
+      console.log('Setting wallet values:', {
+        defaultWallet,
+        currentFormWallet: form.watch('wallet_id'),
+        currentTransferWallet: transferForm.watch('wallet_id_from'),
+        currentAportesWallet: aportesForm.watch('wallet_id')
+      })
+      
+      if (!form.watch('wallet_id')) {
+        form.setValue('wallet_id', defaultWallet)
+        console.log('Set form wallet_id to:', defaultWallet)
+      }
+      if (!transferForm.watch('wallet_id_from')) {
+        transferForm.setValue('wallet_id_from', defaultWallet)
+        console.log('Set transfer wallet_id_from to:', defaultWallet)
+      }
+      if (!aportesForm.watch('wallet_id')) {
+        aportesForm.setValue('wallet_id', defaultWallet)
+        console.log('Set aportes wallet_id to:', defaultWallet)
+      }
+      if (!aportesPropriosForm.watch('wallet_id')) {
+        aportesPropriosForm.setValue('wallet_id', defaultWallet)
+        console.log('Set aportes propios wallet_id to:', defaultWallet)
+      }
+      if (!retirosPropriosForm.watch('wallet_id')) {
+        retirosPropriosForm.setValue('wallet_id', defaultWallet)
+        console.log('Set retiros propios wallet_id to:', defaultWallet)
+      }
     }
     
   }, [members, userData?.user?.id, currencies, wallets, userData?.organization_preferences, editingMovement])
