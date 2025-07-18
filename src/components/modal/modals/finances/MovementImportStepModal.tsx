@@ -1060,8 +1060,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Mapear columnas del archivo</h3>
+      <div className="space-y-2">
+        <Label htmlFor="column-mapping" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Mapear columnas del archivo
+        </Label>
         <p className="text-sm text-muted-foreground">
           Vincula las columnas de tu archivo Excel con los campos de Archub. Solo mapeo de columnas, el mapeo de valores será en el siguiente paso.
         </p>

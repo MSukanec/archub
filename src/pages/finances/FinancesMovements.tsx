@@ -38,6 +38,7 @@ import { Table } from "@/components/ui-custom/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { FinancialCards } from "@/components/ui-custom/FinancialCards";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+import { DangerousConfirmationModal } from "@/components/ui-custom/DangerousConfirmationModal";
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
@@ -1429,41 +1430,28 @@ export default function Movements() {
 
 
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={!!deletingMovement}
-        onOpenChange={() => setDeletingMovement(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {(deletingMovement as any)?._isConversionDeletion 
-                ? "¿Eliminar conversión completa?" 
-                : (deletingMovement as any)?._isTransferDeletion
-                  ? "¿Eliminar transferencia completa?"
-                  : "¿Eliminar movimiento?"
-              }
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {(deletingMovement as any)?._isConversionDeletion 
-                ? "Esta acción no se puede deshacer. La conversión completa (ambos movimientos) será eliminada permanentemente."
-                : (deletingMovement as any)?._isTransferDeletion
-                  ? "Esta acción no se puede deshacer. La transferencia completa (ambos movimientos) será eliminada permanentemente."
-                  : "Esta acción no se puede deshacer. El movimiento será eliminado permanentemente."
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={deleteMovementMutation.isPending}
-            >
-              {deleteMovementMutation.isPending ? "Eliminando..." : "Eliminar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete Confirmation Modal */}
+      <DangerousConfirmationModal
+        isOpen={!!deletingMovement}
+        onClose={() => setDeletingMovement(null)}
+        onConfirm={confirmDelete}
+        title={
+          (deletingMovement as any)?._isConversionDeletion 
+            ? "¿Eliminar conversión completa?" 
+            : (deletingMovement as any)?._isTransferDeletion
+              ? "¿Eliminar transferencia completa?"
+              : "¿Eliminar movimiento?"
+        }
+        message={
+          (deletingMovement as any)?._isConversionDeletion 
+            ? "Esta acción no se puede deshacer. La conversión completa (ambos movimientos) será eliminada permanentemente."
+            : (deletingMovement as any)?._isTransferDeletion
+              ? "Esta acción no se puede deshacer. La transferencia completa (ambos movimientos) será eliminada permanentemente."
+              : "Esta acción no se puede deshacer. El movimiento será eliminado permanentemente."
+        }
+        itemName={deletingMovement?.description || ""}
+        loading={deleteMovementMutation.isPending}
+      />
 
       {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog
