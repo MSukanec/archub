@@ -35,50 +35,7 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
 
   return (
     <>
-      {/* Fila 1: Creador | Fecha */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="created_by"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Creador *</FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={members || []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar creador"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="movement_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha *</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                  onChange={(e) => {
-                    const localDate = new Date(e.target.value + 'T00:00:00');
-                    field.onChange(localDate);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Fila 3: Categoría (full width) */}
+      {/* Categoría */}
       <FormField
         control={form.control}
         name="category_id"

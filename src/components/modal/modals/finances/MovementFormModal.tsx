@@ -1368,10 +1368,53 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const editPanel = (
     <div className="space-y-4">
+      {/* Campos centralizados: Creador y Fecha */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Creador *
+          </label>
+          <UserSelector
+            users={members || []}
+            value={form.watch('created_by')}
+            onChange={(value) => {
+              // Actualizar todos los formularios
+              form.setValue('created_by', value)
+              conversionForm.setValue('created_by', value)
+              transferForm.setValue('created_by', value)
+              aportesForm.setValue('created_by', value)
+              aportesPropriosForm.setValue('created_by', value)
+              retirosPropriosForm.setValue('created_by', value)
+            }}
+            placeholder="Seleccionar creador"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Fecha *
+          </label>
+          <Input
+            type="date"
+            value={form.watch('movement_date') ? form.watch('movement_date').toISOString().split('T')[0] : ''}
+            onChange={(e) => {
+              const localDate = new Date(e.target.value + 'T00:00:00');
+              // Actualizar todos los formularios
+              form.setValue('movement_date', localDate)
+              conversionForm.setValue('movement_date', localDate)
+              transferForm.setValue('movement_date', localDate)
+              aportesForm.setValue('movement_date', localDate)
+              aportesPropriosForm.setValue('movement_date', localDate)
+              retirosPropriosForm.setValue('movement_date', localDate)
+            }}
+          />
+        </div>
+      </div>
+
       {/* Selector de tipo de movimiento - CENTRALIZADO */}
       <div className="space-y-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Tipo de movimiento
+          Tipo de movimiento *
         </label>
         <Select onValueChange={(value) => {
           // Actualizar todos los formularios
@@ -1471,85 +1514,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO NORMAL
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
-          {/* Desktop: Grid Layout, Mobile: Single Column */}
-          
-          {/* Fila 1: Creador | Fecha */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Creador *</FormLabel>
-                  <FormControl>
-                    <UserSelector
-                      users={members || []}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Seleccionar creador"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="movement_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                      onChange={(e) => {
-                        const localDate = new Date(e.target.value + 'T00:00:00');
-                        field.onChange(localDate);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Fila 2: Tipo (full width) */}
-          <FormField
-            control={form.control}
-            name="type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {concepts?.filter((concept: any) => !concept.parent_id).map((concept) => (
-                      <SelectItem key={concept.id} value={concept.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{concept.name}</span>
-                          {concept.is_system && (
-                            <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                              Sistema
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Fila 3: Categoría (full width) */}
+          {/* Categoría (full width) */}
           <FormField
             control={form.control}
             name="category_id"

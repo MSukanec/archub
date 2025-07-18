@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. CENTRALIZED MOVEMENT FORM FIELDS SYSTEM COMPLETED: Successfully implemented complete centralized field system for MovementFormModal.tsx - COMPLETED
+  • Moved Creador, Fecha, and Tipo de movimiento fields to centralized location at top of modal
+  • Implemented proper hierarchical order: Creador → Fecha → Tipo de movimiento
+  • Added asterisk (*) labels to all required fields (Creador *, Fecha *, Tipo de movimiento *)
+  • Enhanced type selector with automatic form switching based on view_mode detection
+  • Eliminated all duplicate fields from modular components: AportesFields, AportesPropiosFields, RetirosPropiosFields, ConversionFields, TransferFields
+  • Implemented comprehensive form synchronization: all form instances (form, conversionForm, transferForm, aportesForm, etc.) update simultaneously
+  • Fixed form context issues by using native React selectors instead of Form wrappers for centralized fields
+  • System now provides unified UX: common fields always visible at top, specific fields load dynamically based on movement type
+  • Verified working in production: logs show correct type detection and form switching functionality
 - July 18, 2025. CENTRALIZED TYPE SELECTION SYSTEM COMPLETED: Successfully implemented single type selector at modal start with dynamic form switching - COMPLETED
   • Created centralized type_id selector at the beginning of MovementFormModal.tsx for all movement types
   • Removed type_id fields from all movement form components (AportesFields, AportesPropiosFields, RetirosPropiosFields, ConversionFields, TransferFields)

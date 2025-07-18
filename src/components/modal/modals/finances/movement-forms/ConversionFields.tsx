@@ -33,49 +33,6 @@ interface Props {
 export function ConversionFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
     <div className="space-y-4">
-        {/* Fila 1: Creador | Fecha */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creador *</FormLabel>
-                <FormControl>
-                  <UserSelector
-                    users={members || []}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar creador"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="movement_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                    onChange={(e) => {
-                      const localDate = new Date(e.target.value + 'T00:00:00');
-                      field.onChange(localDate);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         {/* Separador y título de sección de conversión */}
         <div className="col-span-2">
           <Separator className="mb-4" />
