@@ -338,8 +338,8 @@ const SMART_COLUMN_MAPPING: { [key: string]: string } = {
   'date': 'movement_date',
   'tipo': 'type_id',
   'type': 'type_id',
-  'categoria': 'subcategory_id',
-  'categoría': 'subcategory_id',
+  'categoria': 'category_id',
+  'categoría': 'category_id',
   'subcategoria': 'subcategory_id',
   'subcategoría': 'subcategory_id',
   'moneda': 'currency_id',
@@ -805,6 +805,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     // Check for any remaining text values in UUID fields
     const badMovements = processedMovements.filter(m => 
       (m.type_id && typeof m.type_id === 'string' && !m.type_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.category_id && typeof m.category_id === 'string' && !m.category_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
       (m.currency_id && typeof m.currency_id === 'string' && !m.currency_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
       (m.wallet_id && typeof m.wallet_id === 'string' && !m.wallet_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
       (m.subcategory_id && typeof m.subcategory_id === 'string' && !m.subcategory_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i))
@@ -999,10 +1000,30 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           available: organizationWallets?.map(w => w.wallets.name) || [],
           mappedValue: walletNormalized
         }
+      case 'category_id':
+        const categoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
+        // Check if it's a direct UUID match with categories table (intermediate level)
+        const categoryMatch = categories.find(c => c.id === categoryNormalized)
+        const isDirectCategoryMatch = !!categoryMatch
+
+        console.log('🔍 Validating category_id:', {
+          originalValue: value,
+          categoryNormalized,
+          isDirectCategoryMatch,
+          categoryMatch: categoryMatch?.name
+        });
+
+        return { 
+          isValid: isDirectCategoryMatch, 
+          suggestion: categoryMatch?.name,
+          available: categories.map(c => c.name),
+          mappedValue: categoryNormalized
+        }
       case 'subcategory_id':
         const subcategoryNormalized = normalizeValue(fieldName, value, valueMap, manualMappings)
-        // Check if it's a direct UUID match with categories table
-        const subcategoryMatch = categories.find(c => c.id === subcategoryNormalized)
+        // Check if it's a direct UUID match with subcategories table (deepest level)
+        const allSubcategoriesForValidation = categories?.flatMap(cat => cat.children || []) || []
+        const subcategoryMatch = allSubcategoriesForValidation.find(s => s.id === subcategoryNormalized)
         const isDirectSubcategoryMatch = !!subcategoryMatch
 
         console.log('🔍 Validating subcategory_id:', {
@@ -1015,7 +1036,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         return { 
           isValid: isDirectSubcategoryMatch, 
           suggestion: subcategoryMatch?.name,
-          available: categories.map(c => c.name),
+          available: allSubcategoriesForValidation.map(s => s.name),
           mappedValue: subcategoryNormalized
         }
       default:
@@ -1030,6 +1051,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       case 'type_id':
         options = types.map(t => ({ id: t.id, name: t.name }))
         break
+      case 'category_id':
+        options = categories.map(c => ({ id: c.id, name: c.name }))
+        break
       case 'currency_id':
         options = (organizationCurrencies || []).map(c => ({ id: c.currency.id, name: c.currency.name }))
         break
@@ -1037,7 +1061,8 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         options = (organizationWallets || []).map(w => ({ id: w.wallets.id, name: w.wallets.name }))
         break
       case 'subcategory_id':
-        options = categories.map(c => ({ id: c.id, name: c.name }))
+        const allSubcategoriesForOptions = categories?.flatMap(cat => cat.children || []) || []
+        options = allSubcategoriesForOptions.map(s => ({ id: s.id, name: s.name }))
         break
       default:
         options = []
@@ -1165,7 +1190,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     onClick={() => {
                       const fieldMappings: { [key: string]: string } = {};
                       values.forEach(value => {
-                        fieldMappings[`${fieldName}_${value}`] = '';
+                        fieldMappings[`${fieldName}_${value}`] = 'empty-placeholder';
                       });
                       setManualMappings(prev => {
                         const newMappings = {
@@ -1213,7 +1238,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         <div className="col-span-5">
                           <Select 
                             key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
-                            value={manualMappings[mappingKey] || ''}
+                            value={manualMappings[mappingKey] === 'empty-placeholder' ? '' : manualMappings[mappingKey] || ''}
                             onValueChange={(selectedId) => {
                               setManualMappings(prev => ({
                                 ...prev,
@@ -1224,12 +1249,15 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                               let selectedName = '';
                               if (fieldName === 'type_id') {
                                 selectedName = types.find(t => t.id === selectedId)?.name || '';
+                              } else if (fieldName === 'category_id') {
+                                selectedName = categories.find(c => c.id === selectedId)?.name || '';
                               } else if (fieldName === 'currency_id') {
                                 selectedName = organizationCurrencies?.find(c => c.currency.id === selectedId)?.currency?.name || '';
                               } else if (fieldName === 'wallet_id') {
                                 selectedName = organizationWallets?.find(w => w.wallets.id === selectedId)?.wallets?.name || '';
                               } else if (fieldName === 'subcategory_id') {
-                                selectedName = categories.find(c => c.id === selectedId)?.name || '';
+                                const allSubcategoriesForToast = categories?.flatMap(cat => cat.children || []) || []
+                                selectedName = allSubcategoriesForToast.find(s => s.id === selectedId)?.name || '';
                               }
                               
                               toast({
@@ -1253,7 +1281,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         </div>
                         
                         <div className="col-span-2">
-                          {manualMappings[mappingKey] ? (
+                          {manualMappings[mappingKey] && manualMappings[mappingKey] !== 'empty-placeholder' ? (
                             <div className="flex items-center gap-1 text-green-700 text-xs">
                               <CheckCircle className="h-3 w-3" />
                               <span>Mapeado</span>
@@ -1290,7 +1318,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     if (parsedData) {
       parsedData.rows.slice(0, 10).forEach((row) => {
         Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
-          if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+          if (['type_id', 'category_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
             const value = row[parseInt(columnIndex)]
             if (value) {
               const normalizedValue = normalizeValue(fieldName, value, valueMap)
