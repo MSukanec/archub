@@ -21,8 +21,7 @@ import { useLocation } from "wouter";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { MobileMenu } from "../mobile/MobileMenu";
 import { useMobileMenuStore } from "../mobile/useMobileMenuStore";
-import { MobileAvatarMenu } from "../mobile/MobileAvatarMenu";
-import { useMobileAvatarMenuStore } from "../mobile/useMobileAvatarMenuStore";
+
 import { useMobile } from "@/hooks/use-mobile";
 import { ProjectSelector } from "@/components/navigation/ProjectSelector";
 import { useProjectContext } from "@/stores/projectContext";
@@ -58,7 +57,7 @@ export function Header({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
-  const { isOpen: isMobileAvatarMenuOpen, openMenu: openAvatarMenu, closeMenu: closeAvatarMenu } = useMobileAvatarMenuStore();
+
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -215,7 +214,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            onClick={openAvatarMenu}
+            onClick={() => navigate('/profile')}
             className="h-10 w-10 p-0 hover:bg-transparent"
           >
             <Avatar className="h-9 w-9">
@@ -688,9 +687,6 @@ export function Header({
 
     {/* Mobile Menu */}
     {isMobileMenuOpen && <MobileMenu onClose={closeMenu} isOpen={isMobileMenuOpen} />}
-    
-    {/* Mobile Avatar Menu */}
-    {isMobileAvatarMenuOpen && <MobileAvatarMenu onClose={closeAvatarMenu} isOpen={isMobileAvatarMenuOpen} />}
     </>
   );
 }
