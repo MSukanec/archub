@@ -141,6 +141,11 @@ interface MovementFormModalProps {
 export default function MovementFormModal({ modalData, onClose }: MovementFormModalProps) {
   const editingMovement = modalData?.editingMovement
   const { currentPanel, setPanel } = useModalPanelStore()
+  
+  // Inicializar panel correcto según el modo
+  React.useEffect(() => {
+    setPanel('edit') // Siempre empezar en modo edición
+  }, [setPanel])
   const { data: userData, isLoading: isUserDataLoading } = useCurrentUser()
   const { data: members, isLoading: isMembersLoading } = useOrganizationMembers(userData?.organization?.id)
   const { data: currencies, isLoading: isCurrenciesLoading } = useOrganizationCurrencies(userData?.organization?.id)
@@ -2111,8 +2116,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
+      viewPanel={currentPanel === 'view' ? viewPanel : null}
+      editPanel={currentPanel === 'edit' ? editPanel : null}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
