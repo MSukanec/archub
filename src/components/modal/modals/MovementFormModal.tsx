@@ -277,7 +277,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       description: '',
       type_id: '',
       category_id: '',
-      member_id: '',
+      member_id: userData?.user?.id || '',
       currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
       wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -293,7 +293,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       description: '',
       type_id: '',
       category_id: '',
-      member_id: '',
+      member_id: userData?.user?.id || '',
       currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
       wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -415,7 +415,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             if (currentMember) aportesPropriosForm.setValue('created_by', currentMember)
             if (defaultCurrency) aportesPropriosForm.setValue('currency_id', defaultCurrency)
             if (defaultWallet) aportesPropriosForm.setValue('wallet_id', defaultWallet)
-            aportesPropriosForm.setValue('member_id', '') // Limpiar socio
+            aportesPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
           } else if (isRetirosPropiosCategory) {
             // RETIROS PROPIOS: Socio + Cotización
             console.log('Initializing retiros propios form with values:', {
@@ -434,7 +434,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             if (currentMember) retirosPropriosForm.setValue('created_by', currentMember)
             if (defaultCurrency) retirosPropriosForm.setValue('currency_id', defaultCurrency)
             if (defaultWallet) retirosPropriosForm.setValue('wallet_id', defaultWallet)
-            retirosPropriosForm.setValue('member_id', '') // Limpiar socio
+            retirosPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
             retirosPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
 
           }
