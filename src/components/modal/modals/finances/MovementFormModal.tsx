@@ -413,13 +413,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   }, [retirosPropriosTypeId, movementType])
 
-  // Inicializar creador por defecto en formularios cuando los datos estén listos
+  // Inicializar valores por defecto cuando los datos estén listos
   React.useEffect(() => {
-    if (!members || !userData?.user?.id || editingMovement) return
+    if (!members || !userData?.user?.id || !currencies || !wallets || editingMovement) return
     
     const currentMember = members.find(m => m.user_id === userData.user.id)
+    const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
+    const defaultWallet = userData?.organization_preferences?.default_wallet || wallets?.[0]?.id
+    
+    console.log('Initializing default values:', {
+      currentMember: currentMember?.id,
+      defaultCurrency,
+      defaultWallet,
+      hasOrgPreferences: !!userData?.organization_preferences
+    })
+    
     if (currentMember) {
-      // Asegurar que todos los formularios tengan el creador correcto
+      // Inicializar CREADOR en todos los formularios
       if (!form.watch('created_by')) form.setValue('created_by', currentMember.id)
       if (!conversionForm.watch('created_by')) conversionForm.setValue('created_by', currentMember.id)
       if (!transferForm.watch('created_by')) transferForm.setValue('created_by', currentMember.id)
@@ -427,7 +437,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!aportesPropriosForm.watch('created_by')) aportesPropriosForm.setValue('created_by', currentMember.id)
       if (!retirosPropriosForm.watch('created_by')) retirosPropriosForm.setValue('created_by', currentMember.id)
     }
-  }, [members, userData?.user?.id, editingMovement])
+    
+    // Inicializar valores por defecto para RETIROS PROPIOS específicamente
+    if (defaultCurrency && !retirosPropriosForm.watch('currency_id')) {
+      retirosPropriosForm.setValue('currency_id', defaultCurrency)
+    }
+    if (defaultWallet && !retirosPropriosForm.watch('wallet_id')) {
+      console.log('Setting default wallet in retiros propios form:', defaultWallet)
+      retirosPropriosForm.setValue('wallet_id', defaultWallet)
+    }
+    
+  }, [members, userData?.user?.id, currencies, wallets, userData?.organization_preferences, editingMovement])
 
 
 
@@ -1405,6 +1425,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const onSubmitRetirosPropios = async (data: RetirosPropriosForm) => {
     console.log('Saving retiros propios data:', {
+      created_by: data.created_by,
       wallet_id: data.wallet_id,
       member_id: data.member_id,
       category_id: data.category_id,
@@ -1412,6 +1433,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       amount: data.amount,
       currency_id: data.currency_id
     })
+    console.log('Full form data for retiros propios:', data)
     await createRetirosPropriosMutation.mutateAsync(data)
   }
 
