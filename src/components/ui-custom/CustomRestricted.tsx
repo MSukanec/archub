@@ -83,13 +83,14 @@ export function CustomRestricted({
     return <>{children}</>;
   }
 
-  // Si es administrador y la restricción es "coming_soon", permitir acceso pero mostrar indicador visual
-  if (isAdmin && reason === "coming_soon") {
+  // Si es administrador, permitir acceso a TODO excepto "general_mode"
+  // "general_mode" sigue siendo aplicable incluso para admins porque es una restricción de contexto, no de permisos
+  if (isAdmin && reason !== "general_mode") {
     return (
       <div className="relative w-full">
         {children}
         
-        {/* Indicador visual para admin en coming_soon */}
+        {/* Indicador visual para admin que muestra que tienen acceso especial */}
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
             <div
@@ -97,7 +98,7 @@ export function CustomRestricted({
               onMouseEnter={() => setIsPopoverOpen(true)}
               onMouseLeave={() => setIsPopoverOpen(false)}
             >
-              <div className="bg-black rounded-full p-1 shadow-sm border border-black group-hover:shadow-md transition-shadow">
+              <div className="bg-accent rounded-full p-1 shadow-sm border border-accent group-hover:shadow-md transition-shadow">
                 <Lock className="h-2 w-2 text-white" />
               </div>
             </div>
@@ -113,9 +114,12 @@ export function CustomRestricted({
                   <Lock className="h-3 w-3 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-medium text-xs">Acceso de Admin</h4>
+                  <h4 className="font-medium text-xs">Acceso de Administrador</h4>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Esta función está en desarrollo. Tienes acceso como administrador.
+                    {reason === "coming_soon" 
+                      ? "Esta función está en desarrollo. Tienes acceso como administrador."
+                      : "Esta función está restringida para usuarios normales. Tienes acceso como administrador."
+                    }
                   </p>
                 </div>
               </div>

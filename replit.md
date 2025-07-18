@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. ADMIN BYPASS FOR RESTRICTED COMPONENTS: Modified CustomRestricted component to allow full admin access to all restricted features - COMPLETED
+  • Administrators now bypass ALL restrictions except "general_mode" (project context requirements)
+  • "general_mode" restrictions still apply to admins since they're contextual, not permission-based
+  • Admin access shows green badge indicator instead of black lock icon for visual distinction
+  • Enhanced admin tooltip messaging to indicate special administrator access privileges
+  • System maintains security for project-context features while giving admins full access to plan/feature restrictions
 - July 18, 2025. EXCEL IMPORT STEP 3 UX ENHANCEMENTS: Enhanced user experience with improved scroll behavior and hierarchical value display - COMPLETED
   • Fixed scroll positioning to properly scroll to modal start instead of subcategory field when entering Step 3
   • Enhanced hierarchy visualization to show complete context: "Egreso > Cuotas" instead of just "Cuotas" 
