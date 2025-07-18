@@ -1,50 +1,55 @@
-import React, { useState, useMemo } from 'react'
-import { ChevronUp, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import React, { useState, useMemo } from "react";
+import {
+  ChevronUp,
+  ChevronDown,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-
-type SortDirection = 'asc' | 'desc' | null
+type SortDirection = "asc" | "desc" | null;
 
 interface TableProps<T = any> {
   columns: {
-    key: keyof T | string
-    label: string
-    render?: (item: T) => React.ReactNode
-    sortable?: boolean // Por defecto true, usar false para deshabilitarlo
-    sortType?: 'string' | 'number' | 'date'
-    width?: string // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
-  }[]
-  data: T[]
-  emptyState?: React.ReactNode
-  isLoading?: boolean
-  className?: string
+    key: keyof T | string;
+    label: string;
+    render?: (item: T) => React.ReactNode;
+    sortable?: boolean; // Por defecto true, usar false para deshabilitarlo
+    sortType?: "string" | "number" | "date";
+    width?: string; // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
+  }[];
+  data: T[];
+  emptyState?: React.ReactNode;
+  isLoading?: boolean;
+  className?: string;
   // Nuevas props para selección múltiple
-  selectable?: boolean
-  selectedItems?: T[]
-  onSelectionChange?: (selectedItems: T[]) => void
-  getItemId?: (item: T) => string | number
+  selectable?: boolean;
+  selectedItems?: T[];
+  onSelectionChange?: (selectedItems: T[]) => void;
+  getItemId?: (item: T) => string | number;
   // Nueva prop para personalizar el estilo de las filas
-  getRowClassName?: (item: T) => string
+  getRowClassName?: (item: T) => string;
   // Nueva prop para click-to-edit en cards
-  onCardClick?: (item: T) => void
+  onCardClick?: (item: T) => void;
   // Nueva prop para ordenamiento inicial
   defaultSort?: {
-    key: string
-    direction: 'asc' | 'desc'
-  }
+    key: string;
+    direction: "asc" | "desc";
+  };
   // Nueva prop para renderizado de cards en mobile
-  renderCard?: (item: T) => React.ReactNode
+  renderCard?: (item: T) => React.ReactNode;
   // Nuevo: Espaciado opcional para cards
-  cardSpacing?: string
+  cardSpacing?: string;
 }
 
-export function Table<T = any>({ 
-  columns, 
-  data, 
-  emptyState, 
-  isLoading = false, 
+export function Table<T = any>({
+  columns,
+  data,
+  emptyState,
+  isLoading = false,
   className,
   selectable = false,
   selectedItems = [],
@@ -54,151 +59,186 @@ export function Table<T = any>({
   onCardClick,
   defaultSort,
   renderCard,
-  cardSpacing = "space-y-2"
+  cardSpacing = "space-y-2",
 }: TableProps<T>) {
-  const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key || null)
-  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSort?.direction || null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 20
-  const showPagination = data.length > itemsPerPage
+  const [sortKey, setSortKey] = useState<string | null>(
+    defaultSort?.key || null,
+  );
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    defaultSort?.direction || null,
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 100;
+  const showPagination = data.length > itemsPerPage;
 
   // Helper function to handle sort logic
-  const handleSort = (key: string, sortType: 'string' | 'number' | 'date' = 'string') => {
+  const handleSort = (
+    key: string,
+    sortType: "string" | "number" | "date" = "string",
+  ) => {
     if (sortKey === key) {
-      setSortDirection(prev => {
-        if (prev === 'asc') return 'desc'
-        if (prev === 'desc') return null
-        return 'asc'
-      })
+      setSortDirection((prev) => {
+        if (prev === "asc") return "desc";
+        if (prev === "desc") return null;
+        return "asc";
+      });
     } else {
-      setSortKey(key)
-      setSortDirection('asc')
+      setSortKey(key);
+      setSortDirection("asc");
     }
 
     if (sortDirection === null) {
-      setSortKey(null)
+      setSortKey(null);
     }
-  }
+  };
 
   // Sort data
   const sortedData = useMemo(() => {
-    if (!sortKey || !sortDirection) return data
+    if (!sortKey || !sortDirection) return data;
 
     return [...data].sort((a, b) => {
-      const column = columns.find(col => col.key === sortKey)
-      const sortType = column?.sortType || 'string'
-      
-      const aValue = a[sortKey as keyof T]
-      const bValue = b[sortKey as keyof T]
+      const column = columns.find((col) => col.key === sortKey);
+      const sortType = column?.sortType || "string";
+
+      const aValue = a[sortKey as keyof T];
+      const bValue = b[sortKey as keyof T];
 
       // Handle null/undefined values
-      if (aValue == null && bValue == null) return 0
-      if (aValue == null) return sortDirection === 'asc' ? -1 : 1
-      if (bValue == null) return sortDirection === 'asc' ? 1 : -1
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortDirection === "asc" ? -1 : 1;
+      if (bValue == null) return sortDirection === "asc" ? 1 : -1;
 
-      let comparison = 0
+      let comparison = 0;
 
       switch (sortType) {
-        case 'number':
-          comparison = (Number(aValue) || 0) - (Number(bValue) || 0)
-          break
-        case 'date':
-          const dateA = new Date(String(aValue))
-          const dateB = new Date(String(bValue))
-          comparison = dateA.getTime() - dateB.getTime()
-          break
-        case 'string':
+        case "number":
+          comparison = (Number(aValue) || 0) - (Number(bValue) || 0);
+          break;
+        case "date":
+          const dateA = new Date(String(aValue));
+          const dateB = new Date(String(bValue));
+          comparison = dateA.getTime() - dateB.getTime();
+          break;
+        case "string":
         default:
-          comparison = String(aValue).localeCompare(String(bValue))
-          break
+          comparison = String(aValue).localeCompare(String(bValue));
+          break;
       }
 
-      return sortDirection === 'asc' ? comparison : -comparison
-    })
-  }, [data, sortKey, sortDirection, columns])
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [data, sortKey, sortDirection, columns]);
 
   // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
-  const paginatedData = showPagination 
-    ? sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : sortedData
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const paginatedData = showPagination
+    ? sortedData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+      )
+    : sortedData;
 
   const isItemSelected = (item: T) => {
-    return selectedItems.some(selectedItem => getItemId(selectedItem) === getItemId(item))
-  }
+    return selectedItems.some(
+      (selectedItem) => getItemId(selectedItem) === getItemId(item),
+    );
+  };
 
   const handleSelectItem = (item: T, checked: boolean) => {
-    if (!onSelectionChange) return
+    if (!onSelectionChange) return;
 
     if (checked) {
-      onSelectionChange([...selectedItems, item])
+      onSelectionChange([...selectedItems, item]);
     } else {
-      onSelectionChange(selectedItems.filter(selectedItem => getItemId(selectedItem) !== getItemId(item)))
+      onSelectionChange(
+        selectedItems.filter(
+          (selectedItem) => getItemId(selectedItem) !== getItemId(item),
+        ),
+      );
     }
-  }
+  };
 
   const handleSelectAll = (checked: boolean) => {
-    if (!onSelectionChange) return
+    if (!onSelectionChange) return;
 
     if (checked) {
       // Add all items from current page to selection
-      const newSelectedItems = [...selectedItems]
-      paginatedData.forEach(item => {
+      const newSelectedItems = [...selectedItems];
+      paginatedData.forEach((item) => {
         if (!isItemSelected(item)) {
-          newSelectedItems.push(item)
+          newSelectedItems.push(item);
         }
-      })
-      onSelectionChange(newSelectedItems)
+      });
+      onSelectionChange(newSelectedItems);
     } else {
       // Remove all items from current page from selection
-      const currentPageIds = new Set(paginatedData.map(item => getItemId(item)))
-      const filteredSelection = selectedItems.filter(item => !currentPageIds.has(getItemId(item)))
-      onSelectionChange(filteredSelection)
+      const currentPageIds = new Set(
+        paginatedData.map((item) => getItemId(item)),
+      );
+      const filteredSelection = selectedItems.filter(
+        (item) => !currentPageIds.has(getItemId(item)),
+      );
+      onSelectionChange(filteredSelection);
     }
-  }
+  };
 
   const getGridTemplateColumns = () => {
-    const baseColumns = columns.map(col => col.width || 'minmax(0, 1fr)').join(' ')
-    return selectable ? `40px ${baseColumns}` : baseColumns
-  }
+    const baseColumns = columns
+      .map((col) => col.width || "minmax(0, 1fr)")
+      .join(" ");
+    return selectable ? `40px ${baseColumns}` : baseColumns;
+  };
 
   // Function to get sort icon for column header
   const getSortIcon = (key: string) => {
-    if (sortKey !== key) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />
-    if (sortDirection === 'asc') return <ChevronUp className="ml-1 h-3 w-3 text-accent" />
-    if (sortDirection === 'desc') return <ChevronDown className="ml-1 h-3 w-3 text-accent" />
-    return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />
-  }
+    if (sortKey !== key)
+      return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+    if (sortDirection === "asc")
+      return <ChevronUp className="ml-1 h-3 w-3 text-accent" />;
+    if (sortDirection === "desc")
+      return <ChevronDown className="ml-1 h-3 w-3 text-accent" />;
+    return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+  };
 
   // Handle the special case for numbers with thousands formatting (accounting for TypeScript strict mode)
   const formatSortableValue = (key: string, value: any): any => {
-    const column = columns.find(col => col.key === key)
-    if (column?.sortType === 'number' && typeof value === 'number') {
-      return value as T[keyof T]
+    const column = columns.find((col) => col.key === key);
+    if (column?.sortType === "number" && typeof value === "number") {
+      return value as T[keyof T];
     }
-    if (column?.sortType === 'number' && typeof value !== 'number') {
-      return Number(value) as T[keyof T]
+    if (column?.sortType === "number" && typeof value !== "number") {
+      return Number(value) as T[keyof T];
     }
-    if (column?.sortType === 'string' && typeof value !== 'string') {
-      return String(value) as T[keyof T]
+    if (column?.sortType === "string" && typeof value !== "string") {
+      return String(value) as T[keyof T];
     }
-    return value
-  }
+    return value;
+  };
 
   if (isLoading) {
     return (
       <div className={cn("space-y-3", className)}>
         {/* Desktop loading skeleton */}
         <div className="hidden lg:block">
-          <div className="grid gap-4 p-4 bg-muted/50 rounded-lg" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+          <div
+            className="grid gap-4 p-4 bg-muted/50 rounded-lg"
+            style={{ gridTemplateColumns: getGridTemplateColumns() }}
+          >
             {columns.map((_, index) => (
               <div key={index} className="h-4 bg-muted rounded animate-pulse" />
             ))}
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="grid gap-4 p-4 border rounded-lg" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+            <div
+              key={index}
+              className="grid gap-4 p-4 border rounded-lg"
+              style={{ gridTemplateColumns: getGridTemplateColumns() }}
+            >
               {columns.map((_, colIndex) => (
-                <div key={colIndex} className="h-4 bg-muted/50 rounded animate-pulse" />
+                <div
+                  key={colIndex}
+                  className="h-4 bg-muted/50 rounded animate-pulse"
+                />
               ))}
             </div>
           ))}
@@ -220,15 +260,11 @@ export function Table<T = any>({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (data.length === 0) {
-    return (
-      <div className={cn("space-y-3", className)}>
-        {emptyState}
-      </div>
-    )
+    return <div className={cn("space-y-3", className)}>{emptyState}</div>;
   }
 
   return (
@@ -236,11 +272,17 @@ export function Table<T = any>({
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
         {/* Column Headers */}
-        <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]" style={{ gridTemplateColumns: getGridTemplateColumns() }}>
+        <div
+          className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+          style={{ gridTemplateColumns: getGridTemplateColumns() }}
+        >
           {selectable && (
             <div className="flex items-center justify-center">
               <Checkbox
-                checked={paginatedData.length > 0 && paginatedData.every(item => isItemSelected(item))}
+                checked={
+                  paginatedData.length > 0 &&
+                  paginatedData.every((item) => isItemSelected(item))
+                }
                 onCheckedChange={handleSelectAll}
                 aria-label="Seleccionar todos"
                 className="h-3 w-3"
@@ -252,9 +294,12 @@ export function Table<T = any>({
               key={String(column.key)}
               className={cn(
                 "flex items-center justify-start text-left transition-colors hover:text-accent",
-                column.sortable !== false && "cursor-pointer"
+                column.sortable !== false && "cursor-pointer",
               )}
-              onClick={() => column.sortable !== false && handleSort(String(column.key), column.sortType)}
+              onClick={() =>
+                column.sortable !== false &&
+                handleSort(String(column.key), column.sortType)
+              }
               disabled={column.sortable === false}
             >
               {column.label}
@@ -270,8 +315,10 @@ export function Table<T = any>({
               key={index}
               className={cn(
                 "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
-                index < paginatedData.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
-                getRowClassName?.(item)
+                index < paginatedData.length - 1
+                  ? "border-b border-[var(--table-row-border)]"
+                  : "",
+                getRowClassName?.(item),
               )}
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
@@ -279,21 +326,24 @@ export function Table<T = any>({
                 <div className="flex items-center justify-center">
                   <Checkbox
                     checked={isItemSelected(item)}
-                    onCheckedChange={(checked) => handleSelectItem(item, checked as boolean)}
+                    onCheckedChange={(checked) =>
+                      handleSelectItem(item, checked as boolean)
+                    }
                     aria-label={`Seleccionar fila ${index + 1}`}
                     className="h-3 w-3"
                   />
                 </div>
               )}
               {columns.map((column) => (
-                <div key={String(column.key)} className="text-xs flex items-center justify-start">
-                  {column.render 
+                <div
+                  key={String(column.key)}
+                  className="text-xs flex items-center justify-start"
+                >
+                  {column.render
                     ? column.render(item)
-                    : String(item[column.key as keyof T] || '-')
-                  }
+                    : String(item[column.key as keyof T] || "-")}
                 </div>
               ))}
-
             </div>
           ))}
         </div>
@@ -301,7 +351,7 @@ export function Table<T = any>({
 
       {/* Mobile Card View */}
       <div className="lg:hidden">
-        {paginatedData.map((item, index) => 
+        {paginatedData.map((item, index) =>
           renderCard ? (
             // Use custom card renderer if provided
             <div key={index} onClick={() => onCardClick?.(item)}>
@@ -313,17 +363,19 @@ export function Table<T = any>({
               key={index}
               className={cn(
                 "p-3 border border-[var(--card-border)] rounded-lg mb-2 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer",
-                getRowClassName?.(item)
+                getRowClassName?.(item),
               )}
               onClick={() => onCardClick?.(item)}
             >
               {selectable && (
                 <div className="flex items-center justify-between mb-2 pb-2 border-b">
-                  <span className="text-xs font-medium text-muted-foreground">Seleccionar</span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Seleccionar
+                  </span>
                   <Checkbox
                     checked={isItemSelected(item)}
                     onCheckedChange={(checked) => {
-                      handleSelectItem(item, checked === true)
+                      handleSelectItem(item, checked === true);
                     }}
                     aria-label="Seleccionar elemento"
                     className="h-4 w-4"
@@ -332,33 +384,41 @@ export function Table<T = any>({
                 </div>
               )}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                {columns.filter((_, idx) => idx < 6).map((column) => {
-                  const value = column.render 
-                    ? column.render(item)
-                    : String(item[column.key as keyof T] || '-')
-                  
-                  return (
-                    <div key={String(column.key)} className="flex flex-col min-w-0">
-                      <span className="text-xs font-medium text-muted-foreground truncate">
-                        {column.label}
-                      </span>
-                      <div className="text-sm font-medium truncate">
-                        {value}
+                {columns
+                  .filter((_, idx) => idx < 6)
+                  .map((column) => {
+                    const value = column.render
+                      ? column.render(item)
+                      : String(item[column.key as keyof T] || "-");
+
+                    return (
+                      <div
+                        key={String(column.key)}
+                        className="flex flex-col min-w-0"
+                      >
+                        <span className="text-xs font-medium text-muted-foreground truncate">
+                          {column.label}
+                        </span>
+                        <div className="text-sm font-medium truncate">
+                          {value}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    );
+                  })}
               </div>
               {columns.length > 6 && (
                 <div className="mt-2 pt-2 border-t">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     {columns.slice(6).map((column) => {
-                      const value = column.render 
+                      const value = column.render
                         ? column.render(item)
-                        : String(item[column.key as keyof T] || '-')
-                      
+                        : String(item[column.key as keyof T] || "-");
+
                       return (
-                        <div key={String(column.key)} className="flex flex-col min-w-0">
+                        <div
+                          key={String(column.key)}
+                          className="flex flex-col min-w-0"
+                        >
                           <span className="text-xs font-medium text-muted-foreground truncate">
                             {column.label}
                           </span>
@@ -366,13 +426,13 @@ export function Table<T = any>({
                             {value}
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </div>
               )}
             </div>
-          )
+          ),
         )}
       </div>
 
@@ -381,51 +441,75 @@ export function Table<T = any>({
         <div className="mt-4 pt-4 border-t border-[var(--table-border)]">
           <div className="flex items-center justify-between">
             <div className="text-sm text-[var(--muted-fg)]">
-              Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, sortedData.length)} a {Math.min(currentPage * itemsPerPage, sortedData.length)} de {sortedData.length} entradas
+              Mostrando{" "}
+              {Math.min(
+                (currentPage - 1) * itemsPerPage + 1,
+                sortedData.length,
+              )}{" "}
+              a {Math.min(currentPage * itemsPerPage, sortedData.length)} de{" "}
+              {sortedData.length} entradas
             </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              
+
               {/* Page Number Buttons */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                // Show first page, last page, current page, and pages around current
-                const isVisible = 
-                  pageNum === 1 ||
-                  pageNum === totalPages ||
-                  Math.abs(pageNum - currentPage) <= 1;
-                
-                if (!isVisible && pageNum !== 2 && pageNum !== totalPages - 1) {
-                  // Show ellipsis
-                  if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                    return <span key={pageNum} className="px-1 text-[var(--muted-fg)]">...</span>;
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (pageNum) => {
+                  // Show first page, last page, current page, and pages around current
+                  const isVisible =
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    Math.abs(pageNum - currentPage) <= 1;
+
+                  if (
+                    !isVisible &&
+                    pageNum !== 2 &&
+                    pageNum !== totalPages - 1
+                  ) {
+                    // Show ellipsis
+                    if (
+                      pageNum === currentPage - 2 ||
+                      pageNum === currentPage + 2
+                    ) {
+                      return (
+                        <span
+                          key={pageNum}
+                          className="px-1 text-[var(--muted-fg)]"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
                   }
-                  return null;
-                }
-                
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={pageNum === currentPage ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(pageNum)}
-                    className="min-w-[32px]"
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              })}
-              
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={pageNum === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="min-w-[32px]"
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                },
+              )}
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -435,7 +519,7 @@ export function Table<T = any>({
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Table
+export default Table;

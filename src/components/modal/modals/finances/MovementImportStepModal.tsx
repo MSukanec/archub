@@ -918,7 +918,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm font-medium">Haz clic o arrastra un archivo</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Formatos soportados: .xlsx, .xls, .csv
+              Formatos soportados: .xlsx, .xls, .csv (máximo 50MB)
             </p>
           </div>
         )}
