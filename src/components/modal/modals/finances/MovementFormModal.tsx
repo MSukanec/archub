@@ -30,6 +30,7 @@ import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useContacts } from '@/hooks/use-contacts'
 import { useProjectClients } from '@/hooks/use-project-clients'
+import { useProjects } from '@/hooks/use-projects'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 
 const movementFormSchema = z.object({
@@ -38,6 +39,7 @@ const movementFormSchema = z.object({
   description: z.string().optional(),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
+  project_id: z.string().nullable(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
@@ -148,6 +150,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const { data: contacts, isLoading: isContactsLoading } = useContacts()
   const { data: projectClients, isLoading: isProjectClientsLoading } = useProjectClients(userData?.preferences?.last_project_id)
   const { data: organizationConcepts, isLoading: isOrganizationConceptsLoading } = useOrganizationMovementConcepts(userData?.organization?.id)
+  const { data: projects, isLoading: isProjectsLoading } = useProjects(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -230,6 +233,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       description: '',
       amount: 0,
       exchange_rate: undefined,
+      project_id: userData?.preferences?.last_project_id || null,
       type_id: '',
       category_id: '',
       subcategory_id: '',
@@ -442,6 +446,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!aportesForm.watch('created_by')) aportesForm.setValue('created_by', currentMember.id)
       if (!aportesPropriosForm.watch('created_by')) aportesPropriosForm.setValue('created_by', currentMember.id)
       if (!retirosPropriosForm.watch('created_by')) retirosPropriosForm.setValue('created_by', currentMember.id)
+    }
+    
+    // Inicializar PROYECTO (solo si no está editando)
+    if (!editingMovement && userData?.preferences?.last_project_id !== undefined) {
+      if (form.watch('project_id') === undefined) {
+        form.setValue('project_id', userData.preferences.last_project_id)
+      }
     }
     
     // Inicializar MONEDA y BILLETERA en TODOS los formularios
@@ -922,6 +933,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
+          project_id: editingMovement.project_id || null,
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
@@ -953,6 +965,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
+          project_id: editingMovement.project_id || null,
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
@@ -1002,7 +1015,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const movementData = {
         ...data,
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null, // Permitir null para movimientos de organización
+        project_id: data.project_id || null, // Usar project_id del formulario
         movement_date: data.movement_date.toISOString().split('T')[0],
         category_id: data.category_id || null,
         subcategory_id: data.subcategory_id || null,
@@ -1080,7 +1093,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             amount: data.amount_from,
             currency_id: data.currency_id_from,
             wallet_id: data.wallet_id_from,
-            exchange_rate: data.exchange_rate || null
+            exchange_rate: data.exchange_rate || null,
+            project_id: form.watch('project_id') || null
           })
           .eq('id', egressMovement.id)
         
@@ -1096,7 +1110,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             amount: data.amount_to,
             currency_id: data.currency_id_to,
             wallet_id: data.wallet_id_to,
-            exchange_rate: data.exchange_rate || null
+            exchange_rate: data.exchange_rate || null,
+            project_id: form.watch('project_id') || null
           })
           .eq('id', ingressMovement.id)
         
@@ -1117,7 +1132,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
         const baseMovementData = {
           organization_id: userData.organization.id,
-          project_id: userData.preferences?.last_project_id || null,
+          project_id: form.watch('project_id') || null,
           movement_date: data.movement_date.toISOString().split('T')[0],
           created_by: data.created_by,
           conversion_group_id: conversionGroupId
@@ -1193,7 +1208,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       const baseMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null, // Permitir null para transferencias de organización
+        project_id: form.watch('project_id') || null, // Usar project_id del formulario
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         transfer_group_id: transferGroupId // Usar el campo específico para transferencias
@@ -1253,7 +1268,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       const movementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null, // Permitir null para aportes de organización
+        project_id: form.watch('project_id') || null, // Usar project_id del formulario
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         description: data.description || 'Aporte',
@@ -1317,7 +1332,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       const movementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: form.watch('project_id') || null,
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         description: data.description || 'Aporte Propio',
@@ -1380,7 +1395,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       const movementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: form.watch('project_id') || null,
         movement_date: data.movement_date.toISOString().split('T')[0],
         created_by: data.created_by,
         description: data.description || 'Retiro Propio',
@@ -1624,6 +1639,43 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             }}
           />
         </div>
+      </div>
+
+      {/* Selector de proyecto */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Proyecto
+        </label>
+        <Select 
+          onValueChange={(value) => {
+            const projectId = value === 'general' ? null : value
+            form.setValue('project_id', projectId)
+          }} 
+          value={form.watch('project_id') || 'general'}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar proyecto..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                <span>General</span>
+              </div>
+            </SelectItem>
+            {projects?.map((project) => (
+              <SelectItem key={project.id} value={project.id}>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: project.color || '#000000' }}
+                  ></div>
+                  <span>{project.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Selector de tipo de movimiento - CENTRALIZADO */}
