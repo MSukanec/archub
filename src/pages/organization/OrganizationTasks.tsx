@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useGlobalModalStore } from '@/components/modal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';

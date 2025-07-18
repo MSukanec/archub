@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 import { useProjectContext } from "@/stores/projectContext";
+import Plan from "@/components/ui-custom/Plan";
 
 import { 
   Home,
@@ -320,9 +321,14 @@ export function SidebarSubmenu() {
             })
           ) : null}
         </div>
-
-
       </div>
+      
+      {/* Plan section - only show in organizacion section */}
+      {currentSection === 'organizacion' && (
+        <div className="p-3 border-t border-[var(--secondary-sidebar-border)]">
+          <Plan isExpanded={isSecondarySidebarExpanded} />
+        </div>
+      )}
     </div>
   );
 }

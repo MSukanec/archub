@@ -61,7 +61,7 @@ import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import AdminCategories from "@/pages/admin/AdminCategories";
 
 import NotFound from "@/pages/NotFound";
-import { ModalFactory } from "@/components/modal";
+import { ModalFactory } from "@/components/modal/form/ModalFactory";
 
 function Router() {
   return (
