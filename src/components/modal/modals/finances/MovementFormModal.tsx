@@ -1508,6 +1508,82 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           </SelectContent>
         </Select>
       </div>
+
+      {/* Campos de Categoría y Subcategoría - CENTRALIZADOS para TODOS los tipos */}
+      <div className="grid grid-cols-1 gap-4">
+        {/* Categoría */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Categoría *
+          </label>
+          <Select 
+            onValueChange={(value) => {
+              // Actualizar todos los formularios
+              form.setValue('category_id', value)
+              aportesForm.setValue('category_id', value)
+              aportesPropriosForm.setValue('category_id', value) 
+              retirosPropriosForm.setValue('category_id', value)
+              setSelectedCategoryId(value)
+            }} 
+            value={form.watch('category_id')}
+            disabled={!form.watch('type_id')}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={!form.watch('type_id') ? "Seleccione primero un tipo" : "Seleccionar categoría..."} />
+            </SelectTrigger>
+            <SelectContent>
+              {categories?.map((category: any) => (
+                <SelectItem key={category.id} value={category.id}>
+                  <div className="flex items-center justify-between w-full">
+                    <span>{category.name}</span>
+                    {category.is_system && (
+                      <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
+                        Sistema
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Subcategoría */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Subcategoría
+          </label>
+          <Select 
+            onValueChange={(value) => {
+              // Actualizar todos los formularios
+              form.setValue('subcategory_id', value)
+              aportesForm.setValue('subcategory_id', value)
+              aportesPropriosForm.setValue('subcategory_id', value)
+              retirosPropriosForm.setValue('subcategory_id', value)
+            }} 
+            value={form.watch('subcategory_id')}
+            disabled={!selectedCategoryId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={!selectedCategoryId ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
+            </SelectTrigger>
+            <SelectContent>
+              {subcategories?.map((subcategory: any) => (
+                <SelectItem key={subcategory.id} value={subcategory.id}>
+                  <div className="flex items-center justify-between w-full">
+                    <span>{subcategory.name}</span>
+                    {subcategory.is_system && (
+                      <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
+                        Sistema
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       
       {(isConversion || isEditingConversion) ? (
         <Form {...conversionForm}>
@@ -1572,220 +1648,143 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO NORMAL
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
-
-          {/* Categoría (full width) */}
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoría</FormLabel>
-                <Select 
-                  onValueChange={(value) => {
-                    field.onChange(value)
-                    setSelectedCategoryId(value)
-                  }} 
-                  value={field.value}
-                  disabled={!selectedTypeId}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={!selectedTypeId ? "Seleccione primero un tipo" : "Seleccionar categoría..."} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories?.map((category: any) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{category.name}</span>
-                          {category.is_system && (
-                            <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                              Sistema
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Fila 4: Subcategoría (full width) */}
-          <FormField
-            control={form.control}
-            name="subcategory_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subcategoría</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value}
-                  disabled={!selectedCategoryId}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={!selectedCategoryId ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {subcategories?.map((subcategory: any) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{subcategory.name}</span>
-                          {subcategory.is_system && (
-                            <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                              Sistema
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Separador y título de sección de movimiento financiero */}
-          <div className="col-span-2">
-            <Separator className="mb-4" />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-                <DollarSign className="w-4 h-4 text-accent" />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-foreground">Información Financiera</h3>
-                <p className="text-xs text-muted-foreground">Detalles específicos del movimiento financiero</p>
+            {/* Separador y título de sección de movimiento financiero */}
+            <div className="col-span-2">
+              <Separator className="mb-4" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                  <DollarSign className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">Información Financiera</h3>
+                  <p className="text-xs text-muted-foreground">Detalles específicos del movimiento financiero</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Fila 6: Moneda | Billetera */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="currency_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moneda *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+            {/* Fila: Moneda | Billetera */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moneda *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar moneda..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies?.map((orgCurrency) => (
+                          <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                            {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="wallet_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Billetera *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar billetera..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {wallets?.map((wallet) => (
+                          <SelectItem key={wallet.id} value={wallet.id}>
+                            {wallet.wallets?.name || 'Sin nombre'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Fila: Monto | Cotización */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monto *</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar moneda..." />
-                      </SelectTrigger>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          className="pl-10"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
                     </FormControl>
-                    <SelectContent>
-                      {currencies?.map((orgCurrency) => (
-                        <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                          {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="wallet_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Billetera *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+              <FormField
+                control={form.control}
+                name="exchange_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cotización (opcional)</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar billetera..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {wallets?.map((wallet) => (
-                        <SelectItem key={wallet.id} value={wallet.id}>
-                          {wallet.wallets?.name || 'Sin nombre'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Fila 7: Monto | Cotización */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Monto *</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input 
                         type="number" 
-                        step="0.01"
+                        step="0.0001"
                         min="0"
-                        placeholder="0.00"
-                        className="pl-10"
+                        placeholder="Ej: 1.0000"
                         value={field.value || ''}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
                       />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
+            {/* Descripción */}
             <FormField
               control={form.control}
-              name="exchange_rate"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cotización (opcional)</FormLabel>
+                  <FormLabel>Descripción (opcional)</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      step="0.0001"
-                      min="0"
-                      placeholder="Ej: 1.0000"
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    <Textarea 
+                      placeholder="Descripción del movimiento..."
+                      className="resize-none"
+                      rows={3}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-
-          {/* Descripción al final (full width) */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción (opcional)</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descripción del movimiento..."
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
+          </form>
+        </Form>
       )}
     </div>
   )
