@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. FINANCES DASHBOARD LAYOUT COMPLETELY REORGANIZED: Fixed dashboard structure to match user specifications exactly - COMPLETED
+  • Reorganized all dashboard rows to exact specification: 1) TÍTULO+MOVIMIENTOS → 2) BALANCES POR BILLETERA Y MONEDA → 3) MÉTRICAS+FLUJO FINANCIERO → 4) EGRESOS+ESTE MES+RECIENTES
+  • Eliminated duplicate "Flujo Financiero Mensual" chart that was appearing twice causing layout confusion
+  • Moved "Balances por Billetera y Moneda" table from 3rd position to 2nd position as single full-width card
+  • Maintained wallet-currency table column order: MONEDA first, BILLETERA second as previously corrected
+  • Preserved all real-time cache invalidation for immediate balance updates without F5 refresh requirement
+  • Dashboard now displays: Row 1 (Title 75% + Movements 25%) → Row 2 (Wallet-Currency Balance 100%) → Row 3 (3 Metrics + Financial Flow Chart) → Row 4 (3 Cards: Categories + This Month + Recent)
 - July 18, 2025. APORTES DE TERCEROS CATEGORY SELECTION BUG FIXED: Resolved issue with "Aportes de Terceros" category causing blank fields and missing wallet preselection - COMPLETED
   • Fixed category detection and form synchronization: "Aportes de Terceros" now properly detected as viewMode "aportes"
   • Enhanced form initialization: Category field no longer goes blank when selecting "Aportes de Terceros"  
