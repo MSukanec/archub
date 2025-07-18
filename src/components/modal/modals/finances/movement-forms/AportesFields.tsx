@@ -141,39 +141,6 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
         />
       </div>
 
-      {/* Tipo - mantiene interactivo para cambiar */}
-      <FormField
-        control={form.control}
-        name="type_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Tipo *</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {concepts?.filter((concept: any) => !concept.parent_id).map((concept: any) => (
-                  <SelectItem key={concept.id} value={concept.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{concept.name}</span>
-                      {concept.is_system && (
-                        <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                          Sistema
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
       {/* Categoría */}
       <FormField
         control={form.control}
