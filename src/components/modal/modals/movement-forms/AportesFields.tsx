@@ -33,6 +33,37 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
     return concepts.filter((concept: any) => concept.parent_id === selectedTypeId)
   }, [selectedTypeId, concepts])
 
+  // Efecto para inicializar valores por defecto cuando están disponibles los datos
+  React.useEffect(() => {
+    if (!currencies || !wallets || !members) return
+    
+    const currentValues = form.getValues()
+    
+    // Inicializar billetera por defecto si no hay una seleccionada
+    if (!currentValues.wallet_id && wallets.length > 0) {
+      const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
+      if (defaultWallet) {
+        form.setValue('wallet_id', defaultWallet.id)
+      }
+    }
+    
+    // Inicializar moneda por defecto si no hay una seleccionada
+    if (!currentValues.currency_id && currencies.length > 0) {
+      const defaultCurrency = currencies.find(c => c.is_default) || currencies[0]
+      if (defaultCurrency) {
+        form.setValue('currency_id', defaultCurrency.currency_id)
+      }
+    }
+    
+    // Inicializar creador si no hay uno seleccionado
+    if (!currentValues.created_by && members.length > 0) {
+      const currentMember = members.find(m => m.user_id === userData?.user?.id)
+      if (currentMember) {
+        form.setValue('created_by', currentMember.id)
+      }
+    }
+  }, [currencies, wallets, members, userData?.user?.id, form])
+
   // Efecto para actualizar selectedCategoryId cuando cambia category_id en el form
   React.useEffect(() => {
     const subscription = form.watch((value, { name }) => {
@@ -188,46 +219,31 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
         </div>
       </div>
 
-      {/* Selector dinámico (Cliente o Socio) basado en la categoría seleccionada */}
+      {/* Selector de Cliente (siempre para aportes de terceros) */}
       <FormField
         control={form.control}
         name="contact_id"
         render={({ field }) => {
-          // Buscar la categoría seleccionada para obtener el nombre
-          const selectedCategory = categories?.find(c => c.id === selectedCategoryId)
-          const categoryName = selectedCategory?.name || ''
-          
-          // Detectar si es "Aportes de Terceros" para mostrar Cliente
-          const isClienteSelector = categoryName === 'Aportes de Terceros'
-          
-          // Preparar datos para UserSelector
-          const usersData = isClienteSelector ? (
-            // Para clientes: usar project_clients que son los clientes activos del proyecto
-            projectClients?.map((projectClient) => ({
-              id: projectClient.contact.id,
-              first_name: projectClient.contact.first_name,
-              last_name: projectClient.contact.last_name,
-              full_name: projectClient.contact.full_name,
-              company_name: projectClient.contact.company_name,
-              avatar_url: projectClient.contact.avatar_url
-            })) || []
-          ) : (
-            // Para socios: usar miembros directamente
-            members || []
-          )
+          // Para aportes de terceros, siempre mostrar clientes del proyecto
+          const clientsData = projectClients?.map((projectClient) => ({
+            id: projectClient.contact.id,
+            first_name: projectClient.contact.first_name,
+            last_name: projectClient.contact.last_name,
+            full_name: projectClient.contact.full_name,
+            company_name: projectClient.contact.company_name,
+            avatar_url: projectClient.contact.avatar_url
+          })) || []
           
           return (
             <FormItem>
-              <FormLabel>
-                {isClienteSelector ? 'Cliente *' : 'Socio *'}
-              </FormLabel>
+              <FormLabel>Cliente *</FormLabel>
               <FormControl>
                 <UserSelector
-                  users={usersData}
+                  users={clientsData}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder={isClienteSelector ? "Seleccionar cliente" : "Seleccionar socio"}
-                  showCompany={isClienteSelector} // Mostrar empresa solo para clientes
+                  placeholder="Seleccionar cliente"
+                  showCompany={true} // Mostrar empresa para clientes
                 />
               </FormControl>
               <FormMessage />
