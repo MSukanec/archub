@@ -212,7 +212,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.user?.id || '',
+      created_by: '',
       description: '',
       amount: 0,
       exchange_rate: undefined,
@@ -228,7 +228,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(conversionFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.user?.id || '',
+      created_by: '',
       description: '',
       currency_id_from: '',
       wallet_id_from: '',
@@ -244,7 +244,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(transferFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.user?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       currency_id: userData?.organization?.default_currency_id || '',
@@ -258,7 +258,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.user?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       category_id: '',
@@ -274,11 +274,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.user?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       category_id: '',
-      member_id: userData?.user?.id || '',
+      member_id: '',
       currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
       wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -290,11 +290,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(retirosPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: userData?.user?.id || '',
+      created_by: '',
       description: '',
       type_id: '',
       category_id: '',
-      member_id: userData?.user?.id || '',
+      member_id: '',
       currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
       wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -748,6 +748,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
     setPanel('edit')
   }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories])
+
+  // Efecto para inicializar el campo created_by cuando members esté disponible
+  React.useEffect(() => {
+    if (!editingMovement && members && userData?.user?.id) {
+      const currentMember = members.find(m => m.user_id === userData.user.id)
+      if (currentMember?.id) {
+        // Inicializar created_by en todos los formularios
+        form.setValue('created_by', currentMember.id)
+        conversionForm.setValue('created_by', currentMember.id)
+        transferForm.setValue('created_by', currentMember.id)
+        aportesForm.setValue('created_by', currentMember.id)
+        aportesPropriosForm.setValue('created_by', currentMember.id)
+        aportesPropriosForm.setValue('member_id', currentMember.id)
+        retirosPropriosForm.setValue('created_by', currentMember.id)
+        retirosPropriosForm.setValue('member_id', currentMember.id)
+      }
+    }
+  }, [members, userData?.user?.id, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
 
   const createMovementMutation = useMutation({
     mutationFn: async (data: MovementForm) => {
