@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. APORTES DE TERCEROS CATEGORY SELECTION BUG FIXED: Resolved issue with "Aportes de Terceros" category causing blank fields and missing wallet preselection - COMPLETED
+  • Fixed category detection and form synchronization: "Aportes de Terceros" now properly detected as viewMode "aportes"
+  • Enhanced form initialization: Category field no longer goes blank when selecting "Aportes de Terceros"  
+  • Corrected wallet preselection: Billetera field now populates with default wallet when switching to aportes category
+  • Added critical form synchronization: main form category_id syncs with aportes form for consistent UI state
+  • Improved value initialization: all default values (currency, wallet, creator, amount) properly set when category switches to aportes mode
 - July 18, 2025. TRANSFER EDITING FIELDS PRESELECTION FIXED: Resolved critical bug in transfer editing where creator, type, and destination wallet fields appeared empty - COMPLETED
   • Fixed transfer group loading logic: implemented complete transfer group data loading similar to conversions
   • Creator, Movement Type, and Destination Wallet fields now populate correctly when editing existing transfers

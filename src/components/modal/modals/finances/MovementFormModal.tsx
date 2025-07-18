@@ -414,7 +414,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
       const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
       
-      console.log('Category with aportes detected:', { categoryId, selectedCategory })
+
       
       // Detectar el tipo específico de aportes
       const isAportesCategory = viewMode === "aportes"
@@ -443,6 +443,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           
           if (isAportesCategory) {
             // APORTES: Cliente + Cotización
+            
             aportesForm.setValue('type_id', form.watch('type_id'))
             aportesForm.setValue('category_id', categoryId)
             aportesForm.setValue('description', '')
@@ -450,6 +451,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             if (defaultCurrency) aportesForm.setValue('currency_id', defaultCurrency)
             if (defaultWallet) aportesForm.setValue('wallet_id', defaultWallet)
             aportesForm.setValue('contact_id', '') // Limpiar cliente
+            aportesForm.setValue('amount', 0) // Establecer cantidad inicial
+            
+            // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+            form.setValue('category_id', categoryId)
           } else if (isAportesPropiosCategory) {
             // APORTES PROPIOS: Socio + Cotización
             aportesPropriosForm.setValue('type_id', form.watch('type_id'))
@@ -459,6 +464,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             if (defaultCurrency) aportesPropriosForm.setValue('currency_id', defaultCurrency)
             if (defaultWallet) aportesPropriosForm.setValue('wallet_id', defaultWallet)
             aportesPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
+            aportesPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
+            
+            // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+            form.setValue('category_id', categoryId)
           } else if (isRetirosPropiosCategory) {
             // RETIROS PROPIOS: Socio + Cotización
             console.log('Initializing retiros propios form with values:', {
@@ -479,7 +488,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             if (defaultWallet) retirosPropriosForm.setValue('wallet_id', defaultWallet)
             retirosPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
             retirosPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
-
+            
+            // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+            form.setValue('category_id', categoryId)
           }
         }
       } else {
