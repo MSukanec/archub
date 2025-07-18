@@ -10,7 +10,7 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { getRestrictionMessage } from "@/utils/restrictions";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useIsAdmin, useAdminPermissions } from "@/hooks/use-admin-permissions";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectContext } from "@/stores/projectContext";
 
 interface CustomRestrictedProps {
@@ -39,9 +39,7 @@ export function CustomRestricted({
   const { selectedProjectId } = useProjectContext();
 
   // Verificar si el usuario es administrador
-  const isAdmin = useIsAdmin();
-
-
+  const { isAdmin } = useIsAdmin();
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -79,8 +77,6 @@ export function CustomRestricted({
       }
     }
   }
-
-
 
   // Si no está restringido, renderizar directamente los children
   if (!isRestricted) {
@@ -162,11 +158,11 @@ export function CustomRestricted({
         {children}
       </div>
 
-      {/* Badge posicionado en la esquina superior derecha - no bloquea clicks */}
+      {/* Overlay con badge que activa hover */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <div
-            className="absolute -top-1 -right-1 z-10 cursor-pointer group"
+            className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group"
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
