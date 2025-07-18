@@ -96,15 +96,48 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     });
   }
 
-  // CRITICAL FIX: Extract ONLY subcategories (children) for subcategory mapping
-  const allSubcategories = concepts?.flatMap(concept => concept.children || []) || [];
+  // Extract categories (intermediate level: children of types, parents of subcategories)
+  const allCategories = types?.flatMap(type => type.children || []) || [];
+  console.log('🔧 Categories for mapping:', {
+    typesFound: types.length,
+    categoriesFound: allCategories.length,
+    categoryNames: allCategories.map(c => c.name).slice(0, 5)
+  });
+
+  // Add category mappings (intermediate level)
+  if (allCategories?.length) {
+    valueMap.category_id = {};
+    allCategories.forEach(category => {
+      const normalized = normalizeText(category.name);
+      valueMap.category_id[normalized] = category.id;
+      
+      // Add common variations for better fuzzy matching
+      const variations = [
+        category.name.toLowerCase(),
+        category.name.replace(/\s+/g, ''), // Remove spaces: "Mano de Obra" -> "manodeobra"
+        category.name.replace(/[^a-zA-Z0-9]/g, ''), // Remove special chars
+        category.name.replace(/\s+/g, '').toLowerCase(), // Combined
+        category.name.replace(/de|del|la|el|y|e/gi, '').replace(/\s+/g, ''), // Remove common words
+      ];
+      
+      variations.forEach(variation => {
+        const varNormalized = normalizeText(variation);
+        if (varNormalized !== normalized && varNormalized.length > 2) {
+          valueMap.category_id[varNormalized] = category.id;
+        }
+      });
+    });
+  }
+
+  // Extract subcategories (children of categories)
+  const allSubcategories = allCategories?.flatMap(category => category.children || []) || [];
   console.log('🔧 Subcategories for mapping:', {
-    totalConcepts: concepts?.length || 0,
+    categoriesFound: allCategories.length,
     subcategoriesFound: allSubcategories.length,
     subcategoryNames: allSubcategories.map(s => s.name).slice(0, 5)
   });
 
-  // Add subcategory mappings with aggressive fuzzy matching (ONLY children, not parents)
+  // Add subcategory mappings (deepest level)
   if (allSubcategories?.length) {
     valueMap.subcategory_id = {};
     allSubcategories.forEach(subcategory => {
@@ -147,7 +180,7 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   const normalized = normalizeText(stringValue);
   
   // Debug logging for UUID fields
-  if (['type_id', 'subcategory_id'].includes(field)) {
+  if (['type_id', 'category_id', 'subcategory_id'].includes(field)) {
     console.log(`🔍 Processing ${field}:`, {
       originalValue: value,
       stringValue,
@@ -166,7 +199,7 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   
   // Check direct mapping
   if (valueMap[field] && valueMap[field][normalized]) {
-    if (['type_id', 'subcategory_id'].includes(field)) {
+    if (['type_id', 'category_id', 'subcategory_id'].includes(field)) {
       console.log(`✅ ${field} direct match found:`, valueMap[field][normalized]);
     }
     return valueMap[field][normalized];
@@ -574,7 +607,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     // Analizar cada fila del archivo
     parsedData.rows.forEach(row => {
       Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
-        if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+        if (['type_id', 'category_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
           const value = row[parseInt(columnIndex)]
           if (value) {
             const validation = validateFieldValue(fieldName, value)
@@ -740,7 +773,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                 break
               default:
                 // Apply value normalization for specific fields
-                if (['type_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
+                if (['type_id', 'category_id', 'currency_id', 'wallet_id', 'subcategory_id'].includes(fieldName)) {
                   const normalizedValue = normalizeValue(fieldName, value, valueMap, manualMappings)
                   
                   // ONLY set the field if we got a valid UUID
