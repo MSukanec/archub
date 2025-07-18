@@ -1489,15 +1489,27 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
 
   const onSubmitAportes = async (data: AportesForm) => {
+    console.log('onSubmitAportes called with data:', data)
     console.log('Saving aportes data:', {
       wallet_id: data.wallet_id,
       contact_id: data.contact_id,
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
-      currency_id: data.currency_id
+      currency_id: data.currency_id,
+      created_by: data.created_by,
+      movement_date: data.movement_date,
+      description: data.description,
+      exchange_rate: data.exchange_rate
     })
-    await createAportesMutation.mutateAsync(data)
+    
+    try {
+      await createAportesMutation.mutateAsync(data)
+      console.log('Aportes mutation completed successfully')
+    } catch (error) {
+      console.error('Error in aportes mutation:', error)
+      throw error
+    }
   }
 
   const onSubmitAportesPropios = async (data: AportesPropriosForm) => {
