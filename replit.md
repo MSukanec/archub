@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. APORTESFIELDS COMPONENT EXTRACTION COMPLETED: Successfully extracted complete aportes form to reusable component - COMPLETED
+  • Created src/components/modal/modals/movement-forms/AportesFields.tsx component with complete aportes form functionality (~290 lines)
+  • Modularized aportes form: MovementFormModal now uses <AportesFields/> component instead of inline JSX
+  • Enhanced component architecture: following ConversionFields and TransferFields pattern for consistent modal form structure
+  • Component interface: AportesFields accepts form, currencies, wallets, members, concepts props
+  • Aportes form includes: creator/date fields, type/category selectors, description, dynamic client/socio selector, currency/wallet fields, amount/exchange rate
+  • Client/Socio selector logic: automatically switches between project clients and organization members based on category name
+  • Maintained all existing functionality while achieving modular architecture for better code maintainability
 - July 18, 2025. CRITICAL CREATED_BY BUG RESOLVED: Fixed 409 server error in movement creation - COMPLETED
   • Root cause identified: UserSelector sending user_id instead of organization_member.id for created_by field
   • Fixed UserSelector value mapping: changed from user.user_id || user.id to only user.id for organization members
