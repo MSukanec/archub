@@ -40,6 +40,12 @@ export function useProjects(organizationId: string | undefined) {
       if (!supabase || !organizationId) {
         throw new Error('Organization ID required')
       }
+      
+      // TEMPORARY DEBUG - Remove after fix
+      console.log('DEBUG use-projects - Query params:', {
+        organizationId,
+        timestamp: new Date().toISOString()
+      })
 
       const { data, error } = await supabase
         .from('projects')
@@ -79,6 +85,13 @@ export function useProjects(organizationId: string | undefined) {
       if (error) {
         throw error
       }
+      
+      // TEMPORARY DEBUG - Remove after fix
+      console.log('DEBUG use-projects - Query results:', {
+        organizationId,
+        projectCount: data?.length || 0,
+        projects: data?.map(p => ({ id: p.id, name: p.name, organization_id: p.organization_id })) || []
+      })
       
       // Transform the data to match our interface
       const transformedData = (data || []).map(project => {

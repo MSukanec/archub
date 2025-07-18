@@ -37,6 +37,15 @@ export default function OrganizationProjects() {
   const [isMobile, setIsMobile] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
+  
+  // TEMPORARY DEBUG - Remove after fix
+  console.log('DEBUG OrganizationProjects - userData:', {
+    currentOrgId: userData?.organization?.id,
+    currentOrgName: userData?.organization?.name,
+    userEmail: userData?.user?.email,
+    lastOrgId: userData?.preferences?.last_organization_id
+  })
+  
   const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
