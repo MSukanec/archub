@@ -211,7 +211,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       amount: 0,
       exchange_rate: undefined,
@@ -227,7 +227,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(conversionFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       currency_id_from: '',
       wallet_id_from: '',
@@ -243,7 +243,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(transferFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       currency_id: userData?.organization?.default_currency_id || '',
