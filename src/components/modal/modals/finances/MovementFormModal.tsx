@@ -762,6 +762,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
+          project_id: editingMovement.project_id || null,
           type_id: conversionConcept?.id || editingMovement.type_id || '', // Usar el ID del concepto "Conversión"
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
@@ -831,6 +832,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
+          project_id: editingMovement.project_id || null,
           type_id: transferConcept?.id || editingMovement.type_id || '', // Usar el ID del concepto "Transferencia Interna"
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
@@ -865,6 +867,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
+          project_id: editingMovement.project_id || null,
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
@@ -904,6 +907,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           description: editingMovement.description || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined,
+          project_id: editingMovement.project_id || null,
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           subcategory_id: editingMovement.subcategory_id || '',
