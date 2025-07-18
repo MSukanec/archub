@@ -184,8 +184,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Estado centralizado para el tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
   
-  // Flag para evitar recargar datos cuando el usuario está cambiando el tipo manualmente
-  const [isUserChangingType, setIsUserChangingType] = React.useState(false)
+
 
   // Variables derivadas para compatibilidad
   const isConversion = movementType === 'conversion'
@@ -342,8 +341,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     
     console.log('Handling type change:', { newTypeId, selectedTypeId })
     
-    // Marcar que el usuario está cambiando el tipo manualmente
-    setIsUserChangingType(true)
+
     
     // Actualizar estado
     setSelectedTypeId(newTypeId)
@@ -384,8 +382,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       setSelectedCategoryId('')
     }
     
-    // Reset del flag después de un breve delay
-    setTimeout(() => setIsUserChangingType(false), 100)
+
   }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
   
   // Escuchar cambios en el tipo de TODOS los formularios
@@ -396,41 +393,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const aportesPropriosTypeId = aportesPropriosForm.watch('type_id')
   const retirosPropriosTypeId = retirosPropriosForm.watch('type_id')
 
+  // Solo escuchar cambios del formulario principal para simplificar
   React.useEffect(() => {
-    if (typeId && !isUserChangingType) {
+    if (typeId && !editingMovement) {
       handleTypeChange(typeId)
     }
-  }, [typeId, isUserChangingType])
-
-  React.useEffect(() => {
-    if (conversionTypeId && movementType === 'conversion' && !isUserChangingType) {
-      handleTypeChange(conversionTypeId)
-    }
-  }, [conversionTypeId, movementType, isUserChangingType])
-
-  React.useEffect(() => {
-    if (transferTypeId && movementType === 'transfer' && !isUserChangingType) {
-      handleTypeChange(transferTypeId)
-    }
-  }, [transferTypeId, movementType, isUserChangingType])
-
-  React.useEffect(() => {
-    if (aportesTypeId && movementType === 'aportes' && !isUserChangingType) {
-      handleTypeChange(aportesTypeId)
-    }
-  }, [aportesTypeId, movementType, isUserChangingType])
-
-  React.useEffect(() => {
-    if (aportesPropriosTypeId && movementType === 'aportes_propios' && !isUserChangingType) {
-      handleTypeChange(aportesPropriosTypeId)
-    }
-  }, [aportesPropriosTypeId, movementType, isUserChangingType])
-
-  React.useEffect(() => {
-    if (retirosPropriosTypeId && movementType === 'retiros_propios' && !isUserChangingType) {
-      handleTypeChange(retirosPropriosTypeId)
-    }
-  }, [retirosPropriosTypeId, movementType, isUserChangingType])
+  }, [typeId, editingMovement?.id])
 
   // Inicializar valores por defecto cuando los datos estén listos
   React.useEffect(() => {
@@ -624,11 +592,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       form.setValue('subcategory_id', '')
     }
     setSelectedCategoryId(categoryId)
-  }, [categoryId])
+  }, [categoryId, selectedCategoryId])
 
   // Efecto solo para cargar movimientos en edición (sin valores por defecto)
   React.useEffect(() => {
-    if (!editingMovement || isUserChangingType) return
+    if (!editingMovement) return
     
     console.log('Loading editing movement - ONE TIME ONLY')
     
@@ -998,7 +966,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     }
     setPanel('edit')
-  }, [editingMovement, userData?.user?.id, form, setPanel, members, currencies, wallets, concepts, categories, isUserChangingType])
+  }, [editingMovement?.id, form, setPanel])
 
   // Efecto para inicializar el campo created_by cuando members esté disponible
   React.useEffect(() => {
@@ -1711,18 +1679,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           Tipo de movimiento *
         </label>
         <Select onValueChange={(value) => {
-          console.log('🚨 MANUAL TYPE CHANGE FROM UI:', { from: form.watch('type_id'), to: value })
-          setIsUserChangingType(true)
-          
-          // Actualizar todos los formularios
-          form.setValue('type_id', value)
-          conversionForm.setValue('type_id', value)
-          transferForm.setValue('type_id', value)
-          aportesForm.setValue('type_id', value)
-          aportesPropriosForm.setValue('type_id', value)
-          retirosPropriosForm.setValue('type_id', value)
-          
-          // Cambiar el formulario usando handleTypeChange
+          setSelectedTypeId(value)
           handleTypeChange(value)
         }} value={form.watch('type_id')}>
           <SelectTrigger>
