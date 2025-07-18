@@ -784,15 +784,34 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           member_id: editingMovement.member_id || '',
-          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined
+        })
+        
+        // CRITICAL: También cargar en el formulario principal para que los campos centralizados aparezcan
+        form.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined,
+          type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
+          subcategory_id: editingMovement.subcategory_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
         })
         
         // Establecer selectedTypeId para aportes propios también
         if (editingMovement.type_id) {
           setSelectedTypeId(editingMovement.type_id)
+        }
+        
+        // Establecer selectedCategoryId para que aparezca la subcategoría
+        if (editingMovement.category_id) {
+          setSelectedCategoryId(editingMovement.category_id)
         }
       } else if (isRetirosPropriosMovement) {
         // Para retiros propios, cargar datos en formulario de retiros propios
@@ -804,15 +823,34 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           member_id: editingMovement.member_id || '',
-          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined
+        })
+        
+        // CRITICAL: También cargar en el formulario principal para que los campos centralizados aparezcan
+        form.reset({
+          movement_date: editingMovement.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+          created_by: editingMovement.created_by || '',
+          description: editingMovement.description || '',
+          amount: editingMovement.amount || 0,
+          exchange_rate: editingMovement.exchange_rate || undefined,
+          type_id: editingMovement.type_id || '',
+          category_id: editingMovement.category_id || '',
+          subcategory_id: editingMovement.subcategory_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
         })
         
         // Establecer selectedTypeId para retiros propios también
         if (editingMovement.type_id) {
           setSelectedTypeId(editingMovement.type_id)
+        }
+        
+        // Establecer selectedCategoryId para que aparezca la subcategoría
+        if (editingMovement.category_id) {
+          setSelectedCategoryId(editingMovement.category_id)
         }
       } else {
         // Formulario normal
