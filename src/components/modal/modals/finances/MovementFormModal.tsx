@@ -413,6 +413,22 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   }, [retirosPropriosTypeId, movementType])
 
+  // Inicializar creador por defecto en formularios cuando los datos estén listos
+  React.useEffect(() => {
+    if (!members || !userData?.user?.id || editingMovement) return
+    
+    const currentMember = members.find(m => m.user_id === userData.user.id)
+    if (currentMember) {
+      // Asegurar que todos los formularios tengan el creador correcto
+      if (!form.watch('created_by')) form.setValue('created_by', currentMember.id)
+      if (!conversionForm.watch('created_by')) conversionForm.setValue('created_by', currentMember.id)
+      if (!transferForm.watch('created_by')) transferForm.setValue('created_by', currentMember.id)
+      if (!aportesForm.watch('created_by')) aportesForm.setValue('created_by', currentMember.id)
+      if (!aportesPropriosForm.watch('created_by')) aportesPropriosForm.setValue('created_by', currentMember.id)
+      if (!retirosPropriosForm.watch('created_by')) retirosPropriosForm.setValue('created_by', currentMember.id)
+    }
+  }, [members, userData?.user?.id, editingMovement])
+
 
 
   // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
@@ -496,7 +512,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             retirosPropriosForm.setValue('description', '')
             if (currentMember) retirosPropriosForm.setValue('created_by', currentMember)
             if (defaultCurrency) retirosPropriosForm.setValue('currency_id', defaultCurrency)
-            if (defaultWallet) retirosPropriosForm.setValue('wallet_id', defaultWallet)
+            if (defaultWallet) {
+              console.log('Setting default wallet for retiros propios:', defaultWallet)
+              retirosPropriosForm.setValue('wallet_id', defaultWallet)
+            }
             retirosPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
             retirosPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
             
