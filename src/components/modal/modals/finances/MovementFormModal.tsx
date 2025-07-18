@@ -1273,16 +1273,30 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         exchange_rate: data.exchange_rate || null // Agregar cotización opcional
       }
 
-      console.log('Movement data to be inserted:', movementData)
+      console.log('Movement data to be saved:', movementData)
 
-      const { data: result, error } = await supabase
-        .from('movements')
-        .insert([movementData])
-        .select()
-        .single()
+      // Si estamos editando, actualizar el movimiento existente
+      if (editingMovement?.id) {
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
 
-      if (error) throw error
-      return result
+        if (error) throw error
+        return result
+      } else {
+        // Si estamos creando, insertar nuevo movimiento
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert([movementData])
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
@@ -1290,8 +1304,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
-        title: 'Aporte registrado',
-        description: 'El aporte ha sido registrado correctamente',
+        title: editingMovement ? 'Aporte actualizado' : 'Aporte registrado',
+        description: editingMovement 
+          ? 'El aporte ha sido actualizado correctamente'
+          : 'El aporte ha sido registrado correctamente',
       })
       onClose()
     },
@@ -1299,7 +1315,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al registrar el aporte: ${error.message}`,
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el aporte: ${error.message}`,
       })
     }
   })
