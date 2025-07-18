@@ -54,19 +54,13 @@ export default function UserSelector({
       <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger>
           <SelectValue placeholder={placeholder}>
-            {selectedUser && (
-              <span className="text-sm">
-                {getUserDisplayName(selectedUser)}
-              </span>
-            )}
+            {selectedUser && getUserDisplayName(selectedUser)}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {users?.map((user) => (
             <SelectItem key={user.id} value={user.id}>
-              <span className="text-sm">
-                {getUserDisplayName(user)}
-              </span>
+              {getUserDisplayName(user)}
             </SelectItem>
           ))}
         </SelectContent>
