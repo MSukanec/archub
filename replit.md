@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. TRANSFERFIELDS COMPONENT EXTRACTION AND USERSELECTOR FIX COMPLETED - COMPLETED
+  • Fixed critical UserSelector bug: component now correctly compares user.user_id || user.id for organizationMembers data structure
+  • Auto-initialization working: all forms now pre-select creator field using userData?.user?.id in defaultValues
+  • Created TransferFields.tsx component: extracted complete transfer form (~160 lines) to reusable component
+  • Modularized transfer form: MovementFormModal now uses <TransferFields/> component instead of inline JSX
+  • Enhanced component architecture: following ConversionFields pattern for consistent modal form structure
+  • Component interface: TransferFields accepts form, currencies, wallets, members, concepts props
+  • UserSelector compatibility: fixed to work with both direct user objects and organization member objects
+  • Transfer form includes: creator/date fields, type selector, description, currency, wallet origin/destination, amount
 - July 17, 2025. HOOKS CLEANUP: Removed duplicate use-movements-with-logging.ts file - COMPLETED
   • Eliminated redundant use-movements-with-logging.ts hook that duplicated use-movements.ts functionality
   • Added activity logging integration note to use-movements.ts as optional debug comment
