@@ -28,19 +28,14 @@ export default function Plan({ isExpanded }: PlanProps) {
                 {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-blue-500" />}
                 {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-purple-500" />}
               </div>
-              <span className="text-xs font-medium text-gray-600">Plan actual:</span>
+              <span className="text-xs font-medium text-[var(--secondary-sidebar-fg)]">Plan actual:</span>
             </div>
             <div className="mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.1s_forwards]">
-              <span className={cn(
-                "text-sm font-semibold capitalize",
-                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--accent)]",
-                userData?.plan?.name?.toLowerCase() === 'pro' && "text-blue-600",
-                userData?.plan?.name?.toLowerCase() === 'teams' && "text-purple-600"
-              )}>
+              <span className="text-sm font-semibold capitalize text-white">
                 {userData?.plan?.name || 'Free'}
               </span>
             </div>
-            <p className="text-xs text-gray-500 mb-3 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.15s_forwards]">
+            <p className="text-xs text-[var(--secondary-sidebar-fg)] mb-3 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.15s_forwards]">
               {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "Actualiza para obtener las últimas y exclusivas funcionalidades"}
               {userData?.plan?.name?.toLowerCase() === 'pro' && "Todas las funcionalidades profesionales"}
               {userData?.plan?.name?.toLowerCase() === 'teams' && "Máximo rendimiento para equipos"}

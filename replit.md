@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. PLAN COMPONENT REPOSITIONED AND SIDEBAR FIXES COMPLETED: Successfully integrated Plan component as regular menu item and confirmed dock functionality - COMPLETED
+  • Moved Plan component from sidebar footer to appear as regular menu item after PREFERENCIAS in organization submenu
+  • Fixed Plan component text colors: title now displays in white, "Plan actual:" uses sidebar secondary text color variables
+  • Confirmed DOCK SIDEBAR button functionality working correctly - logs show sidebar_docked properly toggles between true/false
+  • Added proper type handling for 'plan' items in SidebarSubmenu component with Crown icon integration
+  • Enhanced Plan component responsive behavior: expands/collapses according to sidebar state
+  • Fixed import path issues and verified all functionality working correctly with proper user preferences integration
+  • System now displays Plan as integrated menu button rather than separate footer component for better UI consistency
 - July 18, 2025. SIDEBAR DOCK & THEME CONTROLS + MODAL REORGANIZATION COMPLETED: Added sidebar settings and completed modal file organization - COMPLETED
   • Added dock/undock toggle button in sidebar footer: PanelLeftOpen/PanelLeftClose icons with user_preferences integration
   • Added theme toggle button in sidebar footer: Sun/Moon icons with real-time theme switching and persistence

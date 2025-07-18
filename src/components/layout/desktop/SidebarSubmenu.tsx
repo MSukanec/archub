@@ -105,6 +105,7 @@ export function SidebarSubmenu() {
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+      { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
     'proyecto': [
@@ -267,6 +268,17 @@ export function SidebarSubmenu() {
                 );
               }
 
+              // Plan component
+              if (item.type === 'plan') {
+                return (
+                  <div key={index} className="mb-[1px]">
+                    <div className="p-1">
+                      <Plan isExpanded={isSecondarySidebarExpanded} />
+                    </div>
+                  </div>
+                );
+              }
+
               // Botón normal con posible restricción
               if (item.restricted) {
                 return (
@@ -322,13 +334,6 @@ export function SidebarSubmenu() {
           ) : null}
         </div>
       </div>
-      
-      {/* Plan section - only show in organizacion section */}
-      {currentSection === 'organizacion' && (
-        <div className="p-3 border-t border-[var(--secondary-sidebar-border)]">
-          <Plan isExpanded={isSecondarySidebarExpanded} />
-        </div>
-      )}
     </div>
   );
 }
