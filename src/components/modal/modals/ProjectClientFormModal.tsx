@@ -113,7 +113,6 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
         .insert({
           project_id: projectId,
           client_id: contactId,
-          organization_id: organizationId,
           committed_amount: 0,
           role: 'cliente',
           is_active: true,

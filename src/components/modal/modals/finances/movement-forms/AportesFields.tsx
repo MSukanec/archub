@@ -45,7 +45,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
     if (!currentValues.wallet_id && wallets.length > 0) {
       const defaultWallet = wallets.find(w => w.is_default) || wallets[0]
       if (defaultWallet) {
-        form.setValue('wallet_id', defaultWallet.wallets?.id || defaultWallet.id)
+        form.setValue('wallet_id', defaultWallet.id)
         hasChanges = true
       }
     }
