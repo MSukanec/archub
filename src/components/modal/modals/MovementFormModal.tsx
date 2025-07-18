@@ -1328,21 +1328,25 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const editPanel = (
     <div className="space-y-4">
       {(isConversion || isEditingConversion) ? (
-        <ConversionFields 
-          form={conversionForm} 
-          currencies={currencies} 
-          wallets={wallets} 
-          members={members}
-          concepts={concepts}
-        />
+        <Form {...conversionForm}>
+          <ConversionFields 
+            form={conversionForm} 
+            currencies={currencies} 
+            wallets={wallets} 
+            members={members}
+            concepts={concepts}
+          />
+        </Form>
       ) : (isTransfer || isEditingTransfer) ? (
-        <TransferFields
-          form={transferForm}
-          currencies={currencies}
-          wallets={wallets}
-          members={members}
-          concepts={concepts}
-        />
+        <Form {...transferForm}>
+          <TransferFields
+            form={transferForm}
+            currencies={currencies}
+            wallets={wallets}
+            members={members}
+            concepts={concepts}
+          />
+        </Form>
       ) : (isAportes || isEditingAportes) ? (
         <Form {...aportesForm}>
           <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
