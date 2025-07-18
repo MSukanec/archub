@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 18, 2025. EXCEL IMPORT STEP 3 REVOLUTIONIZED: Implemented complete inline category/subcategory creation system during Excel import process - COMPLETED
+  • Added hierarchical display showing parent-child relationships: subcategories now display "Calefacción ↳ Materiales" format
+  • Implemented inline category creation: "Crear categoría [nombre]" buttons for creating new categories directly during import
+  • Added inline subcategory creation with parent selection: "Crear subcategoría [nombre]" opens dialog to choose parent category
+  • Enhanced automatic assignment system: newly created categories/subcategories automatically map to original Excel values
+  • Improved visual hierarchy in subcategory selector: shows full parent-child relationship structure
+  • Added comprehensive mutation system with auto-invalidation of queries for immediate UI updates
+  • Created parent category selection dialog for subcategory creation with proper state management
+  • System eliminates need to navigate to preferences page for category management during import workflow
+  • Enhanced user experience: values like "Calefacción" show hierarchy context and allow precise subcategory placement
 - July 18, 2025. FINANCES DASHBOARD LAYOUT COMPLETELY REORGANIZED: Fixed dashboard structure to match user specifications exactly - COMPLETED
   • Reorganized all dashboard rows to exact specification: 1) TÍTULO+MOVIMIENTOS → 2) BALANCES POR BILLETERA Y MONEDA → 3) MÉTRICAS+FLUJO FINANCIERO → 4) EGRESOS+ESTE MES+RECIENTES
   • Eliminated duplicate "Flujo Financiero Mensual" chart that was appearing twice causing layout confusion

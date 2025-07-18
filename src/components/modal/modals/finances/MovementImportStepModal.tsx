@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
 import Papa from 'papaparse'
-import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw, ChevronRight, ArrowRight } from 'lucide-react'
+import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCcw, ChevronRight, ArrowRight, Plus } from 'lucide-react'
 import { FormModalLayout, FormModalStepHeader, FormModalStepFooter } from '@/components/modal/form'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 import { Button } from '@/components/ui/button'
@@ -420,6 +420,121 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     subcategory_sample: Object.keys(valueMap.subcategory_id || {}).slice(0, 5),
     concepts_received: movementConcepts?.length || 0
   })
+
+  // Create mutation for creating new categories
+  const createCategoryMutation = useMutation({
+    mutationFn: async ({ name, parentId, originalValue }: { name: string; parentId?: string; originalValue?: string }) => {
+      if (!organizationId) throw new Error('Organization ID not found')
+      
+      const { data, error } = await supabase
+        .from('movement_concepts')
+        .insert({
+          name: name.trim(),
+          parent_id: parentId || null,
+          organization_id: organizationId,
+          description: `Categoría creada durante importación: ${name}`
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return { newConcept: data, originalValue }
+    },
+    onSuccess: ({ newConcept, originalValue }) => {
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] })
+      
+      // Auto-assign the new category/subcategory to the original value
+      if (originalValue) {
+        const fieldType = newConcept.parent_id ? 'subcategory_id' : 'category_id'
+        const mappingKey = `${fieldType}_${originalValue}`
+        
+        setManualMappings(prev => ({
+          ...prev,
+          [mappingKey]: newConcept.id
+        }))
+        
+        toast({
+          title: "Categoría creada y asignada",
+          description: `"${newConcept.name}" se creó y asignó automáticamente a "${originalValue}"`,
+        })
+      } else {
+        toast({
+          title: "Categoría creada",
+          description: `"${newConcept.name}" se ha creado exitosamente`,
+        })
+      }
+    },
+    onError: (error) => {
+      console.error('Error creating category:', error)
+      toast({
+        title: "Error al crear categoría",
+        description: "No se pudo crear la categoría. Inténtalo de nuevo.",
+        variant: "destructive",
+      })
+    },
+  })
+
+  // Function to render subcategory options with hierarchy
+  const renderSubcategoryOptionsWithHierarchy = () => {
+    const result: JSX.Element[] = []
+    
+    // Loop through all categories to show hierarchy
+    categories.forEach(category => {
+      if (category.children && category.children.length > 0) {
+        category.children.forEach((subcategory, idx) => {
+          result.push(
+            <SelectItem key={`${category.id}-${subcategory.id}-${idx}`} value={subcategory.id}>
+              <div className="flex flex-col">
+                <span>{subcategory.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  ↳ {category.name}
+                </span>
+              </div>
+            </SelectItem>
+          )
+        })
+      }
+    })
+    
+    return result
+  }
+
+  // State for subcategory creation dialog
+  const [showSubcategoryDialog, setShowSubcategoryDialog] = useState(false)
+  const [pendingSubcategoryName, setPendingSubcategoryName] = useState('')
+  const [selectedParentCategory, setSelectedParentCategory] = useState('')
+
+  // Function to handle creating new categories/subcategories
+  const handleCreateNewCategory = async (fieldName: string, value: string) => {
+    if (fieldName === 'category_id') {
+      // Create new category (parent level)
+      await createCategoryMutation.mutateAsync({ 
+        name: value, 
+        originalValue: value 
+      })
+    } else if (fieldName === 'subcategory_id') {
+      // For subcategories, show dialog to select parent category
+      setPendingSubcategoryName(value)
+      setShowSubcategoryDialog(true)
+    }
+  }
+
+  // Function to create subcategory with selected parent
+  const createSubcategoryWithParent = async () => {
+    if (!selectedParentCategory || !pendingSubcategoryName) return
+    
+    await createCategoryMutation.mutateAsync({ 
+      name: pendingSubcategoryName, 
+      parentId: selectedParentCategory,
+      originalValue: pendingSubcategoryName
+    })
+    
+    // Reset dialog state
+    setShowSubcategoryDialog(false)
+    setPendingSubcategoryName('')
+    setSelectedParentCategory('')
+  }
 
   // Reset modal state
   const resetModal = () => {
@@ -1243,48 +1358,65 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         </div>
                         
                         <div className="col-span-5">
-                          <Select 
-                            key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
-                            value={manualMappings[mappingKey] || ''}
-                            onValueChange={(selectedId) => {
-                              setManualMappings(prev => ({
-                                ...prev,
-                                [mappingKey]: selectedId
-                              }));
-                              
-                              // Find the name for the toast
-                              let selectedName = '';
-                              if (fieldName === 'type_id') {
-                                selectedName = types.find(t => t.id === selectedId)?.name || '';
-                              } else if (fieldName === 'category_id') {
-                                selectedName = categories.find(c => c.id === selectedId)?.name || '';
-                              } else if (fieldName === 'currency_id') {
-                                selectedName = organizationCurrencies?.find(c => c.currency.id === selectedId)?.currency?.name || '';
-                              } else if (fieldName === 'wallet_id') {
-                                selectedName = organizationWallets?.find(w => w.wallets.id === selectedId)?.wallets?.name || '';
-                              } else if (fieldName === 'subcategory_id') {
-                                const allSubcategoriesForToast = categories?.flatMap(cat => cat.children || []) || []
-                                selectedName = allSubcategoriesForToast.find(s => s.id === selectedId)?.name || '';
-                              }
-                              
-                              toast({
-                                title: "Mapeo aplicado",
-                                description: `"${value}" → "${selectedName}"`
-                              });
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar valor o dejar sin asignar" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="">Sin asignar (NULL)</SelectItem>
-                              {getAvailableOptionsForField(fieldName).map((option, idx) => (
-                                <SelectItem key={idx} value={option.id}>
-                                  {option.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="space-y-2">
+                            <Select 
+                              key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
+                              value={manualMappings[mappingKey] || ''}
+                              onValueChange={(selectedId) => {
+                                setManualMappings(prev => ({
+                                  ...prev,
+                                  [mappingKey]: selectedId
+                                }));
+                                
+                                // Find the name for the toast
+                                let selectedName = '';
+                                if (fieldName === 'type_id') {
+                                  selectedName = types.find(t => t.id === selectedId)?.name || '';
+                                } else if (fieldName === 'category_id') {
+                                  selectedName = categories.find(c => c.id === selectedId)?.name || '';
+                                } else if (fieldName === 'currency_id') {
+                                  selectedName = organizationCurrencies?.find(c => c.currency.id === selectedId)?.currency?.name || '';
+                                } else if (fieldName === 'wallet_id') {
+                                  selectedName = organizationWallets?.find(w => w.wallets.id === selectedId)?.wallets?.name || '';
+                                } else if (fieldName === 'subcategory_id') {
+                                  const allSubcategoriesForToast = categories?.flatMap(cat => cat.children || []) || []
+                                  selectedName = allSubcategoriesForToast.find(s => s.id === selectedId)?.name || '';
+                                }
+                                
+                                toast({
+                                  title: "Mapeo aplicado",
+                                  description: `"${value}" → "${selectedName}"`
+                                });
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar valor o dejar sin asignar" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-64 overflow-y-auto">
+                                <SelectItem value="">Sin asignar (NULL)</SelectItem>
+                                {fieldName === 'subcategory_id' && renderSubcategoryOptionsWithHierarchy()}
+                                {fieldName !== 'subcategory_id' && getAvailableOptionsForField(fieldName).map((option, idx) => (
+                                  <SelectItem key={idx} value={option.id}>
+                                    {option.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            
+                            {/* Botón crear nuevo para categorías y subcategorías */}
+                            {(fieldName === 'category_id' || fieldName === 'subcategory_id') && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                                onClick={() => handleCreateNewCategory(fieldName, value)}
+                              >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Crear {fieldName === 'category_id' ? 'categoría' : 'subcategoría'} "{value}"
+                              </Button>
+                            )}
+                          </div>
                         </div>
                         
                         <div className="col-span-2">
@@ -1489,13 +1621,63 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   )
 
   return (
-    <FormModalLayout
-      headerContent={headerContent}
-      footerContent={footerContent}
-      stepContent={getCurrentStepContent()}
-      onClose={onClose}
-      columns={1}
-      className="md:min-w-[800px] md:max-w-[1000px]"
-    />
+    <>
+      <FormModalLayout
+        headerContent={headerContent}
+        footerContent={footerContent}
+        stepContent={getCurrentStepContent()}
+        onClose={onClose}
+        columns={1}
+        className="md:min-w-[800px] md:max-w-[1000px]"
+      />
+      
+      {/* Dialog for creating subcategory with parent selection */}
+      {showSubcategoryDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">
+              Crear subcategoría "{pendingSubcategoryName}"
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Selecciona la categoría padre para esta subcategoría:
+            </p>
+            
+            <div className="space-y-4">
+              <Select value={selectedParentCategory} onValueChange={setSelectedParentCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar categoría padre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowSubcategoryDialog(false)
+                    setPendingSubcategoryName('')
+                    setSelectedParentCategory('')
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={createSubcategoryWithParent}
+                  disabled={!selectedParentCategory || createCategoryMutation.isPending}
+                >
+                  {createCategoryMutation.isPending ? 'Creando...' : 'Crear subcategoría'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
