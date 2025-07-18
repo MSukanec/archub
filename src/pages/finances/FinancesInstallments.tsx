@@ -14,7 +14,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
-import { NewInstallmentModal } from '@/modals/NewInstallmentModal'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EditClientCommitmentModal } from '@/modals/EditClientCommitmentModal'
 import { useToast } from '@/hooks/use-toast'
 import ClientSummaryCard from "@/components/cards/ClientSummaryCard";
@@ -83,8 +83,7 @@ interface InstallmentSummary {
 export default function FinancesInstallments() {
   const { data: userData } = useCurrentUser()
   const [searchValue, setSearchValue] = useState("")
-  const [showModal, setShowModal] = useState(false)
-  const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null)
+  const { openModal } = useGlobalModalStore()
   const [showEditCommitmentModal, setShowEditCommitmentModal] = useState(false)
   const [editingClientCommitment, setEditingClientCommitment] = useState<any>(null)
   const queryClient = useQueryClient()
@@ -471,8 +470,11 @@ export default function FinancesInstallments() {
   })
 
   const handleEdit = (installment: Installment) => {
-    setEditingInstallment(installment)
-    setShowModal(true)
+    openModal('installment', {
+      projectId: projectId || '',
+      organizationId: organizationId || '',
+      editingInstallment: installment
+    })
   }
 
   const handleDelete = (installment: Installment) => {
@@ -484,9 +486,11 @@ export default function FinancesInstallments() {
     handleEdit(installment)
   }
 
-  const handleCloseModal = () => {
-    setShowModal(false)
-    setEditingInstallment(null)
+  const handleCreateNew = () => {
+    openModal('installment', {
+      projectId: projectId || '',
+      organizationId: organizationId || ''
+    })
   }
 
   const handleCloseEditCommitmentModal = () => {
@@ -957,7 +961,7 @@ export default function FinancesInstallments() {
       <Button 
         key="add-installment"
         className="h-8 px-3 text-sm"
-        onClick={() => setShowModal(true)}
+        onClick={handleCreateNew}
       >
         Agregar Compromiso
       </Button>
@@ -1053,7 +1057,7 @@ export default function FinancesInstallments() {
             title="Aún no hay compromisos registrados"
             description="Comienza registrando el primer compromiso de pago de un cliente al proyecto"
             action={
-              <Button onClick={() => setShowModal(true)} className="mt-4">
+              <Button onClick={handleCreateNew} className="mt-4">
                 Agregar Primer Compromiso
               </Button>
             }
@@ -1068,14 +1072,6 @@ export default function FinancesInstallments() {
       </div>
 
       {/* Modals */}
-      <NewInstallmentModal
-        open={showModal}
-        onClose={handleCloseModal}
-        editingInstallment={editingInstallment}
-        organizationId={organizationId || ''}
-        projectId={projectId || ''}
-      />
-
       <EditClientCommitmentModal
         open={showEditCommitmentModal}
         onClose={handleCloseEditCommitmentModal}

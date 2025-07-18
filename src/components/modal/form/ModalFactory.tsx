@@ -19,6 +19,7 @@ import MovementImportStepModal from '../modals/finances/MovementImportStepModal'
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/BudgetFormModal';
 import { OrganizationFormModal } from '../modals/organizations/OrganizationFormModal';
+import { InstallmentFormModal } from '../modals/finances/InstallmentFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -72,6 +73,8 @@ export function ModalFactory() {
         currentCategoryId={data?.currentCategoryId}
         isLoading={data?.isLoading || false}
       />;
+    case 'installment':
+      return <InstallmentFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
