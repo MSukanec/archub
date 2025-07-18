@@ -54,7 +54,7 @@ export function useProjectClients(projectId?: string) {
         `)
         .eq('project_id', projectId)
         .eq('is_active', true)
-        .eq('contact.organization_id', organizationId)
+        .eq('organization_id', organizationId)
         .order('created_at', { ascending: false })
 
       if (error) throw error

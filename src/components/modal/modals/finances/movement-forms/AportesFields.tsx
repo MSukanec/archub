@@ -26,8 +26,14 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
   // DEBUG: Ver datos de clientes
   console.log('AportesFields DEBUG:', {
     projectId: userData?.preferences?.last_project_id,
+    organizationId: userData?.organization?.id,
     projectClients: projectClients,
-    clientsCount: projectClients?.length || 0
+    clientsCount: projectClients?.length || 0,
+    clientsData: projectClients?.map((pc) => ({
+      id: pc.contact.id,
+      name: pc.contact.first_name + ' ' + pc.contact.last_name,
+      company: pc.contact.company_name
+    }))
   })
   
   // Estados para la lógica jerárquica
