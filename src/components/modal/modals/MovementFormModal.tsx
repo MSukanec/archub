@@ -1502,26 +1502,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               )}
             />
 
-            {/* Fila 4: Descripción (full width) */}
-            <FormField
-              control={aportesPropriosForm.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descripción del movimiento..."
-                      rows={3}
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Separador y título de sección de aportes propios */}
             <div className="col-span-2">
               <Separator className="mb-4" />
@@ -1653,6 +1633,26 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 )}
               />
             </div>
+
+            {/* Descripción al final (full width) */}
+            <FormField
+              control={aportesPropriosForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción del movimiento..."
+                      rows={3}
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
       ) : (isRetirosPropios || isEditingRetirosPropios) ? (
@@ -1756,26 +1756,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Fila 4: Descripción (full width) */}
-            <FormField
-              control={retirosPropriosForm.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descripción del movimiento..."
-                      rows={3}
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1912,6 +1892,26 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 )}
               />
             </div>
+
+            {/* Descripción al final (full width) */}
+            <FormField
+              control={retirosPropriosForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción del movimiento..."
+                      rows={3}
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
       ) : (
@@ -2073,25 +2073,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             )}
           />
 
-          {/* Fila 5: Descripción (full width) */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción (opcional)</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descripción del movimiento..."
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           {/* Separador y título de sección de movimiento financiero */}
           <div className="col-span-2">
             <Separator className="mb-4" />
@@ -2207,6 +2188,25 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               )}
             />
           </div>
+
+          {/* Descripción al final (full width) */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción (opcional)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Descripción del movimiento..."
+                    rows={3}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </form>
       </Form>
       )}

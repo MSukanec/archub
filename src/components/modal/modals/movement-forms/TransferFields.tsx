@@ -106,24 +106,6 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
           )}
         />
 
-        {/* Descripción (full width) */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción de la transferencia..."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Separador y título de sección de transferencia */}
         <div className="col-span-2">
           <Separator className="mb-4" />
@@ -232,6 +214,24 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
                   placeholder="0.00"
                   value={field.value || ''}
                   onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Descripción al final (full width) */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción de la transferencia..."
+                  {...field}
                 />
               </FormControl>
               <FormMessage />

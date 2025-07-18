@@ -207,25 +207,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
         )}
       />
 
-      {/* Descripción (full width) */}
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Descripción (opcional)</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Descripción del movimiento..."
-                rows={3}
-                {...field}
-                value={field.value || ''} // Asegurar que inicie vacío
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+
 
       {/* Separador y título de sección de aportes */}
       <div className="col-span-2">
@@ -371,6 +353,26 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
           )}
         />
       </div>
+
+      {/* Descripción al final (full width) */}
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descripción (opcional)</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="Descripción del movimiento..."
+                rows={3}
+                {...field}
+                value={field.value || ''} // Asegurar que inicie vacío
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   )
 }

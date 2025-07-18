@@ -109,24 +109,6 @@ export function ConversionFields({ form, currencies, wallets, members, concepts 
           )}
         />
 
-        {/* Descripción (full width) */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción de la conversión..."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Separador y título de sección de conversión */}
         <div className="col-span-2">
           <Separator className="mb-4" />
@@ -331,6 +313,24 @@ export function ConversionFields({ form, currencies, wallets, members, concepts 
             )}
           />
         </div>
+
+        {/* Descripción al final (full width) */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción de la conversión..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
     </div>
   )
 }
