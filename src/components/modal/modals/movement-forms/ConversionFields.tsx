@@ -96,7 +96,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts 
                       <div className="flex items-center justify-between w-full">
                         <span>{concept.name}</span>
                         {concept.is_system && (
-                          <span className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white bg-accent rounded">
+                          <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
                             Sistema
                           </span>
                         )}
