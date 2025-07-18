@@ -33,19 +33,14 @@ export function AportesFields({ form, currencies, wallets, members, concepts }: 
   
   // DEBUG: Ver datos de clientes
   console.log('AportesFields DEBUG:', {
-    projectId: userData?.preferences?.last_project_id,
-    organizationId: userData?.organization?.id,
+    projectId,
+    organizationId,
+    shouldFetchClients,
     projectClients: projectClients,
     clientsCount: projectClients?.length || 0,
-    hookEnabled: {
-      hasProjectId: !!userData?.preferences?.last_project_id,
-      hasOrganizationId: !!userData?.organization?.id,
-      hasSupabase: !!userData && !!userData.organization,
-      shouldExecute: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
-    },
     clientsData: projectClients?.map((pc) => ({
       id: pc.contact.id,
-      name: pc.contact.first_name + ' ' + pc.contact.last_name,
+      name: pc.contact.full_name,
       company: pc.contact.company_name
     }))
   })
