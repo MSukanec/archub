@@ -104,7 +104,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     }
   }, [members, userData?.user?.id, editingInstallment, form])
 
-  // Mutación para crear/actualizar el aporte
+  // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
       if (!userData?.organization?.id) {
@@ -173,10 +173,10 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       toast({
-        title: editingInstallment ? 'Aporte actualizado' : 'Aporte registrado',
+        title: editingInstallment ? 'Compromiso actualizado' : 'Compromiso registrado',
         description: editingInstallment 
-          ? 'El aporte ha sido actualizado correctamente'
-          : 'El aporte ha sido registrado correctamente',
+          ? 'El compromiso ha sido actualizado correctamente'
+          : 'El compromiso ha sido registrado correctamente',
       })
       onClose()
     },
@@ -470,7 +470,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   const headerContent = (
     <FormModalHeader
-      title={editingInstallment ? "Editar Aporte" : "Nuevo Aporte"}
+      title={editingInstallment ? "Editar Compromiso" : "Nuevo Compromiso"}
       icon={DollarSign}
     />
   )
@@ -479,7 +479,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={editingInstallment ? "Actualizar" : "Guardar Aporte"}
+      rightLabel={editingInstallment ? "Actualizar" : "Guardar Compromiso"}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={createInstallmentMutation.isPending}
     />
