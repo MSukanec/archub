@@ -233,8 +233,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       subcategory_id: '',
-      currency_id: '',
-      wallet_id: '',
+      currency_id: userData?.organization_preferences?.default_currency || '',
+      wallet_id: userData?.organization_preferences?.default_wallet || '',
     }
   })
 
@@ -261,8 +261,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       created_by: '',
       description: '',
       type_id: '',
-      currency_id: userData?.organization?.default_currency_id || '',
-      wallet_id_from: userData?.organization?.default_wallet_id || '',
+      currency_id: userData?.organization_preferences?.default_currency || '',
+      wallet_id_from: userData?.organization_preferences?.default_wallet || '',
       wallet_id_to: '',
       amount: 0
     }
@@ -438,13 +438,21 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!retirosPropriosForm.watch('created_by')) retirosPropriosForm.setValue('created_by', currentMember.id)
     }
     
-    // Inicializar valores por defecto para RETIROS PROPIOS específicamente
-    if (defaultCurrency && !retirosPropriosForm.watch('currency_id')) {
-      retirosPropriosForm.setValue('currency_id', defaultCurrency)
+    // Inicializar MONEDA y BILLETERA en TODOS los formularios
+    if (defaultCurrency) {
+      if (!form.watch('currency_id')) form.setValue('currency_id', defaultCurrency)
+      if (!transferForm.watch('currency_id')) transferForm.setValue('currency_id', defaultCurrency)
+      if (!aportesForm.watch('currency_id')) aportesForm.setValue('currency_id', defaultCurrency)
+      if (!aportesPropriosForm.watch('currency_id')) aportesPropriosForm.setValue('currency_id', defaultCurrency)
+      if (!retirosPropriosForm.watch('currency_id')) retirosPropriosForm.setValue('currency_id', defaultCurrency)
     }
-    if (defaultWallet && !retirosPropriosForm.watch('wallet_id')) {
-      console.log('Setting default wallet in retiros propios form:', defaultWallet)
-      retirosPropriosForm.setValue('wallet_id', defaultWallet)
+    
+    if (defaultWallet) {
+      if (!form.watch('wallet_id')) form.setValue('wallet_id', defaultWallet)
+      if (!transferForm.watch('wallet_id_from')) transferForm.setValue('wallet_id_from', defaultWallet)
+      if (!aportesForm.watch('wallet_id')) aportesForm.setValue('wallet_id', defaultWallet)
+      if (!aportesPropriosForm.watch('wallet_id')) aportesPropriosForm.setValue('wallet_id', defaultWallet)
+      if (!retirosPropriosForm.watch('wallet_id')) retirosPropriosForm.setValue('wallet_id', defaultWallet)
     }
     
   }, [members, userData?.user?.id, currencies, wallets, userData?.organization_preferences, editingMovement])
