@@ -231,10 +231,10 @@ export function GanttContainer({
       <div className="relative flex">
         {/* Panel Izquierdo - FIJO (sin scroll horizontal) */}
         <div 
-          className="bg-card border-r flex-shrink-0 overflow-hidden"
+          className="border-r border-border flex-shrink-0 overflow-hidden"
           style={{ 
             width: leftPanelWidth,
-            borderRightColor: 'var(--table-header-bg)'
+            backgroundColor: 'var(--table-header-bg)'
           }}
         >
           {/* Contenido del panel izquierdo */}
