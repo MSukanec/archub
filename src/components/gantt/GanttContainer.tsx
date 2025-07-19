@@ -155,7 +155,7 @@ export function GanttContainer({
           className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex items-center bg-[var(--table-header-bg)]"
           style={{ width: leftPanelWidth }}
         >
-          <div className="px-4 font-medium text-xs text-[var(--table-header-fg)]">
+          <div className="px-4 font-medium text-xs text-foreground">
             Rubro / Tarea
           </div>
         </div>
@@ -185,7 +185,7 @@ export function GanttContainer({
           </style>
           <div style={{ width: timelineWidth }}>
             {/* Fila superior: Meses */}
-            <div className="flex h-6 border-b border-[var(--table-header-border)]/20">
+            <div className="flex h-6">
               {calendarStructure.weeks.map((week) => (
                 <div 
                   key={`month-${week.key}`}

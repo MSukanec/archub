@@ -123,25 +123,53 @@ export default function ConstructionTasks() {
     const ganttRows: any[] = [];
 
     Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]) => {
-      // Agregar fila agrupadora
+      // Agregar fila agrupadora (los grupos no necesitan fechas específicas)
       ganttRows.push({
         id: `group-${rubroName}`,
         name: rubroName,
         type: 'group',
         level: 0,
-        isHeader: true
+        isHeader: true,
+        startDate: undefined,
+        endDate: undefined,
+        durationInDays: undefined
       });
 
       // Agregar tareas del rubro
       rubloTasks.forEach((task) => {
+        // Validar y establecer fechas por defecto
+        let validStartDate = task.start_date;
+        let validEndDate = task.end_date;
+        let validDuration = task.duration_in_days;
+
+        // Si no hay start_date, usar fecha de hoy
+        if (!validStartDate) {
+          validStartDate = new Date().toISOString().split('T')[0];
+        }
+
+        // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
+        if (validStartDate && !validEndDate && !validDuration) {
+          validDuration = 1;
+        }
+
+        // Validar que las fechas sean válidas
+        const startDateObj = new Date(validStartDate);
+        const endDateObj = validEndDate ? new Date(validEndDate) : null;
+
+        // Si end_date existe pero es anterior a start_date, corregir
+        if (endDateObj && startDateObj > endDateObj) {
+          validEndDate = validStartDate; // Hacer que end_date sea igual a start_date
+          validDuration = 1;
+        }
+
         ganttRows.push({
           id: task.id,
           name: task.task.display_name || task.task.code || 'Tarea sin nombre',
           type: 'task',
           level: 1,
-          startDate: task.start_date || undefined,
-          endDate: task.end_date || undefined,
-          durationInDays: task.duration_in_days || undefined,
+          startDate: validStartDate,
+          endDate: validEndDate,
+          durationInDays: validDuration,
           taskData: task // Agregar datos completos de la tarea para edición/eliminación
         });
       });
