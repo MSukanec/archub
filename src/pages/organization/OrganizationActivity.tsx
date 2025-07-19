@@ -277,19 +277,16 @@ export default function OrganizationActivity() {
           </div>
         ) : sortedActivities.length === 0 ? (
           <EmptyState
-            icon={<Activity className="h-12 w-12" />}
+            icon={<Activity className="w-12 h-12" />}
             title="No hay actividades registradas"
             description="Cuando se realicen acciones en la organización, aparecerán aquí."
             action={
-              <Button onClick={() => navigate('/finances/movements')}>
+              <button
+                onClick={() => navigate('/finances/movements')}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
+              >
                 Ver movimientos
-              </Button>
-            }
-            customContent={
-              <div className="text-center py-8 text-muted-foreground mb-6">
-                <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">Gráfico de actividad en desarrollo</p>
-              </div>
+              </button>
             }
           />
         ) : (

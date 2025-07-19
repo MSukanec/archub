@@ -72,7 +72,8 @@ export default function ProjectDocumentation() {
   const { openModal } = useGlobalModalStore();
 
 
-  const { setNavigationContext } = useNavigationStore();
+  const navigationStore = useNavigationStore();
+  const setNavigationContext = navigationStore?.setNavigationContext;
   const isMobile = useMobile();
 
   // Hooks for mobile action bar
@@ -115,7 +116,9 @@ export default function ProjectDocumentation() {
   }, [documents, searchTerm]);
 
   useEffect(() => {
-    setNavigationContext('project');
+    if (setNavigationContext) {
+      setNavigationContext('project');
+    }
   }, [setNavigationContext]);
 
   // Mobile action bar
@@ -259,12 +262,18 @@ export default function ProjectDocumentation() {
     if (filteredFolders.length === 0) {
       return (
         <EmptyState
-          icon={FolderOpen}
+          icon={<FolderOpen className="w-12 h-12" />}
           title="No hay carpetas de documentos"
           description="Comienza creando tu primera carpeta para organizar los documentos del proyecto."
-          actionText="Crear Primera Carpeta"
-          actionIcon={FolderPlus}
-          onActionClick={() => openModal('document-folder-form', {})}
+          action={
+            <button
+              onClick={() => openModal('document-folder-form', {})}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              <FolderPlus className="w-4 h-4" />
+              Crear Primera Carpeta
+            </button>
+          }
         />
       );
     }
@@ -326,12 +335,18 @@ export default function ProjectDocumentation() {
     if (filteredGroups.length === 0) {
       return (
         <EmptyState
-          icon={Package}
+          icon={<Package className="w-12 h-12" />}
           title="No hay grupos de documentos"
           description="Sube documentos para crear grupos organizados dentro de esta carpeta."
-          actionText="Subir Documentos"
-          actionIcon={Upload}
-          onActionClick={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId })}
+          action={
+            <button
+              onClick={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId })}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              <Upload className="w-4 h-4" />
+              Subir Documentos
+            </button>
+          }
         />
       );
     }
@@ -359,12 +374,18 @@ export default function ProjectDocumentation() {
     if (filteredDocuments.length === 0) {
       return (
         <EmptyState
-          icon={FileText}
+          icon={<FileText className="w-12 h-12" />}
           title="No hay documentos"
           description="Este grupo aún no tiene documentos subidos."
-          actionText="Subir Documentos"
-          actionIcon={Upload}
-          onActionClick={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId, defaultGroupId: selectedGroupId })}
+          action={
+            <button
+              onClick={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId, defaultGroupId: selectedGroupId })}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              <Upload className="w-4 h-4" />
+              Subir Documentos
+            </button>
+          }
         />
       );
     }
@@ -556,14 +577,29 @@ export default function ProjectDocumentation() {
     >
       {/* Feature Introduction */}
       <FeatureIntroduction
-        icon={FileText}
-        title="Gestión de Documentos"
-        description="Organiza y versiona todos los documentos del proyecto"
+        title="Documentación"
+        icon={<FileText className="w-5 h-5" />}
         features={[
-          "Control de versiones completo",
-          "Organización por carpetas",
-          "Capacidades de descarga/exportación",
-          "Colaboración en equipo"
+          {
+            icon: <Archive className="w-5 h-5" />,
+            title: "Control de versiones de documentos",
+            description: "Mantén un historial completo de todas las versiones de tus documentos de diseño. Cada actualización se guarda automáticamente, permitiendo recuperar versiones anteriores cuando sea necesario y mantener un registro de la evolución del proyecto."
+          },
+          {
+            icon: <FolderOpen className="w-5 h-5" />,
+            title: "Organización jerárquica de carpetas",
+            description: "Estructura tus documentos en carpetas y subcarpetas organizadas por disciplina, fase del proyecto o cualquier criterio que necesites. Esta organización facilita la búsqueda y mantiene todo ordenado para el equipo."
+          },
+          {
+            icon: <Download className="w-5 h-5" />,
+            title: "Descarga y exportación masiva",
+            description: "Exporta documentos individuales o carpetas completas con un solo clic. Perfecto para compartir entregables con clientes, contratistas o autoridades, manteniendo la estructura organizativa original."
+          },
+          {
+            icon: <Users className="w-5 h-5" />,
+            title: "Colaboración en equipo en tiempo real",
+            description: "Todo el equipo puede acceder, comentar y actualizar documentos simultáneamente. Los cambios se sincronizan automáticamente y cada miembro del equipo mantiene acceso a la información más actualizada del proyecto."
+          }
         ]}
       />
 
