@@ -225,7 +225,7 @@ export default function Movements() {
   // Get projects map for the project badges (only when in GENERAL mode)
   const { data: projectsMap = {} } = useProjectsMap(organizationId);
   
-  // Use isGlobalView from store instead of deriving from projectId
+  // Use isGlobalView from store instead of deriving from projectId  
   const isGeneralMode = isGlobalView;
 
   // Load file counts for all movements
@@ -1284,8 +1284,7 @@ export default function Movements() {
       <CustomRestricted 
         key="import-movements"
         functionName="Importación de Excel"
-        restrictions={['general_mode']}
-        isGeneralMode={isGeneralMode}
+        reason="general_mode"
       >
         <Button
           variant="outline"
