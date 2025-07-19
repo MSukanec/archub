@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2, Calendar, Table as TableIcon } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -16,9 +16,9 @@ import { GanttRowProps } from '@/components/gantt/types'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { supabase } from '@/lib/supabase'
 
-// Función para procesar el display_name con expression_templates (copiada de ConstructionBudgets)
+// Función para procesar el display_name con expression_templates (exacta de ConstructionBudgets)
 async function processDisplayName(displayName: string, paramValues: any): Promise<string> {
-  if (!displayName || !paramValues) return displayName;
+  if (!displayName || !paramValues || !supabase) return displayName;
   
   let processed = displayName;
   
@@ -34,29 +34,42 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
       parameter_id,
       task_parameters!inner(expression_template)
     `)
-    .in('id', paramValueIds);
+    .in('name', paramValueIds);
   
-  if (error || !parameterValues) {
-    console.error('Error loading parameter values:', error);
+  if (error) {
+    console.error("Error fetching parameter values:", error);
     return displayName;
   }
   
-  // Procesar cada valor de parámetro
-  for (const paramValue of parameterValues) {
-    const placeholder = `{{${paramValue.name}}}`;
-    const expressionTemplate = paramValue.task_parameters?.expression_template;
+  // Reemplazar placeholders usando expression_template o label
+  Object.keys(paramValues).forEach(key => {
+    const placeholder = `{{${key}}}`;
+    const paramValueId = paramValues[key];
     
-    if (processed.includes(placeholder) && expressionTemplate) {
-      processed = processed.replace(new RegExp(placeholder, 'g'), expressionTemplate);
+    // Buscar el valor correspondiente
+    const paramValue = parameterValues?.find(pv => pv.name === paramValueId);
+    
+    if (paramValue) {
+      // Usar expression_template si existe, sino usar label
+      let replacement = paramValue.task_parameters?.expression_template || paramValue.label || '';
+      
+      // Si el replacement contiene {value}, reemplazarlo con el label
+      if (replacement && replacement.includes('{value}')) {
+        replacement = replacement.replace(/{value}/g, paramValue.label || '');
+      }
+      
+      processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
     }
-  }
+  });
   
-  return processed;
+  // Clean up multiple spaces and trim the final result
+  return processed.replace(/\s+/g, ' ').trim();
 }
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("cronograma")
+  const [processedTasks, setProcessedTasks] = useState<any[]>([])
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -72,6 +85,42 @@ export default function ConstructionTasks() {
     projectId || '', 
     organizationId || ''
   )
+
+  // Procesar los nombres de las tareas de forma asíncrona
+  useEffect(() => {
+    const processTaskNames = async () => {
+      if (!tasks.length) {
+        setProcessedTasks([])
+        return
+      }
+
+      const processed = await Promise.all(
+        tasks.map(async (task) => {
+          if (task.task.param_values && Object.keys(task.task.param_values).length > 0) {
+            const processedName = await processDisplayName(task.task.display_name, task.task.param_values)
+            return {
+              ...task,
+              task: {
+                ...task.task,
+                processed_display_name: processedName
+              }
+            }
+          }
+          return {
+            ...task,
+            task: {
+              ...task.task,
+              processed_display_name: task.task.display_name
+            }
+          }
+        })
+      )
+      
+      setProcessedTasks(processed)
+    }
+
+    processTaskNames()
+  }, [tasks])
 
   const handleAddTask = () => {
     console.log('Attempting to open modal with data:', { projectId, organizationId, userData: userData?.user?.id });
@@ -139,9 +188,9 @@ export default function ConstructionTasks() {
     })
   }
 
-  // Filtrar tareas basado en el searchValue
-  const filteredTasks = tasks.filter(task => 
-    task.task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+  // Filtrar tareas basado en el searchValue usando processedTasks
+  const filteredTasks = processedTasks.filter(task => 
+    task.task.processed_display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
     task.task.rubro_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
     task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
   )
@@ -203,19 +252,9 @@ export default function ConstructionTasks() {
           validDuration = 1;
         }
 
-        // Procesar el display_name para mostrar texto completo
-        let taskName = task.task.display_name || task.task.code || 'Tarea sin nombre';
-        if (task.task.param_values) {
-          // Intentar reemplazar placeholders básicos
-          taskName = taskName.replace(/\{\{([^}]+)\}\}/g, (match, paramName) => {
-            // Esto es una simplificación - en el futuro se puede hacer más complejo
-            return match.replace(/[{}]/g, ''); // Quitar llaves para hacer más legible
-          });
-        }
-
         ganttRows.push({
           id: task.id,
-          name: taskName,
+          name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
           type: 'task',
           level: 1,
           startDate: validStartDate,
@@ -238,23 +277,12 @@ export default function ConstructionTasks() {
     {
       key: 'tarea',
       label: 'Tarea',
-      render: (task: any) => {
-        // Procesar el display_name para mostrar texto completo como en presupuestos
-        let taskName = task.task.display_name;
-        if (task.task.param_values) {
-          // Simplificar placeholders para mejor legibilidad
-          taskName = taskName.replace(/\{\{([^}]+)\}\}/g, (match, paramName) => {
-            return match.replace(/[{}]/g, ''); // Quitar llaves para hacer más legible
-          });
-        }
-        
-        return (
-          <div>
-            <div className="font-medium">{taskName}</div>
-            <div className="text-xs text-muted-foreground">{task.task.code}</div>
-          </div>
-        )
-      }
+      render: (task: any) => (
+        <div>
+          <div className="font-medium">{task.task.processed_display_name || task.task.display_name}</div>
+          <div className="text-xs text-muted-foreground">{task.task.code}</div>
+        </div>
+      )
     },
     {
       key: 'unidad',
@@ -285,6 +313,22 @@ export default function ConstructionTasks() {
       label: 'Acciones',
       render: (task: any) => (
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              openModal('construction-task', {
+                projectId,
+                organizationId,
+                userId: userData?.user?.id,
+                editingTask: task,
+                isEditing: true
+              })
+            }}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -354,12 +398,18 @@ export default function ConstructionTasks() {
 
         {/* Tabs para alternar vistas */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cronograma" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 border border-[var(--card-border)] bg-[var(--card-bg)] rounded-lg p-1">
+            <TabsTrigger 
+              value="cronograma" 
+              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
+            >
               <Calendar className="w-4 h-4" />
               Cronograma
             </TabsTrigger>
-            <TabsTrigger value="listado" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="listado" 
+              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
+            >
               <TableIcon className="w-4 h-4" />
               Listado
             </TabsTrigger>
