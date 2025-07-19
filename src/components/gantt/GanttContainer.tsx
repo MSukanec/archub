@@ -184,8 +184,21 @@ export function GanttContainer({
             `}
           </style>
           <div style={{ width: timelineWidth }}>
-            {/* Una sola fila: Solo números de días (como Jira) */}
-            <div className="flex h-14">
+            {/* Fila superior: Meses */}
+            <div className="flex h-6 border-b border-[var(--table-header-border)]/20">
+              {calendarStructure.weeks.map((week) => (
+                <div 
+                  key={`month-${week.key}`}
+                  className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
+                  style={{ width: weekWidth }}
+                >
+                  {week.monthLabel}
+                </div>
+              ))}
+            </div>
+            
+            {/* Fila inferior: Números de días */}
+            <div className="flex h-8">
               {calendarStructure.weeks.map((week) => (
                 <div 
                   key={`days-${week.key}`}
@@ -195,7 +208,7 @@ export function GanttContainer({
                   {week.days.map((day, dayIndex) => (
                     <div 
                       key={`${week.key}-${dayIndex}`}
-                      className={`flex-1 flex items-center justify-center text-sm font-medium ${
+                      className={`flex-1 flex items-center justify-center text-xs font-medium ${
                         day.isWeekend 
                           ? 'text-[var(--table-header-fg)]/60' 
                           : 'text-[var(--table-header-fg)]'
