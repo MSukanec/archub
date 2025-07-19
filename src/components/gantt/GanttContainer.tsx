@@ -138,6 +138,17 @@ export function GanttContainer({
 
   return (
     <div className="relative border border-border rounded-lg overflow-hidden bg-card">
+      {/* Handle de redimensionamiento unificado (de punta a punta vertical desde encabezado) */}
+      <div 
+        className="absolute w-3 cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-40 transition-colors z-50 hover:border-l-2 hover:border-[var(--accent)]"
+        style={{ 
+          left: leftPanelWidth - 2,
+          top: 0,
+          height: '100%'
+        }}
+        onMouseDown={startResize}
+      />
+      
       {/* Encabezado unificado */}
       <div className="flex border-b border-border bg-muted/50">
         {/* Encabezado del panel izquierdo */}
@@ -245,17 +256,6 @@ export function GanttContainer({
           </div>
 
         </div>
-
-        {/* Handle de redimensionamiento unificado (de punta a punta vertical desde encabezado) */}
-        <div 
-          className="absolute w-2 cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-30 transition-colors z-20 border-l border-transparent hover:border-[var(--accent)]"
-          style={{ 
-            left: leftPanelWidth - 1,
-            top: 0,
-            height: '100%'
-          }}
-          onMouseDown={startResize}
-        />
 
         {/* Timeline */}
         <div className="flex-1 overflow-x-auto">
