@@ -151,13 +151,13 @@ export function GanttContainer({
       />
       
       {/* Encabezado unificado */}
-      <div className="flex border-b border-border bg-muted/50">
+      <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
         {/* Encabezado del panel izquierdo - FIJO */}
         <div 
-          className="border-r border-border flex-shrink-0 h-14 flex items-center bg-muted/50"
+          className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex items-center bg-[var(--table-header-bg)]"
           style={{ width: leftPanelWidth }}
         >
-          <div className="px-3 font-medium text-sm">
+          <div className="px-4 font-medium text-xs text-[var(--table-header-fg)]">
             Rubro / Tarea
           </div>
         </div>
@@ -176,11 +176,11 @@ export function GanttContainer({
         >
           <div style={{ width: timelineWidth }}>
             {/* Fila de meses */}
-            <div className="flex border-b border-border/50 h-6">
+            <div className="flex border-b border-[var(--table-header-border)]/50 h-7">
               {calendarStructure.months.map((month) => (
                 <div 
                   key={month.label}
-                  className="flex items-center justify-center text-xs font-medium text-muted-foreground border-r border-border/30 last:border-r-0"
+                  className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
                   style={{ width: month.days.length * dayWidth }}
                 >
                   {month.label}
@@ -189,11 +189,11 @@ export function GanttContainer({
             </div>
             
             {/* Fila de días */}
-            <div className="flex h-6">
+            <div className="flex h-7">
               {calendarStructure.allDays.map((day) => (
                 <div 
                   key={day.date}
-                  className="flex items-center justify-center text-xs text-muted-foreground border-r border-border/30 last:border-r-0"
+                  className="flex items-center justify-center text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
                   style={{ width: dayWidth }}
                 >
                   {day.day}
@@ -214,24 +214,24 @@ export function GanttContainer({
           {/* Contenido del panel izquierdo */}
           <div className="max-h-96 overflow-y-auto overflow-x-hidden">
             {data.map((item) => (
-              <div key={`left-${item.id}`} className="border-b border-border h-9 flex items-center">
+              <div key={`left-${item.id}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors">
                 {item.isHeader ? (
-                  <div className="bg-muted/30 w-full h-full flex items-center px-3">
-                    <span className="truncate text-sm text-muted-foreground font-medium uppercase" title={item.name}>
+                  <div className="bg-muted/30 w-full h-full flex items-center px-4">
+                    <span className="truncate text-xs text-[var(--table-header-fg)] font-medium uppercase" title={item.name}>
                       {item.name}
                     </span>
                   </div>
                 ) : (
                   <div 
-                    className="group w-full h-full flex items-center cursor-pointer hover:bg-muted/20 transition-colors"
-                    style={{ paddingLeft: `${12 + item.level * 24}px`, paddingRight: '12px' }}
+                    className="group w-full h-full flex items-center cursor-pointer transition-colors"
+                    style={{ paddingLeft: `${16 + item.level * 24}px`, paddingRight: '16px' }}
                     onClick={() => onItemClick?.(item)}
                   >
                     <div className="flex items-center w-full">
                       {/* Text that contracts on hover to make space for buttons */}
                       <span 
                         className={`
-                          truncate text-sm text-foreground transition-all duration-200
+                          truncate text-xs text-[var(--table-row-fg)] transition-all duration-200
                           ${(onEdit || onDelete) ? 'group-hover:pr-[68px]' : ''}
                         `}
                         title={item.name}
@@ -271,6 +271,13 @@ export function GanttContainer({
                 )}
               </div>
             ))}
+            
+            {/* Filas vacías adicionales para sincronizar con timeline */}
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
+                {/* Fila vacía para mantener altura sincronizada */}
+              </div>
+            ))}
           </div>
 
         </div>
@@ -289,8 +296,8 @@ export function GanttContainer({
         >
           {/* Contenido del timeline */}
           <div className="max-h-96 overflow-y-auto" style={{ width: timelineWidth }}>
-            {data.map((item) => (
-              <div key={`timeline-${item.id}`} className="border-b border-border h-9 flex items-center">
+            {data.map((item, index) => (
+              <div key={`timeline-${item.id}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors">
                 {item.isHeader ? (
                   <div 
                     className="bg-muted/30 h-full w-full"
@@ -306,7 +313,7 @@ export function GanttContainer({
                       {calendarStructure.allDays.map((day) => (
                         <div 
                           key={day.date}
-                          className="border-r border-border/10 last:border-r-0 h-full"
+                          className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
                           style={{ width: dayWidth }}
                         />
                       ))}
@@ -323,6 +330,27 @@ export function GanttContainer({
                     </div>
                   </div>
                 )}
+              </div>
+            ))}
+            
+            {/* Filas vacías adicionales para más espacio */}
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
+                <div 
+                  className="relative h-full w-full"
+                  style={{ width: timelineWidth }}
+                >
+                  {/* Grilla de días de fondo */}
+                  <div className="absolute inset-0 flex">
+                    {calendarStructure.allDays.map((day) => (
+                      <div 
+                        key={`empty-${index}-${day.date}`}
+                        className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
+                        style={{ width: dayWidth }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
