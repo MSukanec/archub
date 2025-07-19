@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { GanttRowProps } from './types';
+import { GanttRowProps, calculateResolvedEndDate } from './types';
 
 interface GanttTimelineBarProps {
   item: GanttRowProps;
@@ -15,32 +15,22 @@ export function GanttTimelineBar({
   timelineWidth 
 }: GanttTimelineBarProps) {
   const barPosition = useMemo(() => {
-    const startDate = new Date(item.startDate);
-    
-    // Calculate end date based on endDate or durationInDays
-    let endDate: Date;
-    if (item.endDate) {
-      endDate = new Date(item.endDate);
-    } else if (item.durationInDays) {
-      endDate = new Date(startDate.getTime() + (item.durationInDays * 24 * 60 * 60 * 1000));
-    } else {
-      // Fallback: 1 day duration if neither is provided
-      endDate = new Date(startDate.getTime() + (24 * 60 * 60 * 1000));
-    }
+    // Use the centralized date calculation utility
+    const dateRange = calculateResolvedEndDate(item);
     
     const totalDuration = timelineEnd.getTime() - timelineStart.getTime();
-    const itemStart = startDate.getTime() - timelineStart.getTime();
-    const itemDuration = endDate.getTime() - startDate.getTime();
+    const itemStart = dateRange.startDate.getTime() - timelineStart.getTime();
+    const itemDuration = dateRange.resolvedEndDate.getTime() - dateRange.startDate.getTime();
     
     const leftPercent = (itemStart / totalDuration) * 100;
-    const widthPercent = (itemDuration / totalDuration) * 100;
+    const widthPercent = Math.max(0.5, (itemDuration / totalDuration) * 100); // Minimum 0.5% width
     
     return {
       left: `${Math.max(0, leftPercent)}%`,
-      width: `${Math.max(2, widthPercent)}%`,
-      endDate
+      width: `${widthPercent}%`,
+      ...dateRange
     };
-  }, [item.startDate, item.endDate, item.durationInDays, timelineStart, timelineEnd]);
+  }, [item, timelineStart, timelineEnd]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -48,6 +38,17 @@ export function GanttTimelineBar({
       month: '2-digit'
     });
   };
+
+  // Don't render bar if invalid dates
+  if (!barPosition.isValid) {
+    return (
+      <div className="relative h-9 flex items-center px-2 bg-background border-b border-border">
+        <div className="text-xs text-destructive opacity-60">
+          Fechas inválidas
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-9 flex items-center px-2 bg-background border-b border-border">
@@ -61,8 +62,8 @@ export function GanttTimelineBar({
         style={barPosition}
       >
         <span className="px-2 truncate">
-          {formatDate(item.startDate)} - {formatDate(barPosition.endDate.toISOString().split('T')[0])}
-          {item.durationInDays && (
+          {formatDate(item.startDate)} - {formatDate(barPosition.resolvedEndDate.toISOString().split('T')[0])}
+          {barPosition.wasCalculated && item.durationInDays && (
             <span className="ml-1 text-xs opacity-80">
               ({item.durationInDays}d)
             </span>

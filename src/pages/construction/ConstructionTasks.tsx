@@ -139,7 +139,7 @@ export default function ConstructionTasks() {
       ]
     },
     {
-      id: "phase-3",
+      id: "phase-3", 
       name: "Instalaciones",
       type: "phase" as const,
       level: 0,
@@ -169,6 +169,25 @@ export default function ConstructionTasks() {
           level: 1,
           startDate: "2024-05-15",
           endDate: "2024-06-30" // Usando fecha exacta
+        }
+      ]
+    },
+    // Ejemplo con fechas inválidas para probar validación
+    {
+      id: "phase-test",
+      name: "Prueba Validación",
+      type: "phase" as const,
+      level: 0,
+      startDate: "2024-07-01",
+      durationInDays: -5, // Duración negativa - debería usar 1 día
+      children: [
+        {
+          id: "task-test-1",
+          name: "Tarea con fecha inválida",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-08-01",
+          endDate: "2024-07-15" // endDate anterior a startDate
         }
       ]
     }
