@@ -39,6 +39,14 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
   // Normalize startDate to avoid UTC interpretation issues
   const startDate = new Date(item.startDate + 'T00:00:00');
   
+  console.log('Date calculation for item:', {
+    itemId: item.id,
+    originalStartDate: item.startDate,
+    parsedStartDate: startDate.toDateString(),
+    originalEndDate: item.endDate,
+    durationInDays: item.durationInDays
+  });
+  
   // Validate that startDate is a valid date
   if (isNaN(startDate.getTime())) {
     console.warn(`Invalid start date for item ${item.id}: ${item.startDate}`);
@@ -63,13 +71,19 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
       // If endDate is invalid, fallback to startDate
       resolvedEndDate = new Date(startDate.getTime());
     }
+    console.log('Using endDate:', resolvedEndDate.toDateString());
   } else if (item.durationInDays && item.durationInDays > 0) {
     // Priority 2: Calculate from durationInDays using normalized date methods
     resolvedEndDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + item.durationInDays - 1);
     wasCalculated = true;
+    console.log('Calculated endDate from duration:', {
+      duration: item.durationInDays,
+      calculatedEndDate: resolvedEndDate.toDateString()
+    });
   } else {
     // Fallback: 1 day duration (same day start and end)
     resolvedEndDate = new Date(startDate.getTime());
+    console.log('Using fallback same-day endDate:', resolvedEndDate.toDateString());
   }
   
   // Validate dates - if start > end, use same day
