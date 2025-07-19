@@ -217,22 +217,29 @@ export function GanttContainer({
                     onClick={() => onItemClick?.(item)}
                   >
                     <div className="flex items-center w-full">
-                      <span className="flex-1 truncate text-sm text-foreground" title={item.name}>
+                      {/* Text that contracts on hover to make space for buttons */}
+                      <span 
+                        className={`
+                          truncate text-sm text-foreground transition-all duration-200
+                          ${(onEdit || onDelete) ? 'group-hover:mr-20' : ''}
+                        `}
+                        title={item.name}
+                      >
                         {item.name}
                       </span>
                       
-                      {/* Action Buttons */}
+                      {/* Action Buttons - same size as table buttons (h-8 w-8) */}
                       {(onEdit || onDelete) && (
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3">
                           {onEdit && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onEdit(item);
                               }}
-                              className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                              className="h-8 w-8 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                             >
-                              <Edit className="w-3 h-3" />
+                              <Edit className="w-4 h-4" />
                             </button>
                           )}
                           {onDelete && (
@@ -241,9 +248,9 @@ export function GanttContainer({
                                 e.stopPropagation();
                                 onDelete(item);
                               }}
-                              className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                              className="h-8 w-8 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           )}
                         </div>
