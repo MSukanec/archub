@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { format, eachDayOfInterval, startOfWeek, endOfWeek, eachWeekOfInterval, startOfMonth, endOfMonth, isSameMonth, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Edit, Edit3, Trash2 } from 'lucide-react';
@@ -130,6 +130,57 @@ export function GanttContainer({
 
   const weekWidth = 240; // Ancho por semana ampliado (doble)
   const timelineWidth = Math.max(calendarStructure.weeks.length * weekWidth, 1200); // Ancho mínimo para garantizar scroll
+
+  // Auto-scroll para posicionar el timeline en HOY - 7 días
+  useEffect(() => {
+    const scrollToToday = () => {
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      
+      // Buscar el índice del día de hoy
+      let todayDayIndex = -1;
+      let currentDayIndex = 0;
+      
+      for (const week of calendarStructure.weeks) {
+        for (const day of week.days) {
+          if (day.date.getTime() === todayStart.getTime()) {
+            todayDayIndex = currentDayIndex;
+            break;
+          }
+          currentDayIndex++;
+        }
+        if (todayDayIndex !== -1) break;
+      }
+      
+      if (todayDayIndex !== -1) {
+        // Calcular posición de HOY - 7 días (una semana antes)
+        const targetDayIndex = Math.max(0, todayDayIndex - 7);
+        const dayWidth = timelineWidth / calendarStructure.totalDays;
+        const targetScrollPosition = targetDayIndex * dayWidth;
+        
+        // Aplicar scroll a ambos contenedores
+        const headerScroll = document.getElementById('timeline-header-scroll');
+        const contentScroll = document.getElementById('timeline-content-scroll');
+        
+        if (headerScroll) {
+          headerScroll.scrollLeft = targetScrollPosition;
+        }
+        if (contentScroll) {
+          contentScroll.scrollLeft = targetScrollPosition;
+        }
+        
+        console.log('Auto-scroll applied:', {
+          todayIndex: todayDayIndex,
+          targetIndex: targetDayIndex,
+          scrollPosition: targetScrollPosition
+        });
+      }
+    };
+
+    // Ejecutar scroll después de un breve delay para asegurar que el DOM esté listo
+    const timeoutId = setTimeout(scrollToToday, 100);
+    return () => clearTimeout(timeoutId);
+  }, [calendarStructure.weeks, calendarStructure.totalDays, timelineWidth]);
 
   if (data.length === 0) {
     return (
@@ -411,16 +462,8 @@ export function GanttContainer({
                         
                         for (const week of calendarStructure.weeks) {
                           for (const day of week.days) {
-                            console.log('Comparing days:', {
-                              dayDate: day.date.toDateString(),
-                              todayDate: todayStart.toDateString(),
-                              dayTime: day.date.getTime(),
-                              todayTime: todayStart.getTime(),
-                              currentIndex: currentDayIndex
-                            });
                             if (day.date.getTime() === todayStart.getTime()) {
                               todayDayIndex = currentDayIndex;
-                              console.log('Found today at index:', todayDayIndex);
                               break;
                             }
                             currentDayIndex++;
@@ -431,14 +474,6 @@ export function GanttContainer({
                         if (todayDayIndex !== -1) {
                           const dayWidth = timelineWidth / calendarStructure.totalDays;
                           const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
-                          
-                          console.log('Today line calculation:', {
-                            todayDayIndex,
-                            totalDays: calendarStructure.totalDays,
-                            timelineWidth,
-                            dayWidth,
-                            todayPosition
-                          });
                           
                           return (
                             <div 
