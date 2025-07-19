@@ -19,7 +19,19 @@ import { supabase } from "@/lib/supabase";
 
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
-  quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0")
+  quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional()
+}).refine((data) => {
+  // Si hay fecha de inicio, debe haber duración o fecha fin
+  if (data.start_date) {
+    return data.duration_in_days || data.end_date;
+  }
+  return true;
+}, {
+  message: "Si especifica fecha de inicio, debe indicar duración en días o fecha de fin",
+  path: ["duration_in_days"]
 });
 
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
@@ -83,7 +95,10 @@ export function ConstructionTaskFormModal({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
       task_id: "",
-      quantity: 1
+      quantity: 1,
+      start_date: "",
+      end_date: "",
+      duration_in_days: undefined
     }
   });
 
@@ -131,12 +146,23 @@ export function ConstructionTaskFormModal({
     setIsSubmitting(true);
     
     try {
+      // Calculate end_date if start_date and duration_in_days are provided
+      let endDate = data.end_date;
+      if (data.start_date && data.duration_in_days && !data.end_date) {
+        const startDate = new Date(data.start_date);
+        startDate.setDate(startDate.getDate() + data.duration_in_days);
+        endDate = startDate.toISOString().split('T')[0];
+      }
+
       await createTask.mutateAsync({
         organization_id: modalData.organizationId,
         project_id: modalData.projectId,
         task_id: data.task_id,
         quantity: data.quantity,
-        created_by: currentMember.id
+        created_by: currentMember.id,
+        start_date: data.start_date || null,
+        end_date: endDate || null,
+        duration_in_days: data.duration_in_days || null
       });
 
       onClose();
@@ -199,6 +225,50 @@ export function ConstructionTaskFormModal({
         </div>
         {errors.quantity && (
           <p className="text-sm text-destructive">{errors.quantity.message}</p>
+        )}
+      </div>
+
+      {/* Date Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Start Date */}
+        <div className="space-y-2">
+          <Label htmlFor="start_date">Fecha de Inicio</Label>
+          <Input
+            type="date"
+            {...form.register('start_date')}
+            className="w-full"
+          />
+          {errors.start_date && (
+            <p className="text-sm text-destructive">{errors.start_date.message}</p>
+          )}
+        </div>
+
+        {/* Duration or End Date */}
+        <div className="space-y-2">
+          <Label htmlFor="duration_in_days">Duración (días)</Label>
+          <Input
+            type="number"
+            min="1"
+            placeholder="Ej: 5"
+            {...form.register('duration_in_days', { valueAsNumber: true })}
+            className="w-full"
+          />
+          {errors.duration_in_days && (
+            <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Alternative End Date */}
+      <div className="space-y-2">
+        <Label htmlFor="end_date">O Fecha de Fin (alternativa a duración)</Label>
+        <Input
+          type="date"
+          {...form.register('end_date')}
+          className="w-full"
+        />
+        {errors.end_date && (
+          <p className="text-sm text-destructive">{errors.end_date.message}</p>
         )}
       </div>
     </form>

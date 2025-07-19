@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 19, 2025. CONSTRUCTION TASK MODAL DATE FIELDS COMPLETED: Enhanced task creation modal with comprehensive date management functionality - COMPLETED
+  • Added start_date, end_date, and duration_in_days fields to ConstructionTaskFormModal schema with proper validation
+  • Implemented smart date calculation: if start_date and duration_in_days provided, automatically calculates end_date
+  • Created responsive grid layout: start_date and duration_in_days side-by-side, with alternative end_date field below
+  • Enhanced form validation with refinement logic requiring duration or end_date when start_date is specified
+  • Updated useCreateConstructionTask hook to accept and pass new date fields to database operations
+  • Modal now supports three date entry modes: 1) start + duration (auto-calculates end), 2) start + end manually, 3) no dates (optional)
+  • All date fields properly integrated with react-hook-form using register() for consistent validation and state management
+  • Fixed "Crear Tarea" button implementation using correct array format matching ConstructionBudgets.tsx pattern
 - July 19, 2025. COMBOBOXWRITE SEARCH FUNCTIONALITY AND EXCEL IMPORT RLS FIXES COMPLETED: Fixed critical search display bug and authentication errors - COMPLETED
   • Fixed ComboBoxWrite component search functionality: eliminated conditional CommandGroup rendering that was preventing task results from displaying
   • Corrected search option filtering logic to always show filtered results when external search (onSearchChange) is provided
