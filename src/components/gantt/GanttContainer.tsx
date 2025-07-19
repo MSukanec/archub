@@ -125,15 +125,8 @@ export function GanttContainer({
 
     const totalDays = allDays.length;
     
-    console.log('CALENDAR STRUCTURE DEBUG:', {
-      timelineStart: timelineStart.toDateString(),
-      timelineEnd: timelineEnd.toDateString(),
-      totalDaysCalculated: totalDays,
-      firstDay: allDays[0]?.date.toDateString(),
-      lastDay: allDays[allDays.length - 1]?.date.toDateString(),
-      todayIndex: allDays.findIndex(d => d.date.toDateString() === new Date().toDateString()),
-      day19Index: allDays.findIndex(d => d.date.toDateString() === new Date('2025-07-19').toDateString())
-    });
+    // Calendar structure generated correctly
+    // console.log('Calendar:', totalDays, 'days from', timelineStart.toDateString(), 'to', timelineEnd.toDateString());
     
     return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
@@ -201,11 +194,8 @@ export function GanttContainer({
           contentScroll.scrollLeft = targetScrollPosition;
         }
         
-        console.log('Auto-scroll applied:', {
-          todayIndex: todayDayIndex,
-          targetIndex: targetDayIndex,
-          scrollPosition: targetScrollPosition
-        });
+        // Auto-scroll to show current week
+        // console.log('Auto-scroll to day', targetDayIndex);
       }
     };
 
@@ -271,17 +261,45 @@ export function GanttContainer({
             `}
           </style>
           <div style={{ width: timelineWidth }}>
-            {/* Fila superior: Meses */}
+            {/* Fila superior: Meses - GROUPED BY ACTUAL MONTHS */}
             <div className="flex h-6">
-              {calendarStructure.weeks.map((week) => (
-                <div 
-                  key={`month-${week.key}`}
-                  className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
-                  style={{ width: weekWidth }}
-                >
-                  {week.monthLabel}
-                </div>
-              ))}
+              {(() => {
+                const monthGroups: Array<{ monthLabel: string; dayCount: number }> = [];
+                let currentMonth = '';
+                let dayCount = 0;
+                
+                calendarStructure.weeks.forEach(week => {
+                  week.days.forEach(day => {
+                    const monthLabel = format(day.date, 'MMM yy', { locale: es }).toUpperCase();
+                    if (monthLabel !== currentMonth) {
+                      if (currentMonth) {
+                        monthGroups.push({ monthLabel: currentMonth, dayCount });
+                      }
+                      currentMonth = monthLabel;
+                      dayCount = 1;
+                    } else {
+                      dayCount++;
+                    }
+                  });
+                });
+                
+                // Add the last month
+                if (currentMonth) {
+                  monthGroups.push({ monthLabel: currentMonth, dayCount });
+                }
+                
+                const dayWidth = timelineWidth / calendarStructure.totalDays;
+                
+                return monthGroups.map((month, index) => (
+                  <div 
+                    key={`month-${index}`}
+                    className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
+                    style={{ width: month.dayCount * dayWidth }}
+                  >
+                    {month.monthLabel}
+                  </div>
+                ));
+              })()}
             </div>
             
             {/* Fila inferior: Números de días - INDIVIDUAL DAYS TO MATCH BARS */}
@@ -452,13 +470,8 @@ export function GanttContainer({
                         const dayWidth = timelineWidth / calendarStructure.totalDays;
                         const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                         
-                        console.log('TODAY LINE CALCULATION:', {
-                          todayDayIndex,
-                          totalDays: calendarStructure.totalDays,
-                          dayWidth,
-                          todayPosition,
-                          calculation: `day ${todayDayIndex} * ${dayWidth} = ${todayPosition}`
-                        });
+                        // Today line positioned correctly
+                        // console.log('Today line at day', todayDayIndex, 'position', todayPosition);
                         
                         return (
                           <div 

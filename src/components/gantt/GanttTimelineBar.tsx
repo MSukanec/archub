@@ -49,17 +49,8 @@ export function GanttTimelineBar({
   const startPixels = dayStartFromTimeline * dayWidth;
   const widthPixels = (dayEndFromTimeline - dayStartFromTimeline + 1) * dayWidth;
   
-  // FINAL BAR CALCULATION - SHOULD MATCH HEADER DAYS
-  console.log('FINAL BAR CALCULATION:', {
-    taskName: item.name.substring(0, 20),
-    taskStartDate: normalizedStart.toDateString(),
-    timelineStartDate: normalizedTimelineStart.toDateString(),
-    dayFromStart: dayStartFromTimeline,
-    totalDays,
-    dayWidth,
-    finalStartPixels: startPixels,
-    calculation: `day ${dayStartFromTimeline} * ${dayWidth} = ${startPixels}px`
-  });
+  // Clean up debug logs - alignment is now working perfectly
+  // console.log('BAR ALIGNED:', item.name.substring(0, 20), startPixels);
 
 
 
