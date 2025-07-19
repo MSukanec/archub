@@ -15,15 +15,11 @@ export function GanttTimelineBar({
   timelineWidth 
 }: GanttTimelineBarProps) {
   // Calculate resolved end date using the utility function
-  const dateRange = calculateResolvedEndDate(item.startDate, item.endDate, item.durationInDays);
+  const dateRange = calculateResolvedEndDate(item);
 
-  // Validate dates
+  // Validate dates - no mostrar barra si no hay fechas válidas
   if (!dateRange.isValid) {
-    return (
-      <div className="flex items-center justify-center h-6 bg-[var(--accent)] border border-[var(--accent)] rounded text-xs text-white font-medium">
-        Fechas inválidas
-      </div>
-    );
+    return null;
   }
 
   const { startDate, resolvedEndDate } = dateRange;
@@ -48,7 +44,7 @@ export function GanttTimelineBar({
 
   return (
     <div 
-      className="h-5 bg-accent rounded-sm shadow-sm flex items-center justify-center text-xs text-white font-medium hover:bg-accent/90 transition-colors cursor-pointer"
+      className="h-5 bg-[var(--accent)] rounded-sm shadow-sm flex items-center justify-center text-xs text-white font-medium hover:bg-[var(--accent)]/90 transition-colors cursor-pointer"
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`
