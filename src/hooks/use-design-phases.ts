@@ -69,53 +69,7 @@ export function useDesignProjectPhases(projectId: string) {
   });
 }
 
-export function useGanttPhasesWithTasks(projectId: string) {
-  return useQuery({
-    queryKey: ['ganttPhasesWithTasks', projectId],
-    queryFn: async () => {
-      if (!projectId) {
-        throw new Error('Project ID is required');
-      }
 
-      const { data: phases, error: phasesError } = await supabase
-        .from('design_project_phases')
-        .select(`
-          *,
-          design_phases (
-            id,
-            name
-          )
-        `)
-        .eq('project_id', projectId)
-        .order('position', { ascending: true });
-
-      if (phasesError) {
-        console.error('Error fetching phases for Gantt:', phasesError);
-        throw phasesError;
-      }
-
-      const { data: tasks, error: tasksError } = await supabase
-        .from('design_phase_tasks')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('position', { ascending: true });
-
-      if (tasksError) {
-        console.error('Error fetching tasks for Gantt:', tasksError);
-        throw tasksError;
-      }
-
-      // Combine phases with their tasks
-      const phasesWithTasks = phases?.map(phase => ({
-        ...phase,
-        tasks: tasks?.filter(task => task.design_project_phase_id === phase.id) || []
-      })) || [];
-
-      return phasesWithTasks;
-    },
-    enabled: !!projectId,
-  });
-}
 
 export function useCreateDesignProjectPhase() {
   const queryClient = useQueryClient();
