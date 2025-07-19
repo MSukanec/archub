@@ -70,6 +70,8 @@ export interface TaskSearchResult {
   rubro_name?: string;
   category_name?: string;
   subcategory_name?: string;
+  unit_name?: string;
+  unit_symbol?: string;
 }
 
 export interface TaskSearchFilters {
@@ -99,7 +101,11 @@ export function useTaskSearch(
       // Construir query con filtros
       let query = supabase
         .from("task_generated_view")
-        .select("*")
+        .select(`
+          *,
+          unit_name,
+          unit_symbol
+        `)
         .limit(100);
 
       // Filtrar por origen (Sistema/Organización)

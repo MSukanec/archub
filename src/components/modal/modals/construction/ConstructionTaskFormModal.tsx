@@ -75,6 +75,12 @@ export function ConstructionTaskFormModal({
   const selectedTaskId = watch('task_id');
   const selectedTask = tasks.find(t => t.id === selectedTaskId);
   const quantity = watch('quantity');
+  
+  // Get task unit
+  const getTaskUnit = () => {
+    if (!selectedTask) return 'ud';
+    return selectedTask.unit_symbol || selectedTask.unit_name || 'ud';
+  };
 
   const createTask = useCreateConstructionTask();
 
@@ -119,7 +125,7 @@ export function ConstructionTaskFormModal({
       {/* Task Selection */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
-        <div className="min-h-[2.5rem] max-h-[4rem] overflow-y-auto">
+        <div className="w-full">
           <ComboBox
             options={taskOptions}
             value={selectedTaskId}
@@ -152,7 +158,7 @@ export function ConstructionTaskFormModal({
           />
           {selectedTaskId && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-              ud
+              {getTaskUnit()}
             </div>
           )}
         </div>

@@ -101,8 +101,12 @@ export function ComboBox({
           )}
           disabled={disabled}
         >
-          <div className="flex-1 min-w-0 text-left">
-            <span className="block text-sm leading-tight whitespace-normal break-words">
+          <div className="flex-1 min-w-0 text-left max-h-[2.5rem] overflow-hidden">
+            <span className="block text-sm leading-tight overflow-hidden text-ellipsis" style={{ 
+              display: '-webkit-box', 
+              WebkitLineClamp: 2, 
+              WebkitBoxOrient: 'vertical' 
+            }}>
               {selectedOption ? selectedOption.label : placeholder}
             </span>
           </div>
