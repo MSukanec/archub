@@ -466,7 +466,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             {/* Project Selector Button */}
             <div className="relative">
               <button
-                onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+                onClick={() => {
+                  setExpandedOrgSelector(false); // Close organization selector
+                  setExpandedProjectSelector(!expandedProjectSelector);
+                }}
                 className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
               >
                 <FolderOpen className="h-6 w-6" />
@@ -474,10 +477,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               {expandedProjectSelector && (
                 <div 
-                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1 min-w-48"
+                  className="absolute bottom-full left-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
-                    borderColor: 'var(--menues-border)'
+                    borderColor: 'var(--menues-border)',
+                    width: 'calc(100vw - 2rem)', // Full width minus padding
+                    marginLeft: 'calc(-100vw/3 + 100vw/6)', // Center relative to screen
                   }}
                 >
                   <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
@@ -514,7 +519,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             {/* Organization Selector Button */}
             <div className="relative">
               <button
-                onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
+                onClick={() => {
+                  setExpandedProjectSelector(false); // Close project selector
+                  setExpandedOrgSelector(!expandedOrgSelector);
+                }}
                 className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
               >
                 <Building className="h-6 w-6" />
@@ -522,10 +530,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               {expandedOrgSelector && (
                 <div 
-                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1 min-w-48"
+                  className="absolute bottom-full left-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
-                    borderColor: 'var(--menues-border)'
+                    borderColor: 'var(--menues-border)',
+                    width: 'calc(100vw - 2rem)', // Full width minus padding
+                    marginLeft: 'calc(-100vw/3 - 100vw/6)', // Center relative to screen
                   }}
                 >
                   <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
