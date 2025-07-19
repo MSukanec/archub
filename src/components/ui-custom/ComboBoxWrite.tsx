@@ -63,7 +63,9 @@ export function ComboBox({
   const handleSelect = (optionValue: string) => {
     onValueChange(optionValue);
     setOpen(false);
-    setSearchValue('');
+    if (!onSearchChange) {
+      setSearchValue('');
+    }
   };
 
   const handleCreateNew = async () => {

@@ -858,10 +858,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           return cleaned
         })
 
+        // Get user token for RLS authentication
+        const { data: { session } } = await supabase.auth.getSession();
+        const userToken = session?.access_token;
+
         const response = await fetch('/api/movements/bulk', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ movements: cleanedMovements })
+          body: JSON.stringify({ 
+            movements: cleanedMovements,
+            user_token: userToken
+          })
         })
         
         if (!response.ok) {
