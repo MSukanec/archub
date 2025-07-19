@@ -16,55 +16,8 @@ import { GanttRowProps } from '@/components/gantt/types'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { supabase } from '@/lib/supabase'
 
-// Función para procesar el display_name con expression_templates (exacta de ConstructionBudgets)
-async function processDisplayName(displayName: string, paramValues: any): Promise<string> {
-  if (!displayName || !paramValues || !supabase) return displayName;
-  
-  let processed = displayName;
-  
-  // Obtener los valores reales de los parámetros
-  const paramValueIds = Object.values(paramValues);
-  if (paramValueIds.length === 0) return displayName;
-  
-  const { data: parameterValues, error } = await supabase
-    .from('task_parameter_values')
-    .select(`
-      name, 
-      label,
-      parameter_id,
-      task_parameters!inner(expression_template)
-    `)
-    .in('name', paramValueIds);
-  
-  if (error) {
-    console.error("Error fetching parameter values:", error);
-    return displayName;
-  }
-  
-  // Reemplazar placeholders usando expression_template o label
-  Object.keys(paramValues).forEach(key => {
-    const placeholder = `{{${key}}}`;
-    const paramValueId = paramValues[key];
-    
-    // Buscar el valor correspondiente
-    const paramValue = parameterValues?.find(pv => pv.name === paramValueId);
-    
-    if (paramValue) {
-      // Usar expression_template si existe, sino usar label
-      let replacement = paramValue.task_parameters?.expression_template || paramValue.label || '';
-      
-      // Si el replacement contiene {value}, reemplazarlo con el label
-      if (replacement && replacement.includes('{value}')) {
-        replacement = replacement.replace(/{value}/g, paramValue.label || '');
-      }
-      
-      processed = processed.replace(new RegExp(placeholder, 'g'), replacement);
-    }
-  });
-  
-  // Clean up multiple spaces and trim the final result
-  return processed.replace(/\s+/g, ' ').trim();
-}
+// Usar el mismo sistema que ConstructionBudgets para procesar nombres
+import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -97,7 +50,7 @@ export default function ConstructionTasks() {
       const processed = await Promise.all(
         tasks.map(async (task) => {
           if (task.task.param_values && Object.keys(task.task.param_values).length > 0) {
-            const processedName = await processDisplayName(task.task.display_name, task.task.param_values)
+            const processedName = await generateTaskDescription(task.task.display_name, task.task.param_values)
             
             return {
               ...task,
@@ -252,12 +205,6 @@ export default function ConstructionTasks() {
           validEndDate = validStartDate; // Hacer que end_date sea igual a start_date
           validDuration = 1;
         }
-
-        console.log('Gantt task name:', {
-          original: task.task.display_name,
-          processed: task.task.processed_display_name,
-          using: task.task.processed_display_name || task.task.display_name
-        });
 
         ganttRows.push({
           id: task.id,
