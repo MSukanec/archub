@@ -355,7 +355,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
   const [incompatibleValues, setIncompatibleValues] = useState<{ [key: string]: string[] }>({})
   // Force re-render counter for the problematic selectors
-  const [renderCounter, setRenderCounter] = useState(0)
+
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -1441,33 +1441,13 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             return (
               <Card key={fieldName}>
                 <CardContent className="p-4">
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4">
                   <div>
                     <h4 className="font-medium text-sm mb-1">Campo: {fieldLabel}</h4>
                     <p className="text-xs text-muted-foreground">
                       {values.length} valor(es) incompatible(s) encontrado(s)
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const newMappings = { ...manualMappings };
-                      values.forEach(value => {
-                        const mappingKey = `${fieldName}_${value}`;
-                        newMappings[mappingKey] = '';
-                      });
-                      setManualMappings(newMappings);
-                      // Force re-render of all Select components
-                      setRenderCounter(prev => prev + 1);
-                      toast({
-                        title: "Campo completado",
-                        description: `Todos los valores de "${fieldLabel}" se asignaron como NULL`
-                      });
-                    }}
-                  >
-                    PONER TODO NULL
-                  </Button>
                 </div>
 
                 <div className="space-y-4">
@@ -1522,7 +1502,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         <div className="col-span-5">
                           <div className="space-y-2">
                             <ComboBox
-                              key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
+                              key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}`}
                               value={manualMappings[mappingKey] || ''}
                               onValueChange={(selectedId) => {
                                 setManualMappings(prev => ({

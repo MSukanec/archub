@@ -281,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bulk movements import endpoint
   app.post("/api/movements/bulk", async (req, res) => {
     try {
-      const { movements } = req.body;
+      const { movements, user_token } = req.body;
 
       if (!movements || !Array.isArray(movements)) {
         return res.status(400).json({ error: "Missing or invalid movements array" });
@@ -289,7 +289,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Received bulk movements:', movements.length);
 
-      const { data, error } = await supabase
+      // Use user's token to bypass RLS with proper user context
+      let clientToUse = supabase;
+      if (user_token) {
+        // Create a client with the user's session token
+        clientToUse = createClient(supabaseUrl, supabaseServiceKey, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${user_token}`
+            }
+          }
+        });
+      }
+
+      const { data, error } = await clientToUse
         .from('movements')
         .insert(movements)
         .select();
