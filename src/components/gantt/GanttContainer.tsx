@@ -231,8 +231,11 @@ export function GanttContainer({
       <div className="relative flex">
         {/* Panel Izquierdo - FIJO (sin scroll horizontal) */}
         <div 
-          className="bg-card border-r border-border flex-shrink-0 overflow-hidden"
-          style={{ width: leftPanelWidth }}
+          className="bg-card border-r flex-shrink-0 overflow-hidden"
+          style={{ 
+            width: leftPanelWidth,
+            borderRightColor: 'var(--table-header-bg)'
+          }}
         >
           {/* Contenido del panel izquierdo */}
           <div className="max-h-96 overflow-y-auto overflow-x-hidden">
@@ -240,7 +243,7 @@ export function GanttContainer({
               <div 
                 key={`left-${item.id}`} 
                 className={`border-b border-[var(--table-row-border)] h-9 flex items-center transition-colors ${
-                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-header-bg)]'
+                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
                 onMouseLeave={() => setHoveredRowId(null)}
@@ -273,7 +276,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para sincronizar con timeline */}
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-header-bg)]">
+              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
                 {/* Fila vacía para mantener altura sincronizada */}
               </div>
             ))}
@@ -303,7 +306,7 @@ export function GanttContainer({
               <div 
                 key={`timeline-${item.id}`} 
                 className={`border-b border-[var(--table-row-border)] h-9 flex items-center transition-colors ${
-                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-header-bg)]'
+                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
                 onMouseLeave={() => setHoveredRowId(null)}
@@ -373,7 +376,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para más espacio */}
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-header-bg)]">
+              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
                 <div 
                   className="relative h-full w-full"
                   style={{ width: timelineWidth }}
