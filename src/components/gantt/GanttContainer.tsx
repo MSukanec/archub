@@ -93,12 +93,16 @@ export function GanttContainer({
         end: weekEnd,
         monthLabel,
         key: format(weekStart, 'yyyy-ww'),
-        days: weekDays.map(day => ({
-          date: day,
-          dayNumber: format(day, 'd'),
-          dayName: format(day, 'EEE', { locale: es }),
-          isWeekend: isWeekend(day)
-        }))
+        days: weekDays.map(day => {
+          // Normalize each day to avoid UTC issues
+          const normalizedDay = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+          return {
+            date: normalizedDay,
+            dayNumber: format(normalizedDay, 'd'),
+            dayName: format(normalizedDay, 'EEE', { locale: es }),
+            isWeekend: isWeekend(normalizedDay)
+          };
+        })
       };
     });
 
