@@ -78,8 +78,8 @@ export function ConstructionTaskFormModal({
   
   // Get task unit
   const getTaskUnit = () => {
-    if (!selectedTask) return 'ud';
-    return selectedTask.unit_symbol || selectedTask.unit_name || 'ud';
+    if (!selectedTask || !selectedTask.units) return 'ud';
+    return selectedTask.units.name || 'ud';
   };
 
   const createTask = useCreateConstructionTask();

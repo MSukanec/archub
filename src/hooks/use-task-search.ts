@@ -70,8 +70,9 @@ export interface TaskSearchResult {
   rubro_name?: string;
   category_name?: string;
   subcategory_name?: string;
-  unit_name?: string;
-  unit_symbol?: string;
+  units?: {
+    name: string;
+  };
 }
 
 export interface TaskSearchFilters {
@@ -103,8 +104,9 @@ export function useTaskSearch(
         .from("task_generated_view")
         .select(`
           *,
-          unit_name,
-          unit_symbol
+          units!inner(
+            name
+          )
         `)
         .limit(100);
 
