@@ -44,13 +44,18 @@ export function ConstructionTaskFormModal({
   useEffect(() => {
     setPanel("edit");
   }, [setPanel]);
-  // Hook para búsqueda de tareas
+  // Hook para búsqueda de tareas (solo buscar si hay al menos 3 caracteres)
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
     searchQuery, 
     modalData.organizationId, 
     { origin: 'all' },
     searchQuery.length >= 3
   );
+
+  // Debug para ver qué está pasando
+  console.log('Search query:', searchQuery);
+  console.log('Tasks found:', tasks.length);
+  console.log('Tasks data:', tasks);
 
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),

@@ -47,10 +47,12 @@ export function ComboBox({
   // Find selected option
   const selectedOption = options.find(option => option.value === value);
 
-  // Filter options based on search
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  // Filter options based on search - solo si NO hay onSearchChange (búsqueda externa)
+  const filteredOptions = onSearchChange 
+    ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
+    : options.filter(option =>
+        option.label.toLowerCase().includes(searchValue.toLowerCase())
+      );
 
   // Check if search value would create a new option
   const canCreateNew = allowCreate && searchValue.trim() && 
