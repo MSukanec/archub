@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -68,130 +68,49 @@ export default function ConstructionTasks() {
     task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
   )
 
-  // Crear datos de ejemplo para el Gantt - mezclando endDate y durationInDays
-  const ganttData = [
-    {
-      id: "phase-1",
-      name: "Estructura",
-      type: "phase" as const,
-      level: 0,
-      startDate: "2024-01-15",
-      endDate: "2024-03-30", // Usando fecha exacta
-      children: [
-        {
-          id: "task-1-1",
-          name: "Excavación y cimientos",
-          type: "task" as const,
+  // Agrupar las tareas reales por rubro_name para el Gantt
+  const ganttData = useMemo(() => {
+    if (!filteredTasks.length) return [];
+
+    // Agrupar tareas por rubro_name
+    const tasksByRubro = filteredTasks.reduce((acc, task) => {
+      const rubroName = task.task.rubro_name || 'Sin Rubro';
+      if (!acc[rubroName]) {
+        acc[rubroName] = [];
+      }
+      acc[rubroName].push(task);
+      return acc;
+    }, {} as Record<string, typeof filteredTasks>);
+
+    // Crear estructura Gantt con agrupadores y tareas
+    const ganttRows: any[] = [];
+
+    Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]) => {
+      // Agregar fila agrupadora
+      ganttRows.push({
+        id: `group-${rubroName}`,
+        name: rubroName,
+        type: 'group',
+        level: 0,
+        isHeader: true
+      });
+
+      // Agregar tareas del rubro
+      rubloTasks.forEach((task) => {
+        ganttRows.push({
+          id: task.id,
+          name: task.task.display_name || task.task.code || 'Tarea sin nombre',
+          type: 'task',
           level: 1,
-          startDate: "2024-01-15",
-          durationInDays: 31 // Usando duración en días
-        },
-        {
-          id: "task-1-2", 
-          name: "Estructura de hormigón",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-02-01",
-          endDate: "2024-03-15" // Usando fecha exacta
-        },
-        {
-          id: "task-1-3",
-          name: "Estructura metálica", 
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-03-01",
-          durationInDays: 29 // Usando duración en días
-        }
-      ]
-    },
-    {
-      id: "phase-2",
-      name: "Albañilería",
-      type: "phase" as const,
-      level: 0,
-      startDate: "2024-03-15",
-      durationInDays: 76, // Usando duración en días para fase
-      children: [
-        {
-          id: "task-2-1",
-          name: "Mampostería exterior",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-03-15",
-          durationInDays: 46 // Usando duración en días
-        },
-        {
-          id: "task-2-2",
-          name: "Tabiquería interior",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-04-01",
-          endDate: "2024-05-15" // Usando fecha exacta
-        },
-        {
-          id: "task-2-3",
-          name: "Revoques y terminaciones",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-05-01",
-          durationInDays: 29 // Usando duración en días
-        }
-      ]
-    },
-    {
-      id: "phase-3", 
-      name: "Instalaciones",
-      type: "phase" as const,
-      level: 0,
-      startDate: "2024-04-15",
-      endDate: "2024-06-30", // Usando fecha exacta
-      children: [
-        {
-          id: "task-3-1",
-          name: "Instalación eléctrica",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-04-15",
-          durationInDays: 45 // Usando duración en días
-        },
-        {
-          id: "task-3-2",
-          name: "Instalación sanitaria",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-05-01",
-          durationInDays: 45 // Usando duración en días
-        },
-        {
-          id: "task-3-3",
-          name: "Sistema de climatización",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-05-15",
-          endDate: "2024-06-30" // Usando fecha exacta
-        }
-      ]
-    },
-    // Ejemplo con fechas inválidas para probar validación
-    {
-      id: "phase-test",
-      name: "Prueba Validación",
-      type: "phase" as const,
-      level: 0,
-      startDate: "2024-07-01",
-      durationInDays: -5, // Duración negativa - debería usar 1 día
-      children: [
-        {
-          id: "task-test-1",
-          name: "Tarea con fecha inválida",
-          type: "task" as const,
-          level: 1,
-          startDate: "2024-08-01",
-          endDate: "2024-07-15" // endDate anterior a startDate
-        }
-      ]
-    }
-  ];
+          startDate: task.start_date || undefined,
+          endDate: task.end_date || undefined,
+          durationInDays: task.duration_in_days || undefined
+        });
+      });
+    });
+
+    return ganttRows;
+  }, [filteredTasks]);
 
   const columns = [
     {
@@ -311,9 +230,6 @@ export default function ConstructionTasks() {
               data={ganttData}
               onItemClick={(item) => {
                 console.log('Clicked item:', item);
-              }}
-              onAddChild={(parentId) => {
-                console.log('Add child to:', parentId);
               }}
             />
           </div>

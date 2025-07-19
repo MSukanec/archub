@@ -1,84 +1,46 @@
-import { useState } from 'react';
 import { GanttLeftPanel } from './GanttLeftPanel';
 import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttRowProps } from './types';
-
-interface GanttRowComponentProps {
-  item: GanttRowProps;
-  timelineStart: Date;
-  timelineEnd: Date;
-  timelineWidth: number;
-  expandedItems: Set<string>;
-  onToggleExpand: (id: string) => void;
-  onItemClick?: (item: GanttRowProps) => void;
-  onAddChild?: (parentId: string) => void;
-}
 
 export function GanttRow({ 
   item, 
   timelineStart, 
   timelineEnd, 
   timelineWidth,
-  expandedItems,
-  onToggleExpand,
-  onItemClick,
-  onAddChild
-}: GanttRowComponentProps) {
-  const isExpanded = expandedItems.has(item.id);
-  const hasChildren = item.children && item.children.length > 0;
-
-  const handleRowClick = () => {
-    if (onItemClick) {
-      onItemClick(item);
-    }
-  };
+  onClick
+}: GanttRowProps & {
+  timelineStart: Date;
+  timelineEnd: Date;
+  timelineWidth: number;
+  onClick?: (item: GanttRowProps) => void;
+}) {
+  // Render group header differently
+  if (item.isHeader) {
+    return (
+      <div className="flex bg-muted/30 px-3 py-2 text-sm text-muted-foreground font-medium uppercase border-b border-border">
+        <div className="w-80">{item.name}</div>
+        <div className="flex-1 border-b border-border/30" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      {/* Main Row */}
-      <div 
-        className="flex group cursor-pointer hover:bg-muted/30 transition-colors"
-        onClick={handleRowClick}
-      >
-        {/* Left Panel - Fixed width */}
-        <div className="w-80 flex-shrink-0">
-          <GanttLeftPanel
-            item={item}
-            isExpanded={isExpanded}
-            onToggleExpand={onToggleExpand}
-            onAddChild={onAddChild}
-          />
-        </div>
-
-        {/* Timeline Bar - Flexible width */}
-        <div className="flex-1 min-w-0">
-          <GanttTimelineBar
-            item={item}
-            timelineStart={timelineStart}
-            timelineEnd={timelineEnd}
-            timelineWidth={timelineWidth}
-          />
-        </div>
+    <div className="flex border-b border-border hover:bg-muted/20 transition-colors">
+      {/* Left Panel */}
+      <GanttLeftPanel 
+        item={item}
+        onClick={onClick}
+      />
+      
+      {/* Timeline Bar */}
+      <div className="flex-1" style={{ width: `${timelineWidth}px` }}>
+        <GanttTimelineBar 
+          item={item}
+          timelineStart={timelineStart}
+          timelineEnd={timelineEnd}
+          timelineWidth={timelineWidth}
+        />
       </div>
-
-      {/* Children Rows */}
-      {hasChildren && isExpanded && item.children && (
-        <>
-          {item.children.map((child) => (
-            <GanttRow
-              key={child.id}
-              item={child}
-              timelineStart={timelineStart}
-              timelineEnd={timelineEnd}
-              timelineWidth={timelineWidth}
-              expandedItems={expandedItems}
-              onToggleExpand={onToggleExpand}
-              onItemClick={onItemClick}
-              onAddChild={onAddChild}
-            />
-          ))}
-        </>
-      )}
-    </>
+    </div>
   );
 }

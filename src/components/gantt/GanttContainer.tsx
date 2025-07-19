@@ -1,13 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { GanttRow } from './GanttRow';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 
 export function GanttContainer({ 
   data, 
-  onItemClick, 
-  onAddChild 
+  onItemClick 
 }: GanttContainerProps) {
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   // Calculate timeline bounds from all items and their children
   const { timelineStart, timelineEnd } = useMemo(() => {
@@ -53,17 +51,7 @@ export function GanttContainer({
     };
   }, [data]);
 
-  const handleToggleExpand = (id: string) => {
-    setExpandedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
+
 
   const timelineWidth = 800; // Fixed width for timeline area
 
@@ -80,7 +68,7 @@ export function GanttContainer({
       {/* Header */}
       <div className="flex border-b border-border bg-muted/50">
         <div className="w-80 flex-shrink-0 px-3 py-2 font-medium text-sm">
-          Fase / Tarea
+          Rubro / Tarea
         </div>
         <div className="flex-1 px-3 py-2 font-medium text-sm">
           Cronograma
@@ -96,10 +84,7 @@ export function GanttContainer({
             timelineStart={timelineStart}
             timelineEnd={timelineEnd}
             timelineWidth={timelineWidth}
-            expandedItems={expandedItems}
-            onToggleExpand={handleToggleExpand}
-            onItemClick={onItemClick}
-            onAddChild={onAddChild}
+            onClick={onItemClick}
           />
         ))}
       </div>

@@ -1,0 +1,127 @@
+### 🎯 Objetivo
+
+Actualizar el componente `Gantt` para mostrar correctamente las tareas de obra usando una agrupación automática por `rubro_name`, sin necesidad de crear carpetas o fases manuales.
+
+---
+
+### ✅ Contexto
+
+- Las tareas vienen desde una vista que ya incluye campos como `display_name`, `rubro_name`, `subcategory_name`, `start_date`, `end_date`, `duration_in_days`, etc.
+- Todas las tareas están en la tabla `construction_tasks` y hacen referencia a una tarea generada.
+- El objetivo es visualizar todas las tareas reales del proyecto en un Gantt.
+
+---
+
+### ✅ Comportamiento esperado
+
+1. **No se deben usar "phases" ni estructuras con `children`**
+2. Cada tarea se muestra como una fila independiente
+3. Las tareas se agrupan automáticamente por el campo `rubro_name` (ej: “Estructura”, “Albañilería”)
+4. Los agrupadores (rubros) se muestran como una fila visual separadora, sin barra de tiempo ni acciones
+
+---
+
+### 🧱 Estructura esperada del Gantt
+
+```ts
+[
+  {
+    id: 'header-Estructura',
+    name: 'Estructura',
+    type: 'group',
+    isHeader: true,
+    level: 0
+  },
+  {
+    id: 'tarea-1',
+    name: 'Excavación y Cimientos',
+    type: 'task',
+    level: 1,
+    startDate: '2024-01-10',
+    durationInDays: 10
+  },
+  ...
+]
+🧠 Implementación necesaria
+En ConstructionTasks.tsx, antes de pasar los datos al Gantt, se debe:
+
+Agrupar las tareas por rubro_name
+
+Para cada grupo:
+
+Agregar una fila de tipo group con isHeader: true
+
+Luego agregar las tareas con level: 1
+
+En GanttRow.tsx, si item.isHeader === true, renderizar la fila como:
+
+Solo texto item.name
+
+Sin GanttLeftPanel ni GanttTimelineBar
+
+Con fondo diferente para destacar el agrupador
+
+tsx
+Copiar
+Editar
+if (item.isHeader) {
+  return (
+    <div className="flex bg-muted px-3 py-1 text-xs text-muted-foreground font-medium uppercase">
+      <div className="w-80">{item.name}</div>
+      <div className="flex-1 border-b border-border" />
+    </div>
+  );
+}
+El resto de las filas (type: 'task') se comportan igual que ahora, mostrando:
+
+Nombre de la tarea
+
+Barra de tiempo
+
+Fechas
+
+Posible duración
+
+✨ Estilos visuales
+Fila agrupadora (isHeader) debe tener:
+
+Fondo gris claro o bg-muted
+
+Texto en mayúsculas
+
+Separador visual
+
+Tareas deben tener:
+
+Padding indentado por level: 1
+
+Color diferenciado por tipo si se desea (opcional)
+
+💡 Extras
+El componente GanttRowProps debe tener:
+
+ts
+Copiar
+Editar
+type GanttRowProps = {
+  id: string;
+  name: string;
+  type: 'task' | 'group';
+  level: number;
+  startDate?: string;
+  endDate?: string;
+  durationInDays?: number;
+  isHeader?: boolean;
+};
+En el futuro se puede permitir agrupar por subcategory_name en lugar de rubro_name, pero por ahora usar solo el rubro.
+
+✅ Resultado esperado
+Una vista tipo Gantt donde:
+
+Las tareas se agrupan automáticamente por rubro
+
+El usuario no crea fases ni carpetas manualmente
+
+Cada tarea tiene su propia barra de tiempo
+
+Todo es limpio, claro y automático

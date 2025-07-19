@@ -1,22 +1,18 @@
 export type GanttRowProps = {
   id: string;
   name: string;
-  type: 'phase' | 'task';
+  type: 'task' | 'group';
   level: number;
-  startDate: string;
+  startDate?: string;
   endDate?: string;           // Optional: exact end date
   durationInDays?: number;    // Optional: duration in days from start
-  children?: GanttRowProps[];
-  isExpanded?: boolean;
-  onToggleExpand?: (id: string) => void;
+  isHeader?: boolean;         // True for group headers
   onClick?: (item: GanttRowProps) => void;
-  onAddChild?: (parentId: string) => void;
 };
 
 export type GanttContainerProps = {
   data: GanttRowProps[];
   onItemClick?: (item: GanttRowProps) => void;
-  onAddChild?: (parentId: string) => void;
 };
 
 export interface ResolvedDateRange {
