@@ -477,12 +477,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               {expandedProjectSelector && (
                 <div 
-                  className="absolute bottom-full left-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
                     borderColor: 'var(--menues-border)',
-                    width: 'calc(100vw - 2rem)', // Full width minus padding
-                    marginLeft: 'calc(-100vw/3 + 100vw/6)', // Center relative to screen
                   }}
                 >
                   <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
@@ -530,12 +528,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               {expandedOrgSelector && (
                 <div 
-                  className="absolute bottom-full left-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
                     borderColor: 'var(--menues-border)',
-                    width: 'calc(100vw - 2rem)', // Full width minus padding
-                    marginLeft: 'calc(-100vw/3 - 100vw/6)', // Center relative to screen
                   }}
                 >
                   <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
