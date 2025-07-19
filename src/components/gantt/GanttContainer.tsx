@@ -353,10 +353,24 @@ export function GanttContainer({
                       const today = new Date();
                       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                       
-                      if (todayStart >= timelineStart && todayStart <= timelineEnd) {
-                        const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
-                        const todayMs = todayStart.getTime() - timelineStart.getTime();
-                        const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                      // Buscar el día exacto en la estructura del calendario
+                      let todayDayIndex = -1;
+                      let currentDayIndex = 0;
+                      
+                      for (const week of calendarStructure.weeks) {
+                        for (const day of week.days) {
+                          if (day.date.getTime() === todayStart.getTime()) {
+                            todayDayIndex = currentDayIndex;
+                            break;
+                          }
+                          currentDayIndex++;
+                        }
+                        if (todayDayIndex !== -1) break;
+                      }
+                      
+                      if (todayDayIndex !== -1) {
+                        const dayWidth = timelineWidth / calendarStructure.totalDays;
+                        const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
                         
                         return (
                           <div 
@@ -390,11 +404,24 @@ export function GanttContainer({
                         const today = new Date();
                         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                         
-                        // Verificar si hoy está dentro del rango del timeline
-                        if (todayStart >= timelineStart && todayStart <= timelineEnd) {
-                          const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
-                          const todayMs = todayStart.getTime() - timelineStart.getTime();
-                          const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                        // Buscar el día exacto en la estructura del calendario
+                        let todayDayIndex = -1;
+                        let currentDayIndex = 0;
+                        
+                        for (const week of calendarStructure.weeks) {
+                          for (const day of week.days) {
+                            if (day.date.getTime() === todayStart.getTime()) {
+                              todayDayIndex = currentDayIndex;
+                              break;
+                            }
+                            currentDayIndex++;
+                          }
+                          if (todayDayIndex !== -1) break;
+                        }
+                        
+                        if (todayDayIndex !== -1) {
+                          const dayWidth = timelineWidth / calendarStructure.totalDays;
+                          const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
                           
                           return (
                             <div 
@@ -473,10 +500,24 @@ export function GanttContainer({
                     const today = new Date();
                     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                     
-                    if (todayStart >= timelineStart && todayStart <= timelineEnd) {
-                      const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
-                      const todayMs = todayStart.getTime() - timelineStart.getTime();
-                      const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                    // Buscar el día exacto en la estructura del calendario
+                    let todayDayIndex = -1;
+                    let currentDayIndex = 0;
+                    
+                    for (const week of calendarStructure.weeks) {
+                      for (const day of week.days) {
+                        if (day.date.getTime() === todayStart.getTime()) {
+                          todayDayIndex = currentDayIndex;
+                          break;
+                        }
+                        currentDayIndex++;
+                      }
+                      if (todayDayIndex !== -1) break;
+                    }
+                    
+                    if (todayDayIndex !== -1) {
+                      const dayWidth = timelineWidth / calendarStructure.totalDays;
+                      const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
                       
                       return (
                         <div 
