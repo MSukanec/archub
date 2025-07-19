@@ -8,6 +8,10 @@ export interface ConstructionTask {
   project_id: string;
   task_id: string;
   quantity: number;
+  created_by: string;
+  start_date?: string;
+  end_date?: string;
+  duration_in_days?: number;
   created_at: string;
   updated_at: string;
   task: {
@@ -65,6 +69,10 @@ export function useCreateConstructionTask() {
       project_id: string;
       task_id: string;
       quantity: number;
+      created_by: string;
+      start_date?: string;
+      end_date?: string;
+      duration_in_days?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 

@@ -28,14 +28,15 @@ export default function ConstructionTasks() {
   )
 
   const handleAddTask = () => {
-    if (!projectId || !organizationId) {
-      console.error('Missing project or organization ID')
+    if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing project, organization ID, or user data')
       return
     }
 
     openModal('construction-task', {
       projectId,
-      organizationId
+      organizationId,
+      userId: userData.user.id
     })
   }
 

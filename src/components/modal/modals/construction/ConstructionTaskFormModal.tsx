@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
@@ -14,6 +15,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -39,6 +41,29 @@ export function ConstructionTaskFormModal({
   
   const { data: userData } = useCurrentUser();
   const { setPanel } = useModalPanelStore();
+
+  // Get current user's member_id
+  const { data: currentMember } = useQuery({
+    queryKey: ['current-member', modalData.organizationId, userData?.user?.id],
+    queryFn: async () => {
+      if (!userData?.user?.id || !modalData.organizationId) return null;
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', modalData.organizationId)
+        .eq('user_id', userData.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching member:', error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!userData?.user?.id && !!modalData.organizationId
+  });
 
   // Forzar modo de edición al abrir el modal
   useEffect(() => {
@@ -94,6 +119,15 @@ export function ConstructionTaskFormModal({
       return;
     }
 
+    if (!currentMember?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo obtener la información del usuario en la organización",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -101,7 +135,8 @@ export function ConstructionTaskFormModal({
         organization_id: modalData.organizationId,
         project_id: modalData.projectId,
         task_id: data.task_id,
-        quantity: data.quantity
+        quantity: data.quantity,
+        created_by: currentMember.id
       });
 
       onClose();
