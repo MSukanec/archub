@@ -221,7 +221,7 @@ export function GanttContainer({
                       <span 
                         className={`
                           truncate text-sm text-foreground transition-all duration-200
-                          ${(onEdit || onDelete) ? 'group-hover:mr-[72px]' : ''}
+                          ${(onEdit || onDelete) ? 'group-hover:pr-[68px]' : ''}
                         `}
                         title={item.name}
                       >
