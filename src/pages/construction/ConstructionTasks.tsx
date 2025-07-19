@@ -178,6 +178,17 @@ export default function ConstructionTasks() {
     }
   ]
 
+  const actions = [
+    <Button 
+      key="new-task"
+      className="h-8 px-3 text-sm"
+      onClick={handleAddTask}
+    >
+      <Plus className="w-4 h-4 mr-2" />
+      Crear Tarea
+    </Button>
+  ]
+
   const headerProps = {
     title: "Tareas",
     showSearch: true,
@@ -185,20 +196,7 @@ export default function ConstructionTasks() {
     onSearchChange: setSearchValue,
     showFilters: false,
     onClearFilters: () => setSearchValue(""),
-    actions: (
-      <div className="flex items-center gap-2">
-        <Button 
-          className="h-8 px-3 text-sm"
-          onClick={handleAddTask}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Crear Tarea
-        </Button>
-        <div className="text-xs text-muted-foreground">
-          Debug: {projectId ? 'P✓' : 'P✗'} {organizationId ? 'O✓' : 'O✗'}
-        </div>
-      </div>
-    )
+    actions
   }
 
   const features = [
