@@ -142,18 +142,12 @@ export function GanttContainer({
       <div className="flex border-b border-border bg-muted/50">
         {/* Encabezado del panel izquierdo */}
         <div 
-          className="relative border-r border-border flex-shrink-0 h-14 flex items-center"
+          className="border-r border-border flex-shrink-0 h-14 flex items-center"
           style={{ width: leftPanelWidth }}
         >
           <div className="px-3 font-medium text-sm">
             Rubro / Tarea
           </div>
-          
-          {/* Handle de redimensionamiento en el header también */}
-          <div 
-            className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-20 transition-colors z-10"
-            onMouseDown={startResize}
-          />
         </div>
 
         {/* Encabezado de fechas doble fila */}
@@ -189,10 +183,10 @@ export function GanttContainer({
       </div>
 
       {/* Contenido principal */}
-      <div className="flex">
+      <div className="relative flex">
         {/* Panel Izquierdo */}
         <div 
-          className="relative bg-card border-r border-border flex-shrink-0"
+          className="bg-card border-r border-border flex-shrink-0"
           style={{ width: leftPanelWidth }}
         >
           {/* Contenido del panel izquierdo */}
@@ -250,12 +244,14 @@ export function GanttContainer({
             ))}
           </div>
 
-          {/* Handle de redimensionamiento */}
-          <div 
-            className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-20 transition-colors z-10"
-            onMouseDown={startResize}
-          />
         </div>
+
+        {/* Handle de redimensionamiento unificado (de punta a punta vertical) */}
+        <div 
+          className="absolute top-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-30 transition-colors z-20 border-l border-transparent hover:border-[var(--accent)]"
+          style={{ left: leftPanelWidth - 1 }}
+          onMouseDown={startResize}
+        />
 
         {/* Timeline */}
         <div className="flex-1 overflow-x-auto">
@@ -270,7 +266,7 @@ export function GanttContainer({
                   />
                 ) : (
                   <div 
-                    className="relative h-full w-full bg-[var(--accent)] bg-opacity-10"
+                    className="relative h-full w-full"
                     style={{ width: timelineWidth }}
                   >
                     {/* Grilla de días de fondo */}
