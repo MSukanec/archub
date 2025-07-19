@@ -48,20 +48,21 @@ export function GanttContainer({
     if (allDates.length === 0) {
       const today = new Date();
       return {
-        timelineStart: today,
-        timelineEnd: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
+        timelineStart: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000), // 60 days antes
+        timelineEnd: new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000) // 120 days después
       };
     }
 
     const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
     const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
     
-    // Add some padding
-    const padding = (maxDate.getTime() - minDate.getTime()) * 0.1;
+    // Add substantial padding to ensure scroll is visible
+    const paddingDays = 30; // 30 days before and after
+    const paddingMillis = paddingDays * 24 * 60 * 60 * 1000;
     
     return {
-      timelineStart: new Date(minDate.getTime() - padding),
-      timelineEnd: new Date(maxDate.getTime() + padding)
+      timelineStart: new Date(minDate.getTime() - paddingMillis),
+      timelineEnd: new Date(maxDate.getTime() + paddingMillis)
     };
   }, [data]);
 
@@ -125,8 +126,8 @@ export function GanttContainer({
     window.addEventListener('mouseup', onMouseUp);
   }, [leftPanelWidth]);
 
-  const dayWidth = 32; // Ancho fijo por día
-  const timelineWidth = calendarStructure.allDays.length * dayWidth;
+  const dayWidth = 40; // Ancho más amplio por día para garantizar scroll
+  const timelineWidth = Math.max(calendarStructure.allDays.length * dayWidth, 1200); // Ancho mínimo para garantizar scroll
 
   if (data.length === 0) {
     return (
@@ -163,7 +164,7 @@ export function GanttContainer({
 
         {/* Encabezado de fechas doble fila - CON SCROLL HORIZONTAL */}
         <div 
-          className="flex-1 overflow-x-auto" 
+          className="flex-1 overflow-x-scroll gantt-timeline-scroll" 
           id="timeline-header-scroll"
           onScroll={(e) => {
             // Sincronizar scroll con el contenido
@@ -276,7 +277,7 @@ export function GanttContainer({
 
         {/* Timeline - CON SCROLL HORIZONTAL SINCRONIZADO */}
         <div 
-          className="flex-1 overflow-x-auto" 
+          className="flex-1 overflow-x-scroll gantt-timeline-scroll" 
           id="timeline-content-scroll"
           onScroll={(e) => {
             // Sincronizar scroll con el header
