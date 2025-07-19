@@ -20,7 +20,7 @@ export function GanttTimelineBar({
   // Validate dates
   if (!dateRange.isValid) {
     return (
-      <div className="flex items-center justify-center h-6 bg-[var(--accent)] bg-opacity-20 border border-[var(--accent)] rounded text-xs text-[var(--accent)]">
+      <div className="flex items-center justify-center h-6 bg-[var(--accent)] border border-[var(--accent)] rounded text-xs text-white font-medium">
         Fechas inválidas
       </div>
     );
