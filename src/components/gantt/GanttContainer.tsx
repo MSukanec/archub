@@ -447,6 +447,14 @@ export function GanttContainer({
                         const dayWidth = timelineWidth / calendarStructure.totalDays;
                         const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                         
+                        console.log('TODAY LINE CALCULATION:', {
+                          todayDayIndex,
+                          totalDays: calendarStructure.totalDays,
+                          dayWidth,
+                          todayPosition,
+                          calculation: `day ${todayDayIndex} * ${dayWidth} = ${todayPosition}`
+                        });
+                        
                         return (
                           <div 
                             className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"

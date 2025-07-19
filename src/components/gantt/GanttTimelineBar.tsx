@@ -44,6 +44,8 @@ export function GanttTimelineBar({
   const dayEndFromTimeline = Math.floor((normalizedEnd.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
   
   const dayWidth = timelineWidth / totalDays;
+  
+  // Use the SAME calculation as the TODAY line for consistency
   const startPixels = dayStartFromTimeline * dayWidth;
   const widthPixels = (dayEndFromTimeline - dayStartFromTimeline + 1) * dayWidth;
   
