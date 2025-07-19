@@ -12,6 +12,7 @@ import { Plus } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask } from "@/hooks/use-construction-tasks";
+import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 
 const addTaskSchema = z.object({
@@ -37,6 +38,12 @@ export function ConstructionTaskFormModal({
   const [searchQuery, setSearchQuery] = useState('');
   
   const { data: userData } = useCurrentUser();
+  const { setPanel } = useModalPanelStore();
+
+  // Forzar modo de edición al abrir el modal
+  useEffect(() => {
+    setPanel("edit");
+  }, [setPanel]);
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
     searchQuery, 
     modalData.organizationId, 
