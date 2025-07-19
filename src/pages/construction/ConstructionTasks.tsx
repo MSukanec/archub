@@ -49,24 +49,43 @@ export default function ConstructionTasks() {
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         <FeatureIntroduction
-          icon={CheckSquare}
+          icon={<CheckSquare className="w-6 h-6" />}
           title="Gestión de Tareas de Obra"
-          description="Administra y controla todas las tareas específicas de esta obra para una gestión eficiente del proyecto."
           features={[
-            "Creación y asignación de tareas específicas de construcción",
-            "Seguimiento del progreso y estado de cada actividad",
-            "Integración directa con presupuestos y cronogramas",
-            "Control de dependencias entre tareas y fases de obra"
+            {
+              icon: <CheckSquare className="w-4 h-4" />,
+              title: "Creación y Asignación",
+              description: "Crea y asigna tareas específicas de construcción a miembros del equipo."
+            },
+            {
+              icon: <CheckSquare className="w-4 h-4" />,
+              title: "Seguimiento del Progreso",
+              description: "Monitorea el estado y progreso de cada actividad en tiempo real."
+            },
+            {
+              icon: <CheckSquare className="w-4 h-4" />,
+              title: "Integración con Presupuestos",
+              description: "Vincula tareas directamente con presupuestos y cronogramas del proyecto."
+            },
+            {
+              icon: <CheckSquare className="w-4 h-4" />,
+              title: "Control de Dependencias",
+              description: "Gestiona dependencias entre tareas y fases de obra para optimizar flujos."
+            }
           ]}
         />
 
         {tasks.length === 0 ? (
           <EmptyState
-            icon={CheckSquare}
+            icon={<CheckSquare className="w-8 h-8 text-muted-foreground" />}
             title="No hay tareas creadas"
             description="Comienza agregando las primeras tareas de construcción para esta obra. Las tareas te permitirán organizar mejor el trabajo y vincularlas con los presupuestos."
-            actionLabel="Agregar Primera Tarea"
-            onAction={() => openModal('construction-task', { open: true })}
+            action={
+              <Button onClick={() => openModal('construction-task', { open: true })}>
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Primera Tarea
+              </Button>
+            }
           />
         ) : (
           <div>

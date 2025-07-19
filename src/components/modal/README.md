@@ -178,3 +178,52 @@ Luego de implementarlo, abrí el modal desde la app y verificá:
 ✅ No hay doble línea en el header
 
 ✅ Tiene bordes redondeados en todo el contenedor
+
+## ⚠️ ERRORES CRÍTICOS DE ICONOS
+
+**PROBLEMA COMÚN:** Error "Objects are not valid as a React child" al usar iconos
+
+**CAUSA:** Pasar componentes de iconos como referencias directas en lugar de JSX Elements
+
+**❌ INCORRECTO:**
+```tsx
+// En páginas que usan FeatureIntroduction y EmptyState
+<FeatureIntroduction
+  icon={CheckSquare}  // ❌ INCORRECTO - referencia de componente
+  features={[
+    "Texto simple"     // ❌ INCORRECTO - array de strings
+  ]}
+/>
+
+<EmptyState
+  icon={Package}      // ❌ INCORRECTO - referencia de componente
+  actionLabel="Click" // ❌ INCORRECTO - no existe esta prop
+  onAction={onClick}  // ❌ INCORRECTO - no existe esta prop
+/>
+```
+
+**✅ CORRECTO:**
+```tsx
+// Iconos como JSX Elements con clases de tamaño
+<FeatureIntroduction
+  icon={<CheckSquare className="w-6 h-6" />}  // ✅ JSX Element
+  features={[
+    {
+      icon: <CheckSquare className="w-4 h-4" />, // ✅ JSX Element
+      title: "Título",
+      description: "Descripción"
+    }
+  ]}
+/>
+
+<EmptyState
+  icon={<Package className="w-8 h-8 text-muted-foreground" />} // ✅ JSX Element
+  action={                                     // ✅ Usar 'action' prop
+    <Button onClick={onClick}>
+      Agregar
+    </Button>
+  }
+/>
+```
+
+**REGLA:** Siempre usar iconos como JSX Elements (`<Icon className="..." />`) nunca como referencias (`Icon`)
