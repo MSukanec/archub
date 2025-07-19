@@ -21,7 +21,7 @@ import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
-  const [activeTab, setActiveTab] = useState("list")
+  const [activeTab, setActiveTab] = useState("cronograma")
   const [processedTasks, setProcessedTasks] = useState<any[]>([])
   
   const { data: userData } = useCurrentUser()
@@ -233,17 +233,17 @@ export default function ConstructionTasks() {
     {
       key: 'tarea',
       label: 'Tarea',
-      width: '80%',
       render: (task: any) => (
-        <div className="font-medium">
-          {task.task.processed_display_name || task.task.display_name}
+        <div>
+          <div className="font-medium">{task.task.processed_display_name || task.task.display_name}</div>
+          <div className="text-xs text-muted-foreground">{task.task.code}</div>
         </div>
       )
     },
     {
       key: 'unidad',
       label: 'Unidad',
-      render: (task: any) => task.task.unit_name || task.task.unit_id || '-'
+      render: (task: any) => task.task.unit_id ? 'Unidad' : '-'
     },
     {
       key: 'cantidad',
@@ -356,53 +356,20 @@ export default function ConstructionTasks() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 border border-[var(--card-border)] bg-[var(--card-bg)] rounded-lg p-1">
             <TabsTrigger 
-              value="listado" 
-              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
-            >
-              <TableIcon className="w-4 h-4" />
-              Listado
-            </TabsTrigger>
-            <TabsTrigger 
               value="cronograma" 
               className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
             >
               <Calendar className="w-4 h-4" />
               Cronograma
             </TabsTrigger>
+            <TabsTrigger 
+              value="listado" 
+              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
+            >
+              <TableIcon className="w-4 h-4" />
+              Listado
+            </TabsTrigger>
           </TabsList>
-
-          {/* Vista Listado - Tabla */}
-          <TabsContent value="listado" className="mt-6">
-            {!projectId ? (
-              <EmptyState
-                icon={<ListTodo className="w-12 h-12" />}
-                title="Selecciona un proyecto"
-                description="Para ver las tareas de construcción, primero selecciona un proyecto específico desde el header."
-              />
-            ) : filteredTasks.length === 0 && !isLoading ? (
-              <EmptyState
-                icon={<ListTodo className="w-12 h-12" />}
-                title="No hay tareas creadas"
-                description="Crea tu primera tarea de construcción para comenzar a organizar el trabajo de la obra."
-                action={
-                  <Button onClick={handleAddTask}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear Primera Tarea
-                  </Button>
-                }
-              />
-            ) : (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">Listado de Tareas</h3>
-                <Table
-                  data={filteredTasks}
-                  columns={columns}
-                  isLoading={isLoading}
-                  emptyMessage="No se encontraron tareas que coincidan con la búsqueda"
-                />
-              </div>
-            )}
-          </TabsContent>
 
           {/* Vista Cronograma - Gantt Timeline */}
           <TabsContent value="cronograma" className="mt-6">
@@ -434,6 +401,39 @@ export default function ConstructionTasks() {
                   }}
                   onEdit={handleEditTask}
                   onDelete={handleDeleteTaskFromGantt}
+                />
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Vista Listado - Tabla */}
+          <TabsContent value="listado" className="mt-6">
+            {!projectId ? (
+              <EmptyState
+                icon={<ListTodo className="w-12 h-12" />}
+                title="Selecciona un proyecto"
+                description="Para ver las tareas de construcción, primero selecciona un proyecto específico desde el header."
+              />
+            ) : filteredTasks.length === 0 && !isLoading ? (
+              <EmptyState
+                icon={<ListTodo className="w-12 h-12" />}
+                title="No hay tareas creadas"
+                description="Crea tu primera tarea de construcción para comenzar a organizar el trabajo de la obra."
+                action={
+                  <Button onClick={handleAddTask}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Primera Tarea
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Listado de Tareas</h3>
+                <Table
+                  data={filteredTasks}
+                  columns={columns}
+                  isLoading={isLoading}
+                  emptyMessage="No se encontraron tareas que coincidan con la búsqueda"
                 />
               </div>
             )}
