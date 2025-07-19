@@ -5,11 +5,11 @@ import { z } from "zod";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { TaskSearchCombo } from "@/components/ui-custom/TaskSearchCombo";
+import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from "@/hooks/use-task-search";
+import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
@@ -36,7 +36,6 @@ export function ConstructionTaskFormModal({
 }: ConstructionTaskFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [taskFilters, setTaskFilters] = useState<TaskSearchFilters>({ origin: 'all' });
   
   const { data: userData } = useCurrentUser();
   const { setPanel } = useModalPanelStore();
@@ -45,17 +44,12 @@ export function ConstructionTaskFormModal({
   useEffect(() => {
     setPanel("edit");
   }, [setPanel]);
-  // Hook para búsqueda de tareas (IGUAL que en presupuestos)
+  // Hook para búsqueda de tareas
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
     searchQuery, 
     modalData.organizationId, 
-    taskFilters,
+    { origin: 'all' },
     searchQuery.length >= 3
-  );
-
-  // Hook para opciones de filtros (IGUAL que en presupuestos)
-  const { data: filterOptions } = useTaskSearchFilterOptions(
-    modalData.organizationId
   );
 
   const form = useForm<AddTaskFormData>({
@@ -68,7 +62,7 @@ export function ConstructionTaskFormModal({
 
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
 
-  // Preparar opciones para TaskSearchCombo usando display_name (IGUAL que en presupuestos)
+  // Preparar opciones para ComboBoxWrite usando display_name
   const taskOptions = tasks.map(task => ({
     value: task.id,
     label: task.display_name || task.code || 'Sin nombre'
@@ -119,55 +113,45 @@ export function ConstructionTaskFormModal({
 
   const editPanel = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Task Selection - EXACTAMENTE igual que en presupuestos */}
+      {/* Task Selection with inline Quantity */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
-        <TaskSearchCombo
-          options={taskOptions}
-          value={selectedTaskId}
-          onValueChange={(value) => setValue('task_id', value)}
-          placeholder="Buscar tipo de tarea..."
-          searchPlaceholder="Buscar tipo de tarea..."
-          emptyText="No se encontraron tareas"
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          filters={taskFilters}
-          onFiltersChange={setTaskFilters}
-          filterOptions={filterOptions}
-          isLoading={tasksLoading}
-        />
-        {errors.task_id && (
-          <p className="text-sm text-destructive">{errors.task_id.message}</p>
-        )}
-      </div>
-
-      {/* Selected Task Info */}
-      {selectedTask && (
-        <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-          <div className="font-medium">{selectedTask.display_name}</div>
-          <div className="text-sm text-muted-foreground">
-            <div>Rubro: {selectedTask.rubro_name || 'Sin rubro'}</div>
-            <div>Categoría: {selectedTask.category_name || 'Sin categoría'}</div>
-            <div>Unidad: {selectedTask.unit_id ? 'Configurada' : 'Sin unidad'}</div>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <ComboBox
+              options={taskOptions}
+              value={selectedTaskId}
+              onValueChange={(value) => setValue('task_id', value)}
+              placeholder="Buscar tarea..."
+              searchPlaceholder="Escriba para buscar tareas..."
+              emptyMessage="No se encontraron tareas"
+              onSearchChange={setSearchQuery}
+            />
+          </div>
+          <div className="w-32">
+            <Input
+              id="quantity"
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={quantity}
+              onChange={(e) => setValue('quantity', parseFloat(e.target.value) || 0)}
+              placeholder="Cantidad"
+            />
           </div>
         </div>
-      )}
-
-      {/* Quantity Input */}
-      <div className="space-y-2">
-        <Label htmlFor="quantity">Cantidad *</Label>
-        <Input
-          id="quantity"
-          type="number"
-          step="0.01"
-          min="0.01"
-          value={quantity}
-          onChange={(e) => setValue('quantity', parseFloat(e.target.value) || 0)}
-          placeholder="Ingrese la cantidad..."
-        />
-        {errors.quantity && (
-          <p className="text-sm text-destructive">{errors.quantity.message}</p>
-        )}
+        <div className="flex gap-3">
+          <div className="flex-1">
+            {errors.task_id && (
+              <p className="text-sm text-destructive">{errors.task_id.message}</p>
+            )}
+          </div>
+          <div className="w-32">
+            {errors.quantity && (
+              <p className="text-sm text-destructive">{errors.quantity.message}</p>
+            )}
+          </div>
+        </div>
       </div>
     </form>
   );
