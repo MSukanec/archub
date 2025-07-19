@@ -126,18 +126,27 @@ export function useUpdateConstructionTask() {
   return useMutation({
     mutationFn: async (data: {
       id: string;
-      quantity: number;
+      quantity?: number;
       project_id: string;
       organization_id: string;
+      start_date?: string;
+      end_date?: string;
+      duration_in_days?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (data.quantity !== undefined) updateData.quantity = data.quantity;
+      if (data.start_date !== undefined) updateData.start_date = data.start_date;
+      if (data.end_date !== undefined) updateData.end_date = data.end_date;
+      if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
+
       const { data: result, error } = await supabase
         .from('construction_tasks')
-        .update({ 
-          quantity: data.quantity,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', data.id)
         .select(`
           *,

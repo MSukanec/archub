@@ -244,7 +244,7 @@ export function GanttContainer({
                 ) : (
                   <div 
                     className="group w-full h-full flex items-center cursor-pointer transition-colors"
-                    style={{ paddingLeft: `${16 + item.level * 24}px`, paddingRight: '16px' }}
+                    style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
                     onClick={() => onItemClick?.(item)}
                   >
                     <div className="flex items-center w-full">

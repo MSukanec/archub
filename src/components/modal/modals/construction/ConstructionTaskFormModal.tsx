@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateConstructionTask } from "@/hooks/use-construction-tasks";
+import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -40,6 +40,9 @@ interface ConstructionTaskFormModalProps {
   modalData: {
     projectId: string;
     organizationId: string;
+    userId?: string;
+    editingTask?: any;
+    isEditing?: boolean;
   };
   onClose: () => void;
 }
@@ -81,6 +84,7 @@ export function ConstructionTaskFormModal({
   useEffect(() => {
     setPanel("edit");
   }, [setPanel]);
+
   // Hook para búsqueda de tareas (solo buscar si hay al menos 3 caracteres)
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
     searchQuery, 
@@ -89,20 +93,37 @@ export function ConstructionTaskFormModal({
     searchQuery.length >= 3
   );
 
-
-
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
-      task_id: "",
-      quantity: 1,
-      start_date: "",
-      end_date: "",
-      duration_in_days: undefined
+      task_id: modalData.editingTask?.task_id || "",
+      quantity: modalData.editingTask?.quantity || 1,
+      start_date: modalData.editingTask?.start_date || "",
+      end_date: modalData.editingTask?.end_date || "",
+      duration_in_days: modalData.editingTask?.duration_in_days || undefined
     }
   });
 
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
+
+  // Cargar datos cuando está en modo edición
+  useEffect(() => {
+    if (modalData.isEditing && modalData.editingTask) {
+      const task = modalData.editingTask;
+      
+      // Pre-cargar la búsqueda con el nombre de la tarea existente
+      if (task.task?.display_name) {
+        setSearchQuery(task.task.display_name);
+      }
+      
+      // Actualizar los valores del formulario
+      setValue('task_id', task.task_id || '');
+      setValue('quantity', task.quantity || 1);
+      setValue('start_date', task.start_date || '');
+      setValue('end_date', task.end_date || '');
+      setValue('duration_in_days', task.duration_in_days || undefined);
+    }
+  }, [modalData.isEditing, modalData.editingTask, setValue]);
 
   // Preparar opciones para ComboBoxWrite usando display_name
   const taskOptions = tasks.map(task => ({
@@ -123,6 +144,7 @@ export function ConstructionTaskFormModal({
   };
 
   const createTask = useCreateConstructionTask();
+  const updateTask = useUpdateConstructionTask();
 
   const onSubmit = async (data: AddTaskFormData) => {
     if (!userData?.user?.id) {
@@ -134,7 +156,7 @@ export function ConstructionTaskFormModal({
       return;
     }
 
-    if (!currentMember?.id) {
+    if (!currentMember?.id && !modalData.isEditing) {
       toast({
         title: "Error",
         description: "No se pudo obtener la información del usuario en la organización",
@@ -154,16 +176,30 @@ export function ConstructionTaskFormModal({
         endDate = startDate.toISOString().split('T')[0];
       }
 
-      await createTask.mutateAsync({
-        organization_id: modalData.organizationId,
-        project_id: modalData.projectId,
-        task_id: data.task_id,
-        quantity: data.quantity,
-        created_by: currentMember.id,
-        start_date: data.start_date || null,
-        end_date: endDate || null,
-        duration_in_days: data.duration_in_days || null
-      });
+      if (modalData.isEditing && modalData.editingTask?.id) {
+        // Update existing task
+        await updateTask.mutateAsync({
+          id: modalData.editingTask.id,
+          project_id: modalData.projectId,
+          organization_id: modalData.organizationId,
+          quantity: data.quantity,
+          start_date: data.start_date || null,
+          end_date: endDate || null,
+          duration_in_days: data.duration_in_days || null
+        });
+      } else {
+        // Create new task
+        await createTask.mutateAsync({
+          organization_id: modalData.organizationId,
+          project_id: modalData.projectId,
+          task_id: data.task_id,
+          quantity: data.quantity,
+          created_by: currentMember.id,
+          start_date: data.start_date || null,
+          end_date: endDate || null,
+          duration_in_days: data.duration_in_days || null
+        });
+      }
 
       onClose();
     } catch (error) {
@@ -276,7 +312,7 @@ export function ConstructionTaskFormModal({
 
   const headerContent = (
     <FormModalHeader 
-      title="Agregar Tarea de Construcción"
+      title={modalData.isEditing ? "Editar Tarea de Construcción" : "Agregar Tarea de Construcción"}
       icon={Plus}
     />
   );
@@ -285,7 +321,7 @@ export function ConstructionTaskFormModal({
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Agregar Tarea"
+      rightLabel={modalData.isEditing ? "Guardar Cambios" : "Agregar Tarea"}
       onRightClick={handleSubmit(onSubmit)}
       rightLoading={isSubmitting}
       rightDisabled={isSubmitting || !selectedTaskId || !quantity}
