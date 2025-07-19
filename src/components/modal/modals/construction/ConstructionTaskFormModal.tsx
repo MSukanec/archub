@@ -279,32 +279,32 @@ export function ConstructionTaskFormModal({
           )}
         </div>
 
-        {/* Duration or End Date */}
+        {/* End Date */}
         <div className="space-y-2">
-          <Label htmlFor="duration_in_days">Duración (días)</Label>
+          <Label htmlFor="end_date">Fecha de Finalización</Label>
           <Input
-            type="number"
-            min="1"
-            placeholder="Ej: 5"
-            {...form.register('duration_in_days', { valueAsNumber: true })}
+            type="date"
+            {...form.register('end_date')}
             className="w-full"
           />
-          {errors.duration_in_days && (
-            <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
+          {errors.end_date && (
+            <p className="text-sm text-destructive">{errors.end_date.message}</p>
           )}
         </div>
       </div>
 
-      {/* Alternative End Date */}
+      {/* Duration */}
       <div className="space-y-2">
-        <Label htmlFor="end_date">O Fecha de Fin (alternativa a duración)</Label>
+        <Label htmlFor="duration_in_days">Duración (días)</Label>
         <Input
-          type="date"
-          {...form.register('end_date')}
+          type="number"
+          min="1"
+          placeholder="Ej: 5"
+          {...form.register('duration_in_days', { valueAsNumber: true })}
           className="w-full"
         />
-        {errors.end_date && (
-          <p className="text-sm text-destructive">{errors.end_date.message}</p>
+        {errors.duration_in_days && (
+          <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
         )}
       </div>
     </form>

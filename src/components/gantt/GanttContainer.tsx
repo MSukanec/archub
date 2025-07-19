@@ -21,6 +21,9 @@ export function GanttContainer({
     return saved ? parseInt(saved, 10) : 320;
   });
 
+  // Estado para el hover sincronizado
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+
   // Calculate timeline bounds from all items and their children
   const { timelineStart, timelineEnd } = useMemo(() => {
     const getAllDates = (items: GanttRowProps[]): Date[] => {
@@ -234,7 +237,14 @@ export function GanttContainer({
           {/* Contenido del panel izquierdo */}
           <div className="max-h-96 overflow-y-auto overflow-x-hidden">
             {data.map((item) => (
-              <div key={`left-${item.id}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors">
+              <div 
+                key={`left-${item.id}`} 
+                className={`border-b border-[var(--table-row-border)] h-9 flex items-center transition-colors ${
+                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
+                }`}
+                onMouseEnter={() => setHoveredRowId(item.id)}
+                onMouseLeave={() => setHoveredRowId(null)}
+              >
                 {item.isHeader ? (
                   <div className="bg-muted/30 w-full h-full flex items-center px-4">
                     <span className="truncate text-xs text-foreground font-medium uppercase" title={item.name}>
@@ -317,7 +327,14 @@ export function GanttContainer({
           {/* Contenido del timeline */}
           <div className="max-h-96 overflow-y-auto" style={{ width: timelineWidth }}>
             {data.map((item, index) => (
-              <div key={`timeline-${item.id}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors">
+              <div 
+                key={`timeline-${item.id}`} 
+                className={`border-b border-[var(--table-row-border)] h-9 flex items-center transition-colors ${
+                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
+                }`}
+                onMouseEnter={() => setHoveredRowId(item.id)}
+                onMouseLeave={() => setHoveredRowId(null)}
+              >
                 {item.isHeader ? (
                   <div 
                     className="bg-muted/30 h-full w-full"
