@@ -142,12 +142,18 @@ export function GanttContainer({
       <div className="flex border-b border-border bg-muted/50">
         {/* Encabezado del panel izquierdo */}
         <div 
-          className="border-r border-border flex-shrink-0 h-14 flex items-center"
+          className="relative border-r border-border flex-shrink-0 h-14 flex items-center"
           style={{ width: leftPanelWidth }}
         >
           <div className="px-3 font-medium text-sm">
             Rubro / Tarea
           </div>
+          
+          {/* Handle de redimensionamiento en el header también */}
+          <div 
+            className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-20 transition-colors z-10"
+            onMouseDown={startResize}
+          />
         </div>
 
         {/* Encabezado de fechas doble fila */}
@@ -201,8 +207,8 @@ export function GanttContainer({
                   </div>
                 ) : (
                   <div 
-                    className="group w-full h-full flex items-center px-3 cursor-pointer hover:bg-muted/20 transition-colors"
-                    style={{ paddingLeft: `${12 + item.level * 24}px` }}
+                    className="group w-full h-full flex items-center cursor-pointer hover:bg-muted/20 transition-colors"
+                    style={{ paddingLeft: `${12 + item.level * 24}px`, paddingRight: '12px' }}
                     onClick={() => onItemClick?.(item)}
                   >
                     <div className="flex items-center w-full">
@@ -246,7 +252,7 @@ export function GanttContainer({
 
           {/* Handle de redimensionamiento */}
           <div 
-            className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-accent/20 transition-colors z-10"
+            className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-20 transition-colors z-10"
             onMouseDown={startResize}
           />
         </div>
@@ -264,7 +270,7 @@ export function GanttContainer({
                   />
                 ) : (
                   <div 
-                    className="relative h-full w-full"
+                    className="relative h-full w-full bg-[var(--accent)] bg-opacity-10"
                     style={{ width: timelineWidth }}
                   >
                     {/* Grilla de días de fondo */}

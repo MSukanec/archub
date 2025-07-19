@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 19, 2025. GANTT HOVER ACTIONS AND UI FIXES COMPLETED: Implemented edit/delete hover buttons and resolved visual issues - COMPLETED
+  • Added hover action buttons (edit/delete) to individual task rows in Gantt left panel using opacity-0 group-hover:opacity-100 pattern
+  • Extended resize handle functionality to header section for complete resizing capability
+  • Fixed resize handle visual feedback using --accent color for better visibility
+  • Removed unnecessary padding/spacing in task rows to eliminate blank space before task names
+  • Applied --accent background color with opacity to timeline task rows for better visual distinction
+  • Integrated DeleteConfirmationModal for task deletion with proper confirmation flow
+  • Connected handleEditTask and handleDeleteTaskFromGantt functions to GanttContainer props
+  • Action buttons use stopPropagation to prevent interference with row click events
+  • Complete taskData included in ganttData structure for edit/delete operations
 - July 19, 2025. CONSTRUCTION TASK MODAL DATE FIELDS COMPLETED: Enhanced task creation modal with comprehensive date management functionality - COMPLETED
   • Added start_date, end_date, and duration_in_days fields to ConstructionTaskFormModal schema with proper validation
   • Implemented smart date calculation: if start_date and duration_in_days provided, automatically calculates end_date
