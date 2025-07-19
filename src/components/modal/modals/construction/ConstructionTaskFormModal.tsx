@@ -52,10 +52,7 @@ export function ConstructionTaskFormModal({
     searchQuery.length >= 3
   );
 
-  // Debug para ver qué está pasando
-  console.log('Search query:', searchQuery);
-  console.log('Tasks found:', tasks.length);
-  console.log('Tasks data:', tasks);
+
 
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),

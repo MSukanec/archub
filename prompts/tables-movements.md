@@ -82,6 +82,10 @@ TABLA MOVEMENTS:
   {
     "column_name": "transfer_group_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "member_id",
+    "data_type": "uuid"
   }
 ]
 
