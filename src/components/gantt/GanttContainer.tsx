@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { format, eachDayOfInterval, startOfWeek, endOfWeek, eachWeekOfInterval, startOfMonth, endOfMonth, isSameMonth, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Edit3, Trash2 } from 'lucide-react';
 import { GanttRow } from './GanttRow';
 import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
@@ -256,18 +256,44 @@ export function GanttContainer({
                   </div>
                 ) : (
                   <div 
-                    className="group w-full h-full flex items-center cursor-pointer transition-colors"
+                    className="group w-full h-full flex items-center cursor-pointer transition-colors relative"
                     style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
                     onClick={() => onItemClick?.(item)}
                   >
-                    <div className="flex items-center w-full">
-                      {/* Text without space reservation */}
+                    <div className="flex items-center justify-between w-full">
+                      {/* Text */}
                       <span 
-                        className="truncate text-xs text-[var(--table-row-fg)]"
+                        className="truncate text-xs text-[var(--table-row-fg)] flex-1"
                         title={item.name}
                       >
                         {item.name}
                       </span>
+                      
+                      {/* Action buttons - only for tasks */}
+                      {item.type === 'task' && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditItem?.(item);
+                            }}
+                            className="p-1 rounded hover:bg-[var(--table-row-hover-bg)] transition-colors"
+                            title="Editar tarea"
+                          >
+                            <Edit3 className="w-3 h-3 text-[var(--table-row-fg)]/70" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteItem?.(item);
+                            }}
+                            className="p-1 rounded hover:bg-[var(--table-row-hover-bg)] transition-colors"
+                            title="Eliminar tarea"
+                          >
+                            <Trash2 className="w-3 h-3 text-red-500" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
