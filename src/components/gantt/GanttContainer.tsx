@@ -339,9 +339,28 @@ export function GanttContainer({
               >
                 {item.isHeader ? (
                   <div 
-                    className="bg-muted/30 h-full w-full"
+                    className="bg-muted/30 h-full w-full relative"
                     style={{ width: timelineWidth }}
-                  />
+                  >
+                    {/* Línea del día de hoy también en headers */}
+                    {(() => {
+                      const today = new Date();
+                      const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                      
+                      if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
+                        const todayMs = today.getTime() - timelineStart.getTime();
+                        const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                        
+                        return (
+                          <div 
+                            className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
+                            style={{ left: `${todayPosition}px` }}
+                          />
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                 ) : (
                   <div 
                     className="relative h-full w-full"
@@ -358,6 +377,29 @@ export function GanttContainer({
                       ))}
                     </div>
                     
+                    {/* Línea del día de hoy */}
+                    <div className="absolute inset-0">
+                      {(() => {
+                        const today = new Date();
+                        const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                        
+                        // Verificar si hoy está dentro del rango del timeline
+                        if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
+                          const todayMs = today.getTime() - timelineStart.getTime();
+                          const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                          
+                          return (
+                            <div 
+                              className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
+                              style={{ left: `${todayPosition}px` }}
+                              title={`Hoy: ${today.toLocaleDateString()}`}
+                            />
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+
                     {/* Barra de tarea */}
                     <div className="absolute inset-0 flex items-center px-1">
                       <GanttTimelineBar 
