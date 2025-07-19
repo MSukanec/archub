@@ -22,6 +22,7 @@ interface ComboBoxProps {
   onCreateNew?: (value: string) => Promise<ComboBoxOption>;
   createLabel?: (value: string) => string;
   createIcon?: React.ReactNode;
+  onSearchChange?: (value: string) => void;
 }
 
 export function ComboBox({
@@ -36,7 +37,8 @@ export function ComboBox({
   allowCreate = false,
   onCreateNew,
   createLabel = (value) => `Crear "${value}"`,
-  createIcon
+  createIcon,
+  onSearchChange
 }: ComboBoxProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -103,7 +105,12 @@ export function ComboBox({
           <CommandInput 
             placeholder={searchPlaceholder}
             value={searchValue}
-            onValueChange={setSearchValue}
+            onValueChange={(value) => {
+              setSearchValue(value);
+              if (onSearchChange) {
+                onSearchChange(value);
+              }
+            }}
             className="text-sm bg-[var(--card-bg)] border-none text-foreground placeholder:text-muted-foreground"
           />
           <CommandList className="max-h-48 overflow-y-auto scrollbar-thin">
