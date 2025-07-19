@@ -416,7 +416,17 @@ label[data-required="true"]::after,
   display: none;
 }
 
-/* Show scrollbars specifically for Gantt timeline */
+/* Hide scrollbar in Gantt timeline header */
+#timeline-header-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+
+#timeline-header-scroll {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Show scrollbars specifically for Gantt timeline content only */
 .gantt-timeline-scroll::-webkit-scrollbar {
   display: block !important;
   height: 12px;

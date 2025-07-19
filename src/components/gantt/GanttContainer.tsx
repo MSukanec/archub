@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { format, eachDayOfInterval, startOfMonth, endOfMonth, isSameMonth } from 'date-fns';
+import { format, eachDayOfInterval, startOfWeek, endOfWeek, eachWeekOfInterval, startOfMonth, endOfMonth, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Edit, Trash2 } from 'lucide-react';
 import { GanttRow } from './GanttRow';
@@ -66,42 +66,28 @@ export function GanttContainer({
     };
   }, [data]);
 
-  // Calcular estructura de calendario (meses y días)
+  // Estructura del calendario por semanas (como Jira)
   const calendarStructure = useMemo(() => {
-    const allDays = eachDayOfInterval({
-      start: timelineStart,
-      end: timelineEnd
+    // Generar todas las semanas del período
+    const allWeeks = eachWeekOfInterval(
+      { start: timelineStart, end: timelineEnd },
+      { weekStartsOn: 1 } // Lunes como inicio de semana
+    );
+    
+    // Crear estructura de semanas con sus meses
+    const weeks = allWeeks.map(weekStart => {
+      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+      const monthLabel = format(weekStart, 'MMM', { locale: es });
+      
+      return {
+        start: weekStart,
+        end: weekEnd,
+        monthLabel,
+        key: format(weekStart, 'yyyy-ww')
+      };
     });
 
-    const months: Array<{
-      label: string;
-      days: Array<{ date: string; day: number }>;
-    }> = [];
-
-    let currentMonth: typeof months[0] | null = null;
-
-    allDays.forEach((day) => {
-      const monthLabel = format(day, "MMMM ''yy", { locale: es });
-      const dayNumber = day.getDate();
-
-      if (!currentMonth || currentMonth.label !== monthLabel) {
-        currentMonth = {
-          label: monthLabel,
-          days: []
-        };
-        months.push(currentMonth);
-      }
-
-      currentMonth.days.push({
-        date: format(day, 'yyyy-MM-dd'),
-        day: dayNumber
-      });
-    });
-
-    return { months, allDays: allDays.map(day => ({
-      date: format(day, 'yyyy-MM-dd'),
-      day: day.getDate()
-    })) };
+    return { weeks };
   }, [timelineStart, timelineEnd]);
 
   // Función para iniciar el redimensionamiento
@@ -126,8 +112,8 @@ export function GanttContainer({
     window.addEventListener('mouseup', onMouseUp);
   }, [leftPanelWidth]);
 
-  const dayWidth = 40; // Ancho más amplio por día para garantizar scroll
-  const timelineWidth = Math.max(calendarStructure.allDays.length * dayWidth, 1200); // Ancho mínimo para garantizar scroll
+  const weekWidth = 120; // Ancho por semana (como en Jira)
+  const timelineWidth = Math.max(calendarStructure.weeks.length * weekWidth, 1200); // Ancho mínimo para garantizar scroll
 
   if (data.length === 0) {
     return (
@@ -162,10 +148,14 @@ export function GanttContainer({
           </div>
         </div>
 
-        {/* Encabezado de fechas doble fila - CON SCROLL HORIZONTAL */}
+        {/* Encabezado de fechas POR SEMANAS - SCROLL INVISIBLE */}
         <div 
-          className="flex-1 overflow-x-scroll gantt-timeline-scroll" 
+          className="flex-1 overflow-x-auto" 
           id="timeline-header-scroll"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
           onScroll={(e) => {
             // Sincronizar scroll con el contenido
             const contentScroll = document.getElementById('timeline-content-scroll');
@@ -174,29 +164,23 @@ export function GanttContainer({
             }
           }}
         >
+          <style>
+            {`
+              #timeline-header-scroll::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
           <div style={{ width: timelineWidth }}>
-            {/* Fila de meses */}
-            <div className="flex border-b border-[var(--table-header-border)]/50 h-7">
-              {calendarStructure.months.map((month) => (
+            {/* Solo fila de semanas con mes centrado (como Jira) */}
+            <div className="flex h-14">
+              {calendarStructure.weeks.map((week) => (
                 <div 
-                  key={month.label}
+                  key={week.key}
                   className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
-                  style={{ width: month.days.length * dayWidth }}
+                  style={{ width: weekWidth }}
                 >
-                  {month.label}
-                </div>
-              ))}
-            </div>
-            
-            {/* Fila de días */}
-            <div className="flex h-7">
-              {calendarStructure.allDays.map((day) => (
-                <div 
-                  key={day.date}
-                  className="flex items-center justify-center text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
-                  style={{ width: dayWidth }}
-                >
-                  {day.day}
+                  {week.monthLabel}
                 </div>
               ))}
             </div>
@@ -308,13 +292,13 @@ export function GanttContainer({
                     className="relative h-full w-full"
                     style={{ width: timelineWidth }}
                   >
-                    {/* Grilla de días de fondo */}
+                    {/* Grilla de semanas de fondo (como Jira) */}
                     <div className="absolute inset-0 flex">
-                      {calendarStructure.allDays.map((day) => (
+                      {calendarStructure.weeks.map((week) => (
                         <div 
-                          key={day.date}
+                          key={week.key}
                           className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
-                          style={{ width: dayWidth }}
+                          style={{ width: weekWidth }}
                         />
                       ))}
                     </div>
@@ -340,13 +324,13 @@ export function GanttContainer({
                   className="relative h-full w-full"
                   style={{ width: timelineWidth }}
                 >
-                  {/* Grilla de días de fondo */}
+                  {/* Grilla de semanas de fondo */}
                   <div className="absolute inset-0 flex">
-                    {calendarStructure.allDays.map((day) => (
+                    {calendarStructure.weeks.map((week) => (
                       <div 
-                        key={`empty-${index}-${day.date}`}
+                        key={`empty-${index}-${week.key}`}
                         className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
-                        style={{ width: dayWidth }}
+                        style={{ width: weekWidth }}
                       />
                     ))}
                   </div>
