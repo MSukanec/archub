@@ -5,11 +5,11 @@ import { z } from "zod";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
+import { TaskSearchCombo } from "@/components/ui-custom/TaskSearchCombo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { useTaskSearch } from "@/hooks/use-task-search";
+import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
@@ -36,6 +36,7 @@ export function ConstructionTaskFormModal({
 }: ConstructionTaskFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [taskFilters, setTaskFilters] = useState<TaskSearchFilters>({ origin: 'all' });
   
   const { data: userData } = useCurrentUser();
   const { setPanel } = useModalPanelStore();
@@ -44,11 +45,17 @@ export function ConstructionTaskFormModal({
   useEffect(() => {
     setPanel("edit");
   }, [setPanel]);
+  // Hook para búsqueda de tareas (IGUAL que en presupuestos)
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
     searchQuery, 
     modalData.organizationId, 
-    { origin: 'all' },
-    true
+    taskFilters,
+    searchQuery.length >= 3
+  );
+
+  // Hook para opciones de filtros (IGUAL que en presupuestos)
+  const { data: filterOptions } = useTaskSearchFilterOptions(
+    modalData.organizationId
   );
 
   const form = useForm<AddTaskFormData>({
@@ -61,11 +68,10 @@ export function ConstructionTaskFormModal({
 
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
 
-  // Preparar opciones para ComboBoxWrite usando display_name
+  // Preparar opciones para TaskSearchCombo usando display_name (IGUAL que en presupuestos)
   const taskOptions = tasks.map(task => ({
     value: task.id,
-    label: task.display_name || task.code || 'Sin nombre',
-    description: `${task.rubro_name || ''} • ${task.category_name || ''}`.trim()
+    label: task.display_name || task.code || 'Sin nombre'
   }));
 
   const selectedTaskId = watch('task_id');
@@ -113,17 +119,22 @@ export function ConstructionTaskFormModal({
 
   const editPanel = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Task Selector */}
+      {/* Task Selection - EXACTAMENTE igual que en presupuestos */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
-        <ComboBox
+        <TaskSearchCombo
           options={taskOptions}
           value={selectedTaskId}
           onValueChange={(value) => setValue('task_id', value)}
-          // onSearchChange={setSearchQuery} // ComboBox doesn't have this prop
-          placeholder="Buscar tarea..."
-          searchPlaceholder="Escriba para buscar tareas..."
-          emptyMessage="No se encontraron tareas"
+          placeholder="Buscar tipo de tarea..."
+          searchPlaceholder="Buscar tipo de tarea..."
+          emptyText="No se encontraron tareas"
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filters={taskFilters}
+          onFiltersChange={setTaskFilters}
+          filterOptions={filterOptions}
+          isLoading={tasksLoading}
         />
         {errors.task_id && (
           <p className="text-sm text-destructive">{errors.task_id.message}</p>
