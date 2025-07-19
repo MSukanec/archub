@@ -275,7 +275,7 @@ export function GanttContainer({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onEditItem?.(item);
+                              onEdit?.(item);
                             }}
                             className="p-1 rounded hover:bg-[var(--table-row-hover-bg)] transition-colors"
                             title="Editar tarea"
@@ -285,7 +285,7 @@ export function GanttContainer({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onDeleteItem?.(item);
+                              onDelete?.(item);
                             }}
                             className="p-1 rounded hover:bg-[var(--table-row-hover-bg)] transition-colors"
                             title="Eliminar tarea"

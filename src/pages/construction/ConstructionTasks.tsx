@@ -118,6 +118,7 @@ export default function ConstructionTasks() {
 
   // Manejar edición de tarea desde Gantt
   const handleEditTask = (item: GanttRowProps) => {
+    console.log('Edit button clicked for item:', item);
     if (item.type !== 'task') return
     
     // Abrir modal de edición con datos pre-cargados
@@ -132,6 +133,7 @@ export default function ConstructionTasks() {
 
   // Manejar eliminación de tarea desde Gantt
   const handleDeleteTaskFromGantt = (item: GanttRowProps) => {
+    console.log('Delete button clicked for item:', item);
     if (item.type !== 'task' || !item.taskData) return
     
     showDeleteConfirmation({
