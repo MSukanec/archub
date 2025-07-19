@@ -1,7 +1,8 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useState, useMemo } from 'react'
-import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2 } from 'lucide-react'
+import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2, Calendar, Table as TableIcon } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Table } from '@/components/ui-custom/Table'
@@ -13,9 +14,49 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { GanttRowProps } from '@/components/gantt/types'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
+import { supabase } from '@/lib/supabase'
+
+// Función para procesar el display_name con expression_templates (copiada de ConstructionBudgets)
+async function processDisplayName(displayName: string, paramValues: any): Promise<string> {
+  if (!displayName || !paramValues) return displayName;
+  
+  let processed = displayName;
+  
+  // Obtener los valores reales de los parámetros
+  const paramValueIds = Object.values(paramValues);
+  if (paramValueIds.length === 0) return displayName;
+  
+  const { data: parameterValues, error } = await supabase
+    .from('task_parameter_values')
+    .select(`
+      name, 
+      label,
+      parameter_id,
+      task_parameters!inner(expression_template)
+    `)
+    .in('id', paramValueIds);
+  
+  if (error || !parameterValues) {
+    console.error('Error loading parameter values:', error);
+    return displayName;
+  }
+  
+  // Procesar cada valor de parámetro
+  for (const paramValue of parameterValues) {
+    const placeholder = `{{${paramValue.name}}}`;
+    const expressionTemplate = paramValue.task_parameters?.expression_template;
+    
+    if (processed.includes(placeholder) && expressionTemplate) {
+      processed = processed.replace(new RegExp(placeholder, 'g'), expressionTemplate);
+    }
+  }
+  
+  return processed;
+}
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
+  const [activeTab, setActiveTab] = useState("cronograma")
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -162,9 +203,19 @@ export default function ConstructionTasks() {
           validDuration = 1;
         }
 
+        // Procesar el display_name para mostrar texto completo
+        let taskName = task.task.display_name || task.task.code || 'Tarea sin nombre';
+        if (task.task.param_values) {
+          // Intentar reemplazar placeholders básicos
+          taskName = taskName.replace(/\{\{([^}]+)\}\}/g, (match, paramName) => {
+            // Esto es una simplificación - en el futuro se puede hacer más complejo
+            return match.replace(/[{}]/g, ''); // Quitar llaves para hacer más legible
+          });
+        }
+
         ganttRows.push({
           id: task.id,
-          name: task.task.display_name || task.task.code || 'Tarea sin nombre',
+          name: taskName,
           type: 'task',
           level: 1,
           startDate: validStartDate,
@@ -187,12 +238,23 @@ export default function ConstructionTasks() {
     {
       key: 'tarea',
       label: 'Tarea',
-      render: (task: any) => (
-        <div>
-          <div className="font-medium">{task.task.display_name}</div>
-          <div className="text-xs text-muted-foreground">{task.task.code}</div>
-        </div>
-      )
+      render: (task: any) => {
+        // Procesar el display_name para mostrar texto completo como en presupuestos
+        let taskName = task.task.display_name;
+        if (task.task.param_values) {
+          // Simplificar placeholders para mejor legibilidad
+          taskName = taskName.replace(/\{\{([^}]+)\}\}/g, (match, paramName) => {
+            return match.replace(/[{}]/g, ''); // Quitar llaves para hacer más legible
+          });
+        }
+        
+        return (
+          <div>
+            <div className="font-medium">{taskName}</div>
+            <div className="text-xs text-muted-foreground">{task.task.code}</div>
+          </div>
+        )
+      }
     },
     {
       key: 'unidad',
@@ -290,48 +352,87 @@ export default function ConstructionTasks() {
           features={features}
         />
 
-        {/* Gantt Timeline */}
-        {filteredTasks.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Cronograma de Construcción</h3>
-            <GanttContainer
-              data={ganttData}
-              onItemClick={(item) => {
-                console.log('Clicked item:', item);
-              }}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTaskFromGantt}
-            />
-          </div>
-        )}
+        {/* Tabs para alternar vistas */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="cronograma" className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Cronograma
+            </TabsTrigger>
+            <TabsTrigger value="listado" className="flex items-center gap-2">
+              <TableIcon className="w-4 h-4" />
+              Listado
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Content Area */}
-        {!projectId ? (
-          <EmptyState
-            icon={<ListTodo className="w-12 h-12" />}
-            title="Selecciona un proyecto"
-            description="Para ver las tareas de construcción, primero selecciona un proyecto específico desde el header."
-          />
-        ) : filteredTasks.length === 0 && !isLoading ? (
-          <EmptyState
-            icon={<ListTodo className="w-12 h-12" />}
-            title="No hay tareas creadas"
-            description="Crea tu primera tarea de construcción para comenzar a organizar el trabajo de la obra."
-            action={
-              <Button onClick={handleAddTask}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Primera Tarea
-              </Button>
-            }
-          />
-        ) : (
-          <Table
-            data={filteredTasks}
-            columns={columns}
-            isLoading={isLoading}
-            emptyMessage="No se encontraron tareas que coincidan con la búsqueda"
-          />
-        )}
+          {/* Vista Cronograma - Gantt Timeline */}
+          <TabsContent value="cronograma" className="mt-6">
+            {!projectId ? (
+              <EmptyState
+                icon={<ListTodo className="w-12 h-12" />}
+                title="Selecciona un proyecto"
+                description="Para ver el cronograma de construcción, primero selecciona un proyecto específico desde el header."
+              />
+            ) : filteredTasks.length === 0 && !isLoading ? (
+              <EmptyState
+                icon={<ListTodo className="w-12 h-12" />}
+                title="No hay tareas creadas"
+                description="Crea tu primera tarea de construcción para comenzar a organizar el cronograma de la obra."
+                action={
+                  <Button onClick={handleAddTask}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Primera Tarea
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Cronograma de Construcción</h3>
+                <GanttContainer
+                  data={ganttData}
+                  onItemClick={(item) => {
+                    console.log('Clicked item:', item);
+                  }}
+                  onEdit={handleEditTask}
+                  onDelete={handleDeleteTaskFromGantt}
+                />
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Vista Listado - Tabla */}
+          <TabsContent value="listado" className="mt-6">
+            {!projectId ? (
+              <EmptyState
+                icon={<ListTodo className="w-12 h-12" />}
+                title="Selecciona un proyecto"
+                description="Para ver las tareas de construcción, primero selecciona un proyecto específico desde el header."
+              />
+            ) : filteredTasks.length === 0 && !isLoading ? (
+              <EmptyState
+                icon={<ListTodo className="w-12 h-12" />}
+                title="No hay tareas creadas"
+                description="Crea tu primera tarea de construcción para comenzar a organizar el trabajo de la obra."
+                action={
+                  <Button onClick={handleAddTask}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Primera Tarea
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Listado de Tareas</h3>
+                <Table
+                  data={filteredTasks}
+                  columns={columns}
+                  isLoading={isLoading}
+                  emptyMessage="No se encontraron tareas que coincidan con la búsqueda"
+                />
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   )
