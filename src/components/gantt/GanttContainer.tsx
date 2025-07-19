@@ -228,9 +228,9 @@ export function GanttContainer({
                         {item.name}
                       </span>
                       
-                      {/* Action Buttons - same size as table buttons (h-8 w-8) */}
+                      {/* Action Buttons - appear in the space freed by text contraction */}
                       {(onEdit || onDelete) && (
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
                           {onEdit && (
                             <button
                               onClick={(e) => {
