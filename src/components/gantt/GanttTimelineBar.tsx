@@ -50,7 +50,7 @@ export function GanttTimelineBar({
 
   return (
     <div 
-      className="h-5 border-2 border-[var(--accent)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--accent)] font-medium hover:bg-[var(--accent)]/10 transition-colors cursor-pointer"
+      className="h-5 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer"
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`
