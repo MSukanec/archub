@@ -36,7 +36,8 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
     };
   }
 
-  const startDate = new Date(item.startDate);
+  // Normalize startDate to avoid UTC interpretation issues
+  const startDate = new Date(item.startDate + 'T00:00:00');
   
   // Validate that startDate is a valid date
   if (isNaN(startDate.getTime())) {
@@ -56,15 +57,15 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
   let wasCalculated = false;
   
   if (item.endDate) {
-    // Priority 1: Use endDate if provided
-    resolvedEndDate = new Date(item.endDate);
+    // Priority 1: Use endDate if provided and normalize
+    resolvedEndDate = new Date(item.endDate + 'T00:00:00');
     if (isNaN(resolvedEndDate.getTime())) {
       // If endDate is invalid, fallback to startDate
       resolvedEndDate = new Date(startDate.getTime());
     }
   } else if (item.durationInDays && item.durationInDays > 0) {
-    // Priority 2: Calculate from durationInDays (subtract 1 for inclusive end date)
-    resolvedEndDate = new Date(startDate.getTime() + ((item.durationInDays - 1) * 24 * 60 * 60 * 1000));
+    // Priority 2: Calculate from durationInDays using normalized date methods
+    resolvedEndDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + item.durationInDays - 1);
     wasCalculated = true;
   } else {
     // Fallback: 1 day duration (same day start and end)
