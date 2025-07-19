@@ -88,44 +88,53 @@ export function GanttContainer({
     };
   }, [data]);
 
-  // Estructura del calendario por semanas (como Jira)
+  // FIXED: Calendar structure - Generate day by day to match timeline calculations exactly
   const calendarStructure = useMemo(() => {
-    // Generar todas las semanas del período
-    const allWeeks = eachWeekOfInterval(
-      { start: timelineStart, end: timelineEnd },
-      { weekStartsOn: 1 } // Lunes como inicio de semana
-    );
+    const allDays: Array<{ date: Date; dayNumber: string; dayName: string; isWeekend: boolean }> = [];
     
-    // Crear estructura de semanas con sus días
-    const weeks = allWeeks.map(weekStart => {
-      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-      const monthLabel = format(weekStart, 'MMM', { locale: es });
-      
-      // Obtener todos los días de la semana
-      const weekDays = eachDayOfInterval({
-        start: weekStart,
-        end: weekEnd
+    // Generate ALL individual days first - EXACT same logic as GanttTimelineBar
+    let currentDate = new Date(timelineStart);
+    while (currentDate <= timelineEnd) {
+      const normalizedDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+      allDays.push({
+        date: normalizedDay,
+        dayNumber: format(normalizedDay, 'd'),
+        dayName: format(normalizedDay, 'EEE', { locale: es }),
+        isWeekend: isWeekend(normalizedDay)
       });
-      
-      return {
-        start: weekStart,
-        end: weekEnd,
-        monthLabel: `${monthLabel} ${format(weekStart, 'yy')}`, // JUN 25 instead of just JUN
-        key: format(weekStart, 'yyyy-ww'),
-        days: weekDays.map(day => {
-          // Normalize each day to avoid UTC issues
-          const normalizedDay = new Date(day.getFullYear(), day.getMonth(), day.getDate());
-          return {
-            date: normalizedDay,
-            dayNumber: format(normalizedDay, 'd'),
-            dayName: format(normalizedDay, 'EEE', { locale: es }),
-            isWeekend: isWeekend(normalizedDay)
-          };
-        })
-      };
-    });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
 
-    const totalDays = weeks.reduce((acc, week) => acc + week.days.length, 0);
+    // Group days into weeks for display only (maintaining week structure for visual consistency)
+    const weeks: any[] = [];
+    let weekKey = 0;
+    for (let i = 0; i < allDays.length; i += 7) {
+      const weekDays = allDays.slice(i, i + 7);
+      if (weekDays.length > 0) {
+        const week = {
+          key: format(weekDays[0].date, 'yyyy-ww'),
+          start: weekDays[0].date,
+          end: weekDays[weekDays.length - 1].date,
+          monthLabel: `${format(weekDays[0].date, 'MMM', { locale: es })} ${format(weekDays[0].date, 'yy')}`,
+          days: weekDays
+        };
+        weeks.push(week);
+        weekKey++;
+      }
+    }
+
+    const totalDays = allDays.length;
+    
+    console.log('CALENDAR STRUCTURE DEBUG:', {
+      timelineStart: timelineStart.toDateString(),
+      timelineEnd: timelineEnd.toDateString(),
+      totalDaysCalculated: totalDays,
+      firstDay: allDays[0]?.date.toDateString(),
+      lastDay: allDays[allDays.length - 1]?.date.toDateString(),
+      todayIndex: allDays.findIndex(d => d.date.toDateString() === new Date().toDateString()),
+      day19Index: allDays.findIndex(d => d.date.toDateString() === new Date('2025-07-19').toDateString())
+    });
+    
     return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
 
