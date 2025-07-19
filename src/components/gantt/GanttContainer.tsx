@@ -422,7 +422,7 @@ export function GanttContainer({
                       
                       if (todayDayIndex !== -1) {
                         const dayWidth = timelineWidth / calendarStructure.totalDays;
-                        const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
+                        const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                         
                         return (
                           <div 
@@ -473,7 +473,7 @@ export function GanttContainer({
                         
                         if (todayDayIndex !== -1) {
                           const dayWidth = timelineWidth / calendarStructure.totalDays;
-                          const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
+                          const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                           
                           return (
                             <div 
@@ -569,7 +569,7 @@ export function GanttContainer({
                     
                     if (todayDayIndex !== -1) {
                       const dayWidth = timelineWidth / calendarStructure.totalDays;
-                      const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
+                      const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                       
                       return (
                         <div 
