@@ -350,7 +350,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [dropzoneKey, setDropzoneKey] = useState(0)
   const [selectedCreator, setSelectedCreator] = useState<string>('')
-  const [selectedProject, setSelectedProject] = useState<string>('')
+
   const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
   const [incompatibleValues, setIncompatibleValues] = useState<{ [key: string]: string[] }>({})
   // Force re-render counter for the problematic selectors
@@ -383,15 +383,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     }
   }, [currentUser?.user?.id, selectedCreator])
 
-  // Set default project when data loads
-  React.useEffect(() => {
-    if (!selectedProject && currentUser?.preferences?.last_project_id) {
-      setSelectedProject(currentUser.preferences.last_project_id)
-    } else if (!selectedProject && organizationProjects && organizationProjects.length > 0) {
-      // If no last project, default to first available project
-      setSelectedProject(organizationProjects[0].id)
-    }
-  }, [currentUser?.preferences?.last_project_id, selectedProject, organizationProjects])
+
 
   // Auto-map columns based on header names when data is parsed
   React.useEffect(() => {
@@ -976,7 +968,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           amount: 0,
           movement_date: new Date().toISOString().split('T')[0],
           organization_id: currentUser.organization.id,
-          project_id: selectedProject || modalData?.projectId || currentUser.preferences?.last_project_id,
+          project_id: modalData?.projectId || currentUser.preferences?.last_project_id,
           created_by: selectedMember.id, // Use organization_member.id instead of user.id
           is_favorite: false
         }
@@ -1107,7 +1099,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           nextAction: {
             label: 'Siguiente',
             onClick: () => setCurrentStep(2),
-            disabled: !parsedData || !selectedCreator || !selectedProject
+            disabled: !parsedData || !selectedCreator
           }
         }
       case 2:
@@ -1165,30 +1157,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         />
       </div>
 
-      <div className="space-y-3">
-        <Label>Proyecto</Label>
-        <Select 
-          value={selectedProject} 
-          onValueChange={setSelectedProject}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar proyecto" />
-          </SelectTrigger>
-          <SelectContent>
-            {organizationProjects?.map((project) => (
-              <SelectItem key={project.id} value={project.id}>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
-                    style={{ backgroundColor: project.color || '#000000' }}
-                  ></div>
-                  <span>{project.name}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+
 
       <div className="space-y-3">
         <Label>Archivo de movimientos</Label>

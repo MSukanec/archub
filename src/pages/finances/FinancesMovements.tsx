@@ -38,6 +38,7 @@ import { Table } from "@/components/ui-custom/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { FinancialCards } from "@/components/ui-custom/FinancialCards";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
@@ -1280,15 +1281,21 @@ export default function Movements() {
           <Trash2 className="h-4 w-4" />
         </Button>
       ] : []),
-      <Button
+      <CustomRestricted 
         key="import-movements"
-        variant="outline"
-        onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-        className="h-8"
+        functionName="Importación de Excel"
+        restrictions={['general_mode']}
+        isGeneralMode={isGeneralMode}
       >
-        <Upload className="mr-2 h-4 w-4" />
-        Importar desde Excel
-      </Button>,
+        <Button
+          variant="outline"
+          onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
+          className="h-8"
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          Importar desde Excel
+        </Button>
+      </CustomRestricted>,
       <Button
         key="new-movement"
         onClick={() => openModal('movement')}
