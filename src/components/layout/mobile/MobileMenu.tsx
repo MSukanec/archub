@@ -278,7 +278,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     obra: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
-      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
