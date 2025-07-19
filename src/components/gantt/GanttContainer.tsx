@@ -151,9 +151,9 @@ export function GanttContainer({
       
       {/* Encabezado unificado */}
       <div className="flex border-b border-border bg-muted/50">
-        {/* Encabezado del panel izquierdo */}
+        {/* Encabezado del panel izquierdo - FIJO */}
         <div 
-          className="border-r border-border flex-shrink-0 h-14 flex items-center"
+          className="border-r border-border flex-shrink-0 h-14 flex items-center bg-muted/50"
           style={{ width: leftPanelWidth }}
         >
           <div className="px-3 font-medium text-sm">
@@ -161,9 +161,19 @@ export function GanttContainer({
           </div>
         </div>
 
-        {/* Encabezado de fechas doble fila */}
-        <div className="flex-1 overflow-x-auto">
-          <div className="min-w-max">
+        {/* Encabezado de fechas doble fila - CON SCROLL HORIZONTAL */}
+        <div 
+          className="flex-1 overflow-x-auto" 
+          id="timeline-header-scroll"
+          onScroll={(e) => {
+            // Sincronizar scroll con el contenido
+            const contentScroll = document.getElementById('timeline-content-scroll');
+            if (contentScroll) {
+              contentScroll.scrollLeft = e.currentTarget.scrollLeft;
+            }
+          }}
+        >
+          <div style={{ width: timelineWidth }}>
             {/* Fila de meses */}
             <div className="flex border-b border-border/50 h-6">
               {calendarStructure.months.map((month) => (
@@ -195,13 +205,13 @@ export function GanttContainer({
 
       {/* Contenido principal */}
       <div className="relative flex">
-        {/* Panel Izquierdo */}
+        {/* Panel Izquierdo - FIJO (sin scroll horizontal) */}
         <div 
-          className="bg-card border-r border-border flex-shrink-0"
+          className="bg-card border-r border-border flex-shrink-0 overflow-hidden"
           style={{ width: leftPanelWidth }}
         >
           {/* Contenido del panel izquierdo */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto overflow-x-hidden">
             {data.map((item) => (
               <div key={`left-${item.id}`} className="border-b border-border h-9 flex items-center">
                 {item.isHeader ? (
@@ -264,10 +274,20 @@ export function GanttContainer({
 
         </div>
 
-        {/* Timeline */}
-        <div className="flex-1 overflow-x-auto">
+        {/* Timeline - CON SCROLL HORIZONTAL SINCRONIZADO */}
+        <div 
+          className="flex-1 overflow-x-auto" 
+          id="timeline-content-scroll"
+          onScroll={(e) => {
+            // Sincronizar scroll con el header
+            const headerScroll = document.getElementById('timeline-header-scroll');
+            if (headerScroll) {
+              headerScroll.scrollLeft = e.currentTarget.scrollLeft;
+            }
+          }}
+        >
           {/* Contenido del timeline */}
-          <div className="max-h-96 overflow-y-auto min-w-max">
+          <div className="max-h-96 overflow-y-auto" style={{ width: timelineWidth }}>
             {data.map((item) => (
               <div key={`timeline-${item.id}`} className="border-b border-border h-9 flex items-center">
                 {item.isHeader ? (
