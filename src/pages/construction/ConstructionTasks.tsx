@@ -67,7 +67,7 @@ export default function ConstructionTasks() {
     task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
   )
 
-  // Crear datos de ejemplo para el Gantt
+  // Crear datos de ejemplo para el Gantt - mezclando endDate y durationInDays
   const ganttData = [
     {
       id: "phase-1",
@@ -75,7 +75,7 @@ export default function ConstructionTasks() {
       type: "phase" as const,
       level: 0,
       startDate: "2024-01-15",
-      endDate: "2024-03-30",
+      endDate: "2024-03-30", // Usando fecha exacta
       children: [
         {
           id: "task-1-1",
@@ -83,7 +83,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-01-15",
-          endDate: "2024-02-15"
+          durationInDays: 31 // Usando duración en días
         },
         {
           id: "task-1-2", 
@@ -91,7 +91,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-02-01",
-          endDate: "2024-03-15"
+          endDate: "2024-03-15" // Usando fecha exacta
         },
         {
           id: "task-1-3",
@@ -99,7 +99,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-03-01",
-          endDate: "2024-03-30"
+          durationInDays: 29 // Usando duración en días
         }
       ]
     },
@@ -109,7 +109,7 @@ export default function ConstructionTasks() {
       type: "phase" as const,
       level: 0,
       startDate: "2024-03-15",
-      endDate: "2024-05-30",
+      durationInDays: 76, // Usando duración en días para fase
       children: [
         {
           id: "task-2-1",
@@ -117,7 +117,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-03-15",
-          endDate: "2024-04-30"
+          durationInDays: 46 // Usando duración en días
         },
         {
           id: "task-2-2",
@@ -125,7 +125,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-04-01",
-          endDate: "2024-05-15"
+          endDate: "2024-05-15" // Usando fecha exacta
         },
         {
           id: "task-2-3",
@@ -133,7 +133,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-05-01",
-          endDate: "2024-05-30"
+          durationInDays: 29 // Usando duración en días
         }
       ]
     },
@@ -143,7 +143,7 @@ export default function ConstructionTasks() {
       type: "phase" as const,
       level: 0,
       startDate: "2024-04-15",
-      endDate: "2024-06-30",
+      endDate: "2024-06-30", // Usando fecha exacta
       children: [
         {
           id: "task-3-1",
@@ -151,7 +151,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-04-15",
-          endDate: "2024-05-30"
+          durationInDays: 45 // Usando duración en días
         },
         {
           id: "task-3-2",
@@ -159,7 +159,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-05-01",
-          endDate: "2024-06-15"
+          durationInDays: 45 // Usando duración en días
         },
         {
           id: "task-3-3",
@@ -167,7 +167,7 @@ export default function ConstructionTasks() {
           type: "task" as const,
           level: 1,
           startDate: "2024-05-15",
-          endDate: "2024-06-30"
+          endDate: "2024-06-30" // Usando fecha exacta
         }
       ]
     }

@@ -16,7 +16,17 @@ export function GanttTimelineBar({
 }: GanttTimelineBarProps) {
   const barPosition = useMemo(() => {
     const startDate = new Date(item.startDate);
-    const endDate = new Date(item.endDate);
+    
+    // Calculate end date based on endDate or durationInDays
+    let endDate: Date;
+    if (item.endDate) {
+      endDate = new Date(item.endDate);
+    } else if (item.durationInDays) {
+      endDate = new Date(startDate.getTime() + (item.durationInDays * 24 * 60 * 60 * 1000));
+    } else {
+      // Fallback: 1 day duration if neither is provided
+      endDate = new Date(startDate.getTime() + (24 * 60 * 60 * 1000));
+    }
     
     const totalDuration = timelineEnd.getTime() - timelineStart.getTime();
     const itemStart = startDate.getTime() - timelineStart.getTime();
@@ -27,9 +37,10 @@ export function GanttTimelineBar({
     
     return {
       left: `${Math.max(0, leftPercent)}%`,
-      width: `${Math.max(2, widthPercent)}%`
+      width: `${Math.max(2, widthPercent)}%`,
+      endDate
     };
-  }, [item.startDate, item.endDate, timelineStart, timelineEnd]);
+  }, [item.startDate, item.endDate, item.durationInDays, timelineStart, timelineEnd]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -50,7 +61,12 @@ export function GanttTimelineBar({
         style={barPosition}
       >
         <span className="px-2 truncate">
-          {formatDate(item.startDate)} - {formatDate(item.endDate)}
+          {formatDate(item.startDate)} - {formatDate(barPosition.endDate.toISOString().split('T')[0])}
+          {item.durationInDays && (
+            <span className="ml-1 text-xs opacity-80">
+              ({item.durationInDays}d)
+            </span>
+          )}
         </span>
       </div>
     </div>

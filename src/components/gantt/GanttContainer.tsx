@@ -15,7 +15,17 @@ export function GanttContainer({
       const dates: Date[] = [];
       
       items.forEach(item => {
-        dates.push(new Date(item.startDate), new Date(item.endDate));
+        const startDate = new Date(item.startDate);
+        dates.push(startDate);
+        
+        // Calculate end date based on endDate or durationInDays
+        if (item.endDate) {
+          dates.push(new Date(item.endDate));
+        } else if (item.durationInDays) {
+          const endDate = new Date(startDate.getTime() + (item.durationInDays * 24 * 60 * 60 * 1000));
+          dates.push(endDate);
+        }
+        
         if (item.children) {
           dates.push(...getAllDates(item.children));
         }

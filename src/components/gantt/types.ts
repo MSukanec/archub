@@ -4,7 +4,8 @@ export type GanttRowProps = {
   type: 'phase' | 'task';
   level: number;
   startDate: string;
-  endDate: string;
+  endDate?: string;           // Optional: exact end date
+  durationInDays?: number;    // Optional: duration in days from start
   children?: GanttRowProps[];
   isExpanded?: boolean;
   onToggleExpand?: (id: string) => void;
