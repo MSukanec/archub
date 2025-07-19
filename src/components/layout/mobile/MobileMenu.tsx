@@ -91,20 +91,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         throw new Error('No user preferences available');
       }
 
-      // Obtener el primer proyecto de la nueva organización
-      const { data: projectsData } = await supabase
-        .from('projects')
-        .select('id')
-        .eq('organization_id', organizationId)
-        .limit(1);
-
-      const firstProjectId = projectsData?.[0]?.id || null;
-
+      // Al cambiar de organización, siempre establecer en modo General (project_id = null)
       const { error } = await supabase
         .from('user_preferences')
         .update({ 
           last_organization_id: organizationId,
-          last_project_id: firstProjectId 
+          last_project_id: null  // Siempre General al cambiar organización
         })
         .eq('id', userData.preferences.id);
 
@@ -112,6 +104,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       return organizationId;
     },
     onSuccess: () => {
+      // Resetear el contexto del proyecto a General
+      setSelectedProject(null);
+      // Marcar explícitamente que estamos en modo General
+      localStorage.setItem('explicit-general-mode', 'true');
+      
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedOrgSelector(false);
       setSidebarContext('organization');

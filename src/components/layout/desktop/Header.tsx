@@ -93,14 +93,24 @@ export function Header({
         throw new Error('Missing required data');
       }
       
+      // Al cambiar de organización, siempre establecer en modo General (project_id = null)
       const { error } = await supabase
         .from('user_preferences')
-        .update({ last_organization_id: organizationId })
+        .update({ 
+          last_organization_id: organizationId,
+          last_project_id: null  // Siempre General al cambiar organización
+        })
         .eq('id', userData.preferences.id);
       
       if (error) throw error;
     },
     onSuccess: () => {
+      // Resetear el contexto del proyecto a General
+      setSelectedProject(null);
+      setLocalSelectedProject(null);
+      // Marcar explícitamente que estamos en modo General
+      localStorage.setItem('explicit-general-mode', 'true');
+      
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     }
   });
