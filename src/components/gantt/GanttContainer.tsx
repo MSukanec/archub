@@ -50,22 +50,32 @@ export function GanttContainer({
     const allDates = getAllDates(data);
     if (allDates.length === 0) {
       const today = new Date();
+      const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const timelineStartRaw = new Date(normalizedToday.getTime() - 60 * 24 * 60 * 60 * 1000);
+      const timelineEndRaw = new Date(normalizedToday.getTime() + 120 * 24 * 60 * 60 * 1000);
+      
       return {
-        timelineStart: new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000), // 60 days antes
-        timelineEnd: new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000) // 120 days después
+        timelineStart: new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate()),
+        timelineEnd: new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate())
       };
     }
 
-    const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
+    // Normalize min and max dates to avoid UTC issues
+    const normalizedDates = allDates.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+    const minDate = new Date(Math.min(...normalizedDates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...normalizedDates.map(d => d.getTime())));
     
     // Add substantial padding to ensure scroll is visible
     const paddingDays = 30; // 30 days before and after
     const paddingMillis = paddingDays * 24 * 60 * 60 * 1000;
     
+    // Normalize timeline boundaries
+    const timelineStartRaw = new Date(minDate.getTime() - paddingMillis);
+    const timelineEndRaw = new Date(maxDate.getTime() + paddingMillis);
+    
     return {
-      timelineStart: new Date(minDate.getTime() - paddingMillis),
-      timelineEnd: new Date(maxDate.getTime() + paddingMillis)
+      timelineStart: new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate()),
+      timelineEnd: new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate())
     };
   }, [data]);
 
