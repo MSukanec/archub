@@ -5,6 +5,7 @@ import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2 } from 'lucide-
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Table } from '@/components/ui-custom/Table'
+import { GanttContainer } from '@/components/gantt'
 import { useConstructionTasks, useUpdateConstructionTask, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -65,6 +66,112 @@ export default function ConstructionTasks() {
     task.task.rubro_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
     task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
   )
+
+  // Crear datos de ejemplo para el Gantt
+  const ganttData = [
+    {
+      id: "phase-1",
+      name: "Estructura",
+      type: "phase" as const,
+      level: 0,
+      startDate: "2024-01-15",
+      endDate: "2024-03-30",
+      children: [
+        {
+          id: "task-1-1",
+          name: "Excavación y cimientos",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-01-15",
+          endDate: "2024-02-15"
+        },
+        {
+          id: "task-1-2", 
+          name: "Estructura de hormigón",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-02-01",
+          endDate: "2024-03-15"
+        },
+        {
+          id: "task-1-3",
+          name: "Estructura metálica", 
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-03-01",
+          endDate: "2024-03-30"
+        }
+      ]
+    },
+    {
+      id: "phase-2",
+      name: "Albañilería",
+      type: "phase" as const,
+      level: 0,
+      startDate: "2024-03-15",
+      endDate: "2024-05-30",
+      children: [
+        {
+          id: "task-2-1",
+          name: "Mampostería exterior",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-03-15",
+          endDate: "2024-04-30"
+        },
+        {
+          id: "task-2-2",
+          name: "Tabiquería interior",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-04-01",
+          endDate: "2024-05-15"
+        },
+        {
+          id: "task-2-3",
+          name: "Revoques y terminaciones",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-05-01",
+          endDate: "2024-05-30"
+        }
+      ]
+    },
+    {
+      id: "phase-3",
+      name: "Instalaciones",
+      type: "phase" as const,
+      level: 0,
+      startDate: "2024-04-15",
+      endDate: "2024-06-30",
+      children: [
+        {
+          id: "task-3-1",
+          name: "Instalación eléctrica",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-04-15",
+          endDate: "2024-05-30"
+        },
+        {
+          id: "task-3-2",
+          name: "Instalación sanitaria",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-05-01",
+          endDate: "2024-06-15"
+        },
+        {
+          id: "task-3-3",
+          name: "Sistema de climatización",
+          type: "task" as const,
+          level: 1,
+          startDate: "2024-05-15",
+          endDate: "2024-06-30"
+        }
+      ]
+    }
+  ];
 
   const columns = [
     {
@@ -175,6 +282,22 @@ export default function ConstructionTasks() {
           icon={<ListTodo className="w-6 h-6" />}
           features={features}
         />
+
+        {/* Gantt Timeline */}
+        {filteredTasks.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">Cronograma de Construcción</h3>
+            <GanttContainer
+              data={ganttData}
+              onItemClick={(item) => {
+                console.log('Clicked item:', item);
+              }}
+              onAddChild={(parentId) => {
+                console.log('Add child to:', parentId);
+              }}
+            />
+          </div>
+        )}
 
         {/* Content Area */}
         {!projectId ? (
