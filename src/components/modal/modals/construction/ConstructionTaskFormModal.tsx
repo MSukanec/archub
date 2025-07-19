@@ -131,6 +131,7 @@ export function ConstructionTaskFormModal({
               searchPlaceholder="Escriba para buscar tareas..."
               emptyMessage="No se encontraron tareas"
               onSearchChange={setSearchQuery}
+              searchQuery={searchQuery}
             />
           </div>
           <div className="w-32">
