@@ -132,32 +132,70 @@ export function GanttContainer({
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card">
+      {/* Encabezado unificado */}
+      <div className="flex border-b border-border bg-muted/50">
+        {/* Encabezado del panel izquierdo */}
+        <div 
+          className="border-r border-border flex-shrink-0 h-14 flex items-center"
+          style={{ width: leftPanelWidth }}
+        >
+          <div className="px-3 font-medium text-sm">
+            Rubro / Tarea
+          </div>
+        </div>
+
+        {/* Encabezado de fechas doble fila */}
+        <div className="flex-1 overflow-x-auto">
+          <div className="min-w-max">
+            {/* Fila de meses */}
+            <div className="flex border-b border-border/50 h-6">
+              {calendarStructure.months.map((month) => (
+                <div 
+                  key={month.label}
+                  className="flex items-center justify-center text-xs font-medium text-muted-foreground border-r border-border/30 last:border-r-0"
+                  style={{ width: month.days.length * dayWidth }}
+                >
+                  {month.label}
+                </div>
+              ))}
+            </div>
+            
+            {/* Fila de días */}
+            <div className="flex h-6">
+              {calendarStructure.allDays.map((day) => (
+                <div 
+                  key={day.date}
+                  className="flex items-center justify-center text-xs text-muted-foreground border-r border-border/30 last:border-r-0"
+                  style={{ width: dayWidth }}
+                >
+                  {day.day}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido principal */}
       <div className="flex">
         {/* Panel Izquierdo */}
         <div 
           className="relative bg-card border-r border-border flex-shrink-0"
           style={{ width: leftPanelWidth }}
         >
-          {/* Encabezado del panel izquierdo */}
-          <div className="border-b border-border bg-muted/50">
-            <div className="px-3 py-2 font-medium text-sm">
-              Rubro / Tarea
-            </div>
-          </div>
-
           {/* Contenido del panel izquierdo */}
           <div className="max-h-96 overflow-y-auto">
             {data.map((item) => (
-              <div key={`left-${item.id}`} className="border-b border-border">
+              <div key={`left-${item.id}`} className="border-b border-border h-9 flex items-center">
                 {item.isHeader ? (
-                  <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground font-medium uppercase">
-                    <span className="truncate" title={item.name}>
+                  <div className="bg-muted/30 w-full h-full flex items-center px-3">
+                    <span className="truncate text-sm text-muted-foreground font-medium uppercase" title={item.name}>
                       {item.name}
                     </span>
                   </div>
                 ) : (
                   <div 
-                    className="flex items-center h-9 px-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                    className="w-full h-full flex items-center px-3 cursor-pointer hover:bg-muted/20 transition-colors"
                     style={{ paddingLeft: `${12 + item.level * 24}px` }}
                     onClick={() => onItemClick?.(item)}
                   >
@@ -179,62 +217,33 @@ export function GanttContainer({
 
         {/* Timeline */}
         <div className="flex-1 overflow-x-auto">
-          {/* Encabezado de fechas doble fila */}
-          <div className="border-b border-border bg-muted/50 min-w-max">
-            {/* Fila de meses */}
-            <div className="flex border-b border-border/50">
-              {calendarStructure.months.map((month) => (
-                <div 
-                  key={month.label}
-                  className="flex items-center justify-center py-1 px-2 text-xs font-medium text-muted-foreground border-r border-border/30 last:border-r-0"
-                  style={{ width: month.days.length * dayWidth }}
-                >
-                  {month.label}
-                </div>
-              ))}
-            </div>
-            
-            {/* Fila de días */}
-            <div className="flex">
-              {calendarStructure.allDays.map((day) => (
-                <div 
-                  key={day.date}
-                  className="flex items-center justify-center py-1 text-xs text-muted-foreground border-r border-border/30 last:border-r-0"
-                  style={{ width: dayWidth }}
-                >
-                  {day.day}
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Contenido del timeline */}
           <div className="max-h-96 overflow-y-auto min-w-max">
             {data.map((item) => (
-              <div key={`timeline-${item.id}`} className="border-b border-border">
+              <div key={`timeline-${item.id}`} className="border-b border-border h-9 flex items-center">
                 {item.isHeader ? (
                   <div 
-                    className="bg-muted/30 h-9"
+                    className="bg-muted/30 h-full w-full"
                     style={{ width: timelineWidth }}
                   />
                 ) : (
                   <div 
-                    className="relative h-9"
+                    className="relative h-full w-full"
                     style={{ width: timelineWidth }}
                   >
                     {/* Grilla de días de fondo */}
                     <div className="absolute inset-0 flex">
-                      {calendarStructure.allDays.map((day, index) => (
+                      {calendarStructure.allDays.map((day) => (
                         <div 
                           key={day.date}
-                          className="border-r border-border/10 last:border-r-0"
+                          className="border-r border-border/10 last:border-r-0 h-full"
                           style={{ width: dayWidth }}
                         />
                       ))}
                     </div>
                     
                     {/* Barra de tarea */}
-                    <div className="absolute inset-y-1 flex items-center">
+                    <div className="absolute inset-0 flex items-center px-1">
                       <GanttTimelineBar 
                         item={item}
                         timelineStart={timelineStart}

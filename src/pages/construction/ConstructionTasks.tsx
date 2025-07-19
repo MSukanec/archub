@@ -184,7 +184,7 @@ export default function ConstructionTasks() {
         disabled={!projectId || !organizationId}
       >
         <Plus className="w-4 h-4 mr-2" />
-        Nueva Tarea
+        Crear Tarea
       </Button>
     )
   }
