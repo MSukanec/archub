@@ -282,7 +282,8 @@ export default function Movements() {
         const { error } = await supabase
           .from("movements")
           .delete()
-          .in("id", movementIds);
+          .in("id", movementIds)
+          .eq("organization_id", organizationId);
 
         if (error) throw error;
         return { isConversion: true, isTransfer: false, count: movementIds.length };
@@ -294,7 +295,8 @@ export default function Movements() {
         const { error } = await supabase
           .from("movements")
           .delete()
-          .in("id", movementIds);
+          .in("id", movementIds)
+          .eq("organization_id", organizationId);
 
         if (error) throw error;
         return { isConversion: false, isTransfer: true, count: movementIds.length };
@@ -304,7 +306,8 @@ export default function Movements() {
         const { error } = await supabase
           .from("movements")
           .delete()
-          .eq("id", movementId);
+          .eq("id", movementId)
+          .eq("organization_id", organizationId);
 
         if (error) throw error;
         return { isConversion: false, isTransfer: false, count: 1 };
@@ -341,7 +344,8 @@ export default function Movements() {
       const { error } = await supabase
         .from("movements")
         .delete()
-        .in("id", movementIds);
+        .in("id", movementIds)
+        .eq("organization_id", organizationId);
 
       if (error) throw error;
     },

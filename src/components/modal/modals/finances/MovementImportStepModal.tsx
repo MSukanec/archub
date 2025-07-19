@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ComboBox } from '@/components/ui-custom/ComboBox'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
@@ -1561,7 +1562,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         
                         <div className="col-span-5">
                           <div className="space-y-2">
-                            <Select 
+                            <ComboBox
                               key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}-${renderCounter}`}
                               value={manualMappings[mappingKey] || ''}
                               onValueChange={(selectedId) => {
@@ -1590,20 +1591,26 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                                   description: `"${value}" → "${selectedName}"`
                                 });
                               }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar valor o dejar sin asignar" />
-                              </SelectTrigger>
-                              <SelectContent className="max-h-64 overflow-y-auto">
-                                <SelectItem value="">Sin asignar (NULL)</SelectItem>
-                                {fieldName === 'subcategory_id' && renderSubcategoryOptionsWithHierarchy()}
-                                {fieldName !== 'subcategory_id' && getAvailableOptionsForField(fieldName).map((option, idx) => (
-                                  <SelectItem key={idx} value={option.id}>
-                                    {option.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              options={[
+                                { value: '', label: 'Sin asignar (NULL)' },
+                                ...(fieldName === 'subcategory_id' 
+                                  ? categories?.flatMap(cat => 
+                                      (cat.children || []).map(sub => ({
+                                        value: sub.id,
+                                        label: `${cat.name} ↳ ${sub.name}`
+                                      }))
+                                    ) || []
+                                  : getAvailableOptionsForField(fieldName).map(option => ({
+                                      value: option.id,
+                                      label: option.name
+                                    }))
+                                )
+                              ]}
+                              placeholder="Seleccionar valor o dejar sin asignar"
+                              searchPlaceholder="Buscar..."
+                              emptyMessage="No se encontraron opciones"
+                              className="h-9"
+                            />
                             
                             {/* Botón crear nuevo para categorías y subcategorías */}
                             {(fieldName === 'category_id' || fieldName === 'subcategory_id') && (
