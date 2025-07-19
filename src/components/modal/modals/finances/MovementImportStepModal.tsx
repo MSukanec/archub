@@ -387,8 +387,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   React.useEffect(() => {
     if (!selectedProject && currentUser?.preferences?.last_project_id) {
       setSelectedProject(currentUser.preferences.last_project_id)
+    } else if (!selectedProject && organizationProjects && organizationProjects.length > 0) {
+      // If no last project, default to first available project
+      setSelectedProject(organizationProjects[0].id)
     }
-  }, [currentUser?.preferences?.last_project_id, selectedProject])
+  }, [currentUser?.preferences?.last_project_id, selectedProject, organizationProjects])
 
   // Auto-map columns based on header names when data is parsed
   React.useEffect(() => {
@@ -1163,7 +1166,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
       </div>
 
       <div className="space-y-3">
-        <Label>Proyecto de destino</Label>
+        <Label>Proyecto</Label>
         <Select 
           value={selectedProject} 
           onValueChange={setSelectedProject}
@@ -1172,12 +1175,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             <SelectValue placeholder="Seleccionar proyecto" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="general">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                <span>General</span>
-              </div>
-            </SelectItem>
             {organizationProjects?.map((project) => (
               <SelectItem key={project.id} value={project.id}>
                 <div className="flex items-center gap-2">
