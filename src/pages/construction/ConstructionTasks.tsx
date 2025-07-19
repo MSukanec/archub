@@ -89,8 +89,6 @@ export default function ConstructionTasks() {
   // Procesar los nombres de las tareas de forma asíncrona
   useEffect(() => {
     const processTaskNames = async () => {
-      console.log('Processing task names, tasks:', tasks.length);
-      
       if (!tasks.length) {
         setProcessedTasks([])
         return
@@ -98,11 +96,8 @@ export default function ConstructionTasks() {
 
       const processed = await Promise.all(
         tasks.map(async (task) => {
-          console.log('Processing task:', task.task.display_name, 'param_values:', task.task.param_values);
-          
           if (task.task.param_values && Object.keys(task.task.param_values).length > 0) {
             const processedName = await processDisplayName(task.task.display_name, task.task.param_values)
-            console.log('Processed name:', processedName);
             
             return {
               ...task,
@@ -122,7 +117,6 @@ export default function ConstructionTasks() {
         })
       )
       
-      console.log('All processed tasks:', processed);
       setProcessedTasks(processed)
     }
 
