@@ -9,6 +9,7 @@ import { GanttContainer } from '@/components/gantt'
 import { useConstructionTasks, useUpdateConstructionTask, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 
 export default function ConstructionTasks() {
@@ -16,6 +17,7 @@ export default function ConstructionTasks() {
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
+  const queryClient = useQueryClient()
   const updateTask = useUpdateConstructionTask()
   const deleteTask = useDeleteConstructionTask()
 
@@ -28,8 +30,14 @@ export default function ConstructionTasks() {
   )
 
   const handleAddTask = () => {
+    console.log('Attempting to open modal with data:', { projectId, organizationId, userData: userData?.user?.id });
+    
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing project, organization ID, or user data')
+      console.error('Missing project, organization ID, or user data', {
+        projectId,
+        organizationId,
+        userId: userData?.user?.id
+      });
       return
     }
 
@@ -37,7 +45,7 @@ export default function ConstructionTasks() {
       projectId,
       organizationId,
       userId: userData.user.id
-    })
+    });
   }
 
   const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
@@ -178,14 +186,18 @@ export default function ConstructionTasks() {
     showFilters: false,
     onClearFilters: () => setSearchValue(""),
     actions: (
-      <Button 
-        className="h-8 px-3 text-sm"
-        onClick={handleAddTask}
-        disabled={!projectId || !organizationId}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Crear Tarea
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button 
+          className="h-8 px-3 text-sm"
+          onClick={handleAddTask}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Crear Tarea
+        </Button>
+        <div className="text-xs text-muted-foreground">
+          Debug: {projectId ? 'P✓' : 'P✗'} {organizationId ? 'O✓' : 'O✗'}
+        </div>
+      </div>
     )
   }
 
