@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { CheckSquare, Plus } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -15,8 +15,10 @@ export default function ConstructionTasks() {
   const { openModal } = useGlobalModalStore()
 
   // Set navigation context
-  setSidebarContext('construction')
-  setActiveSidebarSection('obra')
+  useEffect(() => {
+    setSidebarContext('construction')
+    setActiveSidebarSection('obra')
+  }, [])
 
   const headerProps = {
     title: "Tareas",
