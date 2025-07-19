@@ -102,7 +102,8 @@ export function GanttContainer({
       };
     });
 
-    return { weeks };
+    const totalDays = weeks.reduce((acc, week) => acc + week.days.length, 0);
+    return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
 
   // Función para iniciar el redimensionamiento
@@ -410,8 +411,16 @@ export function GanttContainer({
                         
                         for (const week of calendarStructure.weeks) {
                           for (const day of week.days) {
+                            console.log('Comparing days:', {
+                              dayDate: day.date.toDateString(),
+                              todayDate: todayStart.toDateString(),
+                              dayTime: day.date.getTime(),
+                              todayTime: todayStart.getTime(),
+                              currentIndex: currentDayIndex
+                            });
                             if (day.date.getTime() === todayStart.getTime()) {
                               todayDayIndex = currentDayIndex;
+                              console.log('Found today at index:', todayDayIndex);
                               break;
                             }
                             currentDayIndex++;
@@ -422,6 +431,14 @@ export function GanttContainer({
                         if (todayDayIndex !== -1) {
                           const dayWidth = timelineWidth / calendarStructure.totalDays;
                           const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2);
+                          
+                          console.log('Today line calculation:', {
+                            todayDayIndex,
+                            totalDays: calendarStructure.totalDays,
+                            timelineWidth,
+                            dayWidth,
+                            todayPosition
+                          });
                           
                           return (
                             <div 
