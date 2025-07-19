@@ -210,8 +210,8 @@ export function GanttContainer({
                 >
                   {week.days.map((day, dayIndex) => {
                     const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const isToday = day.date.toDateString() === today.toDateString();
+                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const isToday = day.date.getTime() === todayStart.getTime();
                     
                     return (
                       <div 
@@ -351,21 +351,12 @@ export function GanttContainer({
                     {/* Línea del día de hoy también en headers */}
                     {(() => {
                       const today = new Date();
-                      today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
-                      const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                       
-                      if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
-                        // Encontrar la posición exacta del día usando la estructura de semanas
-                        const dayIndex = calendarStructure.weeks.reduce((acc, week) => {
-                          const dayInWeek = week.days.findIndex(day => 
-                            day.date.toDateString() === today.toDateString()
-                          );
-                          return dayInWeek !== -1 ? acc + dayInWeek : acc + week.days.length;
-                        }, 0);
-                        
-                        // Calcular posición basada en el índice del día
-                        const dayWidth = timelineWidth / calendarStructure.totalDays;
-                        const todayPosition = dayIndex * dayWidth + (dayWidth / 2); // Centro del día
+                      if (todayStart >= timelineStart && todayStart <= timelineEnd) {
+                        const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                        const todayMs = todayStart.getTime() - timelineStart.getTime();
+                        const todayPosition = (todayMs / totalSpan) * timelineWidth;
                         
                         return (
                           <div 
@@ -397,28 +388,19 @@ export function GanttContainer({
                     <div className="absolute inset-0">
                       {(() => {
                         const today = new Date();
-                        today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
-                        const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                         
                         // Verificar si hoy está dentro del rango del timeline
-                        if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
-                          // Encontrar la posición exacta del día usando la estructura de semanas
-                          const dayIndex = calendarStructure.weeks.reduce((acc, week) => {
-                            const dayInWeek = week.days.findIndex(day => 
-                              day.date.toDateString() === today.toDateString()
-                            );
-                            return dayInWeek !== -1 ? acc + dayInWeek : acc + week.days.length;
-                          }, 0);
-                          
-                          // Calcular posición basada en el índice del día
-                          const dayWidth = timelineWidth / calendarStructure.totalDays;
-                          const todayPosition = dayIndex * dayWidth + (dayWidth / 2); // Centro del día
+                        if (todayStart >= timelineStart && todayStart <= timelineEnd) {
+                          const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                          const todayMs = todayStart.getTime() - timelineStart.getTime();
+                          const todayPosition = (todayMs / totalSpan) * timelineWidth;
                           
                           return (
                             <div 
                               className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
                               style={{ left: `${todayPosition}px` }}
-                              title={`Hoy: ${today.toLocaleDateString()}`}
+                              title={`Hoy: ${todayStart.toLocaleDateString()}`}
                             />
                           );
                         }
@@ -489,19 +471,12 @@ export function GanttContainer({
                   {/* Línea del día de hoy en filas vacías */}
                   {(() => {
                     const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                     
-                    if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
-                      const dayIndex = calendarStructure.weeks.reduce((acc, week) => {
-                        const dayInWeek = week.days.findIndex(day => 
-                          day.date.toDateString() === today.toDateString()
-                        );
-                        return dayInWeek !== -1 ? acc + dayInWeek : acc + week.days.length;
-                      }, 0);
-                      
-                      const dayWidth = timelineWidth / calendarStructure.totalDays;
-                      const todayPosition = dayIndex * dayWidth + (dayWidth / 2);
+                    if (todayStart >= timelineStart && todayStart <= timelineEnd) {
+                      const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                      const todayMs = todayStart.getTime() - timelineStart.getTime();
+                      const todayPosition = (todayMs / totalSpan) * timelineWidth;
                       
                       return (
                         <div 

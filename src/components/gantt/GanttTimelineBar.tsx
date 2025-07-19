@@ -24,16 +24,22 @@ export function GanttTimelineBar({
 
   const { startDate, resolvedEndDate } = dateRange;
 
+  // Normalize dates to avoid timezone issues - set to start of day
+  const normalizedStart = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const normalizedEnd = new Date(resolvedEndDate.getFullYear(), resolvedEndDate.getMonth(), resolvedEndDate.getDate());
+  const normalizedTimelineStart = new Date(timelineStart.getFullYear(), timelineStart.getMonth(), timelineStart.getDate());
+  const normalizedTimelineEnd = new Date(timelineEnd.getFullYear(), timelineEnd.getMonth(), timelineEnd.getDate());
+
   // Calculate total timeline span in milliseconds
-  const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+  const totalSpan = normalizedTimelineEnd.getTime() - normalizedTimelineStart.getTime();
   
   if (totalSpan <= 0) {
     return null;
   }
 
   // Calculate task position and width in pixels
-  const taskStartMs = Math.max(0, startDate.getTime() - timelineStart.getTime());
-  const taskEndMs = Math.min(totalSpan, resolvedEndDate.getTime() - timelineStart.getTime());
+  const taskStartMs = Math.max(0, normalizedStart.getTime() - normalizedTimelineStart.getTime());
+  const taskEndMs = Math.min(totalSpan, normalizedEnd.getTime() - normalizedTimelineStart.getTime());
   
   const startPixels = (taskStartMs / totalSpan) * timelineWidth;
   const widthPixels = ((taskEndMs - taskStartMs) / totalSpan) * timelineWidth;
@@ -51,7 +57,7 @@ export function GanttTimelineBar({
       }}
       title={`${item.name} (${format(startDate, 'dd/MM/yyyy')} - ${format(resolvedEndDate, 'dd/MM/yyyy')})`}
     >
-      <span className="truncate px-1 text-[10px]">
+      <span className="truncate text-[10px]" style={{ padding: '0 2px' }}>
         {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
       </span>
     </div>
