@@ -208,18 +208,24 @@ export function GanttContainer({
                   className="flex border-r border-[var(--table-header-border)]/30 last:border-r-0"
                   style={{ width: weekWidth }}
                 >
-                  {week.days.map((day, dayIndex) => (
-                    <div 
-                      key={`${week.key}-${dayIndex}`}
-                      className={`flex-1 flex items-center justify-center text-xs font-medium ${
-                        day.isWeekend 
-                          ? 'text-[var(--table-header-fg)]/60' 
-                          : 'text-[var(--table-header-fg)]'
-                      }`}
-                    >
-                      {day.dayNumber}
-                    </div>
-                  ))}
+                  {week.days.map((day, dayIndex) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const isToday = day.date.toDateString() === today.toDateString();
+                    
+                    return (
+                      <div 
+                        key={`${week.key}-${dayIndex}`}
+                        className={`flex-1 flex items-center justify-center text-xs font-medium ${
+                          day.isWeekend 
+                            ? 'text-[var(--table-header-fg)]/60' 
+                            : 'text-[var(--table-header-fg)]'
+                        } ${isToday ? 'bg-[var(--accent)] text-white rounded-sm mx-0.5' : ''}`}
+                      >
+                        {day.dayNumber}
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
@@ -345,11 +351,21 @@ export function GanttContainer({
                     {/* Línea del día de hoy también en headers */}
                     {(() => {
                       const today = new Date();
+                      today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
                       const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
                       
                       if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
-                        const todayMs = today.getTime() - timelineStart.getTime();
-                        const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                        // Encontrar la posición exacta del día usando la estructura de semanas
+                        const dayIndex = calendarStructure.weeks.reduce((acc, week) => {
+                          const dayInWeek = week.days.findIndex(day => 
+                            day.date.toDateString() === today.toDateString()
+                          );
+                          return dayInWeek !== -1 ? acc + dayInWeek : acc + week.days.length;
+                        }, 0);
+                        
+                        // Calcular posición basada en el índice del día
+                        const dayWidth = timelineWidth / calendarStructure.totalDays;
+                        const todayPosition = dayIndex * dayWidth + (dayWidth / 2); // Centro del día
                         
                         return (
                           <div 
@@ -381,12 +397,22 @@ export function GanttContainer({
                     <div className="absolute inset-0">
                       {(() => {
                         const today = new Date();
+                        today.setHours(0, 0, 0, 0); // Normalizar a inicio del día
                         const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
                         
                         // Verificar si hoy está dentro del rango del timeline
                         if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
-                          const todayMs = today.getTime() - timelineStart.getTime();
-                          const todayPosition = (todayMs / totalSpan) * timelineWidth;
+                          // Encontrar la posición exacta del día usando la estructura de semanas
+                          const dayIndex = calendarStructure.weeks.reduce((acc, week) => {
+                            const dayInWeek = week.days.findIndex(day => 
+                              day.date.toDateString() === today.toDateString()
+                            );
+                            return dayInWeek !== -1 ? acc + dayInWeek : acc + week.days.length;
+                          }, 0);
+                          
+                          // Calcular posición basada en el índice del día
+                          const dayWidth = timelineWidth / calendarStructure.totalDays;
+                          const todayPosition = dayIndex * dayWidth + (dayWidth / 2); // Centro del día
                           
                           return (
                             <div 
@@ -459,6 +485,33 @@ export function GanttContainer({
                       />
                     ))}
                   </div>
+                  
+                  {/* Línea del día de hoy en filas vacías */}
+                  {(() => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const totalSpan = timelineEnd.getTime() - timelineStart.getTime();
+                    
+                    if (today >= timelineStart && today <= timelineEnd && totalSpan > 0) {
+                      const dayIndex = calendarStructure.weeks.reduce((acc, week) => {
+                        const dayInWeek = week.days.findIndex(day => 
+                          day.date.toDateString() === today.toDateString()
+                        );
+                        return dayInWeek !== -1 ? acc + dayInWeek : acc + week.days.length;
+                      }, 0);
+                      
+                      const dayWidth = timelineWidth / calendarStructure.totalDays;
+                      const todayPosition = dayIndex * dayWidth + (dayWidth / 2);
+                      
+                      return (
+                        <div 
+                          className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
+                          style={{ left: `${todayPosition}px` }}
+                        />
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
             ))}

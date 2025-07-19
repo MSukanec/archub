@@ -44,15 +44,15 @@ export function GanttTimelineBar({
 
   return (
     <div 
-      className="h-5 bg-[var(--accent)] rounded-sm shadow-sm flex items-center justify-center text-xs text-white font-medium hover:bg-[var(--accent)]/90 transition-colors cursor-pointer"
+      className="h-5 border-2 border-[var(--accent)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--accent)] font-medium hover:bg-[var(--accent)]/10 transition-colors cursor-pointer"
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`
       }}
       title={`${item.name} (${format(startDate, 'dd/MM/yyyy')} - ${format(resolvedEndDate, 'dd/MM/yyyy')})`}
     >
-      <span className="truncate px-2">
-        {item.name}
+      <span className="truncate px-1 text-[10px]">
+        {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
       </span>
     </div>
   );
