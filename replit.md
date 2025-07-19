@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 19, 2025. COMBOBOXWRITE SEARCH FUNCTIONALITY AND EXCEL IMPORT RLS FIXES COMPLETED: Fixed critical search display bug and authentication errors - COMPLETED
+  • Fixed ComboBoxWrite component search functionality: eliminated conditional CommandGroup rendering that was preventing task results from displaying
+  • Corrected search option filtering logic to always show filtered results when external search (onSearchChange) is provided
+  • Updated MovementImportStepModal to include user authentication token in bulk movements API requests for proper RLS compliance
+  • Enhanced server-side bulk movements endpoint to accept and use user tokens for authenticated database operations
+  • Removed "PONER TODO NULL" button completely from Excel import step 3 as requested by user
+  • Construction task search now properly displays 3 results when typing "mur" instead of showing empty dropdown
+  • Excel movement imports no longer fail with "row violates row-level security policy" errors
+  • All debugging logging cleaned up for production-ready code quality
 - July 18, 2025. CRITICAL SECURITY ISSUE RESOLVED: Fixed navigation logic preventing access to wrong project context in "GENERAL" mode - COMPLETED
   • Identified and resolved critical security flaw where clicking "General" breadcrumb was navigating to /project/dashboard instead of organization context
   • Fixed Header.tsx navigation logic to properly handle General mode: clicks now navigate to /organization/projects for organizational overview

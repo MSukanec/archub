@@ -70,14 +70,7 @@ export function ConstructionTaskFormModal({
     label: task.display_name || task.code || 'Sin nombre'
   }));
 
-  // Debug logging
-  console.log('🔍 ComboBox Debug:', {
-    searchQuery,
-    tasksLength: tasks.length,
-    taskOptionsLength: taskOptions.length,
-    firstTask: tasks[0],
-    firstOption: taskOptions[0]
-  });
+
 
   const selectedTaskId = watch('task_id');
   const selectedTask = tasks.find(t => t.id === selectedTaskId);

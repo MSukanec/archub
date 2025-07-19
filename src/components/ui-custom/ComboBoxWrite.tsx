@@ -49,16 +49,19 @@ export function ComboBox({
   // Find selected option
   const selectedOption = options.find(option => option.value === value);
 
-  // Filter options based on search - solo si NO hay onSearchChange (búsqueda externa)
+  // Filter options based on search
   const filteredOptions = onSearchChange 
     ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
     : options.filter(option =>
         option.label.toLowerCase().includes(searchValue.toLowerCase())
       );
 
+
+
   // Check if search value would create a new option
-  const canCreateNew = allowCreate && searchValue.trim() && 
-    !options.some(option => option.label.toLowerCase() === searchValue.toLowerCase().trim());
+  const searchValueToCheck = onSearchChange ? searchQuery : searchValue;
+  const canCreateNew = allowCreate && searchValueToCheck.trim() && 
+    !options.some(option => option.label.toLowerCase() === searchValueToCheck.toLowerCase().trim());
 
   const handleSelect = (optionValue: string) => {
     onValueChange(optionValue);
@@ -107,7 +110,7 @@ export function ComboBox({
         align="start" 
         style={{ zIndex: 9999 }}
       >
-        <Command className="bg-[var(--card-bg)]">
+        <Command className="bg-[var(--card-bg)]" shouldFilter={false}>
           <CommandInput 
             placeholder={searchPlaceholder}
             value={onSearchChange ? searchQuery : searchValue}
@@ -125,26 +128,24 @@ export function ComboBox({
               <CommandEmpty className="text-sm text-muted-foreground py-3 text-center">{emptyMessage}</CommandEmpty>
             )}
             
-            {filteredOptions.length > 0 && (
-              <CommandGroup>
-                {filteredOptions.map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    value={option.value}
-                    onSelect={() => handleSelect(option.value)}
-                    className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors"
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-3 w-3",
-                        value === option.value ? "opacity-100 text-accent" : "opacity-0"
-                      )}
-                    />
-                    <span className="text-foreground">{option.label}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => handleSelect(option.value)}
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-3 w-3",
+                      value === option.value ? "opacity-100 text-accent" : "opacity-0"
+                    )}
+                  />
+                  <span className="text-foreground">{option.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
 
             {canCreateNew && (
               <CommandGroup>
