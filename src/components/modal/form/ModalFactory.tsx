@@ -20,6 +20,7 @@ import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/construction/BudgetFormModal';
 import { OrganizationFormModal } from '../modals/organizations/OrganizationFormModal';
 import { InstallmentFormModal } from '../modals/finances/InstallmentFormModal';
+import { ConstructionTaskFormModal } from '../modals/construction/ConstructionTaskFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -75,6 +76,8 @@ export function ModalFactory() {
       />;
     case 'installment':
       return <InstallmentFormModal modalData={data} onClose={closeModal} />;
+    case 'construction-task':
+      return <ConstructionTaskFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }

@@ -37,6 +37,7 @@ import ConstructionAttendance from "@/pages/construction/ConstructionAttendance"
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import ConstructionGallery from "@/pages/construction/ConstructionGallery";
+import ConstructionTasks from "@/pages/construction/ConstructionTasks";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignTimeline from "@/pages/design/DesignTimeline";
 import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
@@ -200,6 +201,11 @@ function Router() {
         <Route path="/construction/materials">
           <ProtectedRoute>
             <ConstructionMaterials />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/construction/tasks">
+          <ProtectedRoute>
+            <ConstructionTasks />
           </ProtectedRoute>
         </Route>
 
