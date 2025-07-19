@@ -119,16 +119,18 @@ export function ConstructionTaskFormModal({
       {/* Task Selection */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
-        <ComboBox
-          options={taskOptions}
-          value={selectedTaskId}
-          onValueChange={(value) => setValue('task_id', value)}
-          placeholder="Buscar tarea..."
-          searchPlaceholder="Escriba para buscar tareas..."
-          emptyMessage="No se encontraron tareas"
-          onSearchChange={setSearchQuery}
-          searchQuery={searchQuery}
-        />
+        <div className="min-h-[2.5rem] max-h-[4rem] overflow-y-auto">
+          <ComboBox
+            options={taskOptions}
+            value={selectedTaskId}
+            onValueChange={(value) => setValue('task_id', value)}
+            placeholder="Buscar tarea..."
+            searchPlaceholder="Escriba para buscar tareas..."
+            emptyMessage="No se encontraron tareas"
+            onSearchChange={setSearchQuery}
+            searchQuery={searchQuery}
+          />
+        </div>
         {errors.task_id && (
           <p className="text-sm text-destructive">{errors.task_id.message}</p>
         )}
@@ -148,9 +150,9 @@ export function ConstructionTaskFormModal({
             placeholder="Ingrese cantidad"
             className="pr-16"
           />
-          {selectedTask?.unit && (
+          {selectedTaskId && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-              {selectedTask.unit.name || selectedTask.unit.symbol || 'ud'}
+              ud
             </div>
           )}
         </div>

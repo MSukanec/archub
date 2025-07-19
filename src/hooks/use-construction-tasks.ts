@@ -18,11 +18,6 @@ export interface ConstructionTask {
     category_name: string | null;
     unit_id: string | null;
     rubro_id: string | null;
-    unit?: {
-      id: string;
-      name: string;
-      symbol: string;
-    };
   };
 }
 
@@ -43,12 +38,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             rubro_name,
             category_name,
             unit_id,
-            rubro_id,
-            unit:units (
-              id,
-              name,
-              symbol
-            )
+            rubro_id
           )
         `)
         .eq('project_id', projectId)
@@ -90,12 +80,7 @@ export function useCreateConstructionTask() {
             rubro_name,
             category_name,
             unit_id,
-            rubro_id,
-            unit:units (
-              id,
-              name,
-              symbol
-            )
+            rubro_id
           )
         `)
         .single();

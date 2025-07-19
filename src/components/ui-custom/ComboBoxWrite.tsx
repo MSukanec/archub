@@ -101,7 +101,11 @@ export function ComboBox({
           )}
           disabled={disabled}
         >
-          <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+          <div className="flex-1 min-w-0 text-left">
+            <span className="block text-sm leading-tight whitespace-normal break-words">
+              {selectedOption ? selectedOption.label : placeholder}
+            </span>
+          </div>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
