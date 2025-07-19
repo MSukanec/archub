@@ -95,8 +95,7 @@ export function ConstructionTaskFormModal({
         organization_id: modalData.organizationId,
         project_id: modalData.projectId,
         task_id: data.task_id,
-        quantity: data.quantity,
-        created_by: userData.user.id
+        quantity: data.quantity
       });
 
       onClose();
@@ -117,46 +116,47 @@ export function ConstructionTaskFormModal({
 
   const editPanel = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Task Selection with inline Quantity */}
+      {/* Task Selection */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <ComboBox
-              options={taskOptions}
-              value={selectedTaskId}
-              onValueChange={(value) => setValue('task_id', value)}
-              placeholder="Buscar tarea..."
-              searchPlaceholder="Escriba para buscar tareas..."
-              emptyMessage="No se encontraron tareas"
-              onSearchChange={setSearchQuery}
-              searchQuery={searchQuery}
-            />
-          </div>
-          <div className="w-32">
-            <Input
-              id="quantity"
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={quantity}
-              onChange={(e) => setValue('quantity', parseFloat(e.target.value) || 0)}
-              placeholder="Cantidad"
-            />
-          </div>
+        <ComboBox
+          options={taskOptions}
+          value={selectedTaskId}
+          onValueChange={(value) => setValue('task_id', value)}
+          placeholder="Buscar tarea..."
+          searchPlaceholder="Escriba para buscar tareas..."
+          emptyMessage="No se encontraron tareas"
+          onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+        />
+        {errors.task_id && (
+          <p className="text-sm text-destructive">{errors.task_id.message}</p>
+        )}
+      </div>
+
+      {/* Quantity with Unit */}
+      <div className="space-y-2">
+        <Label htmlFor="quantity">Cantidad *</Label>
+        <div className="relative">
+          <Input
+            id="quantity"
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={quantity}
+            onChange={(e) => setValue('quantity', parseFloat(e.target.value) || 0)}
+            placeholder="Ingrese cantidad"
+            className="pr-16"
+          />
+          {selectedTask?.unit && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+              {selectedTask.unit.name || selectedTask.unit.symbol || 'ud'}
+            </div>
+          )}
         </div>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            {errors.task_id && (
-              <p className="text-sm text-destructive">{errors.task_id.message}</p>
-            )}
-          </div>
-          <div className="w-32">
-            {errors.quantity && (
-              <p className="text-sm text-destructive">{errors.quantity.message}</p>
-            )}
-          </div>
-        </div>
+        {errors.quantity && (
+          <p className="text-sm text-destructive">{errors.quantity.message}</p>
+        )}
       </div>
     </form>
   );

@@ -101,7 +101,7 @@ export function ComboBox({
           )}
           disabled={disabled}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
@@ -142,7 +142,7 @@ export function ComboBox({
                       value === option.value ? "opacity-100 text-accent" : "opacity-0"
                     )}
                   />
-                  <span className="text-foreground">{option.label}</span>
+                  <span className="text-foreground truncate">{option.label}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
