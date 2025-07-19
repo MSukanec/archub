@@ -73,9 +73,18 @@ export function GanttContainer({
     const timelineStartRaw = new Date(minDate.getTime() - paddingMillis);
     const timelineEndRaw = new Date(maxDate.getTime() + paddingMillis);
     
+    const finalTimelineStart = new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate());
+    const finalTimelineEnd = new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate());
+    
+    console.log('Timeline calculation:', {
+      minDateOriginal: minDate.toDateString(),
+      timelineStartCalculated: finalTimelineStart.toDateString(),
+      timelineEndCalculated: finalTimelineEnd.toDateString()
+    });
+    
     return {
-      timelineStart: new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate()),
-      timelineEnd: new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate())
+      timelineStart: finalTimelineStart,
+      timelineEnd: finalTimelineEnd
     };
   }, [data]);
 
@@ -508,6 +517,7 @@ export function GanttContainer({
                         timelineStart={timelineStart}
                         timelineEnd={timelineEnd}
                         timelineWidth={timelineWidth}
+                        totalDays={calendarStructure.totalDays}
                       />
                     </div>
 

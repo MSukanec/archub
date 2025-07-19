@@ -6,13 +6,15 @@ interface GanttTimelineBarProps {
   timelineStart: Date;
   timelineEnd: Date;
   timelineWidth: number;
+  totalDays: number; // Add this to sync with calendar
 }
 
 export function GanttTimelineBar({ 
   item, 
   timelineStart, 
   timelineEnd, 
-  timelineWidth 
+  timelineWidth,
+  totalDays
 }: GanttTimelineBarProps) {
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
@@ -37,23 +39,28 @@ export function GanttTimelineBar({
     return null;
   }
 
-  // Calculate task position and width in pixels
-  const taskStartMs = Math.max(0, normalizedStart.getTime() - normalizedTimelineStart.getTime());
-  const taskEndMs = Math.min(totalSpan, normalizedEnd.getTime() - normalizedTimelineStart.getTime());
+  // Calculate task position using day-based approach to match calendar
+  const dayStartFromTimeline = Math.floor((normalizedStart.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
+  const dayEndFromTimeline = Math.floor((normalizedEnd.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
   
-  const startPixels = (taskStartMs / totalSpan) * timelineWidth;
-  const widthPixels = ((taskEndMs - taskStartMs) / totalSpan) * timelineWidth;
-
-  // Debug logging to see what's happening
-  console.log('Bar alignment debug FIXED:', {
-    taskName: item.name.substring(0, 30),
-    originalStart: startDate.toDateString(),
+  const dayWidth = timelineWidth / totalDays;
+  const startPixels = dayStartFromTimeline * dayWidth;
+  const widthPixels = (dayEndFromTimeline - dayStartFromTimeline + 1) * dayWidth;
+  
+  // EXTREME DEBUG - DAY-BASED CALCULATION
+  console.log('DAY-BASED CALCULATION:', {
+    taskName: item.name.substring(0, 20),
     normalizedStart: normalizedStart.toDateString(),
-    timelineStart: normalizedTimelineStart.toDateString(),
-    dayDifference: Math.floor((normalizedStart.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000)),
+    normalizedTimelineStart: normalizedTimelineStart.toDateString(),
+    dayStartFromTimeline,
+    dayEndFromTimeline,
+    totalDays,
+    dayWidth,
     startPixels,
-    widthPixels
+    calculation: `day ${dayStartFromTimeline} * ${dayWidth} = ${startPixels}`
   });
+
+
 
   if (widthPixels <= 0) {
     return null;
