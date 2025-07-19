@@ -253,6 +253,12 @@ export default function ConstructionTasks() {
           validDuration = 1;
         }
 
+        console.log('Gantt task name:', {
+          original: task.task.display_name,
+          processed: task.task.processed_display_name,
+          using: task.task.processed_display_name || task.task.display_name
+        });
+
         ganttRows.push({
           id: task.id,
           name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
