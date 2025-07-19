@@ -275,34 +275,30 @@ export function GanttContainer({
               ))}
             </div>
             
-            {/* Fila inferior: Números de días */}
+            {/* Fila inferior: Números de días - INDIVIDUAL DAYS TO MATCH BARS */}
             <div className="flex h-8">
-              {calendarStructure.weeks.map((week) => (
-                <div 
-                  key={`days-${week.key}`}
-                  className="flex border-r border-[var(--table-header-border)]/30 last:border-r-0"
-                  style={{ width: weekWidth }}
-                >
-                  {week.days.map((day, dayIndex) => {
-                    const today = new Date();
-                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    const isToday = day.date.getTime() === todayStart.getTime();
-                    
-                    return (
-                      <div 
-                        key={`${week.key}-${dayIndex}`}
-                        className={`flex-1 flex items-center justify-center text-xs font-medium ${
-                          day.isWeekend 
-                            ? 'text-[var(--table-header-fg)]/60' 
-                            : 'text-[var(--table-header-fg)]'
-                        } ${isToday ? 'bg-[var(--accent)] text-white rounded-sm mx-0.5' : ''}`}
-                      >
-                        {day.dayNumber}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+              {calendarStructure.weeks.map((week) => 
+                week.days.map((day, dayIndex) => {
+                  const today = new Date();
+                  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                  const isToday = day.date.getTime() === todayStart.getTime();
+                  const dayWidth = timelineWidth / calendarStructure.totalDays;
+                  
+                  return (
+                    <div 
+                      key={`${week.key}-${dayIndex}`}
+                      className={`flex items-center justify-center text-xs font-medium border-r border-[var(--table-header-border)]/30 last:border-r-0 ${
+                        day.isWeekend 
+                          ? 'text-[var(--table-header-fg)]/60' 
+                          : 'text-[var(--table-header-fg)]'
+                      } ${isToday ? 'bg-[var(--accent)] text-white' : ''}`}
+                      style={{ width: dayWidth, minWidth: dayWidth }}
+                    >
+                      {day.dayNumber}
+                    </div>
+                  );
+                })
+              ).flat()}
             </div>
           </div>
         </div>

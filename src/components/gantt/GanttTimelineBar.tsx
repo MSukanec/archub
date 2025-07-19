@@ -49,17 +49,16 @@ export function GanttTimelineBar({
   const startPixels = dayStartFromTimeline * dayWidth;
   const widthPixels = (dayEndFromTimeline - dayStartFromTimeline + 1) * dayWidth;
   
-  // EXTREME DEBUG - DAY-BASED CALCULATION
-  console.log('DAY-BASED CALCULATION:', {
+  // FINAL BAR CALCULATION - SHOULD MATCH HEADER DAYS
+  console.log('FINAL BAR CALCULATION:', {
     taskName: item.name.substring(0, 20),
-    normalizedStart: normalizedStart.toDateString(),
-    normalizedTimelineStart: normalizedTimelineStart.toDateString(),
-    dayStartFromTimeline,
-    dayEndFromTimeline,
+    taskStartDate: normalizedStart.toDateString(),
+    timelineStartDate: normalizedTimelineStart.toDateString(),
+    dayFromStart: dayStartFromTimeline,
     totalDays,
     dayWidth,
-    startPixels,
-    calculation: `day ${dayStartFromTimeline} * ${dayWidth} = ${startPixels}`
+    finalStartPixels: startPixels,
+    calculation: `day ${dayStartFromTimeline} * ${dayWidth} = ${startPixels}px`
   });
 
 
