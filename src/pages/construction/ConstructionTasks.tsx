@@ -281,7 +281,7 @@ export default function ConstructionTasks() {
   ]
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* Feature Introduction */}
         <FeatureIntroduction

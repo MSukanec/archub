@@ -155,7 +155,7 @@ export function GanttContainer({
           className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex items-center bg-[var(--table-header-bg)]"
           style={{ width: leftPanelWidth }}
         >
-          <div className="px-4 font-medium text-xs text-foreground">
+          <div className="px-4 font-medium text-xs text-[var(--table-header-fg)]">
             Rubro / Tarea
           </div>
         </div>
@@ -237,7 +237,7 @@ export function GanttContainer({
               <div key={`left-${item.id}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors">
                 {item.isHeader ? (
                   <div className="bg-muted/30 w-full h-full flex items-center px-4">
-                    <span className="truncate text-xs text-[var(--table-header-fg)] font-medium uppercase" title={item.name}>
+                    <span className="truncate text-xs text-foreground font-medium uppercase" title={item.name}>
                       {item.name}
                     </span>
                   </div>
