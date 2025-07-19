@@ -86,11 +86,7 @@ export function CustomRestricted({
   // Si es administrador, permitir acceso a TODO excepto "general_mode"
   // "general_mode" sigue siendo aplicable incluso para admins porque es una restricción de contexto, no de permisos
   if (isAdmin && reason !== "general_mode") {
-    return (
-      <div className="relative w-full border-2 border-red-500 rounded-md" title={`Esta función está ${reason === "coming_soon" ? "en desarrollo" : "restringida"} pero tienes acceso como administrador`}>
-        {children}
-      </div>
-    );
+    return <>{children}</>;
   }
 
   // Obtener el mensaje de restricción
