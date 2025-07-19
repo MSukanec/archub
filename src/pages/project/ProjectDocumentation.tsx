@@ -603,32 +603,35 @@ export default function ProjectDocumentation() {
         ]}
       />
 
-      {/* Search and Navigation */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar documentos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        {selectedFolderId && (
-          <Button
-            variant="outline"
-            onClick={handleBackToGroups}
-            className="gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Volver
-          </Button>
-        )}
-      </div>
-
       {/* Breadcrumbs */}
       {renderBreadcrumbs()}
+
+      {/* Search and Navigation - Only when there's content */}
+      {((viewMode === 'folders' && (!selectedFolderId ? filteredFolders.length > 0 : filteredGroups.length > 0)) || 
+        (viewMode === 'documents' && filteredDocuments.length > 0)) && (
+        <div className="flex items-center gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar documentos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          {selectedFolderId && (
+            <Button
+              variant="outline"
+              onClick={handleBackToGroups}
+              className="gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Volver
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Main Content */}
       {renderMainContent()}
