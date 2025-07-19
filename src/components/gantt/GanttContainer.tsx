@@ -404,8 +404,8 @@ export function GanttContainer({
               </div>
             ))}
             
-            {/* Filas vacías adicionales para sincronizar con timeline (10 como en Jira) */}
-            {Array.from({ length: 10 }).map((_, index) => (
+            {/* Filas vacías adicionales para sincronizar con timeline */}
+            {Array.from({ length: 2 }).map((_, index) => (
               <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
                 {/* Fila vacía para mantener altura sincronizada */}
               </div>
@@ -579,103 +579,60 @@ export function GanttContainer({
               </div>
             ))}
             
-            {/* Filas vacías adicionales para más espacio (10 como en Jira) */}
-            {Array.from({ length: 10 }).map((_, index) => {
-              const isLastRow = index === 9;
-              return (
-                <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
-                  <div 
-                    className="relative h-full w-full"
-                    style={{ width: timelineWidth }}
-                  >
-                    {/* Grilla de semanas (sin líneas entre días) */}
-                    <div className="absolute inset-0 flex">
-                      {calendarStructure.weeks.map((week) => (
-                        <div 
-                          key={`empty-${index}-${week.key}`}
-                          className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
-                          style={{ width: weekWidth }}
-                        />
-                      ))}
-                    </div>
-                    
-                    {/* Línea del día de hoy en filas vacías */}
-                    {(() => {
-                      const today = new Date();
-                      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                      
-                      // Buscar el día exacto en la estructura del calendario
-                      let todayDayIndex = -1;
-                      let currentDayIndex = 0;
-                      
-                      for (const week of calendarStructure.weeks) {
-                        for (const day of week.days) {
-                          if (day.date.getTime() === todayStart.getTime()) {
-                            todayDayIndex = currentDayIndex;
-                            break;
-                          }
-                          currentDayIndex++;
-                        }
-                        if (todayDayIndex !== -1) break;
-                      }
-                      
-                      if (todayDayIndex !== -1) {
-                        const dayWidth = timelineWidth / calendarStructure.totalDays;
-                        const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
-                        
-                        return (
-                          <div 
-                            className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
-                            style={{ left: `${todayPosition}px` }}
-                          />
-                        );
-                      }
-                      return null;
-                    })()}
-
-                    {/* Botón HOY en la última fila (como en Jira) */}
-                    {isLastRow && (
-                      <div className="absolute inset-0 flex items-center justify-end pr-4">
-                        <button
-                          onClick={() => {
-                            // Auto-scroll to today's position
-                            const today = new Date();
-                            let todayDayIndex = -1;
-                            let currentDayIndex = 0;
-                            
-                            for (const week of calendarStructure.weeks) {
-                              for (const day of week.days) {
-                                if (day.date.getTime() === today.getTime()) {
-                                  todayDayIndex = currentDayIndex;
-                                  break;
-                                }
-                                currentDayIndex++;
-                              }
-                              if (todayDayIndex !== -1) break;
-                            }
-                            
-                            if (todayDayIndex !== -1) {
-                              const targetDayIndex = Math.max(0, todayDayIndex - 7);
-                              const dayWidth = timelineWidth / calendarStructure.totalDays;
-                              const targetScrollPosition = targetDayIndex * dayWidth;
-                              
-                              const headerScroll = document.getElementById('timeline-header-scroll');
-                              const contentScroll = document.getElementById('timeline-content-scroll');
-                              
-                              if (headerScroll) headerScroll.scrollLeft = targetScrollPosition;
-                              if (contentScroll) contentScroll.scrollLeft = targetScrollPosition;
-                            }
-                          }}
-                          className="px-3 py-1 text-xs font-medium bg-[var(--accent)] text-white rounded hover:bg-[var(--accent)]/80 transition-colors shadow-sm"
-                        >
-                          HOY
-                        </button>
-                      </div>
-                    )}
+            {/* Filas vacías adicionales para más espacio */}
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
+                <div 
+                  className="relative h-full w-full"
+                  style={{ width: timelineWidth }}
+                >
+                  {/* Grilla de semanas (sin líneas entre días) */}
+                  <div className="absolute inset-0 flex">
+                    {calendarStructure.weeks.map((week) => (
+                      <div 
+                        key={`empty-${index}-${week.key}`}
+                        className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
+                        style={{ width: weekWidth }}
+                      />
+                    ))}
                   </div>
+                  
+                  {/* Línea del día de hoy en filas vacías */}
+                  {(() => {
+                    const today = new Date();
+                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    
+                    // Buscar el día exacto en la estructura del calendario
+                    let todayDayIndex = -1;
+                    let currentDayIndex = 0;
+                    
+                    for (const week of calendarStructure.weeks) {
+                      for (const day of week.days) {
+                        if (day.date.getTime() === todayStart.getTime()) {
+                          todayDayIndex = currentDayIndex;
+                          break;
+                        }
+                        currentDayIndex++;
+                      }
+                      if (todayDayIndex !== -1) break;
+                    }
+                    
+                    if (todayDayIndex !== -1) {
+                      const dayWidth = timelineWidth / calendarStructure.totalDays;
+                      const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
+                      
+                      return (
+                        <div 
+                          className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
+                          style={{ left: `${todayPosition}px` }}
+                        />
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
