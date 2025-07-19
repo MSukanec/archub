@@ -91,7 +91,7 @@ export function GanttContainer({
       return {
         start: weekStart,
         end: weekEnd,
-        monthLabel,
+        monthLabel: `${monthLabel} ${format(weekStart, 'yy')}`, // JUN 25 instead of just JUN
         key: format(weekStart, 'yyyy-ww'),
         days: weekDays.map(day => {
           // Normalize each day to avoid UTC issues

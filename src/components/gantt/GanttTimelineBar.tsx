@@ -44,6 +44,16 @@ export function GanttTimelineBar({
   const startPixels = (taskStartMs / totalSpan) * timelineWidth;
   const widthPixels = ((taskEndMs - taskStartMs) / totalSpan) * timelineWidth;
 
+  // Debug logging to see what's happening
+  console.log('Bar alignment debug:', {
+    taskName: item.name.substring(0, 30),
+    originalStart: startDate.toDateString(),
+    normalizedStart: normalizedStart.toDateString(),
+    timelineStart: normalizedTimelineStart.toDateString(),
+    startPixels,
+    widthPixels
+  });
+
   if (widthPixels <= 0) {
     return null;
   }
