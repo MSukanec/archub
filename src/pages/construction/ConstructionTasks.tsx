@@ -11,6 +11,8 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
+import { GanttRowProps } from '@/components/gantt/types'
+import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -20,6 +22,7 @@ export default function ConstructionTasks() {
   const queryClient = useQueryClient()
   const updateTask = useUpdateConstructionTask()
   const deleteTask = useDeleteConstructionTask()
+  const { showDeleteConfirmation } = useDeleteConfirmation()
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
@@ -69,6 +72,32 @@ export default function ConstructionTasks() {
     })
   }
 
+  // Manejar edición de tarea desde Gantt
+  const handleEditTask = (item: GanttRowProps) => {
+    if (item.type !== 'task') return
+    
+    // Abrir modal de edición con datos pre-cargados
+    openModal('construction-task', {
+      projectId,
+      organizationId,
+      userId: userData?.user?.id,
+      editingTask: item.taskData,
+      isEditing: true
+    })
+  }
+
+  // Manejar eliminación de tarea desde Gantt
+  const handleDeleteTaskFromGantt = (item: GanttRowProps) => {
+    if (item.type !== 'task' || !item.taskData) return
+    
+    showDeleteConfirmation({
+      title: "Eliminar Tarea",
+      description: "¿Estás seguro de que deseas eliminar esta tarea del proyecto?",
+      itemName: item.name,
+      onConfirm: () => handleDeleteTask(item.taskData.id)
+    })
+  }
+
   // Filtrar tareas basado en el searchValue
   const filteredTasks = tasks.filter(task => 
     task.task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -112,7 +141,8 @@ export default function ConstructionTasks() {
           level: 1,
           startDate: task.start_date || undefined,
           endDate: task.end_date || undefined,
-          durationInDays: task.duration_in_days || undefined
+          durationInDays: task.duration_in_days || undefined,
+          taskData: task // Agregar datos completos de la tarea para edición/eliminación
         });
       });
     });
@@ -241,6 +271,8 @@ export default function ConstructionTasks() {
               onItemClick={(item) => {
                 console.log('Clicked item:', item);
               }}
+              onEdit={handleEditTask}
+              onDelete={handleDeleteTaskFromGantt}
             />
           </div>
         )}

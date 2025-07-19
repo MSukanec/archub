@@ -1,14 +1,20 @@
 import { useMemo, useState, useCallback } from 'react';
 import { format, eachDayOfInterval, startOfMonth, endOfMonth, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Edit, Trash2 } from 'lucide-react';
 import { GanttRow } from './GanttRow';
 import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 
 export function GanttContainer({ 
   data, 
-  onItemClick 
-}: GanttContainerProps) {
+  onItemClick,
+  onEdit,
+  onDelete
+}: GanttContainerProps & {
+  onEdit?: (item: GanttRowProps) => void;
+  onDelete?: (item: GanttRowProps) => void;
+}) {
   // Estado para el ancho del panel izquierdo
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
     const saved = localStorage.getItem('gantt-left-panel-width');
@@ -195,13 +201,43 @@ export function GanttContainer({
                   </div>
                 ) : (
                   <div 
-                    className="w-full h-full flex items-center px-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                    className="group w-full h-full flex items-center px-3 cursor-pointer hover:bg-muted/20 transition-colors"
                     style={{ paddingLeft: `${12 + item.level * 24}px` }}
                     onClick={() => onItemClick?.(item)}
                   >
-                    <span className="truncate text-sm text-foreground" title={item.name}>
-                      {item.name}
-                    </span>
+                    <div className="flex items-center w-full">
+                      <span className="flex-1 truncate text-sm text-foreground" title={item.name}>
+                        {item.name}
+                      </span>
+                      
+                      {/* Action Buttons */}
+                      {(onEdit || onDelete) && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {onEdit && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(item);
+                              }}
+                              className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            >
+                              <Edit className="w-3 h-3" />
+                            </button>
+                          )}
+                          {onDelete && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(item);
+                              }}
+                              className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

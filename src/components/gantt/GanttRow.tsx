@@ -7,12 +7,16 @@ export function GanttRow({
   timelineStart, 
   timelineEnd, 
   timelineWidth,
-  onClick
+  onClick,
+  onEdit,
+  onDelete
 }: GanttRowProps & {
   timelineStart: Date;
   timelineEnd: Date;
   timelineWidth: number;
   onClick?: (item: GanttRowProps) => void;
+  onEdit?: (item: GanttRowProps) => void;
+  onDelete?: (item: GanttRowProps) => void;
 }) {
   // Render group header differently
   if (item.isHeader) {
@@ -30,6 +34,8 @@ export function GanttRow({
       <GanttLeftPanel 
         item={item}
         onClick={onClick}
+        onEdit={onEdit}
+        onDelete={onDelete}
       />
       
       {/* Timeline Bar */}

@@ -1,14 +1,19 @@
-import { Clock } from 'lucide-react';
+import { Clock, Edit, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { GanttRowProps } from './types';
 
 interface GanttLeftPanelProps {
   item: GanttRowProps;
   onClick?: (item: GanttRowProps) => void;
+  onEdit?: (item: GanttRowProps) => void;
+  onDelete?: (item: GanttRowProps) => void;
 }
 
 export function GanttLeftPanel({ 
   item, 
-  onClick 
+  onClick,
+  onEdit,
+  onDelete
 }: GanttLeftPanelProps) {
   const indentationLevel = item.level * 24; // 24px per level
 
@@ -20,7 +25,7 @@ export function GanttLeftPanel({
 
   return (
     <div 
-      className="flex items-center h-9 px-3 bg-card border-r border-border cursor-pointer"
+      className="group flex items-center h-9 px-3 bg-card border-r border-border cursor-pointer hover:bg-muted/20 transition-colors"
       style={{ paddingLeft: `${12 + indentationLevel}px` }}
       onClick={handleClick}
     >
@@ -33,6 +38,38 @@ export function GanttLeftPanel({
       <span className="flex-1 text-sm truncate text-foreground">
         {item.name}
       </span>
+
+      {/* Action Buttons - Only show for individual tasks, not group headers */}
+      {!item.isHeader && (onEdit || onDelete) && (
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(item);
+              }}
+              className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(item);
+              }}
+              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
