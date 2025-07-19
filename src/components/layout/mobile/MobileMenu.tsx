@@ -36,6 +36,7 @@ import {
   FileImage,
   FileCode,
   Crown,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -459,36 +460,35 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           )}
         </div>
 
-        {/* Project and Organization Selectors - Fixed at bottom */}
-        <div className="px-4 pb-4 space-y-3 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
-          {/* Project Selector */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
-              Proyecto
-            </label>
+        {/* Footer with 3 icon buttons - Fixed at bottom */}
+        <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
+          <div className="grid grid-cols-3 gap-3">
+            {/* Project Selector Button */}
             <div className="relative">
               <button
                 onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
               >
-                <FolderOpen className="h-5 w-5" />
-                <span className="truncate flex-1">
-                  {projectsData?.find((p: any) => p.id === effectiveCurrentProject)?.name || 'General'}
-                </span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${expandedProjectSelector ? 'rotate-180' : ''}`} />
+                <FolderOpen className="h-6 w-6" />
               </button>
 
               {expandedProjectSelector && (
                 <div 
-                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1 min-w-48"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
                     borderColor: 'var(--menues-border)'
                   }}
                 >
+                  <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
+                    Proyecto
+                  </div>
                   {/* Opción "General" */}
                   <button
-                    onClick={() => projectMutation.mutate(null)}
+                    onClick={() => {
+                      projectMutation.mutate(null);
+                      setExpandedProjectSelector(false);
+                    }}
                     className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                     style={{ color: 'var(--menues-fg)' }}
                   >
@@ -497,7 +497,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   {projectsData?.map((project: any) => (
                     <button
                       key={project.id}
-                      onClick={() => projectMutation.mutate(project.id)}
+                      onClick={() => {
+                        projectMutation.mutate(project.id);
+                        setExpandedProjectSelector(false);
+                      }}
                       className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                       style={{ color: 'var(--menues-fg)' }}
                     >
@@ -507,37 +510,34 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Organization Selector */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium" style={{ color: 'var(--menues-fg)' }}>
-              Organización
-            </label>
+            {/* Organization Selector Button */}
             <div className="relative">
               <button
                 onClick={() => setExpandedOrgSelector(!expandedOrgSelector)}
-                className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
               >
-                <Building className="h-5 w-5" />
-                <span className="truncate flex-1">
-                  {currentOrganization?.name || 'Seleccionar organización'}
-                </span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${expandedOrgSelector ? 'rotate-180' : ''}`} />
+                <Building className="h-6 w-6" />
               </button>
 
               {expandedOrgSelector && (
                 <div 
-                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  className="absolute bottom-full left-0 right-0 mb-1 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1 min-w-48"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
                     borderColor: 'var(--menues-border)'
                   }}
                 >
+                  <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
+                    Organización
+                  </div>
                   {sortedOrganizations.map((org: any) => (
                     <button
                       key={org.id}
-                      onClick={() => organizationMutation.mutate(org.id)}
+                      onClick={() => {
+                        organizationMutation.mutate(org.id);
+                        setExpandedOrgSelector(false);
+                      }}
                       className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                       style={{ color: 'var(--menues-fg)' }}
                     >
@@ -547,6 +547,17 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
             </div>
+
+            {/* Avatar/Profile Button */}
+            <button
+              onClick={() => {
+                navigate('/profile');
+                onClose();
+              }}
+              className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+            >
+              <User className="h-6 w-6" />
+            </button>
           </div>
         </div>
       </div>
