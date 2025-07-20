@@ -100,7 +100,12 @@ export function ConstructionTaskFormModal({
         .from('construction_phase_tasks')
         .select('project_phase_id')
         .eq('construction_task_id', modalData.editingTask.id)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching current phase task:', error);
+        return null;
+      }
 
       return data?.project_phase_id || null;
     },

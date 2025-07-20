@@ -24,13 +24,7 @@ export interface ConstructionTask {
     rubro_id: string | null;
     param_values: any;
   };
-  construction_phase_tasks?: Array<{
-    project_phase_id: string;
-    construction_project_phases: {
-      id: string;
-      name: string;
-    };
-  }>;
+
   phase_name?: string;
 }
 
@@ -40,7 +34,8 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      const { data, error } = await supabase
+      // Primero obtener las tareas
+      const { data: tasksData, error: tasksError } = await supabase
         .from('construction_tasks')
         .select(`
           *,
@@ -53,29 +48,68 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             unit_id,
             rubro_id,
             param_values
-          ),
-          construction_phase_tasks!left (
-            project_phase_id,
-            construction_project_phases!inner (
-              id,
-              name
-            )
           )
         `)
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching construction tasks:', error);
-        throw error;
+      if (tasksError) {
+        console.error('Error fetching construction tasks:', tasksError);
+        throw tasksError;
       }
 
-      // Procesar los datos para extraer el nombre de la fase
-      const processedData = (data || []).map(task => ({
-        ...task,
-        phase_name: task.construction_phase_tasks?.[0]?.construction_project_phases?.name || null
-      }));
+      if (!tasksData || tasksData.length === 0) {
+        return [];
+      }
+
+      // Obtener las fases para cada tarea usando consultas separadas
+      const taskIds = tasksData.map(task => task.id);
+      
+      // Primero obtener las relaciones fase-tarea
+      const { data: phaseTasksData, error: phaseTasksError } = await supabase
+        .from('construction_phase_tasks')
+        .select('construction_task_id, project_phase_id')
+        .in('construction_task_id', taskIds);
+
+      // Crear un mapa de task_id -> project_phase_id
+      const taskPhaseMap: Record<string, string> = {};
+      if (phaseTasksData && !phaseTasksError) {
+        phaseTasksData.forEach(pt => {
+          taskPhaseMap[pt.construction_task_id] = pt.project_phase_id;
+        });
+      }
+
+      // Obtener los nombres de las fases
+      const projectPhaseIds = Object.values(taskPhaseMap);
+      let phaseNamesMap: Record<string, string> = {};
+      
+      if (projectPhaseIds.length > 0) {
+        const { data: projectPhasesData, error: projectPhasesError } = await supabase
+          .from('construction_project_phases')
+          .select(`
+            id,
+            phase:construction_phases!inner (name)
+          `)
+          .in('id', projectPhaseIds);
+
+        if (projectPhasesData && !projectPhasesError) {
+          phaseNamesMap = {};
+          projectPhasesData.forEach(pp => {
+            phaseNamesMap[pp.id] = (pp.phase as any)?.name || '';
+          });
+        }
+      }
+
+      // Procesar los datos para agregar el nombre de la fase
+      const processedData = tasksData.map(task => {
+        const projectPhaseId = taskPhaseMap[task.id];
+        const phaseName = projectPhaseId ? phaseNamesMap[projectPhaseId] : null;
+        return {
+          ...task,
+          phase_name: phaseName || null
+        };
+      });
 
       return processedData;
     },
