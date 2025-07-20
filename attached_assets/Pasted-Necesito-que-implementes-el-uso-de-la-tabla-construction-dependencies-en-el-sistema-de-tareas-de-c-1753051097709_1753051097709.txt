@@ -1,0 +1,50 @@
+Necesito que implementes el uso de la tabla `construction_dependencies` en el sistema de tareas de construcción.
+
+### ¿Qué es esta tabla y para qué sirve?
+
+La tabla `construction_dependencies` define relaciones entre tareas de un mismo proyecto. Permite establecer que una tarea solo pueda comenzar cuando otra termina o empieza.
+
+Cada fila representa una dependencia entre dos tareas:
+
+- `predecessor_task_id`: la tarea que va antes
+- `successor_task_id`: la tarea que depende de la otra
+- `type`: tipo de dependencia (por ahora solo usaremos `"FS"` que significa *Finish-to-Start* — la tarea sucesora comienza cuando termina la anterior)
+- `lag_days`: si hay un desfase (ej: esperar 2 días después de terminar la anterior)
+- `created_at`, `updated_at`: timestamps automáticos
+
+Esto se usa para generar cronogramas realistas y coherentes en el Gantt.
+
+---
+
+### ¿Qué necesito que hagas?
+
+1. **Editar el modal de creación y edición de tareas de construcción.**
+
+   - Agregá una nueva sección debajo de “Fechas y duración” que permita definir **dependencias**.
+
+   - Campos a agregar:
+     - 🔽 `Tarea predecesora`: dropdown con tareas existentes del mismo proyecto (mostrar nombre y código)
+     - 🔽 `Tipo de dependencia`: por ahora, dejar fijo `"FS"` (Finish-to-Start)
+     - 🔢 `Desfase en días (lag_days)`: campo numérico opcional
+
+2. **Guardar esta información al confirmar la tarea.**
+   - Insertar automáticamente en `construction_dependencies` con:
+     - `predecessor_task_id` = tarea elegida en el dropdown
+     - `successor_task_id` = la tarea que se está creando o editando
+     - `type` = `"FS"`
+     - `lag_days` = valor cargado (si lo hay)
+
+3. **Validaciones:**
+   - Solo permitir seleccionar tareas **del mismo proyecto** como predecesoras.
+   - No permitir elegir una tarea que dependa de sí misma.
+   - Mostrar un mensaje si se está generando una dependencia circular.
+
+4. **Extras opcionales:**
+   - Mostrar en la tabla de tareas si una tarea tiene predecesora.
+   - Mostrar en el cronograma visual una línea de dependencia si se puede (más adelante).
+
+---
+
+Esto es fundamental para poder establecer relaciones tipo Gantt entre tareas y evitar inconsistencias en la planificación.
+
+Confirmame cuando esté funcionando. Luego podemos mostrar visualmente las dependencias en el Gantt.

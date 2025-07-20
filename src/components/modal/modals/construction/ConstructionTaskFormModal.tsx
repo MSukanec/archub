@@ -13,9 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
+import { useCreateConstructionTask, useUpdateConstructionTask, useConstructionTasks } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
+import { useConstructionDependencies, useCreateConstructionDependency, useUpdateConstructionDependency, useDeleteConstructionDependency, detectCircularDependency } from "@/hooks/use-construction-dependencies";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -25,7 +26,11 @@ const addTaskSchema = z.object({
   project_phase_id: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-  duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional()
+  duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
+  // Campos de dependencias
+  predecessor_task_id: z.string().optional(),
+  dependency_type: z.string().optional(),
+  lag_days: z.number().min(0, "El desfase debe ser 0 o mayor").optional()
 });
 
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
@@ -51,11 +56,22 @@ export function ConstructionTaskFormModal({
   const { data: userData } = useCurrentUser();
   const { setPanel } = useModalPanelStore();
 
+  // Obtener tareas del proyecto para dependencias
+  const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
+  const { data: existingDependencies = [] } = useConstructionDependencies(modalData.projectId);
+
+  // Mutaciones para dependencias
+  const createDependencyMutation = useCreateConstructionDependency();
+  const updateDependencyMutation = useUpdateConstructionDependency();
+  const deleteDependencyMutation = useDeleteConstructionDependency();
+
   // Get current user's member_id
   const { data: currentMember } = useQuery({
     queryKey: ['current-member', modalData.organizationId, userData?.user?.id],
     queryFn: async () => {
       if (!userData?.user?.id || !modalData.organizationId) return null;
+      
+      if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
         .from('organization_members')
@@ -121,8 +137,7 @@ export function ConstructionTaskFormModal({
       return data?.project_phase_id || null;
     },
     enabled: !!modalData.isEditing && !!modalData.editingTask?.id,
-    staleTime: 0, // Always refetch to ensure we have the latest data
-    cacheTime: 0, // Don't cache to avoid stale data issues
+    staleTime: 0 // Always refetch to ensure we have the latest data
   });
 
   const form = useForm<AddTaskFormData>({
@@ -133,7 +148,11 @@ export function ConstructionTaskFormModal({
       project_phase_id: "",
       start_date: modalData.editingTask?.start_date || "",
       end_date: modalData.editingTask?.end_date || "",
-      duration_in_days: modalData.editingTask?.duration_in_days || undefined
+      duration_in_days: modalData.editingTask?.duration_in_days || undefined,
+      // Campos de dependencias
+      predecessor_task_id: "",
+      dependency_type: "FS",
+      lag_days: 0
     }
   });
 
@@ -174,6 +193,21 @@ export function ConstructionTaskFormModal({
       setValue('project_phase_id', currentPhaseTask || '');
     }
   }, [currentPhaseTask, modalData.isEditing, setValue, phaseLoaded, projectPhases]);
+
+  // Cargar dependencia existente cuando estamos editando
+  useEffect(() => {
+    if (modalData.isEditing && modalData.editingTask?.id && existingDependencies.length >= 0) {
+      const existingDependency = existingDependencies.find(
+        dep => dep.successor_task_id === modalData.editingTask.id
+      );
+      
+      if (existingDependency) {
+        setValue('predecessor_task_id', existingDependency.predecessor_task_id);
+        setValue('dependency_type', existingDependency.type);
+        setValue('lag_days', existingDependency.lag_days || 0);
+      }
+    }
+  }, [modalData.isEditing, modalData.editingTask?.id, existingDependencies, setValue]);
 
   // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
   const enhancedTaskOptions = useMemo(() => {
@@ -245,6 +279,8 @@ export function ConstructionTaskFormModal({
         endDate = startDate.toISOString().split('T')[0];
       }
 
+      let taskId: string;
+
       if (modalData.isEditing && modalData.editingTask?.id) {
         // Update existing task
         await updateTask.mutateAsync({
@@ -257,9 +293,10 @@ export function ConstructionTaskFormModal({
           end_date: endDate || undefined,
           duration_in_days: data.duration_in_days || undefined
         });
+        taskId = modalData.editingTask.id;
       } else {
         // Create new task
-        await createTask.mutateAsync({
+        const newTask = await createTask.mutateAsync({
           organization_id: modalData.organizationId,
           project_id: modalData.projectId,
           task_id: data.task_id,
@@ -270,6 +307,42 @@ export function ConstructionTaskFormModal({
           end_date: endDate || undefined,
           duration_in_days: data.duration_in_days || undefined
         });
+        taskId = newTask.id;
+      }
+
+      // Manejar dependencias
+      if (data.predecessor_task_id) {
+        // Buscar si ya existe una dependencia para esta tarea
+        const existingDependency = existingDependencies.find(
+          dep => dep.successor_task_id === taskId
+        );
+
+        if (existingDependency) {
+          // Actualizar dependencia existente
+          await updateDependencyMutation.mutateAsync({
+            id: existingDependency.id,
+            predecessor_task_id: data.predecessor_task_id,
+            type: data.dependency_type || "FS",
+            lag_days: data.lag_days || 0
+          });
+        } else {
+          // Crear nueva dependencia
+          await createDependencyMutation.mutateAsync({
+            predecessor_task_id: data.predecessor_task_id,
+            successor_task_id: taskId,
+            type: data.dependency_type || "FS",
+            lag_days: data.lag_days || 0
+          });
+        }
+      } else {
+        // Si no hay predecesora pero existía antes, eliminar la dependencia
+        const existingDependency = existingDependencies.find(
+          dep => dep.successor_task_id === taskId
+        );
+        
+        if (existingDependency) {
+          await deleteDependencyMutation.mutateAsync(existingDependency.id);
+        }
       }
 
       onClose();
@@ -401,6 +474,104 @@ export function ConstructionTaskFormModal({
           <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
         )}
       </div>
+
+      {/* Dependencies Section */}
+      <div className="space-y-4 border-t pt-4">
+        <h3 className="text-sm font-medium text-foreground">Dependencias de Tarea</h3>
+        
+        {/* Predecessor Task */}
+        <div className="space-y-2">
+          <Label htmlFor="predecessor_task_id">Tarea Predecesora</Label>
+          <Select 
+            value={watch('predecessor_task_id') || ""}
+            onValueChange={(value) => {
+              const selectedPredecessor = value || "";
+              
+              // Validar dependencias circulares antes de establecer
+              if (selectedPredecessor && modalData.editingTask?.id) {
+                const wouldCreateCycle = detectCircularDependency(
+                  selectedPredecessor,
+                  modalData.editingTask.id,
+                  existingDependencies
+                );
+                
+                if (wouldCreateCycle) {
+                  toast({
+                    title: "Error",
+                    description: "Esta dependencia crearía un ciclo. Una tarea no puede depender de sí misma o crear dependencias circulares.",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+              }
+              
+              setValue('predecessor_task_id', selectedPredecessor);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar tarea predecesora (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Sin dependencia</SelectItem>
+              {projectTasks
+                .filter(task => 
+                  // Filtrar la tarea actual si estamos editando
+                  modalData.isEditing ? task.id !== modalData.editingTask?.id : true
+                )
+                .map((task) => (
+                  <SelectItem key={task.id} value={task.id}>
+                    {task.task.code} - {task.task.display_name.slice(0, 50)}
+                    {task.task.display_name.length > 50 ? '...' : ''}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          {errors.predecessor_task_id && (
+            <p className="text-sm text-destructive">{errors.predecessor_task_id.message}</p>
+          )}
+        </div>
+
+        {/* Dependency Type */}
+        {watch('predecessor_task_id') && (
+          <div className="space-y-2">
+            <Label htmlFor="dependency_type">Tipo de Dependencia</Label>
+            <Select 
+              value={watch('dependency_type') || "FS"}
+              onValueChange={(value) => setValue('dependency_type', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="FS">FS (Finish-to-Start) - Inicia cuando termina la anterior</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.dependency_type && (
+              <p className="text-sm text-destructive">{errors.dependency_type.message}</p>
+            )}
+          </div>
+        )}
+
+        {/* Lag Days */}
+        {watch('predecessor_task_id') && (
+          <div className="space-y-2">
+            <Label htmlFor="lag_days">Desfase en días</Label>
+            <Input
+              type="number"
+              min="0"
+              placeholder="0"
+              {...form.register('lag_days', { valueAsNumber: true })}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              Días adicionales de espera después de completar la tarea predecesora
+            </p>
+            {errors.lag_days && (
+              <p className="text-sm text-destructive">{errors.lag_days.message}</p>
+            )}
+          </div>
+        )}
+      </div>
     </form>
   );
 
@@ -417,7 +588,6 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Agregar Tarea"}
       onRightClick={handleSubmit(onSubmit)}
-      isLoading={isSubmitting}
       isDisabled={isSubmitting || !selectedTaskId || !quantity}
     />
   );
