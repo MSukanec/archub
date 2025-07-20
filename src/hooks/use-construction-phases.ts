@@ -154,23 +154,33 @@ export function useCreateProjectPhase() {
 
       // Calculate end_date if start_date and duration_in_days are provided
       let endDate = data.end_date;
-      if (data.start_date && data.duration_in_days && !data.end_date) {
+      if (data.start_date && data.start_date.trim() !== '' && data.duration_in_days && data.duration_in_days > 0 && (!data.end_date || data.end_date.trim() === '')) {
         const startDate = new Date(data.start_date);
         startDate.setDate(startDate.getDate() + data.duration_in_days);
         endDate = startDate.toISOString().split('T')[0];
       }
 
+      const insertData: any = {
+        project_id: data.project_id,
+        phase_id: data.phase_id,
+        position: nextPosition,
+        created_by: data.created_by,
+      };
+
+      // Solo agregar campos de fecha si tienen valores válidos
+      if (data.start_date && data.start_date.trim() !== '') {
+        insertData.start_date = data.start_date;
+      }
+      if (data.duration_in_days && data.duration_in_days > 0) {
+        insertData.duration_in_days = data.duration_in_days;
+      }
+      if (endDate && endDate.trim() !== '') {
+        insertData.end_date = endDate;
+      }
+
       const { data: result, error } = await supabase
         .from("construction_project_phases")
-        .insert({
-          project_id: data.project_id,
-          phase_id: data.phase_id,
-          start_date: data.start_date,
-          duration_in_days: data.duration_in_days,
-          end_date: endDate,
-          position: nextPosition,
-          created_by: data.created_by,
-        })
+        .insert(insertData)
         .select(`
           *,
           phase:construction_phases!inner (*)

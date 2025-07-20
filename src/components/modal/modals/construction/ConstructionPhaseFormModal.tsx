@@ -58,6 +58,8 @@ export function ConstructionPhaseFormModal({
     queryFn: async () => {
       if (!userData?.user?.id || !modalData.organizationId) return null;
       
+      if (!supabase) return null;
+      
       const { data, error } = await supabase
         .from('organization_members')
         .select('id')
@@ -147,7 +149,7 @@ export function ConstructionPhaseFormModal({
 
       // Calculate end_date if start_date and duration_in_days are provided
       let endDate = data.end_date;
-      if (data.start_date && data.duration_in_days && !data.end_date) {
+      if (data.start_date && data.start_date.trim() !== '' && data.duration_in_days && data.duration_in_days > 0 && (!data.end_date || data.end_date.trim() === '')) {
         const startDate = new Date(data.start_date);
         startDate.setDate(startDate.getDate() + data.duration_in_days);
         endDate = startDate.toISOString().split('T')[0];
@@ -157,9 +159,9 @@ export function ConstructionPhaseFormModal({
       await createProjectPhase.mutateAsync({
         project_id: modalData.projectId,
         phase_id: phaseId,
-        start_date: data.start_date,
-        duration_in_days: data.duration_in_days,
-        end_date: endDate,
+        start_date: data.start_date || undefined,
+        duration_in_days: data.duration_in_days || undefined,
+        end_date: endDate || undefined,
         created_by: currentMember.id,
       });
 
@@ -324,7 +326,7 @@ export function ConstructionPhaseFormModal({
       onLeftClick={onClose}
       rightLabel="Crear Fase"
       onRightClick={handleSubmit(onSubmit)}
-      rightLoading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 
