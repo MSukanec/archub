@@ -162,7 +162,7 @@ export default function ConstructionMaterials() {
           <EmptyState
             icon={<Package className="w-8 h-8 text-muted-foreground" />}
             title="No hay materiales disponibles"
-            description="Los materiales aparecerán aquí cuando agregues tareas con materiales a los presupuestos del proyecto"
+            description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
           />
         ) : (
           <Table
