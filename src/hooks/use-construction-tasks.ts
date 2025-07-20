@@ -75,12 +75,23 @@ export function useCreateConstructionTask() {
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
+      project_phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id)
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
-      const { data, error } = await supabase
+      // Crear la tarea de construcción
+      const { data: constructionTask, error: taskError } = await supabase
         .from('construction_tasks')
-        .insert(taskData)
+        .insert({
+          organization_id: taskData.organization_id,
+          project_id: taskData.project_id,
+          task_id: taskData.task_id,
+          quantity: taskData.quantity,
+          created_by: taskData.created_by,
+          start_date: taskData.start_date,
+          end_date: taskData.end_date,
+          duration_in_days: taskData.duration_in_days,
+        })
         .select(`
           *,
           task:task_generated_view!inner (
@@ -95,12 +106,27 @@ export function useCreateConstructionTask() {
         `)
         .single();
 
-      if (error) {
-        console.error('Error creating construction task:', error);
-        throw error;
+      if (taskError) {
+        console.error('Error creating construction task:', taskError);
+        throw taskError;
       }
 
-      return data;
+      // Si se especificó una fase, crear la vinculación en construction_phase_tasks
+      if (taskData.project_phase_id && constructionTask) {
+        const { error: phaseTaskError } = await supabase
+          .from('construction_phase_tasks')
+          .insert({
+            construction_task_id: constructionTask.id,
+            project_phase_id: taskData.project_phase_id,
+          });
+
+        if (phaseTaskError) {
+          console.error('Error linking task to phase:', phaseTaskError);
+          // No lanzamos error aquí para que la tarea se cree aunque falle la vinculación
+        }
+      }
+
+      return constructionTask;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ 

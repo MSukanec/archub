@@ -115,15 +115,11 @@ TABLA CONSTRUCTION_PHASES:
     "data_type": "text"
   },
   {
-    "column_name": "default_duration",
-    "data_type": "integer"
-  },
-  {
     "column_name": "organization_id",
     "data_type": "uuid"
   },
   {
-    "column_name": "is_default",
+    "column_name": "is_system",
     "data_type": "boolean"
   },
   {

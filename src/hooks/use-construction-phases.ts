@@ -5,9 +5,8 @@ export interface ConstructionPhase {
   id: string;
   name: string;
   description?: string;
-  default_duration?: number;
   organization_id: string;
-  is_default: boolean;
+  is_system: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -89,9 +88,8 @@ export function useCreateConstructionPhase() {
     mutationFn: async (data: {
       name: string;
       description?: string;
-      default_duration?: number;
       organization_id: string;
-      is_default?: boolean;
+      is_system: boolean;
     }) => {
       if (!supabase) throw new Error("Supabase not initialized");
 
@@ -100,9 +98,8 @@ export function useCreateConstructionPhase() {
         .insert({
           name: data.name,
           description: data.description,
-          default_duration: data.default_duration,
           organization_id: data.organization_id,
-          is_default: data.is_default || false,
+          is_system: data.is_system,
         })
         .select()
         .single();

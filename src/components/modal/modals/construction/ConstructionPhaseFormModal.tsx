@@ -21,8 +21,6 @@ import { supabase } from "@/lib/supabase";
 const phaseSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().optional(),
-  default_duration: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
-  is_default: z.boolean().optional(),
   // Campos para agregar al proyecto
   start_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
@@ -90,8 +88,6 @@ export function ConstructionPhaseFormModal({
     defaultValues: {
       name: "",
       description: "",
-      default_duration: undefined,
-      is_default: false,
       start_date: "",
       duration_in_days: undefined,
       end_date: "",
@@ -131,9 +127,8 @@ export function ConstructionPhaseFormModal({
         const newPhase = await createPhase.mutateAsync({
           name: data.name,
           description: data.description,
-          default_duration: data.default_duration,
           organization_id: modalData.organizationId,
-          is_default: data.is_default,
+          is_system: false, // Las fases creadas por usuarios nunca son del sistema
         });
         phaseId = newPhase.id;
       }
@@ -250,28 +245,7 @@ export function ConstructionPhaseFormModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="default_duration">Duración por Defecto (días)</Label>
-              <Input
-                id="default_duration"
-                type="number"
-                min="1"
-                placeholder="30"
-                {...register('default_duration', { valueAsNumber: true })}
-              />
-            </div>
 
-            <div className="flex items-center space-x-2 pt-8">
-              <Checkbox 
-                id="is_default" 
-                {...register('is_default')}
-              />
-              <Label htmlFor="is_default" className="text-sm">
-                Fase predeterminada
-              </Label>
-            </div>
-          </div>
         </div>
       )}
 
@@ -326,7 +300,7 @@ export function ConstructionPhaseFormModal({
       onLeftClick={onClose}
       rightLabel="Crear Fase"
       onRightClick={handleSubmit(onSubmit)}
-      isLoading={isSubmitting}
+      loading={isSubmitting}
     />
   );
 

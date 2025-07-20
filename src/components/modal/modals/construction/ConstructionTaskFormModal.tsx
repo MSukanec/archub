@@ -13,13 +13,16 @@ import { Plus } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
+import { useProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
+  project_phase_id: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional()
@@ -84,11 +87,15 @@ export function ConstructionTaskFormModal({
     searchQuery.length >= 3
   );
 
+  // Hook para obtener las fases del proyecto
+  const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
+
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
       task_id: modalData.editingTask?.task_id || "",
       quantity: modalData.editingTask?.quantity || 1,
+      project_phase_id: "",
       start_date: modalData.editingTask?.start_date || "",
       end_date: modalData.editingTask?.end_date || "",
       duration_in_days: modalData.editingTask?.duration_in_days || undefined
@@ -186,6 +193,7 @@ export function ConstructionTaskFormModal({
           task_id: data.task_id,
           quantity: data.quantity,
           created_by: currentMember.id,
+          project_phase_id: data.project_phase_id || undefined,
           start_date: data.start_date || null,
           end_date: endDate || null,
           duration_in_days: data.duration_in_days || null
@@ -252,6 +260,29 @@ export function ConstructionTaskFormModal({
         </div>
         {errors.quantity && (
           <p className="text-sm text-destructive">{errors.quantity.message}</p>
+        )}
+      </div>
+
+      {/* Phase Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
+        <Select 
+          value={watch('project_phase_id') || ""}
+          onValueChange={(value) => setValue('project_phase_id', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar fase (opcional)" />
+          </SelectTrigger>
+          <SelectContent>
+            {projectPhases.map((projectPhase) => (
+              <SelectItem key={projectPhase.id} value={projectPhase.id}>
+                {projectPhase.phase.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.project_phase_id && (
+          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
         )}
       </div>
 
