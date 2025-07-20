@@ -189,43 +189,54 @@ export default function ConstructionTasks() {
       key: 'fechas', 
       label: 'Fechas',
       className: 'w-[200px]'
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      className: 'w-[120px]',
+      render: (item: any) => (
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditTask(item.originalData)}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              showDeleteConfirmation({
+                title: "Eliminar Tarea",
+                description: "¿Estás seguro de que deseas eliminar esta tarea del proyecto?",
+                itemName: item.tarea,
+                onConfirm: () => handleDeleteTask(item.id)
+              })
+            }}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )
     }
   ]
 
-  const tableActions = [
-    {
-      label: 'Editar',
-      icon: Edit,
-      onClick: (item: any) => handleEditTask(item.originalData),
-      variant: 'ghost' as const
-    },
-    {
-      label: 'Eliminar',
-      icon: Trash2,
-      onClick: (item: any) => {
-        showDeleteConfirmation({
-          title: "Eliminar Tarea",
-          description: "¿Estás seguro de que deseas eliminar esta tarea del proyecto?",
-          itemName: item.tarea,
-          onConfirm: () => handleDeleteTask(item.id)
-        })
-      },
-      variant: 'ghost' as const,
-      className: 'text-red-600 hover:text-red-700'
-    }
-  ]
+
 
   const headerProps = {
     title: "Listado de Tareas",
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    actions: (
-      <Button onClick={handleAddTask} className="h-8 px-3 text-sm">
+    actions: [
+      <Button key="new-task" onClick={handleAddTask} className="h-8 px-3 text-sm">
         <Plus className="h-4 w-4 mr-2" />
         Nueva Tarea
       </Button>
-    )
+    ]
   }
 
   if (isLoading) {
@@ -271,19 +282,20 @@ export default function ConstructionTasks() {
       {/* Table or Empty State */}
       {filteredTasks.length === 0 ? (
         <EmptyState
-          icon={CheckSquare}
+          icon={<CheckSquare className="h-8 w-8" />}
           title="No hay tareas en el proyecto"
           description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
-          action={{
-            label: "Crear Primera Tarea",
-            onClick: handleAddTask
-          }}
+          action={
+            <Button onClick={handleAddTask} className="mt-4">
+              <Plus className="h-4 w-4 mr-2" />
+              Crear Primera Tarea
+            </Button>
+          }
         />
       ) : (
         <Table
           data={tableData}
           columns={tableColumns}
-          actions={tableActions}
           showSearch={false}
         />
       )}

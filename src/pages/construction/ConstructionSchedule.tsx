@@ -340,18 +340,16 @@ export default function ConstructionSchedule() {
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    actions: (
-      <div className="flex gap-2">
-        <Button onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Crear Fase
-        </Button>
-        <Button onClick={handleAddTask} className="h-8 px-3 text-sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Tarea
-        </Button>
-      </div>
-    )
+    actions: [
+      <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
+        <Plus className="h-4 w-4 mr-2" />
+        Crear Fase
+      </Button>,
+      <Button key="new-task" onClick={handleAddTask} className="h-8 px-3 text-sm">
+        <Plus className="h-4 w-4 mr-2" />
+        Nueva Tarea
+      </Button>
+    ]
   }
 
   if (isLoading) {
@@ -397,13 +395,21 @@ export default function ConstructionSchedule() {
       {/* Gantt Chart or Empty State */}
       {ganttData.length === 0 ? (
         <EmptyState
-          icon={Calendar}
+          icon={<Calendar className="h-8 w-8" />}
           title="No hay tareas en el cronograma"
           description="Comienza creando tareas y fases para ver el cronograma del proyecto."
-          action={{
-            label: "Crear Primera Tarea",
-            onClick: handleAddTask
-          }}
+          action={
+            <div className="flex gap-2 mt-4">
+              <Button onClick={handleAddPhase} variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Primera Fase
+              </Button>
+              <Button onClick={handleAddTask}>
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Primera Tarea
+              </Button>
+            </div>
+          }
         />
       ) : (
         <GanttContainer
