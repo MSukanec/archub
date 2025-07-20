@@ -23,15 +23,6 @@ const addTaskSchema = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional()
-}).refine((data) => {
-  // Si hay fecha de inicio, debe haber duración o fecha fin
-  if (data.start_date) {
-    return data.duration_in_days || data.end_date;
-  }
-  return true;
-}, {
-  message: "Si especifica fecha de inicio, debe indicar duración en días o fecha de fin",
-  path: ["duration_in_days"]
 });
 
 type AddTaskFormData = z.infer<typeof addTaskSchema>;

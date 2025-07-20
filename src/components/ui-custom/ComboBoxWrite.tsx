@@ -95,22 +95,16 @@ export function ComboBox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60",
+            "flex h-10 w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1",
             !selectedOption && "text-[var(--input-placeholder)]",
             className
           )}
           disabled={disabled}
         >
-          <div className="flex-1 min-w-0 text-left max-h-[2.5rem] overflow-hidden">
-            <span className="block text-sm leading-tight overflow-hidden text-ellipsis" style={{ 
-              display: '-webkit-box', 
-              WebkitLineClamp: 2, 
-              WebkitBoxOrient: 'vertical' 
-            }}>
-              {selectedOption ? selectedOption.label : placeholder}
-            </span>
-          </div>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          <span className="line-clamp-1 text-sm">
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </button>
       </PopoverTrigger>
       <PopoverContent 
