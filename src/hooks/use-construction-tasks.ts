@@ -24,6 +24,14 @@ export interface ConstructionTask {
     rubro_id: string | null;
     param_values: any;
   };
+  construction_phase_tasks?: Array<{
+    project_phase_id: string;
+    construction_project_phases: {
+      id: string;
+      name: string;
+    };
+  }>;
+  phase_name?: string;
 }
 
 export function useConstructionTasks(projectId: string, organizationId: string) {
@@ -45,6 +53,13 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             unit_id,
             rubro_id,
             param_values
+          ),
+          construction_phase_tasks!left (
+            project_phase_id,
+            construction_project_phases!inner (
+              id,
+              name
+            )
           )
         `)
         .eq('project_id', projectId)
@@ -56,7 +71,13 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         throw error;
       }
 
-      return data || [];
+      // Procesar los datos para extraer el nombre de la fase
+      const processedData = (data || []).map(task => ({
+        ...task,
+        phase_name: task.construction_phase_tasks?.[0]?.construction_project_phases?.name || null
+      }));
+
+      return processedData;
     },
     enabled: !!projectId && !!organizationId,
   });
@@ -131,6 +152,9 @@ export function useCreateConstructionTask() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-tasks', data.project_id, data.organization_id] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-phase-task'] 
       });
       toast({
         title: "Tarea agregada",
@@ -225,6 +249,21 @@ export function useUpdateConstructionTask() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-tasks', data.project_id, data.organization_id] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-phase-task'] 
+      });
+      toast({
+        title: "Tarea actualizada",
+        description: "Los cambios se guardaron correctamente",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating construction task:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron guardar los cambios",
+        variant: "destructive",
       });
     },
   });

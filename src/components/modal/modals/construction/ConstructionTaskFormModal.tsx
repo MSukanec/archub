@@ -143,8 +143,8 @@ export function ConstructionTaskFormModal({
 
   // Cargar la fase cuando está disponible en modo edición
   useEffect(() => {
-    if (modalData.isEditing && currentPhaseTask) {
-      setValue('project_phase_id', currentPhaseTask);
+    if (modalData.isEditing && currentPhaseTask !== undefined) {
+      setValue('project_phase_id', currentPhaseTask || '');
     }
   }, [currentPhaseTask, modalData.isEditing, setValue]);
 
@@ -225,10 +225,10 @@ export function ConstructionTaskFormModal({
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           quantity: data.quantity,
-          project_phase_id: data.project_phase_id || null,
-          start_date: data.start_date || null,
-          end_date: endDate || null,
-          duration_in_days: data.duration_in_days || null
+          project_phase_id: data.project_phase_id || undefined,
+          start_date: data.start_date || undefined,
+          end_date: endDate || undefined,
+          duration_in_days: data.duration_in_days || undefined
         });
       } else {
         // Create new task
@@ -237,11 +237,11 @@ export function ConstructionTaskFormModal({
           project_id: modalData.projectId,
           task_id: data.task_id,
           quantity: data.quantity,
-          created_by: currentMember.id,
+          created_by: currentMember?.id || '',
           project_phase_id: data.project_phase_id || undefined,
-          start_date: data.start_date || null,
-          end_date: endDate || null,
-          duration_in_days: data.duration_in_days || null
+          start_date: data.start_date || undefined,
+          end_date: endDate || undefined,
+          duration_in_days: data.duration_in_days || undefined
         });
       }
 
@@ -390,8 +390,8 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Agregar Tarea"}
       onRightClick={handleSubmit(onSubmit)}
-      rightLoading={isSubmitting}
-      rightDisabled={isSubmitting || !selectedTaskId || !quantity}
+      isLoading={isSubmitting}
+      isDisabled={isSubmitting || !selectedTaskId || !quantity}
     />
   );
 
