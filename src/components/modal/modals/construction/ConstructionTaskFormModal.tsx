@@ -10,7 +10,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask, useConstructionTasks } from "@/hooks/use-construction-tasks";
@@ -408,77 +408,39 @@ export function ConstructionTaskFormModal({
         )}
       </div>
 
-      {/* Phase Selection */}
-      <div className="space-y-2">
-        <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
-        <Select 
-          value={watch('project_phase_id') || ""}
-          onValueChange={(value) => setValue('project_phase_id', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar fase (opcional)" />
-          </SelectTrigger>
-          <SelectContent>
-            {projectPhases.map((projectPhase) => (
-              <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                {projectPhase.phase.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.project_phase_id && (
-          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-        )}
-      </div>
-
-      {/* Date Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Start Date */}
-        <div className="space-y-2">
-          <Label htmlFor="start_date">Fecha de Inicio</Label>
-          <Input
-            type="date"
-            {...form.register('start_date')}
-            className="w-full"
-          />
-          {errors.start_date && (
-            <p className="text-sm text-destructive">{errors.start_date.message}</p>
-          )}
-        </div>
-
-        {/* End Date */}
-        <div className="space-y-2">
-          <Label htmlFor="end_date">Fecha de Finalización</Label>
-          <Input
-            type="date"
-            {...form.register('end_date')}
-            className="w-full"
-          />
-          {errors.end_date && (
-            <p className="text-sm text-destructive">{errors.end_date.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Duration */}
-      <div className="space-y-2">
-        <Label htmlFor="duration_in_days">Duración (días)</Label>
-        <Input
-          type="number"
-          min="1"
-          placeholder="Ej: 5"
-          {...form.register('duration_in_days', { valueAsNumber: true })}
-          className="w-full"
-        />
-        {errors.duration_in_days && (
-          <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
-        )}
-      </div>
-
-      {/* Dependencies Section */}
+      {/* Cronograma de Tarea Section */}
       <div className="space-y-4 border-t pt-4">
-        <h3 className="text-sm font-medium text-foreground">Dependencias de Tarea</h3>
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium text-foreground">Cronograma de Tarea</h3>
+          <span className="text-xs text-muted-foreground">
+            Detalles específicos del cronograma de construcción
+          </span>
+        </div>
         
+        {/* Phase Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
+          <Select 
+            value={watch('project_phase_id') || ""}
+            onValueChange={(value) => setValue('project_phase_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar fase (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              {projectPhases.map((projectPhase) => (
+                <SelectItem key={projectPhase.id} value={projectPhase.id}>
+                  {projectPhase.phase.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.project_phase_id && (
+            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
+          )}
+        </div>
+
         {/* Predecessor Task */}
         <div className="space-y-2">
           <Label htmlFor="predecessor_task_id">Tarea Predecesora</Label>
@@ -528,6 +490,34 @@ export function ConstructionTaskFormModal({
           </Select>
           {errors.predecessor_task_id && (
             <p className="text-sm text-destructive">{errors.predecessor_task_id.message}</p>
+          )}
+        </div>
+
+        {/* Start Date */}
+        <div className="space-y-2">
+          <Label htmlFor="start_date">Fecha de Inicio</Label>
+          <Input
+            type="date"
+            {...form.register('start_date')}
+            className="w-full"
+          />
+          {errors.start_date && (
+            <p className="text-sm text-destructive">{errors.start_date.message}</p>
+          )}
+        </div>
+
+        {/* Duration */}
+        <div className="space-y-2">
+          <Label htmlFor="duration_in_days">Cantidad de Días</Label>
+          <Input
+            type="number"
+            min="1"
+            placeholder="Ej: 5"
+            {...form.register('duration_in_days', { valueAsNumber: true })}
+            className="w-full"
+          />
+          {errors.duration_in_days && (
+            <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
           )}
         </div>
 
