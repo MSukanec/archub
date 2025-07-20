@@ -21,7 +21,8 @@ import { BudgetFormModal } from '../modals/construction/BudgetFormModal';
 import { ConstructionTaskFormModal } from '../modals/construction/ConstructionTaskFormModal';
 import { OrganizationFormModal } from '../modals/organizations/OrganizationFormModal';
 import { InstallmentFormModal } from '../modals/finances/InstallmentFormModal';
-import { MaterialFormModal } from '../modals/admin/MaterialFormModal';
+import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
+import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -65,6 +66,10 @@ export function ModalFactory() {
       return <OrganizationFormModal modalData={data} onClose={closeModal} />;
     case 'material-form':
       return <MaterialFormModal modalData={data} onClose={closeModal} />;
+    
+    case 'material-category-form':
+      return <MaterialCategoryFormModal modalData={data} onClose={closeModal} />;
+    
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
         mode={data?.mode || 'dangerous'}

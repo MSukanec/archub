@@ -5,24 +5,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Table } from '@/components/ui-custom/Table';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
-import { NewAdminMaterialCategoryModal } from '@/modals/admin/NewAdminMaterialCategoryModal';
+import { useMaterialCategories, MaterialCategory } from '@/hooks/use-material-categories';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ModalFactory } from '@/components/modal/form/ModalFactory';
 
 export default function AdminMaterialCategories() {
-  const [showModal, setShowModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<MaterialCategory | undefined>();
-  const [deleteCategory, setDeleteCategory] = useState<MaterialCategory | null>(null);
   const [searchValue, setSearchValue] = useState('');
-  const [sortBy, setSortBy] = useState('date');
+  const [sortBy, setSortBy] = useState('name');
 
   const { data: categories = [], isLoading } = useMaterialCategories();
-  const deleteMutation = useDeleteMaterialCategory();
+  const { openModal } = useGlobalModalStore();
 
   // Filter and sort categories
   const filteredCategories = categories
@@ -37,42 +34,34 @@ export default function AdminMaterialCategories() {
     });
 
   const handleEdit = (category: MaterialCategory) => {
-    setEditingCategory(category);
-    setShowModal(true);
-  };
+    openModal('material-category-form', { editingMaterialCategory: category })
+  }
 
-  const handleDelete = async () => {
-    if (!deleteCategory) return;
-    
-    try {
-      await deleteMutation.mutateAsync(deleteCategory.id);
-      toast({
-        title: "Categoría eliminada",
-        description: "La categoría de material ha sido eliminada exitosamente.",
-      });
-      setDeleteCategory(null);
-    } catch (error) {
-      console.error('Error deleting category:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar la categoría de material.",
-        variant: "destructive",
-      });
-    }
-  };
+  const handleCreate = () => {
+    openModal('material-category-form', { editingMaterialCategory: null })
+  }
+
+  const handleDelete = (category: MaterialCategory) => {
+    // Temporary placeholder until delete functionality is implemented
+    console.log('Delete category:', category.id)
+    toast({
+      title: "Función pendiente",
+      description: "La eliminación de categorías estará disponible próximamente"
+    })
+  }
 
   const clearFilters = () => {
     setSearchValue('');
-    setSortBy('date');
+    setSortBy('name');
   };
 
-  // Calculate statistics
-  const totalCategories = categories.length;
+  // Statistics calculations
+  const totalCategories = categories.length
   const recentCategories = categories.filter(cat => {
-    const categoryDate = new Date(cat.created_at);
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return categoryDate >= thirtyDaysAgo;
+    const createdDate = new Date(cat.created_at)
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    return createdDate > weekAgo
   }).length;
 
   // Table columns configuration
@@ -112,7 +101,7 @@ export default function AdminMaterialCategories() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setDeleteCategory(category)}
+            onClick={() => handleDelete(category)}
             className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
           >
             <Trash2 className="w-4 h-4 text-red-500" />
@@ -149,10 +138,7 @@ export default function AdminMaterialCategories() {
     actions: [
       <Button 
         key="new-category"
-        onClick={() => {
-          setEditingCategory(undefined);
-          setShowModal(true);
-        }}
+        onClick={handleCreate}
         size="sm"
         className="gap-2"
       >
@@ -222,36 +208,8 @@ export default function AdminMaterialCategories() {
         />
       </div>
 
-      {/* Category Modal */}
-      <NewAdminMaterialCategoryModal
-        open={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditingCategory(undefined);
-        }}
-        category={editingCategory}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteCategory} onOpenChange={() => setDeleteCategory(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La categoría "{deleteCategory?.name}" será eliminada permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Global Modal Factory */}
+      <ModalFactory />
     </Layout>
   );
 }
