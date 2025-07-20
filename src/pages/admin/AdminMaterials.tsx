@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
-import { useMaterials } from '@/hooks/use-materials'
+import { useMaterials, Material } from '@/hooks/use-materials'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,28 +15,16 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import { NewAdminMaterialModal } from '@/modals/admin/NewAdminMaterialModal'
 
 import { Plus, Edit, Trash2, Package, Crown } from 'lucide-react'
-
-interface Material {
-  id: string
-  name: string
-  unit_id: string
-  cost: number
-  category_id: string
-  created_at: string
-  unit?: { name: string }
-  category?: { name: string }
-}
 
 export default function AdminMaterials() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [categoryFilter, setCategoryFilter] = useState('all')
-  const [newMaterialModalOpen, setNewMaterialModalOpen] = useState(false)
-  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
   const [deletingMaterial, setDeletingMaterial] = useState<Material | null>(null)
+  
+  const { openModal } = useGlobalModalStore()
 
   // Fetch materials using the hook
   const { data: materials = [], isLoading } = useMaterials()
@@ -71,8 +60,11 @@ export default function AdminMaterials() {
   })
 
   const handleEdit = (material: Material) => {
-    setEditingMaterial(material)
-    setNewMaterialModalOpen(true)
+    openModal('material-form', { editingMaterial: material })
+  }
+
+  const handleCreate = () => {
+    openModal('material-form', { editingMaterial: null })
   }
 
   const handleDelete = (material: Material) => {
@@ -220,10 +212,7 @@ export default function AdminMaterials() {
     actions: [
       <Button 
         key="new-material"
-        onClick={() => {
-          setEditingMaterial(null)
-          setNewMaterialModalOpen(true)
-        }}
+        onClick={handleCreate}
         size="sm"
         className="gap-2"
       >
@@ -292,16 +281,6 @@ export default function AdminMaterials() {
           }
         />
       </div>
-
-      {/* Material Modal */}
-      <NewAdminMaterialModal
-        open={newMaterialModalOpen}
-        onClose={() => {
-          setNewMaterialModalOpen(false)
-          setEditingMaterial(null)
-        }}
-        material={editingMaterial}
-      />
 
       <AlertDialog open={!!deletingMaterial} onOpenChange={() => setDeletingMaterial(null)}>
         <AlertDialogContent>
