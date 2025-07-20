@@ -2,7 +2,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useState, useMemo, useEffect } from 'react'
-import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2, Calendar, Table as TableIcon } from 'lucide-react'
+import { Plus, ListTodo, CheckSquare, Clock, Users, Edit, Trash2, Calendar, Table as TableIcon, Layers } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Table } from '@/components/ui-custom/Table'
@@ -89,6 +89,25 @@ export default function ConstructionTasks() {
     }
 
     openModal('construction-task', {
+      projectId,
+      organizationId,
+      userId: userData.user.id
+    });
+  }
+
+  const handleAddPhase = () => {
+    console.log('Attempting to open phase modal with data:', { projectId, organizationId, userData: userData?.user?.id });
+    
+    if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing project, organization ID, or user data for phase modal', {
+        projectId,
+        organizationId,
+        userId: userData?.user?.id
+      });
+      return
+    }
+
+    openModal('construction-phase', {
       projectId,
       organizationId,
       userId: userData.user.id
@@ -226,6 +245,18 @@ export default function ConstructionTasks() {
 
   const columns = [
     {
+      key: 'fase',
+      label: 'Fase',
+      render: (task: any) => (
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm">
+            {task.phase_name || 'Sin fase'}
+          </span>
+        </div>
+      )
+    },
+    {
       key: 'rubro',
       label: 'Rubro',
       render: (task: any) => task.task.rubro_name || '-'
@@ -265,6 +296,29 @@ export default function ConstructionTasks() {
       )
     },
     {
+      key: 'fechas',
+      label: 'Fechas',
+      render: (task: any) => (
+        <div className="text-sm">
+          {task.start_date && (
+            <div className="text-xs text-muted-foreground">
+              Inicio: {new Date(task.start_date).toLocaleDateString('es-ES')}
+            </div>
+          )}
+          {task.end_date && (
+            <div className="text-xs text-muted-foreground">
+              Fin: {new Date(task.end_date).toLocaleDateString('es-ES')}
+            </div>
+          )}
+          {task.duration_in_days && (
+            <div className="text-xs text-muted-foreground">
+              Duración: {task.duration_in_days} días
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
       key: 'acciones',
       label: 'Acciones',
       render: (task: any) => (
@@ -299,6 +353,15 @@ export default function ConstructionTasks() {
   ]
 
   const actions = [
+    <Button 
+      key="new-phase"
+      variant="outline"
+      className="h-8 px-3 text-sm"
+      onClick={handleAddPhase}
+    >
+      <Layers className="w-4 h-4 mr-2" />
+      Crear Fase
+    </Button>,
     <Button 
       key="new-task"
       className="h-8 px-3 text-sm"
