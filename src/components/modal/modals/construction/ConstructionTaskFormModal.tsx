@@ -143,12 +143,12 @@ export function ConstructionTaskFormModal({
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
-      task_id: modalData.editingTask?.task_id || "",
-      quantity: modalData.editingTask?.quantity || 1,
+      task_id: "",
+      quantity: 1,
       project_phase_id: "",
-      start_date: modalData.editingTask?.start_date || "",
-      end_date: modalData.editingTask?.end_date || "",
-      duration_in_days: modalData.editingTask?.duration_in_days || undefined,
+      start_date: "",
+      end_date: "",
+      duration_in_days: undefined,
       // Campos de dependencias
       predecessor_task_id: "",
       dependency_type: "FS",
@@ -159,7 +159,7 @@ export function ConstructionTaskFormModal({
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
   const selectedTaskId = watch('task_id');
 
-  // Cargar datos cuando está en modo edición - consolidado
+  // Cargar datos cuando está en modo edición - reset completo del formulario
   useEffect(() => {
     if (modalData.isEditing && modalData.editingTask) {
       const task = modalData.editingTask;
@@ -170,29 +170,20 @@ export function ConstructionTaskFormModal({
         setSearchQuery(task.task.display_name);
       }
       
-      // Actualizar los valores del formulario
-      setValue('task_id', task.task_id || '');
-      setValue('quantity', task.quantity || 1);
-      setValue('start_date', task.start_date || '');
-      setValue('end_date', task.end_date || '');
-      setValue('duration_in_days', task.duration_in_days || undefined);
-      
-      // Cargar la fase cuando está disponible
-      if (currentPhaseTask !== undefined) {
-        console.log('Setting phase from currentPhaseTask:', currentPhaseTask);
-        setValue('project_phase_id', currentPhaseTask || '');
-      }
+      // Reset completo del formulario con todos los valores
+      form.reset({
+        task_id: task.task_id || '',
+        quantity: task.quantity || 1,
+        project_phase_id: currentPhaseTask || '',
+        start_date: task.start_date || '',
+        end_date: task.end_date || '',
+        duration_in_days: task.duration_in_days || undefined,
+        predecessor_task_id: '',
+        dependency_type: 'FS',
+        lag_days: 0
+      });
     }
-  }, [modalData.isEditing, modalData.editingTask, currentPhaseTask, setValue, setSearchQuery]);
-
-  // Separar useEffect para actualizar la fase cuando se carga después
-  useEffect(() => {
-    if (modalData.isEditing && currentPhaseTask !== undefined && phaseLoaded) {
-      console.log('Phase task loaded separately, updating field:', currentPhaseTask);
-      console.log('Available project phases:', projectPhases);
-      setValue('project_phase_id', currentPhaseTask || '');
-    }
-  }, [currentPhaseTask, modalData.isEditing, setValue, phaseLoaded, projectPhases]);
+  }, [modalData.isEditing, modalData.editingTask, currentPhaseTask, form, setSearchQuery]);
 
   // Cargar dependencia existente cuando estamos editando
   useEffect(() => {
