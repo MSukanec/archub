@@ -21,7 +21,7 @@ import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
-  const [activeTab, setActiveTab] = useState("cronograma")
+  const [activeTab, setActiveTab] = useState("listado")
   const [processedTasks, setProcessedTasks] = useState<any[]>([])
   
   const { data: userData } = useCurrentUser()
@@ -88,7 +88,7 @@ export default function ConstructionTasks() {
       return
     }
 
-    openModal('construction-task', {
+    openModal('construction-task-form', {
       projectId,
       organizationId,
       userId: userData.user.id
@@ -107,7 +107,7 @@ export default function ConstructionTasks() {
       return
     }
 
-    openModal('construction-phase', {
+    openModal('construction-phase-form', {
       projectId,
       organizationId,
       userId: userData.user.id
@@ -136,12 +136,12 @@ export default function ConstructionTasks() {
   }
 
   // Manejar edición de tarea desde Gantt
-  const handleEditTask = (item: GanttRowProps) => {
+  const handleEditTask = (item: any) => {
     console.log('Edit button clicked for item:', item);
     if (item.type !== 'task') return
     
     // Abrir modal de edición con datos pre-cargados
-    openModal('construction-task', {
+    openModal('construction-task-form', {
       projectId,
       organizationId,
       userId: userData?.user?.id,
@@ -151,7 +151,7 @@ export default function ConstructionTasks() {
   }
 
   // Manejar eliminación de tarea desde Gantt
-  const handleDeleteTaskFromGantt = (item: GanttRowProps) => {
+  const handleDeleteTaskFromGantt = (item: any) => {
     console.log('Delete button clicked for item:', item);
     if (item.type !== 'task' || !item.taskData) return
     
@@ -187,7 +187,7 @@ export default function ConstructionTasks() {
     // Crear estructura Gantt con agrupadores y tareas
     const ganttRows: any[] = [];
 
-    Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]) => {
+    Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]: [string, any[]]) => {
       // Agregar fila agrupadora (los grupos no necesitan fechas específicas)
       ganttRows.push({
         id: `group-${rubroName}`,
@@ -201,7 +201,7 @@ export default function ConstructionTasks() {
       });
 
       // Agregar tareas del rubro
-      rubloTasks.forEach((task) => {
+      rubloTasks.forEach((task: any) => {
         // Validar y establecer fechas por defecto
         let validStartDate = task.start_date;
         let validEndDate = task.end_date;
@@ -265,35 +265,56 @@ export default function ConstructionTasks() {
       key: 'tarea',
       label: 'Tarea',
       render: (task: any) => (
-        <div>
-          <div className="font-medium">{task.task.processed_display_name || task.task.display_name}</div>
-          <div className="text-xs text-muted-foreground">{task.task.code}</div>
+        <div className="font-medium">
+          {task.task.processed_display_name || task.task.display_name}
         </div>
       )
     },
     {
       key: 'unidad',
       label: 'Unidad',
-      render: (task: any) => task.task.unit_id ? 'Unidad' : '-'
+      render: (task: any) => {
+        // Obtener la unidad desde task.units si existe en la vista
+        if (task.task && task.task.units && task.task.units.name) {
+          return task.task.units.name;
+        }
+        // Fallback si no hay datos de unidad
+        return task.task.unit_id ? 'Unidad' : '-';
+      }
     },
     {
       key: 'cantidad',
       label: 'Cantidad',
-      render: (task: any) => (
-        <Input
-          type="number"
-          value={task.quantity}
-          onChange={(e) => {
-            const newQuantity = parseFloat(e.target.value) || 0
-            if (newQuantity > 0) {
-              handleUpdateQuantity(task.id, newQuantity)
-            }
-          }}
-          className="w-20 h-8"
-          step="0.01"
-          min="0.01"
-        />
-      )
+      render: (task: any) => {
+        // Obtener la unidad para mostrar dentro del input
+        const getTaskUnit = () => {
+          if (task.task && task.task.units && task.task.units.name) {
+            return task.task.units.name;
+          }
+          return 'ud';
+        };
+        
+        return (
+          <div className="relative">
+            <Input
+              type="number"
+              value={task.quantity}
+              onChange={(e) => {
+                const newQuantity = parseFloat(e.target.value) || 0
+                if (newQuantity > 0) {
+                  handleUpdateQuantity(task.id, newQuantity)
+                }
+              }}
+              className="w-20 h-8 pr-8"
+              step="0.01"
+              min="0.01"
+            />
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+              {getTaskUnit()}
+            </div>
+          </div>
+        )
+      }
     },
     {
       key: 'fechas',
@@ -327,7 +348,7 @@ export default function ConstructionTasks() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              openModal('construction-task', {
+              openModal('construction-task-form', {
                 projectId,
                 organizationId,
                 userId: userData?.user?.id,
@@ -419,18 +440,18 @@ export default function ConstructionTasks() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 border border-[var(--card-border)] bg-[var(--card-bg)] rounded-lg p-1">
             <TabsTrigger 
-              value="cronograma" 
-              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
-            >
-              <Calendar className="w-4 h-4" />
-              Cronograma
-            </TabsTrigger>
-            <TabsTrigger 
               value="listado" 
               className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
             >
               <TableIcon className="w-4 h-4" />
               Listado
+            </TabsTrigger>
+            <TabsTrigger 
+              value="cronograma" 
+              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
+            >
+              <Calendar className="w-4 h-4" />
+              Cronograma
             </TabsTrigger>
           </TabsList>
 
@@ -496,7 +517,6 @@ export default function ConstructionTasks() {
                   data={filteredTasks}
                   columns={columns}
                   isLoading={isLoading}
-                  emptyMessage="No se encontraron tareas que coincidan con la búsqueda"
                 />
               </div>
             )}

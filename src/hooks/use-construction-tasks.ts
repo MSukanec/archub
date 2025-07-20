@@ -23,6 +23,11 @@ export interface ConstructionTask {
     unit_id: string | null;
     rubro_id: string | null;
     param_values: any;
+    units?: {
+      id: string;
+      name: string;
+      symbol: string;
+    } | null;
   };
 }
 
@@ -44,7 +49,12 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             category_name,
             unit_id,
             rubro_id,
-            param_values
+            param_values,
+            units (
+              id,
+              name,
+              symbol
+            )
           )
         `)
         .eq('project_id', projectId)
