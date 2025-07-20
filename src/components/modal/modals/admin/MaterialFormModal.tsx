@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -41,6 +42,12 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const updateMutation = useUpdateMaterial()
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
+  const { setPanel } = useModalPanelStore()
+
+  // Force edit mode when modal opens
+  useEffect(() => {
+    setPanel('edit')
+  }, [])
 
   // Form setup
   const form = useForm<z.infer<typeof materialSchema>>({
