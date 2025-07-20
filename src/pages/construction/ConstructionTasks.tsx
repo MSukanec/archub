@@ -265,10 +265,7 @@ export default function ConstructionTasks() {
       key: 'tarea',
       label: 'Tarea',
       render: (task: any) => (
-        <div>
-          <div className="font-medium">{task.task.processed_display_name || task.task.display_name}</div>
-          <div className="text-xs text-muted-foreground">{task.task.code}</div>
-        </div>
+        <div className="font-medium">{task.task.processed_display_name || task.task.display_name}</div>
       )
     },
     {
