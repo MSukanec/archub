@@ -31,7 +31,8 @@ export function useOrganizationStats() {
         }
       }
 
-      const thirtyDaysAgo = subDays(new Date(), 30)
+      try {
+        const thirtyDaysAgo = subDays(new Date(), 30)
 
       // Count active projects
       const { count: activeProjectsCount } = await supabase
@@ -68,8 +69,14 @@ export function useOrganizationStats() {
         generatedTasks: tasksCount || 0,
         financialMovementsLast30Days: Math.abs(totalMovements)
       }
+      } catch (error) {
+        console.error('Error fetching organization stats:', error)
+        throw new Error('Error al cargar estadísticas. Inténtalo nuevamente.')
+      }
     },
-    enabled: !!organizationId
+    enabled: !!organizationId,
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
 
@@ -82,14 +89,15 @@ export function useOrganizationActivity() {
     queryFn: async (): Promise<ActivityData[]> => {
       if (!supabase || !organizationId) return []
 
-      const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const date = subDays(new Date(), 6 - i)
-        return startOfDay(date)
-      })
+      try {
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+          const date = subDays(new Date(), 6 - i)
+          return startOfDay(date)
+        })
 
-      const activityData: ActivityData[] = []
+        const activityData: ActivityData[] = []
 
-      for (const date of last7Days) {
+        for (const date of last7Days) {
         const nextDay = new Date(date)
         nextDay.setDate(nextDay.getDate() + 1)
 
@@ -141,8 +149,14 @@ export function useOrganizationActivity() {
         })
       }
 
-      return activityData
+        return activityData
+      } catch (error) {
+        console.error('Error fetching organization activity:', error)
+        throw new Error('Error al cargar actividad. Inténtalo nuevamente.')
+      }
     },
-    enabled: !!organizationId
+    enabled: !!organizationId,
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }

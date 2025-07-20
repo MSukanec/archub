@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Calendar, Crown, Users, Building } from "lucide-react";
+import { Calendar, Crown, Users, Building, RefreshCw } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
@@ -9,6 +9,7 @@ import { Layout } from "@/components/layout/desktop/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { OrganizationStatsCards } from "@/components/cards/OrganizationStatsCards";
 import { OrganizationActivityChart } from "@/components/charts/OrganizationActivityChart";
 import { OrganizationQuickActions } from "@/components/cards/OrganizationQuickActions";
@@ -55,8 +56,8 @@ export default function OrganizationDashboard() {
   const isMobile = useMobile();
 
   const currentOrganization = userData?.organization;
-  const { data: stats, isLoading: statsLoading } = useOrganizationStats();
-  const { data: activityData, isLoading: activityLoading } =
+  const { data: stats, isLoading: statsLoading, error: statsError } = useOrganizationStats();
+  const { data: activityData, isLoading: activityLoading, error: activityError } =
     useOrganizationActivity();
 
   // Set sidebar context and hide mobile action bar on dashboards
@@ -75,6 +76,29 @@ export default function OrganizationDashboard() {
     showSearch: false,
     showFilters: false,
   };
+
+  // Show error state if there's an error
+  if (statsError || activityError) {
+    return (
+      <Layout headerProps={headerProps} wide>
+        <div className="text-center py-12">
+          <Building className="h-12 w-12 mx-auto mb-4 text-red-500" />
+          <h3 className="font-medium mb-2 text-red-700">Error al cargar dashboard</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            {statsError?.message || activityError?.message || "Inténtalo nuevamente"}
+          </p>
+          <Button 
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Recargar página
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!currentOrganization) {
     return (
