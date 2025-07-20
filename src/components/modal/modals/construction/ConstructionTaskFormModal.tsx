@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -79,12 +79,12 @@ export function ConstructionTaskFormModal({
     setPanel("edit");
   }, [setPanel]);
 
-  // Hook para búsqueda de tareas (solo buscar si hay al menos 3 caracteres)
+  // Hook para búsqueda de tareas (buscar siempre si hay query o si estamos editando)
   const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
     searchQuery, 
     modalData.organizationId, 
     { origin: 'all' },
-    searchQuery.length >= 3
+    searchQuery.length >= 3 || modalData.isEditing
   );
 
   // Hook para obtener las fases del proyecto
@@ -123,11 +123,31 @@ export function ConstructionTaskFormModal({
     }
   }, [modalData.isEditing, modalData.editingTask, setValue]);
 
-  // Preparar opciones para ComboBoxWrite usando display_name
-  const taskOptions = tasks.map(task => ({
-    value: task.id,
-    label: task.display_name || task.code || 'Sin nombre'
-  }));
+  // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
+  const enhancedTaskOptions = useMemo(() => {
+    const baseOptions = tasks.map(task => ({
+      value: task.id,
+      label: task.display_name || task.code || 'Sin nombre'
+    }));
+
+    // Si estamos editando y la tarea actual no está en las opciones, agregarla
+    if (modalData.isEditing && modalData.editingTask && selectedTaskId) {
+      const currentTaskExists = baseOptions.some(option => option.value === selectedTaskId);
+      
+      if (!currentTaskExists && modalData.editingTask.task) {
+        baseOptions.unshift({
+          value: modalData.editingTask.task_id,
+          label: modalData.editingTask.task.processed_display_name || 
+                 modalData.editingTask.task.display_name || 
+                 modalData.editingTask.task.code || 'Tarea actual'
+        });
+      }
+    }
+
+    return baseOptions;
+  }, [tasks, modalData.isEditing, modalData.editingTask, selectedTaskId]);
+
+
 
 
 
@@ -223,7 +243,7 @@ export function ConstructionTaskFormModal({
         <Label htmlFor="task_id">Tarea *</Label>
         <div className="w-full">
           <ComboBox
-            options={taskOptions}
+            options={enhancedTaskOptions}
             value={selectedTaskId}
             onValueChange={(value) => setValue('task_id', value)}
             placeholder="Buscar tarea..."
