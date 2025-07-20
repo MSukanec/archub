@@ -38,6 +38,7 @@ import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import ConstructionGallery from "@/pages/construction/ConstructionGallery";
 import ConstructionTasks from "@/pages/construction/ConstructionTasks";
+import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 
 import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
@@ -182,6 +183,11 @@ function Router() {
         <Route path="/construction/tasks">
           <ProtectedRoute>
             <ConstructionTasks />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/construction/schedule">
+          <ProtectedRoute>
+            <ConstructionSchedule />
           </ProtectedRoute>
         </Route>
         <Route path="/construction/logs">
