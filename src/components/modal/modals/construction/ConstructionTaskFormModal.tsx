@@ -103,6 +103,7 @@ export function ConstructionTaskFormModal({
   });
 
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
+  const selectedTaskId = watch('task_id');
 
   // Cargar datos cuando está en modo edición
   useEffect(() => {
@@ -151,7 +152,6 @@ export function ConstructionTaskFormModal({
 
 
 
-  const selectedTaskId = watch('task_id');
   const selectedTask = tasks.find(t => t.id === selectedTaskId);
   const quantity = watch('quantity');
   
