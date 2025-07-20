@@ -9,6 +9,7 @@ import { Table } from '@/components/ui-custom/Table';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useMaterialCategories, MaterialCategory } from '@/hooks/use-material-categories';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useDeleteMaterialCategory } from '@/hooks/use-material-categories';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -20,6 +21,7 @@ export default function AdminMaterialCategories() {
 
   const { data: categories = [], isLoading } = useMaterialCategories();
   const { openModal } = useGlobalModalStore();
+  const deleteMutation = useDeleteMaterialCategory();
 
   // Filter and sort categories
   const filteredCategories = categories
@@ -42,11 +44,29 @@ export default function AdminMaterialCategories() {
   }
 
   const handleDelete = (category: MaterialCategory) => {
-    // Temporary placeholder until delete functionality is implemented
-    console.log('Delete category:', category.id)
-    toast({
-      title: "Función pendiente",
-      description: "La eliminación de categorías estará disponible próximamente"
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar Categoría de Material',
+      description: 'Esta acción eliminará permanentemente la categoría y no se puede deshacer.',
+      itemName: category.name,
+      destructiveActionText: 'Eliminar Categoría',
+      onConfirm: async () => {
+        try {
+          await deleteMutation.mutateAsync(category.id);
+          toast({
+            title: "Categoría eliminada",
+            description: `La categoría "${category.name}" ha sido eliminada exitosamente.`,
+          });
+        } catch (error) {
+          console.error('Error deleting category:', error);
+          toast({
+            title: "Error",
+            description: "No se pudo eliminar la categoría de material.",
+            variant: "destructive",
+          });
+        }
+      },
+      isLoading: deleteMutation.isPending
     })
   }
 
