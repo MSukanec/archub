@@ -88,13 +88,23 @@ export function ConstructionTaskFormModal({
   );
 
   // Hook para obtener las fases del proyecto
-  const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
+  const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useProjectPhases(modalData.projectId);
+  
+  // Log para debug
+  useEffect(() => {
+    console.log('Project phases loaded:', projectPhases);
+  }, [projectPhases]);
 
   // Hook para obtener la fase actual de la tarea cuando se está editando
-  const { data: currentPhaseTask } = useQuery({
+  const { data: currentPhaseTask, isLoading: isLoadingPhase, isSuccess: phaseLoaded } = useQuery({
     queryKey: ['construction-phase-task', modalData.editingTask?.id],
     queryFn: async () => {
-      if (!modalData.editingTask?.id || !supabase) return null;
+      if (!modalData.editingTask?.id || !supabase) {
+        console.log('No task ID or supabase available for phase query');
+        return null;
+      }
+      
+      console.log('Fetching phase for task:', modalData.editingTask.id);
       
       const { data, error } = await supabase
         .from('construction_phase_tasks')
@@ -107,9 +117,12 @@ export function ConstructionTaskFormModal({
         return null;
       }
 
+      console.log('Phase task query result:', data);
       return data?.project_phase_id || null;
     },
     enabled: !!modalData.isEditing && !!modalData.editingTask?.id,
+    staleTime: 0, // Always refetch to ensure we have the latest data
+    cacheTime: 0, // Don't cache to avoid stale data issues
   });
 
   const form = useForm<AddTaskFormData>({
@@ -127,10 +140,11 @@ export function ConstructionTaskFormModal({
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
   const selectedTaskId = watch('task_id');
 
-  // Cargar datos cuando está en modo edición
+  // Cargar datos cuando está en modo edición - consolidado
   useEffect(() => {
     if (modalData.isEditing && modalData.editingTask) {
       const task = modalData.editingTask;
+      console.log('Loading task for editing:', task);
       
       // Pre-cargar la búsqueda con el nombre de la tarea existente
       if (task.task?.display_name) {
@@ -143,15 +157,23 @@ export function ConstructionTaskFormModal({
       setValue('start_date', task.start_date || '');
       setValue('end_date', task.end_date || '');
       setValue('duration_in_days', task.duration_in_days || undefined);
+      
+      // Cargar la fase cuando está disponible
+      if (currentPhaseTask !== undefined) {
+        console.log('Setting phase from currentPhaseTask:', currentPhaseTask);
+        setValue('project_phase_id', currentPhaseTask || '');
+      }
     }
-  }, [modalData.isEditing, modalData.editingTask, setValue]);
+  }, [modalData.isEditing, modalData.editingTask, currentPhaseTask, setValue, setSearchQuery]);
 
-  // Cargar la fase cuando está disponible en modo edición
+  // Separar useEffect para actualizar la fase cuando se carga después
   useEffect(() => {
-    if (modalData.isEditing && currentPhaseTask !== undefined) {
+    if (modalData.isEditing && currentPhaseTask !== undefined && phaseLoaded) {
+      console.log('Phase task loaded separately, updating field:', currentPhaseTask);
+      console.log('Available project phases:', projectPhases);
       setValue('project_phase_id', currentPhaseTask || '');
     }
-  }, [currentPhaseTask, modalData.isEditing, setValue]);
+  }, [currentPhaseTask, modalData.isEditing, setValue, phaseLoaded, projectPhases]);
 
   // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
   const enhancedTaskOptions = useMemo(() => {

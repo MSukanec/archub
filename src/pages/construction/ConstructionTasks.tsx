@@ -245,18 +245,6 @@ export default function ConstructionTasks() {
 
   const columns = [
     {
-      key: 'fase',
-      label: 'Fase',
-      render: (task: any) => (
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm">
-            {task.phase_name || 'Sin fase'}
-          </span>
-        </div>
-      )
-    },
-    {
       key: 'rubro',
       label: 'Rubro',
       render: (task: any) => task.task.rubro_name || '-'
@@ -290,6 +278,18 @@ export default function ConstructionTasks() {
           step="0.01"
           min="0.01"
         />
+      )
+    },
+    {
+      key: 'fase',
+      label: 'Fase',
+      render: (task: any) => (
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm">
+            {task.phase_name || 'Sin fase'}
+          </span>
+        </div>
       )
     },
     {

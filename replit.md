@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 20, 2025. CONSTRUCTION TASKS TABLE COLUMN REORDERING AND PHASE FIELD BUG FIXES: Fixed table organization and improved phase field reliability in edit mode - COMPLETED
+  • Reordered table columns to exact user specification: Rubro → Tarea → Unidad → Cantidad → Fase → Fechas → Acciones
+  • Fixed intermittent phase field loading issue in edit mode by adding comprehensive logging and query optimization
+  • Enhanced phase field query with staleTime: 0 and cacheTime: 0 to prevent stale data issues
+  • Consolidated useEffect logic for task editing data loading with proper dependency management
+  • Added detailed console logging to track phase loading behavior and identify timing issues
+  • Improved robustness of currentPhaseTask query with proper error handling and loading states
+  • Phase field now loads more consistently when editing construction tasks
 - July 19, 2025. GANTT HOVER ACTIONS AND UI FIXES COMPLETED: Implemented edit/delete hover buttons and resolved visual issues - COMPLETED
   • Added hover action buttons (edit/delete) to individual task rows in Gantt left panel using opacity-0 group-hover:opacity-100 pattern
   • Extended resize handle functionality to header section for complete resizing capability
