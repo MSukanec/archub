@@ -164,6 +164,7 @@ export default function ProjectBasicData() {
       // Invalidate queries to refresh data including current user for header updates
       queryClient.invalidateQueries({ queryKey: ['project-info', projectId] });
       queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] }); // Critical: header uses projects list
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     },
     delay: 750,
