@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 20, 2025. MATERIALS PAGE CACHE INVALIDATION AND SIDEBAR REORDERING COMPLETED: Fixed real-time updates and improved navigation structure - COMPLETED
+  • Added cache invalidation for construction-materials query in all construction task mutations (create, update, delete)
+  • Materials page now updates automatically when tasks are modified without requiring F5 refresh
+  • Reordered construction sidebar to user specification: Resumen de Obra → Tareas → Materiales → Presupuestos → Bitácora → Asistencia
+  • Applied sidebar reordering to both desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx for consistency
+  • Enhanced user experience: materials quantities now reflect changes immediately after task modifications
+  • Fixed ReactQuery cache synchronization between construction tasks and materials calculation system
 - July 20, 2025. MATERIALS PAGE UPDATED TO USE NEW TABLE STRUCTURE: Migrated from budget_tasks to construction_tasks system - COMPLETED  
   • Updated useConstructionMaterials hook to use construction_tasks instead of budget_tasks for proper data sourcing
   • Fixed material quantity calculations to multiply task_materials.amount by construction_tasks.quantity for accurate totals

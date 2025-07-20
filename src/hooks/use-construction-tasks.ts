@@ -190,6 +190,10 @@ export function useCreateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-phase-task'] 
       });
+      // Invalidar cache de materiales para que se actualice automáticamente
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-materials', data.project_id] 
+      });
       toast({
         title: "Tarea agregada",
         description: "La tarea se agregó correctamente al proyecto",
@@ -287,6 +291,10 @@ export function useUpdateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-phase-task'] 
       });
+      // Invalidar cache de materiales para que se actualice automáticamente
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-materials', data.project_id] 
+      });
       toast({
         title: "Tarea actualizada",
         description: "Los cambios se guardaron correctamente",
@@ -329,6 +337,10 @@ export function useDeleteConstructionTask() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-tasks', data.project_id, data.organization_id] 
+      });
+      // Invalidar cache de materiales para que se actualice automáticamente
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-materials', data.project_id] 
       });
       toast({
         title: "Tarea eliminada",
