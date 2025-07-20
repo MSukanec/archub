@@ -209,6 +209,15 @@ export function ConstructionTaskFormModal({
     }
   }, [modalData.isEditing, modalData.editingTask?.id, existingDependencies, setValue]);
 
+  // Limpiar fecha de inicio cuando se selecciona tarea predecesora
+  useEffect(() => {
+    const predecessorTask = watch('predecessor_task_id');
+    if (predecessorTask) {
+      // Si hay tarea predecesora, limpiar la fecha de inicio
+      setValue('start_date', '');
+    }
+  }, [watch('predecessor_task_id'), setValue]);
+
   // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
   const enhancedTaskOptions = useMemo(() => {
     const baseOptions = tasks.map(task => ({
@@ -411,12 +420,12 @@ export function ConstructionTaskFormModal({
       {/* Cronograma de Tarea Section */}
       <div className="space-y-4 border-t pt-4">
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Calendar className="h-4 w-4" style={{ color: 'var(--accent)' }} />
           <h3 className="text-sm font-medium text-foreground">Cronograma de Tarea</h3>
-          <span className="text-xs text-muted-foreground">
-            Detalles específicos del cronograma de construcción
-          </span>
         </div>
+        <span className="text-xs text-muted-foreground">
+          Detalles específicos del cronograma de construcción
+        </span>
         
         {/* Phase Selection */}
         <div className="space-y-2">
@@ -493,18 +502,20 @@ export function ConstructionTaskFormModal({
           )}
         </div>
 
-        {/* Start Date */}
-        <div className="space-y-2">
-          <Label htmlFor="start_date">Fecha de Inicio</Label>
-          <Input
-            type="date"
-            {...form.register('start_date')}
-            className="w-full"
-          />
-          {errors.start_date && (
-            <p className="text-sm text-destructive">{errors.start_date.message}</p>
-          )}
-        </div>
+        {/* Start Date - solo si NO hay tarea predecesora */}
+        {!watch('predecessor_task_id') && (
+          <div className="space-y-2">
+            <Label htmlFor="start_date">Fecha de Inicio</Label>
+            <Input
+              type="date"
+              {...form.register('start_date')}
+              className="w-full"
+            />
+            {errors.start_date && (
+              <p className="text-sm text-destructive">{errors.start_date.message}</p>
+            )}
+          </div>
+        )}
 
         {/* Duration */}
         <div className="space-y-2">
