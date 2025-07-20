@@ -160,6 +160,7 @@ export function useUpdateConstructionTask() {
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
+      project_phase_id?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -193,6 +194,30 @@ export function useUpdateConstructionTask() {
       if (error) {
         console.error('Error updating construction task:', error);
         throw error;
+      }
+
+      // Manejar la vinculación con la fase
+      if (data.project_phase_id !== undefined) {
+        // Primero eliminar cualquier vinculación existente
+        await supabase
+          .from('construction_phase_tasks')
+          .delete()
+          .eq('construction_task_id', data.id);
+
+        // Si se especifica una fase, crear nueva vinculación
+        if (data.project_phase_id) {
+          const { error: phaseTaskError } = await supabase
+            .from('construction_phase_tasks')
+            .insert({
+              construction_task_id: data.id,
+              project_phase_id: data.project_phase_id,
+            });
+
+          if (phaseTaskError) {
+            console.error('Error linking task to phase:', phaseTaskError);
+            // No lanzamos error aquí para que la actualización continúe
+          }
+        }
       }
 
       return result;

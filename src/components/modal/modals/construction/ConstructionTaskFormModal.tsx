@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
@@ -16,7 +17,6 @@ import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/us
 import { useProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const addTaskSchema = z.object({
@@ -90,6 +90,23 @@ export function ConstructionTaskFormModal({
   // Hook para obtener las fases del proyecto
   const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
 
+  // Hook para obtener la fase actual de la tarea cuando se está editando
+  const { data: currentPhaseTask } = useQuery({
+    queryKey: ['construction-phase-task', modalData.editingTask?.id],
+    queryFn: async () => {
+      if (!modalData.editingTask?.id || !supabase) return null;
+      
+      const { data, error } = await supabase
+        .from('construction_phase_tasks')
+        .select('project_phase_id')
+        .eq('construction_task_id', modalData.editingTask.id)
+        .single();
+
+      return data?.project_phase_id || null;
+    },
+    enabled: !!modalData.isEditing && !!modalData.editingTask?.id,
+  });
+
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
@@ -123,6 +140,13 @@ export function ConstructionTaskFormModal({
       setValue('duration_in_days', task.duration_in_days || undefined);
     }
   }, [modalData.isEditing, modalData.editingTask, setValue]);
+
+  // Cargar la fase cuando está disponible en modo edición
+  useEffect(() => {
+    if (modalData.isEditing && currentPhaseTask) {
+      setValue('project_phase_id', currentPhaseTask);
+    }
+  }, [currentPhaseTask, modalData.isEditing, setValue]);
 
   // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
   const enhancedTaskOptions = useMemo(() => {
@@ -201,6 +225,7 @@ export function ConstructionTaskFormModal({
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           quantity: data.quantity,
+          project_phase_id: data.project_phase_id || null,
           start_date: data.start_date || null,
           end_date: endDate || null,
           duration_in_days: data.duration_in_days || null
