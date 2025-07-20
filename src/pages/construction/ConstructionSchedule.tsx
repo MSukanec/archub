@@ -1,21 +1,18 @@
+import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { useState, useMemo, useEffect } from 'react'
-import { Plus, Calendar, Clock, Activity, CheckSquare, Edit, Trash2 } from 'lucide-react'
+import { Plus, Calendar, Clock, Activity, CheckSquare } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { useConstructionTasks, useUpdateConstructionTask, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useProjectPhases } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useQueryClient } from '@tanstack/react-query'
-import { Input } from '@/components/ui/input'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
-import { Badge } from '@/components/ui/badge'
+import { useNavigationStore } from '@/stores/navigationStore'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
-
-// Usar el mismo sistema que ConstructionBudgets para procesar nombres
-import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
+import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
@@ -23,10 +20,14 @@ export default function ConstructionSchedule() {
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
-  const queryClient = useQueryClient()
-  const updateTask = useUpdateConstructionTask()
   const deleteTask = useDeleteConstructionTask()
   const { showDeleteConfirmation } = useDeleteConfirmation()
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [])
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
@@ -94,8 +95,6 @@ export default function ConstructionSchedule() {
   }
 
   const handleAddPhase = () => {
-    console.log('Attempting to open phase modal with data:', { projectId, organizationId, userData: userData?.user?.id });
-    
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing project, organization ID, or user data for phase modal', {
         projectId,
@@ -124,10 +123,8 @@ export default function ConstructionSchedule() {
 
   // Manejar edición de tarea desde Gantt
   const handleEditTask = (item: GanttRowProps) => {
-    console.log('Edit button clicked for item:', item);
     if (item.type !== 'task') return
     
-    // Abrir modal de edición con datos pre-cargados
     openModal('construction-task', {
       projectId,
       organizationId,
@@ -139,7 +136,6 @@ export default function ConstructionSchedule() {
 
   // Manejar eliminación de tarea desde Gantt
   const handleDeleteTaskFromGantt = (item: GanttRowProps) => {
-    console.log('Delete button clicked for item:', item);
     if (item.type !== 'task' || !item.taskData) return
     
     showDeleteConfirmation({
@@ -152,7 +148,6 @@ export default function ConstructionSchedule() {
 
   // Manejar edición de fase desde Gantt
   const handleEditPhase = (item: GanttRowProps) => {
-    console.log('Edit phase button clicked for item:', item);
     if (item.type !== 'phase' || !item.phaseData) return
     
     openModal('construction-phase', {
@@ -166,7 +161,6 @@ export default function ConstructionSchedule() {
 
   // Manejar eliminación de fase desde Gantt
   const handleDeletePhase = (item: GanttRowProps) => {
-    console.log('Delete phase button clicked for item:', item);
     if (item.type !== 'phase' || !item.phaseData) return
     
     showDeleteConfirmation({
@@ -174,7 +168,6 @@ export default function ConstructionSchedule() {
       description: "¿Estás seguro de que deseas eliminar esta fase del proyecto?",
       itemName: item.name,
       onConfirm: () => {
-        // Aquí iría la lógica para eliminar la fase
         console.log('Deleting phase:', item.phaseData.id);
       }
     })
@@ -255,7 +248,7 @@ export default function ConstructionSchedule() {
 
           // Si end_date existe pero es anterior a start_date, corregir
           if (endDateObj && startDateObj > endDateObj) {
-            validEndDate = validStartDate; // Hacer que end_date sea igual a start_date
+            validEndDate = validStartDate;
             validDuration = 1;
           }
 
@@ -267,7 +260,7 @@ export default function ConstructionSchedule() {
             startDate: validStartDate,
             endDate: validEndDate,
             durationInDays: validDuration,
-            taskData: task // Agregar datos completos de la tarea para edición/eliminación
+            taskData: task
           });
         });
       });
@@ -287,17 +280,14 @@ export default function ConstructionSchedule() {
         });
 
         tasksWithoutPhase.forEach((task) => {
-          // Validar y establecer fechas por defecto
           let validStartDate = task.start_date;
           let validEndDate = task.end_date;
           let validDuration = task.duration_in_days;
 
-          // Si no hay start_date, usar fecha de hoy
           if (!validStartDate) {
             validStartDate = new Date().toISOString().split('T')[0];
           }
 
-          // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
           if (validStartDate && !validEndDate && !validDuration) {
             validDuration = 1;
           }
@@ -317,17 +307,14 @@ export default function ConstructionSchedule() {
     } else {
       // Si no hay fases del proyecto, mostrar todas las tareas sin agrupación
       filteredTasks.forEach((task) => {
-        // Validar y establecer fechas por defecto
         let validStartDate = task.start_date;
         let validEndDate = task.end_date;
         let validDuration = task.duration_in_days;
 
-        // Si no hay start_date, usar fecha de hoy
         if (!validStartDate) {
           validStartDate = new Date().toISOString().split('T')[0];
         }
 
-        // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
         if (validStartDate && !validEndDate && !validDuration) {
           validDuration = 1;
         }
@@ -348,9 +335,28 @@ export default function ConstructionSchedule() {
     return ganttRows;
   }, [filteredTasks, projectPhases]);
 
+  const headerProps = {
+    title: "Cronograma de Construcción",
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    actions: (
+      <div className="flex gap-2">
+        <Button onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Crear Fase
+        </Button>
+        <Button onClick={handleAddTask} className="h-8 px-3 text-sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Nueva Tarea
+        </Button>
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
-      <Layout sidebar="construccion">
+      <Layout headerProps={headerProps}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando cronograma...</div>
         </div>
@@ -359,97 +365,53 @@ export default function ConstructionSchedule() {
   }
 
   return (
-    <Layout sidebar="construccion">
-      <div className="container mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Cronograma de Construcción</h1>
-            <p className="text-muted-foreground">
-              Visualización temporal de tareas y fases del proyecto
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={handleAddPhase} variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Fase
-            </Button>
-            <Button onClick={handleAddTask}>
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Tarea
-            </Button>
-          </div>
-        </div>
+    <Layout headerProps={headerProps}>
+      {/* Feature Introduction */}
+      <FeatureIntroduction
+        icon={<Calendar className="h-6 w-6" />}
+        title="Cronograma de Construcción"
+        features={[
+          {
+            icon: <Calendar className="h-5 w-5" />,
+            title: "Visualización temporal",
+            description: "Cronograma visual tipo Gantt con barras temporales"
+          },
+          {
+            icon: <Activity className="h-5 w-5" />,
+            title: "Organización por fases",
+            description: "Tareas agrupadas jerárquicamente por fases del proyecto"
+          },
+          {
+            icon: <CheckSquare className="h-5 w-5" />,
+            title: "Gestión de dependencias",
+            description: "Control de precedencias y relaciones entre tareas"
+          },
+          {
+            icon: <Clock className="h-5 w-5" />,
+            title: "Control de tiempo",
+            description: "Fechas de inicio, fin y duración de cada elemento"
+          }
+        ]}
+      />
 
-        {/* Feature Introduction */}
-        <FeatureIntroduction
-          icon={<Calendar className="h-6 w-6" />}
-          title="Cronograma de Construcción"
-          features={[
-            {
-              icon: <Calendar className="h-5 w-5" />,
-              title: "Visualización temporal",
-              description: "Cronograma visual tipo Gantt con barras temporales"
-            },
-            {
-              icon: <Activity className="h-5 w-5" />,
-              title: "Organización por fases",
-              description: "Tareas agrupadas jerárquicamente por fases del proyecto"
-            },
-            {
-              icon: <CheckSquare className="h-5 w-5" />,
-              title: "Gestión de dependencias",
-              description: "Control de precedencias y relaciones entre tareas"
-            },
-            {
-              icon: <Clock className="h-5 w-5" />,
-              title: "Control de tiempo",
-              description: "Fechas de inicio, fin y duración de cada elemento"
-            }
-          ]}
+      {/* Gantt Chart or Empty State */}
+      {ganttData.length === 0 ? (
+        <EmptyState
+          icon={Calendar}
+          title="No hay tareas en el cronograma"
+          description="Comienza creando tareas y fases para ver el cronograma del proyecto."
+          action={{
+            label: "Crear Primera Tarea",
+            onClick: handleAddTask
+          }}
         />
-
-        {/* Search */}
-        <div className="flex items-center space-x-4">
-          <div className="flex-1 max-w-sm">
-            <Input
-              placeholder="Buscar tareas..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="w-full"
-            />
-          </div>
-        </div>
-
-        {/* Gantt Chart */}
-        {ganttData.length === 0 ? (
-          <div className="text-center py-20">
-            <Calendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No hay tareas en el cronograma</h3>
-            <p className="text-muted-foreground mb-6">
-              Comienza creando tareas y fases para ver el cronograma del proyecto.
-            </p>
-            <div className="flex gap-2 justify-center">
-              <Button onClick={handleAddPhase} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Fase
-              </Button>
-              <Button onClick={handleAddTask}>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Tarea
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <GanttContainer
-            ganttData={ganttData}
-            handleEditTask={handleEditTask}
-            handleDeleteTaskFromGantt={handleDeleteTaskFromGantt}
-            handleEditPhase={handleEditPhase}
-            handleDeletePhase={handleDeletePhase}
-          />
-        )}
-      </div>
+      ) : (
+        <GanttContainer
+          data={ganttData}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTaskFromGantt}
+        />
+      )}
     </Layout>
   )
 }

@@ -118,6 +118,17 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 20, 2025. CONSTRUCTION TASKS AND SCHEDULE PAGES ARCHITECTURAL RESTRUCTURING COMPLETED: Fixed template compliance and page structure following proper patterns - COMPLETED
+  • Completely restructured both ConstructionTasks.tsx and ConstructionSchedule.tsx to follow prompts/ai-page-template.md structure exactly
+  • Fixed both pages to use Layout with headerProps instead of nested div containers for proper template compliance
+  • ConstructionTasks.tsx now displays complete table view with columns: Rubro → Tarea → Unidad → Cantidad → Fase → Fechas
+  • ConstructionSchedule.tsx now displays proper Gantt view with hierarchical phases and tasks organization
+  • Added proper FeatureIntroduction components explaining functionality of each page type (table vs timeline)
+  • Integrated search functionality and action buttons (Nueva Tarea, Crear Fase) directly in headerProps as per template guidelines
+  • Fixed GanttContainer prop passing issue (changed ganttData to data, onEdit/onDelete handlers)
+  • Both pages now render correctly without "Cannot read properties of undefined" errors
+  • Enhanced user experience with EmptyState components when no data exists
+  • Achieved clean separation between LISTADO (table view) and CRONOGRAMA (Gantt view) as distinct functional pages
 - July 20, 2025. MATERIALS PAGE CACHE INVALIDATION AND SIDEBAR REORDERING COMPLETED: Fixed real-time updates and improved navigation structure - COMPLETED
   • Added cache invalidation for construction-materials query in all construction task mutations (create, update, delete)
   • Materials page now updates automatically when tasks are modified without requiring F5 refresh
