@@ -21,7 +21,7 @@ import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
-  const [activeTab, setActiveTab] = useState("listado")
+  const [activeTab, setActiveTab] = useState("cronograma")
   const [processedTasks, setProcessedTasks] = useState<any[]>([])
   
   const { data: userData } = useCurrentUser()
@@ -39,23 +39,41 @@ export default function ConstructionTasks() {
     organizationId || ''
   )
 
-  // Procesar los nombres de las tareas de forma simple para evitar bucles infinitos
+  // Procesar los nombres de las tareas de forma asíncrona
   useEffect(() => {
-    if (!tasks.length) {
-      setProcessedTasks([])
-      return
+    const processTaskNames = async () => {
+      if (!tasks.length) {
+        setProcessedTasks([])
+        return
+      }
+
+      const processed = await Promise.all(
+        tasks.map(async (task) => {
+          if (task.task.param_values && Object.keys(task.task.param_values).length > 0) {
+            const processedName = await generateTaskDescription(task.task.display_name, task.task.param_values)
+            
+            return {
+              ...task,
+              task: {
+                ...task.task,
+                processed_display_name: processedName
+              }
+            }
+          }
+          return {
+            ...task,
+            task: {
+              ...task.task,
+              processed_display_name: task.task.display_name
+            }
+          }
+        })
+      )
+      
+      setProcessedTasks(processed)
     }
 
-    // Por ahora usar display_name directamente para evitar problemas de rendering
-    const processed = tasks.map((task) => ({
-      ...task,
-      task: {
-        ...task.task,
-        processed_display_name: task.task.display_name
-      }
-    }))
-    
-    setProcessedTasks(processed)
+    processTaskNames()
   }, [tasks])
 
   const handleAddTask = () => {
@@ -70,7 +88,7 @@ export default function ConstructionTasks() {
       return
     }
 
-    openModal('construction-task-form', {
+    openModal('construction-task', {
       projectId,
       organizationId,
       userId: userData.user.id
@@ -89,7 +107,7 @@ export default function ConstructionTasks() {
       return
     }
 
-    openModal('construction-phase-form', {
+    openModal('construction-phase', {
       projectId,
       organizationId,
       userId: userData.user.id
@@ -118,12 +136,12 @@ export default function ConstructionTasks() {
   }
 
   // Manejar edición de tarea desde Gantt
-  const handleEditTask = (item: any) => {
+  const handleEditTask = (item: GanttRowProps) => {
     console.log('Edit button clicked for item:', item);
     if (item.type !== 'task') return
     
     // Abrir modal de edición con datos pre-cargados
-    openModal('construction-task-form', {
+    openModal('construction-task', {
       projectId,
       organizationId,
       userId: userData?.user?.id,
@@ -133,7 +151,7 @@ export default function ConstructionTasks() {
   }
 
   // Manejar eliminación de tarea desde Gantt
-  const handleDeleteTaskFromGantt = (item: any) => {
+  const handleDeleteTaskFromGantt = (item: GanttRowProps) => {
     console.log('Delete button clicked for item:', item);
     if (item.type !== 'task' || !item.taskData) return
     
@@ -169,7 +187,7 @@ export default function ConstructionTasks() {
     // Crear estructura Gantt con agrupadores y tareas
     const ganttRows: any[] = [];
 
-    Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]: [string, any[]]) => {
+    Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]) => {
       // Agregar fila agrupadora (los grupos no necesitan fechas específicas)
       ganttRows.push({
         id: `group-${rubroName}`,
@@ -183,7 +201,7 @@ export default function ConstructionTasks() {
       });
 
       // Agregar tareas del rubro
-      rubloTasks.forEach((task: any) => {
+      rubloTasks.forEach((task) => {
         // Validar y establecer fechas por defecto
         let validStartDate = task.start_date;
         let validEndDate = task.end_date;
@@ -247,8 +265,9 @@ export default function ConstructionTasks() {
       key: 'tarea',
       label: 'Tarea',
       render: (task: any) => (
-        <div className="font-medium">
-          {task.task.processed_display_name || task.task.display_name}
+        <div>
+          <div className="font-medium">{task.task.processed_display_name || task.task.display_name}</div>
+          <div className="text-xs text-muted-foreground">{task.task.code}</div>
         </div>
       )
     },
@@ -261,24 +280,19 @@ export default function ConstructionTasks() {
       key: 'cantidad',
       label: 'Cantidad',
       render: (task: any) => (
-        <div className="relative">
-          <Input
-            type="number"
-            value={task.quantity}
-            onChange={(e) => {
-              const newQuantity = parseFloat(e.target.value) || 0
-              if (newQuantity > 0) {
-                handleUpdateQuantity(task.id, newQuantity)
-              }
-            }}
-            className="w-20 h-8 pr-8"
-            step="0.01"
-            min="0.01"
-          />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-            ud
-          </div>
-        </div>
+        <Input
+          type="number"
+          value={task.quantity}
+          onChange={(e) => {
+            const newQuantity = parseFloat(e.target.value) || 0
+            if (newQuantity > 0) {
+              handleUpdateQuantity(task.id, newQuantity)
+            }
+          }}
+          className="w-20 h-8"
+          step="0.01"
+          min="0.01"
+        />
       )
     },
     {
@@ -313,7 +327,7 @@ export default function ConstructionTasks() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              openModal('construction-task-form', {
+              openModal('construction-task', {
                 projectId,
                 organizationId,
                 userId: userData?.user?.id,
@@ -405,18 +419,18 @@ export default function ConstructionTasks() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 border border-[var(--card-border)] bg-[var(--card-bg)] rounded-lg p-1">
             <TabsTrigger 
-              value="listado" 
-              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
-            >
-              <TableIcon className="w-4 h-4" />
-              Listado
-            </TabsTrigger>
-            <TabsTrigger 
               value="cronograma" 
               className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
             >
               <Calendar className="w-4 h-4" />
               Cronograma
+            </TabsTrigger>
+            <TabsTrigger 
+              value="listado" 
+              className="flex items-center gap-2 data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white border-0 rounded-md"
+            >
+              <TableIcon className="w-4 h-4" />
+              Listado
             </TabsTrigger>
           </TabsList>
 
@@ -482,6 +496,7 @@ export default function ConstructionTasks() {
                   data={filteredTasks}
                   columns={columns}
                   isLoading={isLoading}
+                  emptyMessage="No se encontraron tareas que coincidan con la búsqueda"
                 />
               </div>
             )}
