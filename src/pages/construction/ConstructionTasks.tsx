@@ -39,41 +39,23 @@ export default function ConstructionTasks() {
     organizationId || ''
   )
 
-  // Procesar los nombres de las tareas de forma asíncrona
+  // Procesar los nombres de las tareas de forma simple para evitar bucles infinitos
   useEffect(() => {
-    const processTaskNames = async () => {
-      if (!tasks.length) {
-        setProcessedTasks([])
-        return
-      }
-
-      const processed = await Promise.all(
-        tasks.map(async (task) => {
-          if (task.task.param_values && Object.keys(task.task.param_values).length > 0) {
-            const processedName = await generateTaskDescription(task.task.display_name, task.task.param_values)
-            
-            return {
-              ...task,
-              task: {
-                ...task.task,
-                processed_display_name: processedName
-              }
-            }
-          }
-          return {
-            ...task,
-            task: {
-              ...task.task,
-              processed_display_name: task.task.display_name
-            }
-          }
-        })
-      )
-      
-      setProcessedTasks(processed)
+    if (!tasks.length) {
+      setProcessedTasks([])
+      return
     }
 
-    processTaskNames()
+    // Por ahora usar display_name directamente para evitar problemas de rendering
+    const processed = tasks.map((task) => ({
+      ...task,
+      task: {
+        ...task.task,
+        processed_display_name: task.task.display_name
+      }
+    }))
+    
+    setProcessedTasks(processed)
   }, [tasks])
 
   const handleAddTask = () => {
@@ -273,48 +255,31 @@ export default function ConstructionTasks() {
     {
       key: 'unidad',
       label: 'Unidad',
-      render: (task: any) => {
-        // Obtener la unidad desde task.units si existe en la vista
-        if (task.task && task.task.units && task.task.units.name) {
-          return task.task.units.name;
-        }
-        // Fallback si no hay datos de unidad
-        return task.task.unit_id ? 'Unidad' : '-';
-      }
+      render: (task: any) => task.task.unit_id ? 'Unidad' : '-'
     },
     {
       key: 'cantidad',
       label: 'Cantidad',
-      render: (task: any) => {
-        // Obtener la unidad para mostrar dentro del input
-        const getTaskUnit = () => {
-          if (task.task && task.task.units && task.task.units.name) {
-            return task.task.units.name;
-          }
-          return 'ud';
-        };
-        
-        return (
-          <div className="relative">
-            <Input
-              type="number"
-              value={task.quantity}
-              onChange={(e) => {
-                const newQuantity = parseFloat(e.target.value) || 0
-                if (newQuantity > 0) {
-                  handleUpdateQuantity(task.id, newQuantity)
-                }
-              }}
-              className="w-20 h-8 pr-8"
-              step="0.01"
-              min="0.01"
-            />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-              {getTaskUnit()}
-            </div>
+      render: (task: any) => (
+        <div className="relative">
+          <Input
+            type="number"
+            value={task.quantity}
+            onChange={(e) => {
+              const newQuantity = parseFloat(e.target.value) || 0
+              if (newQuantity > 0) {
+                handleUpdateQuantity(task.id, newQuantity)
+              }
+            }}
+            className="w-20 h-8 pr-8"
+            step="0.01"
+            min="0.01"
+          />
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            ud
           </div>
-        )
-      }
+        </div>
+      )
     },
     {
       key: 'fechas',
