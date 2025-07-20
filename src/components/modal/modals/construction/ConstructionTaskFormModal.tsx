@@ -508,7 +508,8 @@ export function ConstructionTaskFormModal({
             <Label htmlFor="start_date">Fecha de Inicio</Label>
             <Input
               type="date"
-              {...form.register('start_date')}
+              value={watch('start_date') || ''}
+              onChange={(e) => setValue('start_date', e.target.value)}
               className="w-full"
             />
             {errors.start_date && (
@@ -524,7 +525,8 @@ export function ConstructionTaskFormModal({
             type="number"
             min="1"
             placeholder="Ej: 5"
-            {...form.register('duration_in_days', { valueAsNumber: true })}
+            value={watch('duration_in_days') || ''}
+            onChange={(e) => setValue('duration_in_days', parseInt(e.target.value) || 1)}
             className="w-full"
           />
           {errors.duration_in_days && (
@@ -561,7 +563,8 @@ export function ConstructionTaskFormModal({
               type="number"
               min="0"
               placeholder="0"
-              {...form.register('lag_days', { valueAsNumber: true })}
+              value={watch('lag_days') || ''}
+              onChange={(e) => setValue('lag_days', parseInt(e.target.value) || 0)}
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
