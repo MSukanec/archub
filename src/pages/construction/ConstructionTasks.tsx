@@ -400,7 +400,7 @@ export default function ConstructionTasks() {
     }
 
     return ganttRows;
-  }, [filteredTasks, projectPhases]);
+  }, [filteredTasks, projectPhases, tasks]);
 
   const columns = [
     {

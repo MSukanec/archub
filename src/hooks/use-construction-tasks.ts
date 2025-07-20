@@ -285,6 +285,7 @@ export function useUpdateConstructionTask() {
       return result;
     },
     onSuccess: (data) => {
+      // Invalidar todas las queries relacionadas con tareas de construcción
       queryClient.invalidateQueries({ 
         queryKey: ['construction-tasks', data.project_id, data.organization_id] 
       });
@@ -294,6 +295,14 @@ export function useUpdateConstructionTask() {
       // Invalidar cache de materiales para que se actualice automáticamente
       queryClient.invalidateQueries({ 
         queryKey: ['construction-materials', data.project_id] 
+      });
+      // También invalidar las queries de dependencias por si afectan al Gantt
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-dependencies'] 
+      });
+      // Refetch inmediato para asegurar que los datos se actualicen en el Gantt
+      queryClient.refetchQueries({ 
+        queryKey: ['construction-tasks', data.project_id, data.organization_id] 
       });
       toast({
         title: "Tarea actualizada",
