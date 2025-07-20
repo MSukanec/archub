@@ -22,7 +22,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
-  phase_id: z.string().optional(),
   project_phase_id: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
@@ -96,7 +95,6 @@ export function ConstructionTaskFormModal({
     defaultValues: {
       task_id: modalData.editingTask?.task_id || "",
       quantity: modalData.editingTask?.quantity || 1,
-      phase_id: modalData.editingTask?.phase_id || "",
       project_phase_id: "",
       start_date: modalData.editingTask?.start_date || "",
       end_date: modalData.editingTask?.end_date || "",
@@ -120,7 +118,6 @@ export function ConstructionTaskFormModal({
       // Actualizar los valores del formulario
       setValue('task_id', task.task_id || '');
       setValue('quantity', task.quantity || 1);
-      setValue('phase_id', task.phase_id || '');
       setValue('start_date', task.start_date || '');
       setValue('end_date', task.end_date || '');
       setValue('duration_in_days', task.duration_in_days || undefined);
@@ -204,7 +201,6 @@ export function ConstructionTaskFormModal({
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           quantity: data.quantity,
-          phase_id: data.phase_id || null,
           start_date: data.start_date || null,
           end_date: endDate || null,
           duration_in_days: data.duration_in_days || null
@@ -217,7 +213,6 @@ export function ConstructionTaskFormModal({
           task_id: data.task_id,
           quantity: data.quantity,
           created_by: currentMember.id,
-          phase_id: data.phase_id || null,
           project_phase_id: data.project_phase_id || undefined,
           start_date: data.start_date || null,
           end_date: endDate || null,
@@ -290,24 +285,24 @@ export function ConstructionTaskFormModal({
 
       {/* Phase Selection */}
       <div className="space-y-2">
-        <Label htmlFor="phase_id">Fase del Proyecto</Label>
+        <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
         <Select 
-          value={watch('phase_id') || ""}
-          onValueChange={(value) => setValue('phase_id', value)}
+          value={watch('project_phase_id') || ""}
+          onValueChange={(value) => setValue('project_phase_id', value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar fase (opcional)" />
           </SelectTrigger>
           <SelectContent>
             {projectPhases.map((projectPhase) => (
-              <SelectItem key={projectPhase.phase.id} value={projectPhase.phase.id}>
+              <SelectItem key={projectPhase.id} value={projectPhase.id}>
                 {projectPhase.phase.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {errors.phase_id && (
-          <p className="text-sm text-destructive">{errors.phase_id.message}</p>
+        {errors.project_phase_id && (
+          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
         )}
       </div>
 

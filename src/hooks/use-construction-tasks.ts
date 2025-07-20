@@ -9,7 +9,6 @@ export interface ConstructionTask {
   task_id: string;
   quantity: number;
   created_by: string;
-  phase_id?: string;
   start_date?: string;
   end_date?: string;
   duration_in_days?: number;
@@ -73,7 +72,6 @@ export function useCreateConstructionTask() {
       task_id: string;
       quantity: number;
       created_by: string;
-      phase_id?: string;
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
@@ -90,7 +88,6 @@ export function useCreateConstructionTask() {
           task_id: taskData.task_id,
           quantity: taskData.quantity,
           created_by: taskData.created_by,
-          phase_id: taskData.phase_id,
           start_date: taskData.start_date,
           end_date: taskData.end_date,
           duration_in_days: taskData.duration_in_days,
@@ -160,7 +157,6 @@ export function useUpdateConstructionTask() {
       quantity?: number;
       project_id: string;
       organization_id: string;
-      phase_id?: string;
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
@@ -172,7 +168,6 @@ export function useUpdateConstructionTask() {
       };
 
       if (data.quantity !== undefined) updateData.quantity = data.quantity;
-      if (data.phase_id !== undefined) updateData.phase_id = data.phase_id;
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
