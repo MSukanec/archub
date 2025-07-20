@@ -58,9 +58,21 @@ export function GanttTimelineBar({
     return null;
   }
 
+  // Diferentes estilos según el tipo de elemento
+  const getBarStyle = () => {
+    switch (item.type) {
+      case 'phase':
+        return "h-6 border-2 border-blue-500 bg-blue-100 dark:bg-blue-900/30 rounded-md shadow-sm flex items-center justify-center text-xs text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer";
+      case 'task':
+        return "h-5 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer";
+      default:
+        return "h-5 border-2 border-gray-400 bg-gray-100 dark:bg-gray-800 rounded-sm shadow-sm flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer";
+    }
+  };
+
   return (
     <div 
-      className="h-5 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer"
+      className={getBarStyle()}
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`

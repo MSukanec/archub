@@ -1,12 +1,14 @@
 export type GanttRowProps = {
   id: string;
   name: string;
-  type: 'task' | 'group';
+  type: 'task' | 'group' | 'phase';
   level: number;
   startDate?: string;
   endDate?: string;           // Optional: exact end date
   durationInDays?: number;    // Optional: duration in days from start
   isHeader?: boolean;         // True for group headers
+  phaseData?: any;            // Data for phase rows
+  taskData?: any;             // Data for task rows
   onClick?: (item: GanttRowProps) => void;
 };
 
