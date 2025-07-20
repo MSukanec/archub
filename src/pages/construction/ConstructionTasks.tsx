@@ -222,23 +222,12 @@ export default function ConstructionTasks() {
     task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
   )
 
-  // Crear estructura Gantt con fases y tareas combinadas
+  // Crear estructura Gantt con tareas organizadas dentro de fases
   const ganttData = useMemo(() => {
     const ganttRows: any[] = [];
 
-    // 1. PRIMERO: Agregar todas las fases del proyecto
+    // Si hay fases del proyecto, organizar tareas dentro de fases
     if (projectPhases.length > 0) {
-      ganttRows.push({
-        id: 'phases-header',
-        name: 'FASES DEL PROYECTO',
-        type: 'group',
-        level: 0,
-        isHeader: true,
-        startDate: undefined,
-        endDate: undefined,
-        durationInDays: undefined
-      });
-
       projectPhases.forEach((projectPhase) => {
         // Validar y establecer fechas de la fase
         let validStartDate = projectPhase.start_date;
@@ -255,60 +244,26 @@ export default function ConstructionTasks() {
           validDuration = 7;
         }
 
+        // Agregar la fase como fila de grupo (en mayúsculas)
         ganttRows.push({
           id: `phase-${projectPhase.id}`,
-          name: projectPhase.phase.name,
+          name: projectPhase.phase.name.toUpperCase(),
           type: 'phase',
-          level: 1,
+          level: 0,
+          isHeader: true,
           startDate: validStartDate,
           endDate: validEndDate,
           durationInDays: validDuration,
           phaseData: projectPhase
         });
-      });
-    }
 
-    // 2. SEGUNDO: Agregar tareas agrupadas por rubro
-    if (filteredTasks.length > 0) {
-      // Agrupar tareas por rubro_name
-      const tasksByRubro = filteredTasks.reduce((acc, task) => {
-        const rubroName = task.task.rubro_name || 'Sin Rubro';
-        if (!acc[rubroName]) {
-          acc[rubroName] = [];
-        }
-        acc[rubroName].push(task);
-        return acc;
-      }, {} as Record<string, typeof filteredTasks>);
+        // Filtrar tareas que pertenecen a esta fase
+        const tasksInPhase = filteredTasks.filter(task => 
+          task.phase_id === projectPhase.phase_id
+        );
 
-      // Agregar header de tareas si hay fases arriba
-      if (projectPhases.length > 0) {
-        ganttRows.push({
-          id: 'tasks-header',
-          name: 'TAREAS DE CONSTRUCCIÓN',
-          type: 'group',
-          level: 0,
-          isHeader: true,
-          startDate: undefined,
-          endDate: undefined,
-          durationInDays: undefined
-        });
-      }
-
-      Object.entries(tasksByRubro).forEach(([rubroName, rubloTasks]) => {
-        // Agregar fila agrupadora del rubro
-        ganttRows.push({
-          id: `group-${rubroName}`,
-          name: rubroName,
-          type: 'group',
-          level: projectPhases.length > 0 ? 1 : 0,
-          isHeader: true,
-          startDate: undefined,
-          endDate: undefined,
-          durationInDays: undefined
-        });
-
-        // Agregar tareas del rubro
-        rubloTasks.forEach((task) => {
+        // Agregar las tareas de esta fase
+        tasksInPhase.forEach((task) => {
           // Validar y establecer fechas por defecto
           let validStartDate = task.start_date;
           let validEndDate = task.end_date;
@@ -338,12 +293,104 @@ export default function ConstructionTasks() {
             id: task.id,
             name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
             type: 'task',
-            level: projectPhases.length > 0 ? 2 : 1,
+            level: 1,
             startDate: validStartDate,
             endDate: validEndDate,
             durationInDays: validDuration,
             taskData: task // Agregar datos completos de la tarea para edición/eliminación
           });
+        });
+      });
+
+      // Agregar tareas sin fase asignada si las hay
+      const tasksWithoutPhase = filteredTasks.filter(task => !task.phase_id);
+      if (tasksWithoutPhase.length > 0) {
+        ganttRows.push({
+          id: 'no-phase-header',
+          name: 'TAREAS SIN FASE ASIGNADA',
+          type: 'group',
+          level: 0,
+          isHeader: true,
+          startDate: undefined,
+          endDate: undefined,
+          durationInDays: undefined
+        });
+
+        tasksWithoutPhase.forEach((task) => {
+          // Validar y establecer fechas por defecto
+          let validStartDate = task.start_date;
+          let validEndDate = task.end_date;
+          let validDuration = task.duration_in_days;
+
+          // Si no hay start_date, usar fecha de hoy
+          if (!validStartDate) {
+            validStartDate = new Date().toISOString().split('T')[0];
+          }
+
+          // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
+          if (validStartDate && !validEndDate && !validDuration) {
+            validDuration = 1;
+          }
+
+          // Validar que las fechas sean válidas
+          const startDateObj = new Date(validStartDate);
+          const endDateObj = validEndDate ? new Date(validEndDate) : null;
+
+          // Si end_date existe pero es anterior a start_date, corregir
+          if (endDateObj && startDateObj > endDateObj) {
+            validEndDate = validStartDate; // Hacer que end_date sea igual a start_date
+            validDuration = 1;
+          }
+
+          ganttRows.push({
+            id: task.id,
+            name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
+            type: 'task',
+            level: 1,
+            startDate: validStartDate,
+            endDate: validEndDate,
+            durationInDays: validDuration,
+            taskData: task // Agregar datos completos de la tarea para edición/eliminación
+          });
+        });
+      }
+    } else {
+      // Si no hay fases, mostrar todas las tareas sin agrupación por rubro
+      filteredTasks.forEach((task) => {
+        // Validar y establecer fechas por defecto
+        let validStartDate = task.start_date;
+        let validEndDate = task.end_date;
+        let validDuration = task.duration_in_days;
+
+        // Si no hay start_date, usar fecha de hoy
+        if (!validStartDate) {
+          validStartDate = new Date().toISOString().split('T')[0];
+        }
+
+        // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
+        if (validStartDate && !validEndDate && !validDuration) {
+          validDuration = 1;
+        }
+
+        // Validar que las fechas sean válidas
+        const startDateObj = new Date(validStartDate);
+        const endDateObj = validEndDate ? new Date(validEndDate) : null;
+
+        // Si end_date existe pero es anterior a start_date, corregir
+        if (endDateObj && startDateObj > endDateObj) {
+          validEndDate = validStartDate; // Hacer que end_date sea igual a start_date
+          validDuration = 1;
+        }
+
+        ganttRows.push({
+          id: task.id,
+          name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
+          type: 'task',
+          level: 0,
+          startDate: validStartDate,
+          endDate: validEndDate,
+          durationInDays: validDuration,
+          taskData: task // Agregar datos completos de la tarea para edición/eliminación
         });
       });
     }
