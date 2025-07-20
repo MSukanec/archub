@@ -226,6 +226,8 @@ export default function ConstructionTasks() {
   const ganttData = useMemo(() => {
     const ganttRows: any[] = [];
 
+
+
     // Si hay fases del proyecto, organizar tareas dentro de fases
     if (projectPhases.length > 0) {
       projectPhases.forEach((projectPhase) => {
@@ -257,10 +259,12 @@ export default function ConstructionTasks() {
           phaseData: projectPhase
         });
 
-        // Filtrar tareas que pertenecen a esta fase
+        // Filtrar tareas que pertenecen a esta fase del proyecto
         const tasksInPhase = filteredTasks.filter(task => 
-          task.phase_id === projectPhase.phase_id
+          task.phase_name === projectPhase.phase.name
         );
+
+
 
         // Agregar las tareas de esta fase
         tasksInPhase.forEach((task) => {
@@ -303,7 +307,7 @@ export default function ConstructionTasks() {
       });
 
       // Agregar tareas sin fase asignada si las hay
-      const tasksWithoutPhase = filteredTasks.filter(task => !task.phase_id);
+      const tasksWithoutPhase = filteredTasks.filter(task => !task.phase_name);
       if (tasksWithoutPhase.length > 0) {
         ganttRows.push({
           id: 'no-phase-header',
