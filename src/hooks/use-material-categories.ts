@@ -26,7 +26,7 @@ export function useMaterialCategories() {
           name,
           created_at
         `)
-        .order('created_at', { ascending: false });
+        .order('name', { ascending: true });
 
       if (error) {
         console.error('Error fetching material categories:', error);
