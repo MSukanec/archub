@@ -20,7 +20,6 @@ import { Package } from 'lucide-react'
 const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
-  cost: z.number().min(0, 'El costo debe ser mayor o igual a 0'),
   category_id: z.string().min(1, 'La categoría es requerida'),
 })
 
@@ -55,7 +54,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     defaultValues: {
       name: '',
       unit_id: '',
-      cost: 0,
       category_id: '',
     },
   })
@@ -66,14 +64,12 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       form.reset({
         name: editingMaterial.name,
         unit_id: editingMaterial.unit_id,
-        cost: editingMaterial.cost,
         category_id: editingMaterial.category_id,
       })
     } else {
       form.reset({
         name: '',
         unit_id: '',
-        cost: 0,
         category_id: '',
       })
     }
@@ -177,27 +173,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           )}
         />
 
-        {/* Cost */}
-        <FormField
-          control={form.control}
-          name="cost"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Costo Unitario *</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
       </form>
     </Form>
   )

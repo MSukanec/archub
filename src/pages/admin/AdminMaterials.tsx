@@ -32,8 +32,8 @@ export default function AdminMaterials() {
 
   // Statistics calculations
   const totalMaterials = materials.length
-  const averageCost = materials.length > 0 ? materials.reduce((sum, mat) => sum + (mat.cost || 0), 0) / materials.length : 0
-  const highValueMaterials = materials.filter(mat => (mat.cost || 0) > 1000).length
+  const totalCategories = Array.from(new Set(materials.map(mat => mat.category?.name).filter(Boolean))).length
+  const totalUnits = Array.from(new Set(materials.map(mat => mat.unit?.name).filter(Boolean))).length
   const recentMaterials = materials.filter(mat => {
     const createdDate = new Date(mat.created_at)
     const weekAgo = new Date()
@@ -52,8 +52,8 @@ export default function AdminMaterials() {
   const sortedMaterials = [...filteredMaterials].sort((a, b) => {
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name)
-    } else if (sortBy === 'cost') {
-      return (b.cost || 0) - (a.cost || 0)
+    } else if (sortBy === 'category') {
+      return (a.category?.name || '').localeCompare(b.category?.name || '')
     } else {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
@@ -129,16 +129,7 @@ export default function AdminMaterials() {
         </span>
       )
     },
-    {
-      key: 'cost',
-      label: 'Costo',
-      width: '5%',
-      render: (material: Material) => (
-        <Badge variant="outline" className="text-xs">
-          ${material.cost?.toLocaleString() || '0'}
-        </Badge>
-      )
-    },
+
     {
       key: 'actions',
       label: 'Acciones',
@@ -176,7 +167,7 @@ export default function AdminMaterials() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="name">Nombre</SelectItem>
-            <SelectItem value="cost">Costo</SelectItem>
+            <SelectItem value="category">Categoría</SelectItem>
             <SelectItem value="created_at">Fecha de creación</SelectItem>
           </SelectContent>
         </Select>
@@ -240,8 +231,8 @@ export default function AdminMaterials() {
           <Card className="p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Costo Promedio</p>
-                <p className="text-lg font-semibold">${averageCost.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Total Categorías</p>
+                <p className="text-lg font-semibold">{totalCategories}</p>
               </div>
               <Crown className="h-4 w-4 text-muted-foreground" />
             </div>
@@ -250,8 +241,8 @@ export default function AdminMaterials() {
           <Card className="p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Alto Valor</p>
-                <p className="text-lg font-semibold">{highValueMaterials}</p>
+                <p className="text-xs text-muted-foreground">Total Unidades</p>
+                <p className="text-lg font-semibold">{totalUnits}</p>
               </div>
               <Crown className="h-4 w-4 text-muted-foreground" />
             </div>

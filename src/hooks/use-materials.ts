@@ -7,7 +7,6 @@ export interface Material {
   id: string
   name: string
   unit_id: string
-  cost: number
   category_id: string
   created_at: string
   unit?: { name: string }
@@ -17,7 +16,6 @@ export interface Material {
 export interface NewMaterialData {
   name: string
   unit_id: string
-  cost: number
   category_id: string
 }
 
