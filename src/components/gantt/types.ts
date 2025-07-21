@@ -9,6 +9,7 @@ export type GanttRowProps = {
   isHeader?: boolean;         // True for group headers
   phaseData?: any;            // Data for phase rows
   taskData?: any;             // Data for task rows
+  phaseTasks?: any[];         // Tasks contained in phase for automatic date calculation
   onClick?: (item: GanttRowProps) => void;
 };
 
@@ -44,6 +45,33 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
       isValid: true,
       durationInDays: 1
     };
+  }
+
+  // For phases: try to calculate from contained tasks first
+  if (item.type === 'phase' && item.phaseTasks && item.phaseTasks.length > 0) {
+    // Calculate dates based on contained tasks
+    const taskDates = item.phaseTasks
+      .filter(task => task.start_date)
+      .map(task => ({
+        start: new Date(task.start_date + 'T00:00:00'),
+        end: task.end_date ? new Date(task.end_date + 'T00:00:00') : 
+             task.duration_in_days ? new Date(new Date(task.start_date + 'T00:00:00').getTime() + (task.duration_in_days - 1) * 24 * 60 * 60 * 1000) :
+             new Date(task.start_date + 'T00:00:00')
+      }));
+    
+    if (taskDates.length > 0) {
+      const startDate = new Date(Math.min(...taskDates.map(d => d.start.getTime())));
+      const resolvedEndDate = new Date(Math.max(...taskDates.map(d => d.end.getTime())));
+      const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      
+      return {
+        startDate,
+        resolvedEndDate,
+        wasCalculated: true,
+        isValid: true,
+        durationInDays
+      };
+    }
   }
 
   // For phases or headers without startDate, return invalid

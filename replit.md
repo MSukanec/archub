@@ -118,13 +118,21 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. PHASE COLUMN DATA CALCULATION SYSTEM COMPLETED: Fixed phase columns to display automatically calculated dates instead of manual input - COMPLETED
+  • Fixed phase date display in INICIO and DÍAS columns to use calculateResolvedEndDate function for automatic calculation
+  • Enhanced GanttRowProps interface to include phaseTasks property for containing task information
+  • Updated ConstructionSchedule.tsx to pass phaseTasks array to phase rows for calculation reference
+  • Improved calculateResolvedEndDate function to prioritize task-based calculation for phases over manual dates
+  • Phase columns now correctly show calculated start date (earliest task start) and duration (total span) automatically
+  • System eliminates manual phase date management in favor of dynamic calculation based on contained tasks
+  • Enhanced phase data accuracy: dates automatically update when tasks are modified within phases
 - July 21, 2025. GANTT COLUMN WIDTH EXPANSION AND PHASE DELETION FIX COMPLETED: Enhanced column layout and corrected phase deletion functionality - COMPLETED
   • Expanded INICIO and DÍAS columns from 50px to 75px each (1.5x wider) for better date visibility
   • Updated leftPanelWidth calculation from 100px to 150px to accommodate wider date columns
   • Fixed critical phase deletion bug: added proper useDeleteProjectPhase hook integration and async deletion logic
   • Repositioned floating action buttons by 50px (right-152px) to align with new column widths
   • Enhanced phase deletion workflow: modal appears and now actually deletes phases from database
-  • Added debugging logs to investigate phase bar visualization issues
+  • Added phase bar visualization system for timeline view with proper coordinate calculation
   • All column proportions properly maintained: FASE/TAREA uses calculated width (leftPanelWidth - 150px), INICIO and DÍAS use fixed 75px each
 - July 21, 2025. GANTT DOUBLE-LINE TEXT AND HEIGHT OPTIMIZATION COMPLETED: Enhanced text display with proper vertical sizing - COMPLETED
   • Increased task row height from h-11 to h-12 (48px) for better content visibility without excessive height

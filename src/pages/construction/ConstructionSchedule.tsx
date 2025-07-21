@@ -264,7 +264,8 @@ export default function ConstructionSchedule() {
           startDate: phaseStartDate,
           endDate: phaseEndDate,
           durationInDays: phaseDuration,
-          phaseData: projectPhase
+          phaseData: projectPhase,
+          phaseTasks: tasksInPhase // Agregar las tareas contenidas para calculateResolvedEndDate
         });
 
         // Agregar las tareas de esta fase

@@ -665,20 +665,50 @@ export function GanttContainer({
                     
                     {/* Columna Inicio - 75px fijo */}
                     <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
-                      {item.startDate && (
-                        <span className="text-xs text-[var(--table-row-fg)]">
-                          {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
-                        </span>
-                      )}
+                      {(() => {
+                        if (item.type === 'phase') {
+                          const { startDate, isValid } = calculateResolvedEndDate(item);
+                          if (isValid && startDate) {
+                            return (
+                              <span className="text-xs text-[var(--table-row-fg)]">
+                                {format(startDate, 'dd/MM/yy', { locale: es })}
+                              </span>
+                            );
+                          }
+                        } else if (item.startDate) {
+                          return (
+                            <span className="text-xs text-[var(--table-row-fg)]">
+                              {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                     
                     {/* Columna Días - 75px fijo */}
                     <div className="w-[75px] px-1 flex items-center justify-center">
-                      {item.endDate && item.startDate && (
-                        <span className="text-xs text-[var(--table-row-fg)]">
-                          {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
-                        </span>
-                      )}
+                      {(() => {
+                        if (item.type === 'phase') {
+                          const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
+                          if (isValid && startDate && resolvedEndDate) {
+                            const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                            return (
+                              <span className="text-xs text-[var(--table-row-fg)]">
+                                {durationInDays}
+                              </span>
+                            );
+                          }
+                        } else if (item.endDate && item.startDate) {
+                          const durationInDays = Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          return (
+                            <span className="text-xs text-[var(--table-row-fg)]">
+                              {durationInDays}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                     
                     {/* Floating Action buttons - al final de la columna FASE/TAREA */}
