@@ -220,7 +220,8 @@ export default function ConstructionTasks() {
     { 
       key: 'fechas', 
       label: 'Fechas',
-      className: 'w-[5%]'
+      className: 'w-[5%]',
+      render: (item: any) => item.fechas
     },
     {
       key: 'acciones',
@@ -282,7 +283,7 @@ export default function ConstructionTasks() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide={true}>
       {/* Feature Introduction */}
       <FeatureIntroduction
         icon={<CheckSquare className="h-6 w-6" />}
