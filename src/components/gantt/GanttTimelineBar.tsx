@@ -190,34 +190,35 @@ export function GanttTimelineBar({
     setResizeType(type);
     
     const handleMouseMove = (e: MouseEvent) => {
-      if (!item.taskData) return;
+      if (!item.taskData || !barRef.current) return;
       
-      const newDay = calculateDayFromX(e.clientX);
+      // Calcular posición exacta del mouse sin snapping a días
+      const containerRect = barRef.current.parentElement?.getBoundingClientRect();
+      if (!containerRect) return;
+      
+      const relativeX = e.clientX - containerRect.left;
       const dayWidth = timelineWidth / totalDays;
       
-      // Calcular nueva fecha basada en la posición del mouse
-      const newDate = addDays(timelineStart, newDay);
+      // Calcular días actuales para mantener las proporciones
+      const currentStartDay = Math.floor((normalizedStart.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
+      const currentEndDay = Math.floor((normalizedEnd.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
       
-      // Mostrar feedback visual temporal (opcional)
-      if (barRef.current) {
-        const currentStartDay = Math.floor((normalizedStart.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
-        const currentEndDay = Math.floor((normalizedEnd.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
-        
-        if (type === 'start') {
-          const newWidth = (currentEndDay - newDay + 1) * dayWidth;
-          const newLeft = newDay * dayWidth;
-          barRef.current.style.width = `${Math.max(dayWidth, newWidth)}px`;
-          barRef.current.style.marginLeft = `${newLeft}px`;
-        } else {
-          const newWidth = (newDay - currentStartDay + 1) * dayWidth;
-          barRef.current.style.width = `${Math.max(dayWidth, newWidth)}px`;
-        }
+      // Feedback visual suave - seguir el mouse exactamente sin snap
+      if (type === 'start') {
+        const newLeft = Math.max(0, relativeX);
+        const newWidth = Math.max(dayWidth, (currentEndDay + 1) * dayWidth - newLeft);
+        barRef.current.style.marginLeft = `${newLeft}px`;
+        barRef.current.style.width = `${newWidth}px`;
+      } else {
+        const newWidth = Math.max(dayWidth, relativeX - currentStartDay * dayWidth);
+        barRef.current.style.width = `${newWidth}px`;
       }
     };
     
     const handleMouseUp = (e: MouseEvent) => {
       if (!item.taskData) return;
       
+      // AQUÍ sí hacer el snap al día más cercano
       const newDay = calculateDayFromX(e.clientX);
       const newDate = addDays(timelineStart, newDay);
       
@@ -251,6 +252,12 @@ export function GanttTimelineBar({
       // Limpiar eventos
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      
+      // Resetear estilos para que React tome control nuevamente
+      if (barRef.current) {
+        barRef.current.style.width = '';
+        barRef.current.style.marginLeft = '';
+      }
       
       // Sin toast para evitar ruido en UX - el feedback visual es suficiente
     };
