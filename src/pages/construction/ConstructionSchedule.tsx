@@ -62,20 +62,6 @@ export default function ConstructionSchedule() {
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
   const updatePhasesDates = useUpdatePhasesDates()
 
-  // Función para actualizar fechas automáticamente
-  const handleUpdatePhasesDates = async () => {
-    if (!projectId || !organizationId) return
-    
-    try {
-      await updatePhasesDates.mutateAsync({
-        projectId,
-        organizationId
-      })
-    } catch (error) {
-      console.error('Error actualizando fechas de fases:', error)
-    }
-  }
-
   // Procesar los nombres de las tareas de forma simplificada
   const processedTasks = useMemo(() => {
     if (!tasks.length) return []
@@ -396,10 +382,7 @@ export default function ConstructionSchedule() {
         <Plus className="h-4 w-4 mr-2" />
         Crear Fase
       </Button>,
-      <Button key="update-dates" onClick={handleUpdatePhasesDates} variant="secondary" className="h-8 px-3 text-sm">
-        <Clock className="h-4 w-4 mr-2" />
-        Actualizar Fechas
-      </Button>,
+
       <Button key="new-task" onClick={handleAddTask} className="h-8 px-3 text-sm">
         <Plus className="h-4 w-4 mr-2" />
         Nueva Tarea

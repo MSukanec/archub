@@ -208,10 +208,6 @@ TABLA CONSTRUCTION_PROJECT_PHASES:
     "data_type": "date"
   },
   {
-    "column_name": "duration_in_days",
-    "data_type": "integer"
-  },
-  {
     "column_name": "end_date",
     "data_type": "date"
   },

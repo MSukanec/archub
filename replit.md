@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. AUTOMATIC PHASE DATE CALCULATION SYSTEM IMPLEMENTED: Successfully created comprehensive automatic phase date calculation based on contained tasks - COMPLETED
+  • Implemented calculatePhaseDates function in use-construction-phases.ts that automatically sets phase start_date to earliest task start and end_date to latest task end
+  • Added useUpdatePhasesDates hook for real-time phase date updates based on contained task calculations
+  • Fixed critical database schema issues: construction_gantt_view uses 'task_instance_id' not 'id', no 'organization_id' column
+  • Corrected construction_project_phases table structure - only start_date/end_date fields exist (no duration_in_days)
+  • System now automatically calculates phase dates: start_date = first task start, end_date = last task end from contained tasks
+  • Enhanced Gantt timeline: phase bars automatically adjust to match the span of their contained tasks
+  • Phase creation/editing now works with automatic date calculation when tasks are modified or rearranged
+  • System eliminates manual phase date management - dates update automatically based on task modifications
 - July 21, 2025. CONSTRUCTION TASK MODAL SYSTEM DUALIZATION COMPLETED: Successfully separated construction task creation from scheduling management - COMPLETED
   • Created new ConstructionTaskScheduleModal.tsx specifically for CRONOGRAMA page with scheduling fields (start_date, duration_in_days, progress_percent, project_phase_id)
   • Added 'construction-task-schedule' type to ModalFactory types.ts and integrated in ModalFactory.tsx with proper imports

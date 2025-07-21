@@ -228,9 +228,8 @@ export function useUpdatePhasesDates() {
       // 2. Obtener todas las tareas del proyecto con sus fechas
       const { data: tasks, error: tasksError } = await supabase
         .from("construction_gantt_view")
-        .select("id, start_date, end_date, duration_in_days, phase_name")
-        .eq("project_id", data.projectId)
-        .eq("organization_id", data.organizationId);
+        .select("task_instance_id, start_date, end_date, duration_in_days, phase_name")
+        .eq("project_id", data.projectId);
 
       if (tasksError) throw tasksError;
 
@@ -238,9 +237,9 @@ export function useUpdatePhasesDates() {
       const phaseUpdates = [];
       
       for (const projectPhase of projectPhases || []) {
-        // Filtrar tareas de esta fase
+        // Filtrar tareas de esta fase  
         const tasksInPhase = (tasks || []).filter(task => 
-          task.phase_name === projectPhase.phase.name
+          task.phase_name === (projectPhase.phase as any)?.name
         );
 
         if (tasksInPhase.length > 0) {
@@ -268,17 +267,11 @@ export function useUpdatePhasesDates() {
           if (taskStartDates.length > 0 && taskEndDates.length > 0) {
             const phaseStartDate = taskStartDates[0];
             const phaseEndDate = taskEndDates[0];
-            
-            // Calcular duración
-            const startDate = new Date(phaseStartDate);
-            const endDate = new Date(phaseEndDate);
-            const phaseDuration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
             phaseUpdates.push({
               id: projectPhase.id,
               start_date: phaseStartDate,
-              end_date: phaseEndDate,
-              duration_in_days: phaseDuration
+              end_date: phaseEndDate
             });
           }
         }
