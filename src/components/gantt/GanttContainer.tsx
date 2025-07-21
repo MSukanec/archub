@@ -476,6 +476,22 @@ export function GanttContainer({
               >
                 {item.isHeader ? (
                   <div className="bg-muted/30 w-full h-full flex items-center px-4">
+                    {/* Icono de colapso para fases header */}
+                    {item.type === 'phase' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePhaseCollapse(item.id);
+                        }}
+                        className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
+                      >
+                        {collapsedPhases.has(item.id) ? (
+                          <ChevronRight className="w-3 h-3 text-foreground" />
+                        ) : (
+                          <ChevronDown className="w-3 h-3 text-foreground" />
+                        )}
+                      </button>
+                    )}
                     <span className="truncate text-xs text-foreground font-medium uppercase" title={item.name}>
                       {item.name}
                     </span>
