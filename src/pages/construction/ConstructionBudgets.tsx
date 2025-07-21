@@ -383,8 +383,13 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    // TODO: Abrir modal de agregar tareas
-    console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
+    console.log('Abrir modal de agregar tareas');
+    openModal('budget-task-bulk-add', { 
+      budgetId,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['budget-tasks'] });
+      }
+    });
   }
 
   // Delete task mutation

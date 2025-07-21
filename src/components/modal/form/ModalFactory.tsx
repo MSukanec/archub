@@ -25,6 +25,7 @@ import { InstallmentFormModal } from '../modals/finances/InstallmentFormModal';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { DependencyConnectionModal } from '../modals/construction/DependencyConnectionModal';
+import { BudgetTaskBulkAddModal } from '../modals/construction/BudgetTaskBulkAddModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -92,6 +93,8 @@ export function ModalFactory() {
       return <InstallmentFormModal modalData={data} onClose={closeModal} />;
     case 'dependency-connection':
       return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
+    case 'budget-task-bulk-add':
+      return <BudgetTaskBulkAddModal budgetId={data?.budgetId} onClose={closeModal} onSuccess={data?.onSuccess} />;
     default:
       return null;
   }
