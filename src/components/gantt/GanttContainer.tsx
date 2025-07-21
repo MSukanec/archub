@@ -459,8 +459,8 @@ export function GanttContainer({
                     </span>
                     
                     {/* Floating Action buttons - aparecer SOBRE el texto */}
-                    {item.type === 'task' && (onEdit || onDelete) && (
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {item.type === 'task' && (onEdit || onDelete) && hoveredRowId === item.id && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onEdit && (
                           <button
                             onClick={(e) => {
