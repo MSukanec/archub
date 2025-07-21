@@ -450,41 +450,41 @@ export function GanttContainer({
                     style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
                     onClick={() => onItemClick?.(item)}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      {/* Text */}
-                      <span 
-                        className="truncate text-xs text-[var(--table-row-fg)] flex-1"
-                        title={item.name}
-                      >
-                        {item.name}
-                      </span>
-                      
-                      {/* Action buttons - only for tasks */}
-                      {item.type === 'task' && (
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                    {/* Text - ocupando todo el ancho disponible */}
+                    <span 
+                      className="truncate text-xs text-[var(--table-row-fg)] w-full"
+                      title={item.name}
+                    >
+                      {item.name}
+                    </span>
+                    
+                    {/* Floating Action buttons - aparecer SOBRE el texto */}
+                    {item.type === 'task' && (onEdit || onDelete) && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {onEdit && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onEdit?.(item);
+                              onEdit(item);
                             }}
-                            className="p-1 rounded hover:bg-[var(--table-row-hover-bg)] transition-colors"
-                            title="Editar tarea"
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
-                            <Edit3 className="w-3 h-3 text-[var(--table-row-fg)]/70" />
+                            <Edit className="w-3 h-3" />
                           </button>
+                        )}
+                        {onDelete && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onDelete?.(item);
+                              onDelete(item);
                             }}
-                            className="p-1 rounded hover:bg-[var(--table-row-hover-bg)] transition-colors"
-                            title="Eliminar tarea"
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
-                            <Trash2 className="w-3 h-3 text-red-500" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -637,33 +637,7 @@ export function GanttContainer({
                       />
                     </div>
 
-                    {/* Action Buttons - appear in timeline on hover */}
-                    {(onEdit || onDelete) && hoveredRowId === item.id && (
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1">
-                        {onEdit && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(item);
-                            }}
-                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
-                          >
-                            <Edit className="w-3 h-3" />
-                          </button>
-                        )}
-                        {onDelete && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDelete(item);
-                            }}
-                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    )}
+
                   </div>
                 )}
               </div>
