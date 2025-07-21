@@ -87,17 +87,18 @@ export function GanttDependencies({
     return { x: absoluteX, y: relativeY };
   };
 
-  // Función para generar el path SVG con conexión directa como en tu dibujo
+  // Función para generar el path SVG con offsets en ambos extremos
   const generatePath = (from: { x: number; y: number }, to: { x: number; y: number }): string => {
-    // Si las tareas están en la misma fila (mismo Y), línea horizontal directa
+    const offsetRight = 20; // Offset hacia la derecha desde la tarea origen
+    const offsetLeft = 20;  // Offset hacia la izquierda hacia la tarea destino
+    
+    // Si las tareas están en la misma fila (mismo Y), línea horizontal con offsets
     if (Math.abs(from.y - to.y) < 10) {
-      return `M ${from.x} ${from.y} H ${to.x}`;
+      return `M ${from.x} ${from.y} H ${from.x + offsetRight} H ${to.x - offsetLeft} H ${to.x}`;
     }
     
-    // Si están en filas diferentes: horizontal → vertical → horizontal (conexión directa)
-    // Punto medio vertical entre las dos tareas
-    const midY = (from.y + to.y) / 2;
-    return `M ${from.x} ${from.y} V ${midY} H ${to.x} V ${to.y}`;
+    // Si están en filas diferentes: horizontal(offset) → vertical → horizontal(offset)
+    return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${to.y} H ${to.x - offsetLeft} H ${to.x}`;
   };
 
   // Efecto para escuchar scroll y forzar re-render
