@@ -496,29 +496,33 @@ export function GanttContainer({
                       {item.name}
                     </span>
                     
-                    {/* Botones de acción flotantes para fases */}
-                    {item.type === 'phase' && (
-                      <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onItemEdit?.(item);
-                          }}
-                          className="p-1 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
-                          title="Editar fase"
-                        >
-                          <Edit3 className="w-3 h-3 text-[var(--table-row-fg)]" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onItemDelete?.(item);
-                          }}
-                          className="p-1 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
-                          title="Eliminar fase"
-                        >
-                          <Trash2 className="w-3 h-3 text-destructive" />
-                        </button>
+                    {/* Botones de acción flotantes para fases header */}
+                    {item.type === 'phase' && (onItemEdit || onItemDelete) && hoveredRowId === item.id && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
+                        {onItemEdit && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onItemEdit(item);
+                            }}
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            title="Editar fase"
+                          >
+                            <Edit className="w-3 h-3" />
+                          </button>
+                        )}
+                        {onItemDelete && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onItemDelete(item);
+                            }}
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            title="Eliminar fase"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
