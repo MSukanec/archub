@@ -49,7 +49,7 @@ export function GanttDependencies({
   //   totalDays
   // });
 
-  // Función para obtener las coordenadas de una tarea relativas al viewport visible
+  // Función para obtener las coordenadas de una tarea en el sistema de coordenadas del SVG
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
     const taskBarElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineScrollContainer = document.getElementById('timeline-content-scroll');
@@ -60,21 +60,22 @@ export function GanttDependencies({
 
     const taskRect = taskBarElement.getBoundingClientRect();
     const scrollContainerRect = timelineScrollContainer.getBoundingClientRect();
+    const currentScrollLeft = timelineScrollContainer.scrollLeft;
     
-    // Calcular posición Y relativa al contenedor de scroll
+    // Calcular posición Y relativa al contenedor interno
     const relativeY = taskRect.top - scrollContainerRect.top + (taskRect.height / 2);
     
-    // Calcular posición X relativa al viewport visible (sin scroll offset)
-    let relativeX: number;
+    // Calcular posición X en coordenadas del timeline completo (incluyendo parte scrolleada)
+    let absoluteX: number;
     if (connectorType === 'output') {
-      // Conector de salida: lado derecho relativo al viewport
-      relativeX = taskRect.right - scrollContainerRect.left;
+      // Conector de salida: lado derecho + scroll offset
+      absoluteX = (taskRect.right - scrollContainerRect.left) + currentScrollLeft;
     } else {
-      // Conector de entrada: lado izquierdo relativo al viewport
-      relativeX = taskRect.left - scrollContainerRect.left;
+      // Conector de entrada: lado izquierdo + scroll offset  
+      absoluteX = (taskRect.left - scrollContainerRect.left) + currentScrollLeft;
     }
 
-    return { x: relativeX, y: relativeY };
+    return { x: absoluteX, y: relativeY };
   };
 
   // Función para generar el path SVG con líneas rectas estilo profesional
@@ -158,7 +159,7 @@ export function GanttDependencies({
   };
   
   return (
-    <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+    <div className="absolute top-0 left-0 h-full pointer-events-none" style={{ width: timelineWidth }}>
       {/* DEBUG: Botón temporal para ir a las tareas */}
       <button 
         onClick={scrollToTasks}
@@ -168,7 +169,9 @@ export function GanttDependencies({
       </button>
       
       <svg 
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+        className="absolute top-0 left-0 h-full pointer-events-none"
+        width={timelineWidth}
+        height="100%"
         style={{ 
           zIndex: 50, // Mayor z-index para estar encima de las barras
           backgroundColor: 'rgba(0, 255, 0, 0.1)' // Debug: fondo verde semi-transparente
