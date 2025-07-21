@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { format, eachDayOfInterval, startOfWeek, endOfWeek, eachWeekOfInterval, startOfMonth, endOfMonth, isSameMonth, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Edit, Edit3, Trash2 } from 'lucide-react';
+import { Edit, Edit3, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { GanttRow } from './GanttRow';
 import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttDependencies } from './GanttDependencies';
@@ -41,6 +41,22 @@ export function GanttContainer({
 
   // Estado para el hover sincronizado
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  
+  // Estado para fases colapsadas
+  const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
+  
+  // Función para alternar el colapso de una fase
+  const togglePhaseCollapse = useCallback((phaseId: string) => {
+    setCollapsedPhases(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(phaseId)) {
+        newSet.delete(phaseId);
+      } else {
+        newSet.add(phaseId);
+      }
+      return newSet;
+    });
+  }, []);
   
   // Ref para el contenedor del timeline para posicionamiento de dependencias
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -298,6 +314,26 @@ export function GanttContainer({
     );
   }
 
+  // Filtrar datos para ocultar tareas de fases colapsadas
+  const filteredData = useMemo(() => {
+    const result: GanttRowProps[] = [];
+    let currentPhaseId: string | null = null;
+    
+    for (const item of data) {
+      if (item.type === 'phase') {
+        currentPhaseId = item.id;
+        result.push(item); // Siempre mostrar las fases
+      } else if (item.type === 'task') {
+        // Solo mostrar tareas si la fase no está colapsada
+        if (!currentPhaseId || !collapsedPhases.has(currentPhaseId)) {
+          result.push(item);
+        }
+      }
+    }
+    
+    return result;
+  }, [data, collapsedPhases]);
+
   return (
     <div className="relative border border-border rounded-lg overflow-hidden bg-card">
       {/* Handle de redimensionamiento unificado (de punta a punta vertical desde encabezado) */}
@@ -319,7 +355,7 @@ export function GanttContainer({
           style={{ width: leftPanelWidth }}
         >
           <div className="px-4 font-medium text-xs text-[var(--table-header-fg)]">
-            Rubro / Tarea
+            Fase / Tarea
           </div>
         </div>
 
@@ -429,7 +465,7 @@ export function GanttContainer({
         >
           {/* Contenido del panel izquierdo */}
           <div className="max-h-96 overflow-y-auto overflow-x-hidden">
-            {data.map((item) => (
+            {filteredData.map((item) => (
               <div 
                 key={`left-${item.id}`} 
                 className={`border-b border-[var(--table-row-border)] h-11 flex items-center transition-colors ${
@@ -450,6 +486,23 @@ export function GanttContainer({
                     style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
                     onClick={() => onItemClick?.(item)}
                   >
+                    {/* Icono de colapso para fases */}
+                    {item.type === 'phase' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePhaseCollapse(item.id);
+                        }}
+                        className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
+                      >
+                        {collapsedPhases.has(item.id) ? (
+                          <ChevronRight className="w-3 h-3 text-[var(--table-row-fg)]" />
+                        ) : (
+                          <ChevronDown className="w-3 h-3 text-[var(--table-row-fg)]" />
+                        )}
+                      </button>
+                    )}
+                    
                     {/* Text - ocupando todo el ancho disponible */}
                     <span 
                       className="truncate text-xs text-[var(--table-row-fg)] w-full"
@@ -519,7 +572,7 @@ export function GanttContainer({
         >
           {/* Contenido del timeline */}
           <div className="max-h-96 overflow-y-auto" style={{ width: timelineWidth }}>
-            {data.map((item, index) => (
+            {filteredData.map((item, index) => (
               <div 
                 key={`timeline-${item.id}`} 
                 className={`border-b border-[var(--table-row-border)] h-11 flex items-center transition-colors ${
@@ -701,7 +754,7 @@ export function GanttContainer({
           
           {/* Dependencias overlay - flechas y líneas punteadas */}
           <GanttDependencies
-            data={data}
+            data={filteredData}
             dependencies={dependencies}
             timelineStart={timelineStart}
             timelineEnd={timelineEnd}
