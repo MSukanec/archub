@@ -590,9 +590,12 @@ export function GanttContainer({
                             );
                           }
                         } else if (item.startDate) {
+                          // Crear fecha sin conversión de zona horaria para strings YYYY-MM-DD
+                          const dateStr = item.startDate;
+                          const localDate = dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T00:00:00');
                           return (
                             <span className="text-xs text-foreground font-medium">
-                              {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
+                              {format(localDate, 'dd/MM/yy', { locale: es })}
                             </span>
                           );
                         }
@@ -614,7 +617,12 @@ export function GanttContainer({
                             );
                           }
                         } else if (item.endDate && item.startDate) {
-                          const durationInDays = Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          // Crear fechas sin conversión de zona horaria para strings YYYY-MM-DD
+                          const startStr = item.startDate;
+                          const endStr = item.endDate;
+                          const localStartDate = startStr.includes('T') ? new Date(startStr) : new Date(startStr + 'T00:00:00');
+                          const localEndDate = endStr.includes('T') ? new Date(endStr) : new Date(endStr + 'T00:00:00');
+                          const durationInDays = Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                           return (
                             <span className="text-xs text-foreground font-medium">
                               {durationInDays}
@@ -706,9 +714,12 @@ export function GanttContainer({
                             );
                           }
                         } else if (item.startDate) {
+                          // Crear fecha sin conversión de zona horaria para strings YYYY-MM-DD
+                          const dateStr = item.startDate;
+                          const localDate = dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T00:00:00');
                           return (
                             <span className="text-xs text-[var(--table-row-fg)]">
-                              {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
+                              {format(localDate, 'dd/MM/yy', { locale: es })}
                             </span>
                           );
                         }
@@ -730,7 +741,12 @@ export function GanttContainer({
                             );
                           }
                         } else if (item.endDate && item.startDate) {
-                          const durationInDays = Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          // Crear fechas sin conversión de zona horaria para strings YYYY-MM-DD
+                          const startStr = item.startDate;
+                          const endStr = item.endDate;
+                          const localStartDate = startStr.includes('T') ? new Date(startStr) : new Date(startStr + 'T00:00:00');
+                          const localEndDate = endStr.includes('T') ? new Date(endStr) : new Date(endStr + 'T00:00:00');
+                          const durationInDays = Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                           return (
                             <span className="text-xs text-[var(--table-row-fg)]">
                               {durationInDays}
