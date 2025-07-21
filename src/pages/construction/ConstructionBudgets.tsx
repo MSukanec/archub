@@ -348,8 +348,34 @@ export default function ConstructionBudgets() {
     }
   })
 
-  // Local state for grouping instead of database column
-  const [groupingType, setGroupingType] = useState('none');
+  // Update budget grouping mutation
+  const updateBudgetGroupingMutation = useMutation({
+    mutationFn: async ({ budgetId, groupingType }: { budgetId: string, groupingType: string }) => {
+      if (!supabase) throw new Error('Supabase client not available')
+      
+      const { error } = await supabase
+        .from('budgets')
+        .update({ grouping_type: groupingType })
+        .eq('id', budgetId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] })
+      toast({
+        title: "Configuración actualizada",
+        description: "La vista del presupuesto ha sido actualizada",
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating budget grouping:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la configuración",
+        variant: "destructive",
+      })
+    }
+  })
 
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
@@ -357,24 +383,8 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
-      toast({
-        title: "Error",
-        description: "No se pudo identificar el proyecto u organización",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Obtener IDs de tareas que ya están en el presupuesto
-    const existingTaskIds = budgetTasks?.map(task => task.task_id) || [];
-
-    openModal('budget-task-bulk-add', {
-      budgetId,
-      projectId: userData.preferences.last_project_id,
-      organizationId: userData.preferences.last_organization_id,
-      existingTaskIds
-    });
+    // TODO: Abrir modal de agregar tareas
+    console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
   }
 
   // Delete task mutation
@@ -660,8 +670,13 @@ export default function ConstructionBudgets() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-muted-foreground">Agrupar:</span>
                       <Select
-                        value={groupingType}
-                        onValueChange={setGroupingType}
+                        value={selectedBudget?.grouping_type || 'none'}
+                        onValueChange={(value) => {
+                          updateBudgetGroupingMutation.mutate({ 
+                            budgetId: selectedBudget.id, 
+                            groupingType: value 
+                          });
+                        }}
                       >
                         <SelectTrigger className="w-[160px] h-8">
                           <SelectValue />
@@ -703,24 +718,11 @@ export default function ConstructionBudgets() {
                     {/* Add Tasks Button */}
                     <Button
                       onClick={() => {
-                        // Test with simple modal first
-                        openModal('test-modal', { test: 'data' });
-                      }}
-                      className="px-4 mr-2"
-                      size="sm"
-                      variant="outline"
-                    >
-                      TEST MODAL
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (selectedBudget) {
-                          handleAddTask(selectedBudget.id);
-                        }
+                        // TODO: Abrir modal de agregar tareas
+                        console.log('Abrir modal de agregar tareas');
                       }}
                       className="px-4"
                       size="sm"
-                      disabled={!selectedBudget}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       AGREGAR TAREAS

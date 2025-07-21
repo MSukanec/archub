@@ -1,4 +1,4 @@
-export type ModalType = "member" | "movement" | "movement-concept" | "organization-movement-concept" | "movement-import" | "bitacora" | "contact" | "gallery" | "board" | "card" | "list" | "project" | "project-client" | "document-upload" | "document-folder" | "budget" | "construction-task" | "delete-confirmation" | "organization" | "installment" | "material-form" | "material-category-form" | "dependency-connection" | "phase" | "budget-task-bulk-add";
+export type ModalType = "member" | "movement" | "movement-concept" | "organization-movement-concept" | "movement-import" | "bitacora" | "contact" | "gallery" | "board" | "card" | "list" | "project" | "project-client" | "document-upload" | "document-folder" | "budget" | "construction-task" | "delete-confirmation" | "organization" | "installment" | "material-form" | "material-category-form" | "dependency-connection" | "phase";
 
 export interface ModalData {
   [key: string]: any;
