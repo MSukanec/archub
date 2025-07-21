@@ -357,9 +357,6 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    console.log('handleAddTask called with:', budgetId);
-    console.log('openModal function available:', !!openModal);
-    
     if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
       toast({
         title: "Error",
@@ -372,22 +369,12 @@ export default function ConstructionBudgets() {
     // Obtener IDs de tareas que ya están en el presupuesto
     const existingTaskIds = budgetTasks?.map(task => task.task_id) || [];
 
-    const modalData = {
+    openModal('budget-task-bulk-add', {
       budgetId,
       projectId: userData.preferences.last_project_id,
       organizationId: userData.preferences.last_organization_id,
       existingTaskIds
-    };
-
-    console.log('Calling openModal with type:', 'budget-task-bulk-add');
-    console.log('Modal data:', modalData);
-    
-    try {
-      openModal('budget-task-bulk-add', modalData);
-      console.log('openModal called successfully');
-    } catch (error) {
-      console.error('Error calling openModal:', error);
-    }
+    });
   }
 
   // Delete task mutation
@@ -716,11 +703,13 @@ export default function ConstructionBudgets() {
                     {/* Add Tasks Button */}
                     <Button
                       onClick={() => {
-                        // TODO: Abrir modal de agregar tareas
-                        console.log('Abrir modal de agregar tareas');
+                        if (selectedBudget) {
+                          handleAddTask(selectedBudget.id);
+                        }
                       }}
                       className="px-4"
                       size="sm"
+                      disabled={!selectedBudget}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       AGREGAR TAREAS

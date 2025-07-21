@@ -27,8 +27,6 @@ export function BudgetTaskBulkAddModal({
   modalData, 
   onClose 
 }: BudgetTaskBulkAddModalProps) {
-  console.log('BudgetTaskBulkAddModal rendered with modalData:', modalData);
-  
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

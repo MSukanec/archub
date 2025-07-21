@@ -29,8 +29,6 @@ import { BudgetTaskBulkAddModal } from '../modals/construction/BudgetTaskBulkAdd
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
-  
-  console.log('ModalFactory render - open:', open, 'type:', type, 'data:', data);
 
   if (!open) return null;
 
@@ -96,7 +94,6 @@ export function ModalFactory() {
     case 'dependency-connection':
       return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
     case 'budget-task-bulk-add':
-      console.log('ModalFactory: Rendering BudgetTaskBulkAddModal with data:', data);
       return <BudgetTaskBulkAddModal modalData={data} onClose={closeModal} />;
     default:
       return null;
