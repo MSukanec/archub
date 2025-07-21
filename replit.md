@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT COLUMN WIDTH EXPANSION AND PHASE DELETION FIX COMPLETED: Enhanced column layout and corrected phase deletion functionality - COMPLETED
+  • Expanded INICIO and DÍAS columns from 50px to 75px each (1.5x wider) for better date visibility
+  • Updated leftPanelWidth calculation from 100px to 150px to accommodate wider date columns
+  • Fixed critical phase deletion bug: added proper useDeleteProjectPhase hook integration and async deletion logic
+  • Repositioned floating action buttons by 50px (right-152px) to align with new column widths
+  • Enhanced phase deletion workflow: modal appears and now actually deletes phases from database
+  • Added debugging logs to investigate phase bar visualization issues
+  • All column proportions properly maintained: FASE/TAREA uses calculated width (leftPanelWidth - 150px), INICIO and DÍAS use fixed 75px each
 - July 21, 2025. GANTT DOUBLE-LINE TEXT AND HEIGHT OPTIMIZATION COMPLETED: Enhanced text display with proper vertical sizing - COMPLETED
   • Increased task row height from h-11 to h-12 (48px) for better content visibility without excessive height
   • Implemented line-clamp-2 for double-line text display in "Fase/Tarea" column with elegant truncation

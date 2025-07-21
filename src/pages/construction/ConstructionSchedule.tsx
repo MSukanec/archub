@@ -5,7 +5,7 @@ import { Plus, Calendar, Clock, Activity, CheckSquare } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
-import { useProjectPhases, useUpdatePhasesDates } from '@/hooks/use-construction-phases'
+import { useProjectPhases, useUpdatePhasesDates, useDeleteProjectPhase } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -41,6 +41,7 @@ export default function ConstructionSchedule() {
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
+  const deletePhase = useDeleteProjectPhase()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
 
@@ -167,8 +168,12 @@ export default function ConstructionSchedule() {
       title: "Eliminar Fase",
       description: "¿Estás seguro de que deseas eliminar esta fase del proyecto?",
       itemName: item.name,
-      onConfirm: () => {
+      onConfirm: async () => {
         console.log('Deleting phase:', item.phaseData.id);
+        await deletePhase.mutateAsync({
+          id: item.phaseData.id,
+          project_id: projectId || ''
+        });
       }
     })
   }

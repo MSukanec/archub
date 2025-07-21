@@ -423,15 +423,15 @@ export function GanttContainer({
         >
           {/* Columna Fase/Tarea - ancho calculado */}
           <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30"
-            style={{ width: `${leftPanelWidth - 100}px` }}>
+            style={{ width: `${leftPanelWidth - 150}px` }}>
             Fase / Tarea
           </div>
-          {/* Columna Inicio - 50px fijo */}
-          <div className="w-[50px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
+          {/* Columna Inicio - 75px fijo */}
+          <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
             Inicio
           </div>
-          {/* Columna Días - 50px fijo */}
-          <div className="w-[50px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
+          {/* Columna Días - 75px fijo */}
+          <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
             Días
           </div>
         </div>
@@ -632,7 +632,7 @@ export function GanttContainer({
                     {/* Columna Nombre - ancho calculado */}
                     <div className="flex items-center border-r border-[var(--table-header-border)]/30 overflow-hidden"
                       style={{ 
-                        width: `${leftPanelWidth - 100}px`,
+                        width: `${leftPanelWidth - 150}px`,
                         paddingLeft: `${4 + item.level * 16}px`, 
                         paddingRight: '16px' 
                       }}
@@ -663,8 +663,8 @@ export function GanttContainer({
                       </span>
                     </div>
                     
-                    {/* Columna Inicio - 50px fijo */}
-                    <div className="w-[50px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                    {/* Columna Inicio - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {item.startDate && (
                         <span className="text-xs text-[var(--table-row-fg)]">
                           {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
@@ -672,8 +672,8 @@ export function GanttContainer({
                       )}
                     </div>
                     
-                    {/* Columna Días - 50px fijo */}
-                    <div className="w-[50px] px-1 flex items-center justify-center">
+                    {/* Columna Días - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center">
                       {item.endDate && item.startDate && (
                         <span className="text-xs text-[var(--table-row-fg)]">
                           {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
@@ -683,7 +683,7 @@ export function GanttContainer({
                     
                     {/* Floating Action buttons - al final de la columna FASE/TAREA */}
                     {(onItemEdit || onItemDelete) && hoveredRowId === item.id && (
-                      <div className="absolute right-[102px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
+                      <div className="absolute right-[152px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onItemEdit && (
                           <button
                             onClick={(e) => {
@@ -792,6 +792,62 @@ export function GanttContainer({
                       }
                       return null;
                     })()}
+
+                    {/* Barra de fase - solo para elementos tipo 'phase' */}
+                    {item.type === 'phase' && item.startDate && (
+                      <div className="absolute inset-0 flex items-center px-1">
+                        {(() => {
+                          const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
+                          
+                          if (!isValid) return null;
+                          
+                          const dayWidth = timelineWidth / calendarStructure.totalDays;
+                          
+                          // Calcular posición inicial
+                          let startDayIndex = -1;
+                          let currentDayIndex = 0;
+                          
+                          for (const week of calendarStructure.weeks) {
+                            for (const day of week.days) {
+                              const dayStart = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate());
+                              const itemStart = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                              
+                              if (dayStart.getTime() === itemStart.getTime()) {
+                                startDayIndex = currentDayIndex;
+                                break;
+                              }
+                              currentDayIndex++;
+                            }
+                            if (startDayIndex !== -1) break;
+                          }
+                          
+                          if (startDayIndex === -1) return null;
+                          
+                          // Calcular duración en días
+                          const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          
+                          const barLeft = startDayIndex * dayWidth;
+                          const barWidth = Math.max(durationInDays * dayWidth, dayWidth * 0.5); // Mínimo medio día
+                          
+                          return (
+                            <div
+                              className="bg-[var(--accent)] opacity-60 rounded-sm flex items-center justify-center text-white text-xs font-medium shadow-sm"
+                              style={{
+                                left: `${barLeft}px`,
+                                width: `${barWidth}px`,
+                                height: '24px',
+                                minWidth: '8px'
+                              }}
+                              title={`${item.name}: ${startDate.toLocaleDateString()} - ${resolvedEndDate.toLocaleDateString()}`}
+                            >
+                              <span className="truncate px-1">
+                                {item.name}
+                              </span>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div 
