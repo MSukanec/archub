@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { processTaskName } from '@/utils/taskNameProcessor';
 
 export interface ConstructionDependency {
   id: string;
@@ -42,6 +43,7 @@ export function useConstructionDependencies(projectId: string) {
           *,
           predecessor_task:construction_tasks!predecessor_task_id (
             id,
+            param_values,
             task:task_generated_view!inner (
               code,
               display_name
@@ -49,6 +51,7 @@ export function useConstructionDependencies(projectId: string) {
           ),
           successor_task:construction_tasks!successor_task_id (
             id,
+            param_values,
             task:task_generated_view!inner (
               code,
               display_name
@@ -63,7 +66,32 @@ export function useConstructionDependencies(projectId: string) {
         throw error;
       }
 
-      return data || [];
+      // Procesar nombres de tareas en las dependencias
+      const processedData = (data || []).map(dep => ({
+        ...dep,
+        predecessor_task: dep.predecessor_task ? {
+          ...dep.predecessor_task,
+          task: {
+            ...dep.predecessor_task.task,
+            display_name: processTaskName(
+              dep.predecessor_task.task.display_name,
+              dep.predecessor_task.param_values
+            )
+          }
+        } : undefined,
+        successor_task: dep.successor_task ? {
+          ...dep.successor_task,
+          task: {
+            ...dep.successor_task.task,
+            display_name: processTaskName(
+              dep.successor_task.task.display_name,
+              dep.successor_task.param_values
+            )
+          }
+        } : undefined
+      }));
+
+      return processedData;
     },
     enabled: !!projectId,
   });
