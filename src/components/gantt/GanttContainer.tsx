@@ -545,7 +545,7 @@ export function GanttContainer({
             {filteredData.map((item) => (
               <div 
                 key={`left-${item.id}`} 
-                className={`border-b border-[var(--table-row-border)] ${item.isHeader ? 'h-11' : 'h-12'} flex items-center transition-colors ${
+                className={`border-b border-[var(--table-row-border)] h-12 flex items-center transition-colors ${
                   hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
@@ -555,7 +555,7 @@ export function GanttContainer({
                   <div className="bg-muted/30 w-full h-full flex relative">
                     {/* Columna Nombre - ancho calculado */}
                     <div className="flex items-center px-4 border-r border-[var(--table-header-border)]/30 overflow-hidden"
-                      style={{ width: `${leftPanelWidth - 100}px` }}>
+                      style={{ width: `${leftPanelWidth - 150}px` }}>
                       {/* Icono de colapso para fases header */}
                       {item.type === 'phase' && (
                         <button
@@ -805,7 +805,7 @@ export function GanttContainer({
             {filteredData.map((item, index) => (
               <div 
                 key={`timeline-${item.id}`} 
-                className={`border-b border-[var(--table-row-border)] ${item.isHeader ? 'h-11' : 'h-12'} flex items-center transition-colors ${
+                className={`border-b border-[var(--table-row-border)] h-12 flex items-center transition-colors ${
                   hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
