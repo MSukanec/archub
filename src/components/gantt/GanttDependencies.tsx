@@ -135,7 +135,6 @@ export function GanttDependencies({
       }).filter(Boolean);
 
       setArrowPaths(paths as any);
-      console.log('Arrows calculated successfully:', paths.length, paths);
     };
 
     // Delay inicial para asegurar que el DOM esté completamente renderizado
@@ -148,46 +147,30 @@ export function GanttDependencies({
     return null;
   }
 
-  console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
-  
-  // DEBUG: Botón para ir a las tareas
-  const scrollToTasks = () => {
-    const timelineScrollContainer = document.getElementById('timeline-content-scroll');
-    if (timelineScrollContainer) {
-      timelineScrollContainer.scrollLeft = 2000; // Scroll a donde están las tareas
-    }
-  };
+
   
   return (
     <div className="absolute top-0 left-0 h-full pointer-events-none" style={{ width: timelineWidth }}>
-      {/* DEBUG: Botón temporal para ir a las tareas */}
-      <button 
-        onClick={scrollToTasks}
-        className="absolute top-2 right-2 z-50 bg-red-500 text-white px-3 py-1 rounded text-sm pointer-events-auto"
-      >
-        IR A TAREAS
-      </button>
       
       <svg 
         className="absolute top-0 left-0 h-full pointer-events-none"
         width={timelineWidth}
         height="100%"
         style={{ 
-          zIndex: 50, // Mayor z-index para estar encima de las barras
-          backgroundColor: 'rgba(0, 255, 0, 0.1)' // Debug: fondo verde semi-transparente
+          zIndex: 50 // Mayor z-index para estar encima de las barras
         }}
       >
       {/* Definir el marcador de flecha profesional */}
       <defs>
         <marker
           id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="10"
-          refY="3.5"
+          markerWidth="8"
+          markerHeight="6"
+          refX="7"
+          refY="3"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
+          <polygon points="0 0, 8 3, 0 6" fill="var(--table-row-fg)" />
         </marker>
       </defs>
 
@@ -199,7 +182,7 @@ export function GanttDependencies({
             <path
               d={arrow.path}
               stroke="white"
-              strokeWidth="4"
+              strokeWidth="3"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -207,15 +190,15 @@ export function GanttDependencies({
             {/* Línea principal de la flecha */}
             <path
               d={arrow.path}
-              stroke="#dc2626"
-              strokeWidth="8" // Hacer más gruesa para debug
+              stroke="var(--table-row-fg)"
+              strokeWidth="2"
               fill="none"
               markerEnd="url(#arrowhead)"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="cursor-pointer hover:stroke-red-400 pointer-events-auto"
+              className="cursor-pointer pointer-events-auto"
               onClick={() => {
-                console.log('Dependency clicked:', arrow.dependency);
+                // TODO: Implementar modal de edición de dependencia
               }}
             />
           </g>
