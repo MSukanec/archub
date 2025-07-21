@@ -1,10 +1,16 @@
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, Edit } from 'lucide-react';
 import { Calculator } from 'lucide-react';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface BudgetTask {
   id: string;
@@ -57,6 +63,12 @@ interface BudgetTableProps {
   handleAddTask: (budgetId: string) => void;
   onGroupingChange?: (value: string) => void;
   onAddTasks?: () => void;
+  // New props for budget selector row
+  budgets?: any[];
+  selectedBudgetId?: string;
+  onBudgetChange?: (budgetId: string) => void;
+  onEditBudget?: () => void;
+  onDeleteBudget?: () => void;
 }
 
 export function BudgetTable({
@@ -73,7 +85,12 @@ export function BudgetTable({
   handleDeleteTask,
   handleAddTask,
   onGroupingChange,
-  onAddTasks
+  onAddTasks,
+  budgets,
+  selectedBudgetId,
+  onBudgetChange,
+  onEditBudget,
+  onDeleteBudget
 }: BudgetTableProps) {
   // Local state for input values to prevent interruption during typing
   const [localQuantities, setLocalQuantities] = useState<Record<string, string>>({});
@@ -243,27 +260,90 @@ export function BudgetTable({
 
   return (
     <div>
-      {/* Desktop Action Bar - Only visible on desktop */}
+      {/* Budget Selector Row - Desktop only */}
+      {budgets && selectedBudgetId && onBudgetChange && (
+        <div className="hidden lg:block mb-2">
+          <div className="flex items-center justify-between px-4 py-2 bg-[var(--card-bg)] text-xs font-medium text-[var(--card-fg)] border border-[var(--card-border)] rounded-lg">
+            {/* Budget Selector - Left side */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                Presupuesto:
+              </span>
+              <div className="w-64">
+                <Select value={selectedBudgetId} onValueChange={onBudgetChange}>
+                  <SelectTrigger className="w-full h-7 text-xs">
+                    <SelectValue placeholder="Selecciona un presupuesto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {budgets.map((budget: any) => (
+                      <SelectItem key={budget.id} value={budget.id}>
+                        <span className="text-left">{budget.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            {/* Budget Action Buttons - Right side */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={onEditBudget}
+              >
+                <Edit className="w-3 h-3" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                onClick={onDeleteBudget}
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table Action Bar - Desktop only */}
       <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '5px' }}>
-          {/* Grouping Selector - Left side */}
+          {/* Groups Dropdown Button - Left side */}
           <div className="flex items-center">
-            <Select
-              value={groupingType}
-              onValueChange={(value) => onGroupingChange?.(value)}
-            >
-              <SelectTrigger className="w-[200px] h-7 text-xs bg-[var(--table-row-bg)] border-[var(--table-row-border)] text-[var(--table-row-fg)] hover:bg-[var(--table-row-hover-bg)]">
-                <SelectValue placeholder="Sin agrupar" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin agrupar</SelectItem>
-                <SelectItem value="rubros">Agrupar por Rubros</SelectItem>
-                <SelectItem value="phases">Agrupar por Fases</SelectItem>
-                <SelectItem value="rubros-phases">Rubros y Fases</SelectItem>
-                <SelectItem value="phases-rubros">Fases y Rubros</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-3 text-xs bg-[var(--table-row-bg)] border-[var(--table-row-border)] text-[var(--table-row-fg)] hover:bg-[var(--table-row-hover-bg)]"
+                >
+                  GRUPOS
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => onGroupingChange?.('none')}>
+                  Sin agrupar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onGroupingChange?.('rubros')}>
+                  Agrupar por Rubros
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onGroupingChange?.('phases')}>
+                  Agrupar por Fases
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onGroupingChange?.('rubros-phases')}>
+                  Rubros y Fases
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onGroupingChange?.('phases-rubros')}>
+                  Fases y Rubros
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           {/* Add Tasks Button - Right side */}

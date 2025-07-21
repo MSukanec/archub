@@ -560,6 +560,125 @@ export default function ConstructionBudgets() {
     );
   }
 
+  // Budget Task Table with Selector Component 
+  function BudgetTaskTableWithSelector({ budgetId }: { budgetId: string }) {
+    const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask, deleteBudgetTask } = useBudgetTasks(budgetId);
+    const { data: parameterValues = [] } = useTaskParameterValues();
+    const { data: units = [] } = useUnits();
+    const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+    const [groupingType, setGroupingType] = useState('none');
+
+    // Helper functions
+    const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
+      try {
+        const task = budgetTasks?.find(t => t.id === taskId);
+        if (!task) return;
+
+        await updateBudgetTask.mutateAsync({
+          id: taskId,
+          budget_id: budgetId,
+          task_id: task.task_id,
+          quantity: newQuantity,
+          start_date: task.start_date,
+          end_date: task.end_date,
+          priority: task.priority,
+          dependencies: task.dependencies,
+          organization_id: task.organization_id,
+        });
+      } catch (error) {
+        console.error('Error updating task quantity:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo actualizar la cantidad",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const handleDeleteTask = async (taskId: string) => {
+      try {
+        if (!supabase) throw new Error('Supabase client not available');
+        
+        const { error } = await supabase
+          .from('budget_tasks')
+          .delete()
+          .eq('id', taskId);
+
+        if (error) throw error;
+
+        queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+        
+        toast({
+          title: "Tarea eliminada",
+          description: "La tarea se eliminó del presupuesto correctamente",
+        });
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar la tarea",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const handleAddTask = (budgetId: string) => {
+      console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
+    };
+
+    const getUnitName = (unitId: string | null): string => {
+      if (!unitId) return '-';
+      const unit = units.find(u => u.id === unitId);
+      return unit?.name || '-';
+    };
+
+    return (
+      <BudgetTable
+        budgetId={budgetId}
+        budgetTasks={budgetTasks}
+        isLoading={isLoading}
+        groupingType={groupingType}
+        selectedTasks={selectedTasks}
+        setSelectedTasks={setSelectedTasks}
+        generateTaskDisplayName={generateTaskDisplayName}
+        parameterValues={parameterValues}
+        getUnitName={getUnitName}
+        handleUpdateQuantity={handleUpdateQuantity}
+        handleDeleteTask={handleDeleteTask}
+        handleAddTask={handleAddTask}
+        onGroupingChange={setGroupingType}
+        onAddTasks={() => {
+          openModal('budget-task-bulk-add', { 
+            budgetId: budgetId,
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+            }
+          });
+        }}
+        // New props for budget selector
+        budgets={filteredBudgets}
+        selectedBudgetId={selectedBudgetId}
+        onBudgetChange={(budgetId) => {
+          console.log('Budget selector changed to:', budgetId);
+          setSelectedBudgetId(budgetId);
+          if (userData?.user?.id) {
+            updateBudgetPreferenceMutation.mutate(budgetId);
+          }
+        }}
+        onEditBudget={() => {
+          if (selectedBudget) {
+            openModal('budget', { budget: selectedBudget });
+          }
+        }}
+        onDeleteBudget={() => {
+          if (selectedBudget) {
+            handleDeleteBudget(selectedBudget);
+          }
+        }}
+      />
+    );
+  }
+
   return (
     <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
@@ -612,79 +731,11 @@ export default function ConstructionBudgets() {
           <>
 
 
-            {/* Quick Add Task Section - Consolidated */}
-            {selectedBudget && (
-              <Card className="mb-4">
-                <CardContent className="p-4">
-                {/* First row: Budget Controls */}
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
-                    {/* Budget Selector */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
-                      <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                        Presupuesto:
-                      </span>
-                      <div className="w-full sm:max-w-md">
-                        <Select value={selectedBudgetId} onValueChange={(value) => {
-                          console.log('Budget selector changed to:', value);
-                          console.log('User data available:', !!userData?.user?.id);
-                          console.log('Preferences ID available:', !!userData?.preferences?.id);
-                          
-                          setSelectedBudgetId(value);
-                          if (userData?.user?.id) {
-                            console.log('Executing budget preference mutation...');
-                            updateBudgetPreferenceMutation.mutate(value);
-                          }
-                        }}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecciona un presupuesto" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {filteredBudgets.map((budget: Budget) => (
-                              <SelectItem key={budget.id} value={budget.id}>
-                                <span className="text-left">{budget.name}</span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Action Buttons - Solo los botones de editar/eliminar */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        if (selectedBudget) {
-                          openModal('budget', { budget: selectedBudget })
-                        }
-                      }}
-                      disabled={!selectedBudget}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
-                      disabled={!selectedBudget}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Budget Tasks Table - Direct without Card wrapper */}
             {selectedBudget ? (
-              <BudgetTaskTable budgetId={selectedBudget.id} />
+              <BudgetTaskTableWithSelector budgetId={selectedBudget.id} />
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 Selecciona un presupuesto para ver sus tareas
