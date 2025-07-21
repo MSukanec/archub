@@ -53,12 +53,28 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar únicamente la vista construction_gantt_view que ahora incluye task_name
+      // Usar construction_tasks con join a task_generated_view para obtener display_name
       const { data: ganttData, error } = await supabase
-        .from('construction_gantt_view')
-        .select('*')
+        .from('construction_tasks')
+        .select(`
+          *,
+          task_details:task_generated_view!inner (
+            code,
+            display_name
+          ),
+          phase_tasks:construction_phase_tasks (
+            progress_percent,
+            project_phase:construction_project_phases (
+              id,
+              position,
+              phase:construction_phases (
+                name
+              )
+            )
+          )
+        `)
         .eq('project_id', projectId)
-        .order('phase_position', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (error) {
         console.error('Error fetching construction gantt view:', error);
@@ -69,48 +85,59 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         return [];
       }
 
-      // Mapear datos de la vista al formato esperado
-      const mappedTasks: ConstructionTask[] = ganttData.map((item) => ({
-        // Campos principales de la vista
-        task_instance_id: item.task_instance_id,
-        project_id: item.project_id,
-        task_id: item.task_id,
-        task_code: item.task_code,
-        param_values: item.param_values,
-        start_date: item.start_date,
-        end_date: item.end_date,
-        duration_in_days: item.duration_in_days,
-        phase_instance_id: item.phase_instance_id,
-        phase_name: item.phase_name,
-        phase_position: item.phase_position,
-        progress_percent: item.progress_percent || 0,
+      // Debug: ver qué campos están llegando exactamente
+      console.log('RAW GANTT DATA SAMPLE:', JSON.stringify(ganttData?.[0], null, 2));
+
+      // Mapear datos de construction_tasks con task_details al formato esperado
+      const mappedTasks: ConstructionTask[] = ganttData.map((item: any) => {
+        const phaseTask = item.phase_tasks?.[0];
+        const projectPhase = phaseTask?.project_phase;
+        const phase = projectPhase?.phase;
         
-        // Compatibilidad con sistema existente
-        id: item.task_instance_id, // ID principal para compatibilidad
-        organization_id: organizationId, // Del contexto
-        
-        // Crear objeto task para compatibilidad con componentes existentes
-        task: {
-          id: item.task_id,
-          code: item.task_code,
-          display_name: item.task_name || item.task_code, // Usar task_name de la vista
-          rubro_name: null, // Se puede obtener si es necesario
-          category_name: null, // Se puede obtener si es necesario
-          unit_id: null, // Se puede obtener si es necesario
-          unit_name: null, // Se puede obtener si es necesario
-          rubro_id: null, // Se puede obtener si es necesario
-          param_values: item.param_values
-        }
-      }));
+        return {
+          // Campos principales de construction_tasks
+          task_instance_id: item.id,
+          project_id: item.project_id,
+          task_id: item.task_id,
+          task_code: item.task_details?.code || '',
+          param_values: item.param_values,
+          start_date: item.start_date,
+          end_date: item.end_date,
+          duration_in_days: item.duration_in_days,
+          
+          // Campos de fase
+          phase_instance_id: projectPhase?.id || null,
+          phase_name: phase?.name || null,
+          phase_position: projectPhase?.position || 0,
+          progress_percent: phaseTask?.progress_percent || 0,
+          
+          // Compatibilidad con sistema existente
+          id: item.id, // ID principal para compatibilidad
+          organization_id: organizationId, // Del contexto
+          
+          // Crear objeto task para compatibilidad con componentes existentes
+          task: {
+            id: item.task_id,
+            code: item.task_details?.code || '',
+            display_name: item.task_details?.display_name || item.task_details?.code || '', // USAR EL DISPLAY_NAME CORRECTO
+            rubro_name: null,
+            category_name: null,
+            unit_id: null,
+            unit_name: null,
+            rubro_id: null,
+            param_values: item.param_values
+          }
+        };
+      });
 
       console.log('GANTT VIEW DATA:', {
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
-        rawSample: {
-          task_code: ganttData?.[0]?.task_code,
-          task_name: ganttData?.[0]?.task_name,
-          mappedDisplayName: mappedTasks[0]?.task?.display_name
+        sample: {
+          code: mappedTasks[0]?.task?.code,
+          display_name: mappedTasks[0]?.task?.display_name,
+          raw_display_name: ganttData?.[0]?.task_details?.display_name
         }
       });
 
