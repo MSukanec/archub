@@ -49,7 +49,7 @@ export function GanttDependencies({
   //   totalDays
   // });
 
-  // Función para obtener las coordenadas de una tarea ajustadas por scroll
+  // Función para obtener las coordenadas de una tarea relativas al viewport visible
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
     const taskBarElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineScrollContainer = document.getElementById('timeline-content-scroll');
@@ -60,19 +60,18 @@ export function GanttDependencies({
 
     const taskRect = taskBarElement.getBoundingClientRect();
     const scrollContainerRect = timelineScrollContainer.getBoundingClientRect();
-    const currentScrollLeft = timelineScrollContainer.scrollLeft;
     
-    // Calcular posición Y relativa al contenedor
+    // Calcular posición Y relativa al contenedor de scroll
     const relativeY = taskRect.top - scrollContainerRect.top + (taskRect.height / 2);
     
-    // Calcular posición X ajustada por scroll para coordenadas SVG
+    // Calcular posición X relativa al viewport visible (sin scroll offset)
     let relativeX: number;
     if (connectorType === 'output') {
-      // Conector de salida: lado derecho + scroll offset
-      relativeX = (taskRect.right - scrollContainerRect.left) + currentScrollLeft;
+      // Conector de salida: lado derecho relativo al viewport
+      relativeX = taskRect.right - scrollContainerRect.left;
     } else {
-      // Conector de entrada: lado izquierdo + scroll offset
-      relativeX = (taskRect.left - scrollContainerRect.left) + currentScrollLeft;
+      // Conector de entrada: lado izquierdo relativo al viewport
+      relativeX = taskRect.left - scrollContainerRect.left;
     }
 
     return { x: relativeX, y: relativeY };
@@ -171,7 +170,8 @@ export function GanttDependencies({
       <svg 
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
         style={{ 
-          zIndex: 10
+          zIndex: 50, // Mayor z-index para estar encima de las barras
+          backgroundColor: 'rgba(0, 255, 0, 0.1)' // Debug: fondo verde semi-transparente
         }}
       >
       {/* Definir el marcador de flecha profesional */}
@@ -184,26 +184,38 @@ export function GanttDependencies({
           refY="3.5"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+          <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
         </marker>
       </defs>
 
-      {/* Renderizar las flechas */}
+      {/* Renderizar las flechas con doble layer para mejor visibilidad */}
       {arrowPaths.map((arrow) => {
         return (
-          <path
-            key={arrow.id}
-            d={arrow.path}
-            stroke="#6b7280"
-            strokeWidth="2"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            className="cursor-pointer hover:stroke-red-400 pointer-events-auto"
-            onClick={() => {
-              console.log('Dependency clicked:', arrow.dependency);
-              // Aquí se puede abrir el modal de dependencias
-            }}
-          />
+          <g key={arrow.id}>
+            {/* Línea de fondo blanca para contraste */}
+            <path
+              d={arrow.path}
+              stroke="white"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* Línea principal de la flecha */}
+            <path
+              d={arrow.path}
+              stroke="#dc2626"
+              strokeWidth="8" // Hacer más gruesa para debug
+              fill="none"
+              markerEnd="url(#arrowhead)"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="cursor-pointer hover:stroke-red-400 pointer-events-auto"
+              onClick={() => {
+                console.log('Dependency clicked:', arrow.dependency);
+              }}
+            />
+          </g>
         );
       })}
       </svg>
