@@ -121,24 +121,16 @@ export function GanttDependencies({
       return;
     }
 
-    // Esperar un poco para que las tareas se rendericen
-    const timeoutId = setTimeout(() => {
-      // console.log('useEffect calculating paths...');
-      
+    const calculateArrows = () => {
       const paths = dependencies.map(dep => {
-        // console.log('Processing dependency:', dep.id, 'from:', dep.predecessor_task_id, 'to:', dep.successor_task_id);
-        
         const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
         const toCoords = getTaskPosition(dep.successor_task_id, 'input');
 
         if (!fromCoords || !toCoords) {
-          // console.log('Missing coordinates for dependency:', dep.id);
           return null;
         }
 
         const pathString = generatePath(fromCoords, toCoords);
-        // console.log('Generated path for dependency:', dep.id, pathString);
-
         return {
           id: dep.id,
           path: pathString,
@@ -146,9 +138,27 @@ export function GanttDependencies({
         };
       }).filter(Boolean);
       
-      // console.log('Final arrowPaths count:', paths.length);
       setArrowPaths(paths);
-    }, 200);
+    };
+
+    // Calcular inicialmente
+    const timeoutId = setTimeout(calculateArrows, 200);
+
+    // Agregar listener para scroll horizontal al contenedor específico del timeline
+    const scrollableElement = document.getElementById('timeline-content-scroll');
+    if (scrollableElement) {
+      const handleScroll = () => {
+        console.log('Scroll detected - recalculating arrows');
+        calculateArrows();
+      };
+      
+      scrollableElement.addEventListener('scroll', handleScroll);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        scrollableElement.removeEventListener('scroll', handleScroll);
+      };
+    }
 
     return () => clearTimeout(timeoutId);
   }, [dependencies, data, timelineWidth, totalDays]);
