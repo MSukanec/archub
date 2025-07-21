@@ -62,7 +62,7 @@ export function GanttDependencies({
     // });
     
     if (!taskBarElement || !timelineElement) {
-      console.log('Missing elements for task:', taskId);
+      // console.log('Missing elements for task:', taskId);
       return null;
     }
 
@@ -122,6 +122,18 @@ export function GanttDependencies({
     }
 
     const calculateArrows = () => {
+      // Verificar que todas las barras de tareas estén renderizadas antes de calcular
+      const allTasksRendered = dependencies.every(dep => {
+        const predTask = document.querySelector(`[data-task-id="${dep.predecessor_task_id}"]`);
+        const succTask = document.querySelector(`[data-task-id="${dep.successor_task_id}"]`);
+        return predTask && succTask;
+      });
+
+      if (!allTasksRendered) {
+        // console.log('Not all tasks rendered yet, waiting...');
+        return;
+      }
+
       const paths = dependencies.map(dep => {
         const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
         const toCoords = getTaskPosition(dep.successor_task_id, 'input');
@@ -139,17 +151,31 @@ export function GanttDependencies({
       }).filter(Boolean);
       
       setArrowPaths(paths);
+      // console.log('Arrows calculated successfully:', paths.length);
     };
 
-    // Calcular inicialmente
-    const timeoutId = setTimeout(calculateArrows, 200);
+    // Calcular con múltiples intentos para manejar el auto-scroll al día actual
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const tryCalculateArrows = () => {
+      attempts++;
+      calculateArrows();
+      
+      // Si no se calcularon las flechas y aún hay intentos, intentar de nuevo
+      if (arrowPaths.length === 0 && attempts < maxAttempts) {
+        setTimeout(tryCalculateArrows, 300);
+      }
+    };
+
+    const timeoutId = setTimeout(tryCalculateArrows, 500);
 
     // Agregar listener para scroll horizontal al contenedor específico del timeline
     const scrollableElement = document.getElementById('timeline-content-scroll');
     if (scrollableElement) {
       const handleScroll = () => {
-        console.log('Scroll detected - recalculating arrows');
-        calculateArrows();
+        // Usar un pequeño delay para evitar recálculos excesivos durante scroll continuo
+        setTimeout(calculateArrows, 50);
       };
       
       scrollableElement.addEventListener('scroll', handleScroll);
