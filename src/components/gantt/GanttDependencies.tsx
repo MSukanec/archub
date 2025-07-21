@@ -119,17 +119,24 @@ export function GanttDependencies({
     };
   }, [dragConnectionData, taskMap, containerRef]);
 
+  console.log('Dependencies rendering:', dependencies.length, 'paths:', dependencyPaths.length);
+  
   return (
-    <svg
-      ref={svgRef}
-      className="absolute inset-0 pointer-events-none"
-      style={{ 
-        width: timelineWidth, 
-        height: '100%',
-        zIndex: 25 // MUY ALTO para estar encima de todo
-      }}
-      viewBox={`0 0 ${timelineWidth} 1000`}
-    >
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 30 }}>
+      <svg
+        ref={svgRef}
+        width="100%"
+        height="100%"
+        style={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%'
+        }}
+        viewBox={`0 0 ${timelineWidth} 1000`}
+        preserveAspectRatio="none"
+      >
       <defs>
         {/* Definir marcador de flecha */}
         <marker
@@ -185,6 +192,7 @@ export function GanttDependencies({
           opacity="0.7"
         />
       )}
-    </svg>
+      </svg>
+    </div>
   );
 }

@@ -336,8 +336,8 @@ export function GanttContainer({
               })()}
             </div>
             
-            {/* Fila inferior: Números de días - INDIVIDUAL DAYS TO MATCH BARS */}
-            <div className="flex h-8">
+            {/* Fila inferior: Días de la semana + número - INDIVIDUAL DAYS TO MATCH BARS */}
+            <div className="flex h-8 border-t border-[var(--table-header-border)]">
               {calendarStructure.weeks.map((week) => 
                 week.days.map((day: any, dayIndex: number) => {
                   const today = new Date();
@@ -355,7 +355,7 @@ export function GanttContainer({
                       } ${isToday ? 'bg-[var(--accent)] text-white' : ''}`}
                       style={{ width: dayWidth, minWidth: dayWidth }}
                     >
-                      {day.dayNumber}
+                      {format(day.date, 'EEE d', { locale: es })}
                     </div>
                   );
                 })
