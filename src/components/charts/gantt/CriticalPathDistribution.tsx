@@ -63,7 +63,7 @@ export default function CriticalPathDistribution({ data, dependencies = [] }: Cr
       <CardContent className="pt-0">
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" strokeOpacity={0.5} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" className="opacity-30" />
             <XAxis 
               dataKey="category"
               tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
