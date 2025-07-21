@@ -940,13 +940,14 @@ export function GanttContainer({
                           return (
                             <div
                               key={`phase-bar-${item.id}-${scrollUpdateTrigger}`}
-                              className="bg-[var(--chart-2)] opacity-70 rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden border-2 border-[var(--table-row-fg)]"
+                              className="bg-[var(--chart-2)] rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden"
                               style={{
                                 left: `${barLeft}px`,
                                 width: `${barWidth}px`,
                                 height: '36px',
                                 minWidth: '8px',
-                                top: '6px'
+                                top: '6px',
+                                border: '2px solid var(--table-row-fg)'
                               }}
                               title={`${item.name}: ${startDate.toLocaleDateString()} - ${resolvedEndDate.toLocaleDateString()}`}
                             >
