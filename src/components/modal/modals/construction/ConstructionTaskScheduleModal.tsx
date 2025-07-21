@@ -45,6 +45,7 @@ interface ConstructionTaskScheduleModalProps {
     projectId: string;
     organizationId: string;
     editingTask: any;
+    isEditing?: boolean;
   };
   onClose: () => void;
 }
@@ -325,6 +326,7 @@ export function ConstructionTaskScheduleModal({
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={modalData.editingTask ? true : false}
     />
   );
 }
