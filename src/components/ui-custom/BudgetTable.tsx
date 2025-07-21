@@ -254,7 +254,7 @@ export function BudgetTable({
       <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
         {/* Column Headers - Identical to Table.tsx */}
         <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-             style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+             style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
           <div className="flex items-center justify-center">
             <input
               type="checkbox"
@@ -266,7 +266,7 @@ export function BudgetTable({
                   setSelectedTasks([]);
                 }
               }}
-              className="h-3 w-3 rounded"
+              className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
             />
           </div>
           <div className="text-left">ID</div>
@@ -295,7 +295,7 @@ export function BudgetTable({
                   {/* Group Header Row */}
                   {groupingType !== 'none' && (
                     <div className="grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
-                         style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+                         style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
                       <div></div>
                       <div className="font-semibold text-xs">{rubroNumber}</div>
                       <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
@@ -332,7 +332,7 @@ export function BudgetTable({
                              "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
                              taskIndex < tasks.length - 1 ? "border-b border-[var(--table-row-border)]" : ""
                            )}
-                           style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+                           style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
                         
                         <div className="flex items-center justify-center">
                           <input
@@ -345,7 +345,7 @@ export function BudgetTable({
                                 setSelectedTasks(selectedTasks.filter(id => id !== task.id));
                               }
                             }}
-                            className="h-3 w-3 rounded"
+                            className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
                           />
                         </div>
                         
@@ -408,7 +408,7 @@ export function BudgetTable({
             
             {/* TOTAL Row - Same styling as header */}
             <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-                 style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+                 style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
               <div></div>
               <div className="text-xs font-semibold">TOTAL</div>
               {groupingType === 'none' && <div></div>}

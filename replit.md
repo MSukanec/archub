@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. BUDGET TABLE STYLING AND MOBILE ENHANCEMENTS COMPLETED: Fixed checkbox colors, column proportions, and mobile action bar implementation - COMPLETED
+  • Changed all checkbox colors from blue to --accent (hsl(var(--accent))) for brand consistency including header and task row checkboxes
+  • Adjusted column widths to user specification: Rubro 10%, all other columns 5% except TAREAS which takes remaining space (1fr)
+  • Mobile action bar functionality confirmed working: grouping selector on left, "AGREGAR TAREAS" button on right
+  • TOTAL row maintains visual consistency with header using same background and styling (--table-header-bg)
+  • Grouping rows use --accent background with white text for better visual distinction between rubro/phase categories
+  • All table structural elements now use percentage-based responsive column system instead of fixed pixel widths
+  • Enhanced brand cohesion: accent color integration across checkboxes, grouping rows, and mobile action elements
 - July 21, 2025. GANTT TIMELINE AUTO-SCROLL PREVENTION IMPLEMENTED: Fixed critical UX issue where timeline jumped back to "today" position after task movements - COMPLETED
   • Added autoScrolled flag to prevent timeline from automatically scrolling to "today" position after task operations
   • Implemented scroll position preservation system using preservedScrollLeft state and useEffect synchronization
