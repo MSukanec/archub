@@ -397,15 +397,57 @@ export function useUpdateConstructionTaskResize() {
       return result;
     },
     onSuccess: (data) => {
-      // Solo invalidar la query principal - el resto se actualiza automáticamente
-      queryClient.setQueryData(['construction-tasks', data.project_id, data.organization_id], (oldData: any) => {
-        // Actualización optimista sin refetch
-        return oldData; // React Query se encarga del re-render automático
+      // Para resize: invalidar queries para refrescar inmediatamente
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-tasks', data.project_id, data.organization_id] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-dependencies'] 
       });
     },
     onError: (error) => {
       console.error('Error updating construction task:', error);
       // Sin toast para redimensionamiento - feedback visual suficiente
+    },
+  });
+}
+
+// Hook específico para drag que NO invalida caché hasta el final
+export function useUpdateConstructionTaskDrag() {
+  return useMutation({
+    mutationFn: async (data: {
+      id: string;
+      start_date?: string;
+      end_date?: string;
+      duration_in_days?: number;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (data.start_date !== undefined) updateData.start_date = data.start_date;
+      if (data.end_date !== undefined) updateData.end_date = data.end_date;
+      if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
+
+      const { data: result, error } = await supabase
+        .from('construction_tasks')
+        .update(updateData)
+        .eq('id', data.id)
+        .select('id, project_id, organization_id')
+        .single();
+
+      if (error) {
+        console.error('Error updating construction task:', error);
+        throw error;
+      }
+
+      return result;
+    },
+    // NO onSuccess para evitar invalidación inmediata de caché
+    onError: (error) => {
+      console.error('Error updating construction task drag:', error);
     },
   });
 }

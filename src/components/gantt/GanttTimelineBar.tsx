@@ -2,8 +2,9 @@ import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
-import { useUpdateConstructionTaskResize } from '@/hooks/use-construction-tasks';
+import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface GanttTimelineBarProps {
   item: GanttRowProps;
@@ -47,6 +48,8 @@ export function GanttTimelineBar({
   const barRef = useRef<HTMLDivElement>(null);
   const createDependency = useCreateConstructionDependency();
   const updateTaskResize = useUpdateConstructionTaskResize();
+  const updateTaskDrag = useUpdateConstructionTaskDrag();
+  const queryClient = useQueryClient();
   
   // Throttled callback para optimizar actualizaciones de flechas
   const throttledDragUpdate = useMemo(() => {
@@ -310,20 +313,29 @@ export function GanttTimelineBar({
       });
       
       if (item.taskData?.id) {
-        updateTaskResize.mutate({
+        // Usar el hook específico de drag que NO invalida caché automáticamente
+        updateTaskDrag.mutateAsync({
           id: item.taskData.id,
           start_date: format(newStartDate, 'yyyy-MM-dd'),
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
-        }, {
-          onSuccess: () => {
-            console.log('DRAG UPDATE SUCCESS');
-            // Actualizar flechas después del snap final
+        }).then(() => {
+          console.log('DRAG UPDATE SUCCESS - Invalidating cache manually');
+          
+          // Invalidar caché manualmente SOLO después del drag exitoso
+          queryClient.invalidateQueries({ 
+            queryKey: ['construction-tasks'] 
+          });
+          queryClient.invalidateQueries({ 
+            queryKey: ['construction-dependencies'] 
+          });
+          
+          // Actualizar flechas después de la invalidación
+          setTimeout(() => {
             onTaskUpdate?.();
-          },
-          onError: (error) => {
-            console.error('DRAG UPDATE ERROR:', error);
-          }
+          }, 50);
+        }).catch((error) => {
+          console.error('DRAG UPDATE ERROR:', error);
         });
       }
       
