@@ -35,7 +35,7 @@ export function GanttContainer({
   const timelineRef = useRef<HTMLDivElement>(null);
   
   // Cargar dependencias existentes
-  const { data: dependencies = [] } = useConstructionDependencies(data?.[0]?.projectId);
+  const { data: dependencies = [] } = useConstructionDependencies();
 
   // Función para manejar el redimensionamiento del panel
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -294,7 +294,7 @@ export function GanttContainer({
               }
             `}
           </style>
-          <div style={{ width: timelineWidth }}>
+          <div style={{ width: timelineWidth * 2 }}> {/* ANCHO DOBLE PARA DÍAS ANCHOS */}
             {/* Fila superior: Meses - GROUPED BY ACTUAL MONTHS */}
             <div className="flex h-6">
               {(() => {
@@ -479,7 +479,7 @@ export function GanttContainer({
                 {item.isHeader ? (
                   <div 
                     className="bg-muted/30 h-full w-full relative"
-                    style={{ width: timelineWidth }}
+                    style={{ width: timelineWidth * 2 }} // ANCHO DOBLE
                   >
                     {/* Línea del día de hoy también en headers */}
                     {(() => {
@@ -502,7 +502,7 @@ export function GanttContainer({
                       }
                       
                       if (todayDayIndex !== -1) {
-                        const dayWidth = timelineWidth / calendarStructure.totalDays;
+                        const dayWidth = (timelineWidth * 2) / calendarStructure.totalDays; // DÍAS ANCHOS
                         const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                         
                         // Today line positioned correctly
@@ -521,7 +521,7 @@ export function GanttContainer({
                 ) : (
                   <div 
                     className="relative h-full w-full"
-                    style={{ width: timelineWidth }}
+                    style={{ width: timelineWidth * 2 }} // ANCHO DOBLE
                   >
                     {/* Grilla de semanas (sin líneas entre días) */}
                     <div className="absolute inset-0 flex">
@@ -556,7 +556,7 @@ export function GanttContainer({
                         }
                         
                         if (todayDayIndex !== -1) {
-                          const dayWidth = timelineWidth / calendarStructure.totalDays;
+                          const dayWidth = (timelineWidth * 2) / calendarStructure.totalDays; // DÍAS ANCHOS
                           const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                           
                           return (
@@ -577,7 +577,7 @@ export function GanttContainer({
                         item={item}
                         timelineStart={timelineStart}
                         timelineEnd={timelineEnd}
-                        timelineWidth={timelineWidth}
+                        timelineWidth={timelineWidth * 2} // ANCHO DOBLE PARA BARRAS
                         totalDays={calendarStructure.totalDays}
                         onConnectionDrag={setDragConnectionData}
                         dragConnectionData={dragConnectionData}
@@ -655,7 +655,7 @@ export function GanttContainer({
                     }
                     
                     if (todayDayIndex !== -1) {
-                      const dayWidth = timelineWidth / calendarStructure.totalDays;
+                      const dayWidth = (timelineWidth * 2) / calendarStructure.totalDays; // DÍAS ANCHOS
                       const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                       
                       return (
@@ -678,7 +678,7 @@ export function GanttContainer({
             dependencies={dependencies}
             timelineStart={timelineStart}
             timelineEnd={timelineEnd}
-            timelineWidth={timelineWidth}
+            timelineWidth={timelineWidth * 2} // ANCHO DOBLE PARA DEPENDENCIAS
             totalDays={calendarStructure.totalDays}
             dragConnectionData={dragConnectionData}
             containerRef={timelineRef}

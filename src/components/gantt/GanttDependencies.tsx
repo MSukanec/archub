@@ -61,7 +61,7 @@ export function GanttDependencies({
       
       if (!fromTaskData.startDate || !toTaskData.startDate) return null;
       
-      const dayWidth = timelineWidth / totalDays;
+      const dayWidth = timelineWidth / totalDays; // timelineWidth ya viene duplicado
       const timelineStartTime = timelineStart.getTime();
       
       // Posición de fin de la tarea predecesora
@@ -123,7 +123,8 @@ export function GanttDependencies({
     <svg
       ref={svgRef}
       className="absolute inset-0 pointer-events-none z-10"
-      style={{ width: timelineWidth }}
+      style={{ width: timelineWidth, height: '100%' }}
+      viewBox={`0 0 ${timelineWidth} 1000`}
     >
       <defs>
         {/* Definir marcador de flecha */}
