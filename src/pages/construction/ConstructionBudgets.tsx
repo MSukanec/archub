@@ -348,34 +348,8 @@ export default function ConstructionBudgets() {
     }
   })
 
-  // Update budget grouping mutation
-  const updateBudgetGroupingMutation = useMutation({
-    mutationFn: async ({ budgetId, groupingType }: { budgetId: string, groupingType: string }) => {
-      if (!supabase) throw new Error('Supabase client not available')
-      
-      const { error } = await supabase
-        .from('budgets')
-        .update({ grouping_type: groupingType })
-        .eq('id', budgetId)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budgets'] })
-      toast({
-        title: "Configuración actualizada",
-        description: "La vista del presupuesto ha sido actualizada",
-      })
-    },
-    onError: (error) => {
-      console.error('Error updating budget grouping:', error)
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar la configuración",
-        variant: "destructive",
-      })
-    }
-  })
+  // Local grouping state (no database persistence needed)
+  const [groupingType, setGroupingType] = useState<string>('none')
 
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
@@ -492,8 +466,7 @@ export default function ConstructionBudgets() {
     const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
-    // Get grouping type from budget
-    const groupingType = selectedBudget?.grouping_type || 'none';
+    // Use local grouping state
 
     // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
@@ -675,12 +648,9 @@ export default function ConstructionBudgets() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-muted-foreground">Agrupar:</span>
                       <Select
-                        value={selectedBudget?.grouping_type || 'none'}
+                        value={groupingType}
                         onValueChange={(value) => {
-                          updateBudgetGroupingMutation.mutate({ 
-                            budgetId: selectedBudget.id, 
-                            groupingType: value 
-                          });
+                          setGroupingType(value);
                         }}
                       >
                         <SelectTrigger className="w-[160px] h-8">

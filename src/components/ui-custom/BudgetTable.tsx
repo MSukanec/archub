@@ -374,7 +374,7 @@ export function BudgetTable({
               {groupingType === 'none' && <div></div>}
               <div></div>
               <div></div>
-              <div className="text-xs font-semibold">{totalQuantity.toFixed(2)}</div>
+              <div></div>
               <div></div>
               <div></div>
               <div className="text-xs font-semibold">$0</div>
