@@ -25,6 +25,14 @@ export function GanttContainer({
     fromTaskId: string;
     fromPoint: 'start' | 'end';
   } | null>(null);
+  
+  // Estados para línea punteada temporal
+  const [connectionLineData, setConnectionLineData] = useState<{
+    startX: number;
+    startY: number;
+    mouseX: number;
+    mouseY: number;
+  } | null>(null);
   // Estado para el ancho del panel izquierdo
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
     const saved = localStorage.getItem('gantt-left-panel-width');
@@ -166,6 +174,27 @@ export function GanttContainer({
     
     return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
+
+  // Función para manejar el seguimiento de la línea punteada
+  useEffect(() => {
+    if (!dragConnectionData) {
+      setConnectionLineData(null);
+      return;
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (connectionLineData) {
+        setConnectionLineData(prev => prev ? {
+          ...prev,
+          mouseX: e.clientX,
+          mouseY: e.clientY
+        } : null);
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [dragConnectionData, connectionLineData]);
 
   // Función para iniciar el redimensionamiento
   const startResize = useCallback((e: React.MouseEvent) => {
@@ -694,6 +723,46 @@ export function GanttContainer({
         className="w-1 bg-[var(--accent)] cursor-col-resize hover:bg-[var(--accent)]/80 transition-colors flex-shrink-0"
         onMouseDown={handleMouseDown}
       />
+      
+      {/* LÍNEA PUNTEADA TEMPORAL DURANTE CONEXIÓN */}
+      {connectionLineData && (
+        <svg
+          className="fixed inset-0 pointer-events-none"
+          style={{ zIndex: 9999 }}
+          width="100vw"
+          height="100vh"
+        >
+          <defs>
+            <marker
+              id="central-connection-arrow"
+              markerWidth="8"
+              markerHeight="6"
+              refX="8"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <polygon
+                points="0,0 0,6 8,3"
+                fill="var(--accent)"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+            </marker>
+          </defs>
+          <line
+            x1={connectionLineData.startX}
+            y1={connectionLineData.startY}
+            x2={connectionLineData.mouseX}
+            y2={connectionLineData.mouseY}
+            stroke="var(--accent)"
+            strokeWidth="2"
+            strokeDasharray="8,4"
+            markerEnd="url(#central-connection-arrow)"
+            opacity="0.8"
+          />
+        </svg>
+      )}
     </div>
   );
 }

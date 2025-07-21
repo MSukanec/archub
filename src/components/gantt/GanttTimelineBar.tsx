@@ -14,7 +14,7 @@ interface GanttTimelineBarProps {
   onConnectionDrag?: (dragData: {
     fromTaskId: string;
     fromPoint: 'start' | 'end';
-  } | null) => void;
+  } | null, initialPosition?: { x: number; y: number }) => void;
   dragConnectionData?: {
     fromTaskId: string;
     fromPoint: 'start' | 'end';
@@ -137,11 +137,11 @@ export function GanttTimelineBar({
     });
     setMousePosition({ x: e.clientX, y: e.clientY });
     
-    // Notificar al componente padre sobre el inicio del drag
+    // Notificar al componente padre sobre el inicio del drag con posición inicial
     onConnectionDrag?.({
       fromTaskId: item.taskData.id,
       fromPoint: point
-    });
+    }, { x: connectionX, y: connectionY });
     
     // Agregar event listeners para seguir el mouse
     const handleMouseMove = (moveEvent: MouseEvent) => {
@@ -481,45 +481,7 @@ export function GanttTimelineBar({
         </>
       )}
       
-      {/* LÍNEA PUNTEADA TEMPORAL DURANTE CONEXIÓN */}
-      {isConnecting && connectionStart && (
-        <svg
-          className="fixed inset-0 pointer-events-none"
-          style={{ zIndex: 9999 }}
-          width="100vw"
-          height="100vh"
-        >
-          <defs>
-            <marker
-              id="connection-arrow"
-              markerWidth="8"
-              markerHeight="6"
-              refX="8"
-              refY="3"
-              orient="auto"
-              markerUnits="strokeWidth"
-            >
-              <polygon
-                points="0,0 0,6 8,3"
-                fill="var(--accent)"
-                stroke="white"
-                strokeWidth="0.5"
-              />
-            </marker>
-          </defs>
-          <line
-            x1={connectionStart.x}
-            y1={connectionStart.y}
-            x2={mousePosition.x}
-            y2={mousePosition.y}
-            stroke="var(--accent)"
-            strokeWidth="2"
-            strokeDasharray="8,4"
-            markerEnd="url(#connection-arrow)"
-            opacity="0.8"
-          />
-        </svg>
-      )}
+
     </div>
   );
 }
