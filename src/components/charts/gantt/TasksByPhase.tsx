@@ -7,14 +7,14 @@ interface TasksByPhaseProps {
 }
 
 const COLORS = [
-  'hsl(var(--accent))',
-  'hsl(var(--primary))', 
-  'hsl(var(--secondary))',
-  '#8884d8',
-  '#82ca9d',
-  '#ffc658',
-  '#ff7300',
-  '#0088fe',
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))', 
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
 ]
 
 export default function TasksByPhase({ data }: TasksByPhaseProps) {
@@ -61,21 +61,21 @@ export default function TasksByPhase({ data }: TasksByPhaseProps) {
   }
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Tareas por Fase</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={200}>
+      <CardContent className="pt-0">
+        <ResponsiveContainer width="100%" height={280}>
           <PieChart>
             <Pie
               data={chartData}
               cx="50%"
-              cy="50%"
+              cy="45%"
               labelLine={false}
               label={renderCustomizedLabel}
-              outerRadius={60}
-              fill="#8884d8"
+              outerRadius={90}
+              fill="hsl(var(--chart-1))"
               dataKey="value"
             >
               {chartData.map((entry, index) => (
@@ -88,9 +88,15 @@ export default function TasksByPhase({ data }: TasksByPhaseProps) {
             <Tooltip 
               formatter={(value: any, name: string) => [value, 'Tareas']}
               labelFormatter={(label) => `Fase: ${label}`}
+              contentStyle={{ 
+                backgroundColor: 'hsl(var(--popover-bg))', 
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                fontSize: '12px'
+              }}
             />
             <Legend 
-              wrapperStyle={{ fontSize: '12px' }}
+              wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
               formatter={(value) => value}
             />
           </PieChart>

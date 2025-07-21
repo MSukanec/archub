@@ -68,30 +68,30 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
   }
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Heatmap de Avance Semanal</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-6 gap-1 h-40">
+      <CardContent className="pt-0">
+        <div className="grid grid-cols-6 gap-2 h-64">
           {heatmapData.map((week, index) => (
             <div
               key={week.week}
               className={`
-                relative rounded-sm border flex flex-col items-center justify-center
+                relative rounded-md border-2 flex flex-col items-center justify-center
                 ${getHeatmapColor(week.progress)}
-                transition-all hover:scale-105 cursor-pointer
+                transition-all hover:scale-105 cursor-pointer shadow-sm
               `}
               title={`${week.week}: ${week.progress}% promedio (${week.tasks} tareas)`}
             >
               <div className="text-xs font-medium text-center">
                 {week.week}
               </div>
-              <div className="text-xs opacity-80">
+              <div className="text-xs font-bold">
                 {week.progress}%
               </div>
               {week.tasks > 0 && (
-                <div className="text-xs opacity-60">
+                <div className="text-xs opacity-70">
                   {week.tasks}t
                 </div>
               )}

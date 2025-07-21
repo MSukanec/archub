@@ -53,20 +53,24 @@ export default function BurndownChart({ data }: BurndownChartProps) {
   }, [data])
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Burndown Chart</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+      <CardContent className="pt-0">
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" opacity={0.3} />
             <XAxis 
               dataKey="displayDate" 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <YAxis 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <Tooltip 
               formatter={(value: any, name: string) => [
@@ -74,20 +78,26 @@ export default function BurndownChart({ data }: BurndownChartProps) {
                 name === 'remaining' ? 'Tareas Pendientes' : 'Tareas Completadas'
               ]}
               labelFormatter={(label) => `Fecha: ${label}`}
+              contentStyle={{ 
+                backgroundColor: 'hsl(var(--popover-bg))', 
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                fontSize: '12px'
+              }}
             />
             <Line 
               type="monotone" 
               dataKey="remaining" 
-              stroke="hsl(var(--destructive))" 
-              strokeWidth={2}
-              dot={{ r: 4 }}
+              stroke="hsl(var(--chart-2))" 
+              strokeWidth={3}
+              dot={{ fill: 'hsl(var(--chart-2))', strokeWidth: 2, r: 4 }}
             />
             <Line 
               type="monotone" 
               dataKey="completed" 
-              stroke="hsl(var(--accent))" 
-              strokeWidth={2}
-              dot={{ r: 4 }}
+              stroke="hsl(var(--chart-1))" 
+              strokeWidth={3}
+              dot={{ fill: 'hsl(var(--chart-1))', strokeWidth: 2, r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>

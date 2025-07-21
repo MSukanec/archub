@@ -44,32 +44,36 @@ export default function CriticalPathDistribution({ data, dependencies = [] }: Cr
         category: 'Críticas',
         count: criticalTasks,
         percentage: ((criticalTasks / data.length) * 100).toFixed(1),
-        fill: 'hsl(var(--destructive))'
+        fill: 'hsl(var(--chart-2))'
       },
       {
         category: 'Normales', 
         count: normalTasks,
         percentage: ((normalTasks / data.length) * 100).toFixed(1),
-        fill: 'hsl(var(--accent))'
+        fill: 'hsl(var(--chart-1))'
       }
     ]
   }, [data, dependencies])
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Distribución de Tareas Críticas</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+      <CardContent className="pt-0">
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" opacity={0.3} />
             <XAxis 
               dataKey="category"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <YAxis 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <Tooltip 
               formatter={(value: any, name: string, props: any) => [
@@ -77,10 +81,16 @@ export default function CriticalPathDistribution({ data, dependencies = [] }: Cr
                 'Cantidad'
               ]}
               labelFormatter={(label) => `Tipo: ${label}`}
+              contentStyle={{ 
+                backgroundColor: 'hsl(var(--popover-bg))', 
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                fontSize: '12px'
+              }}
             />
             <Bar 
               dataKey="count" 
-              radius={[2, 2, 0, 0]}
+              radius={[4, 4, 0, 0]}
             >
               {chartData.map((entry, index) => (
                 <Bar key={`bar-${index}`} fill={entry.fill} dataKey="count" />

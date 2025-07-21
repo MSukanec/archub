@@ -64,11 +64,11 @@ export default function DependencyNetwork({ data, dependencies = [] }: Dependenc
   }
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Red de Dependencias</CardTitle>
       </CardHeader>
-      <CardContent className="overflow-y-auto">
+      <CardContent className="pt-0 overflow-y-auto">
         <div className="space-y-3">
           {networkData.slice(0, 5).map((connection) => {
             if (!connection) return null

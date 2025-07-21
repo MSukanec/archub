@@ -60,29 +60,39 @@ export default function WorkloadOverTime({ data }: WorkloadOverTimeProps) {
   }, [data])
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Carga de Trabajo Diaria</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+      <CardContent className="pt-0">
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" opacity={0.3} />
             <XAxis 
               dataKey="week" 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <YAxis 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <Tooltip 
               formatter={(value: any) => [value, 'Tareas Activas']}
               labelFormatter={(label) => `Semana: ${label}`}
+              contentStyle={{ 
+                backgroundColor: 'hsl(var(--popover-bg))', 
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                fontSize: '12px'
+              }}
             />
             <Bar 
               dataKey="activeTasks" 
-              fill="hsl(var(--accent))" 
-              radius={[2, 2, 0, 0]}
+              fill="hsl(var(--chart-1))" 
+              radius={[4, 4, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>

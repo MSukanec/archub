@@ -36,24 +36,28 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
   }, [data])
 
   return (
-    <Card className="h-80">
-      <CardHeader>
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">Duración Promedio por Rubro</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData} layout="horizontal">
-            <CartesianGrid strokeDasharray="3 3" />
+      <CardContent className="pt-0">
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={chartData} layout="horizontal" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" opacity={0.3} />
             <XAxis 
               type="number"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
               tickFormatter={(value) => `${value}d`}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <YAxis 
               type="category"
               dataKey="rubro"
-              tick={{ fontSize: 10 }}
-              width={80}
+              tick={{ fontSize: 10, fill: 'hsl(var(--chart-grid-text))' }}
+              width={100}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
             />
             <Tooltip 
               formatter={(value: any) => [`${value.toFixed(1)} días`, 'Duración Promedio']}
@@ -61,11 +65,17 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
                 const item = payload?.[0]?.payload
                 return `${item?.fullRubro || label} (${item?.totalTasks || 0} tareas)`
               }}
+              contentStyle={{ 
+                backgroundColor: 'hsl(var(--popover-bg))', 
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                fontSize: '12px'
+              }}
             />
             <Bar 
               dataKey="averageDuration" 
-              fill="hsl(var(--accent))" 
-              radius={[0, 2, 2, 0]}
+              fill="hsl(var(--chart-2))" 
+              radius={[0, 4, 4, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
