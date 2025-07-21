@@ -40,6 +40,7 @@ export function GanttDependencies({
     path: string;
     dependency: any;
   }>>([]);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   // console.log('GanttDependencies rendering with:', {
   //   dependenciesCount: dependencies.length,
@@ -48,9 +49,8 @@ export function GanttDependencies({
   //   totalDays
   // });
 
-  // Función para obtener las coordenadas de una tarea basándose en la barra de tarea específica
+  // Función para obtener las coordenadas de una tarea ajustadas por scroll
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
-    // Buscar la barra de tarea específica directamente por data-task-id
     const taskBarElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineScrollContainer = document.getElementById('timeline-content-scroll');
     
@@ -60,70 +60,61 @@ export function GanttDependencies({
 
     const taskRect = taskBarElement.getBoundingClientRect();
     const scrollContainerRect = timelineScrollContainer.getBoundingClientRect();
+    const currentScrollLeft = timelineScrollContainer.scrollLeft;
     
-    // Calcular posición relativa al VIEWPORT VISIBLE del timeline scroll container
+    // Calcular posición Y relativa al contenedor
     const relativeY = taskRect.top - scrollContainerRect.top + (taskRect.height / 2);
     
+    // Calcular posición X ajustada por scroll para coordenadas SVG
     let relativeX: number;
     if (connectorType === 'output') {
-      // Conector de salida: lado derecho de la barra de tarea
-      relativeX = taskRect.right - scrollContainerRect.left;
+      // Conector de salida: lado derecho + scroll offset
+      relativeX = (taskRect.right - scrollContainerRect.left) + currentScrollLeft;
     } else {
-      // Conector de entrada: lado izquierdo de la barra de tarea  
-      relativeX = taskRect.left - scrollContainerRect.left;
+      // Conector de entrada: lado izquierdo + scroll offset
+      relativeX = (taskRect.left - scrollContainerRect.left) + currentScrollLeft;
     }
-
-    // console.log('Task position calculated:', {
-    //   taskId,
-    //   connectorType,
-    //   relativeX,
-    //   relativeY,
-    //   taskRect: { left: taskRect.left, right: taskRect.right, width: taskRect.width },
-    //   scrollContainerRect: { left: scrollContainerRect.left, width: scrollContainerRect.width },
-    //   isVisible: relativeX >= 0 && relativeX <= scrollContainerRect.width
-    // });
 
     return { x: relativeX, y: relativeY };
   };
 
-  // Función para generar el path SVG según las especificaciones del prompt
+  // Función para generar el path SVG con líneas rectas estilo profesional
   const generatePath = (from: { x: number; y: number }, to: { x: number; y: number }): string => {
-    const startX = from.x;
-    const startY = from.y;
-    const endX = to.x;
-    const endY = to.y;
-
-    // Según el prompt: línea horizontal → vertical → horizontal
-    // 1. Línea horizontal desde el conector de salida hacia la derecha 8-16px
-    const midX1 = startX + 12; // 12px hacia la derecha
+    const offsetX = 40; // Distancia horizontal antes del giro
     
-    // 2. Línea vertical hasta alinearse con el conector de entrada
-    const midY = endY;
-    
-    // 3. Línea horizontal hasta el conector de entrada
-    const midX2 = endX;
-
-    // Path con solo líneas rectas y pequeña curva en los giros
-    return `M ${startX} ${startY} H ${midX1} V ${midY} H ${midX2}`;
+    // Línea horizontal → vertical → horizontal (estilo "L invertida")
+    return `M ${from.x} ${from.y} H ${from.x + offsetX} V ${to.y} H ${to.x}`;
   };
 
-  // Calcular las flechas cuando las tareas estén disponibles
+  // Efecto para escuchar scroll y forzar re-render
   useEffect(() => {
-    if (!dependencies.length || !containerRef.current) {
+    const timelineElement = document.getElementById('timeline-content-scroll');
+    if (!timelineElement) return;
+
+    const handleScroll = () => {
+      setScrollLeft(timelineElement.scrollLeft);
+    };
+
+    timelineElement.addEventListener('scroll', handleScroll);
+    return () => timelineElement.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Calcular flechas con timing correcto y actualización por scroll
+  useEffect(() => {
+    if (!dependencies.length) {
       setArrowPaths([]);
       return;
     }
 
     const calculateArrows = () => {
-      // Verificar que todas las barras de tareas estén renderizadas antes de calcular
+      // Verificar que todas las tareas estén renderizadas
       const allTasksRendered = dependencies.every(dep => {
-        const predTask = document.querySelector(`[data-task-id="${dep.predecessor_task_id}"]`);
-        const succTask = document.querySelector(`[data-task-id="${dep.successor_task_id}"]`);
-        return predTask && succTask;
+        const predecessorEl = document.querySelector(`[data-task-id="${dep.predecessor_task_id}"]`);
+        const successorEl = document.querySelector(`[data-task-id="${dep.successor_task_id}"]`);
+        return predecessorEl && successorEl;
       });
 
       if (!allTasksRendered) {
-        // console.log('Not all tasks rendered yet, waiting...');
         return;
       }
 
@@ -135,19 +126,6 @@ export function GanttDependencies({
           return null;
         }
 
-        // Verificar si al menos una de las tareas está visible en el viewport
-        const timelineScrollContainer = document.getElementById('timeline-content-scroll');
-        if (!timelineScrollContainer) return null;
-        
-        const containerWidth = timelineScrollContainer.getBoundingClientRect().width;
-        const isFromVisible = fromCoords.x >= -100 && fromCoords.x <= containerWidth + 100; // 100px de margen
-        const isToVisible = toCoords.x >= -100 && toCoords.x <= containerWidth + 100;
-        
-        // Solo dibujar la flecha si al menos una tarea está visible
-        if (!isFromVisible && !isToVisible) {
-          return null;
-        }
-
         const pathString = generatePath(fromCoords, toCoords);
         return {
           id: dep.id,
@@ -155,45 +133,16 @@ export function GanttDependencies({
           dependency: dep
         };
       }).filter(Boolean);
-      
-      setArrowPaths(paths);
+
+      setArrowPaths(paths as any);
       console.log('Arrows calculated successfully:', paths.length, paths);
     };
 
-    // Calcular con múltiples intentos para manejar el auto-scroll al día actual
-    let attempts = 0;
-    const maxAttempts = 10;
+    // Delay inicial para asegurar que el DOM esté completamente renderizado
+    const timer = setTimeout(calculateArrows, 200);
     
-    const tryCalculateArrows = () => {
-      attempts++;
-      calculateArrows();
-      
-      // Si no se calcularon las flechas y aún hay intentos, intentar de nuevo
-      if (arrowPaths.length === 0 && attempts < maxAttempts) {
-        setTimeout(tryCalculateArrows, 300);
-      }
-    };
-
-    const timeoutId = setTimeout(tryCalculateArrows, 500);
-
-    // Agregar listener para scroll horizontal al contenedor específico del timeline
-    const scrollableElement = document.getElementById('timeline-content-scroll');
-    if (scrollableElement) {
-      const handleScroll = () => {
-        // Usar un pequeño delay para evitar recálculos excesivos durante scroll continuo
-        setTimeout(calculateArrows, 50);
-      };
-      
-      scrollableElement.addEventListener('scroll', handleScroll);
-      
-      return () => {
-        clearTimeout(timeoutId);
-        scrollableElement.removeEventListener('scroll', handleScroll);
-      };
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [dependencies, data, timelineWidth, totalDays]);
+    return () => clearTimeout(timer);
+  }, [dependencies, data, scrollLeft]); // Incluir scrollLeft para recalcular en scroll
 
   if (!arrowPaths.length) {
     return null;
@@ -222,60 +171,39 @@ export function GanttDependencies({
       <svg 
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
         style={{ 
-          zIndex: 100,
-          backgroundColor: 'rgba(255, 0, 0, 0.1)' // Debug: fondo rojo semi-transparente para ver el SVG
+          zIndex: 10
         }}
       >
-      {/* Definir el marcador de flecha */}
+      {/* Definir el marcador de flecha profesional */}
       <defs>
         <marker
           id="arrowhead"
-          markerWidth="8"
-          markerHeight="6"
-          refX="8"
-          refY="3"
+          markerWidth="10"
+          markerHeight="7"
+          refX="10"
+          refY="3.5"
           orient="auto"
-          markerUnits="strokeWidth"
         >
-          <polygon
-            points="0,0 0,6 8,3"
-            fill="red" // Debug: flecha roja para que sea visible
-          />
+          <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
         </marker>
       </defs>
 
-      {/* Renderizar cada flecha */}
-      {arrowPaths.map(arrow => {
-        if (!arrow) return null;
-        
-        // console.log('Rendering path:', arrow.id, arrow.path);
-        
+      {/* Renderizar las flechas */}
+      {arrowPaths.map((arrow) => {
         return (
-          <g key={arrow.id}>
-            {/* Línea de fondo blanca para contraste */}
-            <path
-              d={arrow.path}
-              stroke="white"
-              strokeWidth="4"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Línea principal con color del borde de barras */}
-            <path
-              d={arrow.path}
-              stroke="red" // Debug: usar color rojo visible para debug
-              strokeWidth="4" // Debug: hacer más gruesa para que sea más visible
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              markerEnd="url(#arrowhead)"
-              className="pointer-events-auto hover:opacity-80 cursor-pointer transition-opacity duration-200"
-              onClick={() => {
-                console.log('Dependency clicked:', arrow.dependency);
-              }}
-            />
-          </g>
+          <path
+            key={arrow.id}
+            d={arrow.path}
+            stroke="#6b7280"
+            strokeWidth="2"
+            fill="none"
+            markerEnd="url(#arrowhead)"
+            className="cursor-pointer hover:stroke-red-400 pointer-events-auto"
+            onClick={() => {
+              console.log('Dependency clicked:', arrow.dependency);
+              // Aquí se puede abrir el modal de dependencias
+            }}
+          />
         );
       })}
       </svg>
