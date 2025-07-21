@@ -514,7 +514,7 @@ export default function ConstructionSchedule() {
             className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
           >
             <Table className="h-4 w-4" />
-            Vista de Listado
+            Listado de Tareas
           </TabsTrigger>
         </TabsList>
 

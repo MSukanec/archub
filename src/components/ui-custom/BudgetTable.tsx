@@ -1,70 +1,76 @@
-import React, { useState, useMemo, Fragment } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Search, Filter, Calculator, Plus, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { cn } from '@/lib/utils'
+import { Fragment, useState, useEffect, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Trash2, Plus, ChevronDown, Edit, Filter, Search } from 'lucide-react';
+import { Calculator } from 'lucide-react';
+import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { cn } from '@/lib/utils';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-export interface BudgetTask {
-  id: string
-  budget_id: string
-  task_id: string
-  organization_id: string
-  project_id: string
-  created_at: string
-  updated_at: string
+interface BudgetTask {
+  id: string;
+  budget_id: string;
+  task_id: string;
+  organization_id: string;
+  project_id: string;
+  created_at: string;
+  updated_at: string;
   task: {
-    task_instance_id?: string
-    project_id?: string
-    task_id?: string
-    task_code?: string
-    start_date?: string
-    end_date?: string
-    duration_in_days?: number
-    quantity: number
-    phase_instance_id?: string
-    phase_name?: string
-    phase_position?: number
-    progress_percent?: number
-    unit_id?: string
-    unit_name?: string
-    unit_symbol?: string
-    display_name?: string
-    subcategory_id?: string
-    subcategory_name?: string
-    category_id?: string
-    category_name?: string
-    rubro_id?: string
-    rubro_name?: string
-    task_group_id?: string
-    task_group_name?: string
-    processed_display_name?: string
-  }
+    task_instance_id: string;
+    project_id: string;
+    task_id: string;
+    task_code: string;
+    start_date: string | null;
+    end_date: string | null;
+    duration_in_days: number | null;
+    quantity: number;
+    phase_instance_id: string;
+    phase_name: string;
+    phase_position: number;
+    progress_percent: number;
+    unit_id: string;
+    unit_name: string;
+    unit_symbol: string;
+    display_name: string;
+    subcategory_id: string;
+    subcategory_name: string;
+    category_id: string;
+    category_name: string;
+    rubro_id: string;
+    rubro_name: string;
+    task_group_id: string;
+    task_group_name: string;
+  } | null;
 }
 
-export interface BudgetTableProps {
-  budgetId?: string
-  budgetTasks: BudgetTask[] | null
-  isLoading: boolean
-  groupingType: string
-  selectedTasks: string[]
-  setSelectedTasks: (tasks: string[]) => void
-  generateTaskDisplayName: (task: any, parameterValues: any[]) => string
-  parameterValues: any[]
-  getUnitName: (unitId: string | null) => string
-  handleDeleteTask?: (taskId: string) => void
-  handleAddTask?: (budgetId: string) => void
-  onGroupingChange?: (grouping: string) => void
-  onAddTasks?: () => void
-  budgets?: any[]
-  selectedBudgetId?: string
-  onBudgetChange?: (budgetId: string) => void
-  onEditBudget?: (budgetId: string) => void
-  onDeleteBudget?: (budgetId: string) => void
-  mode?: 'budget' | 'construction'
-  handleEditTask?: (task: BudgetTask) => void
+interface BudgetTableProps {
+  budgetId: string;
+  budgetTasks: BudgetTask[] | undefined;
+  isLoading: boolean;
+  groupingType: string; // 'none', 'rubros', 'phases'
+  selectedTasks: string[];
+  setSelectedTasks: (tasks: string[]) => void;
+  generateTaskDisplayName: (task: any, parameterValues: any[]) => string;
+  parameterValues: any[];
+  getUnitName: (unitId: string | null) => string;
+
+  handleDeleteTask: (taskId: string) => void;
+  handleAddTask: (budgetId: string) => void;
+  onGroupingChange?: (value: string) => void;
+  onAddTasks?: () => void;
+  // New props for budget selector row
+  budgets?: any[];
+  selectedBudgetId?: string;
+  onBudgetChange?: (budgetId: string) => void;
+  onEditBudget?: () => void;
+  onDeleteBudget?: () => void;
+  // Construction mode props
+  mode?: 'budget' | 'construction';
+  handleEditTask?: (task: any) => void;
 }
 
 export function BudgetTable({
@@ -77,6 +83,7 @@ export function BudgetTable({
   generateTaskDisplayName,
   parameterValues,
   getUnitName,
+
   handleDeleteTask,
   handleAddTask,
   onGroupingChange,
@@ -89,9 +96,11 @@ export function BudgetTable({
   mode = 'budget',
   handleEditTask
 }: BudgetTableProps) {
+  // Local state for search functionality
   const [showSearch, setShowSearch] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-
+  // Local state for search functionality only
+  
   // Group tasks based on groupingType
   const groupedTasks = useMemo(() => {
     if (!budgetTasks) return { ungrouped: [] };
@@ -119,11 +128,34 @@ export function BudgetTable({
         acc[groupKey].push(task);
         return acc;
       }, {} as Record<string, BudgetTask[]>);
-
+      
       return grouped;
     }
     
-    return { 'Todas las tareas': budgetTasks };
+    // Nested grouping for compound types
+    const nestedGrouped = budgetTasks.reduce((acc, task) => {
+      if (!task.task) return acc;
+      
+      let primaryKey, secondaryKey;
+      
+      if (groupingType === 'rubros-phases') {
+        primaryKey = task.task.rubro_name || 'Sin rubro';
+        secondaryKey = task.task.phase_name || 'Sin fase';
+      } else if (groupingType === 'phases-rubros') {
+        primaryKey = task.task.phase_name || 'Sin fase';
+        secondaryKey = task.task.rubro_name || 'Sin rubro';
+      }
+      
+      const combinedKey = `${primaryKey} > ${secondaryKey}`;
+      
+      if (!acc[combinedKey]) {
+        acc[combinedKey] = [];
+      }
+      acc[combinedKey].push(task);
+      return acc;
+    }, {} as Record<string, BudgetTask[]>);
+    
+    return nestedGrouped;
   }, [budgetTasks, groupingType]);
 
   // Calculate total quantity for construction mode
@@ -133,7 +165,9 @@ export function BudgetTable({
       return sum + (task.task?.quantity || 0);
     }, 0);
   }, [budgetTasks, mode]);
-
+  
+  // No longer needed - quantity is now read-only
+  
   if (isLoading) {
     return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
   }
@@ -147,7 +181,7 @@ export function BudgetTable({
         action={
           <Button 
             size="sm" 
-            onClick={() => handleAddTask?.(budgetId || '')}
+            onClick={() => handleAddTask(budgetId)}
             className="h-8 px-3 text-xs"
           >
             <Plus className="w-3 h-3 mr-1" />
@@ -158,110 +192,212 @@ export function BudgetTable({
     );
   }
 
+  // Calculate totals for TOTAL row (using the totalQuantity already calculated above)
+
   // Total budget amount (placeholder since we don't have real pricing yet)
   const totalBudgetAmount = 0;
 
-  // Mobile card component for individual tasks
+  // Mobile card component for individual tasks - removed Card import
   const BudgetTaskCard = ({ task, processedName, unitName, onEdit, onDelete }: any) => (
     <div className="p-3 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="font-medium text-sm text-[var(--card-fg)]">{processedName}</div>
-        <div className="flex items-center gap-1">
-          {onEdit && (
-            <Button variant="ghost" size="sm" onClick={onEdit} className="h-6 w-6 p-0">
-              <Edit className="h-3 w-3" />
-            </Button>
-          )}
-          {onDelete && (
-            <Button variant="ghost" size="sm" onClick={onDelete} className="h-6 w-6 p-0">
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          )}
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="font-medium text-sm leading-tight mb-1">
+            {processedName}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {task.task?.rubro_name || 'Sin rubro'} • {task.task?.category_name || 'Sin categoría'}
+          </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(task.id)}
+          className="h-7 w-7 p-0 text-destructive hover:text-destructive ml-2"
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
       </div>
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div>
-          <span className="text-muted-foreground">Unidad:</span> {unitName}
+      
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">Cantidad:</span>
+          <span className="font-medium">{task.task?.quantity || '0'}</span>
+          <span className="text-muted-foreground">{unitName}</span>
         </div>
-        <div>
-          <span className="text-muted-foreground">Cantidad:</span> {task.task?.quantity || '0'}
+        <div className="text-right">
+          <div className="font-medium">$0</div>
+          <div className="text-muted-foreground">0.0%</div>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-4">
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant={showSearch ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowSearch(!showSearch)}
-            className="h-8"
-          >
-            <Search className="w-4 h-4 mr-1" />
-            Buscar
-          </Button>
-          
-          {onGroupingChange && (
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
-              <Select value={groupingType} onValueChange={onGroupingChange}>
-                <SelectTrigger className="w-[140px] h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sin agrupar</SelectItem>
-                  <SelectItem value="rubros">Por rubros</SelectItem>
-                  <SelectItem value="phases">Por fases</SelectItem>
-                </SelectContent>
-              </Select>
+    <div>
+      {/* Budget Selector Row - Desktop only */}
+      {budgets && selectedBudgetId && onBudgetChange && (
+        <div className="hidden lg:block mb-2">
+          <div className="flex items-center justify-between px-4 py-2 bg-[var(--card-bg)] text-xs font-medium text-[var(--card-fg)] border border-[var(--card-border)] rounded-lg">
+            {/* Budget Selector - Left side */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                Presupuesto:
+              </span>
+              <div className="w-64">
+                <Select value={selectedBudgetId} onValueChange={onBudgetChange}>
+                  <SelectTrigger className="w-full h-7 text-xs">
+                    <SelectValue placeholder="Selecciona un presupuesto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {budgets.map((budget: any) => (
+                      <SelectItem key={budget.id} value={budget.id}>
+                        <span className="text-left">{budget.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onAddTasks && (
-            <Button onClick={onAddTasks} size="sm" className="h-8 px-3 text-xs">
-              <Plus className="w-3 h-3 mr-1" />
-              AGREGAR TAREAS
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Search Input */}
-      {showSearch && (
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar tareas por nombre, código o rubro..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="pl-8 h-8 text-xs"
-            />
+            
+            {/* Budget Action Buttons - Right side */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={onEditBudget}
+              >
+                <Edit className="w-3 h-3" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                onClick={onDeleteBudget}
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSearch(false)}
-            className="h-8"
-          >
-            <ChevronUp className="w-4 h-4" />
-          </Button>
         </div>
       )}
 
-      {/* Desktop Table View */}
+      {/* Table Action Bar - Desktop only */}
+      <div className="hidden lg:block">
+        <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
+             style={{ marginBottom: '3px' }}>
+          {/* Empty left side */}
+          <div></div>
+          
+          {/* Right side - Search Field + Search Button + Filter Button + Add Tasks Button */}
+          <div className="flex items-center gap-2">
+            {showSearch && (
+              <input
+                type="text"
+                placeholder="Buscar tareas..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="h-6 px-2 text-xs border border-gray-300 rounded bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--accent)] w-48"
+                autoFocus
+                onBlur={() => {
+                  if (!searchValue) {
+                    setShowSearch(false);
+                  }
+                }}
+              />
+            )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
+              onClick={() => setShowSearch(!showSearch)}
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
+                >
+                  <Filter className="w-4 h-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
+                <div className="py-1">
+                  <button
+                    onClick={() => onGroupingChange?.('none')}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Sin agrupar
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('rubros')}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Agrupar por Rubros
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('phases')}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Agrupar por Fases
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('rubros-phases')}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Rubros y Fases
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('phases-rubros')}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Fases y Rubros
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            <Button
+              variant="default"
+              size="sm"
+              className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+              onClick={() => onAddTasks?.()}
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              AGREGAR TAREAS
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Table View - Using Table.tsx structure */}
       <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
         {/* Column Headers - Different layouts for budget vs construction mode */}
         {mode === 'construction' ? (
-          // Construction mode columns: Fase (10%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (10%)
+          // Construction mode columns: Checks (5%), Fase (5%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (5%)
           <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-               style={{ gridTemplateColumns: `10% 10% 1fr 5% 5% 5% 10%` }}>
+               style={{ gridTemplateColumns: `5% 5% 10% 1fr 5% 5% 5% 5%` }}>
+            <div className="flex items-center justify-center">
+              <input
+                type="checkbox"
+                checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                  } else {
+                    setSelectedTasks([]);
+                  }
+                }}
+                className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
+              />
+            </div>
             <div className="text-left">Fase</div>
             <div className="text-left">Rubro</div>
             <div className="text-left">Tarea</div>
@@ -303,274 +439,302 @@ export function BudgetTable({
           </div>
         )}
 
-        {/* Table Rows */}
+        {/* Table Rows - Using div structure like Table.tsx */}
         <div>
-          {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
-            const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0);
-            const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
-            const rubroNumber = rubroIndex + 1;
-            
-            return (
-              <Fragment key={rubroName}>
-                {/* Group Header Row */}
-                {groupingType !== 'none' && (
-                  <div className={cn(
-                    "grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
-                  )} style={{ 
-                    gridTemplateColumns: mode === 'construction' 
-                      ? `10% 10% 1fr 5% 5% 5% 10%` 
-                      : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
-                  }}>
-                    {mode === 'construction' ? (
-                      <>
-                        <div></div>
-                        <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
-                        <div className="font-semibold text-xs">{tasks.length} tareas</div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                      </>
-                    ) : (
-                      <>
-                        <div></div>
-                        <div className="font-semibold text-xs">{rubroNumber}</div>
-                        <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div className="text-xs font-semibold">${rubroSubtotal.toLocaleString()}</div>
-                        <div className="text-xs font-semibold">{rubroPercentage.toFixed(1)}%</div>
-                        <div></div>
-                      </>
-                    )}
-                  </div>
-                )}
-                
-                {/* Task Rows */}
-                {tasks.map((task: any, taskIndex) => {
-                  const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
-                  
-                  let taskId: string;
-                  if (groupingType !== 'none') {
-                    taskId = `${rubroNumber}.${taskIndex + 1}`;
-                  } else {
-                    let globalIndex = 0;
-                    const rubroEntries = Object.entries(groupedTasks);
-                    for (let i = 0; i < rubroIndex; i++) {
-                      globalIndex += rubroEntries[i][1].length;
-                    }
-                    globalIndex += taskIndex + 1;
-                    taskId = globalIndex.toString().padStart(3, '0');
-                  }
-
-                  return (
-                    <div key={task.id} 
-                         className={cn(
-                           "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
-                           taskIndex < tasks.length - 1 ? "border-b border-[var(--table-row-border)]" : ""
-                         )}
-                         style={{ 
-                           gridTemplateColumns: mode === 'construction' 
-                             ? `10% 10% 1fr 5% 5% 5% 10%` 
-                             : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
-                         }}>
-                      
+            {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
+              const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0);
+              const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
+              const rubroNumber = rubroIndex + 1;
+              
+              return (
+                <Fragment key={rubroName}>
+                  {/* Group Header Row */}
+                  {groupingType !== 'none' && (
+                    <div className={cn(
+                      "grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
+                    )} style={{ 
+                      gridTemplateColumns: mode === 'construction' 
+                        ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                        : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
+                    }}>
+                      <div></div>
                       {mode === 'construction' ? (
                         <>
-                          {/* Fase */}
-                          <div className="text-xs flex items-center justify-start">
-                            <div className="font-medium">{task.task?.phase_name || 'Sin fase'}</div>
-                          </div>
-                          
-                          {/* Rubro */}
-                          <div className="text-xs flex items-center justify-start">
-                            <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
-                          </div>
-                          
-                          {/* Tarea */}
-                          <div className="text-xs flex items-center justify-start">
-                            {generateTaskDisplayName(task.task, parameterValues)}
-                          </div>
-                          
-                          {/* Unidad */}
-                          <div className="text-xs flex items-center justify-start">
-                            {task.task?.unit_name || '-'}
-                          </div>
-                          
-                          {/* Cantidad */}
-                          <div className="text-xs flex items-center justify-start">
-                            {task.task?.quantity || '0'}
-                          </div>
-                          
-                          {/* Fechas */}
-                          <div className="text-xs flex items-center justify-start">
-                            {task.task?.start_date ? new Date(task.task.start_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }) : '--'}
-                            {task.task?.end_date && ` - ${new Date(task.task.end_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}`}
-                          </div>
-                          
-                          {/* Progreso */}
-                          <div className="text-xs flex items-center justify-start">
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-green-600 h-2 rounded-full" 
-                                style={{ width: `${task.task?.progress_percent || 0}%` }}
-                              ></div>
-                            </div>
-                            <span className="ml-2 text-xs font-medium">{task.task?.progress_percent || 0}%</span>
-                          </div>
+                          <div></div>
+                          <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
+                          <div className="font-semibold text-xs">{tasks.length} tareas</div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
                         </>
                       ) : (
                         <>
-                          <div className="flex items-center justify-center">
-                            <input
-                              type="checkbox"
-                              checked={selectedTasks.includes(task.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedTasks([...selectedTasks, task.id]);
-                                } else {
-                                  setSelectedTasks(selectedTasks.filter(id => id !== task.id));
-                                }
-                              }}
-                              className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
-                            />
-                          </div>
-                          
-                          {/* ID */}
-                          <div className="text-xs font-medium text-muted-foreground">
-                            {taskId}
-                          </div>
-                          
-                          {/* Rubro (solo si groupingType es 'none') */}
-                          {groupingType === 'none' && (
-                            <div className="text-xs">
-                              {task.task?.rubro_name || task.task?.category_name || '-'}
-                            </div>
-                          )}
-                          
-                          {/* Tarea */}
-                          <div className="text-xs text-left">
-                            <div className="font-medium leading-tight">
-                              {generateTaskDisplayName(task.task, parameterValues)}
-                            </div>
-                          </div>
-                          
-                          {/* Unidad */}
-                          <div className="text-xs text-center">
-                            {getUnitName(task.task?.unit_id)}
-                          </div>
-                          
-                          {/* Cantidad */}
-                          <div className="text-xs text-center font-medium">
-                            {task.task?.quantity || '0'}
-                          </div>
-                          
-                          {/* M.O., Mat., Subtotal, % Inc. - placeholders */}
-                          <div className="text-xs text-right">$0</div>
-                          <div className="text-xs text-right">$0</div>
-                          <div className="text-xs text-right font-medium">$0</div>
-                          <div className="text-xs text-center">0%</div>
-                          
-                          {/* Acciones */}
-                          <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {handleEditTask && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditTask(task);
-                                }}
-                                className="p-1 rounded hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors"
-                                title="Editar tarea"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </button>
-                            )}
-                            {handleDeleteTask && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteTask(task.id);
-                                }}
-                                className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                title="Eliminar tarea"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
-                            )}
-                          </div>
+                          <div className="font-semibold text-xs">{rubroNumber}</div>
+                          <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div className="text-xs font-semibold">${rubroSubtotal.toLocaleString()}</div>
+                          <div className="text-xs font-semibold">{rubroPercentage.toFixed(1)}%</div>
+                          <div></div>
                         </>
                       )}
                     </div>
-                  );
-                })}
-              </Fragment>
-            );
-          })}
-        </div>
+                  )}
+                  
+                  {/* Task Rows */}
+                  {tasks.map((task: any, taskIndex) => {
+                    const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
+                    
+                    let taskId: string;
+                    if (groupingType !== 'none') {
+                      taskId = `${rubroNumber}.${taskIndex + 1}`;
+                    } else {
+                      let globalIndex = 0;
+                      const rubroEntries = Object.entries(groupedTasks);
+                      for (let i = 0; i < rubroIndex; i++) {
+                        globalIndex += rubroEntries[i][1].length;
+                      }
+                      globalIndex += taskIndex + 1;
+                      taskId = globalIndex.toString().padStart(3, '0');
+                    }
 
-        {/* TOTAL Row */}
-        <div className={cn(
-          "grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-bold text-[var(--table-header-fg)] border-t-2 border-[var(--table-header-border)]"
-        )} style={{ 
-          gridTemplateColumns: mode === 'construction' 
-            ? `10% 10% 1fr 5% 5% 5% 10%` 
-            : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
-        }}>
-          {mode === 'construction' ? (
-            <>
+                    return (
+                      <div key={task.id} 
+                           className={cn(
+                             "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                             taskIndex < tasks.length - 1 ? "border-b border-[var(--table-row-border)]" : ""
+                           )}
+                           style={{ 
+                             gridTemplateColumns: mode === 'construction' 
+                               ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                               : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
+                           }}>
+                        
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedTasks.includes(task.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTasks([...selectedTasks, task.id]);
+                              } else {
+                                setSelectedTasks(selectedTasks.filter(id => id !== task.id));
+                              }
+                            }}
+                            className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
+                          />
+                        </div>
+                        
+                        {mode === 'construction' ? (
+                          <>
+                            {/* Fase */}
+                            <div className="text-xs flex items-center justify-start">
+                              <div className="font-medium">{task.task?.phase_name || 'Sin fase'}</div>
+                            </div>
+                            
+                            {/* Rubro */}
+                            <div className="text-xs flex items-center justify-start">
+                              <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
+                            </div>
+                            
+                            {/* Tarea */}
+                            <div className="text-xs flex items-center justify-start">
+                              {generateTaskDisplayName(task.task, parameterValues)}
+                            </div>
+                            
+                            {/* Unidad */}
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.unit_name || '-'}
+                            </div>
+                            
+                            {/* Cantidad */}
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.quantity || '0'}
+                            </div>
+                            
+                            {/* Fechas */}
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.start_date || task.task?.end_date ? (
+                                <div className="space-y-0">
+                                  {task.task?.start_date && (
+                                    <div className="text-muted-foreground text-xs leading-tight">
+                                      {new Date(task.task.start_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                                    </div>
+                                  )}
+                                  {task.task?.end_date && (
+                                    <div className="text-muted-foreground text-xs leading-tight">
+                                      - {new Date(task.task.end_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </div>
+                            
+                            {/* Progreso */}
+                            <div className="text-xs flex items-center justify-start gap-2">
+                              <div className="flex items-center gap-2 min-w-[60px]">
+                                <div className="flex-1 bg-gray-200 rounded-full h-1 overflow-hidden">
+                                  <div 
+                                    className="h-full rounded-full transition-all duration-300 bg-green-500"
+                                    style={{
+                                      width: `${Math.min(Math.max(task.task?.progress_percent || 0, 0), 100)}%`
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-xs text-muted-foreground font-medium min-w-[25px]">
+                                  {task.task?.progress_percent || 0}%
+                                </span>
+                              </div>
+                              {/* Actions for construction mode */}
+                              <div className="flex items-center gap-1 ml-2">
+                                {handleEditTask && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditTask({
+                                      id: task.id,
+                                      name: generateTaskDisplayName(task.task, parameterValues),
+                                      type: 'task',
+                                      level: 0,
+                                      taskData: task
+                                    })}
+                                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTask(task.id)}
+                                  className="h-7 w-7 p-0 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-xs flex items-center justify-start font-medium">
+                              {taskId}
+                            </div>
+                            
+                            {groupingType === 'none' && (
+                              <div className="text-xs flex items-center justify-start">
+                                <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
+                              </div>
+                            )}
+                            
+                            <div className="text-xs flex items-center justify-start">
+                              {generateTaskDisplayName(task.task, parameterValues)}
+                            </div>
+                            
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.unit_name || '-'}
+                            </div>
+                            
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.quantity || '0'}
+                            </div>
+                            
+                            <div className="text-xs flex items-center justify-start">$0</div>
+                            <div className="text-xs flex items-center justify-start">$0</div>
+                            <div className="text-xs flex items-center justify-start font-medium">$0</div>
+                            <div className="text-xs flex items-center justify-start text-muted-foreground">{percentage.toFixed(1)}%</div>
+                            
+                            <div className="flex items-center justify-start">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+            
+            {/* TOTAL Row - Same styling as header */}
+            <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+                 style={{ 
+                   gridTemplateColumns: mode === 'construction' 
+                     ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                     : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
+                 }}>
               <div></div>
-              <div className="font-bold text-xs">TOTAL</div>
-              <div></div>
-              <div></div>
-              <div className="text-xs font-bold text-center">{totalQuantity}</div>
-              <div></div>
-              <div></div>
-            </>
-          ) : (
-            <>
-              <div></div>
-              <div className="font-bold text-xs">TOTAL</div>
-              {groupingType === 'none' && <div></div>}
-              <div></div>
-              <div></div>
-              <div className="text-xs font-bold text-center">{totalQuantity || 0}</div>
-              <div className="text-xs font-bold text-right">$0</div>
-              <div className="text-xs font-bold text-right">$0</div>
-              <div className="text-xs font-bold text-right">${totalBudgetAmount.toLocaleString()}</div>
-              <div></div>
-              <div></div>
-            </>
-          )}
+              {mode === 'construction' ? (
+                <>
+                  <div></div>
+                  <div className="text-xs font-semibold">TOTAL</div>
+                  <div className="text-xs font-semibold">{budgetTasks?.length || 0} tareas</div>
+                  <div></div>
+                  <div className="text-xs font-semibold">{totalQuantity}</div>
+                  <div></div>
+                  <div></div>
+                </>
+              ) : (
+                <>
+                  <div className="text-xs font-semibold">TOTAL</div>
+                  {groupingType === 'none' && <div></div>}
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div className="text-xs font-semibold">$0</div>
+                  <div className="text-xs font-semibold">100.0%</div>
+                  <div></div>
+                </>
+              )}
+            </div>
         </div>
       </div>
 
-      {/* Mobile View */}
-      <div className="lg:hidden space-y-3">
-        {Object.entries(groupedTasks).map(([rubroName, tasks]) => (
-          <div key={rubroName} className="space-y-2">
-            {/* Group Header for Mobile */}
-            {groupingType !== 'none' && (
-              <div className="bg-[var(--accent)] text-white p-3 rounded-lg">
-                <div className="font-semibold text-sm capitalize">{rubroName.toLowerCase()}</div>
-                <div className="text-xs opacity-90">{tasks.length} tareas</div>
+      {/* Mobile Cards View - Following Table.tsx structure */}
+      <div className="lg:hidden space-y-2">
+        {budgetTasks?.map((task: any) => {
+          const processedName = generateTaskDisplayName(task.task, parameterValues);
+          const unitName = getUnitName(task.task?.unit_id);
+          return (
+            <BudgetTaskCard
+              key={task.id}
+              task={task}
+              processedName={processedName}
+              unitName={unitName}
+              onEdit={(taskToEdit: any) => {
+                console.log('Edit task mobile:', taskToEdit);
+                // TODO: Implement edit functionality
+              }}
+              onDelete={handleDeleteTask}
+            />
+          );
+        })}
+        
+        {/* Mobile Total Card - without Card component */}
+        <div className="border-2 border-accent bg-accent/5 rounded-lg">
+          <div className="p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">TOTAL</span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-semibold">$0</span>
+                <span className="text-xs text-muted-foreground">100.0%</span>
               </div>
-            )}
-            
-            {/* Task Cards */}
-            {tasks.map((task: any) => (
-              <BudgetTaskCard
-                key={task.id}
-                task={task}
-                processedName={generateTaskDisplayName(task.task, parameterValues)}
-                unitName={getUnitName(task.task?.unit_id)}
-                onEdit={handleEditTask ? () => handleEditTask(task) : undefined}
-                onDelete={handleDeleteTask ? () => handleDeleteTask(task.id) : undefined}
-              />
-            ))}
+            </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
