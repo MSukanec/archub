@@ -169,13 +169,13 @@ export function GanttTimelineBar({
   const resizeStyles = isResizing ? 'ring-2 ring-orange-400 ring-opacity-70 shadow-lg' : '';
 
   // Funciones para drag & drop de redimensionamiento
-  const calculateDayFromX = useCallback((clientX: number) => {
-    if (!barRef.current) return 0;
+  const calculateDayFromX = useCallback((clientX: number, containerElement?: HTMLElement) => {
+    // Usar el contenedor padre del timeline para cálculos consistentes
+    const container = containerElement || barRef.current?.parentElement;
+    if (!container) return 0;
     
-    const containerRect = barRef.current.parentElement?.getBoundingClientRect();
-    if (!containerRect) return 0;
-    
-    const relativeX = clientX - containerRect.left;
+    const containerRect = container.getBoundingClientRect();
+    const relativeX = Math.max(0, clientX - containerRect.left);
     const dayWidth = timelineWidth / totalDays;
     return Math.round(relativeX / dayWidth);
   }, [timelineWidth, totalDays]);
@@ -196,7 +196,7 @@ export function GanttTimelineBar({
       const containerRect = barRef.current.parentElement?.getBoundingClientRect();
       if (!containerRect) return;
       
-      const relativeX = e.clientX - containerRect.left;
+      const relativeX = Math.max(0, e.clientX - containerRect.left);
       const dayWidth = timelineWidth / totalDays;
       
       // Calcular días actuales para mantener las proporciones
@@ -205,7 +205,7 @@ export function GanttTimelineBar({
       
       // Feedback visual suave - seguir el mouse exactamente sin snap
       if (type === 'start') {
-        const newLeft = Math.max(0, relativeX);
+        const newLeft = relativeX;
         const newWidth = Math.max(dayWidth, (currentEndDay + 1) * dayWidth - newLeft);
         barRef.current.style.marginLeft = `${newLeft}px`;
         barRef.current.style.width = `${newWidth}px`;
@@ -218,8 +218,15 @@ export function GanttTimelineBar({
     const handleMouseUp = (e: MouseEvent) => {
       if (!item.taskData) return;
       
-      // AQUÍ sí hacer el snap al día más cercano
-      const newDay = calculateDayFromX(e.clientX);
+      // Resetear estilos ANTES de calcular para obtener coordenadas correctas
+      if (barRef.current) {
+        barRef.current.style.width = '';
+        barRef.current.style.marginLeft = '';
+      }
+      
+      // AQUÍ sí hacer el snap al día más cercano usando el container original
+      const container = barRef.current?.parentElement;
+      const newDay = calculateDayFromX(e.clientX, container);
       const newDate = addDays(timelineStart, newDay);
       
       // Actualizar la tarea en la base de datos
@@ -252,12 +259,6 @@ export function GanttTimelineBar({
       // Limpiar eventos
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-      
-      // Resetear estilos para que React tome control nuevamente
-      if (barRef.current) {
-        barRef.current.style.width = '';
-        barRef.current.style.marginLeft = '';
-      }
       
       // Sin toast para evitar ruido en UX - el feedback visual es suficiente
     };
