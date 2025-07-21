@@ -188,7 +188,7 @@ export function ConstructionTaskScheduleModal({
       }}
     >
       {/* Información de la tarea */}
-      <div className="p-3 bg-muted/50 rounded-md">
+      <div className="p-3">
         <h4 className="font-medium mb-2">Tarea:</h4>
         <p className="text-sm text-muted-foreground leading-5">
           {modalData.editingTask?.task?.display_name || modalData.editingTask?.task?.code || 'Sin nombre'}
