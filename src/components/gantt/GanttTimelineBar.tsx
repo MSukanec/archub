@@ -320,14 +320,35 @@ export function GanttTimelineBar({
         Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
       const newEndDate = addDays(newStartDate, originalDuration - 1);
       
-      // PROPAGACIÓN OPTIMÍSTICA DE DEPENDENCIAS durante el drag
+      // PROPAGACIÓN VISUAL SUAVE DE DEPENDENCIAS durante el drag
       if (allTasks && allDependencies.length > 0) {
-        throttledPropagation(
+        const propagationUpdates = propagateDependencyChanges(
           item.taskData.id,
           format(newEndDate, 'yyyy-MM-dd'),
           allTasks,
           allDependencies
         );
+        
+        // Aplicar transformaciones CSS suaves a las tareas dependientes
+        propagationUpdates.forEach(update => {
+          const dependentBarElement = document.querySelector(`[data-task-id="${update.taskId}"]`) as HTMLElement;
+          if (dependentBarElement) {
+            const dependentTask = allTasks.find(t => t.id === update.taskId);
+            if (dependentTask && dependentTask.start_date) {
+              // Calcular offset basado en días de diferencia
+              const originalStartDay = Math.floor((new Date(dependentTask.start_date).getTime() - timelineStart.getTime()) / (24 * 60 * 60 * 1000));
+              const newStartDay = Math.floor((new Date(update.newStart).getTime() - timelineStart.getTime()) / (24 * 60 * 60 * 1000));
+              const offsetDays = newStartDay - originalStartDay;
+              const dayWidth = timelineWidth / totalDays;
+              const offsetPixels = offsetDays * dayWidth;
+              
+              // Aplicar transformación CSS suave
+              dependentBarElement.style.transform = `translateX(${offsetPixels}px)`;
+              dependentBarElement.style.opacity = '0.8';
+              dependentBarElement.style.transition = 'none'; // Sin transición para movimiento directo
+            }
+          }
+        });
       }
       
       // FEEDBACK VISUAL de la tarea principal
@@ -347,7 +368,17 @@ export function GanttTimelineBar({
         barRef.current.style.zIndex = '';
       }
       
-      // Las tareas dependientes ya están actualizadas por propagación optimística
+      // Limpiar transformaciones CSS de todas las tareas dependientes
+      if (allTasks && allDependencies.length > 0) {
+        allTasks.forEach(task => {
+          const dependentBarElement = document.querySelector(`[data-task-id="${task.id}"]`) as HTMLElement;
+          if (dependentBarElement) {
+            dependentBarElement.style.transform = '';
+            dependentBarElement.style.opacity = '';
+            dependentBarElement.style.transition = '';
+          }
+        });
+      }
       
       // Calcular nuevo día y actualizar en base de datos
       const newDay = calculateDayFromX(e.clientX - dragOffset);
@@ -357,6 +388,16 @@ export function GanttTimelineBar({
       const originalDuration = item.taskData?.duration_in_days || 
         Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
       const newEndDate = addDays(newStartDate, originalDuration - 1);
+      
+      // Propagación real de dependencias para la base de datos
+      if (allTasks && allDependencies.length > 0) {
+        throttledPropagation(
+          item.taskData.id,
+          format(newEndDate, 'yyyy-MM-dd'),
+          allTasks,
+          allDependencies
+        );
+      }
       
       console.log('DRAG UPDATE:', {
         taskId: item.taskData?.id,
