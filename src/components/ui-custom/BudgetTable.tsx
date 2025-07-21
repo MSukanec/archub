@@ -312,57 +312,57 @@ export function BudgetTable({
       <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '5px' }}>
-          {/* Groups Action Button - Left side */}
-          <div className="flex items-center">
+          {/* Empty left side */}
+          <div></div>
+          
+          {/* Right side - Filter Button + Add Tasks Button */}
+          <div className="flex items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                  className="h-7 w-7 p-0 hover:bg-gray-100 text-gray-500"
                 >
-                  <Filter className="w-3 h-3" />
+                  <Filter className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="start" className="w-48 p-1">
-                <div className="space-y-1">
+              <PopoverContent align="end" className="w-48 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
+                <div className="py-1">
                   <button
                     onClick={() => onGroupingChange?.('none')}
-                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
                   >
                     Sin agrupar
                   </button>
                   <button
                     onClick={() => onGroupingChange?.('rubros')}
-                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
                   >
                     Agrupar por Rubros
                   </button>
                   <button
                     onClick={() => onGroupingChange?.('phases')}
-                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
                   >
                     Agrupar por Fases
                   </button>
                   <button
                     onClick={() => onGroupingChange?.('rubros-phases')}
-                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
                   >
                     Rubros y Fases
                   </button>
                   <button
                     onClick={() => onGroupingChange?.('phases-rubros')}
-                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
                   >
                     Fases y Rubros
                   </button>
                 </div>
               </PopoverContent>
             </Popover>
-          </div>
-          
-          {/* Add Tasks Button - Right side */}
-          <div>
+            
             <Button
               variant="default"
               size="sm"
