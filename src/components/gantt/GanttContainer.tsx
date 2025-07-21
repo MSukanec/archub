@@ -262,7 +262,7 @@ export function GanttContainer({
 
   // Preservar posición del scroll cuando cambian los datos
   useEffect(() => {
-    if (preservedScrollLeft !== null) {
+    if (preservedScrollLeft !== null && autoScrolled) {
       const timelineContainer = document.getElementById('timeline-content-scroll');
       const headerContainer = document.getElementById('timeline-header-scroll');
       
@@ -272,7 +272,7 @@ export function GanttContainer({
         setPreservedScrollLeft(null); // Limpiar después de restaurar
       }
     }
-  }, [calendarStructure, preservedScrollLeft]);
+  }, [calendarStructure, preservedScrollLeft, autoScrolled]);
 
   // Función para manejar el inicio de conexión con posición inicial
   const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start' | 'end' } | null, initialPosition?: { x: number; y: number }) => {
@@ -440,8 +440,10 @@ export function GanttContainer({
             if (contentScroll) {
               contentScroll.scrollLeft = e.currentTarget.scrollLeft;
             }
-            // Preservar posición del scroll para evitar saltos
-            setPreservedScrollLeft(e.currentTarget.scrollLeft);
+            // Solo preservar si ya se hizo el auto-scroll inicial
+            if (autoScrolled) {
+              setPreservedScrollLeft(e.currentTarget.scrollLeft);
+            }
           }}
         >
           <style>
@@ -683,8 +685,10 @@ export function GanttContainer({
             if (headerScroll) {
               headerScroll.scrollLeft = e.currentTarget.scrollLeft;
             }
-            // Preservar posición del scroll para evitar saltos
-            setPreservedScrollLeft(e.currentTarget.scrollLeft);
+            // Solo preservar si ya se hizo el auto-scroll inicial
+            if (autoScrolled) {
+              setPreservedScrollLeft(e.currentTarget.scrollLeft);
+            }
           }}
         >
           {/* Contenido del timeline */}
