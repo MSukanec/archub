@@ -53,10 +53,18 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar únicamente la vista construction_gantt_view
+      // Usar la vista construction_gantt_view y unir con task_generated_view para obtener nombres completos
       const { data: ganttData, error } = await supabase
         .from('construction_gantt_view')
-        .select('*')
+        .select(`
+          *,
+          task_details:task_generated_view!task_id (
+            display_name,
+            rubro_name,
+            category_name,
+            unit_id
+          )
+        `)
         .eq('project_id', projectId)
         .order('phase_position', { ascending: true });
 
