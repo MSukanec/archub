@@ -169,12 +169,12 @@ export function GanttTimelineBar({
   const resizeStyles = isResizing ? 'ring-2 ring-orange-400 ring-opacity-70 shadow-lg' : '';
 
   // Funciones para drag & drop de redimensionamiento
-  const calculateDayFromX = useCallback((clientX: number, containerElement?: HTMLElement) => {
-    // Usar el contenedor padre del timeline para cálculos consistentes
-    const container = containerElement || barRef.current?.parentElement;
-    if (!container) return 0;
+  const calculateDayFromX = useCallback((clientX: number) => {
+    // Buscar el contenedor específico del timeline por ID
+    const timelineContainer = document.getElementById('timeline-content-scroll') as HTMLElement;
+    if (!timelineContainer) return 0;
     
-    const containerRect = container.getBoundingClientRect();
+    const containerRect = timelineContainer.getBoundingClientRect();
     const relativeX = Math.max(0, clientX - containerRect.left);
     const dayWidth = timelineWidth / totalDays;
     return Math.round(relativeX / dayWidth);
@@ -224,25 +224,8 @@ export function GanttTimelineBar({
         barRef.current.style.marginLeft = '';
       }
       
-      // DEBUG: Agregar logs temporales para entender el problema
-      const container = barRef.current?.parentElement;
-      const containerRect = container?.getBoundingClientRect();
-      const relativeX = e.clientX - (containerRect?.left || 0);
-      const dayWidth = timelineWidth / totalDays;
-      const calculatedDay = Math.round(relativeX / dayWidth);
-      
-      console.log('RESIZE DEBUG:', {
-        clientX: e.clientX,
-        containerLeft: containerRect?.left,
-        relativeX: relativeX,
-        dayWidth: dayWidth,
-        totalDays: totalDays,
-        calculatedDay: calculatedDay,
-        timelineWidth: timelineWidth
-      });
-      
-      // AQUÍ sí hacer el snap al día más cercano usando el container original
-      const newDay = Math.max(0, calculatedDay); // Asegurar que no sea negativo
+      // AQUÍ sí hacer el snap al día más cercano
+      const newDay = calculateDayFromX(e.clientX);
       const newDate = addDays(timelineStart, newDay);
       
       // Actualizar la tarea en la base de datos
