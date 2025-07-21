@@ -28,7 +28,7 @@ export default function ConstructionTasks() {
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
-  }, [])
+  }, [setSidebarContext])
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id

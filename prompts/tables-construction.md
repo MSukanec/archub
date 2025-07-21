@@ -61,6 +61,10 @@ VISTA CONSTRUCTION_GANTT_VIEW:
     "data_type": "integer"
   },
   {
+    "column_name": "quantity",
+    "data_type": "real"
+  },
+  {
     "column_name": "phase_instance_id",
     "data_type": "uuid"
   },
@@ -79,6 +83,14 @@ VISTA CONSTRUCTION_GANTT_VIEW:
   {
     "column_name": "unit_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "unit_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit_symbol",
+    "data_type": "text"
   },
   {
     "column_name": "display_name",

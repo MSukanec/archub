@@ -54,26 +54,17 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar construction_gantt_view que ya incluye display_name y unit_id
+      // Usar construction_gantt_view simplificada - ya incluye todos los campos necesarios
       const { data: ganttData, error } = await supabase
         .from('construction_gantt_view')
         .select(`
           *,
-          unit:units!unit_id (
-            id,
-            name,
-            symbol
-          ),
           task_rubro:task_generated_view!task_id (
             rubro_id,
             rubro:rubros!rubro_id (
               id,
               name
             )
-          ),
-          construction_task:construction_tasks!task_instance_id (
-            quantity,
-            param_values
           )
         `)
         .eq('project_id', projectId)
@@ -99,10 +90,11 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           project_id: item.project_id,
           task_id: item.task_id,
           task_code: item.task_code,
-          param_values: item.construction_task?.param_values || item.param_values,
+          param_values: item.param_values,
           start_date: item.start_date,
           end_date: item.end_date,
           duration_in_days: item.duration_in_days,
+          quantity: item.quantity || 0, // CANTIDAD DIRECTA DE LA VISTA
           
           // Campos de fase de la vista
           phase_instance_id: item.phase_instance_id,
@@ -113,39 +105,39 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           // Compatibilidad con sistema existente
           id: item.task_instance_id, // ID principal para compatibilidad
           organization_id: organizationId, // Del contexto
-          quantity: item.construction_task?.quantity || 0,
           
           // Crear objeto task para compatibilidad con componentes existentes
           task: {
             id: item.task_id,
             code: item.task_code,
-            display_name: item.display_name || item.task_code, // USAR EL DISPLAY_NAME DE LA VISTA
-            rubro_name: item.task_rubro?.rubro?.name || null, // DATOS DE RUBRO
+            display_name: item.display_name || item.task_code, // DISPLAY_NAME DIRECTO DE LA VISTA
+            rubro_name: item.task_rubro?.rubro?.name || null, // DATOS DE RUBRO VIA JOIN
             category_name: null,
             unit_id: item.unit_id,
-            unit_name: item.unit?.name || null, // DATOS DE UNIDAD
-            unit_symbol: item.unit?.symbol || null, // SÍMBOLO DE UNIDAD
+            unit_name: item.unit_name || null, // UNIT_NAME DIRECTO DE LA VISTA
+            unit_symbol: item.unit_symbol || null, // UNIT_SYMBOL DIRECTO DE LA VISTA
             rubro_id: item.task_rubro?.rubro_id || null,
-            param_values: item.construction_task?.param_values || item.param_values
+            param_values: item.param_values
           }
         };
       });
 
-      console.log('GANTT VIEW DATA:', {
+      console.log('UPDATED GANTT VIEW DATA:', {
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
         sample: {
-          code: mappedTasks[0]?.task?.code,
           display_name: mappedTasks[0]?.task?.display_name,
           rubro_name: mappedTasks[0]?.task?.rubro_name,
           unit_name: mappedTasks[0]?.task?.unit_name,
           unit_symbol: mappedTasks[0]?.task?.unit_symbol,
           quantity: mappedTasks[0]?.quantity,
-          raw_data: {
+          view_fields: {
             display_name: ganttData?.[0]?.display_name,
-            unit: ganttData?.[0]?.unit,
-            task_rubro: ganttData?.[0]?.task_rubro
+            unit_name: ganttData?.[0]?.unit_name,
+            unit_symbol: ganttData?.[0]?.unit_symbol,
+            quantity: ganttData?.[0]?.quantity,
+            rubro_join: ganttData?.[0]?.task_rubro?.rubro?.name
           }
         }
       });
