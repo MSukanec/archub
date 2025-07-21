@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { GanttRowProps } from './types';
 
 interface GanttDependenciesProps {
@@ -35,6 +35,12 @@ export function GanttDependencies({
   leftPanelWidth
 }: GanttDependenciesProps) {
   
+  const [arrowPaths, setArrowPaths] = useState<Array<{
+    id: string;
+    path: string;
+    dependency: any;
+  }>>([]);
+
   console.log('GanttDependencies rendering with:', {
     dependenciesCount: dependencies.length,
     dataCount: data.length,
@@ -100,41 +106,43 @@ export function GanttDependencies({
     return `M ${startX} ${startY} H ${midX1} V ${midY} H ${midX2}`;
   };
 
-  // Memoizar las flechas para evitar recálculos innecesarios
-  const arrowPaths = useMemo(() => {
-    console.log('useMemo arrowPaths calculating...', {
-      dependenciesLength: dependencies.length,
-      hasContainer: !!containerRef.current
-    });
-    
+  // Calcular las flechas cuando las tareas estén disponibles
+  useEffect(() => {
     if (!dependencies.length || !containerRef.current) {
-      console.log('Early return from arrowPaths useMemo');
-      return [];
+      setArrowPaths([]);
+      return;
     }
 
-    const paths = dependencies.map(dep => {
-      console.log('Processing dependency:', dep.id, 'from:', dep.predecessor_task_id, 'to:', dep.successor_task_id);
+    // Esperar un poco para que las tareas se rendericen
+    const timeoutId = setTimeout(() => {
+      console.log('useEffect calculating paths...');
       
-      const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
-      const toCoords = getTaskPosition(dep.successor_task_id, 'input');
+      const paths = dependencies.map(dep => {
+        console.log('Processing dependency:', dep.id, 'from:', dep.predecessor_task_id, 'to:', dep.successor_task_id);
+        
+        const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
+        const toCoords = getTaskPosition(dep.successor_task_id, 'input');
 
-      if (!fromCoords || !toCoords) {
-        console.log('Missing coordinates for dependency:', dep.id);
-        return null;
-      }
+        if (!fromCoords || !toCoords) {
+          console.log('Missing coordinates for dependency:', dep.id);
+          return null;
+        }
 
-      const pathString = generatePath(fromCoords, toCoords);
-      console.log('Generated path for dependency:', dep.id, pathString);
+        const pathString = generatePath(fromCoords, toCoords);
+        console.log('Generated path for dependency:', dep.id, pathString);
 
-      return {
-        id: dep.id,
-        path: pathString,
-        dependency: dep
-      };
-    }).filter(Boolean);
-    
-    console.log('Final arrowPaths count:', paths.length);
-    return paths;
+        return {
+          id: dep.id,
+          path: pathString,
+          dependency: dep
+        };
+      }).filter(Boolean);
+      
+      console.log('Final arrowPaths count:', paths.length);
+      setArrowPaths(paths);
+    }, 200);
+
+    return () => clearTimeout(timeoutId);
   }, [dependencies, data, timelineWidth, totalDays]);
 
   if (!arrowPaths.length) {
