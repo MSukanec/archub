@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. DHTMLX GANTT COMPLETELY ELIMINATED: Removed all DHTMLX code, dependencies, and references per user request - COMPLETED
+  • Uninstalled dhtmlx-gantt package completely from project dependencies
+  • Deleted DHtmlxGanttComponent.tsx file and all DHTMLX-related code from ConstructionSchedule.tsx
+  • Eliminated all DHTMLX warnings and obsolete scale configuration messages from console
+  • Project now uses exclusively our custom-built Gantt system with SVG dependency arrows
+  • Simplified ConstructionSchedule.tsx to use only GanttContainer without DHTMLX comparison section
+  • All Gantt functionality now relies on our native React components and Supabase integration
 - July 21, 2025. GANTT DEPENDENCY ARROWS VISUALIZATION SYSTEM COMPLETED: Successfully implemented professional SVG-based dependency visualization with proper coordinate positioning - COMPLETED
   • Refactored GanttDependencies from useMemo to useEffect with useState for proper DOM timing management
   • Fixed critical coordinate calculation issue: eliminated absolute positioning, now uses relative coordinates to timeline viewport

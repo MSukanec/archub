@@ -14,7 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
-import { DHtmlxGanttComponent } from '@/components/gantt/DHtmlxGanttComponent'
+
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
@@ -152,7 +152,7 @@ export default function ConstructionSchedule() {
   const handleEditPhase = (item: GanttRowProps) => {
     if (item.type !== 'phase' || !item.phaseData) return
     
-    openModal('construction-phase', {
+    openModal('phase', {
       projectId,
       organizationId,
       userId: userData?.user?.id,
@@ -414,33 +414,24 @@ export default function ConstructionSchedule() {
           }
         />
       ) : (
-        <div className="space-y-8">
-          {/* Nuestro Gantt actual */}
-          <GanttContainer
-            data={ganttData}
-            dependencies={dependencies}
-            onItemEdit={(item) => {
-              if (item.type === 'task') {
-                handleEditTask(item);
-              } else if (item.type === 'phase') {
-                handleEditPhase(item);
-              }
-            }}
-            onItemDelete={(item) => {
-              if (item.type === 'task') {
-                handleDeleteTaskFromGantt(item);
-              } else if (item.type === 'phase') {
-                handleDeletePhase(item);
-              }
-            }}
-          />
-          
-          {/* DHTMLX Gantt para comparación */}
-          <DHtmlxGanttComponent 
-            tasks={processedTasks}
-            phases={projectPhases}
-          />
-        </div>
+        <GanttContainer
+          data={ganttData}
+          dependencies={dependencies}
+          onItemEdit={(item) => {
+            if (item.type === 'task') {
+              handleEditTask(item);
+            } else if (item.type === 'phase') {
+              handleEditPhase(item);
+            }
+          }}
+          onItemDelete={(item) => {
+            if (item.type === 'task') {
+              handleDeleteTaskFromGantt(item);
+            } else if (item.type === 'phase') {
+              handleDeletePhase(item);
+            }
+          }}
+        />
       )}
     </Layout>
   )
