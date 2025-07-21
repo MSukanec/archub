@@ -15,6 +15,25 @@ import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
 
+// Función para limpiar nombres de tareas eliminando códigos y variables
+function cleanTaskDisplayName(name: string): string {
+  if (!name) return 'Tarea sin nombre'
+  
+  // Eliminar códigos al inicio (ej: "RPE-000001: ")
+  let cleanedName = name.replace(/^[A-Z]{2,4}-[0-9]{6}:\s*/, '')
+  
+  // Eliminar variables template (ej: "{{aditivos}}", "{{mortar_type}}")
+  cleanedName = cleanedName.replace(/\{\{[^}]*\}\}\.?/g, '')
+  
+  // Eliminar puntos sobrantes al final
+  cleanedName = cleanedName.replace(/\.\s*$/, '')
+  
+  // Limpiar espacios múltiples y trim
+  cleanedName = cleanedName.replace(/\s+/g, ' ').trim()
+  
+  return cleanedName || 'Tarea sin nombre'
+}
+
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
@@ -179,12 +198,13 @@ export default function ConstructionSchedule() {
   const filteredTasks = useMemo(() => {
     if (!searchValue.trim()) return processedTasks
     
-    return processedTasks.filter(task =>
-      task.task.processed_display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.task.rubro_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
-    )
+    return processedTasks.filter(task => {
+      const cleanName = cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || '')
+      return cleanName.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.task.rubro_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
+    })
   }, [processedTasks, searchValue])
 
   // Crear estructura Gantt con tareas organizadas dentro de fases
@@ -256,7 +276,7 @@ export default function ConstructionSchedule() {
 
           ganttRows.push({
             id: task.id,
-            name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
+            name: cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre'),
             type: 'task',
             level: 1,
             startDate: validStartDate,
@@ -296,7 +316,7 @@ export default function ConstructionSchedule() {
 
           ganttRows.push({
             id: task.id,
-            name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
+            name: cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre'),
             type: 'task',
             level: 1,
             startDate: validStartDate,
@@ -323,7 +343,7 @@ export default function ConstructionSchedule() {
 
         ganttRows.push({
           id: task.id,
-          name: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
+          name: cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre'),
           type: 'task',
           level: 0,
           startDate: validStartDate,

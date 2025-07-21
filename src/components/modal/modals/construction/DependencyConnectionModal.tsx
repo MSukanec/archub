@@ -53,7 +53,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
             Tarea Predecesora
           </div>
           <div className="text-sm font-medium">
-            {predecessorTask.code}: {predecessorTask.display_name}
+            {predecessorTask.display_name.replace(/\{\{[^}]*\}\}\.?/g, '').trim()}
           </div>
         </div>
         
@@ -70,7 +70,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
             Tarea Sucesora
           </div>
           <div className="text-sm font-medium">
-            {successorTask.code}: {successorTask.display_name}
+            {successorTask.display_name.replace(/\{\{[^}]*\}\}\.?/g, '').trim()}
           </div>
         </div>
       </div>
