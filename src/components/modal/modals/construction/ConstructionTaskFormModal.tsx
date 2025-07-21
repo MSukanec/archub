@@ -367,7 +367,16 @@ export function ConstructionTaskFormModal({
   );
 
   const editPanel = (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form 
+      onSubmit={handleSubmit(onSubmit)} 
+      className="space-y-6"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSubmit(onSubmit)();
+        }
+      }}
+    >
       {/* Task Selection */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>

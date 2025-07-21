@@ -187,27 +187,27 @@ export default function ConstructionTasks() {
     { 
       key: 'rubro', 
       label: 'Rubro',
-      className: 'w-[150px]'
+      className: 'w-[5%]'
     },
     { 
       key: 'tarea', 
       label: 'Tarea',
-      className: 'min-w-[250px]'
+      className: 'flex-1'
     },
     { 
       key: 'unidad', 
       label: 'Unidad',
-      className: 'w-[100px]'
+      className: 'w-[5%]'
     },
     { 
       key: 'cantidad', 
       label: 'Cantidad',
-      className: 'w-[100px] text-right'
+      className: 'w-[5%] text-right'
     },
     {
       key: 'progreso',
       label: 'Progreso',
-      className: 'w-[150px]',
+      className: 'w-[5%]',
       render: (item: any) => (
         <ProgressBar progress={item.progreso} />
       )
@@ -215,17 +215,17 @@ export default function ConstructionTasks() {
     { 
       key: 'fase', 
       label: 'Fase',
-      className: 'w-[150px]'
+      className: 'w-[5%]'
     },
     { 
       key: 'fechas', 
       label: 'Fechas',
-      className: 'w-[200px]'
+      className: 'w-[5%]'
     },
     {
       key: 'acciones',
       label: 'Acciones',
-      className: 'w-[120px]',
+      className: 'w-[5%]',
       render: (item: any) => (
         <div className="flex gap-1">
           <Button
