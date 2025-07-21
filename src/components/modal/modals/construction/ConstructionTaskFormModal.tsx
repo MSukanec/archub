@@ -11,7 +11,7 @@ import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButt
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wrench, ArrowLeft } from "lucide-react";
+import { Wrench, ArrowLeft, List } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
@@ -28,6 +28,7 @@ import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-te
 import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 import { generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
 import { Switch } from "@/components/ui/switch";
+import { TaskBulkSelector } from "@/components/ui-custom/TaskBulkSelector";
 
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -71,9 +72,11 @@ export function ConstructionTaskFormModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreatingCustomTask, setIsCreatingCustomTask] = useState(false);
   const [isCreatingTemplateTask, setIsCreatingTemplateTask] = useState(false);
+  const [isBulkSelecting, setIsBulkSelecting] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
   const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
+  const [bulkSelections, setBulkSelections] = useState<{taskId: string, quantity: number}[]>([]);
   
   const { data: userData } = useCurrentUser();
   const { setPanel, currentPanel } = useModalPanelStore();
@@ -500,6 +503,16 @@ export function ConstructionTaskFormModal({
               setPanel('subform');
             }}
           />
+          
+          <FormSubsectionButton
+            icon={<List />}
+            title="Selección en bulk"
+            description="Selecciona múltiples tareas de una vez con cantidades"
+            onClick={() => {
+              setIsBulkSelecting(true);
+              setPanel('subform');
+            }}
+          />
         </div>
       </div>
 
@@ -540,8 +553,118 @@ export function ConstructionTaskFormModal({
     createTemplateTaskMutation.mutate(data);
   };
 
-  // Panel del subformulario (templates o personalizada)
-  const subformPanel = isCreatingTemplateTask ? (
+  // Función para manejar envío de selecciones en bulk
+  const onBulkSubmit = async () => {
+    if (bulkSelections.length === 0) {
+      toast({
+        title: "Advertencia",
+        description: "No hay tareas seleccionadas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!userData?.user?.id || !currentMember?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo identificar el usuario",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Obtener la fase seleccionada del formulario principal
+    const phaseId = watch('project_phase_id');
+    if (!phaseId) {
+      toast({
+        title: "Error", 
+        description: "Debe seleccionar una fase del proyecto primero",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Crear todas las tareas en paralelo
+      await Promise.all(
+        bulkSelections.map(selection => 
+          createTask.mutateAsync({
+            organization_id: modalData.organizationId,
+            project_id: modalData.projectId,
+            task_id: selection.taskId,
+            quantity: selection.quantity,
+            created_by: currentMember.id,
+            project_phase_id: phaseId
+          })
+        )
+      );
+
+      toast({
+        title: "Éxito",
+        description: `Se agregaron ${bulkSelections.length} tareas correctamente`,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error('Error creating bulk tasks:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Panel del subformulario (templates, personalizada o bulk selection)
+  const subformPanel = isBulkSelecting ? (
+    // Subformulario para selección en bulk
+    <div className="space-y-6">
+      {/* Botón para volver */}
+      <div className="flex items-center space-x-2 mb-4">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setPanel('edit');
+            setIsBulkSelecting(false);
+            setBulkSelections([]);
+          }}
+          className="flex items-center space-x-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Volver a selección de tareas</span>
+        </Button>
+      </div>
+
+      {/* Componente de selección en bulk */}
+      <TaskBulkSelector
+        organizationId={modalData.organizationId}
+        selections={bulkSelections}
+        onSelectionChange={setBulkSelections}
+      />
+
+      {/* Botones de acción */}
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setPanel('edit');
+            setIsBulkSelecting(false);
+            setBulkSelections([]);
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={onBulkSubmit}
+          disabled={isSubmitting || bulkSelections.length === 0}
+        >
+          {isSubmitting ? "Creando tareas..." : `Agregar ${bulkSelections.length} tareas`}
+        </Button>
+      </div>
+    </div>
+  ) : isCreatingTemplateTask ? (
     // Subformulario para crear tarea desde template
     <form 
       onSubmit={templateTaskForm.handleSubmit(onTemplateTaskSubmit)} 
