@@ -1,5 +1,8 @@
 import { format } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
+import { useState, useRef } from 'react';
+import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
+import { toast } from '@/hooks/use-toast';
 
 interface GanttTimelineBarProps {
   item: GanttRowProps;
@@ -7,6 +10,14 @@ interface GanttTimelineBarProps {
   timelineEnd: Date;
   timelineWidth: number;
   totalDays: number; // Add this to sync with calendar
+  onConnectionDrag?: (dragData: {
+    fromTaskId: string;
+    fromPoint: 'start' | 'end';
+  } | null) => void;
+  dragConnectionData?: {
+    fromTaskId: string;
+    fromPoint: 'start' | 'end';
+  } | null;
 }
 
 export function GanttTimelineBar({ 
@@ -14,8 +25,13 @@ export function GanttTimelineBar({
   timelineStart, 
   timelineEnd, 
   timelineWidth,
-  totalDays
+  totalDays,
+  onConnectionDrag,
+  dragConnectionData
 }: GanttTimelineBarProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  const createDependency = useCreateConstructionDependency();
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
 
@@ -70,18 +86,103 @@ export function GanttTimelineBar({
     }
   };
 
+  // Handlers para drag & drop de conexiones
+  const handleConnectionStart = (e: React.MouseEvent, point: 'start' | 'end') => {
+    if (item.type !== 'task' || !item.taskData?.id) return;
+    
+    e.stopPropagation();
+    e.preventDefault();
+    
+    // Notificar al componente padre sobre el inicio del drag
+    onConnectionDrag?.({
+      fromTaskId: item.taskData.id,
+      fromPoint: point
+    });
+    
+    console.log('Starting connection from:', item.name, point);
+  };
+
+  const handleConnectionEnd = (e: React.MouseEvent) => {
+    if (!dragConnectionData || item.type !== 'task' || !item.taskData?.id) return;
+    
+    e.stopPropagation();
+    
+    const fromTaskId = dragConnectionData.fromTaskId;
+    const toTaskId = item.taskData.id;
+    
+    // Evitar conectar una tarea consigo misma
+    if (fromTaskId === toTaskId) {
+      onConnectionDrag?.(null);
+      return;
+    }
+    
+    // Determinar el tipo de dependencia basado en los puntos de conexión
+    let dependencyType = 'finish-to-start'; // Por defecto
+    if (dragConnectionData.fromPoint === 'end') {
+      dependencyType = 'finish-to-start'; // Más común: termina A -> empieza B
+    } else if (dragConnectionData.fromPoint === 'start') {
+      dependencyType = 'start-to-start'; // Empiezan al mismo tiempo
+    }
+    
+    // Crear la dependencia
+    createDependency.mutate({
+      predecessor_task_id: fromTaskId,
+      successor_task_id: toTaskId,
+      type: dependencyType,
+      lag_days: 0
+    });
+    
+    // Limpiar el estado de drag
+    onConnectionDrag?.(null);
+    
+    console.log('Created dependency:', fromTaskId, '->', toTaskId, 'type:', dependencyType);
+  };
+
+  // Solo mostrar puntos de conexión en tareas (no fases) y cuando hay hover
+  const shouldShowConnectionPoints = item.type === 'task' && isHovered;
+  
+  // Mostrar indicador visual cuando esta tarea puede recibir una conexión
+  const canReceiveConnection = dragConnectionData && item.type === 'task' && 
+                              item.taskData?.id !== dragConnectionData.fromTaskId;
+  
+  // Estilos adicionales cuando se está arrastrando una conexión
+  const dragStyles = canReceiveConnection ? 'ring-2 ring-blue-400 ring-opacity-50' : '';
+
   return (
     <div 
-      className={getBarStyle()}
+      ref={barRef}
+      className={`${getBarStyle()} ${dragStyles} relative group`}
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`
       }}
       title={`${item.name} (${format(startDate, 'dd/MM/yyyy')} - ${format(resolvedEndDate, 'dd/MM/yyyy')})`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onMouseUp={handleConnectionEnd}
     >
       <span className="truncate text-[10px]" style={{ padding: '0 2px' }}>
         {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
       </span>
+      
+      {/* Puntos de conexión que aparecen en hover */}
+      {shouldShowConnectionPoints && (
+        <>
+          {/* Punto izquierdo (inicio de tarea) */}
+          <div
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-blue-600 z-10"
+            onMouseDown={(e) => handleConnectionStart(e, 'start')}
+            title="Conectar desde el inicio de esta tarea"
+          />
+          
+          {/* Punto derecho (final de tarea) */}
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-green-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-green-600 z-10"
+            onMouseDown={(e) => handleConnectionStart(e, 'end')}
+            title="Conectar desde el final de esta tarea"
+          />
+        </>
+      )}
     </div>
   );
 }

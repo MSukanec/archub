@@ -15,6 +15,11 @@ export function GanttContainer({
   onEdit?: (item: GanttRowProps) => void;
   onDelete?: (item: GanttRowProps) => void;
 }) {
+  // Estado para manejar conexiones drag & drop entre tareas
+  const [dragConnectionData, setDragConnectionData] = useState<{
+    fromTaskId: string;
+    fromPoint: 'start' | 'end';
+  } | null>(null);
   // Estado para el ancho del panel izquierdo
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
     const saved = localStorage.getItem('gantt-left-panel-width');
@@ -544,6 +549,8 @@ export function GanttContainer({
                         timelineEnd={timelineEnd}
                         timelineWidth={timelineWidth}
                         totalDays={calendarStructure.totalDays}
+                        onConnectionDrag={setDragConnectionData}
+                        dragConnectionData={dragConnectionData}
                       />
                     </div>
 
