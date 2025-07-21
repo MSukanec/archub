@@ -5,7 +5,7 @@ import { Plus, Calendar, Clock, Activity, CheckSquare } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
-import { useProjectPhases } from '@/hooks/use-construction-phases'
+import { useProjectPhases, useUpdatePhasesDates } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -60,6 +60,21 @@ export default function ConstructionSchedule() {
   // Obtener las fases del proyecto y dependencias
   const { data: projectPhases = [] } = useProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
+  const updatePhasesDates = useUpdatePhasesDates()
+
+  // Función para actualizar fechas automáticamente
+  const handleUpdatePhasesDates = async () => {
+    if (!projectId || !organizationId) return
+    
+    try {
+      await updatePhasesDates.mutateAsync({
+        projectId,
+        organizationId
+      })
+    } catch (error) {
+      console.error('Error actualizando fechas de fases:', error)
+    }
+  }
 
   // Procesar los nombres de las tareas de forma simplificada
   const processedTasks = useMemo(() => {
@@ -192,19 +207,60 @@ export default function ConstructionSchedule() {
     // Si hay fases del proyecto, organizar tareas dentro de fases
     if (projectPhases.length > 0) {
       projectPhases.forEach((projectPhase) => {
-        // Validar y establecer fechas de la fase
-        let validStartDate = projectPhase.start_date;
-        let validEndDate = projectPhase.end_date;
-        let validDuration = projectPhase.duration_in_days;
+        // Filtrar tareas que pertenecen a esta fase del proyecto
+        const tasksInPhase = filteredTasks.filter(task => 
+          task.phase_name === projectPhase.phase.name
+        );
 
-        // Si no hay start_date, usar fecha de hoy
-        if (!validStartDate) {
-          validStartDate = new Date().toISOString().split('T')[0];
+        // Calcular fechas de inicio y fin basándose en las tareas de la fase
+        let phaseStartDate = projectPhase.start_date;
+        let phaseEndDate = projectPhase.end_date;
+        let phaseDuration = projectPhase.duration_in_days;
+
+        if (tasksInPhase.length > 0) {
+          // Encontrar la fecha de inicio más temprana de las tareas
+          const taskStartDates = tasksInPhase
+            .map(task => task.start_date)
+            .filter(date => date !== null && date !== undefined)
+            .sort();
+
+          // Encontrar la fecha de fin más tardía de las tareas
+          const taskEndDates = tasksInPhase
+            .map(task => {
+              if (task.end_date) {
+                return task.end_date;
+              } else if (task.start_date && task.duration_in_days) {
+                const startDate = new Date(task.start_date);
+                startDate.setDate(startDate.getDate() + task.duration_in_days - 1);
+                return startDate.toISOString().split('T')[0];
+              }
+              return null;
+            })
+            .filter(date => date !== null)
+            .sort().reverse();
+
+          // Actualizar fechas de la fase si hay tareas con fechas
+          if (taskStartDates.length > 0) {
+            phaseStartDate = taskStartDates[0];
+          }
+          if (taskEndDates.length > 0) {
+            phaseEndDate = taskEndDates[0];
+          }
+
+          // Calcular duración en días si tenemos ambas fechas
+          if (phaseStartDate && phaseEndDate) {
+            const startDate = new Date(phaseStartDate);
+            const endDate = new Date(phaseEndDate);
+            phaseDuration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          }
         }
 
-        // Si hay start_date pero no end_date ni duration, establecer duración de 7 días por defecto
-        if (validStartDate && !validEndDate && !validDuration) {
-          validDuration = 7;
+        // Si aún no hay fechas, usar valores por defecto
+        if (!phaseStartDate) {
+          phaseStartDate = new Date().toISOString().split('T')[0];
+        }
+        if (!phaseEndDate && !phaseDuration) {
+          phaseDuration = 7;
         }
 
         // Agregar la fase como fila de grupo (en mayúsculas)
@@ -214,16 +270,11 @@ export default function ConstructionSchedule() {
           type: 'phase',
           level: 0,
           isHeader: true,
-          startDate: validStartDate,
-          endDate: validEndDate,
-          durationInDays: validDuration,
+          startDate: phaseStartDate,
+          endDate: phaseEndDate,
+          durationInDays: phaseDuration,
           phaseData: projectPhase
         });
-
-        // Filtrar tareas que pertenecen a esta fase del proyecto
-        const tasksInPhase = filteredTasks.filter(task => 
-          task.phase_name === projectPhase.phase.name
-        );
 
         // Agregar las tareas de esta fase
         tasksInPhase.forEach((task) => {
@@ -344,6 +395,10 @@ export default function ConstructionSchedule() {
       <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
         <Plus className="h-4 w-4 mr-2" />
         Crear Fase
+      </Button>,
+      <Button key="update-dates" onClick={handleUpdatePhasesDates} variant="secondary" className="h-8 px-3 text-sm">
+        <Clock className="h-4 w-4 mr-2" />
+        Actualizar Fechas
       </Button>,
       <Button key="new-task" onClick={handleAddTask} className="h-8 px-3 text-sm">
         <Plus className="h-4 w-4 mr-2" />

@@ -199,6 +199,124 @@ export function useCreateProjectPhase() {
   });
 }
 
+// Hook para actualizar fechas automáticamente de las fases basándose en sus tareas
+export function useUpdatePhasesDates() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      projectId: string;
+      organizationId: string;
+    }) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+
+      console.log('Actualizando fechas automáticas de fases...');
+
+      // 1. Obtener todas las fases del proyecto
+      const { data: projectPhases, error: phasesError } = await supabase
+        .from("construction_project_phases")
+        .select(`
+          id,
+          project_id,
+          phase_id,
+          phase:construction_phases!inner (name)
+        `)
+        .eq("project_id", data.projectId);
+
+      if (phasesError) throw phasesError;
+
+      // 2. Obtener todas las tareas del proyecto con sus fechas
+      const { data: tasks, error: tasksError } = await supabase
+        .from("construction_gantt_view")
+        .select("id, start_date, end_date, duration_in_days, phase_name")
+        .eq("project_id", data.projectId)
+        .eq("organization_id", data.organizationId);
+
+      if (tasksError) throw tasksError;
+
+      // 3. Calcular fechas para cada fase
+      const phaseUpdates = [];
+      
+      for (const projectPhase of projectPhases || []) {
+        // Filtrar tareas de esta fase
+        const tasksInPhase = (tasks || []).filter(task => 
+          task.phase_name === projectPhase.phase.name
+        );
+
+        if (tasksInPhase.length > 0) {
+          // Encontrar fecha de inicio más temprana
+          const taskStartDates = tasksInPhase
+            .map(task => task.start_date)
+            .filter(date => date !== null && date !== undefined)
+            .sort();
+
+          // Encontrar fecha de fin más tardía
+          const taskEndDates = tasksInPhase
+            .map(task => {
+              if (task.end_date) {
+                return task.end_date;
+              } else if (task.start_date && task.duration_in_days) {
+                const startDate = new Date(task.start_date);
+                startDate.setDate(startDate.getDate() + task.duration_in_days - 1);
+                return startDate.toISOString().split('T')[0];
+              }
+              return null;
+            })
+            .filter(date => date !== null)
+            .sort().reverse();
+
+          if (taskStartDates.length > 0 && taskEndDates.length > 0) {
+            const phaseStartDate = taskStartDates[0];
+            const phaseEndDate = taskEndDates[0];
+            
+            // Calcular duración
+            const startDate = new Date(phaseStartDate);
+            const endDate = new Date(phaseEndDate);
+            const phaseDuration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+            phaseUpdates.push({
+              id: projectPhase.id,
+              start_date: phaseStartDate,
+              end_date: phaseEndDate,
+              duration_in_days: phaseDuration
+            });
+          }
+        }
+      }
+
+      // 4. Actualizar fechas en la base de datos
+      for (const update of phaseUpdates) {
+        const { error: updateError } = await supabase
+          .from("construction_project_phases")
+          .update({
+            start_date: update.start_date,
+            end_date: update.end_date,
+            duration_in_days: update.duration_in_days,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', update.id);
+
+        if (updateError) {
+          console.error('Error actualizando fase:', updateError);
+          throw updateError;
+        }
+      }
+
+      console.log(`Actualizadas ${phaseUpdates.length} fases automáticamente`);
+      return phaseUpdates;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidar queries para actualizar la UI
+      queryClient.invalidateQueries({ 
+        queryKey: ["project-phases", variables.projectId] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["construction-tasks", variables.projectId, variables.organizationId] 
+      });
+    },
+  });
+}
+
 // Hook para eliminar una fase de proyecto
 export function useDeleteProjectPhase() {
   const queryClient = useQueryClient();
