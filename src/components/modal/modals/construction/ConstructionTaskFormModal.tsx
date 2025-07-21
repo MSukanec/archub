@@ -11,13 +11,13 @@ import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButt
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Calendar, Wrench, ArrowLeft } from "lucide-react";
+import { Wrench, ArrowLeft } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateConstructionTask, useUpdateConstructionTask, useConstructionTasks } from "@/hooks/use-construction-tasks";
+import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
-import { useConstructionDependencies, useCreateConstructionDependency, useUpdateConstructionDependency, useDeleteConstructionDependency, detectCircularDependency } from "@/hooks/use-construction-dependencies";
+
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,15 +32,7 @@ import { Switch } from "@/components/ui/switch";
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
-  project_phase_id: z.string().optional(),
-  progress_percent: z.number().min(0).max(100).optional().default(0),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
-  duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
-  // Campos de dependencias
-  predecessor_task_id: z.string().optional(),
-  dependency_type: z.string().optional(),
-  lag_days: z.number().min(0, "El desfase debe ser 0 o mayor").optional()
+  project_phase_id: z.string().min(1, "Debe seleccionar una fase de proyecto")
 });
 
 // Esquema para el subformulario de tarea personalizada
@@ -92,14 +84,9 @@ export function ConstructionTaskFormModal({
   const { data: parameters, isLoading: parametersLoading, refetch: refetchParameters } = useTaskTemplateParameters(selectedTemplateId || null);
   const createGeneratedTask = useCreateGeneratedTask();
 
-  // Obtener tareas del proyecto para dependencias
-  const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
-  const { data: existingDependencies = [] } = useConstructionDependencies(modalData.projectId);
 
-  // Mutaciones para dependencias
-  const createDependencyMutation = useCreateConstructionDependency();
-  const updateDependencyMutation = useUpdateConstructionDependency();
-  const deleteDependencyMutation = useDeleteConstructionDependency();
+
+
 
   // Get current user's member_id
   const { data: currentMember } = useQuery({
@@ -184,15 +171,7 @@ export function ConstructionTaskFormModal({
     defaultValues: {
       task_id: "",
       quantity: 1,
-      project_phase_id: "",
-      progress_percent: 0,
-      start_date: "",
-      end_date: "",
-      duration_in_days: undefined,
-      // Campos de dependencias
-      predecessor_task_id: "",
-      dependency_type: "FS",
-      lag_days: 0
+      project_phase_id: ""
     }
   });
 
@@ -219,7 +198,7 @@ export function ConstructionTaskFormModal({
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
   const selectedTaskId = watch('task_id');
 
-  // Cargar datos cuando está en modo edición - reset completo del formulario
+  // Cargar datos cuando está en modo edición
   useEffect(() => {
     if (modalData.isEditing && modalData.editingTask) {
       const task = modalData.editingTask;
@@ -230,50 +209,18 @@ export function ConstructionTaskFormModal({
         setSearchQuery(task.task.display_name);
       }
       
-      // Reset completo del formulario con todos los valores
+      // Reset del formulario con valores básicos
       form.reset({
         task_id: task.task_id || '',
         quantity: task.quantity || 1,
-        project_phase_id: currentPhaseTask?.project_phase_id || '',
-        progress_percent: task.progress_percent || currentPhaseTask?.progress_percent || 0,
-        start_date: task.start_date || '',
-        end_date: task.end_date || '',
-        duration_in_days: task.duration_in_days || undefined,
-        predecessor_task_id: '',
-        dependency_type: 'FS',
-        lag_days: 0
+        project_phase_id: currentPhaseTask?.project_phase_id || ''
       });
     }
   }, [modalData.isEditing, modalData.editingTask, currentPhaseTask, form, setSearchQuery]);
 
-  // Cargar dependencia existente cuando estamos editando
-  useEffect(() => {
-    if (modalData.isEditing && modalData.editingTask?.id && existingDependencies.length > 0) {
-      const existingDependency = existingDependencies.find(
-        dep => dep.successor_task_id === modalData.editingTask.id
-      );
-      
-      if (existingDependency) {
-        setValue('predecessor_task_id', existingDependency.predecessor_task_id);
-        setValue('dependency_type', existingDependency.type || 'FS');
-        setValue('lag_days', existingDependency.lag_days || 0);
-      } else {
-        // Si no hay dependencia existente, limpiar los campos
-        setValue('predecessor_task_id', '');
-        setValue('dependency_type', 'FS');
-        setValue('lag_days', 0);
-      }
-    }
-  }, [modalData.isEditing, modalData.editingTask?.id, existingDependencies, setValue]);
 
-  // Limpiar fecha de inicio cuando se selecciona tarea predecesora
-  useEffect(() => {
-    const predecessorTask = watch('predecessor_task_id');
-    if (predecessorTask) {
-      // Si hay tarea predecesora, limpiar la fecha de inicio
-      setValue('start_date', '');
-    }
-  }, [watch('predecessor_task_id'), setValue]);
+
+
 
   // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
   const enhancedTaskOptions = useMemo(() => {
@@ -442,16 +389,6 @@ export function ConstructionTaskFormModal({
     setIsSubmitting(true);
     
     try {
-      // Calculate end_date if start_date and duration_in_days are provided
-      let endDate = data.end_date;
-      if (data.start_date && data.duration_in_days && !data.end_date) {
-        const startDate = new Date(data.start_date);
-        startDate.setDate(startDate.getDate() + data.duration_in_days);
-        endDate = startDate.toISOString().split('T')[0];
-      }
-
-      let taskId: string;
-
       if (modalData.isEditing && modalData.editingTask?.id) {
         // Update existing task
         await updateTask.mutateAsync({
@@ -459,63 +396,18 @@ export function ConstructionTaskFormModal({
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           quantity: data.quantity,
-          project_phase_id: data.project_phase_id || undefined,
-          progress_percent: data.progress_percent || 0,
-          start_date: data.start_date || undefined,
-          end_date: endDate || undefined,
-          duration_in_days: data.duration_in_days || undefined
+          project_phase_id: data.project_phase_id || undefined
         });
-        taskId = modalData.editingTask.id;
       } else {
         // Create new task
-        const newTask = await createTask.mutateAsync({
+        await createTask.mutateAsync({
           organization_id: modalData.organizationId,
           project_id: modalData.projectId,
           task_id: data.task_id,
           quantity: data.quantity,
           created_by: currentMember?.id || '',
-          project_phase_id: data.project_phase_id || undefined,
-          progress_percent: data.progress_percent || 0,
-          start_date: data.start_date || undefined,
-          end_date: endDate || undefined,
-          duration_in_days: data.duration_in_days || undefined
+          project_phase_id: data.project_phase_id || undefined
         });
-        taskId = newTask.id;
-      }
-
-      // Manejar dependencias
-      if (data.predecessor_task_id && data.predecessor_task_id !== 'empty-placeholder') {
-        // Buscar si ya existe una dependencia para esta tarea
-        const existingDependency = existingDependencies.find(
-          dep => dep.successor_task_id === taskId
-        );
-
-        if (existingDependency) {
-          // Actualizar dependencia existente
-          await updateDependencyMutation.mutateAsync({
-            id: existingDependency.id,
-            predecessor_task_id: data.predecessor_task_id,
-            type: data.dependency_type || "FS",
-            lag_days: data.lag_days || 0
-          });
-        } else {
-          // Crear nueva dependencia
-          await createDependencyMutation.mutateAsync({
-            predecessor_task_id: data.predecessor_task_id,
-            successor_task_id: taskId,
-            type: data.dependency_type || "FS",
-            lag_days: data.lag_days || 0
-          });
-        }
-      } else {
-        // Si no hay predecesora pero existía antes, eliminar la dependencia
-        const existingDependency = existingDependencies.find(
-          dep => dep.successor_task_id === taskId
-        );
-        
-        if (existingDependency) {
-          await deleteDependencyMutation.mutateAsync(existingDependency.id);
-        }
       }
 
       onClose();
@@ -545,6 +437,29 @@ export function ConstructionTaskFormModal({
         }
       }}
     >
+      {/* Phase Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="project_phase_id">Fase del Proyecto *</Label>
+        <Select 
+          value={watch('project_phase_id') || ""}
+          onValueChange={(value) => setValue('project_phase_id', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar fase del proyecto" />
+          </SelectTrigger>
+          <SelectContent>
+            {projectPhases.map((projectPhase) => (
+              <SelectItem key={projectPhase.id} value={projectPhase.id}>
+                {projectPhase.phase.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.project_phase_id && (
+          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
+        )}
+      </div>
+
       {/* Task Selection */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
@@ -610,189 +525,6 @@ export function ConstructionTaskFormModal({
         </div>
         {errors.quantity && (
           <p className="text-sm text-destructive">{errors.quantity.message}</p>
-        )}
-      </div>
-
-      {/* Cronograma de Tarea Section */}
-      <div className="space-y-4 border-t pt-4">
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-          <h3 className="text-sm font-medium text-foreground">Cronograma de Tarea</h3>
-        </div>
-        <span className="text-xs text-muted-foreground">
-          Detalles específicos del cronograma de construcción
-        </span>
-        
-        {/* 1. Phase Selection */}
-        <div className="space-y-2">
-          <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
-          <Select 
-            value={watch('project_phase_id') || ""}
-            onValueChange={(value) => setValue('project_phase_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar fase (opcional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {projectPhases.map((projectPhase) => (
-                <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                  {projectPhase.phase.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.project_phase_id && (
-            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-          )}
-        </div>
-
-        {/* 2. Predecessor Task */}
-        <div className="space-y-2">
-          <Label htmlFor="predecessor_task_id">Tarea Predecesora</Label>
-          <Select 
-            value={watch('predecessor_task_id') || ""}
-            onValueChange={(value) => {
-              const selectedPredecessor = value || "";
-              
-              // Validar dependencias circulares antes de establecer
-              if (selectedPredecessor && modalData.editingTask?.id) {
-                const wouldCreateCycle = detectCircularDependency(
-                  selectedPredecessor,
-                  modalData.editingTask.id,
-                  existingDependencies
-                );
-                
-                if (wouldCreateCycle) {
-                  toast({
-                    title: "Error",
-                    description: "Esta dependencia crearía un ciclo. Una tarea no puede depender de sí misma o crear dependencias circulares.",
-                    variant: "destructive"
-                  });
-                  return;
-                }
-              }
-              
-              setValue('predecessor_task_id', selectedPredecessor);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar tarea predecesora (opcional)" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Sin dependencia</SelectItem>
-              {projectTasks
-                .filter(task => 
-                  // Filtrar la tarea actual si estamos editando
-                  modalData.isEditing ? task.id !== modalData.editingTask?.id : true
-                )
-                .map((task) => (
-                  <SelectItem key={task.id} value={task.id}>
-                    {task.task?.code} - {task.task?.display_name?.slice(0, 50)}
-                    {(task.task?.display_name?.length || 0) > 50 ? '...' : ''}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-          {errors.predecessor_task_id && (
-            <p className="text-sm text-destructive">{errors.predecessor_task_id.message}</p>
-          )}
-        </div>
-
-        {/* 3. Start Date and Duration - Inline */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Start Date - solo si NO hay tarea predecesora */}
-          {!watch('predecessor_task_id') && (
-            <div className="space-y-2">
-              <Label htmlFor="start_date">Fecha de Inicio</Label>
-              <Input
-                type="date"
-                value={watch('start_date') || ''}
-                onChange={(e) => setValue('start_date', e.target.value)}
-                className="w-full"
-              />
-              {errors.start_date && (
-                <p className="text-sm text-destructive">{errors.start_date.message}</p>
-              )}
-            </div>
-          )}
-
-          {/* Duration */}
-          <div className="space-y-2">
-            <Label htmlFor="duration_in_days">Cantidad de Días</Label>
-            <Input
-              type="number"
-              min="1"
-              placeholder="Ej: 5"
-              value={watch('duration_in_days') || ''}
-              onChange={(e) => setValue('duration_in_days', parseInt(e.target.value) || 1)}
-              className="w-full"
-            />
-            {errors.duration_in_days && (
-              <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
-            )}
-          </div>
-        </div>
-
-        {/* 4. Progress Percentage */}
-        <div className="space-y-2">
-          <Label htmlFor="progress_percent">Progreso (%)</Label>
-          <Input
-            type="number"
-            min="0"
-            max="100"
-            placeholder="0"
-            value={watch('progress_percent') || ''}
-            onChange={(e) => setValue('progress_percent', parseInt(e.target.value) || 0)}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Porcentaje de progreso completado de la tarea (0-100%)
-          </p>
-          {errors.progress_percent && (
-            <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
-          )}
-        </div>
-
-        {/* Dependency Type */}
-        {watch('predecessor_task_id') && (
-          <div className="space-y-2">
-            <Label htmlFor="dependency_type">Tipo de Dependencia</Label>
-            <Select 
-              value={watch('dependency_type') || "FS"}
-              onValueChange={(value) => setValue('dependency_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="FS">FS (Finish-to-Start) - Inicia cuando termina la anterior</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.dependency_type && (
-              <p className="text-sm text-destructive">{errors.dependency_type.message}</p>
-            )}
-          </div>
-        )}
-
-        {/* Lag Days */}
-        {watch('predecessor_task_id') && (
-          <div className="space-y-2">
-            <Label htmlFor="lag_days">Desfase en días</Label>
-            <Input
-              type="number"
-              min="0"
-              placeholder="0"
-              value={watch('lag_days') || ''}
-              onChange={(e) => setValue('lag_days', parseInt(e.target.value) || 0)}
-              className="w-full"
-            />
-            <p className="text-xs text-muted-foreground">
-              Días adicionales de espera después de completar la tarea predecesora
-            </p>
-            {errors.lag_days && (
-              <p className="text-sm text-destructive">{errors.lag_days.message}</p>
-            )}
-          </div>
         )}
       </div>
     </form>
