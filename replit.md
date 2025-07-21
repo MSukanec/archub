@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT TASK BAR RESIZE SYSTEM PERFECTED AND CONNECTION POINTS REPOSITIONED: Successfully fixed coordinate calculation bug and improved UI positioning - COMPLETED
+  • Fixed critical coordinate calculation issue in resize operations using proper timeline-content-scroll container
+  • Root cause identified: missing scroll offset adjustment in position calculations (now uses adjustedX = clientX - containerLeft + scrollLeft)
+  • Implemented proper day calculation using timeline-content-scroll ID instead of incorrect container references
+  • Resize operations now snap to exact day positions where user releases mouse cursor, eliminating jumping behavior
+  • Connection points repositioned completely outside task bars using left: -10px and right: -10px positioning
+  • Separated connection points (z-index 30) from resize handles (z-index 20) to prevent visual conflicts
+  • Connection circles reduced to 12px (w-3 h-3) and positioned with style props for precise control
+  • System handles horizontal scroll seamlessly with proper coordinate transformation for precise day-level snapping
 - July 21, 2025. GANTT TASK BAR RESIZE SYSTEM PERFECTED: Successfully fixed coordinate calculation bug causing bars to jump to timeline start during resize operations - COMPLETED
   • Fixed critical coordinate calculation issue where bars jumped to timeline beginning when released during resize
   • Root cause identified: missing scroll offset adjustment in position calculations (containerLeft was -1640 indicating wrong container)

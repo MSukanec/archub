@@ -295,9 +295,27 @@ export function GanttTimelineBar({
         barRef.current.style.marginLeft = '';
       }
       
-      // AQUÍ sí hacer el snap al día más cercano
-      const newDay = calculateDayFromX(e.clientX);
+      // CORRECCIÓN CRÍTICA: usar el contenedor correcto y ajustar por scroll
+      const timelineContainer = document.getElementById('timeline-content-scroll') as HTMLElement;
+      if (!timelineContainer) return;
+      
+      const containerRect = timelineContainer.getBoundingClientRect();
+      const scrollLeft = timelineContainer.scrollLeft || 0;
+      const adjustedX = e.clientX - containerRect.left + scrollLeft;
+      
+      const dayWidth = timelineWidth / totalDays;
+      const newDay = Math.round(adjustedX / dayWidth);
       const newDate = addDays(timelineStart, newDay);
+      
+      console.log('Resize calculation:', {
+        clientX: e.clientX,
+        containerLeft: containerRect.left,
+        scrollLeft,
+        adjustedX,
+        dayWidth,
+        newDay,
+        newDate: format(newDate, 'yyyy-MM-dd')
+      });
       
       // Actualizar la tarea en la base de datos
       if (type === 'start') {
@@ -374,35 +392,37 @@ export function GanttTimelineBar({
       {/* Controles de redimensionamiento que aparecen en hover */}
       {shouldShowResizeHandles && (
         <>
-          {/* Handle de redimensionamiento izquierdo */}
+          {/* Handle de redimensionamiento izquierdo - SEPARADO de puntos de conexión */}
           <div
-            className="absolute left-0 top-0 w-2 h-full bg-orange-500 opacity-0 group-hover:opacity-80 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-l z-30"
+            className="absolute left-0 top-0 w-3 h-full bg-orange-500 opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-l z-20"
             onMouseDown={(e) => handleResizeStart(e, 'start')}
             title="Arrastrar para cambiar fecha de inicio"
           />
           
-          {/* Handle de redimensionamiento derecho */}
+          {/* Handle de redimensionamiento derecho - SEPARADO de puntos de conexión */}
           <div
-            className="absolute right-0 top-0 w-2 h-full bg-orange-500 opacity-0 group-hover:opacity-80 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-r z-30"
+            className="absolute right-0 top-0 w-3 h-full bg-orange-500 opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-r z-20"
             onMouseDown={(e) => handleResizeStart(e, 'end')}
             title="Arrastrar para cambiar fecha final"
           />
         </>
       )}
       
-      {/* Puntos de conexión que aparecen en hover - MÁS PROMINENTES Y FUERA DE LA BARRA */}
+      {/* Puntos de conexión claramente AFUERA de la barra como DHTMLX */}
       {shouldShowConnectionPoints && !isResizing && (
         <>
-          {/* Punto izquierdo (inicio de tarea) - MÁS FUERA DE LA BARRA */}
+          {/* Punto izquierdo - COMPLETAMENTE afuera de la barra */}
           <div
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-blue-600 hover:scale-110 z-20"
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-blue-600 hover:scale-125 z-30"
+            style={{ left: '-10px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
             title="Conectar desde el inicio de esta tarea"
           />
           
-          {/* Punto derecho (final de tarea) - MÁS FUERA DE LA BARRA */}
+          {/* Punto derecho - COMPLETAMENTE afuera de la barra */}
           <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-green-600 hover:scale-110 z-20"
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-green-600 hover:scale-125 z-30"
+            style={{ right: '-10px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
             title="Conectar desde el final de esta tarea"
           />
