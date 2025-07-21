@@ -361,7 +361,7 @@ export function GanttTimelineBar({
   return (
     <div 
       ref={barRef}
-      className={`${getBarStyle()} ${dragStyles} ${resizeStyles} ${barDragStyles} relative group`}
+      className={`${getBarStyle()} ${dragStyles} ${resizeStyles} ${barDragStyles} relative group overflow-visible`}
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`
@@ -408,23 +408,23 @@ export function GanttTimelineBar({
         </>
       )}
       
-      {/* Puntos de conexión como DHTMLX - visibles AFUERA en hover */}
+      {/* PUNTOS DE CONEXIÓN - SIEMPRE VISIBLES PARA PRUEBA */}
       {shouldShowConnectionPoints && (
         <>
-          {/* Punto izquierdo - como DHTMLX */}
+          {/* Punto izquierdo - SIEMPRE VISIBLE para probar */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gray-400 border border-gray-600 rounded-full cursor-crosshair opacity-0 hover:opacity-100 group-hover:opacity-100 transition-all duration-200 hover:bg-blue-500 hover:border-blue-700 z-40"
-            style={{ left: '-8px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50"
+            style={{ left: '-12px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
-            title="Conectar desde el inicio"
+            title="Conectar desde inicio"
           />
           
-          {/* Punto derecho - como DHTMLX */}
+          {/* Punto derecho - SIEMPRE VISIBLE para probar */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gray-400 border border-gray-600 rounded-full cursor-crosshair opacity-0 hover:opacity-100 group-hover:opacity-100 transition-all duration-200 hover:bg-green-500 hover:border-green-700 z-40"
-            style={{ right: '-8px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-green-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50"
+            style={{ right: '-12px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
-            title="Conectar desde el final"
+            title="Conectar desde final"
           />
         </>
       )}
