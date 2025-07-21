@@ -87,17 +87,20 @@ export function GanttDependencies({
     return { x: absoluteX, y: relativeY };
   };
 
-  // Función para generar el path SVG con offsets en ambos extremos
+  // Función para generar el path SVG con offsets en ambos extremos como en tu dibujo
   const generatePath = (from: { x: number; y: number }, to: { x: number; y: number }): string => {
     const offsetRight = 20; // Offset hacia la derecha desde la tarea origen
     const offsetLeft = 20;  // Offset hacia la izquierda hacia la tarea destino
     
-    // Si las tareas están en la misma fila (mismo Y), línea horizontal con offsets
+    // Si las tareas están en la misma fila (mismo Y), línea horizontal simple con offsets
     if (Math.abs(from.y - to.y) < 10) {
       return `M ${from.x} ${from.y} H ${from.x + offsetRight} H ${to.x - offsetLeft} H ${to.x}`;
     }
     
-    // Si están en filas diferentes: horizontal(offset) → vertical → horizontal(offset)
+    // Si están en filas diferentes: Horizontal → Vertical → Horizontal (como en tu dibujo rojo)
+    // 1. Salir horizontal desde origen con offset
+    // 2. Bajar/subir vertical hasta la fila destino  
+    // 3. Entrar horizontal hacia destino con offset
     return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${to.y} H ${to.x - offsetLeft} H ${to.x}`;
   };
 
