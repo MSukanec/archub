@@ -92,16 +92,15 @@ export function GanttDependencies({
     const offsetRight = 20; // Offset hacia la derecha desde la tarea origen
     const offsetLeft = 20;  // Offset hacia la izquierda hacia la tarea destino
     
-    // Si las tareas están en la misma fila (mismo Y), línea horizontal simple con offsets
-    if (Math.abs(from.y - to.y) < 10) {
+    const yDifference = Math.abs(from.y - to.y);
+    
+    // Si las tareas están exactamente en la misma fila, usar path horizontal directo
+    if (yDifference === 0) {
       return `M ${from.x} ${from.y} H ${from.x + offsetRight} H ${to.x - offsetLeft} H ${to.x}`;
     }
     
-    // Si están en filas diferentes: Horizontal → Vertical → Horizontal (como en tu dibujo rojo)
-    // 1. Salir horizontal desde origen con offset
-    // 2. Bajar/subir vertical hasta la fila destino  
-    // 3. Entrar horizontal hacia destino con offset
-    return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${to.y} H ${to.x - offsetLeft} H ${to.x}`;
+    // Para todas las demás dependencias: Horizontal → Vertical → Horizontal (como en tu dibujo)
+    return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${to.y} H ${to.x - offsetLeft} H ${to.x}`;;
   };
 
   // Efecto para escuchar scroll y forzar re-render
