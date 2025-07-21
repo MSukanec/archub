@@ -91,8 +91,14 @@ export function GanttDependencies({
       return `M ${from.x} ${from.y} H ${from.x + offsetRight} H ${to.x - offsetLeft} H ${to.x}`;
     }
     
-    // Para todas las demás dependencias: Horizontal → Vertical → Horizontal (como en tu dibujo)
-    return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${to.y} H ${to.x - offsetLeft} H ${to.x}`;;
+    // Para dependencias entre diferentes filas:
+    // 1. Salir horizontalmente desde el centro de la barra origen
+    // 2. Bajar/subir verticalmente hasta ENTRE las filas (punto medio)
+    // 3. Ir horizontalmente hasta cerca de la barra destino
+    // 4. Bajar/subir hasta el centro de la barra destino
+    const midY = (from.y + to.y) / 2; // Punto medio entre las dos filas
+    
+    return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${midY} H ${to.x - offsetLeft} V ${to.y} H ${to.x}`;
   };
 
   // Efecto para escuchar scroll y forzar re-render
