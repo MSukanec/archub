@@ -577,27 +577,57 @@ export function GanttContainer({
                       </span>
                     </div>
                     
-                    {/* Columna Inicio - 60px fijo */}
-                    <div className="w-[60px] px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
-                      {item.startDate && (
-                        <span className="text-xs text-foreground font-medium">
-                          {format(new Date(item.startDate), 'dd/MM', { locale: es })}
-                        </span>
-                      )}
+                    {/* Columna Inicio - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                      {(() => {
+                        if (item.type === 'phase') {
+                          const { startDate, isValid } = calculateResolvedEndDate(item);
+                          if (isValid && startDate) {
+                            return (
+                              <span className="text-xs text-foreground font-medium">
+                                {format(startDate, 'dd/MM/yy', { locale: es })}
+                              </span>
+                            );
+                          }
+                        } else if (item.startDate) {
+                          return (
+                            <span className="text-xs text-foreground font-medium">
+                              {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                     
-                    {/* Columna Días - 40px fijo */}
-                    <div className="w-[40px] px-1 flex items-center justify-center">
-                      {item.endDate && item.startDate && (
-                        <span className="text-xs text-foreground font-medium">
-                          {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
-                        </span>
-                      )}
+                    {/* Columna Días - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center">
+                      {(() => {
+                        if (item.type === 'phase') {
+                          const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
+                          if (isValid && startDate && resolvedEndDate) {
+                            const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                            return (
+                              <span className="text-xs text-foreground font-medium">
+                                {durationInDays}
+                              </span>
+                            );
+                          }
+                        } else if (item.endDate && item.startDate) {
+                          const durationInDays = Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          return (
+                            <span className="text-xs text-foreground font-medium">
+                              {durationInDays}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                     
                     {/* Botones de acción flotantes para fases header */}
                     {item.type === 'phase' && (onItemEdit || onItemDelete) && hoveredRowId === item.id && (
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
+                      <div className="absolute right-[152px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onItemEdit && (
                           <button
                             onClick={(e) => {
