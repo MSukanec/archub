@@ -67,7 +67,7 @@ export default function WorkloadOverTime({ data }: WorkloadOverTimeProps) {
       <CardContent className="pt-0">
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" opacity={0.3} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" strokeOpacity={0.5} />
             <XAxis 
               dataKey="week" 
               tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}

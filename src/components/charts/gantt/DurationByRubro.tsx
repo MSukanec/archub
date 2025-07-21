@@ -52,25 +52,25 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
       </CardHeader>
       <CardContent className="pt-0">
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={chartData} layout="horizontal" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" opacity={0.3} />
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 30 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid-text))" strokeOpacity={0.5} />
             <XAxis 
-              type="number"
-              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
-              tickFormatter={(value) => `${value}d`}
-              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
-              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
-            />
-            <YAxis 
-              type="category"
               dataKey="rubro"
               tick={{ fontSize: 10, fill: 'hsl(var(--chart-grid-text))' }}
-              width={100}
               axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
               tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis 
+              tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}
+              axisLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickLine={{ stroke: 'hsl(var(--chart-grid-text))', opacity: 0.3 }}
+              tickFormatter={(value) => `${value}d`}
             />
             <Tooltip 
-              formatter={(value: any) => [`${value.toFixed(1)} días`, 'Duración Promedio']}
+              formatter={(value: any) => [`${Number(value).toFixed(1)} días`, 'Duración Promedio']}
               labelFormatter={(label, payload) => {
                 const item = payload?.[0]?.payload
                 return `${item?.fullRubro || label} (${item?.totalTasks || 0} tareas)`
@@ -85,7 +85,7 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
             <Bar 
               dataKey="averageDuration" 
               fill="var(--chart-2)" 
-              radius={[0, 4, 4, 0]}
+              radius={[4, 4, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
