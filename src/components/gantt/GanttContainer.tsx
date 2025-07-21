@@ -130,8 +130,14 @@ export function GanttContainer({
     document.addEventListener('mouseup', handleMouseUp);
   }, [leftPanelWidth]);
 
-  // Calculate timeline bounds from all items and their children
+  // Calculate timeline bounds from all items and their children - solo en la primera carga
+  const [fixedTimelineBounds, setFixedTimelineBounds] = useState<{timelineStart: Date, timelineEnd: Date} | null>(null);
+  
   const { timelineStart, timelineEnd } = useMemo(() => {
+    // Si ya tenemos bounds fijos, usarlos siempre
+    if (fixedTimelineBounds) {
+      return fixedTimelineBounds;
+    }
     const getAllDates = (items: GanttRowProps[]): Date[] => {
       const dates: Date[] = [];
       
@@ -159,10 +165,14 @@ export function GanttContainer({
       const timelineStartRaw = new Date(normalizedToday.getTime() - 60 * 24 * 60 * 60 * 1000);
       const timelineEndRaw = new Date(normalizedToday.getTime() + 120 * 24 * 60 * 60 * 1000);
       
-      return {
+      const result = {
         timelineStart: new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate()),
         timelineEnd: new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate())
       };
+      
+      // Guardar estos bounds para que no cambien más
+      setFixedTimelineBounds(result);
+      return result;
     }
 
     // Normalize min and max dates to avoid UTC issues
@@ -187,11 +197,16 @@ export function GanttContainer({
       timelineEndCalculated: finalTimelineEnd.toDateString()
     });
     
-    return {
+    const result = {
       timelineStart: finalTimelineStart,
       timelineEnd: finalTimelineEnd
     };
-  }, [data]);
+    
+    // Guardar estos bounds para que no cambien más
+    setFixedTimelineBounds(result);
+    
+    return result;
+  }, [data, fixedTimelineBounds]);
 
   // FIXED: Calendar structure - Generate day by day to match timeline calculations exactly
   const calendarStructure = useMemo(() => {
