@@ -426,12 +426,12 @@ export function GanttContainer({
             style={{ width: `${leftPanelWidth - 100}px` }}>
             Fase / Tarea
           </div>
-          {/* Columna Inicio - 60px fijo */}
-          <div className="w-[60px] px-2 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
+          {/* Columna Inicio - 50px fijo */}
+          <div className="w-[50px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
             Inicio
           </div>
-          {/* Columna Días - 40px fijo */}
-          <div className="w-[40px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
+          {/* Columna Días - 50px fijo */}
+          <div className="w-[50px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
             Días
           </div>
         </div>
@@ -663,17 +663,17 @@ export function GanttContainer({
                       </span>
                     </div>
                     
-                    {/* Columna Inicio - 60px fijo */}
-                    <div className="w-[60px] px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                    {/* Columna Inicio - 50px fijo */}
+                    <div className="w-[50px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {item.startDate && (
                         <span className="text-xs text-[var(--table-row-fg)]">
-                          {format(new Date(item.startDate), 'dd/MM', { locale: es })}
+                          {format(new Date(item.startDate), 'dd/MM/yy', { locale: es })}
                         </span>
                       )}
                     </div>
                     
-                    {/* Columna Días - 40px fijo */}
-                    <div className="w-[40px] px-1 flex items-center justify-center">
+                    {/* Columna Días - 50px fijo */}
+                    <div className="w-[50px] px-1 flex items-center justify-center">
                       {item.endDate && item.startDate && (
                         <span className="text-xs text-[var(--table-row-fg)]">
                           {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
@@ -681,9 +681,9 @@ export function GanttContainer({
                       )}
                     </div>
                     
-                    {/* Floating Action buttons - aparecer SOBRE el texto */}
+                    {/* Floating Action buttons - al final de la columna FASE/TAREA */}
                     {(onItemEdit || onItemDelete) && hoveredRowId === item.id && (
-                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
+                      <div className="absolute right-[102px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onItemEdit && (
                           <button
                             onClick={(e) => {

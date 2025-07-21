@@ -128,9 +128,11 @@ Archub is a modern construction management platform built with a React frontend 
   • Optimized padding and spacing to prevent excessive row heights while maximizing content visibility
 - July 21, 2025. GANTT LEFT PANEL ENHANCEMENT COMPLETED: Added "Inicio" and "Días" columns with proper text truncation - COMPLETED
   • Added three-column layout to Gantt left panel: "Fase / Tarea", "Inicio", "Días"
-  • Implemented proper column width management with calculated width for name column (leftPanelWidth - 100px) and fixed widths for date columns (60px + 40px)
+  • Equalized column widths: INICIO and DÍAS now both use 50px for consistent appearance
+  • Enhanced date display: INICIO column shows full date format including year (dd/MM/yy)
+  • Repositioned action buttons to end of FASE/TAREA column instead of overlapping DÍAS column
+  • Implemented proper column width management with calculated width for name column (leftPanelWidth - 100px) and fixed widths for date columns (50px + 50px)
   • Added text truncation with overflow:hidden to prevent text overflow into adjacent columns
-  • "Inicio" column displays start dates in dd/MM format using date-fns formatting
   • "Días" column automatically calculates duration from start/end dates showing task/phase duration
   • Maintained all existing functionality: hover actions, phase collapse, edit/delete buttons
   • Enhanced user experience: users can now see task/phase dates and durations directly in left panel without needing to examine timeline bars
