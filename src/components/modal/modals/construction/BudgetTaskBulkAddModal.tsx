@@ -105,5 +105,14 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
     />
   );
 
-  return { viewPanel, editPanel, headerContent, footerContent };
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
+    />
+  );
 }

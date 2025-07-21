@@ -93,19 +93,8 @@ export function ModalFactory() {
       return <InstallmentFormModal modalData={data} onClose={closeModal} />;
     case 'dependency-connection':
       return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
-    case 'budget-task-bulk-add': {
-      const modalProps = BudgetTaskBulkAddModal({ modalData: data, onClose: closeModal });
-      return (
-        <FormModalLayout
-          columns={1}
-          viewPanel={modalProps.viewPanel}
-          editPanel={modalProps.editPanel}
-          headerContent={modalProps.headerContent}
-          footerContent={modalProps.footerContent}
-          onClose={closeModal}
-        />
-      );
-    }
+    case 'budget-task-bulk-add':
+      return <BudgetTaskBulkAddModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
