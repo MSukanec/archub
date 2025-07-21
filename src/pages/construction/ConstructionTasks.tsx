@@ -329,7 +329,6 @@ export default function ConstructionTasks() {
         <Table
           data={tableData}
           columns={tableColumns}
-          showSearch={false}
         />
       )}
     </Layout>

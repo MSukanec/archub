@@ -481,35 +481,44 @@ export default function ConstructionLogs() {
           ]}
         />
 
-        {/* Timeline Chart */}
-        <SiteLogTimelineChart 
-          data={siteLogTimelineData} 
-          isLoading={timelineLoading}
-          timePeriod={timePeriod}
-          onTimePeriodChange={setTimePeriod}
-        />
-
-
-
         {filteredSiteLogs.length === 0 ? (
-          <EmptyState
-            icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-            title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-            description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-            }
-            action={
-              !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-                <Button onClick={() => setShowNewSiteLogModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Entrada
-                </Button>
-              )
-            }
-          />
+          <div className="space-y-6">
+            {/* Timeline Chart */}
+            <SiteLogTimelineChart 
+              data={siteLogTimelineData} 
+              isLoading={timelineLoading}
+              timePeriod={timePeriod}
+              onTimePeriodChange={setTimePeriod}
+            />
+
+            <EmptyState
+              icon={<FileText className="w-12 h-12 text-muted-foreground" />}
+              title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+              description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+                ? 'Prueba ajustando los filtros de búsqueda' 
+                : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
+              }
+              action={
+                !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
+                  <Button onClick={() => setShowNewSiteLogModal(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crear Primera Entrada
+                  </Button>
+                )
+              }
+            />
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-6">
+            {/* Timeline Chart */}
+            <SiteLogTimelineChart 
+              data={siteLogTimelineData} 
+              isLoading={timelineLoading}
+              timePeriod={timePeriod}
+              onTimePeriodChange={setTimePeriod}
+            />
+            
+            <div className="space-y-3">
             {filteredSiteLogs.map((siteLog: any) => {
               const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
               const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
@@ -796,6 +805,7 @@ export default function ConstructionLogs() {
                 </Collapsible>
               );
             })}
+            </div>
           </div>
         )}
       </div>
