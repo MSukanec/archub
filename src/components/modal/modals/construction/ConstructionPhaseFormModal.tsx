@@ -22,9 +22,6 @@ import { useQueryClient } from "@tanstack/react-query";
 const phaseSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().optional(),
-  // Campos para agregar al proyecto
-  start_date: z.string().optional(),
-  duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
   use_existing_phase: z.boolean().optional(),
   existing_phase_id: z.string().optional(),
 });
@@ -91,8 +88,6 @@ export function ConstructionPhaseFormModal({
     defaultValues: {
       name: modalData.isEditing ? modalData.editingPhase?.phase?.name || "" : "",
       description: modalData.isEditing ? modalData.editingPhase?.phase?.description || "" : "",
-      start_date: modalData.isEditing ? modalData.editingPhase?.start_date || "" : "",
-      duration_in_days: modalData.isEditing ? modalData.editingPhase?.duration_in_days || undefined : undefined,
       use_existing_phase: false,
       existing_phase_id: "",
     }
@@ -140,21 +135,7 @@ export function ConstructionPhaseFormModal({
           throw phaseError;
         }
 
-        // Actualizar la información del proyecto_fase
-        const updateData: any = {
-          start_date: data.start_date || null,
-          duration_in_days: data.duration_in_days || null,
-        };
-
-        const { error: projectPhaseError } = await supabase
-          .from("construction_project_phases")
-          .update(updateData)
-          .eq("id", modalData.editingPhase.id);
-
-        if (projectPhaseError) {
-          console.error("Error updating project phase:", projectPhaseError);
-          throw projectPhaseError;
-        }
+        // Las fechas se calculan automáticamente, no necesitamos actualizar construction_project_phases
 
         // Invalidar cache para refrescar el Gantt
         queryClient.invalidateQueries({ queryKey: ["project-phases", modalData.projectId] });
@@ -189,12 +170,10 @@ export function ConstructionPhaseFormModal({
           return;
         }
 
-        // Add phase to project
+        // Add phase to project (fechas se calculan automáticamente)
         await createProjectPhase.mutateAsync({
           project_id: modalData.projectId,
           phase_id: phaseId,
-          start_date: data.start_date || undefined,
-          duration_in_days: data.duration_in_days || undefined,
           created_by: currentMember.id,
         });
 
@@ -250,7 +229,7 @@ export function ConstructionPhaseFormModal({
             <SelectContent>
               {existingPhases.map((phase) => (
                 <SelectItem key={phase.id} value={phase.id}>
-                  {phase.name} {phase.default_duration ? `(${phase.default_duration} días)` : ''}
+                  {phase.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -283,39 +262,8 @@ export function ConstructionPhaseFormModal({
               rows={3}
             />
           </div>
-
-
         </div>
       )}
-
-      {/* Project-specific fields */}
-      <div className="border-t pt-6">
-        <h4 className="text-sm font-medium mb-4">Configuración en el Proyecto</h4>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="start_date">Fecha de Inicio</Label>
-            <Input
-              id="start_date"
-              type="date"
-              {...register('start_date')}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="duration_in_days">Duración (días)</Label>
-            <Input
-              id="duration_in_days"
-              type="number"
-              min="1"
-              placeholder="30"
-              {...register('duration_in_days', { valueAsNumber: true })}
-            />
-          </div>
-        </div>
-
-
-      </div>
     </div>
   );
 
@@ -332,7 +280,7 @@ export function ConstructionPhaseFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Crear Fase"}
       onRightClick={handleSubmit(onSubmit)}
-      loading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 

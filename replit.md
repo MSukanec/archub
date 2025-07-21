@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. PHASE MODAL SIMPLIFICATION COMPLETED: Eliminated manual date configuration from phase modal as dates now calculate automatically - COMPLETED
+  • Removed entire "Configuración en el Proyecto" section from phase creation/editing modal
+  • Eliminated start_date and duration_in_days fields from phase schema and form since dates calculate automatically from contained tasks
+  • Simplified phase creation workflow: users only need to provide name and description
+  • Updated phase creation mutations to exclude manual date fields - system uses automatic calculation instead
+  • Enhanced user experience: no more manual date management, phases automatically span their contained tasks' date range
+  • Modal now focuses on essential phase information while dates are handled transparently by the automatic calculation system
 - July 21, 2025. PHASE BAR VISUALIZATION SYSTEM COMPLETED: Fixed critical bug preventing phase bars from appearing in Gantt timeline view - COMPLETED
   • Root cause identified: calculateResolvedEndDate function was incorrectly excluding all isHeader=true elements from showing bars
   • Modified validation logic in types.ts to allow phase elements with dates to display bars while still blocking groups without dates
