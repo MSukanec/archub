@@ -581,12 +581,18 @@ export default function ConstructionSchedule() {
 
       {/* Tabs Container */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 border">
-          <TabsTrigger value="gantt" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 border bg-card p-1 rounded-lg">
+          <TabsTrigger 
+            value="gantt" 
+            className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+          >
             <BarChart3 className="h-4 w-4" />
             Vista Gantt
           </TabsTrigger>
-          <TabsTrigger value="table" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="table" 
+            className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+          >
             <Table className="h-4 w-4" />
             Listado de Tareas
           </TabsTrigger>
