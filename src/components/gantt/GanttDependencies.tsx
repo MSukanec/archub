@@ -68,16 +68,16 @@ export function GanttDependencies({
     const taskRect = taskElement.getBoundingClientRect();
     const timelineRect = timelineElement.getBoundingClientRect();
     
-    // Calcular posición relativa al SVG considerando el scroll
+    // Calcular posición relativa al SVG SIN considerar el scroll (posición viewport)
     const relativeY = taskRect.top - timelineRect.top + (taskRect.height / 2);
     
     let relativeX: number;
     if (connectorType === 'output') {
       // Conector de salida: lado derecho de la tarea + 8px hacia afuera
-      relativeX = taskRect.right - timelineRect.left + timelineElement.scrollLeft + 8;
+      relativeX = taskRect.right - timelineRect.left + 8;
     } else {
       // Conector de entrada: lado izquierdo de la tarea - 8px hacia afuera  
-      relativeX = taskRect.left - timelineRect.left + timelineElement.scrollLeft - 8;
+      relativeX = taskRect.left - timelineRect.left - 8;
     }
 
     const result = { x: relativeX, y: relativeY };
@@ -150,11 +150,11 @@ export function GanttDependencies({
   }
 
   // console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
-
+  
   return (
     <svg 
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 50 }}
+      style={{ zIndex: 100 }}
     >
       {/* Definir el marcador de flecha */}
       <defs>
