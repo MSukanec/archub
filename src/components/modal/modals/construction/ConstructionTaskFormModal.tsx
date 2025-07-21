@@ -662,9 +662,10 @@ export function ConstructionTaskFormModal({
             <div className="p-3 bg-muted rounded-md">
               <p className="text-sm text-muted-foreground">
                 {generatePreviewDescription(
-                  templates?.find(t => t.id === selectedTemplateId),
+                  templates?.find(t => t.id === selectedTemplateId)?.name_template || '',
+                  paramValues,
                   parameters,
-                  paramValues
+                  parameterOptions
                 )}
               </p>
             </div>
@@ -880,7 +881,7 @@ export function ConstructionTaskFormModal({
           ? "Editar Tarea de Construcción" 
           : "Agregar Tarea de Construcción"
       }
-      icon={currentPanel === 'subform' ? Wrench : Plus}
+      icon={currentPanel === 'subform' ? Wrench : Wrench}
     />
   );
 
@@ -896,7 +897,6 @@ export function ConstructionTaskFormModal({
   return (
     <FormModalLayout
       columns={1}
-      size="large" // Tamaño fijo para el modal
       viewPanel={viewPanel}
       editPanel={editPanel}
       subformPanel={subformPanel}
