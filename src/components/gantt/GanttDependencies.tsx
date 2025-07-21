@@ -41,47 +41,47 @@ export function GanttDependencies({
     dependency: any;
   }>>([]);
 
-  console.log('GanttDependencies rendering with:', {
-    dependenciesCount: dependencies.length,
-    dataCount: data.length,
-    timelineWidth,
-    totalDays
-  });
+  // console.log('GanttDependencies rendering with:', {
+  //   dependenciesCount: dependencies.length,
+  //   dataCount: data.length,
+  //   timelineWidth,
+  //   totalDays
+  // });
 
   // Función para obtener las coordenadas de una tarea
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
     const taskElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineElement = containerRef.current;
     
-    console.log('getTaskPosition called:', {
-      taskId,
-      connectorType,
-      taskElement: !!taskElement,
-      timelineElement: !!timelineElement
-    });
+    // console.log('getTaskPosition called:', {
+    //   taskId,
+    //   connectorType,
+    //   taskElement: !!taskElement,
+    //   timelineElement: !!timelineElement
+    // });
     
     if (!taskElement || !timelineElement) {
-      console.log('Missing elements for task:', taskId);
+      // console.log('Missing elements for task:', taskId);
       return null;
     }
 
     const taskRect = taskElement.getBoundingClientRect();
     const timelineRect = timelineElement.getBoundingClientRect();
     
-    // Calcular posición relativa al SVG (que está absolute dentro del timeline)
+    // Calcular posición relativa al SVG considerando el scroll
     const relativeY = taskRect.top - timelineRect.top + (taskRect.height / 2);
     
     let relativeX: number;
     if (connectorType === 'output') {
       // Conector de salida: lado derecho de la tarea + 8px hacia afuera
-      relativeX = taskRect.right - timelineRect.left + 8;
+      relativeX = taskRect.right - timelineRect.left + timelineElement.scrollLeft + 8;
     } else {
-      // Conector de entrada: lado izquierdo de la tarea - 8px hacia afuera
-      relativeX = taskRect.left - timelineRect.left - 8;
+      // Conector de entrada: lado izquierdo de la tarea - 8px hacia afuera  
+      relativeX = taskRect.left - timelineRect.left + timelineElement.scrollLeft - 8;
     }
 
     const result = { x: relativeX, y: relativeY };
-    console.log('getTaskPosition result:', result);
+    // console.log('getTaskPosition result:', result);
     return result;
   };
 
@@ -115,21 +115,21 @@ export function GanttDependencies({
 
     // Esperar un poco para que las tareas se rendericen
     const timeoutId = setTimeout(() => {
-      console.log('useEffect calculating paths...');
+      // console.log('useEffect calculating paths...');
       
       const paths = dependencies.map(dep => {
-        console.log('Processing dependency:', dep.id, 'from:', dep.predecessor_task_id, 'to:', dep.successor_task_id);
+        // console.log('Processing dependency:', dep.id, 'from:', dep.predecessor_task_id, 'to:', dep.successor_task_id);
         
         const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
         const toCoords = getTaskPosition(dep.successor_task_id, 'input');
 
         if (!fromCoords || !toCoords) {
-          console.log('Missing coordinates for dependency:', dep.id);
+          // console.log('Missing coordinates for dependency:', dep.id);
           return null;
         }
 
         const pathString = generatePath(fromCoords, toCoords);
-        console.log('Generated path for dependency:', dep.id, pathString);
+        // console.log('Generated path for dependency:', dep.id, pathString);
 
         return {
           id: dep.id,
@@ -138,7 +138,7 @@ export function GanttDependencies({
         };
       }).filter(Boolean);
       
-      console.log('Final arrowPaths count:', paths.length);
+      // console.log('Final arrowPaths count:', paths.length);
       setArrowPaths(paths);
     }, 200);
 
@@ -146,11 +146,10 @@ export function GanttDependencies({
   }, [dependencies, data, timelineWidth, totalDays]);
 
   if (!arrowPaths.length) {
-    console.log('No arrowPaths, returning null');
     return null;
   }
 
-  console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
+  // console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
 
   return (
     <svg 
@@ -170,9 +169,7 @@ export function GanttDependencies({
         >
           <polygon
             points="0,0 0,6 8,3"
-            fill="#ff0000"
-            stroke="white"
-            strokeWidth="1"
+            fill="var(--table-row-fg)"
           />
         </marker>
       </defs>
@@ -194,18 +191,18 @@ export function GanttDependencies({
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* Línea principal roja */}
+            {/* Línea principal con color del borde de barras */}
             <path
               d={arrow.path}
-              stroke="#ef4444"
+              stroke="var(--table-row-fg)"
               strokeWidth="2"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
               markerEnd="url(#arrowhead)"
-              className="pointer-events-auto hover:stroke-red-600 cursor-pointer transition-colors duration-200"
+              className="pointer-events-auto hover:opacity-80 cursor-pointer transition-opacity duration-200"
               onClick={() => {
-                console.log('Dependency clicked:', arrow.dependency);
+                // console.log('Dependency clicked:', arrow.dependency);
                 // Aquí se puede agregar modal de edición de dependencia
               }}
             />
