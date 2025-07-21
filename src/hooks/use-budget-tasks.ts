@@ -6,13 +6,8 @@ export interface BudgetTask {
   id: string;
   budget_id: string;
   task_id: string;
-  quantity: number;
-  start_date: string | null;
-  end_date: string | null;
-  planned_days: number | null;
-  priority: string | null;
-  dependencies: string[];
   organization_id: string;
+  project_id: string;
   created_at: string;
   updated_at: string;
   // Datos de la tarea relacionada (construction_gantt_view)
@@ -47,13 +42,8 @@ export interface BudgetTask {
 export interface CreateBudgetTaskData {
   budget_id: string;
   task_id: string;
-  quantity: number;
-  start_date?: string | null;
-  end_date?: string | null;
-  planned_days?: number | null;
-  priority?: string | null;
-  dependencies?: string[];
   organization_id: string;
+  project_id: string;
 }
 
 export interface UpdateBudgetTaskData extends CreateBudgetTaskData {

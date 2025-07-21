@@ -25,13 +25,12 @@ interface PendingTask {
   id: string;
   task_id: string;
   task_name: string;
-  quantity: number;
   unit_name?: string;
+  quantity?: number; // La cantidad viene de la vista, no del usuario
 }
 
 const addTaskSchema = z.object({
-  task_id: z.string().min(1, "Debe seleccionar una tarea"),
-  quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0")
+  task_id: z.string().min(1, "Debe seleccionar una tarea")
 });
 
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
@@ -77,8 +76,7 @@ export default function NewBudgetTaskModal({
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
-      task_id: "",
-      quantity: 1
+      task_id: ""
     }
   });
 
@@ -94,8 +92,7 @@ export default function NewBudgetTaskModal({
   useEffect(() => {
     if (open) {
       reset({
-        task_id: "",
-        quantity: 1
+        task_id: ""
       });
       setPendingTasks([]);
     }
@@ -121,7 +118,6 @@ export default function NewBudgetTaskModal({
       id: `temp-${Date.now()}`,
       task_id: newTask.id,
       task_name: taskName,
-      quantity: 1,
       unit_name: newTask.unit_name
     };
     
@@ -162,16 +158,15 @@ export default function NewBudgetTaskModal({
       id: `temp-${Date.now()}`,
       task_id: data.task_id,
       task_name: selectedTask.display_name || selectedTask.task_code || 'Sin nombre',
-      quantity: data.quantity,
-      unit_name: selectedTask.unit_name
+      unit_name: selectedTask.unit_name,
+      quantity: selectedTask.quantity // La cantidad viene de la vista
     };
 
     setPendingTasks(prev => [...prev, newPendingTask]);
     
     // Reset form
     reset({
-      task_id: "",
-      quantity: 1
+      task_id: ""
     });
 
     toast({
@@ -185,13 +180,7 @@ export default function NewBudgetTaskModal({
     setPendingTasks(prev => prev.filter(pt => pt.id !== taskId));
   };
 
-  // Actualizar cantidad de tarea pendiente
-  const updatePendingTaskQuantity = (taskId: string, quantity: number) => {
-    if (quantity <= 0) return;
-    setPendingTasks(prev => 
-      prev.map(pt => pt.id === taskId ? { ...pt, quantity } : pt)
-    );
-  };
+  // Esta función ya no es necesaria porque quantity viene de la vista
 
   // Guardar todas las tareas pendientes
   const saveAllTasks = async () => {
@@ -211,8 +200,8 @@ export default function NewBudgetTaskModal({
         createBudgetTask.mutateAsync({
           budget_id: budgetId,
           task_id: task.task_id,
-          quantity: task.quantity,
-          organization_id: organizationId
+          organization_id: organizationId,
+          project_id: userData?.preferences?.last_project_id || ''
         })
       );
 

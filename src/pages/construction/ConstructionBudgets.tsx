@@ -160,7 +160,7 @@ export default function ConstructionBudgets() {
   
   // Quick Add Task states
   const [quickTaskId, setQuickTaskId] = useState<string>('')
-  const [quickQuantity, setQuickQuantity] = useState<number>(1)
+  // quickQuantity ya no es necesario porque viene de la vista construction_gantt_view
   const [quickSearchQuery, setQuickSearchQuery] = useState('')
   const [taskFilters, setTaskFilters] = useState<ConstructionTaskSearchFilters>({})
   const [isAddingQuickTask, setIsAddingQuickTask] = useState(false)
@@ -263,13 +263,12 @@ export default function ConstructionBudgets() {
       await createBudgetTaskMutation.mutateAsync({
         budget_id: selectedBudgetId,
         task_id: quickTaskId,
-        quantity: quickQuantity,
-        organization_id: userData.organization.id
+        organization_id: userData.organization.id,
+        project_id: userData.preferences?.last_project_id || ''
       });
       
       // Reset form
       setQuickTaskId('');
-      setQuickQuantity(1);
       setQuickSearchQuery('');
       
       toast({
@@ -813,28 +812,6 @@ export default function ConstructionBudgets() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-16 sm:w-20">
-                      <Input
-                        type="number"
-                        value={quickQuantity}
-                        onChange={(e) => setQuickQuantity(Number(e.target.value) || 1)}
-                        placeholder="1"
-                        min="1"
-                        step="0.01"
-                        className="text-center"
-                        style={{
-                          MozAppearance: 'textfield', // Firefox
-                          WebkitAppearance: 'none', // Chrome/Safari
-                        }}
-                        onWheel={(e) => e.preventDefault()} // Disable mouse wheel
-                      />
-                    </div>
-                    {quickTaskId && getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id) && (
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {getUnitName(quickTasks.find(t => t.id === quickTaskId)?.unit_id)}
-                      </span>
-                    )}
-                    
                     <Button
                       onClick={handleQuickAddTask}
                       disabled={!quickTaskId || isAddingQuickTask}
@@ -894,9 +871,8 @@ export default function ConstructionBudgets() {
           open={customTaskModalOpen}
           onClose={() => setCustomTaskModalOpen(false)}
           onTaskCreated={(taskId) => {
-            // Auto-select the created task and set quantity to 1
+            // Auto-select the created task
             setQuickTaskId(taskId)
-            setQuickQuantity(1)
             setCustomTaskModalOpen(false)
             
             // Automatically add the created task to the budget
@@ -904,8 +880,8 @@ export default function ConstructionBudgets() {
               createBudgetTaskMutation.mutate({
                 budget_id: selectedBudget.id,
                 task_id: taskId,
-                quantity: 1,
-                organization_id: userData.preferences.last_organization_id
+                organization_id: userData.preferences.last_organization_id,
+                project_id: userData.preferences?.last_project_id || ''
               });
             }
           }}
