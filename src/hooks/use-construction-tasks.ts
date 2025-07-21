@@ -107,9 +107,11 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
-        sampleTaskCode: mappedTasks[0]?.task?.code,
-        sampleTaskName: mappedTasks[0]?.task?.display_name,
-        rawTaskName: ganttData?.[0]?.task_name
+        rawSample: {
+          task_code: ganttData?.[0]?.task_code,
+          task_name: ganttData?.[0]?.task_name,
+          mappedDisplayName: mappedTasks[0]?.task?.display_name
+        }
       });
 
       return mappedTasks;
