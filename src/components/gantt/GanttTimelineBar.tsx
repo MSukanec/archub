@@ -2,7 +2,7 @@ import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
-import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag } from '@/hooks/use-construction-tasks';
+import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag, ConstructionTask } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -313,29 +313,45 @@ export function GanttTimelineBar({
       });
       
       if (item.taskData?.id) {
-        // Usar el hook específico de drag que NO invalida caché automáticamente
+        // OPTIMISTIC UPDATE: Actualizar caché inmediatamente antes de la mutación
+        queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
+          if (!oldData) return oldData;
+          
+          return oldData.map(task => {
+            if (task.id === item.taskData?.id) {
+              return {
+                ...task,
+                start_date: format(newStartDate, 'yyyy-MM-dd'),
+                end_date: format(newEndDate, 'yyyy-MM-dd'),
+                duration_in_days: originalDuration
+              };
+            }
+            return task;
+          });
+        });
+        
+        // Actualizar flechas inmediatamente con los nuevos datos
+        onTaskUpdate?.();
+        
+        // Después enviar la actualización a la base de datos en background
         updateTaskDrag.mutateAsync({
           id: item.taskData.id,
           start_date: format(newStartDate, 'yyyy-MM-dd'),
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
-        }).then(() => {
-          console.log('DRAG UPDATE SUCCESS - Invalidating cache manually');
+        }).catch((error) => {
+          console.error('DRAG UPDATE ERROR - Reverting optimistic update:', error);
           
-          // Invalidar caché manualmente SOLO después del drag exitoso
+          // Si falla, revertir el update optimista
           queryClient.invalidateQueries({ 
             queryKey: ['construction-tasks'] 
           });
-          queryClient.invalidateQueries({ 
-            queryKey: ['construction-dependencies'] 
-          });
           
-          // Actualizar flechas después de la invalidación
-          setTimeout(() => {
-            onTaskUpdate?.();
-          }, 50);
-        }).catch((error) => {
-          console.error('DRAG UPDATE ERROR:', error);
+          toast({
+            title: "Error al actualizar tarea",
+            description: "No se pudo guardar el cambio. Se ha revertido la posición.",
+            variant: "destructive",
+          });
         });
       }
       
@@ -416,34 +432,60 @@ export function GanttTimelineBar({
         newDate: format(newDate, 'yyyy-MM-dd')
       });
       
-      // Actualizar la tarea en la base de datos
+      // OPTIMISTIC UPDATE: Actualizar caché inmediatamente
       if (type === 'start') {
         const currentEndDate = item.taskData.end_date ? new Date(item.taskData.end_date) : addDays(new Date(item.taskData.start_date!), item.taskData.duration_in_days || 1);
         const newDuration = Math.max(1, differenceInDays(currentEndDate, newDate) + 1);
+        
+        // Update optimista inmediato
+        queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
+          if (!oldData) return oldData;
+          
+          return oldData.map(task => {
+            if (task.id === item.taskData?.id) {
+              return {
+                ...task,
+                start_date: format(newDate, 'yyyy-MM-dd'),
+                duration_in_days: newDuration
+              };
+            }
+            return task;
+          });
+        });
+        
+        onTaskUpdate?.();
         
         updateTaskResize.mutate({
           id: item.taskData.id,
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
-        }, {
-          onSuccess: () => {
-            // Actualizar flechas después del resize snap
-            onTaskUpdate?.();
-          }
         });
       } else {
         const startDate = new Date(item.taskData.start_date!);
         const newDuration = Math.max(1, differenceInDays(newDate, startDate) + 1);
         
+        // Update optimista inmediato
+        queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
+          if (!oldData) return oldData;
+          
+          return oldData.map(task => {
+            if (task.id === item.taskData?.id) {
+              return {
+                ...task,
+                end_date: format(newDate, 'yyyy-MM-dd'),
+                duration_in_days: newDuration
+              };
+            }
+            return task;
+          });
+        });
+        
+        onTaskUpdate?.();
+        
         updateTaskResize.mutate({
           id: item.taskData.id,
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
-        }, {
-          onSuccess: () => {
-            // Actualizar flechas después del resize snap
-            onTaskUpdate?.();
-          }
         });
       }
       
