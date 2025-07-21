@@ -392,11 +392,29 @@ export function useUpdateConstructionTaskResize() {
 
       return result;
     },
-    onSuccess: (data) => {
-      // Para resize: invalidar queries para refrescar inmediatamente
-      queryClient.invalidateQueries({ 
-        queryKey: ['construction-tasks', data.project_id, data.organization_id] 
-      });
+    onSuccess: (data, variables) => {
+      // Para resize: usar setQueryData para actualización silenciosa sin refetch
+      queryClient.setQueryData(
+        ['construction-tasks', data.project_id, data.organization_id], 
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          // Actualizar solo la tarea específica en el cache
+          return oldData.map((task: any) => 
+            task.id === variables.id 
+              ? { 
+                  ...task, 
+                  start_date: variables.start_date || task.start_date,
+                  end_date: variables.end_date || task.end_date,
+                  duration_in_days: variables.duration_in_days || task.duration_in_days,
+                  updated_at: new Date().toISOString()
+                }
+              : task
+          );
+        }
+      );
+      
+      // Solo invalidar dependencias si es necesario para las flechas
       queryClient.invalidateQueries({ 
         queryKey: ['construction-dependencies'] 
       });
