@@ -102,28 +102,32 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             id: item.task_id,
             code: item.task_code,
             display_name: item.display_name || item.task_code, // DISPLAY_NAME DIRECTO DE LA VISTA
-            rubro_name: null, // Sin rubros por ahora
-            category_name: null,
+            rubro_name: item.rubro_name || null, // RUBRO_NAME DIRECTO DE LA VISTA
+            category_name: item.category_name || null, // CATEGORY_NAME DIRECTO DE LA VISTA
             unit_id: item.unit_id,
             unit_name: item.unit_name || null, // UNIT_NAME DIRECTO DE LA VISTA
             unit_symbol: item.unit_symbol || null, // UNIT_SYMBOL DIRECTO DE LA VISTA
-            rubro_id: null, // Sin rubros por ahora
+            rubro_id: item.rubro_id || null, // RUBRO_ID DIRECTO DE LA VISTA
             param_values: item.param_values
           }
         };
       });
 
-      console.log('UPDATED GANTT VIEW DATA:', {
+      console.log('UPDATED GANTT VIEW DATA WITH RUBROS:', {
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
         sample: {
           display_name: mappedTasks[0]?.task?.display_name,
+          rubro_name: mappedTasks[0]?.task?.rubro_name,
+          category_name: mappedTasks[0]?.task?.category_name,
           unit_name: mappedTasks[0]?.task?.unit_name,
           unit_symbol: mappedTasks[0]?.task?.unit_symbol,
           quantity: mappedTasks[0]?.quantity,
           view_fields: {
             display_name: ganttData?.[0]?.display_name,
+            rubro_name: ganttData?.[0]?.rubro_name,
+            category_name: ganttData?.[0]?.category_name,
             unit_name: ganttData?.[0]?.unit_name,
             unit_symbol: ganttData?.[0]?.unit_symbol,
             quantity: ganttData?.[0]?.quantity

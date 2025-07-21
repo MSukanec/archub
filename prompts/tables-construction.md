@@ -95,6 +95,38 @@ VISTA CONSTRUCTION_GANTT_VIEW:
   {
     "column_name": "display_name",
     "data_type": "text"
+  },
+  {
+    "column_name": "subcategory_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "subcategory_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "category_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "rubro_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "rubro_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "task_group_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "task_group_name",
+    "data_type": "text"
   }
 ]
 
