@@ -37,6 +37,11 @@ export function GanttTimelineBar({
   const [resizeType, setResizeType] = useState<'start' | 'end' | null>(null);
   const [isDraggingBar, setIsDraggingBar] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  
+  // Estados para línea de conexión temporal
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionStart, setConnectionStart] = useState<{x: number, y: number, type: 'start' | 'end'} | null>(null);
+  const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({x: 0, y: 0});
   const barRef = useRef<HTMLDivElement>(null);
   const createDependency = useCreateConstructionDependency();
   const updateTaskResize = useUpdateConstructionTaskResize();
@@ -107,12 +112,30 @@ export function GanttTimelineBar({
     return item.taskData.progress_percent || 0;
   };
 
-  // Handlers para drag & drop de conexiones
+  // Handlers para drag & drop de conexiones con línea temporal
   const handleConnectionStart = (e: React.MouseEvent, point: 'start' | 'end') => {
     if (item.type !== 'task' || !item.taskData?.id) return;
     
     e.stopPropagation();
     e.preventDefault();
+    
+    console.log('Starting connection from:', item.name, point);
+    
+    // Obtener posición del punto de conexión
+    const rect = barRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const connectionX = point === 'start' ? rect.left - 22 : rect.right + 22;
+    const connectionY = rect.top + rect.height / 2;
+    
+    // Establecer estado de conexión local
+    setIsConnecting(true);
+    setConnectionStart({
+      x: connectionX,
+      y: connectionY,
+      type: point
+    });
+    setMousePosition({ x: e.clientX, y: e.clientY });
     
     // Notificar al componente padre sobre el inicio del drag
     onConnectionDrag?.({
@@ -120,7 +143,22 @@ export function GanttTimelineBar({
       fromPoint: point
     });
     
-    console.log('Starting connection from:', item.name, point);
+    // Agregar event listeners para seguir el mouse
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      setMousePosition({ x: moveEvent.clientX, y: moveEvent.clientY });
+    };
+    
+    const handleMouseUp = () => {
+      setIsConnecting(false);
+      setConnectionStart(null);
+      onConnectionDrag?.(null);
+      
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   const handleConnectionEnd = (e: React.MouseEvent) => {
@@ -435,6 +473,46 @@ export function GanttTimelineBar({
             title="Conectar desde final"
           />
         </>
+      )}
+      
+      {/* LÍNEA PUNTEADA TEMPORAL DURANTE CONEXIÓN */}
+      {isConnecting && connectionStart && (
+        <svg
+          className="fixed inset-0 pointer-events-none"
+          style={{ zIndex: 9999 }}
+          width="100vw"
+          height="100vh"
+        >
+          <defs>
+            <marker
+              id="connection-arrow"
+              markerWidth="8"
+              markerHeight="6"
+              refX="8"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <polygon
+                points="0,0 0,6 8,3"
+                fill="var(--accent)"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+            </marker>
+          </defs>
+          <line
+            x1={connectionStart.x}
+            y1={connectionStart.y}
+            x2={mousePosition.x}
+            y2={mousePosition.y}
+            stroke="var(--accent)"
+            strokeWidth="2"
+            strokeDasharray="8,4"
+            markerEnd="url(#connection-arrow)"
+            opacity="0.8"
+          />
+        </svg>
       )}
     </div>
   );
