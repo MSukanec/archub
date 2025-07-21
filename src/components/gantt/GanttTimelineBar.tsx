@@ -2,7 +2,7 @@ import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
 import { useState, useRef, useCallback } from 'react';
 import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
-import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
+import { useUpdateConstructionTaskResize } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
 
 interface GanttTimelineBarProps {
@@ -37,7 +37,7 @@ export function GanttTimelineBar({
   const [resizeType, setResizeType] = useState<'start' | 'end' | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const createDependency = useCreateConstructionDependency();
-  const updateTask = useUpdateConstructionTask();
+  const updateTaskResize = useUpdateConstructionTaskResize();
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
 
@@ -226,7 +226,7 @@ export function GanttTimelineBar({
         const currentEndDate = item.taskData.end_date ? new Date(item.taskData.end_date) : addDays(new Date(item.taskData.start_date!), item.taskData.duration_in_days || 1);
         const newDuration = Math.max(1, differenceInDays(currentEndDate, newDate) + 1);
         
-        updateTask.mutate({
+        updateTaskResize.mutate({
           id: item.taskData.id,
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
@@ -235,7 +235,7 @@ export function GanttTimelineBar({
         const startDate = new Date(item.taskData.start_date!);
         const newDuration = Math.max(1, differenceInDays(newDate, startDate) + 1);
         
-        updateTask.mutate({
+        updateTaskResize.mutate({
           id: item.taskData.id,
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
@@ -245,22 +245,19 @@ export function GanttTimelineBar({
       setIsResizing(false);
       setResizeType(null);
       
-      // Refrescar los datos
-      onTaskUpdate?.();
+      // No necesitamos refrescar manualmente - React Query se actualiza automáticamente
+      // onTaskUpdate?.();
       
       // Limpiar eventos
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       
-      toast({
-        title: "Tarea actualizada",
-        description: `Duración modificada desde el ${type === 'start' ? 'inicio' : 'final'} de la tarea`
-      });
+      // Sin toast para evitar ruido en UX - el feedback visual es suficiente
     };
     
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [item, timelineStart, timelineWidth, totalDays, calculateDayFromX, updateTask, onTaskUpdate, normalizedStart, normalizedEnd, normalizedTimelineStart]);
+  }, [item, timelineStart, timelineWidth, totalDays, calculateDayFromX, updateTaskResize, onTaskUpdate, normalizedStart, normalizedEnd, normalizedTimelineStart]);
 
   // Solo mostrar controles de redimensionamiento en tareas (no fases) y cuando hay hover
   const shouldShowResizeHandles = item.type === 'task' && isHovered && !isResizing;
