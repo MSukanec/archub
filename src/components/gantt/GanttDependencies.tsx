@@ -74,10 +74,11 @@ export function GanttDependencies({
       const toDayIndex = Math.floor((startDate.getTime() - timelineStartTime) / (1000 * 60 * 60 * 24));
       const toX = toDayIndex * dayWidth; // Inicio de la barra
       
-      // Posiciones Y (centro de las filas)
+      // Posiciones Y (centro de las filas + offset del header)
       const rowHeight = 44; // h-11 = 44px
-      const fromY = fromTask.rowIndex * rowHeight + rowHeight / 2;
-      const toY = toTask.rowIndex * rowHeight + rowHeight / 2;
+      const headerHeight = 100; // Altura del header del timeline
+      const fromY = headerHeight + (fromTask.rowIndex * rowHeight) + (rowHeight / 2);
+      const toY = headerHeight + (toTask.rowIndex * rowHeight) + (rowHeight / 2);
       
       return {
         id: dep.id,
@@ -90,13 +91,20 @@ export function GanttDependencies({
     }).filter(Boolean);
   }, [dependencies, taskMap, timelineWidth, totalDays, timelineStart]);
 
-  // Generar path SVG para flechas
-  const generateArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
-    // Crear línea con curva suave estilo DHTMLX
-    const midX = fromX + (toX - fromX) * 0.5;
-    const controlY = fromY === toY ? fromY : fromY + (toY - fromY) * 0.3;
+  // Generar path SVG estilo DHTMLX con líneas rectas y esquinas
+  const generateDHtmlxArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
+    // Estilo DHTMLX: línea horizontal desde la tarea, luego vertical, luego horizontal hacia destino
+    const horizontalOffset = 10; // Distancia horizontal desde la tarea
+    const midX = fromX + horizontalOffset;
     
-    return `M ${fromX} ${fromY} Q ${midX} ${controlY} ${toX} ${toY}`;
+    // Si las tareas están en la misma altura
+    if (Math.abs(fromY - toY) < 5) {
+      return `M ${fromX} ${fromY} L ${midX} ${fromY} L ${toX - horizontalOffset} ${toY} L ${toX} ${toY}`;
+    }
+    
+    // Si las tareas están en diferentes alturas
+    const verticalMidY = fromY + (toY - fromY) / 2;
+    return `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${verticalMidY} L ${toX - horizontalOffset} ${verticalMidY} L ${toX - horizontalOffset} ${toY} L ${toX} ${toY}`;
   };
 
   // Línea punteada durante drag
@@ -136,12 +144,11 @@ export function GanttDependencies({
         style={{ 
           position: 'absolute',
           top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(255,0,0,0.1)' // Fondo rojo visible para debug
+          left: `${320}px`, // Offset por el panel izquierdo
+          width: `calc(100% - 320px)`,
+          height: '100%'
         }}
-        viewBox={`0 0 ${Math.max(timelineWidth, 4000)} 500`}
+        viewBox={`0 0 ${timelineWidth} 500`}
         preserveAspectRatio="none"
       >
         {/* Línea de prueba SIEMPRE visible */}
@@ -156,62 +163,46 @@ export function GanttDependencies({
         />
         <text x="100" y="45" fill="#ff0000" fontSize="12" fontWeight="bold">DEPS: {dependencies.length}</text>
         
-        {/* Línea de prueba en las coordenadas reales de dependencia */}
-        {dependencyPaths.length > 0 && dependencyPaths[0] && (
-          <g>
-            <line
-              x1={dependencyPaths[0].fromX}
-              y1={dependencyPaths[0].fromY}
-              x2={dependencyPaths[0].toX}
-              y2={dependencyPaths[0].toY}
-              stroke="#00ff00"
-              strokeWidth="4"
-              opacity="1"
-            />
-            <text x={dependencyPaths[0].fromX} y={dependencyPaths[0].fromY - 10} fill="#00ff00" fontSize="10">
-              FROM: {Math.round(dependencyPaths[0].fromX)}, {Math.round(dependencyPaths[0].fromY)}
-            </text>
-            <text x={dependencyPaths[0].toX} y={dependencyPaths[0].toY - 10} fill="#00ff00" fontSize="10">
-              TO: {Math.round(dependencyPaths[0].toX)}, {Math.round(dependencyPaths[0].toY)}
-            </text>
-          </g>
-        )}
-        
-        {/* Renderizar dependencias reales */}
+        {/* Flechas de dependencia estilo DHTMLX profesional */}
         {dependencyPaths.map((path) => path && (
           <g key={path.id}>
-            {/* Línea principal de dependencia */}
+            {/* Línea principal estilo DHTMLX con múltiples segmentos */}
             <path
-              d={generateArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
-              stroke="#84cc16"
+              d={generateDHtmlxArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
+              stroke="#2563eb"
               strokeWidth="2"
               fill="none"
-              markerEnd="url(#arrowhead)"
+              markerEnd="url(#dhtmlx-arrowhead)"
+              opacity="0.8"
             />
             
-            {/* Círculo en el punto de inicio */}
+            {/* Círculo pequeño en el punto de conexión de salida */}
             <circle
               cx={path.fromX}
               cy={path.fromY}
-              r="3"
-              fill="#84cc16"
+              r="2"
+              fill="#2563eb"
+              stroke="white"
+              strokeWidth="1"
             />
           </g>
         ))}
         
-        {/* Definir marcador de flecha */}
+        {/* Marcador de flecha estilo DHTMLX */}
         <defs>
           <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
+            id="dhtmlx-arrowhead"
+            markerWidth="8"
+            markerHeight="6"
+            refX="7"
+            refY="3"
             orient="auto"
+            markerUnits="strokeWidth"
           >
-            <polygon
-              points="0 0, 10 3.5, 0 7"
-              fill="#84cc16"
+            <path
+              d="M0,0 L0,6 L8,3 z"
+              fill="#2563eb"
+              stroke="none"
             />
           </marker>
         </defs>
