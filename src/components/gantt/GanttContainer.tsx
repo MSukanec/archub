@@ -907,12 +907,14 @@ export function GanttContainer({
                           
                           return (
                             <div
-                              className="bg-[var(--accent)] opacity-60 rounded-sm flex items-center justify-center text-white text-xs font-medium shadow-sm"
+                              className="bg-[var(--accent)] opacity-60 rounded-sm flex items-center justify-center text-white text-xs font-medium shadow-sm absolute"
                               style={{
                                 left: `${barLeft}px`,
                                 width: `${barWidth}px`,
                                 height: '24px',
-                                minWidth: '8px'
+                                minWidth: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)'
                               }}
                               title={`${item.name}: ${startDate.toLocaleDateString()} - ${resolvedEndDate.toLocaleDateString()}`}
                             >
