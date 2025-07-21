@@ -296,8 +296,8 @@ export function GanttContainer({
       }
       
       if (todayDayIndex !== -1) {
-        // Calcular posición de HOY - 7 días (una semana antes)
-        const targetDayIndex = Math.max(0, todayDayIndex - 7);
+        // Calcular posición de HOY - 3 días (solo 3 días antes)
+        const targetDayIndex = Math.max(0, todayDayIndex - 3);
         const dayWidth = timelineWidth / calendarStructure.totalDays;
         const targetScrollPosition = targetDayIndex * dayWidth;
         
