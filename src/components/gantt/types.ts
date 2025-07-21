@@ -35,13 +35,24 @@ export interface ResolvedDateRange {
 
 // Utility function to calculate resolved end date with proper validation
 export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange {
-  // Skip validation for groups/headers - they don't need dates
-  if (item.type === 'group' || item.isHeader || !item.startDate) {
+  // Skip validation for groups without dates - but allow phases with dates to show bars
+  if (item.type === 'group' || (!item.startDate && item.type !== 'phase')) {
     return {
       startDate: new Date(),
       resolvedEndDate: new Date(),
       wasCalculated: false,
       isValid: true,
+      durationInDays: 1
+    };
+  }
+
+  // For phases or headers without startDate, return invalid
+  if (!item.startDate) {
+    return {
+      startDate: new Date(),
+      resolvedEndDate: new Date(),
+      wasCalculated: false,
+      isValid: false,
       durationInDays: 1
     };
   }

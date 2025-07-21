@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. PHASE BAR VISUALIZATION SYSTEM COMPLETED: Fixed critical bug preventing phase bars from appearing in Gantt timeline view - COMPLETED
+  • Root cause identified: calculateResolvedEndDate function was incorrectly excluding all isHeader=true elements from showing bars
+  • Modified validation logic in types.ts to allow phase elements with dates to display bars while still blocking groups without dates
+  • Fixed conditional logic: changed from (item.type === 'group' || item.isHeader) to (item.type === 'group' || (!item.startDate && item.type !== 'phase'))
+  • Phase bars now render correctly in timeline showing calculated date spans (start_date = earliest task start, end_date = latest task end)
+  • System verified working: phases calculate dates from contained tasks AND display visual bars spanning the calculated timeframe
+  • Enhanced phase visualization: users can now see both the calculated phase duration and the visual representation in Gantt timeline
+  • Complete phase management: automatic date calculation + proper visual representation + real-time updates when task dates change
 - July 21, 2025. AUTOMATIC PHASE DATE CALCULATION SYSTEM IMPLEMENTED: Successfully created comprehensive automatic phase date calculation based on contained tasks - COMPLETED
   • Implemented calculatePhaseDates function in use-construction-phases.ts that automatically sets phase start_date to earliest task start and end_date to latest task end
   • Added useUpdatePhasesDates hook for real-time phase date updates based on contained task calculations
