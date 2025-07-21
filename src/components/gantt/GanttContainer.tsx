@@ -12,11 +12,11 @@ export function GanttContainer({
   data, 
   dependencies = [],
   onItemClick,
-  onEdit,
-  onDelete
+  onItemEdit,
+  onItemDelete
 }: GanttContainerProps & {
-  onEdit?: (item: GanttRowProps) => void;
-  onDelete?: (item: GanttRowProps) => void;
+  onItemEdit?: (item: GanttRowProps) => void;
+  onItemDelete?: (item: GanttRowProps) => void;
 }) {
   
   console.log('GanttContainer received dependencies:', dependencies);
@@ -554,24 +554,24 @@ export function GanttContainer({
                     </span>
                     
                     {/* Floating Action buttons - aparecer SOBRE el texto */}
-                    {item.type === 'task' && (onEdit || onDelete) && hoveredRowId === item.id && (
+                    {(onItemEdit || onItemDelete) && hoveredRowId === item.id && (
                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
-                        {onEdit && (
+                        {onItemEdit && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onEdit(item);
+                              onItemEdit(item);
                             }}
                             className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
                             <Edit className="w-3 h-3" />
                           </button>
                         )}
-                        {onDelete && (
+                        {onItemDelete && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onDelete(item);
+                              onItemDelete(item);
                             }}
                             className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
