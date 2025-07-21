@@ -545,29 +545,6 @@ export function ConstructionTaskFormModal({
         }
       }}
     >
-      {/* Phase Selection */}
-      <div className="space-y-2">
-        <Label htmlFor="project_phase_id">Fase de Proyecto</Label>
-        <Select 
-          value={watch('project_phase_id') || ""}
-          onValueChange={(value) => setValue('project_phase_id', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar fase (opcional)" />
-          </SelectTrigger>
-          <SelectContent>
-            {projectPhases.map((projectPhase) => (
-              <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                {projectPhase.phase.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.project_phase_id && (
-          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-        )}
-      </div>
-
       {/* Task Selection */}
       <div className="space-y-2">
         <Label htmlFor="task_id">Tarea *</Label>
