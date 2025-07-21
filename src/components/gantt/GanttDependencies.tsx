@@ -87,12 +87,17 @@ export function GanttDependencies({
     return { x: absoluteX, y: relativeY };
   };
 
-  // Función para generar el path SVG con líneas rectas estilo profesional
+  // Función para generar el path SVG con conexión directa como en tu dibujo
   const generatePath = (from: { x: number; y: number }, to: { x: number; y: number }): string => {
-    const offsetX = 40; // Distancia horizontal antes del giro
+    // Si las tareas están en la misma fila (mismo Y), línea horizontal directa
+    if (Math.abs(from.y - to.y) < 10) {
+      return `M ${from.x} ${from.y} H ${to.x}`;
+    }
     
-    // Línea horizontal → vertical → horizontal (estilo "L invertida")
-    return `M ${from.x} ${from.y} H ${from.x + offsetX} V ${to.y} H ${to.x}`;
+    // Si están en filas diferentes: horizontal → vertical → horizontal (conexión directa)
+    // Punto medio vertical entre las dos tareas
+    const midY = (from.y + to.y) / 2;
+    return `M ${from.x} ${from.y} V ${midY} H ${to.x} V ${to.y}`;
   };
 
   // Efecto para escuchar scroll y forzar re-render
