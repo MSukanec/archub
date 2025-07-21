@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar, Clock, Activity, CheckSquare } from 'lucide-react'
@@ -13,6 +13,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
+import { DHtmlxGanttComponent } from '@/components/gantt/DHtmlxGanttComponent'
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
@@ -409,11 +410,20 @@ export default function ConstructionSchedule() {
           }
         />
       ) : (
-        <GanttContainer
-          data={ganttData}
-          onEdit={handleEditTask}
-          onDelete={handleDeleteTaskFromGantt}
-        />
+        <div className="space-y-8">
+          {/* Nuestro Gantt actual */}
+          <GanttContainer
+            data={ganttData}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTaskFromGantt}
+          />
+          
+          {/* DHTMLX Gantt para comparación */}
+          <DHtmlxGanttComponent 
+            tasks={processedTasks}
+            phases={projectPhases}
+          />
+        </div>
       )}
     </Layout>
   )
