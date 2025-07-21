@@ -37,7 +37,6 @@ function cleanTaskDisplayName(name: string): string {
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
-  const [processedTasks, setProcessedTasks] = useState<any[]>([])
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -62,41 +61,17 @@ export default function ConstructionSchedule() {
   const { data: projectPhases = [] } = useProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
 
-  // Procesar los nombres de las tareas de forma asíncrona
-  useEffect(() => {
-    const processTaskNames = async () => {
-      if (!tasks.length) {
-        setProcessedTasks([])
-        return
+  // Procesar los nombres de las tareas de forma simplificada
+  const processedTasks = useMemo(() => {
+    if (!tasks.length) return []
+    
+    return tasks.map((task) => ({
+      ...task,
+      task: {
+        ...task.task,
+        processed_display_name: task.task?.display_name || task.task?.code || 'Tarea sin nombre'
       }
-
-      const processed = await Promise.all(
-        tasks.map(async (task) => {
-          if (task.task?.param_values && Object.keys(task.task.param_values).length > 0) {
-            const processedName = await generateTaskDescription(task.task.display_name, task.task.param_values)
-            
-            return {
-              ...task,
-              task: {
-                ...task.task,
-                processed_display_name: processedName
-              }
-            }
-          }
-          return {
-            ...task,
-            task: {
-              ...task.task,
-              processed_display_name: task.task?.display_name || ''
-            }
-          }
-        })
-      )
-      
-      setProcessedTasks(processed)
-    }
-
-    processTaskNames()
+    }))
   }, [tasks])
 
 
