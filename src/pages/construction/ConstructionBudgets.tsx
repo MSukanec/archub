@@ -383,8 +383,26 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    // TODO: Abrir modal de agregar tareas
-    console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
+    console.log('Abrir modal de agregar tareas');
+    
+    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
+      toast({
+        title: "Error",
+        description: "No se pudo identificar el proyecto u organización",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Obtener IDs de tareas que ya están en el presupuesto
+    const existingTaskIds = budgetTasks?.map(task => task.task_id) || [];
+
+    openModal('budget-task-bulk-add', {
+      budgetId,
+      projectId: userData.preferences.last_project_id,
+      organizationId: userData.preferences.last_organization_id,
+      existingTaskIds
+    });
   }
 
   // Delete task mutation
