@@ -1,6 +1,6 @@
 import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
 import { useUpdateConstructionTaskResize } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
@@ -47,6 +47,22 @@ export function GanttTimelineBar({
   const barRef = useRef<HTMLDivElement>(null);
   const createDependency = useCreateConstructionDependency();
   const updateTaskResize = useUpdateConstructionTaskResize();
+  
+  // Throttled callback para optimizar actualizaciones de flechas
+  const throttledDragUpdate = useMemo(() => {
+    if (!onDragUpdate) return null;
+    
+    let lastCall = 0;
+    const throttleMs = 16; // ~60fps
+    
+    return () => {
+      const now = Date.now();
+      if (now - lastCall >= throttleMs) {
+        lastCall = now;
+        onDragUpdate();
+      }
+    };
+  }, [onDragUpdate]);
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
 
@@ -261,8 +277,8 @@ export function GanttTimelineBar({
       barRef.current.style.transform = `translateX(${adjustedX - startPixels}px)`;
       barRef.current.style.zIndex = '50';
       
-      // Actualizar flechas de dependencias durante el drag
-      onDragUpdate?.();
+      // Actualizar flechas de dependencias durante el drag (throttled)
+      throttledDragUpdate?.();
     };
     
     const handleMouseUp = (e: MouseEvent) => {
@@ -334,8 +350,8 @@ export function GanttTimelineBar({
         barRef.current.style.width = `${newWidth}px`;
       }
       
-      // Actualizar flechas de dependencias durante el resize
-      onDragUpdate?.();
+      // Actualizar flechas de dependencias durante el resize (throttled)
+      throttledDragUpdate?.();
     };
     
     const handleMouseUp = (e: MouseEvent) => {

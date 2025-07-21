@@ -154,10 +154,10 @@ export function GanttDependencies({
       setArrowPaths(paths as any);
     };
 
-    // Delay inicial para asegurar que el DOM esté completamente renderizado
-    const timer = setTimeout(calculateArrows, 200);
+    // Usar requestAnimationFrame para actualización instantánea y suave
+    const frame = requestAnimationFrame(calculateArrows);
     
-    return () => clearTimeout(timer);
+    return () => cancelAnimationFrame(frame);
   }, [dependencies, data, scrollLeft, refreshTrigger]); // Incluir refreshTrigger para recalcular durante drag
 
   if (!arrowPaths.length) {
