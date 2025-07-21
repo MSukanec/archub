@@ -216,7 +216,7 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                         </div>
                       </div>
                       <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
-                        {task.quantity || 0}
+                        {task.quantity || 0} {task.task?.unit_symbol || ''}
                       </div>
                     </div>
                   ))}
@@ -249,7 +249,7 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                       </div>
                     </div>
                     <div className="text-sm font-medium text-muted-foreground text-right">
-                      {task.quantity || 0}
+                      {task.quantity || 0} {task.task?.unit_symbol || ''}
                     </div>
                   </div>
                 </div>
