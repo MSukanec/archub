@@ -940,7 +940,7 @@ export function GanttContainer({
                           return (
                             <div
                               key={`phase-bar-${item.id}-${scrollUpdateTrigger}`}
-                              className="bg-[var(--chart-2)] opacity-70 rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden border border-[var(--table-row-fg)]"
+                              className="bg-[var(--chart-2)] opacity-70 rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden border-2 border-[var(--table-row-fg)]"
                               style={{
                                 left: `${barLeft}px`,
                                 width: `${barWidth}px`,

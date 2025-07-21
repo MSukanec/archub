@@ -246,12 +246,13 @@ export default function ConstructionSchedule() {
           }
         }
 
-        // Si aún no hay fechas, usar valores por defecto
-        if (!phaseStartDate) {
-          phaseStartDate = new Date().toISOString().split('T')[0];
-        }
-        if (!phaseEndDate && !phaseDuration) {
-          phaseDuration = 7;
+        // Solo usar valores por defecto si la fase tiene tareas
+        // Si no hay tareas, la fase NO debe mostrar fechas ni barras
+        if (tasksInPhase.length === 0) {
+          // Limpiar fechas para fases sin tareas
+          phaseStartDate = undefined;
+          phaseEndDate = undefined;
+          phaseDuration = undefined;
         }
 
         // Agregar la fase como fila de grupo (en mayúsculas)

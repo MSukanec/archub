@@ -62,7 +62,7 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
     if (taskDates.length > 0) {
       const startDate = new Date(Math.min(...taskDates.map(d => d.start.getTime())));
       const resolvedEndDate = new Date(Math.max(...taskDates.map(d => d.end.getTime())));
-      const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 1000)) + 1;
       
       return {
         startDate,
