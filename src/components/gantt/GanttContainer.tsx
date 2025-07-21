@@ -418,11 +418,20 @@ export function GanttContainer({
       <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
         {/* Encabezado del panel izquierdo - FIJO */}
         <div 
-          className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex items-center bg-[var(--table-header-bg)]"
+          className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex bg-[var(--table-header-bg)]"
           style={{ width: leftPanelWidth }}
         >
-          <div className="px-4 font-medium text-xs text-[var(--table-header-fg)]">
+          {/* Columna Fase/Tarea - 60% del ancho */}
+          <div className="flex-1 px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
             Fase / Tarea
+          </div>
+          {/* Columna Inicio - 20% del ancho */}
+          <div className="w-20 px-2 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
+            Inicio
+          </div>
+          {/* Columna Días - 20% del ancho */}
+          <div className="w-16 px-2 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
+            Días
           </div>
         </div>
 
@@ -542,26 +551,47 @@ export function GanttContainer({
                 onMouseLeave={() => setHoveredRowId(null)}
               >
                 {item.isHeader ? (
-                  <div className="bg-muted/30 w-full h-full flex items-center px-4 relative">
-                    {/* Icono de colapso para fases header */}
-                    {item.type === 'phase' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePhaseCollapse(item.id);
-                        }}
-                        className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
-                      >
-                        {collapsedPhases.has(item.id) ? (
-                          <ChevronRight className="w-3 h-3 text-foreground" />
-                        ) : (
-                          <ChevronDown className="w-3 h-3 text-foreground" />
-                        )}
-                      </button>
-                    )}
-                    <span className="truncate text-xs text-foreground font-medium uppercase" title={item.name}>
-                      {item.name}
-                    </span>
+                  <div className="bg-muted/30 w-full h-full flex relative">
+                    {/* Columna Nombre - flex-1 */}
+                    <div className="flex-1 flex items-center px-4 border-r border-[var(--table-header-border)]/30">
+                      {/* Icono de colapso para fases header */}
+                      {item.type === 'phase' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePhaseCollapse(item.id);
+                          }}
+                          className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
+                        >
+                          {collapsedPhases.has(item.id) ? (
+                            <ChevronRight className="w-3 h-3 text-foreground" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3 text-foreground" />
+                          )}
+                        </button>
+                      )}
+                      <span className="truncate text-xs text-foreground font-medium uppercase" title={item.name}>
+                        {item.name}
+                      </span>
+                    </div>
+                    
+                    {/* Columna Inicio - w-20 */}
+                    <div className="w-20 px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                      {item.startDate && (
+                        <span className="text-xs text-foreground font-medium">
+                          {format(new Date(item.startDate), 'dd/MM', { locale: es })}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Columna Días - w-16 */}
+                    <div className="w-16 px-2 flex items-center justify-center">
+                      {item.endDate && item.startDate && (
+                        <span className="text-xs text-foreground font-medium">
+                          {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
+                        </span>
+                      )}
+                    </div>
                     
                     {/* Botones de acción flotantes para fases header */}
                     {item.type === 'phase' && (onItemEdit || onItemDelete) && hoveredRowId === item.id && (
@@ -594,35 +624,56 @@ export function GanttContainer({
                     )}
                   </div>
                 ) : (
-                  <div 
-                    className="group w-full h-full flex items-center cursor-pointer transition-colors relative"
-                    style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
+                  <div className="group w-full h-full flex cursor-pointer transition-colors relative"
                     onClick={() => onItemClick?.(item)}
                   >
-                    {/* Icono de colapso para fases */}
-                    {item.type === 'phase' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePhaseCollapse(item.id);
-                        }}
-                        className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
-                      >
-                        {collapsedPhases.has(item.id) ? (
-                          <ChevronRight className="w-3 h-3 text-[var(--table-row-fg)]" />
-                        ) : (
-                          <ChevronDown className="w-3 h-3 text-[var(--table-row-fg)]" />
-                        )}
-                      </button>
-                    )}
-                    
-                    {/* Text - ocupando todo el ancho disponible */}
-                    <span 
-                      className="truncate text-xs text-[var(--table-row-fg)] w-full"
-                      title={item.name}
+                    {/* Columna Nombre - flex-1 */}
+                    <div className="flex-1 flex items-center border-r border-[var(--table-header-border)]/30"
+                      style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
                     >
-                      {item.name}
-                    </span>
+                      {/* Icono de colapso para fases */}
+                      {item.type === 'phase' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePhaseCollapse(item.id);
+                          }}
+                          className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
+                        >
+                          {collapsedPhases.has(item.id) ? (
+                            <ChevronRight className="w-3 h-3 text-[var(--table-row-fg)]" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3 text-[var(--table-row-fg)]" />
+                          )}
+                        </button>
+                      )}
+                      
+                      {/* Text - ocupando todo el ancho disponible */}
+                      <span 
+                        className="truncate text-xs text-[var(--table-row-fg)] w-full"
+                        title={item.name}
+                      >
+                        {item.name}
+                      </span>
+                    </div>
+                    
+                    {/* Columna Inicio - w-20 */}
+                    <div className="w-20 px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                      {item.startDate && (
+                        <span className="text-xs text-[var(--table-row-fg)]">
+                          {format(new Date(item.startDate), 'dd/MM', { locale: es })}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Columna Días - w-16 */}
+                    <div className="w-16 px-2 flex items-center justify-center">
+                      {item.endDate && item.startDate && (
+                        <span className="text-xs text-[var(--table-row-fg)]">
+                          {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
+                        </span>
+                      )}
+                    </div>
                     
                     {/* Floating Action buttons - aparecer SOBRE el texto */}
                     {(onItemEdit || onItemDelete) && hoveredRowId === item.id && (
