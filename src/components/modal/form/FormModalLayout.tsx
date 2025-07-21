@@ -16,6 +16,8 @@ interface FormModalLayoutProps {
   columns?: number;
   // Nueva prop para modales de pasos
   stepContent?: ReactNode;
+  // Prop para inicializar en modo edición
+  isEditing?: boolean;
 }
 
 export function FormModalLayout({
@@ -28,8 +30,9 @@ export function FormModalLayout({
   className,
   columns = 2,
   stepContent,
+  isEditing = false,
 }: FormModalLayoutProps) {
-  const { currentPanel } = useModalPanelStore();
+  const { currentPanel, setPanel } = useModalPanelStore();
 
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
@@ -40,6 +43,21 @@ export function FormModalLayout({
       document.body.style.overflow = originalStyle;
     };
   }, []);
+
+  // Inicializar en modo edición si isEditing es true
+  useEffect(() => {
+    if (isEditing) {
+      setPanel('edit');
+    } else {
+      setPanel('view');
+    }
+  }, [isEditing, setPanel]);
+
+  // Reset panel al cerrar modal
+  const handleClose = () => {
+    setPanel('view');
+    onClose();
+  };
 
   const getCurrentPanel = () => {
     // Si stepContent está definido, úsalo en lugar de las lógicas de panel
@@ -81,7 +99,7 @@ export function FormModalLayout({
             <Button
               variant="ghost"
               size="sm"
-              onClick={onClose}
+              onClick={handleClose}
               className="absolute top-1/2 right-4 transform -translate-y-1/2 h-8 w-8 p-0"
             >
               <X className="h-4 w-4" />
