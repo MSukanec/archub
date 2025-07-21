@@ -311,7 +311,7 @@ export function BudgetTable({
       {/* Table Action Bar - Desktop only */}
       <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
-             style={{ marginBottom: '5px' }}>
+             style={{ marginBottom: '3px' }}>
           {/* Empty left side */}
           <div></div>
           
@@ -322,7 +322,7 @@ export function BudgetTable({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-gray-100 text-gray-500"
+                  className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
                 >
                   <Filter className="w-4 h-4" />
                 </Button>
