@@ -614,16 +614,27 @@ export default function ConstructionSchedule() {
 
         {/* Tab Content - Análisis Visual */}
         <TabsContent value="analytics" className="space-y-4">
+          {/* Primera fila - 3 columnas */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <ProgressCurve data={processedTasks} />
             <BurndownChart data={processedTasks} />
             <WorkloadOverTime data={processedTasks} />
+          </div>
+          
+          {/* Segunda fila - 4 columnas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <TasksByPhase data={processedTasks} />
             <DurationByRubro data={processedTasks} />
             <StatusBreakdown data={processedTasks} />
             <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
+          </div>
+          
+          {/* Tercera fila - Heatmap (1 col) y Red (3 cols) */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
             <WeeklyProgressHeatmap data={processedTasks} />
-            <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+            <div className="xl:col-span-3">
+              <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+            </div>
           </div>
         </TabsContent>
       </Tabs>

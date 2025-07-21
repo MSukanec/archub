@@ -87,9 +87,6 @@ export default function DependencyNetwork({ data, dependencies = [] }: Dependenc
               <div className="flex items-center gap-2 p-2 rounded border bg-muted/5">
                 {/* Tarea Predecesora */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium truncate">
-                    {connection.predecessor.code}
-                  </div>
                   <div className="text-xs text-muted-foreground truncate">
                     {connection.predecessor.name}
                   </div>
@@ -113,9 +110,6 @@ export default function DependencyNetwork({ data, dependencies = [] }: Dependenc
 
                 {/* Tarea Sucesora */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium truncate">
-                    {connection.successor.code}
-                  </div>
                   <div className="text-xs text-muted-foreground truncate">
                     {connection.successor.name}
                   </div>

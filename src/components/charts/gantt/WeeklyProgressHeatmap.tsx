@@ -60,11 +60,19 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
   }, [data])
 
   const getHeatmapColor = (progress: number) => {
+    if (progress === 0) return 'bg-muted text-muted-foreground'
+    if (progress < 25) return 'text-white' // Red background with CSS variable
+    if (progress < 50) return 'text-gray-900 dark:text-gray-100' // Yellow background  
+    if (progress < 75) return 'text-white' // Blue background
+    return 'text-white' // Green background
+  }
+
+  const getHeatmapBgColor = (progress: number) => {
     if (progress === 0) return 'bg-muted'
-    if (progress < 25) return 'bg-red-200/80 dark:bg-red-900/50 text-red-900 dark:text-red-100'
-    if (progress < 50) return 'bg-yellow-200/80 dark:bg-yellow-900/50 text-yellow-900 dark:text-yellow-100'
-    if (progress < 75) return 'bg-blue-200/80 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100'
-    return 'bg-green-200/80 dark:bg-green-900/50 text-green-900 dark:text-green-100'
+    if (progress < 25) return '[background-color:var(--chart-5)]' // Red
+    if (progress < 50) return '[background-color:var(--chart-4)]' // Yellow
+    if (progress < 75) return '[background-color:var(--chart-3)]' // Blue
+    return '[background-color:var(--chart-1)]' // Green
   }
 
   return (
@@ -79,7 +87,7 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
               key={week.week}
               className={`
                 relative rounded-md border-2 flex flex-col items-center justify-center
-                ${getHeatmapColor(week.progress)}
+                ${getHeatmapColor(week.progress)} ${getHeatmapBgColor(week.progress)}
                 transition-all hover:scale-105 cursor-pointer shadow-sm
               `}
               title={`${week.week}: ${week.progress}% promedio (${week.tasks} tareas)`}
@@ -101,11 +109,11 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <span>Menos</span>
           <div className="flex gap-1">
-            <div className="w-3 h-3 bg-muted rounded-sm border border-gray-300"></div>
-            <div className="w-3 h-3 bg-red-200/80 dark:bg-red-900/50 rounded-sm border border-red-300"></div>
-            <div className="w-3 h-3 bg-yellow-200/80 dark:bg-yellow-900/50 rounded-sm border border-yellow-300"></div>
-            <div className="w-3 h-3 bg-blue-200/80 dark:bg-blue-900/50 rounded-sm border border-blue-300"></div>
-            <div className="w-3 h-3 bg-green-200/80 dark:bg-green-900/50 rounded-sm border border-green-300"></div>
+            <div className="w-3 h-3 bg-muted rounded-sm border"></div>
+            <div className="w-3 h-3 [background-color:var(--chart-5)] rounded-sm border"></div>
+            <div className="w-3 h-3 [background-color:var(--chart-4)] rounded-sm border"></div>
+            <div className="w-3 h-3 [background-color:var(--chart-3)] rounded-sm border"></div>
+            <div className="w-3 h-3 [background-color:var(--chart-1)] rounded-sm border"></div>
           </div>
           <span>Más</span>
         </div>
