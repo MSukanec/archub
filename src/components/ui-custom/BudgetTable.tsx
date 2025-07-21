@@ -328,25 +328,20 @@ export function BudgetTable({
                           {task.task?.unit_name || '-'}
                         </td>
                         <td className="p-2">
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="number"
-                              value={localQuantities[task.id] || '0'}
-                              onChange={(e) => handleQuantityInputChange(task.id, e.target.value)}
-                              onBlur={(e) => handleQuantitySave(task.id, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.currentTarget.blur();
-                                }
-                              }}
-                              className="w-16 px-2 py-1 text-sm border rounded"
-                              min="0"
-                              step="0.01"
-                            />
-                            <span className="text-xs text-muted-foreground">
-                              {getUnitName(task.task?.unit_id) || '-'}
-                            </span>
-                          </div>
+                          <input
+                            type="number"
+                            value={localQuantities[task.id] || '0'}
+                            onChange={(e) => handleQuantityInputChange(task.id, e.target.value)}
+                            onBlur={(e) => handleQuantitySave(task.id, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            className="w-16 px-2 py-1 text-sm border rounded"
+                            min="0"
+                            step="0.01"
+                          />
                         </td>
                         <td className="p-2 text-sm">$0</td>
                         <td className="p-2 text-sm">$0</td>
