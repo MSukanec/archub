@@ -57,7 +57,7 @@ interface BudgetTableProps {
   generateTaskDisplayName: (task: any, parameterValues: any[]) => string;
   parameterValues: any[];
   getUnitName: (unitId: string | null) => string;
-  handleUpdateQuantity: (taskId: string, quantity: number) => void;
+
   handleDeleteTask: (taskId: string) => void;
   handleAddTask: (budgetId: string) => void;
   onGroupingChange?: (value: string) => void;
@@ -80,7 +80,7 @@ export function BudgetTable({
   generateTaskDisplayName,
   parameterValues,
   getUnitName,
-  handleUpdateQuantity,
+
   handleDeleteTask,
   handleAddTask,
   onGroupingChange,

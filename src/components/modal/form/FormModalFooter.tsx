@@ -43,7 +43,6 @@ export function FormModalFooter({
               variant="secondary"
               onClick={finalOnLeftClick}
               className="w-1/4"
-              disabled={submitDisabled}
             >
               {finalLeftLabel}
             </Button>
