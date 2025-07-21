@@ -48,6 +48,9 @@ export function GanttContainer({
   // Estado para forzar actualización de flechas durante drag
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
+  // Estado para forzar actualización completa después del drop
+  const [dropRefreshTrigger, setDropRefreshTrigger] = useState(0);
+  
   // Función para alternar el colapso de una fase
   const togglePhaseCollapse = useCallback((phaseId: string) => {
     setCollapsedPhases(prev => {
@@ -64,6 +67,11 @@ export function GanttContainer({
   // Función para forzar actualización de flechas durante drag
   const refreshArrows = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);
+  }, []);
+  
+  // Función para forzar actualización completa después del drop
+  const forceDropRefresh = useCallback(() => {
+    setDropRefreshTrigger(prev => prev + 1);
   }, []);
   
   // Ref para el contenedor del timeline para posicionamiento de dependencias
@@ -740,7 +748,7 @@ export function GanttContainer({
                         totalDays={calendarStructure.totalDays}
                         onConnectionDrag={handleConnectionDrag}
                         dragConnectionData={dragConnectionData}
-                        onTaskUpdate={() => {/* React Query se actualiza automáticamente */}}
+                        onTaskUpdate={forceDropRefresh}
                         onDragUpdate={refreshArrows}
                       />
                     </div>
@@ -809,6 +817,7 @@ export function GanttContainer({
           
           {/* Dependencias overlay vectoriales profesionales estilo DHTMLX */}
           <GanttDependencies
+            key={`dependencies-${dropRefreshTrigger}`}
             data={filteredData}
             dependencies={dependencies}
             timelineStart={timelineStart}
