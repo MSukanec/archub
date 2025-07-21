@@ -224,9 +224,25 @@ export function GanttTimelineBar({
         barRef.current.style.marginLeft = '';
       }
       
-      // AQUÍ sí hacer el snap al día más cercano usando el container original
+      // DEBUG: Agregar logs temporales para entender el problema
       const container = barRef.current?.parentElement;
-      const newDay = calculateDayFromX(e.clientX, container);
+      const containerRect = container?.getBoundingClientRect();
+      const relativeX = e.clientX - (containerRect?.left || 0);
+      const dayWidth = timelineWidth / totalDays;
+      const calculatedDay = Math.round(relativeX / dayWidth);
+      
+      console.log('RESIZE DEBUG:', {
+        clientX: e.clientX,
+        containerLeft: containerRect?.left,
+        relativeX: relativeX,
+        dayWidth: dayWidth,
+        totalDays: totalDays,
+        calculatedDay: calculatedDay,
+        timelineWidth: timelineWidth
+      });
+      
+      // AQUÍ sí hacer el snap al día más cercano usando el container original
+      const newDay = Math.max(0, calculatedDay); // Asegurar que no sea negativo
       const newDate = addDays(timelineStart, newDay);
       
       // Actualizar la tarea en la base de datos
