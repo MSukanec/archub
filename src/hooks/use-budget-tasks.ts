@@ -77,43 +77,23 @@ export function useBudgetTasks(budgetId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      // First get the budget tasks
-      const { data: budgetTasks, error: budgetError } = await supabase
+      // Primero obtener las tareas del presupuesto
+      const { data, error } = await supabase
         .from("budget_tasks")
         .select("*")
         .eq("budget_id", budgetId)
         .order("created_at", { ascending: false });
 
-      if (budgetError) {
-        throw budgetError;
+      if (error) {
+        console.error("Error fetching budget tasks:", error);
+        throw error;
       }
 
-      // Then get the task details from construction_gantt_view
-      const tasksWithDetails = await Promise.all(
-        (budgetTasks || []).map(async (budgetTask) => {
-          const { data: taskDetails, error: taskError } = await supabase
-            .from("construction_gantt_view")
-            .select("*")
-            .eq("task_instance_id", budgetTask.task_id)
-            .single();
-
-          if (taskError) {
-            console.warn("Error fetching task details for task_id:", budgetTask.task_id, taskError);
-            return {
-              ...budgetTask,
-              task: null
-            };
-          }
-
-          return {
-            ...budgetTask,
-            task: taskDetails
-          };
-        })
-      );
-
-      console.log("Budget tasks data received:", tasksWithDetails);
-      return tasksWithDetails;
+      console.log("Budget tasks data received:", data);
+      console.log("Sample budget task structure:", data?.[0]);
+      
+      // Por ahora devolver los datos básicos sin relación hasta entender la estructura
+      return data || [];
     },
     enabled: !!budgetId && !!supabase
   });

@@ -50,6 +50,7 @@ export function useConstructionTaskSearch(
         throw new Error("Supabase client not initialized");
       }
 
+      // Usar directamente la vista construction_gantt_view - ya tiene todos los datos necesarios
       let query = supabase
         .from("construction_gantt_view")
         .select("*")
@@ -63,6 +64,11 @@ export function useConstructionTaskSearch(
       // Filtrar por categoría si se especifica
       if (filters.category) {
         query = query.eq('category_name', filters.category);
+      }
+
+      // Filtrar por fase si se especifica
+      if (filters.phase_id) {
+        query = query.eq('phase_instance_id', filters.phase_id);
       }
 
       const { data: allTasks, error } = await query;
@@ -81,7 +87,7 @@ export function useConstructionTaskSearch(
       console.log("Construction tasks search results:", filteredData.length);
       return filteredData;
     },
-    enabled: enabled && !!supabase && !!organizationId && !!projectId && searchTerm.length >= 3
+    enabled: enabled && !!supabase && !!projectId && searchTerm.length >= 3
   });
 }
 

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { TaskSearchCombo } from "@/components/ui-custom/TaskSearchCombo";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Package } from "lucide-react";
-import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from "@/hooks/use-task-search";
+import { useConstructionTaskSearch, useConstructionTaskSearchFilterOptions, ConstructionTaskSearchFilters } from "@/hooks/use-construction-task-search";
 import { useBudgetTasks } from "@/hooks/use-budget-tasks";
 import { useDebugTasks } from "@/hooks/use-debug-tasks";
 import { CreateGeneratedTaskUserModal } from "@/modals/CreateGeneratedTaskUserModal";
@@ -53,16 +53,20 @@ export default function NewBudgetTaskModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([]);
-  const [taskFilters, setTaskFilters] = useState<TaskSearchFilters>({ origin: 'all' });
+  const [taskFilters, setTaskFilters] = useState<ConstructionTaskSearchFilters>({});
   
-  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useTaskSearch(
+  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useConstructionTaskSearch(
+    organizationId,
+    userData?.preferences?.last_project_id || '',
     searchQuery, 
-    organizationId, 
     taskFilters,
     open
   );
   
-  const { data: filterOptions, isLoading: filterOptionsLoading } = useTaskSearchFilterOptions(organizationId);
+  const { data: filterOptions, isLoading: filterOptionsLoading } = useConstructionTaskSearchFilterOptions(
+    organizationId,
+    userData?.preferences?.last_project_id || ''
+  );
   const budgetTasksHook = useBudgetTasks(budgetId);
   const { createBudgetTask, updateBudgetTask } = budgetTasksHook;
   const { data: userData } = useCurrentUser();
@@ -80,10 +84,10 @@ export default function NewBudgetTaskModal({
 
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = form;
 
-  // Preparar opciones para TaskSearchCombo usando display_name
+  // Preparar opciones para TaskSearchCombo usando display_name de construction_gantt_view
   const taskOptions = tasks.map(task => ({
-    value: task.id,
-    label: task.display_name || task.code || 'Sin nombre'
+    value: task.task_instance_id,
+    label: task.display_name || task.task_code || 'Sin nombre'
   }));
   
   // Resetear form cuando abre el modal
@@ -141,7 +145,7 @@ export default function NewBudgetTaskModal({
 
   // Agregar tarea a la lista temporal
   const onAddTask = async (data: AddTaskFormData) => {
-    const selectedTask = tasks.find(t => t.id === data.task_id);
+    const selectedTask = tasks.find(t => t.task_instance_id === data.task_id);
     if (!selectedTask) return;
 
     // Verificar si la tarea ya está en la lista
@@ -157,7 +161,7 @@ export default function NewBudgetTaskModal({
     const newPendingTask: PendingTask = {
       id: `temp-${Date.now()}`,
       task_id: data.task_id,
-      task_name: selectedTask.display_name || selectedTask.code || 'Sin nombre',
+      task_name: selectedTask.display_name || selectedTask.task_code || 'Sin nombre',
       quantity: data.quantity,
       unit_name: selectedTask.unit_name
     };
