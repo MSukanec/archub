@@ -703,6 +703,17 @@ export default function ConstructionBudgets() {
                     {/* Add Tasks Button */}
                     <Button
                       onClick={() => {
+                        // Test with simple modal first
+                        openModal('test-modal', { test: 'data' });
+                      }}
+                      className="px-4 mr-2"
+                      size="sm"
+                      variant="outline"
+                    >
+                      TEST MODAL
+                    </Button>
+                    <Button
+                      onClick={() => {
                         if (selectedBudget) {
                           handleAddTask(selectedBudget.id);
                         }
