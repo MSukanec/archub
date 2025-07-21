@@ -392,16 +392,18 @@ export function GanttTimelineBar({
       {/* Controles de redimensionamiento que aparecen en hover */}
       {shouldShowResizeHandles && (
         <>
-          {/* Handle de redimensionamiento izquierdo - SEPARADO de puntos de conexión */}
+          {/* Handle de redimensionamiento izquierdo - MITAD DE ANCHO y color accent */}
           <div
-            className="absolute left-0 top-0 w-3 h-full bg-orange-500 opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-l z-20"
+            className="absolute left-0 top-0 w-1.5 h-full opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity rounded-l z-20"
+            style={{ backgroundColor: 'var(--accent)' }}
             onMouseDown={(e) => handleResizeStart(e, 'start')}
             title="Arrastrar para cambiar fecha de inicio"
           />
           
-          {/* Handle de redimensionamiento derecho - SEPARADO de puntos de conexión */}
+          {/* Handle de redimensionamiento derecho - MITAD DE ANCHO y color accent */}
           <div
-            className="absolute right-0 top-0 w-3 h-full bg-orange-500 opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-r z-20"
+            className="absolute right-0 top-0 w-1.5 h-full opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity rounded-r z-20"
+            style={{ backgroundColor: 'var(--accent)' }}
             onMouseDown={(e) => handleResizeStart(e, 'end')}
             title="Arrastrar para cambiar fecha final"
           />
@@ -413,16 +415,16 @@ export function GanttTimelineBar({
         <>
           {/* Punto izquierdo - MÁS AFUERA como DHTMLX */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:bg-blue-500 transition-all"
-            style={{ left: '-18px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:bg-blue-500 transition-all"
+            style={{ left: '-22px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
             title="Conectar desde inicio"
           />
           
           {/* Punto derecho - MÁS AFUERA como DHTMLX */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:bg-green-500 transition-all"
-            style={{ right: '-18px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:bg-green-500 transition-all"
+            style={{ right: '-22px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
             title="Conectar desde final"
           />
