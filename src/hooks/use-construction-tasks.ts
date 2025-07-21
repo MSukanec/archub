@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-import { processTaskName } from '@/utils/taskNameProcessor';
 
 export interface ConstructionTask {
   // Identificadores principales de la vista
@@ -94,7 +93,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         task: {
           id: item.task_id,
           code: item.task_code,
-          display_name: processTaskName(item.task_name || item.task_code, item.param_values), // Procesar parámetros
+          display_name: item.task_name || item.task_code, // Usar task_name de la vista
           rubro_name: null, // Se puede obtener si es necesario
           category_name: null, // Se puede obtener si es necesario
           unit_id: null, // Se puede obtener si es necesario
@@ -110,8 +109,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
         sampleTaskCode: mappedTasks[0]?.task?.code,
         sampleTaskName: mappedTasks[0]?.task?.display_name,
-        rawTaskName: ganttData?.[0]?.task_name,
-        sampleParamValues: ganttData?.[0]?.param_values
+        rawTaskName: ganttData?.[0]?.task_name
       });
 
       return mappedTasks;
