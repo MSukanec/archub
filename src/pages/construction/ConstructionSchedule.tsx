@@ -48,7 +48,7 @@ export default function ConstructionSchedule() {
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
@@ -72,7 +72,7 @@ export default function ConstructionSchedule() {
 
       const processed = await Promise.all(
         tasks.map(async (task) => {
-          if (task.task.param_values && Object.keys(task.task.param_values).length > 0) {
+          if (task.task?.param_values && Object.keys(task.task.param_values).length > 0) {
             const processedName = await generateTaskDescription(task.task.display_name, task.task.param_values)
             
             return {
@@ -87,7 +87,7 @@ export default function ConstructionSchedule() {
             ...task,
             task: {
               ...task.task,
-              processed_display_name: task.task.display_name
+              processed_display_name: task.task?.display_name || ''
             }
           }
         })
