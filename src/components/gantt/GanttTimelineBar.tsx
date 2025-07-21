@@ -82,7 +82,7 @@ export function GanttTimelineBar({
   // Throttled callback para optimizar propagación de dependencias en tiempo real
   const throttledPropagation = useMemo(() => {
     let lastCall = 0;
-    const throttleMs = 50; // 20fps para propagación - menos frecuente que flechas
+    const throttleMs = 16; // 60fps para propagación suave - igual que las flechas
     
     return (taskId: string, newEndDate: string, allTasks: ConstructionTask[], dependencies: any[]) => {
       const now = Date.now();
