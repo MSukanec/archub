@@ -316,7 +316,7 @@ export function ConstructionTaskFormModal({
       }
 
       // Manejar dependencias
-      if (data.predecessor_task_id) {
+      if (data.predecessor_task_id && data.predecessor_task_id !== 'empty-placeholder') {
         // Buscar si ya existe una dependencia para esta tarea
         const existingDependency = existingDependencies.find(
           dep => dep.successor_task_id === taskId
@@ -617,7 +617,7 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Agregar Tarea"}
       onRightClick={handleSubmit(onSubmit)}
-      isDisabled={isSubmitting || !selectedTaskId || !quantity}
+      disabled={isSubmitting || !selectedTaskId || !quantity}
     />
   );
 

@@ -61,9 +61,16 @@ export function GanttTimelineBar({
   
   const dayWidth = timelineWidth / totalDays;
   
-  // Use the SAME calculation as the TODAY line for consistency
+  // CORREGIDO: Cálculo de duración real
+  // Si la tarea tiene duration_in_days, usar ese valor para el ancho de la barra
+  let calculatedDuration = dayEndFromTimeline - dayStartFromTimeline + 1;
+  
+  if (item.taskData?.duration_in_days && item.taskData.duration_in_days > 0) {
+    calculatedDuration = item.taskData.duration_in_days;
+  }
+  
   const startPixels = dayStartFromTimeline * dayWidth;
-  const widthPixels = (dayEndFromTimeline - dayStartFromTimeline + 1) * dayWidth;
+  const widthPixels = calculatedDuration * dayWidth;
   
   // Clean up debug logs - alignment is now working perfectly
   // console.log('BAR ALIGNED:', item.name.substring(0, 20), startPixels);
