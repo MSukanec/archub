@@ -305,6 +305,11 @@ export function GanttTimelineBar({
           start_date: format(newStartDate, 'yyyy-MM-dd'),
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
+        }, {
+          onSuccess: () => {
+            // Actualizar flechas después del snap final
+            onTaskUpdate?.();
+          }
         });
       }
       
@@ -394,6 +399,11 @@ export function GanttTimelineBar({
           id: item.taskData.id,
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
+        }, {
+          onSuccess: () => {
+            // Actualizar flechas después del resize snap
+            onTaskUpdate?.();
+          }
         });
       } else {
         const startDate = new Date(item.taskData.start_date!);
@@ -403,6 +413,11 @@ export function GanttTimelineBar({
           id: item.taskData.id,
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
+        }, {
+          onSuccess: () => {
+            // Actualizar flechas después del resize snap
+            onTaskUpdate?.();
+          }
         });
       }
       

@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT DRAG & DROP ARROW SNAP SYNCHRONIZATION COMPLETED: Fixed final edge case where arrows didn't update after bar drop/snap positioning - COMPLETED
+  • Fixed critical bug: arrows remained at drop position when bars snapped to nearest day after release
+  • Added onSuccess callbacks to all updateTaskResize mutations (drag, resize start, resize end) to trigger arrow updates after database updates
+  • Implemented throttled real-time updates during drag/resize operations using requestAnimationFrame with 16ms throttling for 60fps performance
+  • Eliminated 200ms setTimeout delay, replaced with instant updates for smooth user experience during drag operations
+  • Final result: arrows now update perfectly during drag AND snap to final position after drop/resize completion
+  • System achieves professional-grade synchronization: real-time updates during manipulation + accurate final positioning after database persistence
 - July 21, 2025. GANTT DEPENDENCY ARROWS FINAL POSITIONING FIX: Fixed horizontal lines to pass between row dividers instead of through task bar centers - COMPLETED
   • Critical positioning fix: horizontal arrow lines now pass between task rows instead of through the center of task bars
   • Modified Y-coordinate calculation: output lines pass below tasks (bottom + 6px), input lines pass above tasks (top - 6px)
