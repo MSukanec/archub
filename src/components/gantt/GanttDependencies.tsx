@@ -91,20 +91,42 @@ export function GanttDependencies({
     }).filter(Boolean);
   }, [dependencies, taskMap, timelineWidth, totalDays, timelineStart]);
 
-  // Generar path SVG estilo DHTMLX con líneas rectas y esquinas
-  const generateDHtmlxArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
-    // Estilo DHTMLX: línea horizontal desde la tarea, luego vertical, luego horizontal hacia destino
-    const horizontalOffset = 10; // Distancia horizontal desde la tarea
-    const midX = fromX + horizontalOffset;
+  // Generar path SVG profesional estilo MS Project/DHTMLX
+  const generateProfessionalArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
+    // Configuración profesional
+    const CONNECTOR_LENGTH = 20; // Longitud de los conectores horizontales
+    const MIN_VERTICAL_SPACE = 8; // Espacio mínimo para curvas verticales
     
-    // Si las tareas están en la misma altura
-    if (Math.abs(fromY - toY) < 5) {
-      return `M ${fromX} ${fromY} L ${midX} ${fromY} L ${toX - horizontalOffset} ${toY} L ${toX} ${toY}`;
+    // Puntos de conexión: desde final de tarea origen hasta inicio de tarea destino
+    const startX = fromX;
+    const endX = toX;
+    const startY = fromY;
+    const endY = toY;
+    
+    // Si las tareas están en la misma fila (dependencia horizontal directa)
+    if (Math.abs(startY - endY) <= 2) {
+      // Línea horizontal directa con pequeña curva suave
+      const midX = startX + (endX - startX) * 0.5;
+      return `M ${startX} ${startY} 
+              Q ${startX + 10} ${startY} ${midX} ${startY}
+              Q ${endX - 10} ${endY} ${endX} ${endY}`;
     }
     
-    // Si las tareas están en diferentes alturas
-    const verticalMidY = fromY + (toY - fromY) / 2;
-    return `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${verticalMidY} L ${toX - horizontalOffset} ${verticalMidY} L ${toX - horizontalOffset} ${toY} L ${toX} ${toY}`;
+    // Para tareas en diferentes filas: línea en forma de escalón con curvas suaves
+    const connector1X = startX + CONNECTOR_LENGTH;
+    const connector2X = endX - CONNECTOR_LENGTH;
+    const midX = connector1X + (connector2X - connector1X) * 0.5;
+    const verticalOffset = Math.abs(endY - startY) > MIN_VERTICAL_SPACE ? 0 : MIN_VERTICAL_SPACE;
+    
+    // Path con curvas bezier suaves en las esquinas
+    return `M ${startX} ${startY}
+            L ${connector1X - 8} ${startY}
+            Q ${connector1X} ${startY} ${connector1X} ${startY + (startY < endY ? 8 : -8)}
+            L ${connector1X} ${endY + (startY < endY ? -8 : 8)}
+            Q ${connector1X} ${endY} ${connector1X + 8} ${endY}
+            L ${connector2X - 8} ${endY}
+            Q ${connector2X} ${endY} ${connector2X} ${endY}
+            L ${endX} ${endY}`;
   };
 
   // Línea punteada durante drag
@@ -151,60 +173,68 @@ export function GanttDependencies({
         viewBox={`0 0 ${timelineWidth} 500`}
         preserveAspectRatio="none"
       >
-        {/* Línea de prueba SIEMPRE visible */}
-        <line
-          x1="50"
-          y1="20"
-          x2="250"
-          y2="60"
-          stroke="#ff0000"
-          strokeWidth="3"
-          opacity="0.8"
-        />
-        <text x="100" y="45" fill="#ff0000" fontSize="12" fontWeight="bold">DEPS: {dependencies.length}</text>
-        
-        {/* Flechas de dependencia estilo DHTMLX profesional */}
+        {/* Flechas de dependencia profesionales estilo MS Project */}
         {dependencyPaths.map((path) => path && (
-          <g key={path.id}>
-            {/* Línea principal estilo DHTMLX con múltiples segmentos */}
+          <g key={path.id} className="dependency-arrow">
+            {/* Línea de fondo blanca para mejorar visibilidad */}
             <path
-              d={generateDHtmlxArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
-              stroke="#2563eb"
-              strokeWidth="2"
+              d={generateProfessionalArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
+              stroke="white"
+              strokeWidth="4"
               fill="none"
-              markerEnd="url(#dhtmlx-arrowhead)"
               opacity="0.8"
             />
             
-            {/* Círculo pequeño en el punto de conexión de salida */}
+            {/* Línea principal profesional */}
+            <path
+              d={generateProfessionalArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
+              stroke="#1e40af"
+              strokeWidth="2"
+              fill="none"
+              markerEnd="url(#professional-arrowhead)"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            
+            {/* Punto de conexión en el origen */}
             <circle
               cx={path.fromX}
               cy={path.fromY}
-              r="2"
-              fill="#2563eb"
+              r="3"
+              fill="#1e40af"
               stroke="white"
               strokeWidth="1"
+              opacity="0.9"
             />
           </g>
         ))}
         
-        {/* Marcador de flecha estilo DHTMLX */}
+        {/* Definiciones SVG profesionales */}
         <defs>
+          {/* Marcador de flecha profesional estilo MS Project */}
           <marker
-            id="dhtmlx-arrowhead"
-            markerWidth="8"
-            markerHeight="6"
-            refX="7"
-            refY="3"
+            id="professional-arrowhead"
+            markerWidth="10"
+            markerHeight="8"
+            refX="9"
+            refY="4"
             orient="auto"
             markerUnits="strokeWidth"
           >
+            {/* Flecha sólida con borde blanco para mejor visibilidad */}
             <path
-              d="M0,0 L0,6 L8,3 z"
-              fill="#2563eb"
-              stroke="none"
+              d="M0,0 L0,8 L10,4 z"
+              fill="#1e40af"
+              stroke="white"
+              strokeWidth="0.5"
             />
           </marker>
+          
+          {/* Gradiente para mejorar la apariencia */}
+          <linearGradient id="dependency-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#1e40af" stopOpacity="0.8"/>
+            <stop offset="100%" stopColor="#3b82f6" stopOpacity="1"/>
+          </linearGradient>
         </defs>
       </svg>
     </div>

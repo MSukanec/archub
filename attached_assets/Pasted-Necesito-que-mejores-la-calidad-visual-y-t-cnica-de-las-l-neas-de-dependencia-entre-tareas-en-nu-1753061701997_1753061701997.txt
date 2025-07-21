@@ -1,0 +1,44 @@
+Necesito que mejores la calidad visual y técnica de las **líneas de dependencia entre tareas** en nuestro Gantt personalizado.
+
+### 🔍 Qué está mal:
+Actualmente las flechas entre tareas (que indican dependencias tipo Finish-to-Start) se ven **como si estuvieran dibujadas a mano en Paint**:
+- No siguen una línea limpia
+- No tienen ángulos suaves
+- No terminan alineadas a los nodos correctos
+- Visualmente **rompen la estética profesional del Gantt**
+
+Podés ver la diferencia comparando con el Gantt de abajo (DHTMLX Gantt o react-gantt-task), que usa conexiones vectoriales suaves tipo SVG o canvas bien resueltas.
+
+---
+
+### 🎯 Qué necesito que hagas:
+
+1. **Analizá cómo están actualmente dibujadas las líneas de dependencia**.
+   - ¿Están hechas con HTML/CSS absolutas? ¿Con líneas div? ¿Canvas?
+   - Revisá si están usando algún sistema de coordenadas rudimentario.
+
+2. **Reemplazá esa lógica por una implementación profesional basada en SVG**:
+   - Dibujá las líneas de dependencia con `<svg><path/></svg>`
+   - Asegurate de:
+     - Conectar el borde derecho de la tarea predecesora con el borde izquierdo de la tarea sucesora
+     - Tener una curva suave (usá `path d="M ... C ..."` o `L` si es recta)
+     - Agregá una flecha al final (`marker-end` o un pequeño triángulo)
+
+3. **Eliminá cualquier lógica que use líneas HTML absolutas mal renderizadas**
+
+4. **Asegurate de que las líneas se actualicen si el usuario mueve o reordena tareas** (si ya lo hacen, mantenelo)
+
+5. **Conectá las tareas por `construction_dependencies`**
+   - `predecessor_task_id` → `successor_task_id`
+   - Si no hay dependencias, no se dibuja nada
+
+---
+
+### ✅ Ejemplo visual esperado:
+- Las líneas deben parecer **vectores limpios**, como en MS Project o Gantt Pro
+- Se deben renderizar **por debajo o detrás** de las barras de tareas, no encima
+- Si es posible, podés usar una capa `<svg>` encima del timeline
+
+---
+
+Cuando esté funcionando, confirmame. Después evaluamos si agregamos soporte para otros tipos de dependencias (`SS`, `FF`, `lag_days`, etc).
