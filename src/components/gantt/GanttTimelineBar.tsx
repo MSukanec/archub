@@ -302,6 +302,16 @@ export function GanttTimelineBar({
         Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
       const newEndDate = addDays(newStartDate, originalDuration - 1);
       
+      console.log('DRAG UPDATE:', {
+        taskId: item.taskData?.id,
+        taskName: item.name,
+        originalStartDate: format(startDate, 'yyyy-MM-dd'),
+        newStartDate: format(newStartDate, 'yyyy-MM-dd'),
+        newEndDate: format(newEndDate, 'yyyy-MM-dd'),
+        originalDuration,
+        newDay
+      });
+      
       if (item.taskData?.id) {
         // Usar el hook específico de drag que NO invalida caché automáticamente
         updateTaskDrag.mutateAsync({
@@ -310,7 +320,20 @@ export function GanttTimelineBar({
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
         }).then(() => {
-          // Drag completado exitosamente - las flechas se actualizarán automáticamente
+          console.log('DRAG UPDATE SUCCESS - Invalidating cache manually');
+          
+          // Invalidar caché manualmente SOLO después del drag exitoso
+          queryClient.invalidateQueries({ 
+            queryKey: ['construction-tasks'] 
+          });
+          queryClient.invalidateQueries({ 
+            queryKey: ['construction-dependencies'] 
+          });
+          
+          // Actualizar flechas después de la invalidación
+          setTimeout(() => {
+            onTaskUpdate?.();
+          }, 50);
         }).catch((error) => {
           console.error('DRAG UPDATE ERROR:', error);
         });
