@@ -6,6 +6,7 @@ import { FormModalLayout } from '../../form/FormModalLayout';
 import { useModalPanelStore } from '../../form/modalPanelStore';
 import { TaskSelectionTable, SelectedTask } from '@/components/ui-custom/TaskSelectionTable';
 import { useBudgetTasks } from '@/hooks/use-budget-tasks';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 interface BudgetTaskBulkAddModalProps {
   modalData?: {
@@ -19,10 +20,12 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
   const { budgetId, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
+  // Obtener datos del usuario
+  const { data: userData } = useCurrentUser();
+  
   // Obtener tareas ya existentes en el presupuesto para excluirlas
-  const { data: existingBudgetTasks = [] } = useBudgetTasks(budgetId || '');
+  const { data: existingBudgetTasks = [], createMultipleBudgetTasks } = useBudgetTasks(budgetId || '');
   const excludeTaskIds = existingBudgetTasks.map(bt => bt.task_id);
 
   useEffect(() => {
@@ -30,21 +33,27 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
   }, [setPanel]);
 
   const handleSubmit = async () => {
-    if (selectedTasks.length === 0) {
+    if (selectedTasks.length === 0 || !budgetId || !userData?.user?.id) {
       return;
     }
 
-    setIsSubmitting(true);
+    console.log('Adding tasks to budget:', budgetId, selectedTasks);
+    
+    // Convertir tareas seleccionadas al formato requerido por la base de datos
+    const tasksToAdd = selectedTasks.map(task => ({
+      budget_id: budgetId,
+      task_id: task.task_instance_id, // task_instance_id es el ID correcto
+      organization_id: userData.organization.id,
+      project_id: userData.preferences.last_project_id || '',
+    }));
+
     try {
-      console.log('Adding tasks to budget:', budgetId, selectedTasks);
-      // TODO: Implement task addition logic here
-      
+      await createMultipleBudgetTasks.mutateAsync(tasksToAdd);
       onSuccess?.();
       onClose();
     } catch (error) {
       console.error('Error adding tasks:', error);
-    } finally {
-      setIsSubmitting(false);
+      // El error se maneja en el hook con toast
     }
   };
 
@@ -80,8 +89,8 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
       onLeftClick={onClose}
       rightLabel={`Agregar ${selectedTasks.length > 0 ? selectedTasks.length : ''} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
       onRightClick={handleSubmit}
-      submitDisabled={selectedTasks.length === 0 || isSubmitting}
-      showLoadingSpinner={isSubmitting}
+      submitDisabled={selectedTasks.length === 0 || createMultipleBudgetTasks.isPending}
+      showLoadingSpinner={createMultipleBudgetTasks.isPending}
     />
   );
 

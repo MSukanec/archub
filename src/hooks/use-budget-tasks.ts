@@ -187,6 +187,46 @@ export function useBudgetTasks(budgetId: string) {
     }
   });
 
+  // Crear múltiples tareas en presupuesto (bulk)
+  const createMultipleBudgetTasks = useMutation({
+    mutationFn: async (tasksData: CreateBudgetTaskData[]) => {
+      console.log("Creating multiple budget tasks:", tasksData.length, "tasks");
+      
+      if (!supabase) {
+        throw new Error("Supabase client not initialized");
+      }
+
+      const { data, error } = await supabase
+        .from("budget_tasks")
+        .insert(tasksData)
+        .select();
+
+      if (error) {
+        console.error("Error creating multiple budget tasks:", error);
+        throw error;
+      }
+
+      console.log("Multiple budget tasks created:", data.length, "tasks");
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budget-tasks", budgetId] });
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      toast({
+        title: "Tareas agregadas",
+        description: "Las tareas se agregaron al presupuesto correctamente"
+      });
+    },
+    onError: (error) => {
+      console.error("Error in createMultipleBudgetTasks mutation:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron agregar las tareas al presupuesto",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Eliminar tarea del presupuesto
   const deleteBudgetTask = useMutation({
     mutationFn: async (taskId: string) => {
@@ -231,6 +271,7 @@ export function useBudgetTasks(budgetId: string) {
     isLoading,
     error,
     createBudgetTask,
+    createMultipleBudgetTasks,
     updateBudgetTask,
     deleteBudgetTask
   };
