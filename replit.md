@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT TASK BAR RESIZE SYSTEM PERFECTED: Successfully fixed coordinate calculation bug causing bars to jump to timeline start during resize operations - COMPLETED
+  • Fixed critical coordinate calculation issue where bars jumped to timeline beginning when released during resize
+  • Root cause identified: missing scroll offset adjustment in position calculations (containerLeft was -1640 indicating wrong container)
+  • Implemented proper container targeting using #timeline-content-scroll ID instead of class selectors
+  • Added scroll offset compensation: adjustedX = relativeX + scrollLeft for accurate positioning in scrolled timelines
+  • Task bars now resize smoothly and snap to exact day positions where user releases mouse cursor
+  • Eliminated jumping behavior completely - bars maintain position continuity during and after resize operations
+  • System handles horizontal scroll seamlessly with proper coordinate transformation for precise day-level snapping
 - July 21, 2025. GANTT DEPENDENCY ARROWS SYSTEM COMPLETED: Successfully implemented professional SVG-based dependency visualization system matching DHTMLX/MS Project quality - COMPLETED
   • Professional SVG path system implemented with Bezier curves for smooth connections like MS Project
   • Replaced crude HTML/CSS lines with vector-based SVG paths using proper coordinates

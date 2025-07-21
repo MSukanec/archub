@@ -226,29 +226,8 @@ export function GanttTimelineBar({
         barRef.current.style.marginLeft = '';
       }
       
-      // DEBUG: Agregar logs detallados para entender el problema
-      const timelineContainer = document.getElementById('timeline-content-scroll') as HTMLElement;
-      const containerRect = timelineContainer?.getBoundingClientRect();
-      const scrollLeft = timelineContainer?.scrollLeft || 0;
-      const relativeX = e.clientX - (containerRect?.left || 0);
-      const adjustedX = relativeX + scrollLeft; // Ajustar por el scroll
-      const dayWidth = timelineWidth / totalDays;
-      const calculatedDay = Math.round(adjustedX / dayWidth);
-      
-      console.log('RESIZE DEBUG FINAL:', {
-        clientX: e.clientX,
-        containerLeft: containerRect?.left,
-        scrollLeft: scrollLeft,
-        relativeX: relativeX,
-        adjustedX: adjustedX,
-        dayWidth: dayWidth,
-        totalDays: totalDays,
-        calculatedDay: calculatedDay,
-        timelineWidth: timelineWidth
-      });
-      
-      // AQUÍ sí hacer el snap al día más cercano con ajuste de scroll
-      const newDay = Math.max(0, calculatedDay);
+      // AQUÍ sí hacer el snap al día más cercano
+      const newDay = calculateDayFromX(e.clientX);
       const newDate = addDays(timelineStart, newDay);
       
       // Actualizar la tarea en la base de datos
