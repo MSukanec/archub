@@ -315,8 +315,11 @@ export function BudgetTable({
       <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '3px' }}>
-          {/* Left side - Search Field (when visible) */}
-          <div className="flex items-center">
+          {/* Empty left side */}
+          <div></div>
+          
+          {/* Right side - Search Field + Search Button + Filter Button + Add Tasks Button */}
+          <div className="flex items-center gap-2">
             {showSearch && (
               <input
                 type="text"
@@ -332,10 +335,7 @@ export function BudgetTable({
                 }}
               />
             )}
-          </div>
-          
-          {/* Right side - Search Button + Filter Button + Add Tasks Button */}
-          <div className="flex items-center gap-2">
+            
             <Button
               variant="ghost"
               size="sm"
