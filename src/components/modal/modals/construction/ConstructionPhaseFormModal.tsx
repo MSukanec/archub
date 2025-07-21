@@ -104,25 +104,6 @@ export function ConstructionPhaseFormModal({
     setUseExisting(watchUseExisting || false);
   }, [watchUseExisting]);
 
-  // Handle Enter key submit
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
-      const isTextarea = target.tagName === 'TEXTAREA';
-      
-      // Allow Enter submit if not in textarea, or Ctrl/Cmd+Enter anywhere
-      if (event.key === 'Enter' && (!isTextarea || event.ctrlKey || event.metaKey)) {
-        event.preventDefault();
-        handleSubmit(onSubmit)();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleSubmit, onSubmit]);
-
   const onSubmit = async (data: PhaseFormData) => {
     if (!userData?.user?.id || !currentMember?.id) {
       toast({
@@ -214,6 +195,25 @@ export function ConstructionPhaseFormModal({
       setIsSubmitting(false);
     }
   };
+
+  // Handle Enter key submit
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isTextarea = target.tagName === 'TEXTAREA';
+      
+      // Allow Enter submit if not in textarea, or Ctrl/Cmd+Enter anywhere
+      if (event.key === 'Enter' && (!isTextarea || event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        handleSubmit(onSubmit)();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleSubmit, onSubmit]);
 
   const viewPanel = null; // No view mode for this modal
 
