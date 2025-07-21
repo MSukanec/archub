@@ -3,18 +3,38 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
 export interface ConstructionTask {
-  id: string;
-  organization_id: string;
+  // Identificadores principales de la vista
+  task_instance_id: string;  // ID principal de la instancia de tarea
   project_id: string;
-  task_id: string;
-  quantity: number;
-  created_by: string;
+  task_id: string;          // ID de la tarea generada original
+  
+  // Datos de la tarea
+  task_code: string;
+  param_values: any;
+  
+  // Fechas y duración
   start_date?: string;
   end_date?: string;
   duration_in_days?: number;
-  created_at: string;
-  updated_at: string;
-  task: {
+  
+  // Información de fase
+  phase_instance_id: string;
+  phase_name: string;
+  phase_position: number;
+  
+  // Progreso
+  progress_percent: number;
+
+  // Para compatibilidad con el sistema existente - mapearemos los campos
+  id: string; // Será task_instance_id
+  organization_id?: string; // Lo obtendremos del contexto
+  quantity?: number; // Lo obtendremos si es necesario
+  created_by?: string; // Lo obtendremos si es necesario
+  created_at?: string; // Lo obtendremos si es necesario
+  updated_at?: string; // Lo obtendremos si es necesario
+  
+  // Información de tarea para compatibilidad
+  task?: {
     id: string;
     code: string;
     display_name: string;
@@ -25,9 +45,6 @@ export interface ConstructionTask {
     rubro_id: string | null;
     param_values: any;
   };
-
-  phase_name?: string;
-  progress_percent?: number;
 }
 
 export function useConstructionTasks(projectId: string, organizationId: string) {
@@ -36,111 +53,64 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Primero obtener las tareas
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('construction_tasks')
-        .select(`
-          *,
-          task:task_generated_view!inner (
-            id,
-            code,
-            display_name,
-            rubro_name,
-            category_name,
-            unit_id,
-            rubro_id,
-            param_values
-          )
-        `)
+      // Usar únicamente la vista construction_gantt_view
+      const { data: ganttData, error } = await supabase
+        .from('construction_gantt_view')
+        .select('*')
         .eq('project_id', projectId)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+        .order('phase_position', { ascending: true });
 
-      if (tasksError) {
-        console.error('Error fetching construction tasks:', tasksError);
-        throw tasksError;
+      if (error) {
+        console.error('Error fetching construction gantt view:', error);
+        throw error;
       }
 
-      if (!tasksData || tasksData.length === 0) {
+      if (!ganttData || ganttData.length === 0) {
         return [];
       }
 
-      // Obtener las fases para cada tarea usando consultas separadas
-      const taskIds = tasksData.map(task => task.id);
-      
-      // Primero obtener las relaciones fase-tarea con progreso
-      const { data: phaseTasksData, error: phaseTasksError } = await supabase
-        .from('construction_phase_tasks')
-        .select('construction_task_id, project_phase_id, progress_percent')
-        .in('construction_task_id', taskIds);
-
-      // Crear mapas de task_id -> project_phase_id y task_id -> progress_percent
-      const taskPhaseMap: Record<string, string> = {};
-      const taskProgressMap: Record<string, number> = {};
-      if (phaseTasksData && !phaseTasksError) {
-        phaseTasksData.forEach(pt => {
-          taskPhaseMap[pt.construction_task_id] = pt.project_phase_id;
-          taskProgressMap[pt.construction_task_id] = pt.progress_percent || 0;
-        });
-      }
-
-      // Obtener los nombres de las fases
-      const projectPhaseIds = Object.values(taskPhaseMap);
-      let phaseNamesMap: Record<string, string> = {};
-      
-      if (projectPhaseIds.length > 0) {
-        const { data: projectPhasesData, error: projectPhasesError } = await supabase
-          .from('construction_project_phases')
-          .select(`
-            id,
-            phase:construction_phases!inner (name)
-          `)
-          .in('id', projectPhaseIds);
-
-        if (projectPhasesData && !projectPhasesError) {
-          phaseNamesMap = {};
-          projectPhasesData.forEach(pp => {
-            phaseNamesMap[pp.id] = (pp.phase as any)?.name || '';
-          });
-        }
-      }
-
-      // Obtener información de las unidades para todos los unit_id
-      const unitIds = Array.from(new Set(tasksData.map(task => task.task.unit_id).filter(Boolean)));
-      let unitsMap: Record<string, string> = {};
-      
-      if (unitIds.length > 0) {
-        const { data: unitsData, error: unitsError } = await supabase
-          .from('units')
-          .select('id, name')
-          .in('id', unitIds);
-          
-        if (unitsData && !unitsError) {
-          unitsData.forEach(unit => {
-            unitsMap[unit.id] = unit.name;
-          });
-        }
-      }
-
-      // Procesar los datos para agregar el nombre de la fase, progreso y unidad
-      const processedData = tasksData.map(task => {
-        const projectPhaseId = taskPhaseMap[task.id];
-        const phaseName = projectPhaseId ? phaseNamesMap[projectPhaseId] : null;
-        const progressPercent = taskProgressMap[task.id] || 0;
-        const unitName = task.task.unit_id ? unitsMap[task.task.unit_id] : null;
+      // Mapear datos de la vista al formato esperado
+      const mappedTasks: ConstructionTask[] = ganttData.map((item) => ({
+        // Campos principales de la vista
+        task_instance_id: item.task_instance_id,
+        project_id: item.project_id,
+        task_id: item.task_id,
+        task_code: item.task_code,
+        param_values: item.param_values,
+        start_date: item.start_date,
+        end_date: item.end_date,
+        duration_in_days: item.duration_in_days,
+        phase_instance_id: item.phase_instance_id,
+        phase_name: item.phase_name,
+        phase_position: item.phase_position,
+        progress_percent: item.progress_percent || 0,
         
-        return {
-          ...task,
-          phase_name: phaseName || null,
-          progress_percent: progressPercent,
-          task: {
-            ...task.task,
-            unit_name: unitName || null
-          }
-        };
+        // Compatibilidad con sistema existente
+        id: item.task_instance_id, // ID principal para compatibilidad
+        organization_id: organizationId, // Del contexto
+        
+        // Crear objeto task para compatibilidad con componentes existentes
+        task: {
+          id: item.task_id,
+          code: item.task_code,
+          display_name: `${item.task_code}`, // Por ahora usar el código como display_name
+          rubro_name: null, // Se puede obtener si es necesario
+          category_name: null, // Se puede obtener si es necesario
+          unit_id: null, // Se puede obtener si es necesario
+          unit_name: null, // Se puede obtener si es necesario
+          rubro_id: null, // Se puede obtener si es necesario
+          param_values: item.param_values
+        }
+      }));
+
+      console.log('GANTT VIEW DATA:', {
+        projectId,
+        totalTasks: mappedTasks.length,
+        phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
+        sample: mappedTasks[0]
       });
 
-      return processedData;
+      return mappedTasks;
     },
     enabled: !!projectId && !!organizationId,
   });
@@ -367,7 +337,7 @@ export function useUpdateConstructionTaskResize() {
 
   return useMutation({
     mutationFn: async (data: {
-      id: string;
+      id: string; // task_instance_id
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
@@ -382,15 +352,16 @@ export function useUpdateConstructionTaskResize() {
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
 
+      // CAMBIO: Usar task_instance_id para actualizar construction_tasks
       const { data: result, error } = await supabase
         .from('construction_tasks')
         .update(updateData)
-        .eq('id', data.id)
+        .eq('id', data.id) // data.id es task_instance_id ahora
         .select('id, project_id, organization_id')
         .single();
 
       if (error) {
-        console.error('Error updating construction task:', error);
+        console.error('Error updating construction task resize:', error);
         throw error;
       }
 
@@ -406,7 +377,7 @@ export function useUpdateConstructionTaskResize() {
       });
     },
     onError: (error) => {
-      console.error('Error updating construction task:', error);
+      console.error('Error updating construction task resize:', error);
       // Sin toast para redimensionamiento - feedback visual suficiente
     },
   });
@@ -416,7 +387,7 @@ export function useUpdateConstructionTaskResize() {
 export function useUpdateConstructionTaskDrag() {
   return useMutation({
     mutationFn: async (data: {
-      id: string;
+      id: string; // task_instance_id
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
@@ -431,15 +402,16 @@ export function useUpdateConstructionTaskDrag() {
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
 
+      // CAMBIO: Usar task_instance_id para updates de drag
       const { data: result, error } = await supabase
         .from('construction_tasks')
         .update(updateData)
-        .eq('id', data.id)
+        .eq('id', data.id) // data.id es task_instance_id ahora
         .select('id, project_id, organization_id')
         .single();
 
       if (error) {
-        console.error('Error updating construction task:', error);
+        console.error('Error updating construction task drag:', error);
         throw error;
       }
 

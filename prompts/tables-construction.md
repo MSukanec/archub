@@ -75,6 +75,10 @@ VISTA CONSTRUCTION_GANTT_VIEW:
   {
     "column_name": "phase_position",
     "data_type": "integer"
+  },
+  {
+    "column_name": "progress_percent",
+    "data_type": "integer"
   }
 ]
 
