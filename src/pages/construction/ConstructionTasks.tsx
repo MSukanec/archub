@@ -162,17 +162,17 @@ export default function ConstructionTasks() {
     fechas: task.start_date || task.end_date ? (
       <div className="space-y-1">
         {task.start_date && (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground">
             Inicio: {format(new Date(task.start_date), 'dd/MM/yyyy', { locale: es })}
           </div>
         )}
         {task.end_date && (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground">
             Fin: {format(new Date(task.end_date), 'dd/MM/yyyy', { locale: es })}
           </div>
         )}
         {task.duration_in_days && (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground">
             Duración: {task.duration_in_days} días
           </div>
         )}
