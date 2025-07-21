@@ -97,11 +97,10 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
 
   const footerContent = (
     <FormModalFooter
-      cancelLabel="Cancelar"
-      submitLabel="Agregar Tareas"
-      onCancel={onClose}
-      onSubmit={form.handleSubmit(handleSubmit)}
-      isLoading={false}
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel="Agregar Tareas"
+      onRightClick={form.handleSubmit(handleSubmit)}
     />
   );
 
