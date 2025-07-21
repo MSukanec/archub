@@ -408,21 +408,21 @@ export function GanttTimelineBar({
         </>
       )}
       
-      {/* PUNTOS DE CONEXIÓN - SIEMPRE VISIBLES PARA PRUEBA */}
+      {/* PUNTOS DE CONEXIÓN - COMPLETAMENTE AFUERA COMO DHTMLX */}
       {shouldShowConnectionPoints && (
         <>
-          {/* Punto izquierdo - SIEMPRE VISIBLE para probar */}
+          {/* Punto izquierdo - MÁS AFUERA como DHTMLX */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50"
-            style={{ left: '-12px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:bg-blue-500 transition-all"
+            style={{ left: '-18px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
             title="Conectar desde inicio"
           />
           
-          {/* Punto derecho - SIEMPRE VISIBLE para probar */}
+          {/* Punto derecho - MÁS AFUERA como DHTMLX */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-green-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50"
-            style={{ right: '-12px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-500 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:bg-green-500 transition-all"
+            style={{ right: '-18px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
             title="Conectar desde final"
           />
