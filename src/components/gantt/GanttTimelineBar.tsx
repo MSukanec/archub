@@ -408,23 +408,23 @@ export function GanttTimelineBar({
         </>
       )}
       
-      {/* Puntos de conexión claramente AFUERA de la barra como DHTMLX */}
+      {/* Puntos de conexión exactamente como DHTMLX - AFUERA de la barra */}
       {shouldShowConnectionPoints && !isResizing && (
         <>
-          {/* Punto izquierdo - COMPLETAMENTE afuera de la barra */}
+          {/* Punto izquierdo - exactamente como DHTMLX, afuera a la izquierda */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-blue-600 hover:scale-125 z-30"
-            style={{ left: '-10px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gray-400 border border-gray-600 rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-blue-500 hover:border-blue-700 z-40"
+            style={{ left: '-8px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
-            title="Conectar desde el inicio de esta tarea"
+            title="Conectar desde el inicio"
           />
           
-          {/* Punto derecho - COMPLETAMENTE afuera de la barra */}
+          {/* Punto derecho - exactamente como DHTMLX, afuera a la derecha */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-green-600 hover:scale-125 z-30"
-            style={{ right: '-10px' }}
+            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gray-400 border border-gray-600 rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-green-500 hover:border-green-700 z-40"
+            style={{ right: '-8px' }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
-            title="Conectar desde el final de esta tarea"
+            title="Conectar desde el final"
           />
         </>
       )}
