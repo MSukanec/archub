@@ -905,20 +905,34 @@ export function GanttContainer({
                           const barLeft = startDayIndex * dayWidth;
                           const barWidth = Math.max(durationInDays * dayWidth, dayWidth * 0.5); // Mínimo medio día
                           
+                          // Calcular posición del texto centrado en la parte visible
+                          const timelineContainer = document.getElementById('timeline-content-scroll');
+                          const containerScrollLeft = timelineContainer?.scrollLeft || 0;
+                          const containerWidth = timelineContainer?.clientWidth || 800;
+                          const visibleStart = Math.max(containerScrollLeft, barLeft);
+                          const visibleEnd = Math.min(containerScrollLeft + containerWidth, barLeft + barWidth);
+                          const visibleWidth = Math.max(0, visibleEnd - visibleStart);
+                          const textCenterPosition = visibleWidth > 0 ? (visibleStart + visibleWidth / 2 - barLeft) : barWidth / 2;
+                          
                           return (
                             <div
-                              className="bg-[var(--accent)] opacity-60 rounded-sm flex items-center justify-center text-white text-xs font-medium shadow-sm absolute"
+                              className="bg-[var(--chart-2)] opacity-70 rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden"
                               style={{
                                 left: `${barLeft}px`,
                                 width: `${barWidth}px`,
-                                height: '24px',
+                                height: '36px',
                                 minWidth: '8px',
-                                top: '50%',
-                                transform: 'translateY(-50%)'
+                                top: '6px'
                               }}
                               title={`${item.name}: ${startDate.toLocaleDateString()} - ${resolvedEndDate.toLocaleDateString()}`}
                             >
-                              <span className="truncate px-1">
+                              <span 
+                                className="absolute whitespace-nowrap text-xs font-medium px-2"
+                                style={{
+                                  left: `${Math.max(8, textCenterPosition - 50)}px`,
+                                  transform: 'translateX(-50%)'
+                                }}
+                              >
                                 {item.name}
                               </span>
                             </div>
