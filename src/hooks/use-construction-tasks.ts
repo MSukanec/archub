@@ -198,6 +198,7 @@ export function useCreateConstructionTask() {
           .insert({
             construction_task_id: constructionTask.id,
             project_phase_id: taskData.project_phase_id,
+            project_id: taskData.project_id, // Incluir project_id en la vinculación
             progress_percent: taskData.progress_percent || 0,
           });
 
@@ -300,6 +301,7 @@ export function useUpdateConstructionTask() {
             .insert({
               construction_task_id: data.id,
               project_phase_id: data.project_phase_id,
+              project_id: data.project_id, // Incluir project_id en la vinculación
               progress_percent: data.progress_percent || 0,
             });
 

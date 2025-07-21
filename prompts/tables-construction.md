@@ -146,6 +146,10 @@ TABLA CONSTRUCTION_PHASE_TASKS:
     "data_type": "uuid"
   },
   {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
   },
