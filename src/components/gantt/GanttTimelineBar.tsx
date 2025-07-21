@@ -74,15 +74,15 @@ export function GanttTimelineBar({
     return null;
   }
 
-  // Diferentes estilos según el tipo de elemento
+  // Diferentes estilos según el tipo de elemento - BARRAS MÁS ALTAS
   const getBarStyle = () => {
     switch (item.type) {
       case 'phase':
-        return "h-6 border-2 border-blue-500 bg-blue-100 dark:bg-blue-900/30 rounded-md shadow-sm flex items-center justify-center text-xs text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer";
+        return "h-7 border-2 border-blue-500 bg-blue-100 dark:bg-blue-900/30 rounded-md shadow-sm flex items-center justify-center text-xs text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer";
       case 'task':
-        return "h-5 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer";
+        return "h-7 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer";
       default:
-        return "h-5 border-2 border-gray-400 bg-gray-100 dark:bg-gray-800 rounded-sm shadow-sm flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer";
+        return "h-7 border-2 border-gray-400 bg-gray-100 dark:bg-gray-800 rounded-sm shadow-sm flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer";
     }
   };
 
@@ -165,19 +165,19 @@ export function GanttTimelineBar({
         {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
       </span>
       
-      {/* Puntos de conexión que aparecen en hover */}
+      {/* Puntos de conexión que aparecen en hover - MÁS PROMINENTES Y FUERA DE LA BARRA */}
       {shouldShowConnectionPoints && (
         <>
-          {/* Punto izquierdo (inicio de tarea) */}
+          {/* Punto izquierdo (inicio de tarea) - MÁS FUERA DE LA BARRA */}
           <div
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-blue-600 z-10"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-blue-600 hover:scale-110 z-20"
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
             title="Conectar desde el inicio de esta tarea"
           />
           
-          {/* Punto derecho (final de tarea) */}
+          {/* Punto derecho (final de tarea) - MÁS FUERA DE LA BARRA */}
           <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-green-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-green-600 z-10"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full cursor-crosshair opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-green-600 hover:scale-110 z-20"
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
             title="Conectar desde el final de esta tarea"
           />

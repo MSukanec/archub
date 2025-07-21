@@ -1,10 +1,12 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { format, eachDayOfInterval, startOfWeek, endOfWeek, eachWeekOfInterval, startOfMonth, endOfMonth, isSameMonth, isWeekend } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Edit, Edit3, Trash2 } from 'lucide-react';
 import { GanttRow } from './GanttRow';
 import { GanttTimelineBar } from './GanttTimelineBar';
+import { GanttDependencies } from './GanttDependencies';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
+import { useConstructionDependencies } from '@/hooks/use-construction-dependencies';
 
 export function GanttContainer({ 
   data, 
@@ -28,6 +30,34 @@ export function GanttContainer({
 
   // Estado para el hover sincronizado
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  
+  // Ref para el contenedor del timeline para posicionamiento de dependencias
+  const timelineRef = useRef<HTMLDivElement>(null);
+  
+  // Cargar dependencias existentes
+  const { data: dependencies = [] } = useConstructionDependencies(data?.[0]?.projectId);
+
+  // Función para manejar el redimensionamiento del panel
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = leftPanelWidth;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(200, Math.min(600, startWidth + deltaX));
+      setLeftPanelWidth(newWidth);
+      localStorage.setItem('gantt-left-panel-width', newWidth.toString());
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [leftPanelWidth]);
 
   // Calculate timeline bounds from all items and their children
   const { timelineStart, timelineEnd } = useMemo(() => {
@@ -44,9 +74,8 @@ export function GanttContainer({
           dates.push(dateRange.resolvedEndDate);
         }
         
-        if (item.children) {
-          dates.push(...getAllDates(item.children));
-        }
+        // Note: GanttRowProps doesn't have children in current structure
+        // This was likely from an older version
       });
       
       return dates;
@@ -274,7 +303,7 @@ export function GanttContainer({
                 let dayCount = 0;
                 
                 calendarStructure.weeks.forEach(week => {
-                  week.days.forEach(day => {
+                  week.days.forEach((day: any) => {
                     const monthLabel = format(day.date, 'MMM yy', { locale: es }).toUpperCase();
                     if (monthLabel !== currentMonth) {
                       if (currentMonth) {
@@ -310,7 +339,7 @@ export function GanttContainer({
             {/* Fila inferior: Números de días - INDIVIDUAL DAYS TO MATCH BARS */}
             <div className="flex h-8">
               {calendarStructure.weeks.map((week) => 
-                week.days.map((day, dayIndex) => {
+                week.days.map((day: any, dayIndex: number) => {
                   const today = new Date();
                   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                   const isToday = day.date.getTime() === todayStart.getTime();
@@ -351,7 +380,7 @@ export function GanttContainer({
             {data.map((item) => (
               <div 
                 key={`left-${item.id}`} 
-                className={`border-b border-[var(--table-row-border)] h-9 flex items-center transition-colors ${
+                className={`border-b border-[var(--table-row-border)] h-11 flex items-center transition-colors ${
                   hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
@@ -411,7 +440,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para sincronizar con timeline */}
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
+              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-11 flex items-center bg-[var(--table-row-bg)]">
                 {/* Fila vacía para mantener altura sincronizada */}
               </div>
             ))}
@@ -421,7 +450,8 @@ export function GanttContainer({
 
         {/* Timeline - CON SCROLL HORIZONTAL SINCRONIZADO */}
         <div 
-          className="flex-1 overflow-x-scroll gantt-timeline-scroll" 
+          ref={timelineRef}
+          className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
             scrollbarWidth: 'thin',
@@ -440,7 +470,7 @@ export function GanttContainer({
             {data.map((item, index) => (
               <div 
                 key={`timeline-${item.id}`} 
-                className={`border-b border-[var(--table-row-border)] h-9 flex items-center transition-colors ${
+                className={`border-b border-[var(--table-row-border)] h-11 flex items-center transition-colors ${
                   hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
@@ -588,7 +618,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para más espacio */}
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-9 flex items-center bg-[var(--table-row-bg)]">
+              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-11 flex items-center bg-[var(--table-row-bg)]">
                 <div 
                   className="relative h-full w-full"
                   style={{ width: timelineWidth }}
@@ -641,8 +671,26 @@ export function GanttContainer({
               </div>
             ))}
           </div>
+          
+          {/* Dependencias overlay - flechas y líneas punteadas */}
+          <GanttDependencies
+            data={data}
+            dependencies={dependencies}
+            timelineStart={timelineStart}
+            timelineEnd={timelineEnd}
+            timelineWidth={timelineWidth}
+            totalDays={calendarStructure.totalDays}
+            dragConnectionData={dragConnectionData}
+            containerRef={timelineRef}
+          />
         </div>
       </div>
+
+      {/* Resize handle */}
+      <div
+        className="w-1 bg-[var(--accent)] cursor-col-resize hover:bg-[var(--accent)]/80 transition-colors flex-shrink-0"
+        onMouseDown={handleMouseDown}
+      />
     </div>
   );
 }
