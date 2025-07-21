@@ -190,15 +190,20 @@ export function ConstructionTaskFormModal({
 
   // Cargar dependencia existente cuando estamos editando
   useEffect(() => {
-    if (modalData.isEditing && modalData.editingTask?.id && existingDependencies.length >= 0) {
+    if (modalData.isEditing && modalData.editingTask?.id && existingDependencies.length > 0) {
       const existingDependency = existingDependencies.find(
         dep => dep.successor_task_id === modalData.editingTask.id
       );
       
       if (existingDependency) {
         setValue('predecessor_task_id', existingDependency.predecessor_task_id);
-        setValue('dependency_type', existingDependency.type);
+        setValue('dependency_type', existingDependency.type || 'FS');
         setValue('lag_days', existingDependency.lag_days || 0);
+      } else {
+        // Si no hay dependencia existente, limpiar los campos
+        setValue('predecessor_task_id', '');
+        setValue('dependency_type', 'FS');
+        setValue('lag_days', 0);
       }
     }
   }, [modalData.isEditing, modalData.editingTask?.id, existingDependencies, setValue]);
@@ -432,7 +437,7 @@ export function ConstructionTaskFormModal({
           Detalles específicos del cronograma de construcción
         </span>
         
-        {/* Phase Selection */}
+        {/* 1. Phase Selection */}
         <div className="space-y-2">
           <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
           <Select 
@@ -455,27 +460,7 @@ export function ConstructionTaskFormModal({
           )}
         </div>
 
-        {/* Progress Percentage */}
-        <div className="space-y-2">
-          <Label htmlFor="progress_percent">Progreso (%)</Label>
-          <Input
-            type="number"
-            min="0"
-            max="100"
-            placeholder="0"
-            value={watch('progress_percent') || ''}
-            onChange={(e) => setValue('progress_percent', parseInt(e.target.value) || 0)}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Porcentaje de progreso completado de la tarea (0-100%)
-          </p>
-          {errors.progress_percent && (
-            <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
-          )}
-        </div>
-
-        {/* Predecessor Task */}
+        {/* 2. Predecessor Task */}
         <div className="space-y-2">
           <Label htmlFor="predecessor_task_id">Tarea Predecesora</Label>
           <Select 
@@ -516,8 +501,8 @@ export function ConstructionTaskFormModal({
                 )
                 .map((task) => (
                   <SelectItem key={task.id} value={task.id}>
-                    {task.task.code} - {task.task.display_name.slice(0, 50)}
-                    {task.task.display_name.length > 50 ? '...' : ''}
+                    {task.task?.code} - {task.task?.display_name?.slice(0, 50)}
+                    {(task.task?.display_name?.length || 0) > 50 ? '...' : ''}
                   </SelectItem>
                 ))}
             </SelectContent>
@@ -527,35 +512,58 @@ export function ConstructionTaskFormModal({
           )}
         </div>
 
-        {/* Start Date - solo si NO hay tarea predecesora */}
-        {!watch('predecessor_task_id') && (
+        {/* 3. Start Date and Duration - Inline */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Start Date - solo si NO hay tarea predecesora */}
+          {!watch('predecessor_task_id') && (
+            <div className="space-y-2">
+              <Label htmlFor="start_date">Fecha de Inicio</Label>
+              <Input
+                type="date"
+                value={watch('start_date') || ''}
+                onChange={(e) => setValue('start_date', e.target.value)}
+                className="w-full"
+              />
+              {errors.start_date && (
+                <p className="text-sm text-destructive">{errors.start_date.message}</p>
+              )}
+            </div>
+          )}
+
+          {/* Duration */}
           <div className="space-y-2">
-            <Label htmlFor="start_date">Fecha de Inicio</Label>
+            <Label htmlFor="duration_in_days">Cantidad de Días</Label>
             <Input
-              type="date"
-              value={watch('start_date') || ''}
-              onChange={(e) => setValue('start_date', e.target.value)}
+              type="number"
+              min="1"
+              placeholder="Ej: 5"
+              value={watch('duration_in_days') || ''}
+              onChange={(e) => setValue('duration_in_days', parseInt(e.target.value) || 1)}
               className="w-full"
             />
-            {errors.start_date && (
-              <p className="text-sm text-destructive">{errors.start_date.message}</p>
+            {errors.duration_in_days && (
+              <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
             )}
           </div>
-        )}
+        </div>
 
-        {/* Duration */}
+        {/* 4. Progress Percentage */}
         <div className="space-y-2">
-          <Label htmlFor="duration_in_days">Cantidad de Días</Label>
+          <Label htmlFor="progress_percent">Progreso (%)</Label>
           <Input
             type="number"
-            min="1"
-            placeholder="Ej: 5"
-            value={watch('duration_in_days') || ''}
-            onChange={(e) => setValue('duration_in_days', parseInt(e.target.value) || 1)}
+            min="0"
+            max="100"
+            placeholder="0"
+            value={watch('progress_percent') || ''}
+            onChange={(e) => setValue('progress_percent', parseInt(e.target.value) || 0)}
             className="w-full"
           />
-          {errors.duration_in_days && (
-            <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
+          <p className="text-xs text-muted-foreground">
+            Porcentaje de progreso completado de la tarea (0-100%)
+          </p>
+          {errors.progress_percent && (
+            <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
           )}
         </div>
 
@@ -617,7 +625,6 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Agregar Tarea"}
       onRightClick={handleSubmit(onSubmit)}
-      disabled={isSubmitting || !selectedTaskId || !quantity}
     />
   );
 

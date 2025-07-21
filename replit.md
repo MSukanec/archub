@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. TASK EDIT MODAL DEPENDENCY LOADING BUG FIXED: Resolved issue where "Tarea Predecesora" field wasn't loading existing dependencies during task editing - COMPLETED
+  • Fixed TypeScript null safety issues with task.task?.display_name and task.task?.code in modal dependencies dropdown
+  • Enhanced dependency loading logic with proper conditional checks (existingDependencies.length > 0)
+  • Added automatic field clearing for tasks without existing dependencies to ensure consistent form state
+  • Removed invalid 'disabled' prop from FormModalFooter component causing TypeScript errors
+  • System now correctly loads predecessor task in edit modal for tasks that have incoming dependencies
+  • Confirmed working: tasks without dependencies show empty field, tasks with dependencies show correct predecessor
+  • Modal dependency system fully functional: can create, edit, and remove task dependencies through UI
 - July 21, 2025. REAL-TIME DEPENDENCY PROPAGATION IMPLEMENTED: Enhanced Gantt with professional MS Project-like behavior for dependent task movement - COMPLETED
   • Implemented real-time dependency propagation during drag operations: dependent tasks now move immediately while dragging, not just after release
   • Added throttled propagation system: task updates at 60fps, dependency propagation at 20fps for optimal performance balance
