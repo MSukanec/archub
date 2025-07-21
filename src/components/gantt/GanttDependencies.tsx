@@ -16,6 +16,7 @@ interface GanttDependenciesProps {
   containerRef: React.RefObject<HTMLDivElement>;
   leftPanelWidth: number;
   refreshTrigger?: number; // Trigger para forzar actualización durante drag
+  onDependencyClick?: (dependency: any) => void; // Callback para manejar clicks en dependencias
 }
 
 interface TaskPosition {
@@ -34,7 +35,8 @@ export function GanttDependencies({
   totalDays,
   containerRef,
   leftPanelWidth,
-  refreshTrigger
+  refreshTrigger,
+  onDependencyClick
 }: GanttDependenciesProps) {
   
   const [arrowPaths, setArrowPaths] = useState<Array<{
@@ -213,9 +215,11 @@ export function GanttDependencies({
               markerEnd="url(#arrowhead)"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="cursor-pointer pointer-events-auto"
+              className="cursor-pointer pointer-events-auto hover:stroke-red-500 transition-colors"
               onClick={() => {
-                // TODO: Implementar modal de edición de dependencia
+                if (onDependencyClick) {
+                  onDependencyClick(arrow.dependency);
+                }
               }}
             />
           </g>

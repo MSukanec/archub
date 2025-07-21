@@ -7,6 +7,7 @@ import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttDependencies } from './GanttDependencies';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export function GanttContainer({ 
   data, 
@@ -18,6 +19,8 @@ export function GanttContainer({
   onItemEdit?: (item: GanttRowProps) => void;
   onItemDelete?: (item: GanttRowProps) => void;
 }) {
+  
+  const { openModal } = useGlobalModalStore();
   
   console.log('GanttContainer received dependencies:', dependencies);
   // Estado para manejar conexiones drag & drop entre tareas
@@ -73,6 +76,11 @@ export function GanttContainer({
   const forceDropRefresh = useCallback(() => {
     setDropRefreshTrigger(prev => prev + 1);
   }, []);
+
+  // Función para manejar click en dependencias
+  const handleDependencyClick = useCallback((dependency: any) => {
+    openModal('dependency-connection', { dependency });
+  }, [openModal]);
   
   // Ref para el contenedor del timeline para posicionamiento de dependencias
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -830,6 +838,7 @@ export function GanttContainer({
             containerRef={timelineRef}
             leftPanelWidth={leftPanelWidth}
             refreshTrigger={refreshTrigger}
+            onDependencyClick={handleDependencyClick}
           />
         </div>
       </div>
