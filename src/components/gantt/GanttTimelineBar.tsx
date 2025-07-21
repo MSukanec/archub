@@ -280,7 +280,7 @@ export function GanttTimelineBar({
       
       if (item.taskData?.id) {
         updateTaskResize.mutate({
-          taskId: item.taskData.id,
+          id: item.taskData.id,
           start_date: format(newStartDate, 'yyyy-MM-dd'),
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
@@ -367,7 +367,7 @@ export function GanttTimelineBar({
         const newDuration = Math.max(1, differenceInDays(currentEndDate, newDate) + 1);
         
         updateTaskResize.mutate({
-          taskId: item.taskData.id,
+          id: item.taskData.id,
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
         });
@@ -376,7 +376,7 @@ export function GanttTimelineBar({
         const newDuration = Math.max(1, differenceInDays(newDate, startDate) + 1);
         
         updateTaskResize.mutate({
-          taskId: item.taskData.id,
+          id: item.taskData.id,
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
         });
@@ -405,6 +405,7 @@ export function GanttTimelineBar({
   return (
     <div 
       ref={barRef}
+      data-task-id={item.taskData?.id || item.id}
       className={`${getBarStyle()} ${dragStyles} ${resizeStyles} ${barDragStyles} relative group overflow-visible`}
       style={{
         width: `${widthPixels}px`,

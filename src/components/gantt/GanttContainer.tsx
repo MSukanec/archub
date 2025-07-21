@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale';
 import { Edit, Edit3, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { GanttRow } from './GanttRow';
 import { GanttTimelineBar } from './GanttTimelineBar';
-import { GanttDependenciesAdvanced } from './GanttDependenciesAdvanced';
+import { GanttDependencies } from './GanttDependencies';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies';
 
@@ -799,7 +799,7 @@ export function GanttContainer({
           </div>
           
           {/* Dependencias overlay vectoriales profesionales estilo DHTMLX */}
-          <GanttDependenciesAdvanced
+          <GanttDependencies
             data={filteredData}
             dependencies={dependencies}
             timelineStart={timelineStart}

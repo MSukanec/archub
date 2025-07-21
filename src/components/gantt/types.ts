@@ -14,6 +14,12 @@ export type GanttRowProps = {
 
 export type GanttContainerProps = {
   data: GanttRowProps[];
+  dependencies?: Array<{
+    id: string;
+    predecessor_task_id: string;
+    successor_task_id: string;
+    type: string;
+  }>;
   onItemClick?: (item: GanttRowProps) => void;
 };
 
