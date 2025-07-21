@@ -53,18 +53,10 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar la vista construction_gantt_view y unir con task_generated_view para obtener nombres completos
+      // Usar únicamente la vista construction_gantt_view que ahora incluye task_name
       const { data: ganttData, error } = await supabase
         .from('construction_gantt_view')
-        .select(`
-          *,
-          task_details:task_generated_view!task_id (
-            display_name,
-            rubro_name,
-            category_name,
-            unit_id
-          )
-        `)
+        .select('*')
         .eq('project_id', projectId)
         .order('phase_position', { ascending: true });
 
@@ -101,7 +93,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         task: {
           id: item.task_id,
           code: item.task_code,
-          display_name: `${item.task_code}`, // Por ahora usar el código como display_name
+          display_name: item.task_name || item.task_code, // Usar task_name de la vista
           rubro_name: null, // Se puede obtener si es necesario
           category_name: null, // Se puede obtener si es necesario
           unit_id: null, // Se puede obtener si es necesario
@@ -115,7 +107,9 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
-        sample: mappedTasks[0]
+        sampleTaskCode: mappedTasks[0]?.task?.code,
+        sampleTaskName: mappedTasks[0]?.task?.display_name,
+        rawTaskName: ganttData?.[0]?.task_name
       });
 
       return mappedTasks;
