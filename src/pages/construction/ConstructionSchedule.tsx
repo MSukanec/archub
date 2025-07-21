@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table } from 'lucide-react'
+import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table, Edit, Trash2 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { Table as CustomTable } from '@/components/ui-custom/Table'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useProjectPhases, useUpdatePhasesDates, useDeleteProjectPhase } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
@@ -12,6 +14,8 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
@@ -192,6 +196,29 @@ export default function ConstructionSchedule() {
         task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
     })
   }, [processedTasks, searchValue])
+
+  // Componente para la barra de progreso
+  const ProgressBar = ({ progress }: { progress: number }) => {
+    const percentage = Math.min(Math.max(progress || 0, 0), 100);
+    const hue = (percentage / 100) * 120; // 0 = rojo (0°), 100 = verde (120°)
+    
+    return (
+      <div className="flex items-center gap-2 min-w-[120px]">
+        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div 
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${percentage}%`,
+              background: percentage > 0 ? `hsl(${hue}, 70%, 50%)` : 'transparent'
+            }}
+          />
+        </div>
+        <span className="text-sm text-muted-foreground font-medium min-w-[35px]">
+          {percentage}%
+        </span>
+      </div>
+    );
+  };
 
   // Crear estructura Gantt con tareas organizadas dentro de fases
   const ganttData = useMemo(() => {
@@ -381,6 +408,119 @@ export default function ConstructionSchedule() {
     return ganttRows;
   }, [filteredTasks, projectPhases]);
 
+  // Preparar datos para la tabla
+  const tableData = filteredTasks.map((task) => ({
+    id: task.id,
+    rubro: task.task.rubro_name || 'Sin rubro',
+    tarea: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
+    unidad: task.task.unit_name || 'Sin unidad',
+    cantidad: task.quantity || 0,
+    progreso: task.progress_percent || 0,
+    fase: task.phase_name || 'Sin fase asignada',
+    fechas: task.start_date || task.end_date ? (
+      <div className="space-y-1">
+        {task.start_date && (
+          <div className="text-muted-foreground">
+            Inicio: {format(new Date(task.start_date), 'dd/MM/yyyy', { locale: es })}
+          </div>
+        )}
+        {task.end_date && (
+          <div className="text-muted-foreground">
+            Fin: {format(new Date(task.end_date), 'dd/MM/yyyy', { locale: es })}
+          </div>
+        )}
+        {task.duration_in_days && (
+          <div className="text-muted-foreground">
+            Duración: {task.duration_in_days} días
+          </div>
+        )}
+      </div>
+    ) : (
+      <span className="text-muted-foreground">Sin fechas definidas</span>
+    ),
+    originalData: task
+  }))
+
+  const tableColumns = [
+    { 
+      key: 'rubro', 
+      label: 'Rubro',
+      className: 'w-[5%]'
+    },
+    { 
+      key: 'tarea', 
+      label: 'Tarea',
+      className: 'flex-1'
+    },
+    { 
+      key: 'unidad', 
+      label: 'Unidad',
+      className: 'w-[5%]'
+    },
+    { 
+      key: 'cantidad', 
+      label: 'Cantidad',
+      className: 'w-[5%] text-right'
+    },
+    {
+      key: 'progreso',
+      label: 'Progreso',
+      className: 'w-[5%]',
+      render: (item: any) => (
+        <ProgressBar progress={item.progreso} />
+      )
+    },
+    { 
+      key: 'fase', 
+      label: 'Fase',
+      className: 'w-[5%]'
+    },
+    { 
+      key: 'fechas', 
+      label: 'Fechas',
+      className: 'w-[5%]',
+      render: (item: any) => item.fechas
+    },
+    {
+      key: 'acciones',
+      label: 'Acciones',
+      className: 'w-[5%]',
+      render: (item: any) => (
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditTask({
+              id: item.id,
+              name: item.tarea,
+              type: 'task',
+              level: 0,
+              taskData: item.originalData
+            })}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              showDeleteConfirmation({
+                title: "Eliminar Tarea",
+                description: "¿Estás seguro de que deseas eliminar esta tarea del proyecto?",
+                itemName: item.tarea,
+                onConfirm: () => handleDeleteTask(item.id)
+              })
+            }}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )
+    }
+  ]
+
   const headerProps = {
     title: "Cronograma de Construcción",
     showSearch: true,
@@ -441,14 +581,14 @@ export default function ConstructionSchedule() {
 
       {/* Tabs Container */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 border">
           <TabsTrigger value="gantt" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Vista Gantt
           </TabsTrigger>
           <TabsTrigger value="table" className="flex items-center gap-2">
             <Table className="h-4 w-4" />
-            Segunda Vista
+            Listado de Tareas
           </TabsTrigger>
         </TabsList>
 
@@ -498,11 +638,24 @@ export default function ConstructionSchedule() {
 
         {/* Tab Content - Segunda Vista */}
         <TabsContent value="table" className="space-y-4">
-          <div className="rounded-lg border p-8 text-center text-muted-foreground">
-            <Table className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-medium mb-2">Segunda Vista</h3>
-            <p>Contenido de la segunda tab - pendiente de definir</p>
-          </div>
+          {filteredTasks.length === 0 ? (
+            <EmptyState
+              icon={<CheckSquare className="h-8 w-8" />}
+              title="No hay tareas en el proyecto"
+              description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
+              action={
+                <Button onClick={handleAddTask} className="mt-4">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Primera Tarea
+                </Button>
+              }
+            />
+          ) : (
+            <CustomTable
+              data={tableData}
+              columns={tableColumns}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </Layout>
