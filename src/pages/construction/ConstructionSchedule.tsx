@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table, Edit, Trash2 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { Table as CustomTable } from '@/components/ui-custom/Table'
+import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useProjectPhases, useUpdatePhasesDates, useDeleteProjectPhase } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
@@ -43,6 +43,8 @@ function cleanTaskDisplayName(name: string): string {
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("gantt")
+  const [groupingType, setGroupingType] = useState('rubros')
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -197,28 +199,59 @@ export default function ConstructionSchedule() {
     })
   }, [processedTasks, searchValue])
 
-  // Componente para la barra de progreso
-  const ProgressBar = ({ progress }: { progress: number }) => {
-    const percentage = Math.min(Math.max(progress || 0, 0), 100);
-    const hue = (percentage / 100) * 120; // 0 = rojo (0°), 100 = verde (120°)
+  // Transformar construction tasks al formato que espera BudgetTable
+  const budgetTasks = useMemo(() => {
+    if (!filteredTasks) return []
     
-    return (
-      <div className="flex items-center gap-2 min-w-[120px]">
-        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-          <div 
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${percentage}%`,
-              background: percentage > 0 ? `hsl(${hue}, 70%, 50%)` : 'transparent'
-            }}
-          />
-        </div>
-        <span className="text-sm text-muted-foreground font-medium min-w-[35px]">
-          {percentage}%
-        </span>
-      </div>
-    );
-  };
+    return filteredTasks.map((task) => ({
+      id: task.id,
+      budget_id: 'construction-schedule',
+      task_id: task.task_id,
+      organization_id: task.organization_id || '',
+      project_id: task.project_id || '',
+      created_at: task.created_at || new Date().toISOString(),
+      updated_at: task.updated_at || new Date().toISOString(),
+      task: {
+        task_instance_id: task.id,
+        project_id: task.project_id || '',
+        task_id: task.task_id,
+        task_code: task.task?.code || '',
+        start_date: task.start_date,
+        end_date: task.end_date,
+        duration_in_days: task.duration_in_days,
+        quantity: task.quantity || 0,
+        phase_instance_id: task.phase_instance_id || '',
+        phase_name: task.phase_name || '',
+        phase_position: 1,
+        progress_percent: task.progress_percent || 0,
+        unit_id: task.task?.unit_id || '',
+        unit_name: task.task?.unit_name || '',
+        unit_symbol: task.task?.unit_symbol || '',
+        display_name: task.task?.processed_display_name || task.task?.display_name || task.task?.code || '',
+        subcategory_id: task.task?.subcategory_id || '',
+        subcategory_name: task.task?.subcategory_name || '',
+        category_id: task.task?.category_id || '',
+        category_name: task.task?.category_name || '',
+        rubro_id: task.task?.rubro_id || '',
+        rubro_name: task.task?.rubro_name || '',
+        task_group_id: '',
+        task_group_name: ''
+      }
+    }))
+  }, [filteredTasks])
+
+  // Funciones helper requeridas por BudgetTable
+  const generateTaskDisplayName = (task: any, parameterValues: any[]) => {
+    if (!task) return 'Tarea sin nombre'
+    return cleanTaskDisplayName(task.processed_display_name || task.display_name || task.code || 'Tarea sin nombre')
+  }
+
+  const getUnitName = (unitId: string | null) => {
+    if (!unitId) return 'Sin unidad'
+    // Buscar en los datos de las tareas la unidad correspondiente
+    const taskWithUnit = filteredTasks.find(t => t.task?.unit_id === unitId)
+    return taskWithUnit?.task?.unit_name || taskWithUnit?.task?.unit_symbol || 'Sin unidad'
+  }
 
   // Crear estructura Gantt con tareas organizadas dentro de fases
   const ganttData = useMemo(() => {
@@ -408,119 +441,6 @@ export default function ConstructionSchedule() {
     return ganttRows;
   }, [filteredTasks, projectPhases]);
 
-  // Preparar datos para la tabla
-  const tableData = filteredTasks.map((task) => ({
-    id: task.id,
-    rubro: task.task.rubro_name || 'Sin rubro',
-    tarea: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
-    unidad: task.task.unit_name || 'Sin unidad',
-    cantidad: task.quantity || 0,
-    progreso: task.progress_percent || 0,
-    fase: task.phase_name || 'Sin fase asignada',
-    fechas: task.start_date || task.end_date ? (
-      <div className="space-y-1">
-        {task.start_date && (
-          <div className="text-muted-foreground">
-            Inicio: {format(new Date(task.start_date), 'dd/MM/yyyy', { locale: es })}
-          </div>
-        )}
-        {task.end_date && (
-          <div className="text-muted-foreground">
-            Fin: {format(new Date(task.end_date), 'dd/MM/yyyy', { locale: es })}
-          </div>
-        )}
-        {task.duration_in_days && (
-          <div className="text-muted-foreground">
-            Duración: {task.duration_in_days} días
-          </div>
-        )}
-      </div>
-    ) : (
-      <span className="text-muted-foreground">Sin fechas definidas</span>
-    ),
-    originalData: task
-  }))
-
-  const tableColumns = [
-    { 
-      key: 'rubro', 
-      label: 'Rubro',
-      className: 'w-[5%]'
-    },
-    { 
-      key: 'tarea', 
-      label: 'Tarea',
-      className: 'flex-1'
-    },
-    { 
-      key: 'unidad', 
-      label: 'Unidad',
-      className: 'w-[5%]'
-    },
-    { 
-      key: 'cantidad', 
-      label: 'Cantidad',
-      className: 'w-[5%] text-right'
-    },
-    {
-      key: 'progreso',
-      label: 'Progreso',
-      className: 'w-[5%]',
-      render: (item: any) => (
-        <ProgressBar progress={item.progreso} />
-      )
-    },
-    { 
-      key: 'fase', 
-      label: 'Fase',
-      className: 'w-[5%]'
-    },
-    { 
-      key: 'fechas', 
-      label: 'Fechas',
-      className: 'w-[5%]',
-      render: (item: any) => item.fechas
-    },
-    {
-      key: 'acciones',
-      label: 'Acciones',
-      className: 'w-[5%]',
-      render: (item: any) => (
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditTask({
-              id: item.id,
-              name: item.tarea,
-              type: 'task',
-              level: 0,
-              taskData: item.originalData
-            })}
-            className="h-8 w-8 p-0"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              showDeleteConfirmation({
-                title: "Eliminar Tarea",
-                description: "¿Estás seguro de que deseas eliminar esta tarea del proyecto?",
-                itemName: item.tarea,
-                onConfirm: () => handleDeleteTask(item.id)
-              })
-            }}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
-    }
-  ]
-
   const headerProps = {
     title: "Cronograma de Construcción",
     showSearch: true,
@@ -657,9 +577,19 @@ export default function ConstructionSchedule() {
               }
             />
           ) : (
-            <CustomTable
-              data={tableData}
-              columns={tableColumns}
+            <BudgetTable
+              budgetId="construction-tasks"
+              budgetTasks={budgetTasks}
+              isLoading={isLoading}
+              groupingType={groupingType}
+              selectedTasks={selectedTasks}
+              setSelectedTasks={setSelectedTasks}
+              generateTaskDisplayName={generateTaskDisplayName}
+              parameterValues={[]}
+              getUnitName={getUnitName}
+              handleDeleteTask={handleDeleteTask}
+              handleAddTask={() => handleAddTask()}
+              onGroupingChange={setGroupingType}
             />
           )}
         </TabsContent>
