@@ -383,8 +383,6 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    console.log('Abrir modal de agregar tareas');
-    
     if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
       toast({
         title: "Error",
