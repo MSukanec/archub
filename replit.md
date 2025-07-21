@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT DOUBLE-LINE TEXT AND HEIGHT OPTIMIZATION COMPLETED: Enhanced text display with proper vertical sizing - COMPLETED
+  • Increased task row height from h-11 to h-12 (48px) for better content visibility without excessive height
+  • Implemented line-clamp-2 for double-line text display in "Fase/Tarea" column with elegant truncation
+  • Header rows maintain original h-11 (44px) height for visual hierarchy distinction
+  • Eliminated problematic vertical scrollbars that caused panel desynchronization issues
+  • Synchronized all row heights between left panel and timeline for perfect alignment
+  • Enhanced text readability: long task names now display on two lines with proper overflow handling
+  • Optimized padding and spacing to prevent excessive row heights while maximizing content visibility
 - July 21, 2025. GANTT LEFT PANEL ENHANCEMENT COMPLETED: Added "Inicio" and "Días" columns with proper text truncation - COMPLETED
   • Added three-column layout to Gantt left panel: "Fase / Tarea", "Inicio", "Días"
   • Implemented proper column width management with calculated width for name column (leftPanelWidth - 100px) and fixed widths for date columns (60px + 40px)

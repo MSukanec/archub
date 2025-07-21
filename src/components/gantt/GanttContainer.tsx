@@ -541,11 +541,11 @@ export function GanttContainer({
           }}
         >
           {/* Contenido del panel izquierdo */}
-          <div className="max-h-96 overflow-y-auto overflow-x-hidden">
+          <div className="overflow-x-hidden">
             {filteredData.map((item) => (
               <div 
                 key={`left-${item.id}`} 
-                className={`border-b border-[var(--table-row-border)] ${item.isHeader ? 'h-11' : 'h-16'} flex items-center transition-colors ${
+                className={`border-b border-[var(--table-row-border)] ${item.isHeader ? 'h-11' : 'h-12'} flex items-center transition-colors ${
                   hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
@@ -715,7 +715,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para sincronizar con timeline */}
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-16 flex items-center bg-[var(--table-row-bg)]">
+              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
                 {/* Fila vacía para mantener altura sincronizada */}
               </div>
             ))}
@@ -741,11 +741,11 @@ export function GanttContainer({
           }}
         >
           {/* Contenido del timeline */}
-          <div className="max-h-96 overflow-y-auto" style={{ width: timelineWidth }}>
+          <div style={{ width: timelineWidth }}>
             {filteredData.map((item, index) => (
               <div 
                 key={`timeline-${item.id}`} 
-                className={`border-b border-[var(--table-row-border)] ${item.isHeader ? 'h-11' : 'h-16'} flex items-center transition-colors ${
+                className={`border-b border-[var(--table-row-border)] ${item.isHeader ? 'h-11' : 'h-12'} flex items-center transition-colors ${
                   hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
@@ -875,7 +875,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para más espacio */}
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-16 flex items-center bg-[var(--table-row-bg)]">
+              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
                 <div 
                   className="relative h-full w-full"
                   style={{ width: timelineWidth }}
