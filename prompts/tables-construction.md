@@ -96,6 +96,10 @@ TABLA CONSTRUCTION_PHASE_TASKS:
   {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "progress_percent",
+    "data_type": "integer"
   }
 ]
 

@@ -21,11 +21,13 @@ export interface ConstructionTask {
     rubro_name: string | null;
     category_name: string | null;
     unit_id: string | null;
+    unit_name?: string | null;
     rubro_id: string | null;
     param_values: any;
   };
 
   phase_name?: string;
+  progress_percent?: number;
 }
 
 export function useConstructionTasks(projectId: string, organizationId: string) {
@@ -66,17 +68,19 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       // Obtener las fases para cada tarea usando consultas separadas
       const taskIds = tasksData.map(task => task.id);
       
-      // Primero obtener las relaciones fase-tarea
+      // Primero obtener las relaciones fase-tarea con progreso
       const { data: phaseTasksData, error: phaseTasksError } = await supabase
         .from('construction_phase_tasks')
-        .select('construction_task_id, project_phase_id')
+        .select('construction_task_id, project_phase_id, progress_percent')
         .in('construction_task_id', taskIds);
 
-      // Crear un mapa de task_id -> project_phase_id
+      // Crear mapas de task_id -> project_phase_id y task_id -> progress_percent
       const taskPhaseMap: Record<string, string> = {};
+      const taskProgressMap: Record<string, number> = {};
       if (phaseTasksData && !phaseTasksError) {
         phaseTasksData.forEach(pt => {
           taskPhaseMap[pt.construction_task_id] = pt.project_phase_id;
+          taskProgressMap[pt.construction_task_id] = pt.progress_percent || 0;
         });
       }
 
@@ -101,13 +105,38 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         }
       }
 
-      // Procesar los datos para agregar el nombre de la fase
+      // Obtener información de las unidades para todos los unit_id
+      const unitIds = Array.from(new Set(tasksData.map(task => task.task.unit_id).filter(Boolean)));
+      let unitsMap: Record<string, string> = {};
+      
+      if (unitIds.length > 0) {
+        const { data: unitsData, error: unitsError } = await supabase
+          .from('units')
+          .select('id, name')
+          .in('id', unitIds);
+          
+        if (unitsData && !unitsError) {
+          unitsData.forEach(unit => {
+            unitsMap[unit.id] = unit.name;
+          });
+        }
+      }
+
+      // Procesar los datos para agregar el nombre de la fase, progreso y unidad
       const processedData = tasksData.map(task => {
         const projectPhaseId = taskPhaseMap[task.id];
         const phaseName = projectPhaseId ? phaseNamesMap[projectPhaseId] : null;
+        const progressPercent = taskProgressMap[task.id] || 0;
+        const unitName = task.task.unit_id ? unitsMap[task.task.unit_id] : null;
+        
         return {
           ...task,
-          phase_name: phaseName || null
+          phase_name: phaseName || null,
+          progress_percent: progressPercent,
+          task: {
+            ...task.task,
+            unit_name: unitName || null
+          }
         };
       });
 
@@ -131,6 +160,7 @@ export function useCreateConstructionTask() {
       end_date?: string;
       duration_in_days?: number;
       project_phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id)
+      progress_percent?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -173,6 +203,7 @@ export function useCreateConstructionTask() {
           .insert({
             construction_task_id: constructionTask.id,
             project_phase_id: taskData.project_phase_id,
+            progress_percent: taskData.progress_percent || 0,
           });
 
         if (phaseTaskError) {
@@ -223,6 +254,7 @@ export function useUpdateConstructionTask() {
       end_date?: string;
       duration_in_days?: number;
       project_phase_id?: string;
+      progress_percent?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -273,12 +305,25 @@ export function useUpdateConstructionTask() {
             .insert({
               construction_task_id: data.id,
               project_phase_id: data.project_phase_id,
+              progress_percent: data.progress_percent || 0,
             });
 
           if (phaseTaskError) {
             console.error('Error linking task to phase:', phaseTaskError);
             // No lanzamos error aquí para que la actualización continúe
           }
+        }
+      } else if (data.progress_percent !== undefined) {
+        // Si solo se actualiza el progreso, hacer un update en place
+        const { error: progressError } = await supabase
+          .from('construction_phase_tasks')
+          .update({
+            progress_percent: data.progress_percent
+          })
+          .eq('construction_task_id', data.id);
+
+        if (progressError) {
+          console.error('Error updating progress:', progressError);
         }
       }
 

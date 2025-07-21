@@ -24,6 +24,7 @@ const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
   project_phase_id: z.string().optional(),
+  progress_percent: z.number().min(0).max(100).optional().default(0),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
@@ -124,7 +125,7 @@ export function ConstructionTaskFormModal({
       
       const { data, error } = await supabase
         .from('construction_phase_tasks')
-        .select('project_phase_id')
+        .select('project_phase_id, progress_percent')
         .eq('construction_task_id', modalData.editingTask.id)
         .maybeSingle();
 
@@ -146,6 +147,7 @@ export function ConstructionTaskFormModal({
       task_id: "",
       quantity: 1,
       project_phase_id: "",
+      progress_percent: 0,
       start_date: "",
       end_date: "",
       duration_in_days: undefined,
@@ -174,7 +176,8 @@ export function ConstructionTaskFormModal({
       form.reset({
         task_id: task.task_id || '',
         quantity: task.quantity || 1,
-        project_phase_id: currentPhaseTask || '',
+        project_phase_id: currentPhaseTask?.project_phase_id || '',
+        progress_percent: currentPhaseTask?.progress_percent || 0,
         start_date: task.start_date || '',
         end_date: task.end_date || '',
         duration_in_days: task.duration_in_days || undefined,
@@ -289,6 +292,7 @@ export function ConstructionTaskFormModal({
           organization_id: modalData.organizationId,
           quantity: data.quantity,
           project_phase_id: data.project_phase_id || undefined,
+          progress_percent: data.progress_percent || 0,
           start_date: data.start_date || undefined,
           end_date: endDate || undefined,
           duration_in_days: data.duration_in_days || undefined
@@ -303,6 +307,7 @@ export function ConstructionTaskFormModal({
           quantity: data.quantity,
           created_by: currentMember?.id || '',
           project_phase_id: data.project_phase_id || undefined,
+          progress_percent: data.progress_percent || 0,
           start_date: data.start_date || undefined,
           end_date: endDate || undefined,
           duration_in_days: data.duration_in_days || undefined
@@ -438,6 +443,26 @@ export function ConstructionTaskFormModal({
           </Select>
           {errors.project_phase_id && (
             <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
+          )}
+        </div>
+
+        {/* Progress Percentage */}
+        <div className="space-y-2">
+          <Label htmlFor="progress_percent">Progreso (%)</Label>
+          <Input
+            type="number"
+            min="0"
+            max="100"
+            placeholder="0"
+            value={watch('progress_percent') || ''}
+            onChange={(e) => setValue('progress_percent', parseInt(e.target.value) || 0)}
+            className="w-full"
+          />
+          <p className="text-xs text-muted-foreground">
+            Porcentaje de progreso completado de la tarea (0-100%)
+          </p>
+          {errors.progress_percent && (
+            <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
           )}
         </div>
 

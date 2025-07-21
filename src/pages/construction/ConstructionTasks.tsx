@@ -127,13 +127,37 @@ export default function ConstructionTasks() {
     )
   }, [processedTasks, searchValue])
 
+  // Componente para la barra de progreso
+  const ProgressBar = ({ progress }: { progress: number }) => {
+    const percentage = Math.min(Math.max(progress || 0, 0), 100);
+    const hue = (percentage / 100) * 120; // 0 = rojo (0°), 100 = verde (120°)
+    
+    return (
+      <div className="flex items-center gap-2 min-w-[120px]">
+        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div 
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${percentage}%`,
+              background: percentage > 0 ? `hsl(${hue}, 70%, 50%)` : 'transparent'
+            }}
+          />
+        </div>
+        <span className="text-sm text-muted-foreground font-medium min-w-[35px]">
+          {percentage}%
+        </span>
+      </div>
+    );
+  };
+
   // Preparar datos para la tabla
   const tableData = filteredTasks.map((task) => ({
     id: task.id,
     rubro: task.task.rubro_name || 'Sin rubro',
     tarea: task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre',
-    unidad: task.task.unit_id || 'Sin unidad',
+    unidad: task.task.unit_name || 'Sin unidad',
     cantidad: task.quantity || 0,
+    progreso: task.progress_percent || 0,
     fase: task.phase_name || 'Sin fase asignada',
     fechas: task.start_date || task.end_date ? (
       <div className="space-y-1">
@@ -179,6 +203,14 @@ export default function ConstructionTasks() {
       key: 'cantidad', 
       label: 'Cantidad',
       className: 'w-[100px] text-right'
+    },
+    {
+      key: 'progreso',
+      label: 'Progreso',
+      className: 'w-[150px]',
+      render: (item: any) => (
+        <ProgressBar progress={item.progreso} />
+      )
     },
     { 
       key: 'fase', 
