@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, Plus } from 'lucide-react';
@@ -45,7 +45,7 @@ interface BudgetTableProps {
   budgetId: string;
   budgetTasks: BudgetTask[] | undefined;
   isLoading: boolean;
-  groupTasksByRubro: boolean;
+  groupingType: string; // 'none', 'rubros', 'phases'
   selectedTasks: string[];
   setSelectedTasks: (tasks: string[]) => void;
   generateTaskDisplayName: (task: any, parameterValues: any[]) => string;
@@ -60,7 +60,7 @@ export function BudgetTable({
   budgetId,
   budgetTasks,
   isLoading,
-  groupTasksByRubro,
+  groupingType,
   selectedTasks,
   setSelectedTasks,
   generateTaskDisplayName,
@@ -72,6 +72,35 @@ export function BudgetTable({
 }: BudgetTableProps) {
   // Local state for input values to prevent interruption during typing
   const [localQuantities, setLocalQuantities] = useState<Record<string, string>>({});
+  
+  // Group tasks based on groupingType
+  const groupedTasks = useMemo(() => {
+    if (!budgetTasks) return { ungrouped: [] };
+    
+    if (groupingType === 'none') {
+      return { 'Todas las tareas': budgetTasks };
+    }
+    
+    const grouped = budgetTasks.reduce((acc, task) => {
+      if (!task.task) return acc;
+      
+      let groupKey = 'Sin grupo';
+      
+      if (groupingType === 'rubros') {
+        groupKey = task.task.rubro_name || 'Sin rubro';
+      } else if (groupingType === 'phases') {
+        groupKey = task.task.phase_name || 'Sin fase';
+      }
+      
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
+      }
+      acc[groupKey].push(task);
+      return acc;
+    }, {} as Record<string, BudgetTask[]>);
+    
+    return grouped;
+  }, [budgetTasks, groupingType]);
   
   // Update local quantities when budget tasks change
   useEffect(() => {
@@ -97,6 +126,7 @@ export function BudgetTable({
     const numericValue = parseFloat(value) || 0;
     handleUpdateQuantity(taskId, numericValue);
   };
+  
   if (isLoading) {
     return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
   }
@@ -120,16 +150,6 @@ export function BudgetTable({
       />
     );
   }
-
-  // Group tasks by rubro if enabled
-  const groupedTasks = groupTasksByRubro 
-    ? budgetTasks.reduce((acc, task) => {
-        const rubroName = task.task?.rubro_name || 'Sin rubro';
-        if (!acc[rubroName]) acc[rubroName] = [];
-        acc[rubroName].push(task);
-        return acc;
-      }, {} as Record<string, BudgetTask[]>)
-    : { 'Todas las tareas': budgetTasks };
 
   // Calculate totals for TOTAL row
   const totalQuantity = budgetTasks?.reduce((total, task) => {
@@ -210,7 +230,7 @@ export function BudgetTable({
                 />
               </th>
               <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
-              {!groupTasksByRubro && (
+              {groupingType === 'none' && (
                 <th className="p-2 text-left text-xs font-medium">Rubro</th>
               )}
               <th className="p-2 text-left text-xs font-medium">Tarea</th>
@@ -232,8 +252,8 @@ export function BudgetTable({
               
               return (
                 <Fragment key={rubroName}>
-                  {/* Rubro Header Row (only show if grouping is enabled) */}
-                  {groupTasksByRubro && (
+                  {/* Group Header Row (only show if grouping is enabled) */}
+                  {groupingType !== 'none' && (
                     <tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)' }}>
                       <td className="p-3"></td>
                       <td className="p-3">
@@ -262,7 +282,7 @@ export function BudgetTable({
                     
                     // Generate ID based on grouping mode
                     let taskId: string;
-                    if (groupTasksByRubro) {
+                    if (groupingType !== 'none') {
                       // Hierarchical: 1.1, 1.2, 2.1, 2.2, etc.
                       taskId = `${rubroNumber}.${taskIndex + 1}`;
                     } else {
@@ -296,7 +316,7 @@ export function BudgetTable({
                         <td className="p-2 text-sm font-medium">
                           {taskId}
                         </td>
-                        {!groupTasksByRubro && (
+                        {groupingType === 'none' && (
                           <td className="p-2">
                             <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
                           </td>
@@ -354,7 +374,7 @@ export function BudgetTable({
             <tr className="border-b-2 bg-accent/10 font-medium">
               <td className="p-2"></td>
               <td className="p-2 text-sm font-semibold">TOTAL</td>
-              {!groupTasksByRubro && <td className="p-2"></td>}
+              {groupingType === 'none' && <td className="p-2"></td>}
               <td className="p-2"></td>
               <td className="p-2"></td>
               <td className="p-2"></td>

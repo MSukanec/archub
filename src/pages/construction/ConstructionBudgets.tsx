@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { TogglePill } from '@/components/ui-custom/TogglePill'
+
 import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
@@ -350,12 +350,12 @@ export default function ConstructionBudgets() {
 
   // Update budget grouping mutation
   const updateBudgetGroupingMutation = useMutation({
-    mutationFn: async ({ budgetId, groupByRubro }: { budgetId: string, groupByRubro: boolean }) => {
+    mutationFn: async ({ budgetId, groupingType }: { budgetId: string, groupingType: string }) => {
       if (!supabase) throw new Error('Supabase client not available')
       
       const { error } = await supabase
         .from('budgets')
-        .update({ group_tasks_by_rubro: groupByRubro })
+        .update({ grouping_type: groupingType })
         .eq('id', budgetId)
 
       if (error) throw error
@@ -487,8 +487,8 @@ export default function ConstructionBudgets() {
     const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
-    // Group tasks by rubro if grouping is enabled
-    const groupTasksByRubro = selectedBudget?.group_tasks_by_rubro || false;
+    // Get grouping type from budget
+    const groupingType = selectedBudget?.grouping_type || 'none';
 
     // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
@@ -560,7 +560,7 @@ export default function ConstructionBudgets() {
         budgetId={budgetId}
         budgetTasks={budgetTasks}
         isLoading={isLoading}
-        groupTasksByRubro={groupTasksByRubro}
+        groupingType={groupingType}
         selectedTasks={selectedTasks}
         setSelectedTasks={setSelectedTasks}
         generateTaskDisplayName={generateTaskDisplayName}
@@ -666,18 +666,28 @@ export default function ConstructionBudgets() {
 
                   {/* Action Buttons */}
                   <div className="flex items-center gap-3">
-                    {/* Group by Rubro Toggle */}
-                    <TogglePill
-                      checked={selectedBudget?.group_tasks_by_rubro || false}
-                      onCheckedChange={(checked) => {
-                        updateBudgetGroupingMutation.mutate({ 
-                          budgetId: selectedBudget.id, 
-                          groupByRubro: checked 
-                        });
-                      }}
-                    >
-                      Agrupar por rubro
-                    </TogglePill>
+                    {/* Grouping Type Selector */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-muted-foreground">Agrupar:</span>
+                      <Select
+                        value={selectedBudget?.grouping_type || 'none'}
+                        onValueChange={(value) => {
+                          updateBudgetGroupingMutation.mutate({ 
+                            budgetId: selectedBudget.id, 
+                            groupingType: value 
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="w-[160px] h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sin agrupar</SelectItem>
+                          <SelectItem value="rubros">Agrupar por Rubros</SelectItem>
+                          <SelectItem value="phases">Agrupar por Fases</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     
                     <div className="flex items-center gap-2">
                       <Button
