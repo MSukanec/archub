@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, Calendar, Clock, Activity, CheckSquare } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
@@ -37,6 +38,7 @@ function cleanTaskDisplayName(name: string): string {
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
+  const [activeTab, setActiveTab] = useState("gantt")
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -437,47 +439,72 @@ export default function ConstructionSchedule() {
         ]}
       />
 
-      {/* Gantt Chart or Empty State */}
-      {ganttData.length === 0 ? (
-        <EmptyState
-          icon={<Calendar className="h-8 w-8" />}
-          title="No hay tareas en el cronograma"
-          description="Comienza creando tareas para ver el cronograma del proyecto."
-          action={
-            <div className="flex gap-2 mt-4">
-              <Button onClick={handleAddTask} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Tarea
-              </Button>
-              <Button onClick={handleAddTask}>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Tarea
-              </Button>
-            </div>
-          }
-        />
-      ) : (
-        <GanttContainer
-          data={ganttData}
-          dependencies={dependencies}
-          allTasks={processedTasks}
-          projectId={projectId}
-          onItemEdit={(item) => {
-            if (item.type === 'task') {
-              handleEditTask(item);
-            } else if (item.type === 'phase') {
-              handleEditPhase(item);
-            }
-          }}
-          onItemDelete={(item) => {
-            if (item.type === 'task') {
-              handleDeleteTaskFromGantt(item);
-            } else if (item.type === 'phase') {
-              handleDeletePhase(item);
-            }
-          }}
-        />
-      )}
+      {/* Tabs Container */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="gantt" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Vista Gantt
+          </TabsTrigger>
+          <TabsTrigger value="table" className="flex items-center gap-2">
+            <Table className="h-4 w-4" />
+            Segunda Vista
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Tab Content - Vista Gantt */}
+        <TabsContent value="gantt" className="space-y-4">
+          {ganttData.length === 0 ? (
+            <EmptyState
+              icon={<Calendar className="h-8 w-8" />}
+              title="No hay tareas en el cronograma"
+              description="Comienza creando tareas para ver el cronograma del proyecto."
+              action={
+                <div className="flex gap-2 mt-4">
+                  <Button onClick={handleAddTask} variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear Primera Tarea
+                  </Button>
+                  <Button onClick={handleAddTask}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nueva Tarea
+                  </Button>
+                </div>
+              }
+            />
+          ) : (
+            <GanttContainer
+              data={ganttData}
+              dependencies={dependencies}
+              allTasks={processedTasks}
+              projectId={projectId}
+              onItemEdit={(item) => {
+                if (item.type === 'task') {
+                  handleEditTask(item);
+                } else if (item.type === 'phase') {
+                  handleEditPhase(item);
+                }
+              }}
+              onItemDelete={(item) => {
+                if (item.type === 'task') {
+                  handleDeleteTaskFromGantt(item);
+                } else if (item.type === 'phase') {
+                  handleDeletePhase(item);
+                }
+              }}
+            />
+          )}
+        </TabsContent>
+
+        {/* Tab Content - Segunda Vista */}
+        <TabsContent value="table" className="space-y-4">
+          <div className="rounded-lg border p-8 text-center text-muted-foreground">
+            <Table className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-medium mb-2">Segunda Vista</h3>
+            <p>Contenido de la segunda tab - pendiente de definir</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </Layout>
   )
 }
