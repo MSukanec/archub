@@ -299,6 +299,16 @@ export function GanttTimelineBar({
         Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
       const newEndDate = addDays(newStartDate, originalDuration - 1);
       
+      console.log('DRAG UPDATE:', {
+        taskId: item.taskData?.id,
+        taskName: item.name,
+        originalStartDate: format(startDate, 'yyyy-MM-dd'),
+        newStartDate: format(newStartDate, 'yyyy-MM-dd'),
+        newEndDate: format(newEndDate, 'yyyy-MM-dd'),
+        originalDuration,
+        newDay
+      });
+      
       if (item.taskData?.id) {
         updateTaskResize.mutate({
           id: item.taskData.id,
@@ -307,8 +317,12 @@ export function GanttTimelineBar({
           duration_in_days: originalDuration
         }, {
           onSuccess: () => {
+            console.log('DRAG UPDATE SUCCESS');
             // Actualizar flechas después del snap final
             onTaskUpdate?.();
+          },
+          onError: (error) => {
+            console.error('DRAG UPDATE ERROR:', error);
           }
         });
       }
