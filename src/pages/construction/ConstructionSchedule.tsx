@@ -590,6 +590,8 @@ export default function ConstructionSchedule() {
               handleDeleteTask={handleDeleteTask}
               handleAddTask={() => handleAddTask()}
               onGroupingChange={setGroupingType}
+              mode="construction"
+              handleEditTask={handleEditTask}
             />
           )}
         </TabsContent>

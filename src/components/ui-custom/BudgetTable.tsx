@@ -68,6 +68,9 @@ interface BudgetTableProps {
   onBudgetChange?: (budgetId: string) => void;
   onEditBudget?: () => void;
   onDeleteBudget?: () => void;
+  // Construction mode props
+  mode?: 'budget' | 'construction';
+  handleEditTask?: (task: any) => void;
 }
 
 export function BudgetTable({
@@ -89,7 +92,9 @@ export function BudgetTable({
   selectedBudgetId,
   onBudgetChange,
   onEditBudget,
-  onDeleteBudget
+  onDeleteBudget,
+  mode = 'budget',
+  handleEditTask
 }: BudgetTableProps) {
   // Local state for search functionality
   const [showSearch, setShowSearch] = useState(false);
@@ -152,6 +157,14 @@ export function BudgetTable({
     
     return nestedGrouped;
   }, [budgetTasks, groupingType]);
+
+  // Calculate total quantity for construction mode
+  const totalQuantity = useMemo(() => {
+    if (!budgetTasks || mode !== 'construction') return 0;
+    return budgetTasks.reduce((sum, task) => {
+      return sum + (task.task?.quantity || 0);
+    }, 0);
+  }, [budgetTasks, mode]);
   
   // No longer needed - quantity is now read-only
   
@@ -179,10 +192,7 @@ export function BudgetTable({
     );
   }
 
-  // Calculate totals for TOTAL row
-  const totalQuantity = budgetTasks?.reduce((total, task) => {
-    return total + (task.task?.quantity || 0);
-  }, 0) || 0;
+  // Calculate totals for TOTAL row (using the totalQuantity already calculated above)
 
   // Total budget amount (placeholder since we don't have real pricing yet)
   const totalBudgetAmount = 0;
@@ -369,36 +379,65 @@ export function BudgetTable({
 
       {/* Desktop Table View - Using Table.tsx structure */}
       <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
-        {/* Column Headers - Identical to Table.tsx */}
-        <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-             style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
-          <div className="flex items-center justify-center">
-            <input
-              type="checkbox"
-              checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-                } else {
-                  setSelectedTasks([]);
-                }
-              }}
-              className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
-            />
-          </div>
-          <div className="text-left">ID</div>
-          {groupingType === 'none' && (
+        {/* Column Headers - Different layouts for budget vs construction mode */}
+        {mode === 'construction' ? (
+          // Construction mode columns: Checks (5%), Fase (5%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (5%)
+          <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+               style={{ gridTemplateColumns: `5% 5% 10% 1fr 5% 5% 5% 5%` }}>
+            <div className="flex items-center justify-center">
+              <input
+                type="checkbox"
+                checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                  } else {
+                    setSelectedTasks([]);
+                  }
+                }}
+                className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
+              />
+            </div>
+            <div className="text-left">Fase</div>
             <div className="text-left">Rubro</div>
-          )}
-          <div className="text-left">Tarea</div>
-          <div className="text-left">Unid.</div>
-          <div className="text-left">Cant.</div>
-          <div className="text-left">M.O.</div>
-          <div className="text-left">Mat.</div>
-          <div className="text-left">Subtotal</div>
-          <div className="text-left">% Inc.</div>
-          <div className="text-left">Acc.</div>
-        </div>
+            <div className="text-left">Tarea</div>
+            <div className="text-left">Unidad</div>
+            <div className="text-left">Cantidad</div>
+            <div className="text-left">Fechas</div>
+            <div className="text-left">Progreso</div>
+          </div>
+        ) : (
+          // Budget mode columns (original)
+          <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+               style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
+            <div className="flex items-center justify-center">
+              <input
+                type="checkbox"
+                checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                  } else {
+                    setSelectedTasks([]);
+                  }
+                }}
+                className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
+              />
+            </div>
+            <div className="text-left">ID</div>
+            {groupingType === 'none' && (
+              <div className="text-left">Rubro</div>
+            )}
+            <div className="text-left">Tarea</div>
+            <div className="text-left">Unid.</div>
+            <div className="text-left">Cant.</div>
+            <div className="text-left">M.O.</div>
+            <div className="text-left">Mat.</div>
+            <div className="text-left">Subtotal</div>
+            <div className="text-left">% Inc.</div>
+            <div className="text-left">Acc.</div>
+          </div>
+        )}
 
         {/* Table Rows - Using div structure like Table.tsx */}
         <div>
@@ -411,18 +450,37 @@ export function BudgetTable({
                 <Fragment key={rubroName}>
                   {/* Group Header Row */}
                   {groupingType !== 'none' && (
-                    <div className="grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
-                         style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
+                    <div className={cn(
+                      "grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
+                    )} style={{ 
+                      gridTemplateColumns: mode === 'construction' 
+                        ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                        : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
+                    }}>
                       <div></div>
-                      <div className="font-semibold text-xs">{rubroNumber}</div>
-                      <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                      <div className="text-xs font-semibold">${rubroSubtotal.toLocaleString()}</div>
-                      <div className="text-xs font-semibold">{rubroPercentage.toFixed(1)}%</div>
-                      <div></div>
+                      {mode === 'construction' ? (
+                        <>
+                          <div></div>
+                          <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
+                          <div className="font-semibold text-xs">{tasks.length} tareas</div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="font-semibold text-xs">{rubroNumber}</div>
+                          <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div className="text-xs font-semibold">${rubroSubtotal.toLocaleString()}</div>
+                          <div className="text-xs font-semibold">{rubroPercentage.toFixed(1)}%</div>
+                          <div></div>
+                        </>
+                      )}
                     </div>
                   )}
                   
@@ -449,7 +507,11 @@ export function BudgetTable({
                              "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
                              taskIndex < tasks.length - 1 ? "border-b border-[var(--table-row-border)]" : ""
                            )}
-                           style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
+                           style={{ 
+                             gridTemplateColumns: mode === 'construction' 
+                               ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                               : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
+                           }}>
                         
                         <div className="flex items-center justify-center">
                           <input
@@ -466,43 +528,138 @@ export function BudgetTable({
                           />
                         </div>
                         
-                        <div className="text-xs flex items-center justify-start font-medium">
-                          {taskId}
-                        </div>
-                        
-                        {groupingType === 'none' && (
-                          <div className="text-xs flex items-center justify-start">
-                            <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
-                          </div>
+                        {mode === 'construction' ? (
+                          <>
+                            {/* Fase */}
+                            <div className="text-xs flex items-center justify-start">
+                              <div className="font-medium">{task.task?.phase_name || 'Sin fase'}</div>
+                            </div>
+                            
+                            {/* Rubro */}
+                            <div className="text-xs flex items-center justify-start">
+                              <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
+                            </div>
+                            
+                            {/* Tarea */}
+                            <div className="text-xs flex items-center justify-start">
+                              {generateTaskDisplayName(task.task, parameterValues)}
+                            </div>
+                            
+                            {/* Unidad */}
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.unit_name || '-'}
+                            </div>
+                            
+                            {/* Cantidad */}
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.quantity || '0'}
+                            </div>
+                            
+                            {/* Fechas */}
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.start_date || task.task?.end_date ? (
+                                <div className="space-y-0">
+                                  {task.task?.start_date && (
+                                    <div className="text-muted-foreground text-xs leading-tight">
+                                      {new Date(task.task.start_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                                    </div>
+                                  )}
+                                  {task.task?.end_date && (
+                                    <div className="text-muted-foreground text-xs leading-tight">
+                                      - {new Date(task.task.end_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </div>
+                            
+                            {/* Progreso */}
+                            <div className="text-xs flex items-center justify-start gap-2">
+                              <div className="flex items-center gap-2 min-w-[60px]">
+                                <div className="flex-1 bg-gray-200 rounded-full h-1 overflow-hidden">
+                                  <div 
+                                    className="h-full rounded-full transition-all duration-300 bg-green-500"
+                                    style={{
+                                      width: `${Math.min(Math.max(task.task?.progress_percent || 0, 0), 100)}%`
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-xs text-muted-foreground font-medium min-w-[25px]">
+                                  {task.task?.progress_percent || 0}%
+                                </span>
+                              </div>
+                              {/* Actions for construction mode */}
+                              <div className="flex items-center gap-1 ml-2">
+                                {handleEditTask && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditTask({
+                                      id: task.id,
+                                      name: generateTaskDisplayName(task.task, parameterValues),
+                                      type: 'task',
+                                      level: 0,
+                                      taskData: task
+                                    })}
+                                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTask(task.id)}
+                                  className="h-7 w-7 p-0 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-xs flex items-center justify-start font-medium">
+                              {taskId}
+                            </div>
+                            
+                            {groupingType === 'none' && (
+                              <div className="text-xs flex items-center justify-start">
+                                <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
+                              </div>
+                            )}
+                            
+                            <div className="text-xs flex items-center justify-start">
+                              {generateTaskDisplayName(task.task, parameterValues)}
+                            </div>
+                            
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.unit_name || '-'}
+                            </div>
+                            
+                            <div className="text-xs flex items-center justify-start">
+                              {task.task?.quantity || '0'}
+                            </div>
+                            
+                            <div className="text-xs flex items-center justify-start">$0</div>
+                            <div className="text-xs flex items-center justify-start">$0</div>
+                            <div className="text-xs flex items-center justify-start font-medium">$0</div>
+                            <div className="text-xs flex items-center justify-start text-muted-foreground">{percentage.toFixed(1)}%</div>
+                            
+                            <div className="flex items-center justify-start">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </>
                         )}
-                        
-                        <div className="text-xs flex items-center justify-start">
-                          {generateTaskDisplayName(task.task, parameterValues)}
-                        </div>
-                        
-                        <div className="text-xs flex items-center justify-start">
-                          {task.task?.unit_name || '-'}
-                        </div>
-                        
-                        <div className="text-xs flex items-center justify-start">
-                          {task.task?.quantity || '0'}
-                        </div>
-                        
-                        <div className="text-xs flex items-center justify-start">$0</div>
-                        <div className="text-xs flex items-center justify-start">$0</div>
-                        <div className="text-xs flex items-center justify-start font-medium">$0</div>
-                        <div className="text-xs flex items-center justify-start text-muted-foreground">{percentage.toFixed(1)}%</div>
-                        
-                        <div className="flex items-center justify-start">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteTask(task.id)}
-                            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
                       </div>
                     );
                   })}
@@ -512,18 +669,36 @@ export function BudgetTable({
             
             {/* TOTAL Row - Same styling as header */}
             <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-                 style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
+                 style={{ 
+                   gridTemplateColumns: mode === 'construction' 
+                     ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                     : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
+                 }}>
               <div></div>
-              <div className="text-xs font-semibold">TOTAL</div>
-              {groupingType === 'none' && <div></div>}
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div className="text-xs font-semibold">$0</div>
-              <div className="text-xs font-semibold">100.0%</div>
-              <div></div>
+              {mode === 'construction' ? (
+                <>
+                  <div></div>
+                  <div className="text-xs font-semibold">TOTAL</div>
+                  <div className="text-xs font-semibold">{budgetTasks?.length || 0} tareas</div>
+                  <div></div>
+                  <div className="text-xs font-semibold">{totalQuantity}</div>
+                  <div></div>
+                  <div></div>
+                </>
+              ) : (
+                <>
+                  <div className="text-xs font-semibold">TOTAL</div>
+                  {groupingType === 'none' && <div></div>}
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div className="text-xs font-semibold">$0</div>
+                  <div className="text-xs font-semibold">100.0%</div>
+                  <div></div>
+                </>
+              )}
             </div>
         </div>
       </div>
