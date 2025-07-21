@@ -65,6 +65,9 @@ export function GanttContainer({
   // Bandera para evitar scroll automático después del primer scroll
   const [autoScrolled, setAutoScrolled] = useState(false);
   
+  // Estado para forzar re-renderizado de texto en barras de fase durante scroll
+  const [scrollUpdateTrigger, setScrollUpdateTrigger] = useState(0);
+  
   // Función para alternar el colapso de una fase
   const togglePhaseCollapse = useCallback((phaseId: string) => {
     setCollapsedPhases(prev => {
@@ -96,6 +99,26 @@ export function GanttContainer({
   // Función para forzar actualización completa después del drop
   const forceDropRefresh = useCallback(() => {
     setDropRefreshTrigger(prev => prev + 1);
+  }, []);
+  
+  // Listener para scroll que actualiza la posición del texto en barras de fase con throttling
+  useEffect(() => {
+    const timelineContainer = document.getElementById('timeline-content-scroll');
+    if (!timelineContainer) return;
+    
+    let rafId: number;
+    const handleScroll = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setScrollUpdateTrigger(prev => prev + 1);
+      });
+    };
+    
+    timelineContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      timelineContainer.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Función para manejar click en dependencias
@@ -916,7 +939,8 @@ export function GanttContainer({
                           
                           return (
                             <div
-                              className="bg-[var(--chart-2)] opacity-70 rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden"
+                              key={`phase-bar-${item.id}-${scrollUpdateTrigger}`}
+                              className="bg-[var(--chart-2)] opacity-70 rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden border border-[var(--table-row-fg)]"
                               style={{
                                 left: `${barLeft}px`,
                                 width: `${barWidth}px`,
