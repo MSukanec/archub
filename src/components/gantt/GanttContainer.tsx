@@ -14,7 +14,9 @@ export function GanttContainer({
   dependencies = [],
   onItemClick,
   onItemEdit,
-  onItemDelete
+  onItemDelete,
+  allTasks,
+  projectId
 }: GanttContainerProps & {
   onItemEdit?: (item: GanttRowProps) => void;
   onItemDelete?: (item: GanttRowProps) => void;
@@ -761,6 +763,8 @@ export function GanttContainer({
                           setDropRefreshTrigger(prev => prev + 1);
                         }}
                         onDragUpdate={refreshArrows}
+                        allTasks={allTasks}
+                        projectId={projectId}
                       />
                     </div>
 

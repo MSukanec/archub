@@ -1,10 +1,11 @@
 import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
 import { useState, useRef, useCallback, useMemo } from 'react';
-import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
+import { useCreateConstructionDependency, useConstructionDependencies } from '@/hooks/use-construction-dependencies';
 import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag, ConstructionTask } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { propagateDependencyChanges, applyOptimisticPropagation } from '@/utils/dependencyPropagation';
 
 interface GanttTimelineBarProps {
   item: GanttRowProps;
@@ -22,6 +23,9 @@ interface GanttTimelineBarProps {
   } | null;
   onTaskUpdate?: () => void; // Callback para refrescar después de actualizar
   onDragUpdate?: () => void; // Callback para actualizar flechas durante drag
+  // Props necesarias para propagación de dependencias
+  allTasks?: ConstructionTask[];
+  projectId?: string;
 }
 
 export function GanttTimelineBar({ 
@@ -33,7 +37,9 @@ export function GanttTimelineBar({
   onConnectionDrag,
   dragConnectionData,
   onTaskUpdate,
-  onDragUpdate
+  onDragUpdate,
+  allTasks,
+  projectId
 }: GanttTimelineBarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -50,6 +56,9 @@ export function GanttTimelineBar({
   const updateTaskResize = useUpdateConstructionTaskResize();
   const updateTaskDrag = useUpdateConstructionTaskDrag();
   const queryClient = useQueryClient();
+  
+  // Hook para obtener dependencias para propagación
+  const { data: dependencies = [] } = useConstructionDependencies(projectId || '');
   
   // Throttled callback para optimizar actualizaciones de flechas
   const throttledDragUpdate = useMemo(() => {
@@ -313,11 +322,22 @@ export function GanttTimelineBar({
       });
       
       if (item.taskData?.id) {
-        // OPTIMISTIC UPDATE: Actualizar caché inmediatamente antes de la mutación
+        // PROPAGACIÓN DE DEPENDENCIAS: Calcular tareas que deben moverse
+        const propagationUpdates = allTasks && dependencies.length > 0 
+          ? propagateDependencyChanges(
+              item.taskData.id,
+              format(newEndDate, 'yyyy-MM-dd'),
+              allTasks,
+              dependencies
+            )
+          : [];
+        
+        // OPTIMISTIC UPDATE: Actualizar caché inmediatamente con tarea principal + propagaciones
         queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
           if (!oldData) return oldData;
           
-          return oldData.map(task => {
+          // Actualizar tarea principal
+          let updatedData = oldData.map(task => {
             if (task.id === item.taskData?.id) {
               return {
                 ...task,
@@ -328,6 +348,13 @@ export function GanttTimelineBar({
             }
             return task;
           });
+          
+          // Aplicar propagaciones de dependencias
+          if (propagationUpdates.length > 0) {
+            updatedData = applyOptimisticPropagation(updatedData, propagationUpdates) || updatedData;
+          }
+          
+          return updatedData;
         });
         
         // Actualizar flechas inmediatamente con los nuevos datos
@@ -464,11 +491,22 @@ export function GanttTimelineBar({
         const startDate = new Date(item.taskData.start_date!);
         const newDuration = Math.max(1, differenceInDays(newDate, startDate) + 1);
         
-        // Update optimista inmediato
+        // PROPAGACIÓN DE DEPENDENCIAS: Cuando se extiende end_date, propagar a tareas dependientes
+        const propagationUpdates = allTasks && dependencies.length > 0 
+          ? propagateDependencyChanges(
+              item.taskData.id,
+              format(newDate, 'yyyy-MM-dd'),
+              allTasks,
+              dependencies
+            )
+          : [];
+        
+        // Update optimista inmediato con propagación
         queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
           if (!oldData) return oldData;
           
-          return oldData.map(task => {
+          // Actualizar tarea principal
+          let updatedData = oldData.map(task => {
             if (task.id === item.taskData?.id) {
               return {
                 ...task,
@@ -478,6 +516,13 @@ export function GanttTimelineBar({
             }
             return task;
           });
+          
+          // Aplicar propagaciones de dependencias
+          if (propagationUpdates.length > 0) {
+            updatedData = applyOptimisticPropagation(updatedData, propagationUpdates) || updatedData;
+          }
+          
+          return updatedData;
         });
         
         onTaskUpdate?.();

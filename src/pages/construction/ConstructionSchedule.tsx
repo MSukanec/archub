@@ -437,6 +437,8 @@ export default function ConstructionSchedule() {
         <GanttContainer
           data={ganttData}
           dependencies={dependencies}
+          allTasks={processedTasks}
+          projectId={projectId}
           onItemEdit={(item) => {
             if (item.type === 'task') {
               handleEditTask(item);

@@ -21,6 +21,8 @@ export type GanttContainerProps = {
     type: string;
   }>;
   onItemClick?: (item: GanttRowProps) => void;
+  allTasks?: any[]; // Array de tareas para propagación de dependencias
+  projectId?: string; // ID del proyecto
 };
 
 export interface ResolvedDateRange {
