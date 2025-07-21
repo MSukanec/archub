@@ -52,33 +52,25 @@ export function GanttDependencies({
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
     // Buscar la barra de tarea específica directamente por data-task-id
     const taskBarElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
-    const timelineElement = containerRef.current;
+    const timelineScrollContainer = document.getElementById('timeline-content-scroll');
     
-    // console.log('getTaskPosition called:', {
-    //   taskId,
-    //   connectorType,
-    //   taskBarElement: !!taskBarElement,
-    //   timelineElement: !!timelineElement
-    // });
-    
-    if (!taskBarElement || !timelineElement) {
-      // console.log('Missing elements for task:', taskId);
+    if (!taskBarElement || !timelineScrollContainer) {
       return null;
     }
 
     const taskRect = taskBarElement.getBoundingClientRect();
-    const timelineRect = timelineElement.getBoundingClientRect();
+    const scrollContainerRect = timelineScrollContainer.getBoundingClientRect();
     
-    // Calcular posición relativa al contenedor del timeline
-    const relativeY = taskRect.top - timelineRect.top + (taskRect.height / 2);
+    // Calcular posición relativa al VIEWPORT VISIBLE del timeline scroll container
+    const relativeY = taskRect.top - scrollContainerRect.top + (taskRect.height / 2);
     
     let relativeX: number;
     if (connectorType === 'output') {
       // Conector de salida: lado derecho de la barra de tarea
-      relativeX = taskRect.right - timelineRect.left;
+      relativeX = taskRect.right - scrollContainerRect.left;
     } else {
       // Conector de entrada: lado izquierdo de la barra de tarea  
-      relativeX = taskRect.left - timelineRect.left;
+      relativeX = taskRect.left - scrollContainerRect.left;
     }
 
     // console.log('Task position calculated:', {
@@ -86,8 +78,9 @@ export function GanttDependencies({
     //   connectorType,
     //   relativeX,
     //   relativeY,
-    //   taskRect: { left: taskRect.left, right: taskRect.right, top: taskRect.top, height: taskRect.height },
-    //   timelineRect: { left: timelineRect.left, top: timelineRect.top }
+    //   taskRect: { left: taskRect.left, right: taskRect.right, width: taskRect.width },
+    //   scrollContainerRect: { left: scrollContainerRect.left, width: scrollContainerRect.width },
+    //   isVisible: relativeX >= 0 && relativeX <= scrollContainerRect.width
     // });
 
     return { x: relativeX, y: relativeY };
@@ -139,6 +132,19 @@ export function GanttDependencies({
         const toCoords = getTaskPosition(dep.successor_task_id, 'input');
 
         if (!fromCoords || !toCoords) {
+          return null;
+        }
+
+        // Verificar si al menos una de las tareas está visible en el viewport
+        const timelineScrollContainer = document.getElementById('timeline-content-scroll');
+        if (!timelineScrollContainer) return null;
+        
+        const containerWidth = timelineScrollContainer.getBoundingClientRect().width;
+        const isFromVisible = fromCoords.x >= -100 && fromCoords.x <= containerWidth + 100; // 100px de margen
+        const isToVisible = toCoords.x >= -100 && toCoords.x <= containerWidth + 100;
+        
+        // Solo dibujar la flecha si al menos una tarea está visible
+        if (!isFromVisible && !isToVisible) {
           return null;
         }
 
@@ -195,14 +201,31 @@ export function GanttDependencies({
 
   console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
   
+  // DEBUG: Botón para ir a las tareas
+  const scrollToTasks = () => {
+    const timelineScrollContainer = document.getElementById('timeline-content-scroll');
+    if (timelineScrollContainer) {
+      timelineScrollContainer.scrollLeft = 2000; // Scroll a donde están las tareas
+    }
+  };
+  
   return (
-    <svg 
-      className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ 
-        zIndex: 100,
-        backgroundColor: 'rgba(255, 0, 0, 0.1)' // Debug: fondo rojo semi-transparente para ver el SVG
-      }}
-    >
+    <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+      {/* DEBUG: Botón temporal para ir a las tareas */}
+      <button 
+        onClick={scrollToTasks}
+        className="absolute top-2 right-2 z-50 bg-red-500 text-white px-3 py-1 rounded text-sm pointer-events-auto"
+      >
+        IR A TAREAS
+      </button>
+      
+      <svg 
+        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+        style={{ 
+          zIndex: 100,
+          backgroundColor: 'rgba(255, 0, 0, 0.1)' // Debug: fondo rojo semi-transparente para ver el SVG
+        }}
+      >
       {/* Definir el marcador de flecha */}
       <defs>
         <marker
@@ -255,6 +278,7 @@ export function GanttDependencies({
           </g>
         );
       })}
-    </svg>
+      </svg>
+    </div>
   );
 }
