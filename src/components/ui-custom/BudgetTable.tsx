@@ -215,8 +215,8 @@ export function BudgetTable({
 
   return (
     <div className="space-y-3">
-      {/* Mobile Action Bar - Only visible on mobile */}
-      <div className="lg:hidden">
+      {/* Desktop Action Bar - Only visible on desktop */}
+      <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg mb-[5px]">
           {/* Grouping Selector - Left side */}
           <div className="flex items-center">
