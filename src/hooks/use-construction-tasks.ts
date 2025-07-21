@@ -54,19 +54,10 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar construction_gantt_view simplificada - ya incluye todos los campos necesarios
+      // Usar construction_gantt_view simplificada - sin rubros por ahora
       const { data: ganttData, error } = await supabase
         .from('construction_gantt_view')
-        .select(`
-          *,
-          task_rubro:task_generated_view!task_id (
-            rubro_id,
-            rubro:rubros!rubro_id (
-              id,
-              name
-            )
-          )
-        `)
+        .select('*')
         .eq('project_id', projectId)
         .order('phase_position', { ascending: true });
 
@@ -111,12 +102,12 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             id: item.task_id,
             code: item.task_code,
             display_name: item.display_name || item.task_code, // DISPLAY_NAME DIRECTO DE LA VISTA
-            rubro_name: item.task_rubro?.rubro?.name || null, // DATOS DE RUBRO VIA JOIN
+            rubro_name: null, // Sin rubros por ahora
             category_name: null,
             unit_id: item.unit_id,
             unit_name: item.unit_name || null, // UNIT_NAME DIRECTO DE LA VISTA
             unit_symbol: item.unit_symbol || null, // UNIT_SYMBOL DIRECTO DE LA VISTA
-            rubro_id: item.task_rubro?.rubro_id || null,
+            rubro_id: null, // Sin rubros por ahora
             param_values: item.param_values
           }
         };
@@ -128,7 +119,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
         sample: {
           display_name: mappedTasks[0]?.task?.display_name,
-          rubro_name: mappedTasks[0]?.task?.rubro_name,
           unit_name: mappedTasks[0]?.task?.unit_name,
           unit_symbol: mappedTasks[0]?.task?.unit_symbol,
           quantity: mappedTasks[0]?.quantity,
@@ -136,8 +126,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             display_name: ganttData?.[0]?.display_name,
             unit_name: ganttData?.[0]?.unit_name,
             unit_symbol: ganttData?.[0]?.unit_symbol,
-            quantity: ganttData?.[0]?.quantity,
-            rubro_join: ganttData?.[0]?.task_rubro?.rubro?.name
+            quantity: ganttData?.[0]?.quantity
           }
         }
       });

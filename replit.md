@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. CONSTRUCTION TASKS INFINITE LOOP BUG FIXED: Resolved critical performance issue causing infinite re-renders and eliminated rubro dependency errors - COMPLETED
+  • Fixed infinite loop issue in both ConstructionTasks.tsx and ConstructionSchedule.tsx by replacing useEffect with useMemo for task processing
+  • Eliminated async task name processing that was causing unnecessary re-renders and performance degradation
+  • Removed problematic rubro table joins from construction_gantt_view query that were causing foreign key relationship errors
+  • Simplified query to use construction_gantt_view directly with all built-in fields (quantity, unit_name, unit_symbol, display_name)
+  • Fixed TypeScript null safety issues with task.task references throughout components
+  • Successfully loading 4 construction tasks from "Planta Baja" phase with proper data mapping
+  • System now displays tasks correctly without performance issues or database errors
 - July 21, 2025. GANTT OPTIMISTIC UPDATES IMPLEMENTED: Dramatically improved drag & drop performance with instant UI feedback - COMPLETED
   • Implemented optimistic updates for drag operations using queryClient.setQueryData() to update cache immediately
   • UI now responds instantly to drag & drop without waiting for database response (previously 200-500ms delay)
