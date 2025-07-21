@@ -1,7 +1,7 @@
 import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
 import { useState, useRef, useCallback, useMemo } from 'react';
-import { useCreateConstructionDependency, useConstructionDependencies } from '@/hooks/use-construction-dependencies';
+import { useCreateConstructionDependency, useConstructionDependencies, ConstructionDependencyWithTasks } from '@/hooks/use-construction-dependencies';
 import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag, ConstructionTask } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +25,7 @@ interface GanttTimelineBarProps {
   onDragUpdate?: () => void; // Callback para actualizar flechas durante drag
   // Props necesarias para propagación de dependencias
   allTasks?: ConstructionTask[];
+  dependencies?: ConstructionDependencyWithTasks[];
   projectId?: string;
 }
 
@@ -39,6 +40,7 @@ export function GanttTimelineBar({
   onTaskUpdate,
   onDragUpdate,
   allTasks,
+  dependencies = [],
   projectId
 }: GanttTimelineBarProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -57,8 +59,9 @@ export function GanttTimelineBar({
   const updateTaskDrag = useUpdateConstructionTaskDrag();
   const queryClient = useQueryClient();
   
-  // Hook para obtener dependencias para propagación
-  const { data: dependencies = [] } = useConstructionDependencies(projectId || '');
+  // Hook para obtener dependencias para propagación si no se pasan por props
+  const { data: hookDependencies = [] } = useConstructionDependencies(projectId || '');
+  const allDependencies = dependencies.length > 0 ? dependencies : hookDependencies;
   
   // Throttled callback para optimizar actualizaciones de flechas
   const throttledDragUpdate = useMemo(() => {
@@ -307,7 +310,7 @@ export function GanttTimelineBar({
       const relativeX = Math.max(0, e.clientX - containerRect.left - dragOffset);
       const adjustedX = relativeX + scrollLeft;
       
-      // Calcular nuevo día y fechas en tiempo real
+      // Calcular nuevo día y fechas para propagación visual
       const dayWidth = timelineWidth / totalDays;
       const newDay = Math.round(adjustedX / dayWidth);
       const newStartDate = addDays(timelineStart, newDay);
@@ -317,34 +320,34 @@ export function GanttTimelineBar({
         Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
       const newEndDate = addDays(newStartDate, originalDuration - 1);
       
-      // ACTUALIZACIÓN DE TAREA PRINCIPAL EN TIEMPO REAL
-      queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
-        if (!oldData) return oldData;
-        
-        return oldData.map(task => {
-          if (task.id === item.taskData?.id) {
-            return {
-              ...task,
-              start_date: format(newStartDate, 'yyyy-MM-dd'),
-              end_date: format(newEndDate, 'yyyy-MM-dd'),
-              duration_in_days: originalDuration
-            };
-          }
-          return task;
-        });
-      });
-      
-      // PROPAGACIÓN DE DEPENDENCIAS EN TIEMPO REAL (THROTTLED)
-      if (allTasks && dependencies.length > 0 && throttledPropagation) {
-        throttledPropagation(
+      // PROPAGACIÓN VISUAL DE DEPENDENCIAS (sin actualizar datos)
+      if (allTasks && allDependencies.length > 0 && throttledPropagation) {
+        const propagationUpdates = propagateDependencyChanges(
           item.taskData.id,
           format(newEndDate, 'yyyy-MM-dd'),
           allTasks,
-          dependencies
+          allDependencies
         );
+        
+        // Aplicar transformaciones CSS a las tareas dependientes
+        propagationUpdates.forEach(update => {
+          const dependentBarElement = document.querySelector(`[data-task-id="${update.taskId}"] .task-bar-content`);
+          if (dependentBarElement) {
+            const dependentTask = allTasks.find(t => t.id === update.taskId);
+            if (dependentTask) {
+              const originalStartDay = Math.floor((new Date(dependentTask.start_date).getTime() - timelineStart.getTime()) / (24 * 60 * 60 * 1000));
+              const newStartDay = Math.floor((new Date(update.newStart).getTime() - timelineStart.getTime()) / (24 * 60 * 60 * 1000));
+              const offsetDays = newStartDay - originalStartDay;
+              const offsetPixels = offsetDays * dayWidth;
+              
+              (dependentBarElement as HTMLElement).style.transform = `translateX(${offsetPixels}px)`;
+              (dependentBarElement as HTMLElement).style.opacity = '0.8';
+            }
+          }
+        });
       }
       
-      // Feedback visual suave - mover la barra sin snap
+      // FEEDBACK VISUAL de la tarea principal
       barRef.current.style.transform = `translateX(${adjustedX - startPixels}px)`;
       barRef.current.style.zIndex = '50';
       
@@ -355,10 +358,21 @@ export function GanttTimelineBar({
     const handleMouseUp = (e: MouseEvent) => {
       setIsDraggingBar(false);
       
-      // Limpiar estilos temporales
+      // Limpiar estilos temporales de la tarea principal
       if (barRef.current) {
         barRef.current.style.transform = '';
         barRef.current.style.zIndex = '';
+      }
+      
+      // Limpiar transformaciones CSS de todas las tareas dependientes
+      if (allTasks && allDependencies.length > 0) {
+        allTasks.forEach(task => {
+          const dependentBarElement = document.querySelector(`[data-task-id="${task.id}"] .task-bar-content`);
+          if (dependentBarElement) {
+            (dependentBarElement as HTMLElement).style.transform = '';
+            (dependentBarElement as HTMLElement).style.opacity = '';
+          }
+        });
       }
       
       // Calcular nuevo día y actualizar en base de datos
@@ -551,12 +565,12 @@ export function GanttTimelineBar({
         const newDuration = Math.max(1, differenceInDays(newDate, startDate) + 1);
         
         // PROPAGACIÓN DE DEPENDENCIAS: Cuando se extiende end_date, propagar a tareas dependientes
-        const propagationUpdates = allTasks && dependencies.length > 0 
+        const propagationUpdates = allTasks && allDependencies.length > 0 
           ? propagateDependencyChanges(
               item.taskData.id,
               format(newDate, 'yyyy-MM-dd'),
               allTasks,
-              dependencies
+              allDependencies
             )
           : [];
         
@@ -645,7 +659,7 @@ export function GanttTimelineBar({
       
       {/* Contenido de la barra con nombre de la tarea */}
       <div 
-        className="relative z-10 px-1 h-full flex items-center text-[var(--table-row-fg)]"
+        className="task-bar-content relative z-10 px-1 h-full flex items-center text-[var(--table-row-fg)]"
         style={{
           fontSize: '9px',
           lineHeight: '10px',

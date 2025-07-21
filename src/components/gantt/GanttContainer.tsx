@@ -56,6 +56,12 @@ export function GanttContainer({
   // Estado para forzar actualización completa después del drop
   const [dropRefreshTrigger, setDropRefreshTrigger] = useState(0);
   
+  // Estado temporal para posiciones de arrastre de dependencias
+  const [tempDragPositions, setTempDragPositions] = useState<Record<string, {
+    startDate: string;
+    endDate: string;
+  }>>({});
+  
   // Función para alternar el colapso de una fase
   const togglePhaseCollapse = useCallback((phaseId: string) => {
     setCollapsedPhases(prev => {
@@ -72,6 +78,16 @@ export function GanttContainer({
   // Función para forzar actualización de flechas durante drag
   const refreshArrows = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);
+  }, []);
+  
+  // Función para actualizar posiciones temporales durante drag
+  const updateTempDragPositions = useCallback((positions: Record<string, { startDate: string; endDate: string }>) => {
+    setTempDragPositions(positions);
+  }, []);
+  
+  // Función para limpiar posiciones temporales
+  const clearTempDragPositions = useCallback(() => {
+    setTempDragPositions({});
   }, []);
   
   // Función para forzar actualización completa después del drop
@@ -764,6 +780,7 @@ export function GanttContainer({
                         }}
                         onDragUpdate={refreshArrows}
                         allTasks={allTasks}
+                        dependencies={dependencies}
                         projectId={projectId}
                       />
                     </div>
