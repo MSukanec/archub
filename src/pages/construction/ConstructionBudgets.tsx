@@ -651,74 +651,30 @@ export default function ConstructionBudgets() {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-3">
-                    {/* Grouping Type Selector */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-muted-foreground">Agrupar:</span>
-                      <Select
-                        value={groupingType}
-                        onValueChange={(value) => {
-                          setGroupingType(value);
-                        }}
-                      >
-                        <SelectTrigger className="w-[160px] h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Sin agrupar</SelectItem>
-                          <SelectItem value="rubros">Agrupar por Rubros</SelectItem>
-                          <SelectItem value="phases">Agrupar por Fases</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => {
-                          if (selectedBudget) {
-                            openModal('budget', { budget: selectedBudget })
-                          }
-                        }}
-                        disabled={!selectedBudget}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
-                        disabled={!selectedBudget}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    
-                    {/* Add Tasks Button */}
+                  {/* Action Buttons - Solo los botones de editar/eliminar */}
+                  <div className="flex items-center gap-2">
                     <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
                       onClick={() => {
                         if (selectedBudget) {
-                          openModal('budget-task-bulk-add', { 
-                            budgetId: selectedBudget.id,
-                            onSuccess: () => {
-                              console.log('Tasks added successfully');
-                              // Invalidate budget tasks query to refresh the table
-                              queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
-                            }
-                          });
+                          openModal('budget', { budget: selectedBudget })
                         }
                       }}
-                      className="px-4"
-                      size="sm"
                       disabled={!selectedBudget}
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      AGREGAR TAREAS
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      onClick={() => selectedBudget && handleDeleteBudget(selectedBudget)}
+                      disabled={!selectedBudget}
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

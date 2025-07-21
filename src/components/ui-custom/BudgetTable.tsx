@@ -245,10 +245,10 @@ export function BudgetTable({
     <div>
       {/* Desktop Action Bar - Only visible on desktop */}
       <div className="hidden lg:block">
-        <div className="flex items-center justify-center px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
+        <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '5px' }}>
-          {/* Grouping Selector - Centered */}
-          <div className="flex items-center justify-center w-full">
+          {/* Grouping Selector - Left side */}
+          <div className="flex items-center">
             <Select
               value={groupingType}
               onValueChange={(value) => onGroupingChange?.(value)}
@@ -264,6 +264,19 @@ export function BudgetTable({
                 <SelectItem value="phases-rubros">Fases y Rubros</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          
+          {/* Add Tasks Button - Right side */}
+          <div>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+              onClick={() => onAddTasks?.()}
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              AGREGAR TAREAS
+            </Button>
           </div>
         </div>
       </div>
