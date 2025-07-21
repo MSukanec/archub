@@ -15,6 +15,7 @@ interface GanttDependenciesProps {
   totalDays: number;
   containerRef: React.RefObject<HTMLDivElement>;
   leftPanelWidth: number;
+  refreshTrigger?: number; // Trigger para forzar actualización durante drag
 }
 
 interface TaskPosition {
@@ -32,7 +33,8 @@ export function GanttDependencies({
   timelineWidth,
   totalDays,
   containerRef,
-  leftPanelWidth
+  leftPanelWidth,
+  refreshTrigger
 }: GanttDependenciesProps) {
   
   const [arrowPaths, setArrowPaths] = useState<Array<{
@@ -156,7 +158,7 @@ export function GanttDependencies({
     const timer = setTimeout(calculateArrows, 200);
     
     return () => clearTimeout(timer);
-  }, [dependencies, data, scrollLeft]); // Incluir scrollLeft para recalcular en scroll
+  }, [dependencies, data, scrollLeft, refreshTrigger]); // Incluir refreshTrigger para recalcular durante drag
 
   if (!arrowPaths.length) {
     return null;

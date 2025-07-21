@@ -20,6 +20,7 @@ interface GanttTimelineBarProps {
     fromPoint: 'start' | 'end';
   } | null;
   onTaskUpdate?: () => void; // Callback para refrescar después de actualizar
+  onDragUpdate?: () => void; // Callback para actualizar flechas durante drag
 }
 
 export function GanttTimelineBar({ 
@@ -30,7 +31,8 @@ export function GanttTimelineBar({
   totalDays,
   onConnectionDrag,
   dragConnectionData,
-  onTaskUpdate
+  onTaskUpdate,
+  onDragUpdate
 }: GanttTimelineBarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -258,6 +260,9 @@ export function GanttTimelineBar({
       // Feedback visual suave - mover la barra sin snap
       barRef.current.style.transform = `translateX(${adjustedX - startPixels}px)`;
       barRef.current.style.zIndex = '50';
+      
+      // Actualizar flechas de dependencias durante el drag
+      onDragUpdate?.();
     };
     
     const handleMouseUp = (e: MouseEvent) => {
@@ -328,6 +333,9 @@ export function GanttTimelineBar({
         const newWidth = Math.max(dayWidth, relativeX - currentStartDay * dayWidth);
         barRef.current.style.width = `${newWidth}px`;
       }
+      
+      // Actualizar flechas de dependencias durante el resize
+      onDragUpdate?.();
     };
     
     const handleMouseUp = (e: MouseEvent) => {
