@@ -468,10 +468,25 @@ export function GanttTimelineBar({
         />
       )}
       
-      {/* Contenido de la barra centrado */}
-      <span className="relative z-10 truncate text-[10px]" style={{ padding: '0 2px' }}>
-        {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
-      </span>
+      {/* Contenido de la barra con nombre de la tarea */}
+      <div 
+        className="relative z-10 text-[10px] leading-tight px-2 py-1 h-full flex items-center"
+        style={{
+          fontSize: '10px',
+          lineHeight: '12px',
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          textOverflow: 'ellipsis',
+          wordBreak: 'break-word',
+          hyphens: 'auto'
+        }}
+      >
+        <span className="text-white font-medium">
+          {item.name}
+        </span>
+      </div>
       
       {/* Controles de redimensionamiento que aparecen en hover */}
       {shouldShowResizeHandles && (

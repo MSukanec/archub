@@ -748,7 +748,10 @@ export function GanttContainer({
                         totalDays={calendarStructure.totalDays}
                         onConnectionDrag={handleConnectionDrag}
                         dragConnectionData={dragConnectionData}
-                        onTaskUpdate={forceDropRefresh}
+                        onTaskUpdate={() => {
+                          // Actualización inmediata sin delay
+                          setDropRefreshTrigger(prev => prev + 1);
+                        }}
                         onDragUpdate={refreshArrows}
                       />
                     </div>
