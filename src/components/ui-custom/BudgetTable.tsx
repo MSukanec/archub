@@ -86,25 +86,53 @@ export function BudgetTable({
       return { 'Todas las tareas': budgetTasks };
     }
     
-    const grouped = budgetTasks.reduce((acc, task) => {
+    // Simple grouping for single-level types
+    if (groupingType === 'rubros' || groupingType === 'phases') {
+      const grouped = budgetTasks.reduce((acc, task) => {
+        if (!task.task) return acc;
+        
+        let groupKey = 'Sin grupo';
+        
+        if (groupingType === 'rubros') {
+          groupKey = task.task.rubro_name || 'Sin rubro';
+        } else if (groupingType === 'phases') {
+          groupKey = task.task.phase_name || 'Sin fase';
+        }
+        
+        if (!acc[groupKey]) {
+          acc[groupKey] = [];
+        }
+        acc[groupKey].push(task);
+        return acc;
+      }, {} as Record<string, BudgetTask[]>);
+      
+      return grouped;
+    }
+    
+    // Nested grouping for compound types
+    const nestedGrouped = budgetTasks.reduce((acc, task) => {
       if (!task.task) return acc;
       
-      let groupKey = 'Sin grupo';
+      let primaryKey, secondaryKey;
       
-      if (groupingType === 'rubros') {
-        groupKey = task.task.rubro_name || 'Sin rubro';
-      } else if (groupingType === 'phases') {
-        groupKey = task.task.phase_name || 'Sin fase';
+      if (groupingType === 'rubros-phases') {
+        primaryKey = task.task.rubro_name || 'Sin rubro';
+        secondaryKey = task.task.phase_name || 'Sin fase';
+      } else if (groupingType === 'phases-rubros') {
+        primaryKey = task.task.phase_name || 'Sin fase';
+        secondaryKey = task.task.rubro_name || 'Sin rubro';
       }
       
-      if (!acc[groupKey]) {
-        acc[groupKey] = [];
+      const combinedKey = `${primaryKey} > ${secondaryKey}`;
+      
+      if (!acc[combinedKey]) {
+        acc[combinedKey] = [];
       }
-      acc[groupKey].push(task);
+      acc[combinedKey].push(task);
       return acc;
     }, {} as Record<string, BudgetTask[]>);
     
-    return grouped;
+    return nestedGrouped;
   }, [budgetTasks, groupingType]);
   
   // Update local quantities when budget tasks change
@@ -217,36 +245,25 @@ export function BudgetTable({
     <div>
       {/* Desktop Action Bar - Only visible on desktop */}
       <div className="hidden lg:block">
-        <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
+        <div className="flex items-center justify-center px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '5px' }}>
-          {/* Grouping Selector - Left side */}
-          <div className="flex items-center">
+          {/* Grouping Selector - Centered */}
+          <div className="flex items-center justify-center w-full">
             <Select
               value={groupingType}
               onValueChange={(value) => onGroupingChange?.(value)}
             >
-              <SelectTrigger className="w-[160px] h-7 text-xs bg-[var(--table-row-bg)] border-[var(--table-row-border)] text-[var(--table-row-fg)] hover:bg-[var(--table-row-hover-bg)]">
+              <SelectTrigger className="w-[200px] h-7 text-xs bg-[var(--table-row-bg)] border-[var(--table-row-border)] text-[var(--table-row-fg)] hover:bg-[var(--table-row-hover-bg)]">
                 <SelectValue placeholder="Sin agrupar" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Sin agrupar</SelectItem>
                 <SelectItem value="rubros">Agrupar por Rubros</SelectItem>
                 <SelectItem value="phases">Agrupar por Fases</SelectItem>
+                <SelectItem value="rubros-phases">Rubros y Fases</SelectItem>
+                <SelectItem value="phases-rubros">Fases y Rubros</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          
-          {/* Add Tasks Button - Right side */}
-          <div>
-            <Button
-              variant="default"
-              size="sm"
-              className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
-              onClick={() => onAddTasks?.()}
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              AGREGAR TAREAS
-            </Button>
           </div>
         </div>
       </div>
