@@ -1,20 +1,11 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React, { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { FormModalLayout } from '../../form/FormModalLayout';
 import { useModalPanelStore } from '../../form/modalPanelStore';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-
-const bulkAddSchema = z.object({
-  searchTerm: z.string().optional()
-});
-
-type BulkAddFormData = z.infer<typeof bulkAddSchema>;
+import { TaskSelectionTable, SelectedTask } from '@/components/ui-custom/TaskSelectionTable';
+import { useBudgetTasks } from '@/hooks/use-budget-tasks';
 
 interface BudgetTaskBulkAddModalProps {
   modalData?: {
@@ -27,26 +18,33 @@ interface BudgetTaskBulkAddModalProps {
 export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAddModalProps) {
   const { budgetId, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
+  const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<BulkAddFormData>({
-    resolver: zodResolver(bulkAddSchema),
-    defaultValues: {
-      searchTerm: ''
-    }
-  });
+  // Obtener tareas ya existentes en el presupuesto para excluirlas
+  const { data: existingBudgetTasks = [] } = useBudgetTasks(budgetId || '');
+  const excludeTaskIds = existingBudgetTasks.map(bt => bt.task_id);
 
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
 
-  const handleSubmit = async (data: BulkAddFormData) => {
+  const handleSubmit = async () => {
+    if (selectedTasks.length === 0) {
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      console.log('Adding tasks to budget:', budgetId, data);
-      // TODO: Implement task addition logic
+      console.log('Adding tasks to budget:', budgetId, selectedTasks);
+      // TODO: Implement task addition logic here
+      
       onSuccess?.();
       onClose();
     } catch (error) {
       console.error('Error adding tasks:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -60,37 +58,18 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
   );
 
   const editPanel = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="searchTerm"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Buscar Tareas</FormLabel>
-                <FormControl>
-                  <Input placeholder="Buscar tareas disponibles..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="p-4 border rounded-lg bg-muted/20">
-            <p className="text-sm text-muted-foreground text-center">
-              Aquí aparecerán las tareas disponibles para agregar
-            </p>
-          </div>
-        </div>
-      </form>
-    </Form>
+    <div className="space-y-6">
+      <TaskSelectionTable
+        selectedTasks={selectedTasks}
+        onTasksChange={setSelectedTasks}
+        excludeTaskIds={excludeTaskIds}
+      />
+    </div>
   );
 
   const headerContent = (
     <FormModalHeader 
       title="Agregar Tareas al Presupuesto"
-      description="Selecciona las tareas que deseas incluir"
       icon={Plus}
     />
   );
@@ -99,8 +78,10 @@ export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAdd
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Agregar Tareas"
-      onRightClick={form.handleSubmit(handleSubmit)}
+      rightLabel={`Agregar ${selectedTasks.length > 0 ? selectedTasks.length : ''} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
+      onRightClick={handleSubmit}
+      submitDisabled={selectedTasks.length === 0 || isSubmitting}
+      showLoadingSpinner={isSubmitting}
     />
   );
 
