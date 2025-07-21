@@ -127,7 +127,7 @@ export function GanttTimelineBar({
     const rect = barRef.current?.getBoundingClientRect();
     if (!rect) return;
     
-    const connectionX = point === 'start' ? rect.left - 22 : rect.right + 22;
+    const connectionX = point === 'start' ? rect.left - 30 : rect.right + 30;
     const connectionY = rect.top + rect.height / 2;
     
     // Establecer estado de conexión local
@@ -470,7 +470,7 @@ export function GanttTimelineBar({
           <div
             className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all"
             style={{ 
-              left: '-22px',
+              left: '-30px',
               backgroundColor: 'var(--accent)'
             }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
@@ -481,7 +481,7 @@ export function GanttTimelineBar({
           <div
             className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all"
             style={{ 
-              right: '-22px',
+              right: '-30px',
               backgroundColor: 'var(--accent)'
             }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}

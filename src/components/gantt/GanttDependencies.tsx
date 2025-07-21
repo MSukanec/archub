@@ -181,13 +181,13 @@ export function GanttDependencies({
       <defs>
         <marker
           id="arrowhead"
-          markerWidth="8"
-          markerHeight="6"
-          refX="7"
-          refY="3"
+          markerWidth="6"
+          markerHeight="4"
+          refX="5"
+          refY="2"
           orient="auto"
         >
-          <polygon points="0 0, 8 3, 0 6" fill="var(--table-row-fg)" />
+          <polygon points="0 0, 6 2, 0 4" fill="var(--table-row-fg)" />
         </marker>
       </defs>
 
