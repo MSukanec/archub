@@ -489,16 +489,6 @@ export default function ConstructionLogs() {
               ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
             }
-            customContent={
-              <div className="w-full mb-8">
-                <SiteLogTimelineChart 
-                  data={siteLogTimelineData} 
-                  isLoading={timelineLoading}
-                  timePeriod={timePeriod}
-                  onTimePeriodChange={setTimePeriod}
-                />
-              </div>
-            }
             action={
               !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
                 <Button onClick={() => setShowNewSiteLogModal(true)}>
