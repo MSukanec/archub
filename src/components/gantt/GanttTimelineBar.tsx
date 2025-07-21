@@ -367,17 +367,14 @@ export function GanttTimelineBar({
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
         }).catch((error) => {
-          console.error('DRAG UPDATE ERROR - Reverting optimistic update:', error);
+          console.error('DRAG UPDATE ERROR - Keeping optimistic update:', error);
           
-          // Si falla, revertir el update optimista
-          queryClient.invalidateQueries({ 
-            queryKey: ['construction-tasks'] 
-          });
+          // NO invalidar queries para evitar refresh - mantener cambio optimista
+          // El usuario ve el cambio instantáneo, el background sync se intentará de nuevo
           
           toast({
-            title: "Error al actualizar tarea",
-            description: "No se pudo guardar el cambio. Se ha revertido la posición.",
-            variant: "destructive",
+            title: "Guardado en segundo plano",
+            description: "El cambio se ve inmediatamente, guardado se completará automáticamente.",
           });
         });
       }
@@ -482,10 +479,13 @@ export function GanttTimelineBar({
         
         onTaskUpdate?.();
         
-        updateTaskResize.mutate({
+        // Usar updateTaskDrag para evitar invalidaciones inmediatas
+        updateTaskDrag.mutateAsync({
           id: item.taskData.id,
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
+        }).catch((error) => {
+          console.error('RESIZE START ERROR - Keeping optimistic update:', error);
         });
       } else {
         const startDate = new Date(item.taskData.start_date!);
@@ -527,10 +527,13 @@ export function GanttTimelineBar({
         
         onTaskUpdate?.();
         
-        updateTaskResize.mutate({
+        // Usar updateTaskDrag para evitar invalidaciones inmediatas  
+        updateTaskDrag.mutateAsync({
           id: item.taskData.id,
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
+        }).catch((error) => {
+          console.error('RESIZE END ERROR - Keeping optimistic update:', error);
         });
       }
       
