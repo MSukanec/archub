@@ -9,33 +9,36 @@ interface BudgetTask {
   id: string;
   budget_id: string;
   task_id: string;
-  quantity: number;
-  start_date: string | null;
-  end_date: string | null;
   organization_id: string;
+  project_id: string;
+  created_at: string;
+  updated_at: string;
   task: {
-    id: string;
-    code: string;
-    template_id: string | null;
-    param_values: any;
-    organization_id: string;
-    name_template: string;
-    unit_id: string | null;
-    unit_name: string | null;
+    task_instance_id: string;
+    project_id: string;
+    task_id: string;
     task_code: string;
-    task_group_id: string | null;
-    task_group_name: string | null;
-    category_id: string | null;
-    category_name: string | null;
-    category_code: string | null;
-    subcategory_id: string | null;
-    subcategory_name: string | null;
-    subcategory_code: string | null;
-    rubro_id: string | null;
-    rubro_name: string | null;
-    rubro_code: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    duration_in_days: number | null;
+    quantity: number;
+    phase_instance_id: string;
+    phase_name: string;
+    phase_position: number;
+    progress_percent: number;
+    unit_id: string;
+    unit_name: string;
+    unit_symbol: string;
     display_name: string;
-  };
+    subcategory_id: string;
+    subcategory_name: string;
+    category_id: string;
+    category_name: string;
+    rubro_id: string;
+    rubro_name: string;
+    task_group_id: string;
+    task_group_name: string;
+  } | null;
 }
 
 interface BudgetTableProps {
@@ -75,7 +78,7 @@ export function BudgetTable({
     if (budgetTasks) {
       const quantities: Record<string, string> = {};
       budgetTasks.forEach(task => {
-        quantities[task.id] = String(task.quantity || 0);
+        quantities[task.id] = String(task.task?.quantity || 0);
       });
       setLocalQuantities(quantities);
     }
@@ -128,9 +131,9 @@ export function BudgetTable({
       }, {} as Record<string, BudgetTask[]>)
     : { 'Todas las tareas': budgetTasks };
 
-  // Calculate totals for TOTAL row (simplified since task_tasks doesn't have price fields)
+  // Calculate totals for TOTAL row
   const totalQuantity = budgetTasks?.reduce((total, task) => {
-    return total + (task.quantity || 0);
+    return total + (task.task?.quantity || 0);
   }, 0) || 0;
 
   // Total budget amount (placeholder since we don't have real pricing yet)
@@ -282,9 +285,9 @@ export function BudgetTable({
                             checked={selectedTasks.includes(task.id)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setSelectedTasks(prev => [...prev, task.id]);
+                                setSelectedTasks([...selectedTasks, task.id]);
                               } else {
-                                setSelectedTasks(prev => prev.filter(id => id !== task.id));
+                                setSelectedTasks(selectedTasks.filter(id => id !== task.id));
                               }
                             }}
                             className="rounded"
@@ -376,8 +379,8 @@ export function BudgetTable({
               task={task}
               processedName={processedName}
               unitName={unitName}
-              onEdit={(task) => {
-                console.log('Edit task mobile:', task);
+              onEdit={(taskToEdit: any) => {
+                console.log('Edit task mobile:', taskToEdit);
                 // TODO: Implement edit functionality
               }}
               onDelete={handleDeleteTask}

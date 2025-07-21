@@ -67,7 +67,7 @@ export function useBudgetTasks(budgetId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      // Primero obtener las tareas del presupuesto
+      // Obtener las tareas del presupuesto
       const { data, error } = await supabase
         .from("budget_tasks")
         .select("*")
@@ -80,10 +80,34 @@ export function useBudgetTasks(budgetId: string) {
       }
 
       console.log("Budget tasks data received:", data);
-      console.log("Sample budget task structure:", data?.[0]);
       
-      // Por ahora devolver los datos básicos sin relación hasta entender la estructura
-      return data || [];
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      // Ahora obtener los datos de las tareas desde construction_gantt_view
+      const taskIds = data.map(task => task.task_id);
+      const { data: tasksData, error: tasksError } = await supabase
+        .from("construction_gantt_view")
+        .select("*")
+        .in("task_instance_id", taskIds);
+
+      if (tasksError) {
+        console.error("Error fetching construction tasks data:", tasksError);
+        throw tasksError;
+      }
+
+      // Combinar los datos
+      const enrichedData = data.map(budgetTask => {
+        const taskData = tasksData?.find(t => t.task_instance_id === budgetTask.task_id);
+        return {
+          ...budgetTask,
+          task: taskData || null
+        };
+      });
+
+      console.log("Sample enriched budget task:", enrichedData[0]);
+      return enrichedData;
     },
     enabled: !!budgetId && !!supabase
   });
