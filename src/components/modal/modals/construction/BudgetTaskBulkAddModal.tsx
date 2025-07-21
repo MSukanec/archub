@@ -1,40 +1,45 @@
-import { z } from 'zod';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { z } from 'zod';
+import { Plus } from 'lucide-react';
+import { FormModalHeader } from '../../form/FormModalHeader';
+import { FormModalFooter } from '../../form/FormModalFooter';
+import { FormModalLayout } from '../../form/FormModalLayout';
+import { useModalPanelStore } from '../../form/modalPanelStore';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Calculator, Plus } from 'lucide-react';
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 
-// Schema for the form validation
-const bulkAddTasksSchema = z.object({
+const bulkAddSchema = z.object({
   searchTerm: z.string().optional()
 });
 
-type BulkAddTasksFormData = z.infer<typeof bulkAddTasksSchema>;
+type BulkAddFormData = z.infer<typeof bulkAddSchema>;
 
 interface BudgetTaskBulkAddModalProps {
-  budgetId: string;
+  modalData?: {
+    budgetId?: string;
+    onSuccess?: () => void;
+  };
   onClose: () => void;
-  onSuccess?: () => void;
 }
 
-export function BudgetTaskBulkAddModal({ 
-  budgetId, 
-  onClose, 
-  onSuccess 
-}: BudgetTaskBulkAddModalProps) {
-  const form = useForm<BulkAddTasksFormData>({
-    resolver: zodResolver(bulkAddTasksSchema),
+export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAddModalProps) {
+  const { budgetId, onSuccess } = modalData || {};
+  const { setPanel } = useModalPanelStore();
+
+  const form = useForm<BulkAddFormData>({
+    resolver: zodResolver(bulkAddSchema),
     defaultValues: {
       searchTerm: ''
     }
   });
 
-  const handleSave = async (data: BulkAddTasksFormData) => {
+  useEffect(() => {
+    setPanel('edit');
+  }, [setPanel]);
+
+  const handleSubmit = async (data: BulkAddFormData) => {
     try {
       console.log('Adding tasks to budget:', budgetId, data);
       // TODO: Implement task addition logic
@@ -45,45 +50,36 @@ export function BudgetTaskBulkAddModal({
     }
   };
 
-  const handleCancel = () => {
-    form.reset();
-    onClose();
-  };
-
-  // View Panel - for displaying existing data (not used in this modal)
   const viewPanel = (
     <div className="space-y-6">
       <div className="text-center text-muted-foreground">
-        <Calculator className="w-12 h-12 mx-auto mb-4 text-muted-foreground/60" />
-        <p>Selecciona tareas para agregar al presupuesto</p>
+        <Plus className="w-12 h-12 mx-auto mb-4 text-muted-foreground/60" />
+        <p>Modal de agregar tareas funcionando correctamente</p>
       </div>
     </div>
   );
 
-  // Edit Panel - main form content
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="space-y-4">
           <FormField
             control={form.control}
             name="searchTerm"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Buscar tareas</FormLabel>
+                <FormLabel>Buscar Tareas</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Escribe para buscar tareas disponibles..." 
-                    {...field} 
-                  />
+                  <Input placeholder="Buscar tareas disponibles..." {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           
-          <div className="mt-6 p-4 border rounded-lg bg-muted/20">
+          <div className="p-4 border rounded-lg bg-muted/20">
             <p className="text-sm text-muted-foreground text-center">
-              Aquí aparecerán las tareas disponibles para agregar al presupuesto
+              Aquí aparecerán las tareas disponibles para agregar
             </p>
           </div>
         </div>
@@ -91,33 +87,23 @@ export function BudgetTaskBulkAddModal({
     </Form>
   );
 
-  // Header Content
   const headerContent = (
     <FormModalHeader 
-      title="Agregar Tareas"
-      description="Selecciona tareas para incluir en el presupuesto"
+      title="Agregar Tareas al Presupuesto"
+      description="Selecciona las tareas que deseas incluir"
       icon={Plus}
     />
   );
 
-  // Footer Content
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleCancel}
-      rightLabel="Agregar Tareas"
-      onRightClick={form.handleSubmit(handleSave)}
+      cancelLabel="Cancelar"
+      submitLabel="Agregar Tareas"
+      onCancel={onClose}
+      onSubmit={form.handleSubmit(handleSubmit)}
+      isLoading={false}
     />
   );
 
-  return (
-    <FormModalLayout
-      columns={1}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={onClose}
-    />
-  );
+  return { viewPanel, editPanel, headerContent, footerContent };
 }

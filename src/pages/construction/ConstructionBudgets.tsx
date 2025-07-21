@@ -723,11 +723,20 @@ export default function ConstructionBudgets() {
                     {/* Add Tasks Button */}
                     <Button
                       onClick={() => {
-                        // TODO: Abrir modal de agregar tareas
-                        console.log('Abrir modal de agregar tareas');
+                        if (selectedBudget) {
+                          openModal('budget-task-bulk-add', { 
+                            budgetId: selectedBudget.id,
+                            onSuccess: () => {
+                              console.log('Tasks added successfully');
+                              // Invalidate budget tasks query to refresh the table
+                              queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
+                            }
+                          });
+                        }
                       }}
                       className="px-4"
                       size="sm"
+                      disabled={!selectedBudget}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       AGREGAR TAREAS
