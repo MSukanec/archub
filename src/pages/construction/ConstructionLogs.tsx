@@ -482,32 +482,32 @@ export default function ConstructionLogs() {
         />
 
         {filteredSiteLogs.length === 0 ? (
-          <div className="space-y-6">
-            {/* Timeline Chart */}
-            <SiteLogTimelineChart 
-              data={siteLogTimelineData} 
-              isLoading={timelineLoading}
-              timePeriod={timePeriod}
-              onTimePeriodChange={setTimePeriod}
-            />
-
-            <EmptyState
-              icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-              title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-              description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-                ? 'Prueba ajustando los filtros de búsqueda' 
-                : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-              }
-              action={
-                !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-                  <Button onClick={() => setShowNewSiteLogModal(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear Primera Entrada
-                  </Button>
-                )
-              }
-            />
-          </div>
+          <EmptyState
+            icon={<FileText className="w-12 h-12 text-muted-foreground" />}
+            title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+            description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+              ? 'Prueba ajustando los filtros de búsqueda' 
+              : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
+            }
+            customContent={
+              <div className="w-full mb-8">
+                <SiteLogTimelineChart 
+                  data={siteLogTimelineData} 
+                  isLoading={timelineLoading}
+                  timePeriod={timePeriod}
+                  onTimePeriodChange={setTimePeriod}
+                />
+              </div>
+            }
+            action={
+              !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
+                <Button onClick={() => setShowNewSiteLogModal(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Primera Entrada
+                </Button>
+              )
+            }
+          />
         ) : (
           <div className="space-y-6">
             {/* Timeline Chart */}
