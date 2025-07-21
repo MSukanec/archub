@@ -65,6 +65,9 @@ export function GanttContainer({
   // Estado para preservar la posición del scroll
   const [preservedScrollLeft, setPreservedScrollLeft] = useState<number | null>(null);
   
+  // Bandera para evitar scroll automático después del primer scroll
+  const [autoScrolled, setAutoScrolled] = useState(false);
+  
   // Función para alternar el colapso de una fase
   const togglePhaseCollapse = useCallback((phaseId: string) => {
     setCollapsedPhases(prev => {
@@ -317,8 +320,10 @@ export function GanttContainer({
   const weekWidth = 480; // DÍAS DOBLES: 240 * 2 = días más anchos
   const timelineWidth = Math.max(calendarStructure.weeks.length * weekWidth, 2400); // Ancho mínimo duplicado
 
-  // Auto-scroll para posicionar el timeline en HOY - 7 días
+  // Auto-scroll para posicionar el timeline en HOY - 7 días (solo la primera vez)
   useEffect(() => {
+    if (autoScrolled) return;
+
     const scrollToToday = () => {
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -355,6 +360,9 @@ export function GanttContainer({
           contentScroll.scrollLeft = targetScrollPosition;
         }
         
+        // Marcar que ya se hizo el auto-scroll inicial
+        setAutoScrolled(true);
+        
         // Auto-scroll to show current week
         // console.log('Auto-scroll to day', targetDayIndex);
       }
@@ -363,7 +371,7 @@ export function GanttContainer({
     // Ejecutar scroll después de un breve delay para asegurar que el DOM esté listo
     const timeoutId = setTimeout(scrollToToday, 100);
     return () => clearTimeout(timeoutId);
-  }, [calendarStructure.weeks, calendarStructure.totalDays, timelineWidth]);
+  }, [calendarStructure.weeks, calendarStructure.totalDays, timelineWidth, autoScrolled]);
 
   if (data.length === 0) {
     return (

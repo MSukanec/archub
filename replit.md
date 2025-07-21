@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT TIMELINE AUTO-SCROLL PREVENTION IMPLEMENTED: Fixed critical UX issue where timeline jumped back to "today" position after task movements - COMPLETED
+  • Added autoScrolled flag to prevent timeline from automatically scrolling to "today" position after task operations
+  • Implemented scroll position preservation system using preservedScrollLeft state and useEffect synchronization
+  • Auto-scroll to "today" now only occurs on initial component load, not during subsequent calendarStructure updates
+  • Timeline now maintains user's current viewport position during all task drag & drop, resize, and dependency operations
+  • Enhanced UX: users can navigate to any timeline period and work without viewport jumping back to initial position
+  • Professional timeline behavior: initial orientation to current date + persistent user-controlled viewport thereafter
+  • System eliminates disruptive timeline jumps that interrupted workflow during active task management sessions
 - July 21, 2025. TASK EDIT MODAL DEPENDENCY LOADING BUG FIXED: Resolved issue where "Tarea Predecesora" field wasn't loading existing dependencies during task editing - COMPLETED
   • Fixed TypeScript null safety issues with task.task?.display_name and task.task?.code in modal dependencies dropdown
   • Enhanced dependency loading logic with proper conditional checks (existingDependencies.length > 0)
