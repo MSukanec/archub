@@ -87,10 +87,16 @@ export function GanttTimelineBar({
       case 'phase':
         return "h-7 border-2 border-blue-500 bg-blue-100 dark:bg-blue-900/30 rounded-md shadow-sm flex items-center justify-center text-xs text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors cursor-pointer";
       case 'task':
-        return "h-7 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm flex items-center justify-center text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer";
+        return "h-7 border-2 border-[var(--table-row-fg)] bg-transparent rounded-sm shadow-sm text-xs text-[var(--table-row-fg)] font-medium hover:bg-muted/10 transition-colors cursor-pointer relative overflow-hidden";
       default:
         return "h-7 border-2 border-gray-400 bg-gray-100 dark:bg-gray-800 rounded-sm shadow-sm flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer";
     }
+  };
+
+  // Obtener porcentaje de progreso para barras de tarea
+  const getProgressPercent = () => {
+    if (item.type !== 'task' || !item.taskData) return 0;
+    return item.taskData.progress_percent || 0;
   };
 
   // Handlers para drag & drop de conexiones
@@ -168,7 +174,20 @@ export function GanttTimelineBar({
       onMouseLeave={() => setIsHovered(false)}
       onMouseUp={handleConnectionEnd}
     >
-      <span className="truncate text-[10px]" style={{ padding: '0 2px' }}>
+      {/* Relleno de progreso para tareas */}
+      {item.type === 'task' && getProgressPercent() > 0 && (
+        <div 
+          className="absolute top-0 left-0 h-full rounded-sm transition-all duration-300"
+          style={{ 
+            width: `${getProgressPercent()}%`,
+            backgroundColor: 'var(--accent)',
+            opacity: 0.6
+          }}
+        />
+      )}
+      
+      {/* Contenido de la barra centrado */}
+      <span className="relative z-10 truncate text-[10px]" style={{ padding: '0 2px' }}>
         {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
       </span>
       

@@ -122,8 +122,12 @@ export function GanttDependencies({
   return (
     <svg
       ref={svgRef}
-      className="absolute inset-0 pointer-events-none z-10"
-      style={{ width: timelineWidth, height: '100%' }}
+      className="absolute inset-0 pointer-events-none"
+      style={{ 
+        width: timelineWidth, 
+        height: '100%',
+        zIndex: 25 // MUY ALTO para estar encima de todo
+      }}
       viewBox={`0 0 ${timelineWidth} 1000`}
     >
       <defs>
@@ -145,16 +149,25 @@ export function GanttDependencies({
         </marker>
       </defs>
 
-      {/* Flechas de dependencias existentes */}
+      {/* Flechas de dependencias existentes - MÁS VISIBLES */}
       {dependencyPaths.map((dep) => dep && (
         <g key={dep.id}>
+          {/* Línea de fondo blanca para contraste */}
+          <path
+            d={generateArrowPath(dep.fromX, dep.fromY, dep.toX, dep.toY)}
+            stroke="white"
+            strokeWidth="5"
+            fill="none"
+            opacity="0.9"
+          />
+          {/* Línea principal con color accent */}
           <path
             d={generateArrowPath(dep.fromX, dep.fromY, dep.toX, dep.toY)}
             stroke="var(--accent)"
-            strokeWidth="2"
+            strokeWidth="3"
             fill="none"
             markerEnd="url(#arrowhead)"
-            opacity="0.8"
+            opacity="1"
           />
         </g>
       ))}
