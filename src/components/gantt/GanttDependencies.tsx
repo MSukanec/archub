@@ -64,15 +64,15 @@ export function GanttDependencies({
       const dayWidth = timelineWidth / totalDays;
       const timelineStartTime = timelineStart.getTime();
       
-      // Posición de fin de la tarea predecesora
+      // Calcular posición X de fin de la tarea predecesora (borde derecho)
       const fromEndDate = fromTaskData.endDate ? new Date(fromTaskData.endDate) : new Date(fromTaskData.startDate);
       const fromDayIndex = Math.floor((fromEndDate.getTime() - timelineStartTime) / (1000 * 60 * 60 * 24));
-      const fromX = fromDayIndex * dayWidth + dayWidth; // Fin de la barra
+      const fromX = (fromDayIndex * dayWidth) + dayWidth; // Final de la barra + ancho completo del día
       
-      // Posición de inicio de la tarea sucesora
+      // Calcular posición X de inicio de la tarea sucesora (borde izquierdo)  
       const startDate = new Date(toTaskData.startDate);
       const toDayIndex = Math.floor((startDate.getTime() - timelineStartTime) / (1000 * 60 * 60 * 24));
-      const toX = toDayIndex * dayWidth; // Inicio de la barra
+      const toX = toDayIndex * dayWidth; // Inicio exacto de la barra
       
       // Posiciones Y (centro de las filas + offset del header)
       const rowHeight = 44; // h-11 = 44px
@@ -91,42 +91,35 @@ export function GanttDependencies({
     }).filter(Boolean);
   }, [dependencies, taskMap, timelineWidth, totalDays, timelineStart]);
 
-  // Generar path SVG profesional estilo MS Project/DHTMLX
-  const generateProfessionalArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
-    // Configuración profesional
-    const CONNECTOR_LENGTH = 20; // Longitud de los conectores horizontales
-    const MIN_VERTICAL_SPACE = 8; // Espacio mínimo para curvas verticales
+  // Generar path SVG exactamente como DHTMLX con líneas rectas y esquinas de 90 grados
+  const generateDHTMLXArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
+    // Configuración DHTMLX exacta
+    const HORIZONTAL_OFFSET = 15; // Distancia horizontal desde el borde de la tarea
     
-    // Puntos de conexión: desde final de tarea origen hasta inicio de tarea destino
-    const startX = fromX;
-    const endX = toX;
-    const startY = fromY;
-    const endY = toY;
+    // Puntos de conexión DHTMLX
+    const x1 = fromX; // Borde derecho de tarea predecesora
+    const y1 = fromY; // Centro vertical de tarea predecesora
+    const x4 = toX;   // Borde izquierdo de tarea sucesora  
+    const y4 = toY;   // Centro vertical de tarea sucesora
     
-    // Si las tareas están en la misma fila (dependencia horizontal directa)
-    if (Math.abs(startY - endY) <= 2) {
-      // Línea horizontal directa con pequeña curva suave
-      const midX = startX + (endX - startX) * 0.5;
-      return `M ${startX} ${startY} 
-              Q ${startX + 10} ${startY} ${midX} ${startY}
-              Q ${endX - 10} ${endY} ${endX} ${endY}`;
+    // Si las tareas están en la misma fila
+    if (Math.abs(y1 - y4) < 3) {
+      // Línea horizontal directa
+      return `M ${x1} ${y1} L ${x4} ${y4}`;
     }
     
-    // Para tareas en diferentes filas: línea en forma de escalón con curvas suaves
-    const connector1X = startX + CONNECTOR_LENGTH;
-    const connector2X = endX - CONNECTOR_LENGTH;
-    const midX = connector1X + (connector2X - connector1X) * 0.5;
-    const verticalOffset = Math.abs(endY - startY) > MIN_VERTICAL_SPACE ? 0 : MIN_VERTICAL_SPACE;
+    // Para tareas en diferentes filas: escalón con ángulos de 90 grados
+    const x2 = x1 + HORIZONTAL_OFFSET;     // Primera esquina horizontal
+    const x3 = x4 - HORIZONTAL_OFFSET;     // Segunda esquina horizontal
+    const y2 = y1;                         // Misma altura que origen
+    const y3 = y4;                         // Misma altura que destino
     
-    // Path con curvas bezier suaves en las esquinas
-    return `M ${startX} ${startY}
-            L ${connector1X - 8} ${startY}
-            Q ${connector1X} ${startY} ${connector1X} ${startY + (startY < endY ? 8 : -8)}
-            L ${connector1X} ${endY + (startY < endY ? -8 : 8)}
-            Q ${connector1X} ${endY} ${connector1X + 8} ${endY}
-            L ${connector2X - 8} ${endY}
-            Q ${connector2X} ${endY} ${connector2X} ${endY}
-            L ${endX} ${endY}`;
+    // Path DHTMLX: horizontal → vertical → horizontal → punta
+    return `M ${x1} ${y1} 
+            L ${x2} ${y2} 
+            L ${x2} ${y3} 
+            L ${x3} ${y3} 
+            L ${x4} ${y4}`;
   };
 
   // Línea punteada durante drag
@@ -173,68 +166,58 @@ export function GanttDependencies({
         viewBox={`0 0 ${timelineWidth} 500`}
         preserveAspectRatio="none"
       >
-        {/* Flechas de dependencia profesionales estilo MS Project */}
+        {/* Líneas de dependencia exactamente como DHTMLX */}
         {dependencyPaths.map((path) => path && (
-          <g key={path.id} className="dependency-arrow">
-            {/* Línea de fondo blanca para mejorar visibilidad */}
+          <g key={path.id} className="dhtmlx-dependency">
+            {/* Línea de fondo blanca para contraste */}
             <path
-              d={generateProfessionalArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
+              d={generateDHTMLXArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
               stroke="white"
-              strokeWidth="4"
+              strokeWidth="3"
               fill="none"
-              opacity="0.8"
+              opacity="1"
             />
             
-            {/* Línea principal profesional */}
+            {/* Línea principal DHTMLX - vectorial limpia */}
             <path
-              d={generateProfessionalArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
-              stroke="#1e40af"
-              strokeWidth="2"
+              d={generateDHTMLXArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
+              stroke="#4285f4"
+              strokeWidth="2" 
               fill="none"
-              markerEnd="url(#professional-arrowhead)"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              markerEnd="url(#dhtmlx-arrow)"
+              opacity="1"
             />
             
-            {/* Punto de conexión en el origen */}
+            {/* Círculo de conexión pequeño */}
             <circle
               cx={path.fromX}
               cy={path.fromY}
-              r="3"
-              fill="#1e40af"
+              r="2"
+              fill="#4285f4"
               stroke="white"
               strokeWidth="1"
-              opacity="0.9"
             />
           </g>
         ))}
         
-        {/* Definiciones SVG profesionales */}
+        {/* Definiciones DHTMLX exactas */}
         <defs>
-          {/* Marcador de flecha profesional estilo MS Project */}
+          {/* Flecha DHTMLX vectorial limpia */}
           <marker
-            id="professional-arrowhead"
-            markerWidth="10"
-            markerHeight="8"
-            refX="9"
-            refY="4"
+            id="dhtmlx-arrow"
+            markerWidth="8"
+            markerHeight="6"
+            refX="8"
+            refY="3"
             orient="auto"
             markerUnits="strokeWidth"
           >
-            {/* Flecha sólida con borde blanco para mejor visibilidad */}
             <path
-              d="M0,0 L0,8 L10,4 z"
-              fill="#1e40af"
-              stroke="white"
-              strokeWidth="0.5"
+              d="M0,0 L0,6 L8,3 z"
+              fill="#4285f4"
+              stroke="none"
             />
           </marker>
-          
-          {/* Gradiente para mejorar la apariencia */}
-          <linearGradient id="dependency-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#1e40af" stopOpacity="0.8"/>
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity="1"/>
-          </linearGradient>
         </defs>
       </svg>
     </div>
