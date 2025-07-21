@@ -421,16 +421,17 @@ export function GanttContainer({
           className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex bg-[var(--table-header-bg)]"
           style={{ width: leftPanelWidth }}
         >
-          {/* Columna Fase/Tarea - 60% del ancho */}
-          <div className="flex-1 px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
+          {/* Columna Fase/Tarea - ancho calculado */}
+          <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30"
+            style={{ width: `${leftPanelWidth - 100}px` }}>
             Fase / Tarea
           </div>
-          {/* Columna Inicio - 20% del ancho */}
-          <div className="w-20 px-2 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
+          {/* Columna Inicio - 60px fijo */}
+          <div className="w-[60px] px-2 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
             Inicio
           </div>
-          {/* Columna Días - 20% del ancho */}
-          <div className="w-16 px-2 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
+          {/* Columna Días - 40px fijo */}
+          <div className="w-[40px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
             Días
           </div>
         </div>
@@ -552,8 +553,9 @@ export function GanttContainer({
               >
                 {item.isHeader ? (
                   <div className="bg-muted/30 w-full h-full flex relative">
-                    {/* Columna Nombre - flex-1 */}
-                    <div className="flex-1 flex items-center px-4 border-r border-[var(--table-header-border)]/30">
+                    {/* Columna Nombre - ancho calculado */}
+                    <div className="flex items-center px-4 border-r border-[var(--table-header-border)]/30 overflow-hidden"
+                      style={{ width: `${leftPanelWidth - 100}px` }}>
                       {/* Icono de colapso para fases header */}
                       {item.type === 'phase' && (
                         <button
@@ -575,8 +577,8 @@ export function GanttContainer({
                       </span>
                     </div>
                     
-                    {/* Columna Inicio - w-20 */}
-                    <div className="w-20 px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                    {/* Columna Inicio - 60px fijo */}
+                    <div className="w-[60px] px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {item.startDate && (
                         <span className="text-xs text-foreground font-medium">
                           {format(new Date(item.startDate), 'dd/MM', { locale: es })}
@@ -584,8 +586,8 @@ export function GanttContainer({
                       )}
                     </div>
                     
-                    {/* Columna Días - w-16 */}
-                    <div className="w-16 px-2 flex items-center justify-center">
+                    {/* Columna Días - 40px fijo */}
+                    <div className="w-[40px] px-1 flex items-center justify-center">
                       {item.endDate && item.startDate && (
                         <span className="text-xs text-foreground font-medium">
                           {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
@@ -627,9 +629,13 @@ export function GanttContainer({
                   <div className="group w-full h-full flex cursor-pointer transition-colors relative"
                     onClick={() => onItemClick?.(item)}
                   >
-                    {/* Columna Nombre - flex-1 */}
-                    <div className="flex-1 flex items-center border-r border-[var(--table-header-border)]/30"
-                      style={{ paddingLeft: `${4 + item.level * 16}px`, paddingRight: '16px' }}
+                    {/* Columna Nombre - ancho calculado */}
+                    <div className="flex items-center border-r border-[var(--table-header-border)]/30 overflow-hidden"
+                      style={{ 
+                        width: `${leftPanelWidth - 100}px`,
+                        paddingLeft: `${4 + item.level * 16}px`, 
+                        paddingRight: '16px' 
+                      }}
                     >
                       {/* Icono de colapso para fases */}
                       {item.type === 'phase' && (
@@ -650,15 +656,15 @@ export function GanttContainer({
                       
                       {/* Text - ocupando todo el ancho disponible */}
                       <span 
-                        className="truncate text-xs text-[var(--table-row-fg)] w-full"
+                        className="truncate text-xs text-[var(--table-row-fg)] flex-1"
                         title={item.name}
                       >
                         {item.name}
                       </span>
                     </div>
                     
-                    {/* Columna Inicio - w-20 */}
-                    <div className="w-20 px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                    {/* Columna Inicio - 60px fijo */}
+                    <div className="w-[60px] px-2 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {item.startDate && (
                         <span className="text-xs text-[var(--table-row-fg)]">
                           {format(new Date(item.startDate), 'dd/MM', { locale: es })}
@@ -666,8 +672,8 @@ export function GanttContainer({
                       )}
                     </div>
                     
-                    {/* Columna Días - w-16 */}
-                    <div className="w-16 px-2 flex items-center justify-center">
+                    {/* Columna Días - 40px fijo */}
+                    <div className="w-[40px] px-1 flex items-center justify-center">
                       {item.endDate && item.startDate && (
                         <span className="text-xs text-[var(--table-row-fg)]">
                           {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
