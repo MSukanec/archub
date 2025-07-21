@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT DEPENDENCY ARROWS FINAL POSITIONING FIX: Fixed horizontal lines to pass between row dividers instead of through task bar centers - COMPLETED
+  • Critical positioning fix: horizontal arrow lines now pass between task rows instead of through the center of task bars
+  • Modified Y-coordinate calculation: output lines pass below tasks (bottom + 6px), input lines pass above tasks (top - 6px)
+  • Arrows now correctly navigate between row dividers, preventing content overlap and improving visual clarity
+  • Professional appearance: arrows use var(--table-row-fg) color matching task borders with 2px thickness and 3px white outline
+  • Final result: complete SVG dependency system with L-shaped arrows connecting tasks without interfering with task content visibility
 - July 21, 2025. DHTMLX GANTT COMPLETELY ELIMINATED: Removed all DHTMLX code, dependencies, and references per user request - COMPLETED
   • Uninstalled dhtmlx-gantt package completely from project dependencies
   • Deleted DHtmlxGanttComponent.tsx file and all DHTMLX-related code from ConstructionSchedule.tsx

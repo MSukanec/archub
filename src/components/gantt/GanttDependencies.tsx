@@ -62,8 +62,17 @@ export function GanttDependencies({
     const scrollContainerRect = timelineScrollContainer.getBoundingClientRect();
     const currentScrollLeft = timelineScrollContainer.scrollLeft;
     
-    // Calcular posición Y relativa al contenedor interno
-    const relativeY = taskRect.top - scrollContainerRect.top + (taskRect.height / 2);
+    // Calcular posición Y para que pase entre las filas (líneas divisorias)
+    // Si es salida: línea va por debajo de la tarea (bottom + pequeño offset)
+    // Si es entrada: línea va por encima de la tarea (top - pequeño offset)
+    let relativeY: number;
+    if (connectorType === 'output') {
+      // Para tareas de salida: línea pasa por debajo de la barra
+      relativeY = taskRect.bottom - scrollContainerRect.top + 6;
+    } else {
+      // Para tareas de entrada: línea pasa por encima de la barra
+      relativeY = taskRect.top - scrollContainerRect.top - 6;
+    }
     
     // Calcular posición X en coordenadas del timeline completo (incluyendo parte scrolleada)
     let absoluteX: number;
