@@ -273,7 +273,7 @@ export default function ConstructionTasks() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando tareas...</div>
         </div>

@@ -135,7 +135,7 @@ export function ConstructionTaskFormModal({
       }
 
       console.log('Phase task query result:', data);
-      return data?.project_phase_id || null;
+      return data;
     },
     enabled: !!modalData.isEditing && !!modalData.editingTask?.id,
     staleTime: 0 // Always refetch to ensure we have the latest data
@@ -177,7 +177,7 @@ export function ConstructionTaskFormModal({
         task_id: task.task_id || '',
         quantity: task.quantity || 1,
         project_phase_id: currentPhaseTask?.project_phase_id || '',
-        progress_percent: currentPhaseTask?.progress_percent || 0,
+        progress_percent: task.progress_percent || currentPhaseTask?.progress_percent || 0,
         start_date: task.start_date || '',
         end_date: task.end_date || '',
         duration_in_days: task.duration_in_days || undefined,

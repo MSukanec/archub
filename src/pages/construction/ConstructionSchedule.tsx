@@ -104,11 +104,8 @@ export default function ConstructionSchedule() {
       return
     }
 
-    openModal('construction-phase', {
-      projectId,
-      organizationId,
-      userId: userData.user.id
-    });
+    // TODO: Implementar modal de fases
+    console.log('Create phase modal not implemented yet');
   }
 
   const handleDeleteTask = async (taskId: string) => {
@@ -341,7 +338,7 @@ export default function ConstructionSchedule() {
     searchValue,
     onSearchChange: setSearchValue,
     actions: [
-      <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
+      <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm" disabled>
         <Plus className="h-4 w-4 mr-2" />
         Crear Fase
       </Button>,
@@ -354,7 +351,7 @@ export default function ConstructionSchedule() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando cronograma...</div>
         </div>
@@ -363,7 +360,7 @@ export default function ConstructionSchedule() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide={true}>
       {/* Feature Introduction */}
       <FeatureIntroduction
         icon={<Calendar className="h-6 w-6" />}
@@ -397,12 +394,12 @@ export default function ConstructionSchedule() {
         <EmptyState
           icon={<Calendar className="h-8 w-8" />}
           title="No hay tareas en el cronograma"
-          description="Comienza creando tareas y fases para ver el cronograma del proyecto."
+          description="Comienza creando tareas para ver el cronograma del proyecto."
           action={
             <div className="flex gap-2 mt-4">
-              <Button onClick={handleAddPhase} variant="outline">
+              <Button onClick={handleAddTask} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Fase
+                Crear Primera Tarea
               </Button>
               <Button onClick={handleAddTask}>
                 <Plus className="h-4 w-4 mr-2" />
