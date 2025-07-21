@@ -366,8 +366,8 @@ export function BudgetTable({
               );
             })}
             
-            {/* TOTAL Row - Using div structure */}
-            <div className="grid gap-4 px-4 py-3 bg-accent/10 text-xs font-bold border-t-2 border-accent"
+            {/* TOTAL Row - Same styling as header */}
+            <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
                  style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
               <div></div>
               <div className="text-xs font-semibold">TOTAL</div>
