@@ -4,8 +4,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+
+import { TogglePill } from '@/components/ui-custom/TogglePill'
 import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
@@ -427,7 +427,7 @@ export default function ConstructionBudgets() {
   const customFilters = (
     <div className="flex gap-4">
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
+        <label className="text-sm font-medium">Ordenar por</label>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[140px]">
             <SelectValue />
@@ -666,22 +666,18 @@ export default function ConstructionBudgets() {
 
                   {/* Action Buttons */}
                   <div className="flex items-center gap-3">
-                    {/* Group by Rubro Switch */}
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="group-by-rubro-budget"
-                        checked={selectedBudget?.group_tasks_by_rubro || false}
-                        onCheckedChange={(checked) => {
-                          updateBudgetGroupingMutation.mutate({ 
-                            budgetId: selectedBudget.id, 
-                            groupByRubro: checked 
-                          });
-                        }}
-                      />
-                      <Label htmlFor="group-by-rubro-budget" className="text-xs text-muted-foreground">
-                        Agrupar por rubro
-                      </Label>
-                    </div>
+                    {/* Group by Rubro Toggle */}
+                    <TogglePill
+                      checked={selectedBudget?.group_tasks_by_rubro || false}
+                      onCheckedChange={(checked) => {
+                        updateBudgetGroupingMutation.mutate({ 
+                          budgetId: selectedBudget.id, 
+                          groupByRubro: checked 
+                        });
+                      }}
+                    >
+                      Agrupar por rubro
+                    </TogglePill>
                     
                     <div className="flex items-center gap-2">
                       <Button
