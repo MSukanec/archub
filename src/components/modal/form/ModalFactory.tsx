@@ -29,6 +29,8 @@ import { BudgetTaskBulkAddModal } from '../modals/construction/BudgetTaskBulkAdd
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
+  
+  console.log('ModalFactory render - open:', open, 'type:', type, 'data:', data);
 
   if (!open) return null;
 

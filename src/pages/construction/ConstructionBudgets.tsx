@@ -348,34 +348,8 @@ export default function ConstructionBudgets() {
     }
   })
 
-  // Update budget grouping mutation
-  const updateBudgetGroupingMutation = useMutation({
-    mutationFn: async ({ budgetId, groupingType }: { budgetId: string, groupingType: string }) => {
-      if (!supabase) throw new Error('Supabase client not available')
-      
-      const { error } = await supabase
-        .from('budgets')
-        .update({ grouping_type: groupingType })
-        .eq('id', budgetId)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budgets'] })
-      toast({
-        title: "Configuración actualizada",
-        description: "La vista del presupuesto ha sido actualizada",
-      })
-    },
-    onError: (error) => {
-      console.error('Error updating budget grouping:', error)
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar la configuración",
-        variant: "destructive",
-      })
-    }
-  })
+  // Local state for grouping instead of database column
+  const [groupingType, setGroupingType] = useState('none');
 
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
@@ -383,6 +357,9 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
+    console.log('handleAddTask called with:', budgetId);
+    console.log('openModal function available:', !!openModal);
+    
     if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
       toast({
         title: "Error",
@@ -394,6 +371,16 @@ export default function ConstructionBudgets() {
 
     // Obtener IDs de tareas que ya están en el presupuesto
     const existingTaskIds = budgetTasks?.map(task => task.task_id) || [];
+
+    console.log('Calling openModal with:', {
+      type: 'budget-task-bulk-add',
+      data: {
+        budgetId,
+        projectId: userData.preferences.last_project_id,
+        organizationId: userData.preferences.last_organization_id,
+        existingTaskIds
+      }
+    });
 
     openModal('budget-task-bulk-add', {
       budgetId,
@@ -686,13 +673,8 @@ export default function ConstructionBudgets() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-muted-foreground">Agrupar:</span>
                       <Select
-                        value={selectedBudget?.grouping_type || 'none'}
-                        onValueChange={(value) => {
-                          updateBudgetGroupingMutation.mutate({ 
-                            budgetId: selectedBudget.id, 
-                            groupingType: value 
-                          });
-                        }}
+                        value={groupingType}
+                        onValueChange={setGroupingType}
                       >
                         <SelectTrigger className="w-[160px] h-8">
                           <SelectValue />

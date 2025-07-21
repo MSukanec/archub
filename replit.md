@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. BUDGET TASK BULK ADD MODAL SYSTEM COMPLETED: Implemented comprehensive bulk task addition system following FormModalLayout architecture - COMPLETED
+  • Created BudgetTaskBulkAddModal.tsx with complete task selection interface: Check/Rubro/Tarea/Cantidad columns
+  • Modal includes search functionality, select all/none, and proper data filtering to exclude already-added tasks
+  • Integrated with ModalFactory.tsx as 'budget-task-bulk-add' type with proper TypeScript support in types.ts
+  • Enhanced handleAddTask function to open modal with correct budgetId, projectId, organizationId, and existingTaskIds
+  • Fixed grouping_type database errors by replacing database column with local state management
+  • Modal uses construction_tasks hook and correctly maps task properties (code, display_name, rubro_name, quantity)
+  • System supports bulk creation of budget_tasks entries with proper foreign key relationships and error handling
 - July 21, 2025. GANTT TIMELINE AUTO-SCROLL PREVENTION IMPLEMENTED: Fixed critical UX issue where timeline jumped back to "today" position after task movements - COMPLETED
   • Added autoScrolled flag to prevent timeline from automatically scrolling to "today" position after task operations
   • Implemented scroll position preservation system using preservedScrollLeft state and useEffect synchronization
