@@ -475,7 +475,7 @@ export function GanttContainer({
                 onMouseLeave={() => setHoveredRowId(null)}
               >
                 {item.isHeader ? (
-                  <div className="bg-muted/30 w-full h-full flex items-center px-4">
+                  <div className="bg-muted/30 w-full h-full flex items-center px-4 relative">
                     {/* Icono de colapso para fases header */}
                     {item.type === 'phase' && (
                       <button
@@ -495,6 +495,32 @@ export function GanttContainer({
                     <span className="truncate text-xs text-foreground font-medium uppercase" title={item.name}>
                       {item.name}
                     </span>
+                    
+                    {/* Botones de acción flotantes para fases */}
+                    {item.type === 'phase' && (
+                      <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onItemEdit?.(item);
+                          }}
+                          className="p-1 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                          title="Editar fase"
+                        >
+                          <Edit3 className="w-3 h-3 text-[var(--table-row-fg)]" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onItemDelete?.(item);
+                          }}
+                          className="p-1 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                          title="Eliminar fase"
+                        >
+                          <Trash2 className="w-3 h-3 text-destructive" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div 

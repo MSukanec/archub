@@ -427,8 +427,20 @@ export default function ConstructionSchedule() {
                 }
               ] : []
             }
-            onEdit={handleEditTask}
-            onDelete={handleDeleteTaskFromGantt}
+            onItemEdit={(item) => {
+              if (item.type === 'task') {
+                handleEditTask(item);
+              } else if (item.type === 'phase') {
+                handleEditPhase(item);
+              }
+            }}
+            onItemDelete={(item) => {
+              if (item.type === 'task') {
+                handleDeleteTaskFromGantt(item);
+              } else if (item.type === 'phase') {
+                handleDeletePhase(item);
+              }
+            }}
           />
           
           {/* DHTMLX Gantt para comparación */}
