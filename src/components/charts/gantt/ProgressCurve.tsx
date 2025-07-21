@@ -63,8 +63,8 @@ export default function ProgressCurve({ data }: ProgressCurveProps) {
               formatter={(value: any) => [`${value.toFixed(1)}%`, 'Progreso']}
               labelFormatter={(label) => `Fecha: ${label}`}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}
@@ -72,9 +72,9 @@ export default function ProgressCurve({ data }: ProgressCurveProps) {
             <Line 
               type="monotone" 
               dataKey="progressPercent" 
-              stroke="hsl(var(--chart-1))" 
+              stroke="var(--chart-1)" 
               strokeWidth={3}
-              dot={{ fill: 'hsl(var(--chart-1))', strokeWidth: 2, r: 4 }}
+              dot={{ fill: 'var(--chart-1)', strokeWidth: 2, r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>

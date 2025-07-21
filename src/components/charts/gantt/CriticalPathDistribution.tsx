@@ -44,13 +44,13 @@ export default function CriticalPathDistribution({ data, dependencies = [] }: Cr
         category: 'Críticas',
         count: criticalTasks,
         percentage: ((criticalTasks / data.length) * 100).toFixed(1),
-        fill: 'hsl(var(--chart-2))'
+        fill: 'var(--chart-2)'
       },
       {
         category: 'Normales', 
         count: normalTasks,
         percentage: ((normalTasks / data.length) * 100).toFixed(1),
-        fill: 'hsl(var(--chart-1))'
+        fill: 'var(--chart-1)'
       }
     ]
   }, [data, dependencies])
@@ -82,8 +82,8 @@ export default function CriticalPathDistribution({ data, dependencies = [] }: Cr
               ]}
               labelFormatter={(label) => `Tipo: ${label}`}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}

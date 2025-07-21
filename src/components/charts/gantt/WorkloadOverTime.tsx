@@ -83,15 +83,15 @@ export default function WorkloadOverTime({ data }: WorkloadOverTimeProps) {
               formatter={(value: any) => [value, 'Tareas Activas']}
               labelFormatter={(label) => `Semana: ${label}`}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}
             />
             <Bar 
               dataKey="activeTasks" 
-              fill="hsl(var(--chart-1))" 
+              fill="var(--chart-1)" 
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

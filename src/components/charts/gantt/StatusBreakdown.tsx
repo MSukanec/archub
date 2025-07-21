@@ -7,8 +7,8 @@ interface StatusBreakdownProps {
 }
 
 const STATUS_COLORS = {
-  completed: 'hsl(var(--chart-1))',
-  inProgress: 'hsl(var(--chart-4))', 
+  completed: 'var(--chart-1)',
+  inProgress: 'var(--chart-4)', 
   notStarted: 'hsl(var(--chart-grid-text))'
 }
 
@@ -96,7 +96,7 @@ export default function StatusBreakdown({ data }: StatusBreakdownProps) {
               labelLine={false}
               label={renderCustomizedLabel}
               outerRadius={90}
-              fill="hsl(var(--chart-1))"
+              fill="var(--chart-1)"
               dataKey="value"
             >
               {chartData.map((entry, index) => (
@@ -113,8 +113,8 @@ export default function StatusBreakdown({ data }: StatusBreakdownProps) {
               ]}
               labelFormatter={(label) => `Estado: ${label}`}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}

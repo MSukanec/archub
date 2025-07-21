@@ -79,8 +79,8 @@ export default function BurndownChart({ data }: BurndownChartProps) {
               ]}
               labelFormatter={(label) => `Fecha: ${label}`}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}
@@ -88,16 +88,16 @@ export default function BurndownChart({ data }: BurndownChartProps) {
             <Line 
               type="monotone" 
               dataKey="remaining" 
-              stroke="hsl(var(--chart-2))" 
+              stroke="var(--chart-2)" 
               strokeWidth={3}
-              dot={{ fill: 'hsl(var(--chart-2))', strokeWidth: 2, r: 4 }}
+              dot={{ fill: 'var(--chart-2)', strokeWidth: 2, r: 4 }}
             />
             <Line 
               type="monotone" 
               dataKey="completed" 
-              stroke="hsl(var(--chart-1))" 
+              stroke="var(--chart-1)" 
               strokeWidth={3}
-              dot={{ fill: 'hsl(var(--chart-1))', strokeWidth: 2, r: 4 }}
+              dot={{ fill: 'var(--chart-1)', strokeWidth: 2, r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>

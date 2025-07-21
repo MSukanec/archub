@@ -7,14 +7,14 @@ interface TasksByPhaseProps {
 }
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))', 
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
+  'var(--chart-1)',
+  'var(--chart-2)', 
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
 ]
 
 export default function TasksByPhase({ data }: TasksByPhaseProps) {
@@ -75,7 +75,7 @@ export default function TasksByPhase({ data }: TasksByPhaseProps) {
               labelLine={false}
               label={renderCustomizedLabel}
               outerRadius={90}
-              fill="hsl(var(--chart-1))"
+              fill="var(--chart-1)"
               dataKey="value"
             >
               {chartData.map((entry, index) => (
@@ -89,8 +89,8 @@ export default function TasksByPhase({ data }: TasksByPhaseProps) {
               formatter={(value: any, name: string) => [value, 'Tareas']}
               labelFormatter={(label) => `Fase: ${label}`}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}

@@ -66,15 +66,15 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
                 return `${item?.fullRubro || label} (${item?.totalTasks || 0} tareas)`
               }}
               contentStyle={{ 
-                backgroundColor: 'hsl(var(--popover-bg))', 
-                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'var(--popover-bg)', 
+                border: '1px solid hsl(var(--card-border))',
                 borderRadius: '6px',
                 fontSize: '12px'
               }}
             />
             <Bar 
               dataKey="averageDuration" 
-              fill="hsl(var(--chart-2))" 
+              fill="var(--chart-2)" 
               radius={[0, 4, 4, 0]}
             />
           </BarChart>
