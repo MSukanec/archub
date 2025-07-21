@@ -1,0 +1,75 @@
+import { useMemo } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+interface DurationByRubroProps {
+  data: any[]
+}
+
+export default function DurationByRubro({ data }: DurationByRubroProps) {
+  const chartData = useMemo(() => {
+    if (!data || data.length === 0) return []
+
+    const durationByRubro: Record<string, { total: number, count: number }> = {}
+
+    data.forEach(task => {
+      const rubro = task.rubro_name || 'Sin Rubro'
+      const duration = task.duration_in_days || 0
+
+      if (!durationByRubro[rubro]) {
+        durationByRubro[rubro] = { total: 0, count: 0 }
+      }
+
+      durationByRubro[rubro].total += duration
+      durationByRubro[rubro].count += 1
+    })
+
+    return Object.entries(durationByRubro)
+      .map(([rubro, stats]) => ({
+        rubro: rubro.length > 20 ? rubro.substring(0, 20) + '...' : rubro,
+        fullRubro: rubro,
+        averageDuration: stats.count > 0 ? (stats.total / stats.count) : 0,
+        totalTasks: stats.count
+      }))
+      .sort((a, b) => b.averageDuration - a.averageDuration)
+      .slice(0, 8) // Top 8 rubros
+  }, [data])
+
+  return (
+    <Card className="h-80">
+      <CardHeader>
+        <CardTitle className="text-sm font-medium">Duración Promedio por Rubro</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={chartData} layout="horizontal">
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              type="number"
+              tick={{ fontSize: 12 }}
+              tickFormatter={(value) => `${value}d`}
+            />
+            <YAxis 
+              type="category"
+              dataKey="rubro"
+              tick={{ fontSize: 10 }}
+              width={80}
+            />
+            <Tooltip 
+              formatter={(value: any) => [`${value.toFixed(1)} días`, 'Duración Promedio']}
+              labelFormatter={(label, payload) => {
+                const item = payload?.[0]?.payload
+                return `${item?.fullRubro || label} (${item?.totalTasks || 0} tareas)`
+              }}
+            />
+            <Bar 
+              dataKey="averageDuration" 
+              fill="hsl(var(--accent))" 
+              radius={[0, 2, 2, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  )
+}

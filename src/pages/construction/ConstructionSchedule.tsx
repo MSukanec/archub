@@ -7,6 +7,15 @@ import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table, Edit, T
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
+import ProgressCurve from '@/components/charts/gantt/ProgressCurve'
+import BurndownChart from '@/components/charts/gantt/BurndownChart'
+import WorkloadOverTime from '@/components/charts/gantt/WorkloadOverTime'
+import TasksByPhase from '@/components/charts/gantt/TasksByPhase'
+import DurationByRubro from '@/components/charts/gantt/DurationByRubro'
+import StatusBreakdown from '@/components/charts/gantt/StatusBreakdown'
+import CriticalPathDistribution from '@/components/charts/gantt/CriticalPathDistribution'
+import WeeklyProgressHeatmap from '@/components/charts/gantt/WeeklyProgressHeatmap'
+import DependencyNetwork from '@/components/charts/gantt/DependencyNetwork'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useProjectPhases, useUpdatePhasesDates, useDeleteProjectPhase } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
@@ -501,7 +510,7 @@ export default function ConstructionSchedule() {
 
       {/* Tabs Container */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 border bg-card p-1 rounded-lg">
+        <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
           <TabsTrigger 
             value="gantt" 
             className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
@@ -515,6 +524,13 @@ export default function ConstructionSchedule() {
           >
             <Table className="h-4 w-4" />
             Listado de Tareas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="analytics" 
+            className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+          >
+            <Activity className="h-4 w-4" />
+            Análisis Visual
           </TabsTrigger>
         </TabsList>
 
@@ -594,6 +610,21 @@ export default function ConstructionSchedule() {
               handleEditTask={handleEditTask}
             />
           )}
+        </TabsContent>
+
+        {/* Tab Content - Análisis Visual */}
+        <TabsContent value="analytics" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <ProgressCurve data={processedTasks} />
+            <BurndownChart data={processedTasks} />
+            <WorkloadOverTime data={processedTasks} />
+            <TasksByPhase data={processedTasks} />
+            <DurationByRubro data={processedTasks} />
+            <StatusBreakdown data={processedTasks} />
+            <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
+            <WeeklyProgressHeatmap data={processedTasks} />
+            <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+          </div>
         </TabsContent>
       </Tabs>
     </Layout>
