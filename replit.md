@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT DEPENDENCY ARROWS VISUALIZATION SYSTEM COMPLETED: Successfully implemented professional SVG-based dependency visualization with proper coordinate positioning - COMPLETED
+  • Refactored GanttDependencies from useMemo to useEffect with useState for proper DOM timing management
+  • Fixed critical coordinate calculation issue: eliminated absolute positioning, now uses relative coordinates to timeline viewport
+  • Added 200ms setTimeout delay to ensure DOM elements are fully rendered before calculating arrow coordinates  
+  • Implemented double-layer SVG path rendering: white background stroke (4px) + red foreground stroke (2px) for optimal contrast
+  • Professional arrow markers with proper orientation and click handlers for dependency management
+  • Dependencies now connect precisely from task end to successor start with proper visual feedback
+  • System successfully processes 3 dependency paths with coordinates like (587→365, 518→228, 724→160) instead of incorrect absolute values
+  • SVG container renders with correct z-index (50) and proper viewport positioning for timeline integration
 - July 21, 2025. GANTT VECTORIAL DEPENDENCY SYSTEM COMPLETELY IMPLEMENTED: Successfully replaced basic dependency system with professional SVG-based vectorial arrows matching DHTMLX quality - COMPLETED
   • Completely replaced GanttDependencies with GanttDependenciesAdvanced.tsx using professional SVG Bézier curves
   • Implemented multi-point connection system: single task can connect to multiple successors with beautiful vectorial arrows  
