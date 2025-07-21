@@ -91,35 +91,50 @@ export function GanttDependencies({
     }).filter(Boolean);
   }, [dependencies, taskMap, timelineWidth, totalDays, timelineStart]);
 
-  // Generar path SVG exactamente como DHTMLX con líneas rectas y esquinas de 90 grados
-  const generateDHTMLXArrowPath = (fromX: number, fromY: number, toX: number, toY: number) => {
-    // Configuración DHTMLX exacta
-    const HORIZONTAL_OFFSET = 15; // Distancia horizontal desde el borde de la tarea
+  // Sistema vectorial profesional de flechas estilo MS Project/DHTMLX optimizado
+  const generateProfessionalArrowPath = (fromX: number, fromY: number, toX: number, toY: number, type: string = 'finish-to-start') => {
+    const horizontalDistance = toX - fromX;
+    const verticalDistance = Math.abs(toY - fromY);
+    const ARROW_OFFSET = 20; // Distancia desde bordes de tareas
     
-    // Puntos de conexión DHTMLX
-    const x1 = fromX; // Borde derecho de tarea predecesora
-    const y1 = fromY; // Centro vertical de tarea predecesora
-    const x4 = toX;   // Borde izquierdo de tarea sucesora  
-    const y4 = toY;   // Centro vertical de tarea sucesora
-    
-    // Si las tareas están en la misma fila
-    if (Math.abs(y1 - y4) < 3) {
-      // Línea horizontal directa
-      return `M ${x1} ${y1} L ${x4} ${y4}`;
+    // Algoritmo vectorial para múltiples conexiones como en la imagen de referencia
+    if (type === 'finish-to-start') {
+      // Si las tareas están muy cerca horizontalmente, usar curvas suaves
+      if (horizontalDistance < 40 && verticalDistance < 30) {
+        const cp1X = fromX + Math.max(25, horizontalDistance * 0.7);
+        const cp1Y = fromY;
+        const cp2X = toX - Math.max(25, horizontalDistance * 0.7);
+        const cp2Y = toY;
+        return `M${fromX},${fromY} C${cp1X},${cp1Y} ${cp2X},${cp2Y} ${toX},${toY}`;
+      }
+      
+      // Para conexiones largas: sistema escalonado como DHTMLX pero con esquinas redondeadas
+      const midX = fromX + ARROW_OFFSET + (horizontalDistance - 2 * ARROW_OFFSET) / 2;
+      
+      if (Math.abs(fromY - toY) < 5) {
+        // Línea directa para misma fila
+        return `M${fromX},${fromY} L${toX},${toY}`;
+      } else {
+        // Conexión escalonada profesional con micro-curvas en esquinas
+        const stepX1 = fromX + ARROW_OFFSET;
+        const stepX2 = toX - ARROW_OFFSET;
+        
+        return `M${fromX},${fromY} 
+                L${stepX1},${fromY} 
+                Q${stepX1 + 3},${fromY} ${stepX1 + 3},${fromY + (toY > fromY ? 3 : -3)}
+                L${stepX1 + 3},${toY - (toY > fromY ? 3 : -3)}
+                Q${stepX1 + 3},${toY} ${stepX2},${toY}
+                L${toX},${toY}`;
+      }
     }
     
-    // Para tareas en diferentes filas: escalón con ángulos de 90 grados
-    const x2 = x1 + HORIZONTAL_OFFSET;     // Primera esquina horizontal
-    const x3 = x4 - HORIZONTAL_OFFSET;     // Segunda esquina horizontal
-    const y2 = y1;                         // Misma altura que origen
-    const y3 = y4;                         // Misma altura que destino
+    // Otros tipos de dependencia con paths especializados
+    const cp1X = fromX + Math.max(30, Math.abs(horizontalDistance) * 0.5);
+    const cp1Y = fromY;
+    const cp2X = toX - Math.max(30, Math.abs(horizontalDistance) * 0.5);  
+    const cp2Y = toY;
     
-    // Path DHTMLX: horizontal → vertical → horizontal → punta
-    return `M ${x1} ${y1} 
-            L ${x2} ${y2} 
-            L ${x2} ${y3} 
-            L ${x3} ${y3} 
-            L ${x4} ${y4}`;
+    return `M${fromX},${fromY} C${cp1X},${cp1Y} ${cp2X},${cp2Y} ${toX},${toY}`;
   };
 
   // Línea punteada durante drag
@@ -171,30 +186,42 @@ export function GanttDependencies({
           <g key={path.id} className="dhtmlx-dependency">
             {/* Línea de fondo blanca para contraste */}
             <path
-              d={generateDHTMLXArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
-              stroke="white"
-              strokeWidth="3"
+              d={generateProfessionalArrowPath(path.fromX, path.fromY, path.toX, path.toY, path.type)}
+              stroke="rgba(255, 255, 255, 0.8)"
+              strokeWidth="4"
               fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               opacity="1"
             />
             
-            {/* Línea principal DHTMLX - vectorial limpia */}
+            {/* Línea principal profesional - vectorial optimizada */}
             <path
-              d={generateDHTMLXArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
-              stroke="#4285f4"
-              strokeWidth="2" 
+              d={generateProfessionalArrowPath(path.fromX, path.fromY, path.toX, path.toY, path.type)}
+              stroke="#2563EB"
+              strokeWidth="2.5" 
               fill="none"
-              markerEnd="url(#dhtmlx-arrow)"
-              opacity="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              markerEnd="url(#arrowhead-professional)"
+              opacity="0.9"
             />
             
             {/* Círculo de conexión pequeño */}
             <circle
               cx={path.fromX}
               cy={path.fromY}
-              r="2"
-              fill="#4285f4"
-              stroke="white"
+              r="2.5"
+              fill="#2563EB"
+              stroke="rgba(255, 255, 255, 0.9)"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx={path.toX}
+              cy={path.toY}
+              r="1.5"
+              fill="#10B981"
+              stroke="rgba(255, 255, 255, 0.9)"
               strokeWidth="1"
             />
           </g>
@@ -204,18 +231,19 @@ export function GanttDependencies({
         <defs>
           {/* Flecha DHTMLX vectorial limpia */}
           <marker
-            id="dhtmlx-arrow"
-            markerWidth="8"
-            markerHeight="6"
-            refX="8"
-            refY="3"
+            id="arrowhead-professional"
+            markerWidth="12"
+            markerHeight="8" 
+            refX="11"
+            refY="4"
             orient="auto"
             markerUnits="strokeWidth"
           >
-            <path
-              d="M0,0 L0,6 L8,3 z"
-              fill="#4285f4"
-              stroke="none"
+            <polygon
+              points="0 0, 12 4, 0 8, 2 4"
+              fill="#2563EB"
+              stroke="rgba(255, 255, 255, 0.9)"
+              strokeWidth="0.8"
             />
           </marker>
         </defs>
