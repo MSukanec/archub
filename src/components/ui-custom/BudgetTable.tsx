@@ -214,18 +214,19 @@ export function BudgetTable({
   );
 
   return (
-    <div className="space-y-3">
+    <div>
       {/* Desktop Action Bar - Only visible on desktop */}
       <div className="hidden lg:block">
-        <div className="flex items-center justify-between px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg mb-[5px]">
+        <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
+             style={{ marginBottom: '5px' }}>
           {/* Grouping Selector - Left side */}
           <div className="flex items-center">
             <Select
               value={groupingType}
               onValueChange={(value) => onGroupingChange?.(value)}
             >
-              <SelectTrigger className="w-[140px] h-8 text-xs">
-                <SelectValue />
+              <SelectTrigger className="w-[160px] h-7 text-xs bg-[var(--table-row-bg)] border-[var(--table-row-border)] text-[var(--table-row-fg)] hover:bg-[var(--table-row-hover-bg)]">
+                <SelectValue placeholder="Sin agrupar" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Sin agrupar</SelectItem>
@@ -240,7 +241,7 @@ export function BudgetTable({
             <Button
               variant="default"
               size="sm"
-              className="h-8 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+              className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
               onClick={() => onAddTasks?.()}
             >
               <Plus className="w-3 h-3 mr-1" />
