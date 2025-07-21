@@ -13,26 +13,31 @@ export const DHtmlxGanttComponent = ({ tasks, phases }: DHtmlxGanttComponentProp
   useEffect(() => {
     if (!ganttRef.current) return
 
-    // Configuración básica del Gantt
-    gantt.config.date_format = "%Y-%m-%d"
-    gantt.config.scale_unit = "day"
-    gantt.config.step = 1
-    gantt.config.date_scale = "%d %M"
-    gantt.config.subscales = [
-      { unit: "month", step: 1, date: "%F, %Y" }
-    ]
-    gantt.config.grid_width = 350
-    gantt.config.row_height = 35
-    
-    // Configuración de columnas
-    gantt.config.columns = [
-      { name: "text", label: "Tarea", width: 200, tree: true },
-      { name: "start_date", label: "Inicio", width: 80, align: "center" },
-      { name: "duration", label: "Días", width: 50, align: "center" }
-    ]
+    try {
+      // Configuración básica del Gantt
+      gantt.config.date_format = "%Y-%m-%d"
+      gantt.config.scale_unit = "day"
+      gantt.config.step = 1
+      gantt.config.date_scale = "%d %M"
+      gantt.config.subscales = [
+        { unit: "month", step: 1, date: "%F, %Y" }
+      ]
+      gantt.config.grid_width = 350
+      gantt.config.row_height = 35
+      
+      // Configuración de columnas
+      gantt.config.columns = [
+        { name: "text", label: "Tarea", width: 200, tree: true },
+        { name: "start_date", label: "Inicio", width: 80, align: "center" },
+        { name: "duration", label: "Días", width: 50, align: "center" }
+      ]
 
-    // Inicializar el Gantt
-    gantt.init(ganttRef.current)
+      // Inicializar el Gantt solo si el elemento existe
+      if (ganttRef.current && ganttRef.current.parentNode) {
+        gantt.init(ganttRef.current)
+      } else {
+        return
+      }
 
     // Convertir nuestros datos al formato de DHTMLX
     const dhtmlxData: any = {
@@ -75,12 +80,19 @@ export const DHtmlxGanttComponent = ({ tasks, phases }: DHtmlxGanttComponentProp
       })
     })
 
-    // Cargar datos
-    gantt.parse(dhtmlxData)
+      // Cargar datos
+      gantt.parse(dhtmlxData)
+    } catch (error) {
+      console.error('Error initializing DHTMLX Gantt:', error)
+    }
 
     // Cleanup function
     return () => {
-      gantt.clearAll()
+      try {
+        gantt.clearAll()
+      } catch (error) {
+        console.error('Error cleaning up DHTMLX Gantt:', error)
+      }
     }
   }, [tasks, phases])
 

@@ -6,6 +6,7 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useProjectPhases } from '@/hooks/use-construction-phases'
+import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
@@ -38,8 +39,9 @@ export default function ConstructionSchedule() {
     organizationId || ''
   )
 
-  // Obtener las fases del proyecto
+  // Obtener las fases del proyecto y dependencias
   const { data: projectPhases = [] } = useProjectPhases(projectId || '')
+  const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
 
   // Procesar los nombres de las tareas de forma asíncrona
   useEffect(() => {
@@ -77,6 +79,8 @@ export default function ConstructionSchedule() {
 
     processTaskNames()
   }, [tasks])
+
+
 
   const handleAddTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
@@ -414,19 +418,7 @@ export default function ConstructionSchedule() {
           {/* Nuestro Gantt actual */}
           <GanttContainer
             data={ganttData}
-            dependencies={
-              // Crear dependencias de prueba usando las primeras dos tareas
-              ganttData.filter(item => item.type === 'task').length >= 2 ? [
-                {
-                  id: 'test-dep-1',
-                  predecessor_task_id: ganttData.filter(item => item.type === 'task')[0].id,
-                  successor_task_id: ganttData.filter(item => item.type === 'task')[1].id,
-                  type: 'finish-to-start',
-                  lag_days: 0,
-                  created_at: new Date().toISOString()
-                }
-              ] : []
-            }
+            dependencies={dependencies}
             onItemEdit={(item) => {
               if (item.type === 'task') {
                 handleEditTask(item);

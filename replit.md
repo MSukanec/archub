@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. GANTT VECTORIAL DEPENDENCY SYSTEM COMPLETELY IMPLEMENTED: Successfully replaced basic dependency system with professional SVG-based vectorial arrows matching DHTMLX quality - COMPLETED
+  • Completely replaced GanttDependencies with GanttDependenciesAdvanced.tsx using professional SVG Bézier curves
+  • Implemented multi-point connection system: single task can connect to multiple successors with beautiful vectorial arrows  
+  • Added hover effects, white stroke borders, and proper arrow markers for industry-standard visual quality
+  • System processes multiple dependency paths and groups them efficiently for optimal rendering performance
+  • Eliminated "horrible arrows" completely - now features smooth, curved paths with professional appearance
+  • Dependencies now load from real database using useConstructionDependencies hook instead of mock data
+  • Arrows connect precisely from task end (right edge) to successor start (left edge) with perfect positioning
+  • Professional double-layer rendering: white background + colored foreground for optimal contrast and visibility
+  • Integration confirmed working: 3 dependency paths processed and grouped into 3 connection groups successfully
 - July 21, 2025. PHASE EDITING MODAL FUNCTIONALITY COMPLETED: Successfully implemented complete edit functionality for construction phases with proper data loading and cache invalidation - COMPLETED
   • Fixed phase modal defaultValues to pre-populate fields when editing: name, description, start_date, and duration_in_days now load correctly
   • Removed "Fecha de Finalización" field from phase modal as requested by user for simpler interface design

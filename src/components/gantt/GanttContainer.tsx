@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale';
 import { Edit, Edit3, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { GanttRow } from './GanttRow';
 import { GanttTimelineBar } from './GanttTimelineBar';
-import { GanttDependencies } from './GanttDependencies';
+import { GanttDependenciesAdvanced } from './GanttDependenciesAdvanced';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies';
 
@@ -798,16 +798,16 @@ export function GanttContainer({
             ))}
           </div>
           
-          {/* Dependencias overlay - flechas y líneas punteadas */}
-          <GanttDependencies
+          {/* Dependencias overlay vectoriales profesionales estilo DHTMLX */}
+          <GanttDependenciesAdvanced
             data={filteredData}
             dependencies={dependencies}
             timelineStart={timelineStart}
             timelineEnd={timelineEnd}
             timelineWidth={timelineWidth}
             totalDays={calendarStructure.totalDays}
-            dragConnectionData={dragConnectionData}
             containerRef={timelineRef}
+            leftPanelWidth={leftPanelWidth}
           />
         </div>
       </div>
