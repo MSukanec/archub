@@ -402,30 +402,6 @@ export default function ConstructionBudgets() {
 
 
 
-  // Custom filters for the header
-  const customFilters = (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Ordenar por</label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="created_at">Fecha</SelectItem>
-            <SelectItem value="name">Nombre</SelectItem>
-            <SelectItem value="status">Estado</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  )
-
-  const clearFilters = () => {
-    setSearchValue('')
-    setSortBy('created_at')
-  }
-
   const actions = [
     <Button 
       key="new-budget"
@@ -440,12 +416,6 @@ export default function ConstructionBudgets() {
   const headerProps = {
     icon: Calculator,
     title: "Presupuestos",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    showFilters: true,
-    customFilters,
-    onClearFilters: clearFilters,
     actions
   }
 

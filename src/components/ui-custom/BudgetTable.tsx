@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, ChevronDown, Edit, Filter } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, Edit, Filter, Search } from 'lucide-react';
 import { Calculator } from 'lucide-react';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { cn } from '@/lib/utils';
@@ -91,6 +91,9 @@ export function BudgetTable({
   onEditBudget,
   onDeleteBudget
 }: BudgetTableProps) {
+  // Local state for search functionality
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
   // Local state for input values to prevent interruption during typing
   const [localQuantities, setLocalQuantities] = useState<Record<string, string>>({});
   
@@ -312,11 +315,36 @@ export function BudgetTable({
       <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '3px' }}>
-          {/* Empty left side */}
-          <div></div>
+          {/* Left side - Search Field (when visible) */}
+          <div className="flex items-center">
+            {showSearch && (
+              <input
+                type="text"
+                placeholder="Buscar tareas..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="h-6 px-2 text-xs border border-gray-300 rounded bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--accent)] w-48"
+                autoFocus
+                onBlur={() => {
+                  if (!searchValue) {
+                    setShowSearch(false);
+                  }
+                }}
+              />
+            )}
+          </div>
           
-          {/* Right side - Filter Button + Add Tasks Button */}
+          {/* Right side - Search Button + Filter Button + Add Tasks Button */}
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
+              onClick={() => setShowSearch(!showSearch)}
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+            
             <Popover>
               <PopoverTrigger asChild>
                 <Button
