@@ -42,6 +42,7 @@ export interface ConstructionTask {
     category_name: string | null;
     unit_id: string | null;
     unit_name?: string | null;
+    unit_symbol?: string | null;
     rubro_id: string | null;
     param_values: any;
   };
@@ -53,28 +54,30 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar construction_tasks con join a task_generated_view para obtener display_name
+      // Usar construction_gantt_view que ya incluye display_name y unit_id
       const { data: ganttData, error } = await supabase
-        .from('construction_tasks')
+        .from('construction_gantt_view')
         .select(`
           *,
-          task_details:task_generated_view!inner (
-            code,
-            display_name
+          unit:units!unit_id (
+            id,
+            name,
+            symbol
           ),
-          phase_tasks:construction_phase_tasks (
-            progress_percent,
-            project_phase:construction_project_phases (
+          task_rubro:task_generated_view!task_id (
+            rubro_id,
+            rubro:rubros!rubro_id (
               id,
-              position,
-              phase:construction_phases (
-                name
-              )
+              name
             )
+          ),
+          construction_task:construction_tasks!task_instance_id (
+            quantity,
+            param_values
           )
         `)
         .eq('project_id', projectId)
-        .order('created_at', { ascending: true });
+        .order('phase_position', { ascending: true });
 
       if (error) {
         console.error('Error fetching construction gantt view:', error);
@@ -88,44 +91,42 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       // Debug: ver qué campos están llegando exactamente
       console.log('RAW GANTT DATA SAMPLE:', JSON.stringify(ganttData?.[0], null, 2));
 
-      // Mapear datos de construction_tasks con task_details al formato esperado
+      // Mapear datos de construction_gantt_view al formato esperado
       const mappedTasks: ConstructionTask[] = ganttData.map((item: any) => {
-        const phaseTask = item.phase_tasks?.[0];
-        const projectPhase = phaseTask?.project_phase;
-        const phase = projectPhase?.phase;
-        
         return {
-          // Campos principales de construction_tasks
-          task_instance_id: item.id,
+          // Campos principales de la vista
+          task_instance_id: item.task_instance_id,
           project_id: item.project_id,
           task_id: item.task_id,
-          task_code: item.task_details?.code || '',
-          param_values: item.param_values,
+          task_code: item.task_code,
+          param_values: item.construction_task?.param_values || item.param_values,
           start_date: item.start_date,
           end_date: item.end_date,
           duration_in_days: item.duration_in_days,
           
-          // Campos de fase
-          phase_instance_id: projectPhase?.id || null,
-          phase_name: phase?.name || null,
-          phase_position: projectPhase?.position || 0,
-          progress_percent: phaseTask?.progress_percent || 0,
+          // Campos de fase de la vista
+          phase_instance_id: item.phase_instance_id,
+          phase_name: item.phase_name,
+          phase_position: item.phase_position,
+          progress_percent: item.progress_percent || 0,
           
           // Compatibilidad con sistema existente
-          id: item.id, // ID principal para compatibilidad
+          id: item.task_instance_id, // ID principal para compatibilidad
           organization_id: organizationId, // Del contexto
+          quantity: item.construction_task?.quantity || 0,
           
           // Crear objeto task para compatibilidad con componentes existentes
           task: {
             id: item.task_id,
-            code: item.task_details?.code || '',
-            display_name: item.task_details?.display_name || item.task_details?.code || '', // USAR EL DISPLAY_NAME CORRECTO
-            rubro_name: null,
+            code: item.task_code,
+            display_name: item.display_name || item.task_code, // USAR EL DISPLAY_NAME DE LA VISTA
+            rubro_name: item.task_rubro?.rubro?.name || null, // DATOS DE RUBRO
             category_name: null,
-            unit_id: null,
-            unit_name: null,
-            rubro_id: null,
-            param_values: item.param_values
+            unit_id: item.unit_id,
+            unit_name: item.unit?.name || null, // DATOS DE UNIDAD
+            unit_symbol: item.unit?.symbol || null, // SÍMBOLO DE UNIDAD
+            rubro_id: item.task_rubro?.rubro_id || null,
+            param_values: item.construction_task?.param_values || item.param_values
           }
         };
       });
@@ -137,7 +138,15 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         sample: {
           code: mappedTasks[0]?.task?.code,
           display_name: mappedTasks[0]?.task?.display_name,
-          raw_display_name: ganttData?.[0]?.task_details?.display_name
+          rubro_name: mappedTasks[0]?.task?.rubro_name,
+          unit_name: mappedTasks[0]?.task?.unit_name,
+          unit_symbol: mappedTasks[0]?.task?.unit_symbol,
+          quantity: mappedTasks[0]?.quantity,
+          raw_data: {
+            display_name: ganttData?.[0]?.display_name,
+            unit: ganttData?.[0]?.unit,
+            task_rubro: ganttData?.[0]?.task_rubro
+          }
         }
       });
 
