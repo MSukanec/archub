@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. CONSTRUCTION TASK MODAL SYSTEM DUALIZATION COMPLETED: Successfully separated construction task creation from scheduling management - COMPLETED
+  • Created new ConstructionTaskScheduleModal.tsx specifically for CRONOGRAMA page with scheduling fields (start_date, duration_in_days, progress_percent, project_phase_id)
+  • Added 'construction-task-schedule' type to ModalFactory types.ts and integrated in ModalFactory.tsx with proper imports
+  • Modified ConstructionSchedule.tsx handleEditTask function to use new 'construction-task-schedule' modal instead of general 'construction-task' modal
+  • Maintained original simplified ConstructionTaskFormModal.tsx for basic task creation (Fase → Tarea → Cantidad workflow)
+  • Fixed modal structure compliance: removed invalid 'notes' field and 'isLoading' prop from FormModalFooter for proper modal architecture
+  • System now provides two distinct modal workflows: simplified task creation modal for general use + advanced scheduling modal for Gantt timeline management
+  • Enhanced user experience: CRONOGRAMA page opens appropriate scheduling modal with date/duration/progress fields when editing tasks from Gantt view
 - July 21, 2025. BUDGET TABLE STYLING AND MOBILE ENHANCEMENTS COMPLETED: Fixed checkbox colors, column proportions, and mobile action bar implementation - COMPLETED
   • Changed all checkbox colors from blue to --accent (hsl(var(--accent))) for brand consistency including header and task row checkboxes
   • Adjusted column widths to user specification: Rubro 10%, all other columns 5% except TAREAS which takes remaining space (1fr)

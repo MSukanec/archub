@@ -19,6 +19,7 @@ import MovementImportStepModal from '../modals/finances/MovementImportStepModal'
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/construction/BudgetFormModal';
 import { ConstructionTaskFormModal } from '../modals/construction/ConstructionTaskFormModal';
+import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';
 import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 import { OrganizationFormModal } from '../modals/organizations/OrganizationFormModal';
 import { InstallmentFormModal } from '../modals/finances/InstallmentFormModal';
@@ -65,6 +66,8 @@ export function ModalFactory() {
       return <BudgetFormModal modalData={data} onClose={closeModal} />;
     case 'construction-task':
       return <ConstructionTaskFormModal modalData={data} onClose={closeModal} />;
+    case 'construction-task-schedule':
+      return <ConstructionTaskScheduleModal modalData={data} onClose={closeModal} />;
     case 'construction-phase':
       return <ConstructionPhaseFormModal modalData={data} onClose={closeModal} />;
     case 'organization':

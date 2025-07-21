@@ -121,7 +121,7 @@ export default function ConstructionSchedule() {
   const handleEditTask = (item: GanttRowProps) => {
     if (item.type !== 'task') return
     
-    openModal('construction-task', {
+    openModal('construction-task-schedule', {
       projectId,
       organizationId,
       userId: userData?.user?.id,
