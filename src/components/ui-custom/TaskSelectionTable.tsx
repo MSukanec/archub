@@ -3,7 +3,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Package, CheckSquare } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Package, CheckSquare, List, FolderOpen } from 'lucide-react';
 import { useConstructionTasks } from '@/hooks/use-construction-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
@@ -16,18 +17,21 @@ export interface SelectedTask {
   task_code: string;
 }
 
+type GroupingType = 'none' | 'rubro';
+
 interface TaskSelectionTableProps {
   selectedTasks: SelectedTask[];
   onTasksChange: (tasks: SelectedTask[]) => void;
   excludeTaskIds?: string[]; // IDs de tareas que ya están en el presupuesto
 }
 
-export function TaskSelectionTable({ 
+export const TaskSelectionTable = React.memo(function TaskSelectionTable({ 
   selectedTasks, 
   onTasksChange, 
   excludeTaskIds = [] 
 }: TaskSelectionTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [grouping, setGrouping] = useState<GroupingType>('rubro');
   const { data: userData } = useCurrentUser();
   
   const { data: allTasks = [], isLoading } = useConstructionTasks(
@@ -129,15 +133,36 @@ export function TaskSelectionTable({
 
   return (
     <div className="space-y-4">
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nombre, rubro o código..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search and Grouping Controls */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nombre o rubro..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={grouping} onValueChange={(value: GroupingType) => setGrouping(value)}>
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="rubro">
+              <div className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
+                <span>Agrupadas por Rubro</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="none">
+              <div className="flex items-center gap-2">
+                <List className="w-4 h-4" />
+                <span>Sin Agrupar</span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Selection Summary */}
@@ -154,66 +179,85 @@ export function TaskSelectionTable({
         </Card>
       )}
 
-      {/* Tasks by Rubro */}
-      <div className="space-y-3">
-        {Object.entries(tasksByRubro).map(([rubroName, rubroTasks]) => (
-          <Card key={rubroName} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+      {/* Render based on grouping type */}
+      {grouping === 'rubro' ? (
+        // Grouped by Rubro View
+        <div className="space-y-2">
+          {Object.entries(tasksByRubro).map(([rubroName, rubroTasks]) => (
+            <Card key={rubroName} className="overflow-hidden">
+              <CardHeader className="pb-2 pt-3">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={isRubroFullySelected(rubroTasks)}
-                    indeterminate={isRubroPartiallySelected(rubroTasks)}
+                    indeterminate={isRubroPartiallySelected(rubroTasks) || undefined}
                     onCheckedChange={(checked) => handleSelectAllRubro(rubroTasks, !!checked)}
                   />
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-muted-foreground" />
-                    <CardTitle className="text-base">{rubroName}</CardTitle>
-                    <Badge variant="secondary" className="text-xs">
-                      {rubroTasks.length} tarea{rubroTasks.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
+                  <Package className="w-4 h-4 text-muted-foreground" />
+                  <CardTitle className="text-sm">{rubroName}</CardTitle>
+                  <Badge variant="secondary" className="text-xs ml-auto">
+                    {rubroTasks.length}
+                  </Badge>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {rubroTasks.map((task) => (
-                  <div 
-                    key={task.task_instance_id}
-                    className="flex items-center gap-3 p-2 rounded border bg-card hover:bg-muted/50 transition-colors"
-                  >
-                    <Checkbox
-                      checked={isTaskSelected(task.task_instance_id)}
-                      onCheckedChange={(checked) => handleTaskToggle(task, !!checked)}
-                    />
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="text-xs font-mono">
-                          {task.task_code}
-                        </Badge>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-1">
+                  {rubroTasks.map((task) => (
+                    <div 
+                      key={task.task_instance_id}
+                      className="flex items-center gap-3 py-1 px-2 rounded hover:bg-muted/50 transition-colors"
+                    >
+                      <Checkbox
+                        checked={isTaskSelected(task.task_instance_id)}
+                        onCheckedChange={(checked) => handleTaskToggle(task, !!checked)}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-foreground line-clamp-1">
+                          {task.task?.display_name || task.task_code}
+                        </div>
                       </div>
-                      <div className="text-sm text-foreground line-clamp-2">
-                        {task.task?.display_name || task.task_code}
-                      </div>
-                    </div>
-                    
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-sm font-medium">
+                      <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
                         {task.quantity || 0} {task.task?.unit_symbol || ''}
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        // Flat List View
+        <Card>
+          <CardContent className="p-3">
+            <div className="space-y-1">
+              {filteredTasks.map((task) => (
+                <div 
+                  key={task.task_instance_id}
+                  className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 transition-colors"
+                >
+                  <Checkbox
+                    checked={isTaskSelected(task.task_instance_id)}
+                    onCheckedChange={(checked) => handleTaskToggle(task, !!checked)}
+                  />
+                  <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto] gap-3">
+                    <div>
+                      <div className="text-sm text-foreground line-clamp-1">
+                        {task.task?.display_name || task.task_code}
+                      </div>
                       <div className="text-xs text-muted-foreground">
-                        Cantidad
+                        {task.task?.rubro_name || 'Sin Rubro'}
                       </div>
                     </div>
+                    <div className="text-sm font-medium text-muted-foreground text-right">
+                      {task.quantity || 0} {task.task?.unit_symbol || ''}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {filteredTasks.length === 0 && searchTerm && (
         <Card>
@@ -240,4 +284,4 @@ export function TaskSelectionTable({
       )}
     </div>
   );
-}
+});
