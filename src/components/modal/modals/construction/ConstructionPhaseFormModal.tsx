@@ -17,6 +17,7 @@ import { useCreateConstructionPhase, useCreateProjectPhase, useConstructionPhase
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { useQueryClient } from "@tanstack/react-query";
 
 const phaseSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
@@ -24,7 +25,6 @@ const phaseSchema = z.object({
   // Campos para agregar al proyecto
   start_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser al menos 1 día").optional(),
-  end_date: z.string().optional(),
   use_existing_phase: z.boolean().optional(),
   existing_phase_id: z.string().optional(),
 });
@@ -36,6 +36,8 @@ interface ConstructionPhaseFormModalProps {
     projectId: string;
     organizationId: string;
     userId?: string;
+    editingPhase?: any;
+    isEditing?: boolean;
   };
   onClose: () => void;
 }
@@ -49,6 +51,7 @@ export function ConstructionPhaseFormModal({
   
   const { data: userData } = useCurrentUser();
   const { setPanel } = useModalPanelStore();
+  const queryClient = useQueryClient();
 
   // Get current user's member_id
   const { data: currentMember } = useQuery({
@@ -86,11 +89,10 @@ export function ConstructionPhaseFormModal({
   const form = useForm<PhaseFormData>({
     resolver: zodResolver(phaseSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      start_date: "",
-      duration_in_days: undefined,
-      end_date: "",
+      name: modalData.isEditing ? modalData.editingPhase?.phase?.name || "" : "",
+      description: modalData.isEditing ? modalData.editingPhase?.phase?.description || "" : "",
+      start_date: modalData.isEditing ? modalData.editingPhase?.start_date || "" : "",
+      duration_in_days: modalData.isEditing ? modalData.editingPhase?.duration_in_days || undefined : undefined,
       use_existing_phase: false,
       existing_phase_id: "",
     }
@@ -120,57 +122,94 @@ export function ConstructionPhaseFormModal({
     setIsSubmitting(true);
     
     try {
-      let phaseId = data.existing_phase_id;
+      if (modalData.isEditing && modalData.editingPhase) {
+        // Modo edición: actualizar fase existente
+        if (!supabase) throw new Error("Supabase not initialized");
 
-      // If creating new phase, create it first
-      if (!useExisting) {
-        const newPhase = await createPhase.mutateAsync({
-          name: data.name,
-          description: data.description,
-          organization_id: modalData.organizationId,
-          is_system: false, // Las fases creadas por usuarios nunca son del sistema
-        });
-        phaseId = newPhase.id;
-      }
+        // Actualizar la información de la fase base
+        const { error: phaseError } = await supabase
+          .from("construction_phases")
+          .update({
+            name: data.name,
+            description: data.description,
+          })
+          .eq("id", modalData.editingPhase.phase_id);
 
-      if (!phaseId) {
+        if (phaseError) {
+          console.error("Error updating phase:", phaseError);
+          throw phaseError;
+        }
+
+        // Actualizar la información del proyecto_fase
+        const updateData: any = {
+          start_date: data.start_date || null,
+          duration_in_days: data.duration_in_days || null,
+        };
+
+        const { error: projectPhaseError } = await supabase
+          .from("construction_project_phases")
+          .update(updateData)
+          .eq("id", modalData.editingPhase.id);
+
+        if (projectPhaseError) {
+          console.error("Error updating project phase:", projectPhaseError);
+          throw projectPhaseError;
+        }
+
+        // Invalidar cache para refrescar el Gantt
+        queryClient.invalidateQueries({ queryKey: ["project-phases", modalData.projectId] });
+        queryClient.invalidateQueries({ queryKey: ["construction-phases", modalData.organizationId] });
+
         toast({
-          title: "Error",
-          description: "Debe seleccionar o crear una fase",
-          variant: "destructive",
+          title: "Fase actualizada exitosamente",
+          description: "Los cambios han sido guardados correctamente",
         });
-        return;
+
+      } else {
+        // Modo creación: crear nueva fase
+        let phaseId = data.existing_phase_id;
+
+        // If creating new phase, create it first
+        if (!useExisting) {
+          const newPhase = await createPhase.mutateAsync({
+            name: data.name,
+            description: data.description,
+            organization_id: modalData.organizationId,
+            is_system: false, // Las fases creadas por usuarios nunca son del sistema
+          });
+          phaseId = newPhase.id;
+        }
+
+        if (!phaseId) {
+          toast({
+            title: "Error",
+            description: "Debe seleccionar o crear una fase",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Add phase to project
+        await createProjectPhase.mutateAsync({
+          project_id: modalData.projectId,
+          phase_id: phaseId,
+          start_date: data.start_date || undefined,
+          duration_in_days: data.duration_in_days || undefined,
+          created_by: currentMember.id,
+        });
+
+        toast({
+          title: "Fase creada exitosamente",
+          description: useExisting ? "La fase existente se agregó al proyecto" : "Nueva fase creada y agregada al proyecto",
+        });
       }
-
-      // Calculate end_date if start_date and duration_in_days are provided
-      let endDate = data.end_date;
-      if (data.start_date && data.start_date.trim() !== '' && data.duration_in_days && data.duration_in_days > 0 && (!data.end_date || data.end_date.trim() === '')) {
-        const startDate = new Date(data.start_date);
-        startDate.setDate(startDate.getDate() + data.duration_in_days);
-        endDate = startDate.toISOString().split('T')[0];
-      }
-
-      // Add phase to project
-      await createProjectPhase.mutateAsync({
-        project_id: modalData.projectId,
-        phase_id: phaseId,
-        start_date: data.start_date || undefined,
-        duration_in_days: data.duration_in_days || undefined,
-        end_date: endDate || undefined,
-        created_by: currentMember.id,
-      });
-
-      toast({
-        title: "Fase creada exitosamente",
-        description: useExisting ? "La fase existente se agregó al proyecto" : "Nueva fase creada y agregada al proyecto",
-      });
 
       onClose();
     } catch (error) {
-      console.error('Error creating phase:', error);
+      console.error('Error with phase operation:', error);
       toast({
-        title: "Error al crear la fase",
-        description: "No se pudo crear la fase. Por favor, intente de nuevo.",
+        title: modalData.isEditing ? "Error al actualizar la fase" : "Error al crear la fase",
+        description: modalData.isEditing ? "No se pudieron guardar los cambios. Por favor, intente de nuevo." : "No se pudo crear la fase. Por favor, intente de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -275,21 +314,14 @@ export function ConstructionPhaseFormModal({
           </div>
         </div>
 
-        <div className="space-y-2 mt-4">
-          <Label htmlFor="end_date">Fecha de Finalización (opcional si hay duración)</Label>
-          <Input
-            id="end_date"
-            type="date"
-            {...register('end_date')}
-          />
-        </div>
+
       </div>
     </div>
   );
 
   const headerContent = (
     <FormModalHeader 
-      title="Agregar Fase de Construcción"
+      title={modalData.isEditing ? "Editar Fase" : "Agregar Fase de Construcción"}
       icon={Layers}
     />
   );
@@ -298,7 +330,7 @@ export function ConstructionPhaseFormModal({
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Crear Fase"
+      rightLabel={modalData.isEditing ? "Guardar Cambios" : "Crear Fase"}
       onRightClick={handleSubmit(onSubmit)}
       loading={isSubmitting}
     />
