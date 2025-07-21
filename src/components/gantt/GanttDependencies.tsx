@@ -139,10 +139,10 @@ export function GanttDependencies({
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(255,0,0,0.05)' // Fondo rojo muy sutil para debug
+          backgroundColor: 'rgba(255,0,0,0.1)' // Fondo rojo visible para debug
         }}
-        viewBox={`0 0 ${timelineWidth} 500`}
-        preserveAspectRatio="xMidYMid meet"
+        viewBox={`0 0 ${Math.max(timelineWidth, 4000)} 500`}
+        preserveAspectRatio="none"
       >
         {/* Línea de prueba SIEMPRE visible */}
         <line
@@ -154,7 +154,28 @@ export function GanttDependencies({
           strokeWidth="3"
           opacity="0.8"
         />
-        <text x="100" y="45" fill="#ff0000" fontSize="10">DEPS: {dependencies.length}</text>
+        <text x="100" y="45" fill="#ff0000" fontSize="12" fontWeight="bold">DEPS: {dependencies.length}</text>
+        
+        {/* Línea de prueba en las coordenadas reales de dependencia */}
+        {dependencyPaths.length > 0 && dependencyPaths[0] && (
+          <g>
+            <line
+              x1={dependencyPaths[0].fromX}
+              y1={dependencyPaths[0].fromY}
+              x2={dependencyPaths[0].toX}
+              y2={dependencyPaths[0].toY}
+              stroke="#00ff00"
+              strokeWidth="4"
+              opacity="1"
+            />
+            <text x={dependencyPaths[0].fromX} y={dependencyPaths[0].fromY - 10} fill="#00ff00" fontSize="10">
+              FROM: {Math.round(dependencyPaths[0].fromX)}, {Math.round(dependencyPaths[0].fromY)}
+            </text>
+            <text x={dependencyPaths[0].toX} y={dependencyPaths[0].toY - 10} fill="#00ff00" fontSize="10">
+              TO: {Math.round(dependencyPaths[0].toX)}, {Math.round(dependencyPaths[0].toY)}
+            </text>
+          </g>
+        )}
         
         {/* Renderizar dependencias reales */}
         {dependencyPaths.map((path) => path && (
