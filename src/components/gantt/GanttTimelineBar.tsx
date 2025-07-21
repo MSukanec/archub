@@ -470,10 +470,10 @@ export function GanttTimelineBar({
       
       {/* Contenido de la barra con nombre de la tarea */}
       <div 
-        className="relative z-10 text-[10px] leading-tight px-2 py-1 h-full flex items-center"
+        className="relative z-10 px-1 h-full flex items-center text-[var(--table-row-fg)]"
         style={{
-          fontSize: '10px',
-          lineHeight: '12px',
+          fontSize: '9px',
+          lineHeight: '10px',
           overflow: 'hidden',
           display: '-webkit-box',
           WebkitLineClamp: 2,
@@ -483,7 +483,7 @@ export function GanttTimelineBar({
           hyphens: 'auto'
         }}
       >
-        <span className="text-white font-medium">
+        <span className="font-medium">
           {item.name}
         </span>
       </div>
