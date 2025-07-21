@@ -61,10 +61,10 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
 
   const getHeatmapColor = (progress: number) => {
     if (progress === 0) return 'bg-muted'
-    if (progress < 25) return 'bg-red-200 dark:bg-red-900'
-    if (progress < 50) return 'bg-yellow-200 dark:bg-yellow-900'
-    if (progress < 75) return 'bg-blue-200 dark:bg-blue-900'
-    return 'bg-green-200 dark:bg-green-900'
+    if (progress < 25) return 'bg-red-200/80 dark:bg-red-900/50 text-red-900 dark:text-red-100'
+    if (progress < 50) return 'bg-yellow-200/80 dark:bg-yellow-900/50 text-yellow-900 dark:text-yellow-100'
+    if (progress < 75) return 'bg-blue-200/80 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100'
+    return 'bg-green-200/80 dark:bg-green-900/50 text-green-900 dark:text-green-100'
   }
 
   return (
@@ -101,11 +101,11 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <span>Menos</span>
           <div className="flex gap-1">
-            <div className="w-3 h-3 bg-muted rounded-sm border"></div>
-            <div className="w-3 h-3 bg-red-200 dark:bg-red-900 rounded-sm border"></div>
-            <div className="w-3 h-3 bg-yellow-200 dark:bg-yellow-900 rounded-sm border"></div>
-            <div className="w-3 h-3 bg-blue-200 dark:bg-blue-900 rounded-sm border"></div>
-            <div className="w-3 h-3 bg-green-200 dark:bg-green-900 rounded-sm border"></div>
+            <div className="w-3 h-3 bg-muted rounded-sm border border-gray-300"></div>
+            <div className="w-3 h-3 bg-red-200/80 dark:bg-red-900/50 rounded-sm border border-red-300"></div>
+            <div className="w-3 h-3 bg-yellow-200/80 dark:bg-yellow-900/50 rounded-sm border border-yellow-300"></div>
+            <div className="w-3 h-3 bg-blue-200/80 dark:bg-blue-900/50 rounded-sm border border-blue-300"></div>
+            <div className="w-3 h-3 bg-green-200/80 dark:bg-green-900/50 rounded-sm border border-green-300"></div>
           </div>
           <span>Más</span>
         </div>

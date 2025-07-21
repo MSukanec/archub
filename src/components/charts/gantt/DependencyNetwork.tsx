@@ -16,8 +16,9 @@ export default function DependencyNetwork({ data, dependencies = [] }: Dependenc
     const taskMap = new Map(data.map(task => [task.id, task]))
 
     return dependencies.map(dep => {
-      const predecessorTask = taskMap.get(dep.predecessor_task_id)
-      const successorTask = taskMap.get(dep.successor_task_id)
+      // Intentar obtener las tareas de la dependencia directa o desde nested data
+      const predecessorTask = taskMap.get(dep.predecessor_task_id) || dep.predecessor_task
+      const successorTask = taskMap.get(dep.successor_task_id) || dep.successor_task
 
       if (!predecessorTask || !successorTask) return null
 
@@ -25,14 +26,22 @@ export default function DependencyNetwork({ data, dependencies = [] }: Dependenc
         id: dep.id,
         predecessor: {
           id: predecessorTask.id,
-          name: predecessorTask.display_name?.substring(0, 30) + '...' || 'Tarea sin nombre',
-          code: predecessorTask.code,
+          name: predecessorTask.display_name 
+            ? (predecessorTask.display_name.length > 30 ? predecessorTask.display_name.substring(0, 30) + '...' : predecessorTask.display_name)
+            : (predecessorTask.task?.display_name 
+                ? (predecessorTask.task.display_name.length > 30 ? predecessorTask.task.display_name.substring(0, 30) + '...' : predecessorTask.task.display_name)
+                : 'Tarea sin nombre'),
+          code: predecessorTask.code || predecessorTask.task?.code || 'SIN-CÓDIGO',
           progress: predecessorTask.progress_percent || 0
         },
         successor: {
           id: successorTask.id,
-          name: successorTask.display_name?.substring(0, 30) + '...' || 'Tarea sin nombre', 
-          code: successorTask.code,
+          name: successorTask.display_name 
+            ? (successorTask.display_name.length > 30 ? successorTask.display_name.substring(0, 30) + '...' : successorTask.display_name)
+            : (successorTask.task?.display_name 
+                ? (successorTask.task.display_name.length > 30 ? successorTask.task.display_name.substring(0, 30) + '...' : successorTask.task.display_name)
+                : 'Tarea sin nombre'),
+          code: successorTask.code || successorTask.task?.code || 'SIN-CÓDIGO',
           progress: successorTask.progress_percent || 0
         },
         type: dep.type || 'finish-to-start',
@@ -42,21 +51,21 @@ export default function DependencyNetwork({ data, dependencies = [] }: Dependenc
   }, [data, dependencies])
 
   const getProgressColor = (progress: number) => {
-    if (progress >= 100) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-    if (progress > 0) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-    return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+    if (progress >= 100) return 'text-green-600 dark:text-green-400'
+    if (progress > 0) return 'text-yellow-600 dark:text-yellow-400'
+    return 'text-gray-600 dark:text-gray-400'
   }
 
   if (networkData.length === 0) {
     return (
-      <Card className="h-80">
-        <CardHeader>
+      <Card className="h-[350px]">
+        <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Red de Dependencias</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40">
+        <CardContent className="pt-0 flex items-center justify-center h-64">
           <div className="text-center text-muted-foreground">
             <p className="text-sm">No hay dependencias configuradas</p>
-            <p className="text-xs mt-1">Las dependencias aparecerán aquí cuando se configuren</p>
+            <p className="text-xs mt-1">Las dependencias aparecerán aquí cuando se configuren entre tareas</p>
           </div>
         </CardContent>
       </Card>

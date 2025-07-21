@@ -13,8 +13,10 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
     const durationByRubro: Record<string, { total: number, count: number }> = {}
 
     data.forEach(task => {
-      const rubro = task.rubro_name || 'Sin Rubro'
+      const rubro = task.rubro_name || task.task?.rubro_name || 'Sin Rubro'
       const duration = task.duration_in_days || 0
+
+      if (rubro === 'Sin Rubro' && duration === 0) return // Skip empty data
 
       if (!durationByRubro[rubro]) {
         durationByRubro[rubro] = { total: 0, count: 0 }
@@ -24,11 +26,19 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
       durationByRubro[rubro].count += 1
     })
 
-    return Object.entries(durationByRubro)
+    const entries = Object.entries(durationByRubro).filter(([rubro, stats]) => 
+      rubro !== 'Sin Rubro' && stats.count > 0
+    )
+
+    if (entries.length === 0) {
+      return [{ rubro: 'Sin datos disponibles', fullRubro: 'Sin datos disponibles', averageDuration: 0, totalTasks: 0 }]
+    }
+
+    return entries
       .map(([rubro, stats]) => ({
         rubro: rubro.length > 20 ? rubro.substring(0, 20) + '...' : rubro,
         fullRubro: rubro,
-        averageDuration: stats.count > 0 ? (stats.total / stats.count) : 0,
+        averageDuration: stats.count > 0 ? Math.round((stats.total / stats.count) * 10) / 10 : 0,
         totalTasks: stats.count
       }))
       .sort((a, b) => b.averageDuration - a.averageDuration)
