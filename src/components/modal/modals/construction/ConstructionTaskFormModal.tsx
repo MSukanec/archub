@@ -7,10 +7,11 @@ import { supabase } from "@/lib/supabase";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButton";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Calendar } from "lucide-react";
+import { Plus, Calendar, Wrench, ArrowLeft } from "lucide-react";
 import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask, useConstructionTasks } from "@/hooks/use-construction-tasks";
@@ -19,6 +20,10 @@ import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { useConstructionDependencies, useCreateConstructionDependency, useUpdateConstructionDependency, useDeleteConstructionDependency, detectCircularDependency } from "@/hooks/use-construction-dependencies";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useUnits } from "@/hooks/use-task-categories";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -34,7 +39,15 @@ const addTaskSchema = z.object({
   lag_days: z.number().min(0, "El desfase debe ser 0 o mayor").optional()
 });
 
+// Esquema para el subformulario de tarea personalizada
+const customTaskSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido"),
+  description: z.string().optional(),
+  unit_id: z.string().min(1, "La unidad es requerida"),
+});
+
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
+type CustomTaskFormData = z.infer<typeof customTaskSchema>;
 
 interface ConstructionTaskFormModalProps {
   modalData: {
@@ -53,9 +66,11 @@ export function ConstructionTaskFormModal({
 }: ConstructionTaskFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCreatingCustomTask, setIsCreatingCustomTask] = useState(false);
   
   const { data: userData } = useCurrentUser();
-  const { setPanel } = useModalPanelStore();
+  const { setPanel, currentPanel } = useModalPanelStore();
+  const queryClient = useQueryClient();
 
   // Obtener tareas del proyecto para dependencias
   const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
@@ -106,6 +121,9 @@ export function ConstructionTaskFormModal({
 
   // Hook para obtener las fases del proyecto
   const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useProjectPhases(modalData.projectId);
+
+  // Hook para obtener unidades (para subformulario)
+  const { data: units = [] } = useUnits();
   
   // Log para debug
   useEffect(() => {
@@ -155,6 +173,16 @@ export function ConstructionTaskFormModal({
       predecessor_task_id: "",
       dependency_type: "FS",
       lag_days: 0
+    }
+  });
+
+  // Formulario para el subpanel de tarea personalizada
+  const customTaskForm = useForm<CustomTaskFormData>({
+    resolver: zodResolver(customTaskSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      unit_id: "",
     }
   });
 
@@ -256,6 +284,61 @@ export function ConstructionTaskFormModal({
 
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
+
+  // Mutación para crear tarea personalizada
+  const createCustomTaskMutation = useMutation({
+    mutationFn: async (formData: CustomTaskFormData) => {
+      if (!supabase || !userData?.user?.id || !modalData.organizationId) {
+        throw new Error('Datos de usuario no disponibles');
+      }
+
+      const { data, error } = await supabase
+        .from('task_generated')
+        .insert({
+          name: formData.name,
+          description: formData.description || null,
+          unit_id: formData.unit_id,
+          organization_id: modalData.organizationId,
+          template_id: null,
+          code: `CUSTOM-${Date.now()}`, // Código temporal para tareas personalizadas
+          param_values: {},
+          is_public: false,
+          is_system: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Tarea personalizada creada",
+        description: "La tarea se creó correctamente y está disponible para selección",
+      });
+      
+      // Invalidar queries
+      queryClient.invalidateQueries({ queryKey: ['task-search'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generated'] });
+      
+      // Preseleccionar la nueva tarea en el formulario principal
+      setValue('task_id', data.id);
+      setSearchQuery(data.name);
+      
+      // Resetear formulario del subpanel y volver al panel principal
+      customTaskForm.reset();
+      setPanel('edit');
+      setIsCreatingCustomTask(false);
+    },
+    onError: (error) => {
+      console.error('Error creating custom task:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la tarea personalizada",
+        variant: "destructive",
+      });
+    },
+  });
 
   const onSubmit = async (data: AddTaskFormData) => {
     if (!userData?.user?.id) {
@@ -400,6 +483,17 @@ export function ConstructionTaskFormModal({
         {errors.task_id && (
           <p className="text-sm text-destructive">{errors.task_id.message}</p>
         )}
+        
+        {/* Botón para crear tarea personalizada */}
+        <FormSubsectionButton
+          icon={<Wrench />}
+          title="¿No encontraste la tarea?"
+          description="Crea una nueva tarea personalizada"
+          onClick={() => {
+            setIsCreatingCustomTask(true);
+            setPanel('subform');
+          }}
+        />
       </div>
 
       {/* Quantity with Unit */}
@@ -612,10 +706,123 @@ export function ConstructionTaskFormModal({
     </form>
   );
 
+  // Función para manejar el envío del subformulario
+  const onCustomTaskSubmit = (data: CustomTaskFormData) => {
+    createCustomTaskMutation.mutate(data);
+  };
+
+  // Panel del subformulario para crear tarea personalizada
+  const subformPanel = (
+    <form 
+      onSubmit={customTaskForm.handleSubmit(onCustomTaskSubmit)} 
+      className="space-y-6"
+    >
+      {/* Botón para volver */}
+      <div className="flex items-center space-x-2 mb-4">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setPanel('edit');
+            setIsCreatingCustomTask(false);
+          }}
+          className="flex items-center space-x-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Volver a selección de tareas</span>
+        </Button>
+      </div>
+
+      {/* Campos del formulario para tarea personalizada */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="custom_name">Nombre de la Tarea *</Label>
+          <Input
+            id="custom_name"
+            placeholder="Ej: Instalación de ventanas personalizadas"
+            {...customTaskForm.register('name')}
+          />
+          {customTaskForm.formState.errors.name && (
+            <p className="text-sm text-destructive">
+              {customTaskForm.formState.errors.name.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="custom_description">Descripción</Label>
+          <Textarea
+            id="custom_description"
+            placeholder="Descripción detallada de la tarea (opcional)"
+            rows={3}
+            {...customTaskForm.register('description')}
+          />
+          {customTaskForm.formState.errors.description && (
+            <p className="text-sm text-destructive">
+              {customTaskForm.formState.errors.description.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="custom_unit_id">Unidad de Medida *</Label>
+          <Select 
+            value={customTaskForm.watch('unit_id') || ""} 
+            onValueChange={(value) => customTaskForm.setValue('unit_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar unidad" />
+            </SelectTrigger>
+            <SelectContent>
+              {units?.map((unit) => (
+                <SelectItem key={unit.id} value={unit.id}>
+                  {unit.name} ({unit.symbol})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {customTaskForm.formState.errors.unit_id && (
+            <p className="text-sm text-destructive">
+              {customTaskForm.formState.errors.unit_id.message}
+            </p>
+          )}
+        </div>
+
+        {/* Botón de crear */}
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              customTaskForm.reset();
+              setPanel('edit');
+              setIsCreatingCustomTask(false);
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={createCustomTaskMutation.isPending}
+          >
+            {createCustomTaskMutation.isPending ? "Creando..." : "Crear Tarea"}
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+
   const headerContent = (
     <FormModalHeader 
-      title={modalData.isEditing ? "Editar Tarea de Construcción" : "Agregar Tarea de Construcción"}
-      icon={Plus}
+      title={
+        currentPanel === 'subform' 
+          ? "Nueva Tarea Personalizada" 
+          : modalData.isEditing 
+          ? "Editar Tarea de Construcción" 
+          : "Agregar Tarea de Construcción"
+      }
+      icon={currentPanel === 'subform' ? Wrench : Plus}
     />
   );
 
@@ -633,6 +840,7 @@ export function ConstructionTaskFormModal({
       columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={subformPanel}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
