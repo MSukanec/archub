@@ -1,16 +1,15 @@
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, ChevronDown, Edit } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, Edit, Filter } from 'lucide-react';
 import { Calculator } from 'lucide-react';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { cn } from '@/lib/utils';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface BudgetTask {
   id: string;
@@ -313,37 +312,53 @@ export function BudgetTable({
       <div className="hidden lg:block">
         <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
              style={{ marginBottom: '5px' }}>
-          {/* Groups Dropdown Button - Left side */}
+          {/* Groups Action Button - Left side */}
           <div className="flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 px-3 text-xs bg-[var(--table-row-bg)] border-[var(--table-row-border)] text-[var(--table-row-fg)] hover:bg-[var(--table-row-hover-bg)]"
+                  className="h-7 w-7 p-0 bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                 >
-                  GRUPOS
-                  <ChevronDown className="w-3 h-3 ml-1" />
+                  <Filter className="w-3 h-3" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem onClick={() => onGroupingChange?.('none')}>
-                  Sin agrupar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onGroupingChange?.('rubros')}>
-                  Agrupar por Rubros
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onGroupingChange?.('phases')}>
-                  Agrupar por Fases
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onGroupingChange?.('rubros-phases')}>
-                  Rubros y Fases
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onGroupingChange?.('phases-rubros')}>
-                  Fases y Rubros
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-48 p-1">
+                <div className="space-y-1">
+                  <button
+                    onClick={() => onGroupingChange?.('none')}
+                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                  >
+                    Sin agrupar
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('rubros')}
+                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                  >
+                    Agrupar por Rubros
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('phases')}
+                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                  >
+                    Agrupar por Fases
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('rubros-phases')}
+                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                  >
+                    Rubros y Fases
+                  </button>
+                  <button
+                    onClick={() => onGroupingChange?.('phases-rubros')}
+                    className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 rounded"
+                  >
+                    Fases y Rubros
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* Add Tasks Button - Right side */}
