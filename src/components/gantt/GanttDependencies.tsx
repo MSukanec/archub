@@ -34,13 +34,28 @@ export function GanttDependencies({
   containerRef,
   leftPanelWidth
 }: GanttDependenciesProps) {
+  
+  console.log('GanttDependencies rendering with:', {
+    dependenciesCount: dependencies.length,
+    dataCount: data.length,
+    timelineWidth,
+    totalDays
+  });
 
   // Función para obtener las coordenadas de una tarea
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
     const taskElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineElement = containerRef.current;
     
+    console.log('getTaskPosition called:', {
+      taskId,
+      connectorType,
+      taskElement: !!taskElement,
+      timelineElement: !!timelineElement
+    });
+    
     if (!taskElement || !timelineElement) {
+      console.log('Missing elements for task:', taskId);
       return null;
     }
 
@@ -59,7 +74,9 @@ export function GanttDependencies({
       relativeX = taskRect.left - timelineRect.left + timelineElement.scrollLeft - 8;
     }
 
-    return { x: relativeX, y: relativeY };
+    const result = { x: relativeX, y: relativeY };
+    console.log('getTaskPosition result:', result);
+    return result;
   };
 
   // Función para generar el path SVG según las especificaciones del prompt
@@ -85,19 +102,29 @@ export function GanttDependencies({
 
   // Memoizar las flechas para evitar recálculos innecesarios
   const arrowPaths = useMemo(() => {
+    console.log('useMemo arrowPaths calculating...', {
+      dependenciesLength: dependencies.length,
+      hasContainer: !!containerRef.current
+    });
+    
     if (!dependencies.length || !containerRef.current) {
+      console.log('Early return from arrowPaths useMemo');
       return [];
     }
 
-    return dependencies.map(dep => {
+    const paths = dependencies.map(dep => {
+      console.log('Processing dependency:', dep.id, 'from:', dep.predecessor_task_id, 'to:', dep.successor_task_id);
+      
       const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
       const toCoords = getTaskPosition(dep.successor_task_id, 'input');
 
       if (!fromCoords || !toCoords) {
+        console.log('Missing coordinates for dependency:', dep.id);
         return null;
       }
 
       const pathString = generatePath(fromCoords, toCoords);
+      console.log('Generated path for dependency:', dep.id, pathString);
 
       return {
         id: dep.id,
@@ -105,16 +132,22 @@ export function GanttDependencies({
         dependency: dep
       };
     }).filter(Boolean);
+    
+    console.log('Final arrowPaths count:', paths.length);
+    return paths;
   }, [dependencies, data, timelineWidth, totalDays]);
 
   if (!arrowPaths.length) {
+    console.log('No arrowPaths, returning null');
     return null;
   }
+
+  console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
 
   return (
     <svg 
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 5 }}
+      style={{ zIndex: 50, backgroundColor: 'rgba(255,0,0,0.1)' }}
     >
       {/* Definir el marcador de flecha */}
       <defs>
@@ -129,9 +162,9 @@ export function GanttDependencies({
         >
           <polygon
             points="0,0 0,6 8,3"
-            fill="#666"
+            fill="#ff0000"
             stroke="white"
-            strokeWidth="0.5"
+            strokeWidth="1"
           />
         </marker>
       </defs>
@@ -140,15 +173,17 @@ export function GanttDependencies({
       {arrowPaths.map(arrow => {
         if (!arrow) return null;
         
+        console.log('Rendering path:', arrow.id, arrow.path);
+        
         return (
           <path
             key={arrow.id}
             d={arrow.path}
-            stroke="#666"
-            strokeWidth="2"
+            stroke="#ff0000"
+            strokeWidth="3"
             fill="none"
             markerEnd="url(#arrowhead)"
-            className="pointer-events-auto hover:stroke-red-400 cursor-pointer transition-colors duration-200"
+            className="pointer-events-auto hover:stroke-red-600 cursor-pointer transition-colors duration-200"
             onClick={() => {
               console.log('Dependency clicked:', arrow.dependency);
               // Aquí se puede agregar modal de edición de dependencia
