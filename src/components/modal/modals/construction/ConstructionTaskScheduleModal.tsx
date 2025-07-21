@@ -19,21 +19,20 @@ import { Textarea } from "@/components/ui/textarea";
 
 const scheduleTaskSchema = z.object({
   start_date: z.string().optional(),
-  end_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser mayor a 0").optional(),
   progress_percent: z.number().min(0).max(100).optional(),
   project_phase_id: z.string().optional(),
   notes: z.string().optional()
 }).refine(
   (data) => {
-    // Si hay start_date, debe haber duration_in_days o end_date
-    if (data.start_date && !data.duration_in_days && !data.end_date) {
+    // Si hay start_date, debe haber duration_in_days
+    if (data.start_date && !data.duration_in_days) {
       return false;
     }
     return true;
   },
   {
-    message: "Si especifica fecha de inicio, debe incluir duración o fecha de fin",
+    message: "Si especifica fecha de inicio, debe incluir la duración en días",
     path: ["duration_in_days"]
   }
 );
@@ -89,7 +88,6 @@ export function ConstructionTaskScheduleModal({
     resolver: zodResolver(scheduleTaskSchema),
     defaultValues: {
       start_date: "",
-      end_date: "",
       duration_in_days: undefined,
       progress_percent: 0,
       project_phase_id: "",
@@ -107,7 +105,6 @@ export function ConstructionTaskScheduleModal({
       // Resetear el formulario con los datos de la tarea
       const taskData = {
         start_date: modalData.editingTask.start_date || "",
-        end_date: modalData.editingTask.end_date || "",
         duration_in_days: modalData.editingTask.duration_in_days || undefined,
         progress_percent: modalData.editingTask.progress_percent || 0,
         project_phase_id: currentPhaseTask?.project_phase_id || modalData.editingTask.phase_instance_id || "",
@@ -191,52 +188,71 @@ export function ConstructionTaskScheduleModal({
       }}
     >
       {/* Información de la tarea */}
-      <div className="p-4 bg-muted/50 rounded-md">
-        <h4 className="font-medium text-sm mb-2">Tarea:</h4>
-        <p className="text-sm text-muted-foreground">
+      <div className="p-3 bg-muted/50 rounded-md">
+        <h4 className="font-medium mb-2">Tarea:</h4>
+        <p className="text-sm text-muted-foreground leading-5">
           {modalData.editingTask?.task?.display_name || modalData.editingTask?.task?.code || 'Sin nombre'}
         </p>
       </div>
 
-      {/* Phase Selection */}
-      <div className="space-y-2">
-        <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
-        <Select 
-          value={watch('project_phase_id') || ""}
-          onValueChange={(value) => setValue('project_phase_id', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar fase (opcional)" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Sin fase asignada</SelectItem>
-            {projectPhases.map((phase) => (
-              <SelectItem key={phase.id} value={phase.id}>
-                {phase.phase?.name || 'Fase sin nombre'}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.project_phase_id && (
-          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-        )}
-      </div>
-
-      {/* Fecha de inicio */}
-      <div className="space-y-2">
-        <Label htmlFor="start_date">Fecha de Inicio</Label>
-        <Input
-          type="date"
-          id="start_date"
-          {...register('start_date')}
-        />
-        {errors.start_date && (
-          <p className="text-sm text-destructive">{errors.start_date.message}</p>
-        )}
-      </div>
-
-      {/* Duración o Fecha de fin */}
+      {/* Fase y Progreso en línea */}
       <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
+          <Select 
+            value={watch('project_phase_id') || ""}
+            onValueChange={(value) => setValue('project_phase_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar fase" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Sin fase asignada</SelectItem>
+              {projectPhases.map((phase) => (
+                <SelectItem key={phase.id} value={phase.id}>
+                  {phase.phase?.name || 'Fase sin nombre'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.project_phase_id && (
+            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="progress_percent">Progreso (%)</Label>
+          <Input
+            type="number"
+            id="progress_percent"
+            min="0"
+            max="100"
+            placeholder="ej: 75"
+            {...register('progress_percent', { 
+              valueAsNumber: true,
+              setValueAs: (value) => value === "" ? 0 : Number(value)
+            })}
+          />
+          {errors.progress_percent && (
+            <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Fecha de inicio y Duración en línea */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="start_date">Fecha de Inicio</Label>
+          <Input
+            type="date"
+            id="start_date"
+            {...register('start_date')}
+          />
+          {errors.start_date && (
+            <p className="text-sm text-destructive">{errors.start_date.message}</p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="duration_in_days">Duración (días)</Label>
           <Input
@@ -253,37 +269,6 @@ export function ConstructionTaskScheduleModal({
             <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
           )}
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="end_date">Fecha de Fin</Label>
-          <Input
-            type="date"
-            id="end_date"
-            {...register('end_date')}
-          />
-          {errors.end_date && (
-            <p className="text-sm text-destructive">{errors.end_date.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Progreso */}
-      <div className="space-y-2">
-        <Label htmlFor="progress_percent">Progreso (%)</Label>
-        <Input
-          type="number"
-          id="progress_percent"
-          min="0"
-          max="100"
-          placeholder="ej: 75"
-          {...register('progress_percent', { 
-            valueAsNumber: true,
-            setValueAs: (value) => value === "" ? 0 : Number(value)
-          })}
-        />
-        {errors.progress_percent && (
-          <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
-        )}
       </div>
 
       {/* Notas */}
