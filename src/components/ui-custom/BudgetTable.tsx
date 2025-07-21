@@ -1,5 +1,6 @@
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Plus } from 'lucide-react';
 import { Calculator } from 'lucide-react';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
@@ -54,6 +55,8 @@ interface BudgetTableProps {
   handleUpdateQuantity: (taskId: string, quantity: number) => void;
   handleDeleteTask: (taskId: string) => void;
   handleAddTask: (budgetId: string) => void;
+  onGroupingChange?: (value: string) => void;
+  onAddTasks?: () => void;
 }
 
 export function BudgetTable({
@@ -68,7 +71,9 @@ export function BudgetTable({
   getUnitName,
   handleUpdateQuantity,
   handleDeleteTask,
-  handleAddTask
+  handleAddTask,
+  onGroupingChange,
+  onAddTasks
 }: BudgetTableProps) {
   // Local state for input values to prevent interruption during typing
   const [localQuantities, setLocalQuantities] = useState<Record<string, string>>({});
@@ -210,6 +215,41 @@ export function BudgetTable({
 
   return (
     <div className="space-y-3">
+      {/* Mobile Action Bar - Only visible on mobile */}
+      <div className="lg:hidden">
+        <div className="flex items-center justify-between px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg mb-[5px]">
+          {/* Grouping Selector - Left side */}
+          <div className="flex items-center">
+            <Select
+              value={groupingType}
+              onValueChange={(value) => onGroupingChange?.(value)}
+            >
+              <SelectTrigger className="w-[140px] h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sin agrupar</SelectItem>
+                <SelectItem value="rubros">Agrupar por Rubros</SelectItem>
+                <SelectItem value="phases">Agrupar por Fases</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Add Tasks Button - Right side */}
+          <div>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-8 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+              onClick={() => onAddTasks?.()}
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              AGREGAR TAREAS
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Desktop Table View - Using Table.tsx structure */}
       <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
         {/* Column Headers - Identical to Table.tsx */}

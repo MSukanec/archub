@@ -547,6 +547,15 @@ export default function ConstructionBudgets() {
         handleUpdateQuantity={handleUpdateQuantity}
         handleDeleteTask={handleDeleteTask}
         handleAddTask={handleAddTask}
+        onGroupingChange={setGroupingType}
+        onAddTasks={() => {
+          openModal('budget-task-bulk-add', { 
+            budgetId: budgetId,
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+            }
+          });
+        }}
       />
     );
   }
