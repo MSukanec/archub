@@ -62,9 +62,6 @@ export function GanttContainer({
     endDate: string;
   }>>({});
   
-  // Estado para preservar la posición del scroll
-  const [preservedScrollLeft, setPreservedScrollLeft] = useState<number | null>(null);
-  
   // Bandera para evitar scroll automático después del primer scroll
   const [autoScrolled, setAutoScrolled] = useState(false);
   
@@ -260,19 +257,7 @@ export function GanttContainer({
     return () => document.removeEventListener('mousemove', handleMouseMove);
   }, [dragConnectionData, connectionLineData]);
 
-  // Preservar posición del scroll cuando cambian los datos
-  useEffect(() => {
-    if (preservedScrollLeft !== null && autoScrolled) {
-      const timelineContainer = document.getElementById('timeline-content-scroll');
-      const headerContainer = document.getElementById('timeline-header-scroll');
-      
-      if (timelineContainer && headerContainer) {
-        timelineContainer.scrollLeft = preservedScrollLeft;
-        headerContainer.scrollLeft = preservedScrollLeft;
-        setPreservedScrollLeft(null); // Limpiar después de restaurar
-      }
-    }
-  }, [calendarStructure, preservedScrollLeft, autoScrolled]);
+
 
   // Función para manejar el inicio de conexión con posición inicial
   const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start' | 'end' } | null, initialPosition?: { x: number; y: number }) => {
@@ -439,10 +424,6 @@ export function GanttContainer({
             const contentScroll = document.getElementById('timeline-content-scroll');
             if (contentScroll) {
               contentScroll.scrollLeft = e.currentTarget.scrollLeft;
-            }
-            // Solo preservar si ya se hizo el auto-scroll inicial
-            if (autoScrolled) {
-              setPreservedScrollLeft(e.currentTarget.scrollLeft);
             }
           }}
         >
@@ -684,10 +665,6 @@ export function GanttContainer({
             const headerScroll = document.getElementById('timeline-header-scroll');
             if (headerScroll) {
               headerScroll.scrollLeft = e.currentTarget.scrollLeft;
-            }
-            // Solo preservar si ya se hizo el auto-scroll inicial
-            if (autoScrolled) {
-              setPreservedScrollLeft(e.currentTarget.scrollLeft);
             }
           }}
         >
