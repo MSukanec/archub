@@ -121,7 +121,9 @@ export function GanttDependencies({
 
   console.log('Dependencies rendering:', dependencies.length, 'paths:', dependencyPaths.length);
   console.log('Dependency data:', dependencies);
-  console.log('Task map:', taskMap);
+  console.log('Data items:', data.map(d => ({ id: d.id, type: d.type, taskDataId: d.taskData?.id })));
+  console.log('Task map keys:', Array.from(taskMap.keys()));
+  console.log('Looking for dependency IDs:', dependencies.map(d => ({ pred: d.predecessor_task_id, succ: d.successor_task_id })));
   console.log('Dependency paths details:', dependencyPaths.map(p => p ? { id: p.id, fromX: p.fromX, fromY: p.fromY, toX: p.toX, toY: p.toY } : null));
   
   // SIEMPRE mostrar SVG de debug para verificar posición
@@ -139,8 +141,8 @@ export function GanttDependencies({
           height: '100%',
           backgroundColor: 'rgba(255,0,0,0.05)' // Fondo rojo muy sutil para debug
         }}
-        viewBox={`0 0 ${timelineWidth} 1000`}
-        preserveAspectRatio="none"
+        viewBox={`0 0 ${timelineWidth} 500`}
+        preserveAspectRatio="xMidYMid meet"
       >
         {/* Línea de prueba SIEMPRE visible */}
         <line
@@ -153,61 +155,45 @@ export function GanttDependencies({
           opacity="0.8"
         />
         <text x="100" y="45" fill="#ff0000" fontSize="10">DEPS: {dependencies.length}</text>
-      <defs>
+        
+        {/* Renderizar dependencias reales */}
+        {dependencyPaths.map((path) => path && (
+          <g key={path.id}>
+            {/* Línea principal de dependencia */}
+            <path
+              d={generateArrowPath(path.fromX, path.fromY, path.toX, path.toY)}
+              stroke="#84cc16"
+              strokeWidth="2"
+              fill="none"
+              markerEnd="url(#arrowhead)"
+            />
+            
+            {/* Círculo en el punto de inicio */}
+            <circle
+              cx={path.fromX}
+              cy={path.fromY}
+              r="3"
+              fill="#84cc16"
+            />
+          </g>
+        ))}
+        
         {/* Definir marcador de flecha */}
-        <marker
-          id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
-          orient="auto"
-          markerUnits="strokeWidth"
-        >
-          <polygon
-            points="0 0, 10 3.5, 0 7"
-            fill="var(--accent)"
-            stroke="var(--accent)"
-          />
-        </marker>
-      </defs>
-
-      {/* Flechas de dependencias existentes - MÁS VISIBLES */}
-      {dependencyPaths.map((dep) => dep && (
-        <g key={dep.id}>
-          {/* Línea de fondo blanca para contraste */}
-          <path
-            d={generateArrowPath(dep.fromX, dep.fromY, dep.toX, dep.toY)}
-            stroke="white"
-            strokeWidth="5"
-            fill="none"
-            opacity="0.9"
-          />
-          {/* Línea principal con color accent */}
-          <path
-            d={generateArrowPath(dep.fromX, dep.fromY, dep.toX, dep.toY)}
-            stroke="var(--accent)"
-            strokeWidth="3"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            opacity="1"
-          />
-        </g>
-      ))}
-
-      {/* Línea punteada durante drag */}
-      {dragLine && (
-        <line
-          x1={dragLine.fromX}
-          y1={dragLine.fromY}
-          x2={dragLine.toX}
-          y2={dragLine.toY}
-          stroke="var(--accent)"
-          strokeWidth="2"
-          strokeDasharray="5,5"
-          opacity="0.7"
-        />
-      )}
+        <defs>
+          <marker
+            id="arrowhead"
+            markerWidth="10"
+            markerHeight="7"
+            refX="9"
+            refY="3.5"
+            orient="auto"
+          >
+            <polygon
+              points="0 0, 10 3.5, 0 7"
+              fill="#84cc16"
+            />
+          </marker>
+        </defs>
       </svg>
     </div>
   );
