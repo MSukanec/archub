@@ -37,7 +37,7 @@ export function FormSubsectionButton({
         disabled={disabled}
         className={cn(
           "w-full flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200",
-          "text-left bg-background hover:bg-accent/5",
+          "text-left bg-transparent hover:bg-accent/5",
           "border-dashed border-border hover:border-accent",
           "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-border",
