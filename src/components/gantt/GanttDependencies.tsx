@@ -48,41 +48,49 @@ export function GanttDependencies({
   //   totalDays
   // });
 
-  // Función para obtener las coordenadas de una tarea
+  // Función para obtener las coordenadas de una tarea basándose en la barra de tarea específica
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
-    const taskElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
+    // Buscar la barra de tarea específica directamente por data-task-id
+    const taskBarElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineElement = containerRef.current;
     
     // console.log('getTaskPosition called:', {
     //   taskId,
     //   connectorType,
-    //   taskElement: !!taskElement,
+    //   taskBarElement: !!taskBarElement,
     //   timelineElement: !!timelineElement
     // });
     
-    if (!taskElement || !timelineElement) {
-      // console.log('Missing elements for task:', taskId);
+    if (!taskBarElement || !timelineElement) {
+      console.log('Missing elements for task:', taskId);
       return null;
     }
 
-    const taskRect = taskElement.getBoundingClientRect();
+    const taskRect = taskBarElement.getBoundingClientRect();
     const timelineRect = timelineElement.getBoundingClientRect();
     
-    // Calcular posición relativa al SVG SIN considerar el scroll (posición viewport)
+    // Calcular posición relativa al contenedor del timeline
     const relativeY = taskRect.top - timelineRect.top + (taskRect.height / 2);
     
     let relativeX: number;
     if (connectorType === 'output') {
-      // Conector de salida: lado derecho de la tarea + 8px hacia afuera
-      relativeX = taskRect.right - timelineRect.left + 8;
+      // Conector de salida: lado derecho de la barra de tarea
+      relativeX = taskRect.right - timelineRect.left;
     } else {
-      // Conector de entrada: lado izquierdo de la tarea - 8px hacia afuera  
-      relativeX = taskRect.left - timelineRect.left - 8;
+      // Conector de entrada: lado izquierdo de la barra de tarea  
+      relativeX = taskRect.left - timelineRect.left;
     }
 
-    const result = { x: relativeX, y: relativeY };
-    // console.log('getTaskPosition result:', result);
-    return result;
+    // console.log('Task position calculated:', {
+    //   taskId,
+    //   connectorType,
+    //   relativeX,
+    //   relativeY,
+    //   taskRect: { left: taskRect.left, right: taskRect.right, top: taskRect.top, height: taskRect.height },
+    //   timelineRect: { left: timelineRect.left, top: timelineRect.top }
+    // });
+
+    return { x: relativeX, y: relativeY };
   };
 
   // Función para generar el path SVG según las especificaciones del prompt
