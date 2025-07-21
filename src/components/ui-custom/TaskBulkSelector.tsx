@@ -13,14 +13,14 @@ interface TaskSelection {
 
 interface TaskBulkSelectorProps {
   organizationId: string;
-  selectedTasks: TaskSelection[];
+  selections: TaskSelection[];
   onSelectionChange: (selections: TaskSelection[]) => void;
   className?: string;
 }
 
 export function TaskBulkSelector({
   organizationId,
-  selectedTasks,
+  selections,
   onSelectionChange,
   className
 }: TaskBulkSelectorProps) {
@@ -36,34 +36,37 @@ export function TaskBulkSelector({
 
   // Mapear selecciones para acceso rápido
   const selectedTasksMap = useMemo(() => {
-    return selectedTasks.reduce((acc, selection) => {
+    if (!selections || !Array.isArray(selections)) return {};
+    return selections.reduce((acc, selection) => {
       acc[selection.taskId] = selection.quantity;
       return acc;
     }, {} as Record<string, number>);
-  }, [selectedTasks]);
+  }, [selections]);
 
   // Manejar selección/deselección de tarea
   const handleTaskToggle = useCallback((taskId: string, isSelected: boolean) => {
+    const currentSelections = selections || [];
     if (isSelected) {
       // Agregar tarea con cantidad por defecto
-      const newSelections = [...selectedTasks, { taskId, quantity: 1 }];
+      const newSelections = [...currentSelections, { taskId, quantity: 1 }];
       onSelectionChange(newSelections);
     } else {
       // Quitar tarea
-      const newSelections = selectedTasks.filter(s => s.taskId !== taskId);
+      const newSelections = currentSelections.filter(s => s.taskId !== taskId);
       onSelectionChange(newSelections);
     }
-  }, [selectedTasks, onSelectionChange]);
+  }, [selections, onSelectionChange]);
 
   // Manejar cambio de cantidad
   const handleQuantityChange = useCallback((taskId: string, quantity: number) => {
-    const newSelections = selectedTasks.map(selection => 
+    const currentSelections = selections || [];
+    const newSelections = currentSelections.map(selection => 
       selection.taskId === taskId 
         ? { ...selection, quantity: Math.max(0.01, quantity) }
         : selection
     );
     onSelectionChange(newSelections);
-  }, [selectedTasks, onSelectionChange]);
+  }, [selections, onSelectionChange]);
 
   // Incrementar/decrementar cantidad
   const adjustQuantity = useCallback((taskId: string, delta: number) => {
@@ -86,9 +89,9 @@ export function TaskBulkSelector({
       </div>
 
       {/* Información de selección */}
-      {selectedTasks.length > 0 && (
+      {(selections?.length || 0) > 0 && (
         <div className="text-sm text-muted-foreground">
-          {selectedTasks.length} tarea{selectedTasks.length !== 1 ? 's' : ''} seleccionada{selectedTasks.length !== 1 ? 's' : ''}
+          {selections?.length || 0} tarea{(selections?.length || 0) !== 1 ? 's' : ''} seleccionada{(selections?.length || 0) !== 1 ? 's' : ''}
         </div>
       )}
 
