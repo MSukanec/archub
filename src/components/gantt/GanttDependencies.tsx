@@ -151,7 +151,7 @@ export function GanttDependencies({
       }).filter(Boolean);
       
       setArrowPaths(paths);
-      // console.log('Arrows calculated successfully:', paths.length);
+      console.log('Arrows calculated successfully:', paths.length, paths);
     };
 
     // Calcular con múltiples intentos para manejar el auto-scroll al día actual
@@ -193,12 +193,15 @@ export function GanttDependencies({
     return null;
   }
 
-  // console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
+  console.log('Rendering SVG with arrowPaths:', arrowPaths.length);
   
   return (
     <svg 
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 100 }}
+      style={{ 
+        zIndex: 100,
+        backgroundColor: 'rgba(255, 0, 0, 0.1)' // Debug: fondo rojo semi-transparente para ver el SVG
+      }}
     >
       {/* Definir el marcador de flecha */}
       <defs>
@@ -213,7 +216,7 @@ export function GanttDependencies({
         >
           <polygon
             points="0,0 0,6 8,3"
-            fill="var(--table-row-fg)"
+            fill="red" // Debug: flecha roja para que sea visible
           />
         </marker>
       </defs>
@@ -238,16 +241,15 @@ export function GanttDependencies({
             {/* Línea principal con color del borde de barras */}
             <path
               d={arrow.path}
-              stroke="var(--table-row-fg)"
-              strokeWidth="2"
+              stroke="red" // Debug: usar color rojo visible para debug
+              strokeWidth="4" // Debug: hacer más gruesa para que sea más visible
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
               markerEnd="url(#arrowhead)"
               className="pointer-events-auto hover:opacity-80 cursor-pointer transition-opacity duration-200"
               onClick={() => {
-                // console.log('Dependency clicked:', arrow.dependency);
-                // Aquí se puede agregar modal de edición de dependencia
+                console.log('Dependency clicked:', arrow.dependency);
               }}
             />
           </g>
