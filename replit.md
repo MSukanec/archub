@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. ANÁLISIS VISUAL CHARTS COLOR AND DATA SYSTEM COMPLETELY FIXED: Resolved all color variable issues and data display problems in the 9 analysis charts - COMPLETED
+  • Fixed all CSS variable usage: eliminated incorrect hsl(var(...)) wrappers, now using direct var(--chart-1) through var(--chart-5) format
+  • Corrected all CartesianGrid lines to use hsl(var(--chart-grid-text)) for consistent background grid styling across all charts
+  • Fixed "undefined" data display issues in DependencyNetwork by improving task mapping and fallback data handling
+  • Enhanced DurationByRubro chart to filter empty entries and show "Sin datos disponibles" message when no valid data exists
+  • Eliminated hardcoded colors in WeeklyProgressHeatmap, replaced with proper CSS variable system and transparency controls
+  • Improved data validation throughout all 9 charts: ProgressCurve, BurndownChart, WorkloadOverTime, DurationByRubro, TasksByPhase, StatusBreakdown, CriticalPathDistribution, WeeklyProgressHeatmap, DependencyNetwork
+  • All tooltip backgrounds now use var(--popover-bg) and hsl(var(--card-border)) for visual consistency
+  • Charts now display proper colors: green (--chart-1), teal (--chart-2), blue (--chart-3), yellow (--chart-4), red (--chart-5) instead of black
+  • Enhanced empty state handling: charts show meaningful messages instead of "Sin Grupo", "undefined", or empty displays
 - July 21, 2025. PHASE COLUMN DATA CALCULATION SYSTEM COMPLETED: Fixed phase columns to display automatically calculated dates instead of manual input - COMPLETED
   • Fixed phase date display in INICIO and DÍAS columns to use calculateResolvedEndDate function for automatic calculation
   • Enhanced GanttRowProps interface to include phaseTasks property for containing task information
