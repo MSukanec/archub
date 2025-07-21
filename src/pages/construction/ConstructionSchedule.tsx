@@ -103,8 +103,11 @@ export default function ConstructionSchedule() {
       return
     }
 
-    // TODO: Implementar modal de fases
-    console.log('Create phase modal not implemented yet');
+    openModal('construction-phase', {
+      projectId,
+      organizationId,
+      userId: userData.user.id
+    });
   }
 
   const handleDeleteTask = async (taskId: string) => {
@@ -146,7 +149,7 @@ export default function ConstructionSchedule() {
   const handleEditPhase = (item: GanttRowProps) => {
     if (item.type !== 'phase' || !item.phaseData) return
     
-    openModal('phase', {
+    openModal('construction-phase', {
       projectId,
       organizationId,
       userId: userData?.user?.id,
@@ -338,7 +341,7 @@ export default function ConstructionSchedule() {
     searchValue,
     onSearchChange: setSearchValue,
     actions: [
-      <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm" disabled>
+      <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
         <Plus className="h-4 w-4 mr-2" />
         Crear Fase
       </Button>,
