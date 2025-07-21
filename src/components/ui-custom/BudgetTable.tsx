@@ -1,9 +1,9 @@
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Trash2, Plus } from 'lucide-react';
 import { Calculator } from 'lucide-react';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { cn } from '@/lib/utils';
 
 interface BudgetTask {
   id: string;
@@ -159,9 +159,9 @@ export function BudgetTable({
   // Total budget amount (placeholder since we don't have real pricing yet)
   const totalBudgetAmount = 0;
 
-  // Mobile card component for individual tasks
+  // Mobile card component for individual tasks - removed Card import
   const BudgetTaskCard = ({ task, processedName, unitName, onEdit, onDelete }: any) => (
-    <Card className="p-3 space-y-2">
+    <div className="p-3 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] space-y-2">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="font-medium text-sm leading-tight mb-1">
@@ -205,101 +205,96 @@ export function BudgetTable({
           <div className="text-muted-foreground">0.0%</div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 
   return (
-    <div className="space-y-4">
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="w-8 p-2 text-left">
-                <input
-                  type="checkbox"
-                  checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-                    } else {
-                      setSelectedTasks([]);
-                    }
-                  }}
-                  className="rounded"
-                />
-              </th>
-              <th className="w-16 p-2 text-left text-xs font-medium">ID</th>
-              {groupingType === 'none' && (
-                <th className="p-2 text-left text-xs font-medium">Rubro</th>
-              )}
-              <th className="p-2 text-left text-xs font-medium">Tarea</th>
-              <th className="p-2 text-left text-xs font-medium">Unid.</th>
-              <th className="p-2 text-left text-xs font-medium">Cant.</th>
-              <th className="p-2 text-left text-xs font-medium">M.O.</th>
-              <th className="p-2 text-left text-xs font-medium">Mat.</th>
-              <th className="p-2 text-left text-xs font-medium">Subtotal</th>
-              <th className="p-2 text-left text-xs font-medium">% Inc.</th>
-              <th className="p-2 text-left text-xs font-medium">Acc.</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div className="space-y-3">
+      {/* Desktop Table View - Using Table.tsx structure */}
+      <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
+        {/* Column Headers - Identical to Table.tsx */}
+        <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+             style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+          <div className="flex items-center justify-center">
+            <input
+              type="checkbox"
+              checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                } else {
+                  setSelectedTasks([]);
+                }
+              }}
+              className="h-3 w-3 rounded"
+            />
+          </div>
+          <div className="text-left">ID</div>
+          {groupingType === 'none' && (
+            <div className="text-left">Rubro</div>
+          )}
+          <div className="text-left">Tarea</div>
+          <div className="text-left">Unid.</div>
+          <div className="text-left">Cant.</div>
+          <div className="text-left">M.O.</div>
+          <div className="text-left">Mat.</div>
+          <div className="text-left">Subtotal</div>
+          <div className="text-left">% Inc.</div>
+          <div className="text-left">Acc.</div>
+        </div>
+
+        {/* Table Rows - Using div structure like Table.tsx */}
+        <div>
             {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
-              // Calculate rubro subtotal (all tasks in this rubro have subtotal $0 for now)
-              const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0); // Will be $0 until real pricing is implemented
+              const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0);
               const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
               const rubroNumber = rubroIndex + 1;
               
               return (
                 <Fragment key={rubroName}>
-                  {/* Group Header Row (only show if grouping is enabled) */}
+                  {/* Group Header Row */}
                   {groupingType !== 'none' && (
-                    <tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)' }}>
-                      <td className="p-3"></td>
-                      <td className="p-3">
-                        <div className="font-semibold text-sm" style={{ color: 'var(--table-header-fg)' }}>
-                          {rubroNumber}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="font-semibold text-sm capitalize" style={{ color: 'var(--table-header-fg)' }}>
-                          {rubroName.toLowerCase()}
-                        </div>
-                      </td>
-                      <td className="p-3"></td>
-                      <td className="p-3"></td>
-                      <td className="p-3"></td>
-                      <td className="p-3"></td>
-                      <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>${rubroSubtotal.toLocaleString()}</td>
-                      <td className="p-3 text-sm font-semibold" style={{ color: 'var(--table-header-fg)' }}>{rubroPercentage.toFixed(1)}%</td>
-                      <td className="p-3"></td>
-                    </tr>
+                    <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-row-border)]"
+                         style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+                      <div></div>
+                      <div className="font-semibold text-xs">{rubroNumber}</div>
+                      <div className="font-semibold text-xs capitalize">{rubroName.toLowerCase()}</div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                      <div className="text-xs font-semibold">${rubroSubtotal.toLocaleString()}</div>
+                      <div className="text-xs font-semibold">{rubroPercentage.toFixed(1)}%</div>
+                      <div></div>
+                    </div>
                   )}
                   
                   {/* Task Rows */}
                   {tasks.map((task: any, taskIndex) => {
                     const percentage = totalBudgetAmount > 0 ? (1 / totalBudgetAmount) * 100 : 0;
                     
-                    // Generate ID based on grouping mode
                     let taskId: string;
                     if (groupingType !== 'none') {
-                      // Hierarchical: 1.1, 1.2, 2.1, 2.2, etc.
                       taskId = `${rubroNumber}.${taskIndex + 1}`;
                     } else {
-                      // Sequential: calculate global task index
                       let globalIndex = 0;
                       const rubroEntries = Object.entries(groupedTasks);
                       for (let i = 0; i < rubroIndex; i++) {
                         globalIndex += rubroEntries[i][1].length;
                       }
                       globalIndex += taskIndex + 1;
-                      // Format as 001, 002, 003, etc.
                       taskId = globalIndex.toString().padStart(3, '0');
                     }
 
                     return (
-                      <tr key={task.id} className="border-b hover:bg-muted/20">
-                        <td className="p-2">
+                      <div key={task.id} 
+                           className={cn(
+                             "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                             taskIndex < tasks.length - 1 ? "border-b border-[var(--table-row-border)]" : ""
+                           )}
+                           style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+                        
+                        <div className="flex items-center justify-center">
                           <input
                             type="checkbox"
                             checked={selectedTasks.includes(task.id)}
@@ -310,24 +305,29 @@ export function BudgetTable({
                                 setSelectedTasks(selectedTasks.filter(id => id !== task.id));
                               }
                             }}
-                            className="rounded"
+                            className="h-3 w-3 rounded"
                           />
-                        </td>
-                        <td className="p-2 text-sm font-medium">
+                        </div>
+                        
+                        <div className="text-xs flex items-center justify-start font-medium">
                           {taskId}
-                        </td>
+                        </div>
+                        
                         {groupingType === 'none' && (
-                          <td className="p-2">
-                            <div className="font-medium text-sm">{task.task?.rubro_name || 'Sin rubro'}</div>
-                          </td>
+                          <div className="text-xs flex items-center justify-start">
+                            <div className="font-medium">{task.task?.rubro_name || 'Sin rubro'}</div>
+                          </div>
                         )}
-                        <td className="p-2 text-sm">
+                        
+                        <div className="text-xs flex items-center justify-start">
                           {generateTaskDisplayName(task.task, parameterValues)}
-                        </td>
-                        <td className="p-2 text-sm">
+                        </div>
+                        
+                        <div className="text-xs flex items-center justify-start">
                           {task.task?.unit_name || '-'}
-                        </td>
-                        <td className="p-2">
+                        </div>
+                        
+                        <div className="flex items-center justify-start">
                           <input
                             type="number"
                             value={localQuantities[task.id] || '0'}
@@ -338,53 +338,54 @@ export function BudgetTable({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-16 px-2 py-1 text-sm border rounded"
+                            className="w-16 px-2 py-1 text-xs border rounded"
                             min="0"
                             step="0.01"
                           />
-                        </td>
-                        <td className="p-2 text-sm">$0</td>
-                        <td className="p-2 text-sm">$0</td>
-                        <td className="p-2 text-sm font-medium">$0</td>
-                        <td className="p-2 text-sm text-muted-foreground">{percentage.toFixed(1)}%</td>
-                        <td className="p-2">
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTask(task.id)}
-                              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
+                        </div>
+                        
+                        <div className="text-xs flex items-center justify-start">$0</div>
+                        <div className="text-xs flex items-center justify-start">$0</div>
+                        <div className="text-xs flex items-center justify-start font-medium">$0</div>
+                        <div className="text-xs flex items-center justify-start text-muted-foreground">{percentage.toFixed(1)}%</div>
+                        
+                        <div className="flex items-center justify-start">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
                     );
                   })}
                 </Fragment>
               );
             })}
-            {/* TOTAL Row */}
-            <tr className="border-b-2 bg-accent/10 font-medium">
-              <td className="p-2"></td>
-              <td className="p-2 text-sm font-semibold">TOTAL</td>
-              {groupingType === 'none' && <td className="p-2"></td>}
-              <td className="p-2"></td>
-              <td className="p-2"></td>
-              <td className="p-2"></td>
-              <td className="p-2"></td>
-              <td className="p-2"></td>
-              <td className="p-2 text-sm font-semibold">$0</td>
-              <td className="p-2 text-sm font-semibold">100.0%</td>
-              <td className="p-2"></td>
-            </tr>
-          </tbody>
-        </table>
+            
+            {/* TOTAL Row - Using div structure */}
+            <div className="grid gap-4 px-4 py-3 bg-accent/10 text-xs font-bold border-t-2 border-accent"
+                 style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
+              <div></div>
+              <div className="text-xs font-semibold">TOTAL</div>
+              {groupingType === 'none' && <div></div>}
+              <div></div>
+              <div></div>
+              <div className="text-xs font-semibold">{totalQuantity.toFixed(2)}</div>
+              <div></div>
+              <div></div>
+              <div className="text-xs font-semibold">$0</div>
+              <div className="text-xs font-semibold">100.0%</div>
+              <div></div>
+            </div>
+        </div>
       </div>
 
-      {/* Mobile Cards View */}
-      <div className="md:hidden space-y-3">
+      {/* Mobile Cards View - Following Table.tsx structure */}
+      <div className="lg:hidden space-y-2">
         {budgetTasks?.map((task: any) => {
           const processedName = generateTaskDisplayName(task.task, parameterValues);
           const unitName = getUnitName(task.task?.unit_id);
@@ -403,8 +404,8 @@ export function BudgetTable({
           );
         })}
         
-        {/* Mobile Total Card */}
-        <Card className="border-2 border-accent bg-accent/5">
+        {/* Mobile Total Card - without Card component */}
+        <div className="border-2 border-accent bg-accent/5 rounded-lg">
           <div className="p-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">TOTAL</span>
@@ -414,7 +415,7 @@ export function BudgetTable({
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

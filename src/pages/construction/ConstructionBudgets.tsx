@@ -747,19 +747,14 @@ export default function ConstructionBudgets() {
               </Card>
             )}
 
-            {/* Budget Table Card - Clean without extra controls */}
-            <Card className="overflow-hidden">
-              {/* Budget Tasks Table */}
-              <CardContent className="p-4">
-                {selectedBudget ? (
-                  <BudgetTaskTable budgetId={selectedBudget.id} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Selecciona un presupuesto para ver sus tareas
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Budget Tasks Table - Direct without Card wrapper */}
+            {selectedBudget ? (
+              <BudgetTaskTable budgetId={selectedBudget.id} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Selecciona un presupuesto para ver sus tareas
+              </div>
+            )}
           </>
         )}
       </div>
