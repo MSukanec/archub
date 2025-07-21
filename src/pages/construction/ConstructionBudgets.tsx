@@ -18,7 +18,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import NewBudgetTaskModal from '@/modals/NewBudgetTaskModal'
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
-import { useTaskSearch, useTaskSearchFilterOptions, TaskSearchFilters } from '@/hooks/use-task-search'
+import { useConstructionTaskSearch, useConstructionTaskSearchFilterOptions, ConstructionTaskSearchFilters } from '@/hooks/use-construction-task-search'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -162,7 +162,7 @@ export default function ConstructionBudgets() {
   const [quickTaskId, setQuickTaskId] = useState<string>('')
   const [quickQuantity, setQuickQuantity] = useState<number>(1)
   const [quickSearchQuery, setQuickSearchQuery] = useState('')
-  const [taskFilters, setTaskFilters] = useState<any>({})
+  const [taskFilters, setTaskFilters] = useState<ConstructionTaskSearchFilters>({})
   const [isAddingQuickTask, setIsAddingQuickTask] = useState(false)
 
   const { data: userData, isLoading } = useCurrentUser()
@@ -177,17 +177,19 @@ export default function ConstructionBudgets() {
     setSidebarContext('construction')
   }, [])
 
-  // Quick task search hook con filtros
-  const { data: quickTasks = [], isLoading: quickTasksLoading } = useTaskSearch(
+  // Quick task search hook con filtros  
+  const { data: quickTasks = [], isLoading: quickTasksLoading } = useConstructionTaskSearch(
+    userData?.organization?.id || '',
+    userData?.preferences?.last_project_id || '',
     quickSearchQuery, 
-    userData?.organization?.id || '', 
     taskFilters,
     true
   );
   
   // Hook para opciones de filtros
-  const { data: filterOptions, isLoading: filterOptionsLoading } = useTaskSearchFilterOptions(
-    userData?.organization?.id || ''
+  const { data: filterOptions, isLoading: filterOptionsLoading } = useConstructionTaskSearchFilterOptions(
+    userData?.organization?.id || '',
+    userData?.preferences?.last_project_id || ''
   );
   
   // Hook para obtener unidades
@@ -221,8 +223,8 @@ export default function ConstructionBudgets() {
 
   // Generar opciones para el TaskSearchCombo
   const quickTaskOptions = quickTasks.map(task => ({
-    value: task.id,
-    label: task.display_name || task.name || 'Sin nombre',
+    value: task.task_instance_id,
+    label: task.display_name || 'Sin nombre',
     description: `${task.category_name || ''} • ${task.subcategory_name || ''}`.trim()
   }));
 

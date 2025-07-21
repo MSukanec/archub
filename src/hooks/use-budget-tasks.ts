@@ -15,29 +15,32 @@ export interface BudgetTask {
   organization_id: string;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada (task_generated_view)
+  // Datos de la tarea relacionada (construction_gantt_view)
   task: {
-    id: string;
-    code: string;
-    template_id: string | null;
-    param_values: any;
-    organization_id: string;
-    name_template: string;
-    unit_id: string | null;
-    unit_name: string | null;
+    task_instance_id: string;
+    project_id: string;
+    task_id: string;
     task_code: string;
-    task_group_id: string | null;
-    task_group_name: string | null;
-    category_id: string | null;
-    category_name: string | null;
-    category_code: string | null;
-    subcategory_id: string | null;
-    subcategory_name: string | null;
-    subcategory_code: string | null;
-    rubro_id: string | null;
-    rubro_name: string | null;
-    rubro_code: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    duration_in_days: number | null;
+    quantity: number;
+    phase_instance_id: string;
+    phase_name: string;
+    phase_position: number;
+    progress_percent: number;
+    unit_id: string;
+    unit_name: string;
+    unit_symbol: string;
     display_name: string;
+    subcategory_id: string;
+    subcategory_name: string;
+    category_id: string;
+    category_name: string;
+    rubro_id: string;
+    rubro_name: string;
+    task_group_id: string;
+    task_group_name: string;
   };
 }
 
@@ -74,49 +77,43 @@ export function useBudgetTasks(budgetId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      const { data, error } = await supabase
+      // First get the budget tasks
+      const { data: budgetTasks, error: budgetError } = await supabase
         .from("budget_tasks")
-        .select(`
-          *,
-          task:task_generated_view(*)
-        `)
+        .select("*")
         .eq("budget_id", budgetId)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching budget tasks:", error);
-        throw error;
+      if (budgetError) {
+        throw budgetError;
       }
 
-      console.log("Budget tasks data received:", data);
-      
-      // Procesar los nombres de las tareas usando la función del taskDescriptionGenerator
-      const processedTasks = await Promise.all(
-        (data || []).map(async (task: any) => {
-          if (task.task?.display_name && task.task?.param_values) {
-            console.log('Processing task with display_name:', task.task.display_name, 'and params:', task.task.param_values);
-            
-            // Usar la función generateTaskDescription para procesar correctamente todos los tipos de parámetros
-            const { generateTaskDescription } = await import('@/utils/taskDescriptionGenerator');
-            
-            try {
-              const processedName = await generateTaskDescription(
-                task.task.display_name,
-                task.task.param_values
-              );
-              
-              console.log('Final processed name:', processedName);
-              task.task.display_name = processedName;
-            } catch (error) {
-              console.error('Error processing task description:', error);
-              // Mantener display_name original como fallback
-            }
+      // Then get the task details from construction_gantt_view
+      const tasksWithDetails = await Promise.all(
+        (budgetTasks || []).map(async (budgetTask) => {
+          const { data: taskDetails, error: taskError } = await supabase
+            .from("construction_gantt_view")
+            .select("*")
+            .eq("task_instance_id", budgetTask.task_id)
+            .single();
+
+          if (taskError) {
+            console.warn("Error fetching task details for task_id:", budgetTask.task_id, taskError);
+            return {
+              ...budgetTask,
+              task: null
+            };
           }
-          return task;
+
+          return {
+            ...budgetTask,
+            task: taskDetails
+          };
         })
       );
-      
-      return processedTasks;
+
+      console.log("Budget tasks data received:", tasksWithDetails);
+      return tasksWithDetails;
     },
     enabled: !!budgetId && !!supabase
   });
