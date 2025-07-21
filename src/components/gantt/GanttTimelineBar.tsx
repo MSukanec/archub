@@ -75,6 +75,28 @@ export function GanttTimelineBar({
       }
     };
   }, [onDragUpdate]);
+
+  // Throttled callback para optimizar propagación de dependencias en tiempo real
+  const throttledPropagation = useMemo(() => {
+    let lastCall = 0;
+    const throttleMs = 50; // 20fps para propagación - menos frecuente que flechas
+    
+    return (taskId: string, newEndDate: string, allTasks: ConstructionTask[], dependencies: any[]) => {
+      const now = Date.now();
+      if (now - lastCall >= throttleMs) {
+        lastCall = now;
+        
+        const propagationUpdates = propagateDependencyChanges(taskId, newEndDate, allTasks, dependencies);
+        
+        if (propagationUpdates.length > 0) {
+          queryClient.setQueryData(['construction-tasks', item.taskData?.project_id, item.taskData?.organization_id], (oldData: ConstructionTask[] | undefined) => {
+            if (!oldData) return oldData;
+            return applyOptimisticPropagation(oldData, propagationUpdates) || oldData;
+          });
+        }
+      }
+    };
+  }, [queryClient, item.taskData?.project_id, item.taskData?.organization_id]);
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
 
@@ -284,6 +306,43 @@ export function GanttTimelineBar({
       const scrollLeft = timelineContainer.scrollLeft || 0;
       const relativeX = Math.max(0, e.clientX - containerRect.left - dragOffset);
       const adjustedX = relativeX + scrollLeft;
+      
+      // Calcular nuevo día y fechas en tiempo real
+      const dayWidth = timelineWidth / totalDays;
+      const newDay = Math.round(adjustedX / dayWidth);
+      const newStartDate = addDays(timelineStart, newDay);
+      
+      // Mantener la duración original
+      const originalDuration = item.taskData?.duration_in_days || 
+        Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
+      const newEndDate = addDays(newStartDate, originalDuration - 1);
+      
+      // ACTUALIZACIÓN DE TAREA PRINCIPAL EN TIEMPO REAL
+      queryClient.setQueryData(['construction-tasks', item.taskData.project_id, item.taskData.organization_id], (oldData: ConstructionTask[] | undefined) => {
+        if (!oldData) return oldData;
+        
+        return oldData.map(task => {
+          if (task.id === item.taskData?.id) {
+            return {
+              ...task,
+              start_date: format(newStartDate, 'yyyy-MM-dd'),
+              end_date: format(newEndDate, 'yyyy-MM-dd'),
+              duration_in_days: originalDuration
+            };
+          }
+          return task;
+        });
+      });
+      
+      // PROPAGACIÓN DE DEPENDENCIAS EN TIEMPO REAL (THROTTLED)
+      if (allTasks && dependencies.length > 0 && throttledPropagation) {
+        throttledPropagation(
+          item.taskData.id,
+          format(newEndDate, 'yyyy-MM-dd'),
+          allTasks,
+          dependencies
+        );
+      }
       
       // Feedback visual suave - mover la barra sin snap
       barRef.current.style.transform = `translateX(${adjustedX - startPixels}px)`;

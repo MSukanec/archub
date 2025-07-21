@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 21, 2025. REAL-TIME DEPENDENCY PROPAGATION IMPLEMENTED: Enhanced Gantt with professional MS Project-like behavior for dependent task movement - COMPLETED
+  • Implemented real-time dependency propagation during drag operations: dependent tasks now move immediately while dragging, not just after release
+  • Added throttled propagation system: task updates at 60fps, dependency propagation at 20fps for optimal performance balance
+  • Enhanced optimistic updates: primary task updates instantly, dependent tasks follow with throttled updates for smooth UX
+  • Professional Gantt behavior: dragging one task immediately moves all dependent tasks in cascade chain
+  • Maintained arrow synchronization: dependency arrows update in real-time during drag operations
+  • Performance optimized: separate throttling for visual updates (16ms) vs dependency calculations (50ms)
+  • System now matches industry-standard project management tools like MS Project and Jira for dependency handling
 - July 21, 2025. CONSTRUCTION TASKS INFINITE LOOP BUG FIXED: Resolved critical performance issue causing infinite re-renders and eliminated rubro dependency errors - COMPLETED
   • Fixed infinite loop issue in both ConstructionTasks.tsx and ConstructionSchedule.tsx by replacing useEffect with useMemo for task processing
   • Eliminated async task name processing that was causing unnecessary re-renders and performance degradation
@@ -126,6 +134,7 @@ Archub is a modern construction management platform built with a React frontend 
   • Fixed TypeScript null safety issues with task.task references throughout components
   • Successfully loading 4 construction tasks from "Planta Baja" phase with proper data mapping
   • System now displays tasks correctly without performance issues or database errors
+  • RUBROS INTEGRATION COMPLETED: Successfully integrated rubro_name and category_name fields from updated construction_gantt_view
 - July 21, 2025. GANTT OPTIMISTIC UPDATES IMPLEMENTED: Dramatically improved drag & drop performance with instant UI feedback - COMPLETED
   • Implemented optimistic updates for drag operations using queryClient.setQueryData() to update cache immediately
   • UI now responds instantly to drag & drop without waiting for database response (previously 200-500ms delay)
