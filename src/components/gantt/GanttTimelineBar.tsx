@@ -148,7 +148,8 @@ export function GanttTimelineBar({
       setMousePosition({ x: moveEvent.clientX, y: moveEvent.clientY });
     };
     
-    const handleMouseUp = () => {
+    const handleMouseUp = (upEvent: MouseEvent) => {
+      console.log('Mouse up detected, cleaning connection line');
       setIsConnecting(false);
       setConnectionStart(null);
       onConnectionDrag?.(null);
@@ -171,6 +172,9 @@ export function GanttTimelineBar({
     
     // Evitar conectar una tarea consigo misma
     if (fromTaskId === toTaskId) {
+      // Limpiar TODOS los estados de conexión
+      setIsConnecting(false);
+      setConnectionStart(null);
       onConnectionDrag?.(null);
       return;
     }
@@ -191,7 +195,9 @@ export function GanttTimelineBar({
       lag_days: 0
     });
     
-    // Limpiar el estado de drag
+    // Limpiar TODOS los estados de conexión y drag
+    setIsConnecting(false);
+    setConnectionStart(null);
     onConnectionDrag?.(null);
     
     console.log('Created dependency:', fromTaskId, '->', toTaskId, 'type:', dependencyType);

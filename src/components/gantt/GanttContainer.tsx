@@ -525,12 +525,12 @@ export function GanttContainer({
                     className="relative h-full w-full"
                     style={{ width: timelineWidth }}
                   >
-                    {/* Grilla de semanas (sin líneas entre días) */}
+                    {/* Grilla de semanas SIN LÍNEAS VERTICALES */}
                     <div className="absolute inset-0 flex">
                       {calendarStructure.weeks.map((week) => (
                         <div 
                           key={`week-grid-${week.key}`}
-                          className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
+                          className="h-full"
                           style={{ width: weekWidth }}
                         />
                       ))}
@@ -626,12 +626,12 @@ export function GanttContainer({
                   className="relative h-full w-full"
                   style={{ width: timelineWidth }}
                 >
-                  {/* Grilla de semanas (sin líneas entre días) */}
+                  {/* Grilla de semanas SIN LÍNEAS VERTICALES */}
                   <div className="absolute inset-0 flex">
                     {calendarStructure.weeks.map((week) => (
                       <div 
                         key={`empty-${index}-${week.key}`}
-                        className="border-r border-[var(--table-row-border)]/20 last:border-r-0 h-full"
+                        className="h-full"
                         style={{ width: weekWidth }}
                       />
                     ))}
