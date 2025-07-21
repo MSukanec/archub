@@ -61,7 +61,7 @@ export function GanttDependencies({
       
       if (!fromTaskData.startDate || !toTaskData.startDate) return null;
       
-      const dayWidth = timelineWidth / totalDays; // timelineWidth ya viene duplicado
+      const dayWidth = timelineWidth / totalDays;
       const timelineStartTime = timelineStart.getTime();
       
       // Posición de fin de la tarea predecesora
