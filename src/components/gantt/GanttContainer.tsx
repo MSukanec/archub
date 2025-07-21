@@ -583,6 +583,7 @@ export function GanttContainer({
                         totalDays={calendarStructure.totalDays}
                         onConnectionDrag={setDragConnectionData}
                         dragConnectionData={dragConnectionData}
+                        onTaskUpdate={() => {/* React Query se actualiza automáticamente */}}
                       />
                     </div>
 

@@ -1,7 +1,8 @@
-import { format } from 'date-fns';
+import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useCreateConstructionDependency } from '@/hooks/use-construction-dependencies';
+import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
 import { toast } from '@/hooks/use-toast';
 
 interface GanttTimelineBarProps {
@@ -18,6 +19,7 @@ interface GanttTimelineBarProps {
     fromTaskId: string;
     fromPoint: 'start' | 'end';
   } | null;
+  onTaskUpdate?: () => void; // Callback para refrescar después de actualizar
 }
 
 export function GanttTimelineBar({ 
@@ -27,11 +29,15 @@ export function GanttTimelineBar({
   timelineWidth,
   totalDays,
   onConnectionDrag,
-  dragConnectionData
+  dragConnectionData,
+  onTaskUpdate
 }: GanttTimelineBarProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeType, setResizeType] = useState<'start' | 'end' | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const createDependency = useCreateConstructionDependency();
+  const updateTask = useUpdateConstructionTask();
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
 
@@ -158,13 +164,111 @@ export function GanttTimelineBar({
   const canReceiveConnection = dragConnectionData && item.type === 'task' && 
                               item.taskData?.id !== dragConnectionData.fromTaskId;
   
-  // Estilos adicionales cuando se está arrastrando una conexión
+  // Estilos adicionales cuando se está arrastrando una conexión o redimensionando
   const dragStyles = canReceiveConnection ? 'ring-2 ring-blue-400 ring-opacity-50' : '';
+  const resizeStyles = isResizing ? 'ring-2 ring-orange-400 ring-opacity-70 shadow-lg' : '';
+
+  // Funciones para drag & drop de redimensionamiento
+  const calculateDayFromX = useCallback((clientX: number) => {
+    if (!barRef.current) return 0;
+    
+    const containerRect = barRef.current.parentElement?.getBoundingClientRect();
+    if (!containerRect) return 0;
+    
+    const relativeX = clientX - containerRect.left;
+    const dayWidth = timelineWidth / totalDays;
+    return Math.round(relativeX / dayWidth);
+  }, [timelineWidth, totalDays]);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent, type: 'start' | 'end') => {
+    if (item.type !== 'task' || !item.taskData?.id) return;
+    
+    e.stopPropagation();
+    e.preventDefault();
+    
+    setIsResizing(true);
+    setResizeType(type);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!item.taskData) return;
+      
+      const newDay = calculateDayFromX(e.clientX);
+      const dayWidth = timelineWidth / totalDays;
+      
+      // Calcular nueva fecha basada en la posición del mouse
+      const newDate = addDays(timelineStart, newDay);
+      
+      // Mostrar feedback visual temporal (opcional)
+      if (barRef.current) {
+        const currentStartDay = Math.floor((normalizedStart.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
+        const currentEndDay = Math.floor((normalizedEnd.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
+        
+        if (type === 'start') {
+          const newWidth = (currentEndDay - newDay + 1) * dayWidth;
+          const newLeft = newDay * dayWidth;
+          barRef.current.style.width = `${Math.max(dayWidth, newWidth)}px`;
+          barRef.current.style.marginLeft = `${newLeft}px`;
+        } else {
+          const newWidth = (newDay - currentStartDay + 1) * dayWidth;
+          barRef.current.style.width = `${Math.max(dayWidth, newWidth)}px`;
+        }
+      }
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!item.taskData) return;
+      
+      const newDay = calculateDayFromX(e.clientX);
+      const newDate = addDays(timelineStart, newDay);
+      
+      // Actualizar la tarea en la base de datos
+      if (type === 'start') {
+        const currentEndDate = item.taskData.end_date ? new Date(item.taskData.end_date) : addDays(new Date(item.taskData.start_date!), item.taskData.duration_in_days || 1);
+        const newDuration = Math.max(1, differenceInDays(currentEndDate, newDate) + 1);
+        
+        updateTask.mutate({
+          id: item.taskData.id,
+          start_date: format(newDate, 'yyyy-MM-dd'),
+          duration_in_days: newDuration
+        });
+      } else {
+        const startDate = new Date(item.taskData.start_date!);
+        const newDuration = Math.max(1, differenceInDays(newDate, startDate) + 1);
+        
+        updateTask.mutate({
+          id: item.taskData.id,
+          end_date: format(newDate, 'yyyy-MM-dd'),
+          duration_in_days: newDuration
+        });
+      }
+      
+      setIsResizing(false);
+      setResizeType(null);
+      
+      // Refrescar los datos
+      onTaskUpdate?.();
+      
+      // Limpiar eventos
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      
+      toast({
+        title: "Tarea actualizada",
+        description: `Duración modificada desde el ${type === 'start' ? 'inicio' : 'final'} de la tarea`
+      });
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [item, timelineStart, timelineWidth, totalDays, calculateDayFromX, updateTask, onTaskUpdate, normalizedStart, normalizedEnd, normalizedTimelineStart]);
+
+  // Solo mostrar controles de redimensionamiento en tareas (no fases) y cuando hay hover
+  const shouldShowResizeHandles = item.type === 'task' && isHovered && !isResizing;
 
   return (
     <div 
       ref={barRef}
-      className={`${getBarStyle()} ${dragStyles} relative group`}
+      className={`${getBarStyle()} ${dragStyles} ${resizeStyles} relative group`}
       style={{
         width: `${widthPixels}px`,
         marginLeft: `${startPixels}px`
@@ -191,8 +295,27 @@ export function GanttTimelineBar({
         {format(startDate, 'dd/MM')} - {format(resolvedEndDate, 'dd/MM')}
       </span>
       
+      {/* Controles de redimensionamiento que aparecen en hover */}
+      {shouldShowResizeHandles && (
+        <>
+          {/* Handle de redimensionamiento izquierdo */}
+          <div
+            className="absolute left-0 top-0 w-2 h-full bg-orange-500 opacity-0 group-hover:opacity-80 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-l z-30"
+            onMouseDown={(e) => handleResizeStart(e, 'start')}
+            title="Arrastrar para cambiar fecha de inicio"
+          />
+          
+          {/* Handle de redimensionamiento derecho */}
+          <div
+            className="absolute right-0 top-0 w-2 h-full bg-orange-500 opacity-0 group-hover:opacity-80 cursor-ew-resize transition-opacity hover:bg-orange-600 rounded-r z-30"
+            onMouseDown={(e) => handleResizeStart(e, 'end')}
+            title="Arrastrar para cambiar fecha final"
+          />
+        </>
+      )}
+      
       {/* Puntos de conexión que aparecen en hover - MÁS PROMINENTES Y FUERA DE LA BARRA */}
-      {shouldShowConnectionPoints && (
+      {shouldShowConnectionPoints && !isResizing && (
         <>
           {/* Punto izquierdo (inicio de tarea) - MÁS FUERA DE LA BARRA */}
           <div
