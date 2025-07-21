@@ -120,9 +120,13 @@ export function GanttDependencies({
   }, [dragConnectionData, taskMap, containerRef]);
 
   console.log('Dependencies rendering:', dependencies.length, 'paths:', dependencyPaths.length);
+  console.log('Dependency data:', dependencies);
+  console.log('Task map:', taskMap);
+  console.log('Dependency paths details:', dependencyPaths.map(p => p ? { id: p.id, fromX: p.fromX, fromY: p.fromY, toX: p.toX, toY: p.toY } : null));
   
+  // SIEMPRE mostrar SVG de debug para verificar posición
   return (
-    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 30 }}>
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 50 }}>
       <svg
         ref={svgRef}
         width="100%"
@@ -132,11 +136,23 @@ export function GanttDependencies({
           top: 0,
           left: 0,
           width: '100%',
-          height: '100%'
+          height: '100%',
+          backgroundColor: 'rgba(255,0,0,0.05)' // Fondo rojo muy sutil para debug
         }}
         viewBox={`0 0 ${timelineWidth} 1000`}
         preserveAspectRatio="none"
       >
+        {/* Línea de prueba SIEMPRE visible */}
+        <line
+          x1="50"
+          y1="20"
+          x2="250"
+          y2="60"
+          stroke="#ff0000"
+          strokeWidth="3"
+          opacity="0.8"
+        />
+        <text x="100" y="45" fill="#ff0000" fontSize="10">DEPS: {dependencies.length}</text>
       <defs>
         {/* Definir marcador de flecha */}
         <marker

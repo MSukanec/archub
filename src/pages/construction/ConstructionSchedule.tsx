@@ -414,6 +414,19 @@ export default function ConstructionSchedule() {
           {/* Nuestro Gantt actual */}
           <GanttContainer
             data={ganttData}
+            dependencies={
+              // Crear dependencias de prueba usando las primeras dos tareas
+              ganttData.filter(item => item.type === 'task').length >= 2 ? [
+                {
+                  id: 'test-dep-1',
+                  predecessor_task_id: ganttData.filter(item => item.type === 'task')[0].id,
+                  successor_task_id: ganttData.filter(item => item.type === 'task')[1].id,
+                  type: 'finish-to-start',
+                  lag_days: 0,
+                  created_at: new Date().toISOString()
+                }
+              ] : []
+            }
             onEdit={handleEditTask}
             onDelete={handleDeleteTaskFromGantt}
           />

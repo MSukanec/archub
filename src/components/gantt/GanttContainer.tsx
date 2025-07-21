@@ -10,6 +10,7 @@ import { useConstructionDependencies } from '@/hooks/use-construction-dependenci
 
 export function GanttContainer({ 
   data, 
+  dependencies = [],
   onItemClick,
   onEdit,
   onDelete
@@ -17,6 +18,8 @@ export function GanttContainer({
   onEdit?: (item: GanttRowProps) => void;
   onDelete?: (item: GanttRowProps) => void;
 }) {
+  
+  console.log('GanttContainer received dependencies:', dependencies);
   // Estado para manejar conexiones drag & drop entre tareas
   const [dragConnectionData, setDragConnectionData] = useState<{
     fromTaskId: string;
@@ -34,8 +37,7 @@ export function GanttContainer({
   // Ref para el contenedor del timeline para posicionamiento de dependencias
   const timelineRef = useRef<HTMLDivElement>(null);
   
-  // Cargar dependencias existentes
-  const { data: dependencies = [] } = useConstructionDependencies();
+  // Las dependencias vienen como prop, no necesitamos el hook aquí
 
   // Función para manejar el redimensionamiento del panel
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
