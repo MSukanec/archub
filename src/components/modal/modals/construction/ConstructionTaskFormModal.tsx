@@ -24,6 +24,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useUnits } from "@/hooks/use-task-categories";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-templates";
+import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
+import { generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
+import { Switch } from "@/components/ui/switch";
 
 const addTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -46,8 +50,15 @@ const customTaskSchema = z.object({
   unit_id: z.string().min(1, "La unidad es requerida"),
 });
 
+// Esquema para el subformulario de template
+const templateTaskSchema = z.object({
+  template_id: z.string().min(1, "Debe seleccionar una plantilla"),
+  unit_id: z.string().optional()
+}).catchall(z.any());
+
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
 type CustomTaskFormData = z.infer<typeof customTaskSchema>;
+type TemplateTaskFormData = z.infer<typeof templateTaskSchema>;
 
 interface ConstructionTaskFormModalProps {
   modalData: {
@@ -67,10 +78,19 @@ export function ConstructionTaskFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreatingCustomTask, setIsCreatingCustomTask] = useState(false);
+  const [isCreatingTemplateTask, setIsCreatingTemplateTask] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [paramValues, setParamValues] = useState<Record<string, any>>({});
+  const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
   
   const { data: userData } = useCurrentUser();
   const { setPanel, currentPanel } = useModalPanelStore();
   const queryClient = useQueryClient();
+
+  // Hooks para sistema de templates
+  const { data: templates, isLoading: templatesLoading } = useTaskTemplates();
+  const { data: parameters, isLoading: parametersLoading, refetch: refetchParameters } = useTaskTemplateParameters(selectedTemplateId || null);
+  const createGeneratedTask = useCreateGeneratedTask();
 
   // Obtener tareas del proyecto para dependencias
   const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
@@ -186,6 +206,16 @@ export function ConstructionTaskFormModal({
     }
   });
 
+  // Formulario para el subpanel de template
+  const templateTaskForm = useForm<TemplateTaskFormData>({
+    resolver: zodResolver(templateTaskSchema),
+    defaultValues: {
+      template_id: "",
+      ...paramValues
+    },
+    mode: "onBlur"
+  });
+
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
   const selectedTaskId = watch('task_id');
 
@@ -284,6 +314,56 @@ export function ConstructionTaskFormModal({
 
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
+
+  // Mutación para crear tarea desde template
+  const createTemplateTaskMutation = useMutation({
+    mutationFn: async (formData: TemplateTaskFormData) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Información de organización no disponible');
+      }
+
+      const { template_id, ...params } = formData;
+
+      const result = await createGeneratedTask.mutateAsync({
+        template_id: template_id,
+        param_values: params,
+        organization_id: userData.organization.id,
+        is_system: false
+      });
+
+      return result;
+    },
+    onSuccess: (result) => {
+      if (result.new_task) {
+        toast({
+          title: "Tarea creada desde template",
+          description: `Tarea creada exitosamente con código ${result.generated_code}`,
+        });
+        
+        // Invalidar queries y preseleccionar nueva tarea
+        queryClient.invalidateQueries({ queryKey: ['task-search'] });
+        queryClient.invalidateQueries({ queryKey: ['task-generated'] });
+        
+        setValue('task_id', result.new_task.id);
+        setSearchQuery(result.new_task.name);
+        
+        // Resetear y volver al panel principal
+        templateTaskForm.reset();
+        setPanel('edit');
+        setIsCreatingTemplateTask(false);
+        setSelectedTemplateId("");
+        setParamValues({});
+      }
+    },
+    onError: (error) => {
+      console.error('Error creating template task:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la tarea desde el template",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Mutación para crear tarea personalizada
   const createCustomTaskMutation = useMutation({
@@ -484,16 +564,28 @@ export function ConstructionTaskFormModal({
           <p className="text-sm text-destructive">{errors.task_id.message}</p>
         )}
         
-        {/* Botón para crear tarea personalizada */}
-        <FormSubsectionButton
-          icon={<Wrench />}
-          title="¿No encontraste la tarea?"
-          description="Crea una nueva tarea personalizada"
-          onClick={() => {
-            setIsCreatingCustomTask(true);
-            setPanel('subform');
-          }}
-        />
+        {/* Botones para crear nuevas tareas */}
+        <div className="grid gap-3">
+          <FormSubsectionButton
+            icon={<Wrench />}
+            title="Crear desde plantilla"
+            description="Crea una tarea desde una plantilla existente"
+            onClick={() => {
+              setIsCreatingTemplateTask(true);
+              setPanel('subform');
+            }}
+          />
+          
+          <FormSubsectionButton
+            icon={<Wrench />}
+            title="Crear tarea personalizada"
+            description="Crea una nueva tarea completamente personalizada"
+            onClick={() => {
+              setIsCreatingCustomTask(true);
+              setPanel('subform');
+            }}
+          />
+        </div>
       </div>
 
       {/* Quantity with Unit */}
@@ -711,8 +803,168 @@ export function ConstructionTaskFormModal({
     createCustomTaskMutation.mutate(data);
   };
 
-  // Panel del subformulario para crear tarea personalizada
-  const subformPanel = (
+  // Funciones de envío
+  const onTemplateTaskSubmit = (data: TemplateTaskFormData) => {
+    createTemplateTaskMutation.mutate(data);
+  };
+
+  // Panel del subformulario (templates o personalizada)
+  const subformPanel = isCreatingTemplateTask ? (
+    // Subformulario para crear tarea desde template
+    <form 
+      onSubmit={templateTaskForm.handleSubmit(onTemplateTaskSubmit)} 
+      className="space-y-6"
+    >
+      {/* Botón para volver */}
+      <div className="flex items-center space-x-2 mb-4">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setPanel('edit');
+            setIsCreatingTemplateTask(false);
+            setSelectedTemplateId("");
+            setParamValues({});
+          }}
+          className="flex items-center space-x-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Volver a selección de tareas</span>
+        </Button>
+      </div>
+
+      {/* Selector de template */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="template_id">Plantilla de Tarea *</Label>
+          <Select 
+            value={selectedTemplateId} 
+            onValueChange={(value) => {
+              setSelectedTemplateId(value);
+              templateTaskForm.setValue('template_id', value);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar plantilla" />
+            </SelectTrigger>
+            <SelectContent>
+              {templatesLoading ? (
+                <SelectItem value="" disabled>Cargando plantillas...</SelectItem>
+              ) : (
+                templates?.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name_template}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+          {templateTaskForm.formState.errors.template_id && (
+            <p className="text-sm text-destructive">
+              {templateTaskForm.formState.errors.template_id.message}
+            </p>
+          )}
+        </div>
+
+        {/* Parámetros dinámicos del template */}
+        {selectedTemplateId && Array.isArray(parameters) && parameters.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Parámetros del Template</h4>
+            {parameters.map((param) => (
+              <div key={param.id} className="space-y-2">
+                <Label htmlFor={param.name}>{param.label}</Label>
+                {param.type === 'select' ? (
+                  <Select 
+                    value={templateTaskForm.watch(param.name) || ""} 
+                    onValueChange={(value) => {
+                      templateTaskForm.setValue(param.name, value);
+                      setParamValues(prev => ({ ...prev, [param.name]: value }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={`Seleccionar ${param.label.toLowerCase()}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parameterOptions[param.id]?.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : param.type === 'boolean' ? (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={templateTaskForm.watch(param.name) || false}
+                      onCheckedChange={(checked) => {
+                        templateTaskForm.setValue(param.name, checked);
+                        setParamValues(prev => ({ ...prev, [param.name]: checked }));
+                      }}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {templateTaskForm.watch(param.name) ? 'Sí' : 'No'}
+                    </span>
+                  </div>
+                ) : (
+                  <Input
+                    type={param.type === 'number' ? 'number' : 'text'}
+                    placeholder={param.label}
+                    {...templateTaskForm.register(param.name)}
+                    onChange={(e) => {
+                      const value = param.type === 'number' ? Number(e.target.value) : e.target.value;
+                      templateTaskForm.setValue(param.name, value);
+                      setParamValues(prev => ({ ...prev, [param.name]: value }));
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Vista previa de descripción */}
+        {selectedTemplateId && Array.isArray(parameters) && (
+          <div className="space-y-2">
+            <Label>Vista Previa</Label>
+            <div className="p-3 bg-muted rounded-md">
+              <p className="text-sm text-muted-foreground">
+                {generatePreviewDescription(
+                  templates?.find(t => t.id === selectedTemplateId),
+                  parameters,
+                  paramValues
+                )}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Botones */}
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              templateTaskForm.reset();
+              setPanel('edit');
+              setIsCreatingTemplateTask(false);
+              setSelectedTemplateId("");
+              setParamValues({});
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={createTemplateTaskMutation.isPending || !selectedTemplateId}
+          >
+            {createTemplateTaskMutation.isPending ? "Creando..." : "Crear Tarea"}
+          </Button>
+        </div>
+      </div>
+    </form>
+  ) : (
+    // Subformulario para crear tarea personalizada
     <form 
       onSubmit={customTaskForm.handleSubmit(onCustomTaskSubmit)} 
       className="space-y-6"
@@ -813,11 +1065,85 @@ export function ConstructionTaskFormModal({
     </form>
   );
 
+  // Cargar opciones para parámetros de tipo select
+  useEffect(() => {
+    if (parameters?.length) {
+      const loadOptions = async () => {
+        const optionsMap: Record<string, any[]> = {};
+        
+        for (const param of parameters) {
+          if (param.type === 'select') {
+            try {
+              if (supabase) {
+                const { data: options, error } = await supabase
+                  .from('task_parameter_values')
+                  .select('name, label')
+                  .eq('parameter_id', param.id)
+                  .order('name');
+                
+                if (error) {
+                  console.error('Error fetching parameter options:', error);
+                  optionsMap[param.id] = [];
+                } else {
+                  optionsMap[param.id] = (options || []).map(opt => ({
+                    value: opt.name,
+                    label: opt.label || opt.name
+                  }));
+                }
+              }
+            } catch (error) {
+              console.error(`Error loading options for parameter ${param.id}:`, error);
+              optionsMap[param.id] = [];
+            }
+          }
+        }
+        
+        setParameterOptions(optionsMap);
+      };
+      
+      loadOptions();
+    }
+  }, [parameters]);
+
+  // Reset form when template changes
+  useEffect(() => {
+    if (selectedTemplateId) {
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', selectedTemplateId] });
+      refetchParameters();
+      
+      const newParamValues: Record<string, any> = {};
+      if (Array.isArray(parameters)) {
+        parameters.forEach(param => {
+          if (param.type === 'boolean') {
+            newParamValues[param.name] = false;
+          } else {
+            newParamValues[param.name] = '';
+          }
+        });
+      }
+      setParamValues(newParamValues);
+      
+      setTimeout(() => {
+        templateTaskForm.reset({
+          template_id: selectedTemplateId,
+          ...newParamValues
+        });
+      }, 50);
+    }
+  }, [selectedTemplateId, parameters, refetchParameters]);
+
+  const getSubformTitle = () => {
+    if (currentPanel !== 'subform') return "";
+    if (isCreatingTemplateTask) return "Crear desde Plantilla";
+    if (isCreatingCustomTask) return "Nueva Tarea Personalizada";
+    return "";
+  };
+
   const headerContent = (
     <FormModalHeader 
       title={
         currentPanel === 'subform' 
-          ? "Nueva Tarea Personalizada" 
+          ? getSubformTitle()
           : modalData.isEditing 
           ? "Editar Tarea de Construcción" 
           : "Agregar Tarea de Construcción"
@@ -838,6 +1164,7 @@ export function ConstructionTaskFormModal({
   return (
     <FormModalLayout
       columns={1}
+      size="large" // Tamaño fijo para el modal
       viewPanel={viewPanel}
       editPanel={editPanel}
       subformPanel={subformPanel}
