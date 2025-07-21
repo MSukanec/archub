@@ -196,6 +196,27 @@ export function GanttContainer({
     return () => document.removeEventListener('mousemove', handleMouseMove);
   }, [dragConnectionData, connectionLineData]);
 
+  // Función para manejar el inicio de conexión con posición inicial
+  const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start' | 'end' } | null, initialPosition?: { x: number; y: number }) => {
+    console.log('GanttContainer handleConnectionDrag:', data, initialPosition);
+    setDragConnectionData(data);
+    
+    if (data && initialPosition) {
+      // Crear la línea punteada inicial
+      setConnectionLineData({
+        startX: initialPosition.x,
+        startY: initialPosition.y,
+        mouseX: initialPosition.x,
+        mouseY: initialPosition.y
+      });
+      console.log('Línea punteada creada:', initialPosition);
+    } else {
+      // Limpiar la línea cuando se cancela el drag
+      setConnectionLineData(null);
+      console.log('Línea punteada limpiada');
+    }
+  }, []);
+
   // Función para iniciar el redimensionamiento
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -610,7 +631,7 @@ export function GanttContainer({
                         timelineEnd={timelineEnd}
                         timelineWidth={timelineWidth}
                         totalDays={calendarStructure.totalDays}
-                        onConnectionDrag={setDragConnectionData}
+                        onConnectionDrag={handleConnectionDrag}
                         dragConnectionData={dragConnectionData}
                         onTaskUpdate={() => {/* React Query se actualiza automáticamente */}}
                       />
