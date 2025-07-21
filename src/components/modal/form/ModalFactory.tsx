@@ -96,6 +96,7 @@ export function ModalFactory() {
     case 'dependency-connection':
       return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
     case 'budget-task-bulk-add':
+      console.log('ModalFactory: Rendering BudgetTaskBulkAddModal with data:', data);
       return <BudgetTaskBulkAddModal modalData={data} onClose={closeModal} />;
     default:
       return null;

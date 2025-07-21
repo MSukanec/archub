@@ -372,22 +372,22 @@ export default function ConstructionBudgets() {
     // Obtener IDs de tareas que ya están en el presupuesto
     const existingTaskIds = budgetTasks?.map(task => task.task_id) || [];
 
-    console.log('Calling openModal with:', {
-      type: 'budget-task-bulk-add',
-      data: {
-        budgetId,
-        projectId: userData.preferences.last_project_id,
-        organizationId: userData.preferences.last_organization_id,
-        existingTaskIds
-      }
-    });
-
-    openModal('budget-task-bulk-add', {
+    const modalData = {
       budgetId,
       projectId: userData.preferences.last_project_id,
       organizationId: userData.preferences.last_organization_id,
       existingTaskIds
-    });
+    };
+
+    console.log('Calling openModal with type:', 'budget-task-bulk-add');
+    console.log('Modal data:', modalData);
+    
+    try {
+      openModal('budget-task-bulk-add', modalData);
+      console.log('openModal called successfully');
+    } catch (error) {
+      console.error('Error calling openModal:', error);
+    }
   }
 
   // Delete task mutation
