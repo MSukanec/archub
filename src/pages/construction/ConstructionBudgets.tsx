@@ -15,18 +15,18 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import NewBudgetTaskModal from '@/modals/NewBudgetTaskModal'
+
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
-import { useConstructionTaskSearch, useConstructionTaskSearchFilterOptions, ConstructionTaskSearchFilters } from '@/hooks/use-construction-task-search'
+
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
-import { TaskSearchCombo } from '@/components/ui-custom/TaskSearchCombo'
+
 import { Input } from '@/components/ui/input'
-import { CreateGeneratedTaskUserModal } from '@/modals/CreateGeneratedTaskUserModal'
+
 import { validateUserDataForDatabaseOperation, logDatabaseOperation } from '@/utils/databaseSafety'
 
 
@@ -153,17 +153,6 @@ export default function ConstructionBudgets() {
 
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
-  const [budgetTaskModalOpen, setBudgetTaskModalOpen] = useState(false)
-  const [newTaskModalOpen, setNewTaskModalOpen] = useState(false)
-  const [customTaskModalOpen, setCustomTaskModalOpen] = useState(false)
-  const [currentBudgetId, setCurrentBudgetId] = useState<string>('')
-  
-  // Quick Add Task states
-  const [quickTaskId, setQuickTaskId] = useState<string>('')
-  // quickQuantity ya no es necesario porque viene de la vista construction_gantt_view
-  const [quickSearchQuery, setQuickSearchQuery] = useState('')
-  const [taskFilters, setTaskFilters] = useState<ConstructionTaskSearchFilters>({})
-  const [isAddingQuickTask, setIsAddingQuickTask] = useState(false)
 
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
@@ -177,20 +166,7 @@ export default function ConstructionBudgets() {
     setSidebarContext('construction')
   }, [])
 
-  // Quick task search hook con filtros  
-  const { data: quickTasks = [], isLoading: quickTasksLoading } = useConstructionTaskSearch(
-    userData?.organization?.id || '',
-    userData?.preferences?.last_project_id || '',
-    quickSearchQuery, 
-    taskFilters,
-    true
-  );
-  
-  // Hook para opciones de filtros
-  const { data: filterOptions, isLoading: filterOptionsLoading } = useConstructionTaskSearchFilterOptions(
-    userData?.organization?.id || '',
-    userData?.preferences?.last_project_id || ''
-  );
+
   
   // Hook para obtener unidades
   const { data: units = [] } = useQuery({
@@ -221,71 +197,22 @@ export default function ConstructionBudgets() {
     return unit?.name || '-';
   };
 
-  // Generar opciones para el TaskSearchCombo
-  const quickTaskOptions = quickTasks.map(task => ({
-    value: task.task_instance_id,
-    label: task.display_name || 'Sin nombre',
-    description: `${task.category_name || ''} • ${task.subcategory_name || ''}`.trim()
-  }));
-
-  // Hook para crear tareas en presupuesto (debe estar aquí para usar en handleQuickAddTask)
-  const createBudgetTaskMutation = useMutation({
-    mutationFn: async (taskData: any) => {
-      if (!supabase) {
-        throw new Error("Supabase client not initialized");
-      }
-
+  // Obtener parámetros para generar nombres de tareas
+  const { data: parameterValues = [] } = useQuery({
+    queryKey: ['task-parameter-values', userData?.organization?.id],
+    queryFn: async () => {
+      if (!supabase || !userData?.organization?.id) return [];
+      
       const { data, error } = await supabase
-        .from("budget_tasks")
-        .insert(taskData)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error creating budget task:", error);
-        throw error;
-      }
-
-      return data;
+        .from('task_parameter_values')
+        .select('*')
+        .eq('organization_id', userData.organization.id);
+      
+      if (error) throw error;
+      return data || [];
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-tasks", selectedBudgetId] });
-      queryClient.invalidateQueries({ queryKey: ["budgets"] });
-    }
+    enabled: !!userData?.organization?.id
   });
-
-  // Quick add task function
-  const handleQuickAddTask = async () => {
-    if (!quickTaskId || !selectedBudgetId || !userData?.organization?.id) return;
-    
-    setIsAddingQuickTask(true);
-    try {
-      await createBudgetTaskMutation.mutateAsync({
-        budget_id: selectedBudgetId,
-        task_id: quickTaskId,
-        organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || ''
-      });
-      
-      // Reset form
-      setQuickTaskId('');
-      setQuickSearchQuery('');
-      
-      toast({
-        title: "Tarea agregada",
-        description: "La tarea se agregó al presupuesto correctamente"
-      });
-    } catch (error) {
-      console.error('Error adding quick task:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo agregar la tarea al presupuesto",
-        variant: "destructive"
-      });
-    } finally {
-      setIsAddingQuickTask(false);
-    }
-  };
 
 
 
@@ -456,14 +383,8 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    setCurrentBudgetId(budgetId)
-    setBudgetTaskModalOpen(true)
-  }
-
-  // Close task modal
-  const handleCloseTaskModal = () => {
-    setBudgetTaskModalOpen(false)
-    setCurrentBudgetId('')
+    // TODO: Abrir modal de agregar tareas
+    console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
   }
 
   // Delete task mutation
@@ -624,8 +545,8 @@ export default function ConstructionBudgets() {
     };
 
     const handleAddTask = (budgetId: string) => {
-      setCurrentBudgetId(budgetId);
-      setBudgetTaskModalOpen(true);
+      // TODO: Abrir modal de agregar tareas
+      console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
     };
 
     const getUnitName = (unitId: string | null): string => {
@@ -787,38 +708,18 @@ export default function ConstructionBudgets() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="border-b border-border mb-4"></div>
-
-                {/* Second row: Task Search and Add */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 min-w-0">
-                    <TaskSearchCombo
-                      value={quickTaskId}
-                      onValueChange={setQuickTaskId}
-                      searchQuery={quickSearchQuery}
-                      onSearchChange={setQuickSearchQuery}
-                      options={quickTaskOptions}
-                      placeholder="Buscar tipo de tarea..."
-                      isLoading={quickTasksLoading}
-                      filters={taskFilters}
-                      onFiltersChange={setTaskFilters}
-                      filterOptions={filterOptions}
-                      showCreateButton={true}
-                      onCreateTask={() => setCustomTaskModalOpen(true)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
+                    
+                    {/* Add Tasks Button */}
                     <Button
-                      onClick={handleQuickAddTask}
-                      disabled={!quickTaskId || isAddingQuickTask}
-                      className="px-3 sm:px-4 whitespace-nowrap"
+                      onClick={() => {
+                        // TODO: Abrir modal de agregar tareas
+                        console.log('Abrir modal de agregar tareas');
+                      }}
+                      className="px-4"
                       size="sm"
                     >
-                      {isAddingQuickTask ? "Agregando..." : "Agregar Tarea"}
+                      <Plus className="w-4 h-4 mr-2" />
+                      AGREGAR TAREAS
                     </Button>
                   </div>
                 </div>
@@ -845,69 +746,7 @@ export default function ConstructionBudgets() {
 
 
 
-      {/* Budget Task Modal */}
-      {budgetTaskModalOpen && (
-        <NewBudgetTaskModal
-          open={budgetTaskModalOpen}
-          onClose={handleCloseTaskModal}
-          budgetId={currentBudgetId}
-          organizationId={userData?.organization?.id || ''}
-        />
-      )}
 
-      {/* New Task Modal from TaskSearchCombo */}
-      {newTaskModalOpen && (
-        <NewBudgetTaskModal
-          open={newTaskModalOpen}
-          onClose={() => setNewTaskModalOpen(false)}
-          budgetId={selectedBudget?.id || ''}
-          organizationId={userData?.organization?.id || ''}
-        />
-      )}
-
-      {/* Custom Task Modal from TaskSearchCombo */}
-      {customTaskModalOpen && (
-        <CreateGeneratedTaskUserModal
-          open={customTaskModalOpen}
-          onClose={() => setCustomTaskModalOpen(false)}
-          onTaskCreated={(taskId) => {
-            // Auto-select the created task
-            setQuickTaskId(taskId)
-            setCustomTaskModalOpen(false)
-            
-            // Automatically add the created task to the budget
-            if (selectedBudget && userData?.preferences?.last_organization_id) {
-              createBudgetTaskMutation.mutate({
-                budget_id: selectedBudget.id,
-                task_id: taskId,
-                organization_id: userData.preferences.last_organization_id,
-                project_id: userData.preferences?.last_project_id || ''
-              });
-            }
-          }}
-        />
-      )}
-
-      {/* Delete Budget Dialog */}
-      <AlertDialog open={!!deletingBudget} onOpenChange={() => setDeletingBudget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar presupuesto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente el presupuesto "{deletingBudget?.name}" y todas sus tareas asociadas.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => deletingBudget && deleteBudgetMutation.mutate(deletingBudget.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Layout>
   )
 }
