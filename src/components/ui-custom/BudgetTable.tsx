@@ -254,7 +254,7 @@ export function BudgetTable({
                 <Fragment key={rubroName}>
                   {/* Group Header Row */}
                   {groupingType !== 'none' && (
-                    <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-row-border)]"
+                    <div className="grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
                          style={{ gridTemplateColumns: `40px 60px ${groupingType === 'none' ? '120px ' : ''}1fr 60px 80px 80px 80px 100px 80px 60px` }}>
                       <div></div>
                       <div className="font-semibold text-xs">{rubroNumber}</div>
