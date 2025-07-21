@@ -94,8 +94,7 @@ export function BudgetTable({
   // Local state for search functionality
   const [showSearch, setShowSearch] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  // Local state for input values to prevent interruption during typing
-  const [localQuantities, setLocalQuantities] = useState<Record<string, string>>({});
+  // Local state for search functionality only
   
   // Group tasks based on groupingType
   const groupedTasks = useMemo(() => {
@@ -154,30 +153,7 @@ export function BudgetTable({
     return nestedGrouped;
   }, [budgetTasks, groupingType]);
   
-  // Update local quantities when budget tasks change
-  useEffect(() => {
-    if (budgetTasks) {
-      const quantities: Record<string, string> = {};
-      budgetTasks.forEach(task => {
-        quantities[task.id] = String(task.task?.quantity || 0);
-      });
-      setLocalQuantities(quantities);
-    }
-  }, [budgetTasks]);
-  
-  // Handle quantity input change (local state only)
-  const handleQuantityInputChange = (taskId: string, value: string) => {
-    setLocalQuantities(prev => ({
-      ...prev,
-      [taskId]: value
-    }));
-  };
-  
-  // Handle quantity save (when user finishes typing)
-  const handleQuantitySave = (taskId: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    handleUpdateQuantity(taskId, numericValue);
-  };
+  // No longer needed - quantity is now read-only
   
   if (isLoading) {
     return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
@@ -236,20 +212,7 @@ export function BudgetTable({
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Cantidad:</span>
-          <input
-            type="number"
-            value={localQuantities[task.id] || '0'}
-            onChange={(e) => handleQuantityInputChange(task.id, e.target.value)}
-            onBlur={(e) => handleQuantitySave(task.id, e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.currentTarget.blur();
-              }
-            }}
-            className="w-16 px-1 py-0.5 text-xs border rounded"
-            min="0"
-            step="0.01"
-          />
+          <span className="font-medium">{task.task?.quantity || '0'}</span>
           <span className="text-muted-foreground">{unitName}</span>
         </div>
         <div className="text-right">
@@ -521,21 +484,8 @@ export function BudgetTable({
                           {task.task?.unit_name || '-'}
                         </div>
                         
-                        <div className="flex items-center justify-start">
-                          <input
-                            type="number"
-                            value={localQuantities[task.id] || '0'}
-                            onChange={(e) => handleQuantityInputChange(task.id, e.target.value)}
-                            onBlur={(e) => handleQuantitySave(task.id, e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.currentTarget.blur();
-                              }
-                            }}
-                            className="w-16 px-2 py-1 text-xs border rounded"
-                            min="0"
-                            step="0.01"
-                          />
+                        <div className="text-xs flex items-center justify-start">
+                          {task.task?.quantity || '0'}
                         </div>
                         
                         <div className="text-xs flex items-center justify-start">$0</div>
