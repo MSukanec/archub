@@ -6,6 +6,25 @@ import { Link, Trash2 } from "lucide-react";
 import { useDeleteConstructionDependency } from "@/hooks/use-construction-dependencies";
 import { toast } from "@/hooks/use-toast";
 
+// Función para limpiar nombres de tareas eliminando códigos y variables
+function cleanTaskName(name: string): string {
+  if (!name) return 'Tarea sin nombre'
+  
+  // Eliminar códigos al inicio (ej: "RPE-000001: ")
+  let cleanedName = name.replace(/^[A-Z]{2,4}-[0-9]{6}:\s*/, '')
+  
+  // Eliminar variables template (ej: "{{aditivos}}", "{{mortar_type}}")
+  cleanedName = cleanedName.replace(/\{\{[^}]*\}\}\.?/g, '')
+  
+  // Eliminar puntos sobrantes al final
+  cleanedName = cleanedName.replace(/\.\s*$/, '')
+  
+  // Limpiar espacios múltiples y trim
+  cleanedName = cleanedName.replace(/\s+/g, ' ').trim()
+  
+  return cleanedName || 'Tarea sin nombre'
+}
+
 interface DependencyConnectionModalProps {
   modalData: ModalData;
   onClose: () => void;
@@ -53,7 +72,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
             Tarea Predecesora
           </div>
           <div className="text-sm font-medium">
-            {predecessorTask.display_name.replace(/\{\{[^}]*\}\}\.?/g, '').trim()}
+            {cleanTaskName(predecessorTask.display_name)}
           </div>
         </div>
         
@@ -70,7 +89,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
             Tarea Sucesora
           </div>
           <div className="text-sm font-medium">
-            {successorTask.display_name.replace(/\{\{[^}]*\}\}\.?/g, '').trim()}
+            {cleanTaskName(successorTask.display_name)}
           </div>
         </div>
       </div>

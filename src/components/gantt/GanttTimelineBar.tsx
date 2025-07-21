@@ -538,9 +538,9 @@ export function GanttTimelineBar({
       {/* PUNTOS DE CONEXIÓN - COMPLETAMENTE AFUERA COMO DHTMLX */}
       {shouldShowConnectionPoints && (
         <>
-          {/* Punto izquierdo - SIEMPRE color accent */}
+          {/* Punto izquierdo - SIEMPRE color accent - hover: 1.5x más grande */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all"
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:w-6 hover:h-6 transition-all duration-200"
             style={{ 
               left: '-30px',
               backgroundColor: 'var(--accent)'
@@ -549,9 +549,9 @@ export function GanttTimelineBar({
             title="Conectar desde inicio"
           />
           
-          {/* Punto derecho - SIEMPRE color accent */}
+          {/* Punto derecho - SIEMPRE color accent - hover: 1.5x más grande */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-all"
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:w-6 hover:h-6 transition-all duration-200"
             style={{ 
               right: '-30px',
               backgroundColor: 'var(--accent)'

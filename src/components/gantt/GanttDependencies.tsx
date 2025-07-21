@@ -197,7 +197,7 @@ export function GanttDependencies({
       {arrowPaths.map((arrow) => {
         return (
           <g key={arrow.id}>
-            {/* Línea de fondo blanca para contraste */}
+            {/* Línea de fondo blanca para contraste - hover: doble ancho */}
             <path
               d={arrow.path}
               stroke="white"
@@ -205,8 +205,12 @@ export function GanttDependencies({
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
+              style={{
+                transition: 'stroke-width 0.2s ease'
+              }}
+              className="hover:[stroke-width:6px]"
             />
-            {/* Línea principal de la flecha */}
+            {/* Línea principal de la flecha - hover: doble ancho */}
             <path
               d={arrow.path}
               stroke="var(--table-row-fg)"
@@ -215,7 +219,10 @@ export function GanttDependencies({
               markerEnd="url(#arrowhead)"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="cursor-pointer pointer-events-auto hover:stroke-red-500 transition-colors"
+              style={{
+                transition: 'stroke-width 0.2s ease, stroke 0.2s ease'
+              }}
+              className="cursor-pointer pointer-events-auto hover:stroke-red-500 hover:[stroke-width:4px]"
               onClick={() => {
                 if (onDependencyClick) {
                   onDependencyClick(arrow.dependency);
