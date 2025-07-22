@@ -128,13 +128,21 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   
   // Center timeline on today - for both initial load and HOY button
   const centerTimelineOnToday = React.useCallback(() => {
+    console.log('centerTimelineOnToday called', { 
+      timelineElement: !!timelineElement, 
+      dateRangeLength: dateRange.length,
+      todayIndex: dateRange.findIndex(date => isToday(date))
+    })
     if (timelineElement && dateRange.length > 0) {
       const todayIndex = dateRange.findIndex(date => isToday(date))
       if (todayIndex !== -1) {
         const columnWidth = 65 // Updated to match new column width
         const containerWidth = timelineElement.clientWidth
         const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
+        console.log('Scrolling to position:', scrollPosition, 'today index:', todayIndex)
         timelineElement.scrollLeft = Math.max(0, scrollPosition)
+      } else {
+        console.log('Today not found in date range')
       }
     }
   }, [timelineElement, dateRange])
@@ -146,9 +154,9 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     }
   }, [timelineElement, centerTimelineOnToday])
 
-  // Center on today when HOY button is triggered
+  // Center on today when HOY button is triggered (responds to any change in triggerTodayCenter)
   React.useEffect(() => {
-    if (triggerTodayCenter && timelineElement) {
+    if (timelineElement) {
       console.log('HOY button triggered, centering timeline on today')
       setTimeout(centerTimelineOnToday, 100)
     }
