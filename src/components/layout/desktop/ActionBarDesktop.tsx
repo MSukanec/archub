@@ -262,9 +262,9 @@ export function ActionBarDesktop({
         {primaryActionLabel && onPrimaryActionClick && (
           <Button
             onClick={onPrimaryActionClick}
-            className="h-9 px-4"
+            className="h-8"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 mr-2" />
             {primaryActionLabel}
           </Button>
         )}
