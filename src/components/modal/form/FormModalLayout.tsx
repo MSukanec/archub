@@ -97,7 +97,7 @@ export function FormModalLayout({
           <div className="shrink-0 relative">
             {headerContent}
             <Button
-              variant="ghost"
+              variant="ghost-flat"
               size="sm"
               onClick={handleClose}
               className="absolute top-1/2 right-4 transform -translate-y-1/2 h-8 w-8 p-0"

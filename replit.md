@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. MODAL CLOSE BUTTON FLATTENED: Changed modal close button (X) to use ghost-flat variant without hover translateY effect - COMPLETED
+  • Updated FormModalLayout.tsx close button from "ghost" to "ghost-flat" variant
+  • Eliminated unwanted downward movement on hover for modal close buttons
+  • Close button now behaves like standard ghost button without shadow or movement effects
+  • Maintains consistent flat styling across all modal close interactions
 - July 22, 2025. ACTIONBAR CONDITIONAL VISIBILITY COMPLETED: ActionBarDesktop now only appears when there are tasks, hidden in empty state - COMPLETED
   • Moved ActionBarDesktop component inside the data condition in ConstructionTasks.tsx
   • ActionBar no longer displays when tasks list is empty for cleaner empty state experience
