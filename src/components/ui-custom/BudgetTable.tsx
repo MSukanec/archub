@@ -264,99 +264,6 @@ export function BudgetTable({
         </div>
       )}
 
-      {/* Table Action Bar - Desktop only */}
-      <div className="hidden lg:block">
-        <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
-             style={{ marginBottom: '3px' }}>
-          {/* Empty left side */}
-          <div></div>
-          
-          {/* Right side - Search Field + Search Button + Filter Button + Add Tasks Button */}
-          <div className="flex items-center gap-2">
-            {showSearch && (
-              <input
-                type="text"
-                placeholder="Buscar tareas..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className="h-6 px-2 text-xs border border-gray-300 rounded bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--accent)] w-48"
-                autoFocus
-                onBlur={() => {
-                  if (!searchValue) {
-                    setShowSearch(false);
-                  }
-                }}
-              />
-            )}
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
-              onClick={() => setShowSearch(!showSearch)}
-            >
-              <Search className="w-4 h-4" />
-            </Button>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
-                >
-                  <Filter className="w-4 h-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-48 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
-                <div className="py-1">
-                  <button
-                    onClick={() => onGroupingChange?.('none')}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Sin agrupar
-                  </button>
-                  <button
-                    onClick={() => onGroupingChange?.('rubros')}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Agrupar por Rubros
-                  </button>
-                  <button
-                    onClick={() => onGroupingChange?.('phases')}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Agrupar por Fases
-                  </button>
-                  <button
-                    onClick={() => onGroupingChange?.('rubros-phases')}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Rubros y Fases
-                  </button>
-                  <button
-                    onClick={() => onGroupingChange?.('phases-rubros')}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                  >
-                    Fases y Rubros
-                  </button>
-                </div>
-              </PopoverContent>
-            </Popover>
-            
-            <Button
-              variant="default"
-              size="sm"
-              className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
-              onClick={() => onAddTasks?.()}
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              AGREGAR TAREAS
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Show EmptyState when no tasks, but keep selector visible */}
       {(!budgetTasks || budgetTasks.length === 0) ? (
         <EmptyState
@@ -376,6 +283,123 @@ export function BudgetTable({
         />
       ) : (
         <>
+          {/* Table Action Bar - Desktop only */}
+          <div className="hidden lg:block">
+            <div className="flex items-center justify-between px-4 py-2 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border border-[var(--table-header-border)] rounded-lg"
+                 style={{ marginBottom: '3px' }}>
+              {/* Empty left side */}
+              <div></div>
+              
+              {/* Right side - Search Field + Search Button + Filter Button + Add Tasks Button */}
+              <div className="flex items-center gap-2">
+                {showSearch && (
+                  <input
+                    type="text"
+                    placeholder="Buscar tareas..."
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className="h-6 px-2 text-xs border border-gray-300 rounded bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--accent)] w-48"
+                    autoFocus
+                    onBlur={() => {
+                      if (!searchValue) {
+                        setShowSearch(false);
+                      }
+                    }}
+                  />
+                )}
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
+                  onClick={() => setShowSearch(!showSearch)}
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+                
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 bg-transparent hover:bg-transparent text-white hover:text-[var(--accent)]"
+                    >
+                      <Filter className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-48 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <div className="py-1">
+                      <button
+                        onClick={() => onGroupingChange?.('none')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Sin agrupar
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('rubros')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Agrupar por Rubros
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('phases')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Agrupar por Fases
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('rubros-phases')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Rubros y Fases
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('phases-rubros')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Fases y Rubros
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+                  onClick={() => onAddTasks?.()}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  AGREGAR TAREAS
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Bar - Mobile specific with grouping and add button */}
+          <div className="lg:hidden flex items-center justify-between mb-4 p-3 bg-[var(--table-header-bg)] rounded-lg border border-[var(--table-header-border)]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Agrupado por:</span>
+              <span className="text-xs font-medium capitalize">{
+                groupingType === 'rubros' ? 'Rubros' :
+                groupingType === 'phases' ? 'Fases' :
+                groupingType === 'rubros-phases' ? 'Rubros y Fases' :
+                groupingType === 'phases-rubros' ? 'Fases y Rubros' :
+                'Sin Agrupar'
+              }</span>
+            </div>
+            
+            <Button
+              variant="default"
+              size="sm"
+              className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+              onClick={() => onAddTasks?.()}
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              AGREGAR TAREAS
+            </Button>
+          </div>
+
           {/* Desktop Table View - Using Table.tsx structure */}
           <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
             {/* Column Headers - Different layouts for budget vs construction mode */}
