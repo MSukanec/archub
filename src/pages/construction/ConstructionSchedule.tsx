@@ -515,14 +515,14 @@ export default function ConstructionSchedule() {
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             showGrouping={false}
-            primaryActionLabel="Nueva Tarea"
+            primaryActionLabel="+ Nueva Tarea"
             onPrimaryActionClick={handleAddTask}
             customActions={[
               <Button 
                 key="create-phase"
                 onClick={handleAddPhase} 
                 variant="secondary" 
-                className="h-10 px-4"
+                className="h-9 px-4"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Crear Fase
