@@ -51,14 +51,11 @@ export function ActionBarDesktop({
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Budget Selector (first), then Grouping */}
+      {/* Left side - Budget Selector, Search, then Grouping */}
       <div className="flex items-center gap-3">
         {/* Budget Selector - FIRST (only for budgets page) */}
         {budgetSelector && (
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-              Presupuesto:
-            </span>
             <div className="w-64">
               <Select value={budgetSelector.selectedBudgetId} onValueChange={budgetSelector.onBudgetChange}>
                 <SelectTrigger className="w-full h-8 text-sm">
@@ -97,16 +94,26 @@ export function ActionBarDesktop({
           </div>
         )}
 
-        {/* Grouping button - SECOND */}
+        {/* Expandable Search Button - SECOND */}
+        {showSearch && (
+          <ExpandableSearchButton
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            onSearchSubmit={onSearchClick}
+            placeholder="Buscar tareas, rubros o fases..."
+          />
+        )}
+
+        {/* Grouping button - THIRD (after search) */}
         {showGrouping && onGroupingChange && (
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                size="default"
+                size="sm"
+                className="h-8 w-8 p-0"
               >
-                <LayoutGrid />
-                Agrupar
+                <LayoutGrid className="w-4 h-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent 
@@ -174,18 +181,8 @@ export function ActionBarDesktop({
         )}
       </div>
 
-      {/* Right side - Search and Main actions */}
+      {/* Right side - Main actions */}
       <div className="flex items-center gap-2">
-        {/* Expandable Search Button - moved to RIGHT side */}
-        {showSearch && (
-          <ExpandableSearchButton
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            onSearchSubmit={onSearchClick}
-            placeholder="Buscar tareas, rubros o fases..."
-          />
-        )}
-
         {/* Custom actions */}
         {customActions.map((action, index) => (
           <div key={index}>{action}</div>

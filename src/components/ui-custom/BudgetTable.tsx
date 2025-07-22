@@ -62,12 +62,6 @@ interface BudgetTableProps {
   handleAddTask: (budgetId: string) => void;
   onGroupingChange?: (value: string) => void;
   onAddTasks?: () => void;
-  // New props for budget selector row
-  budgets?: any[];
-  selectedBudgetId?: string;
-  onBudgetChange?: (budgetId: string) => void;
-  onEditBudget?: () => void;
-  onDeleteBudget?: () => void;
   // Construction mode props
   mode?: 'budget' | 'construction';
   handleEditTask?: (task: any) => void;
@@ -88,11 +82,6 @@ export function BudgetTable({
   handleAddTask,
   onGroupingChange,
   onAddTasks,
-  budgets,
-  selectedBudgetId,
-  onBudgetChange,
-  onEditBudget,
-  onDeleteBudget,
   mode = 'budget',
   handleEditTask
 }: BudgetTableProps) {
@@ -215,54 +204,6 @@ export function BudgetTable({
 
   return (
     <div>
-      {/* Budget Selector Row - Desktop only */}
-      {budgets && selectedBudgetId && onBudgetChange && (
-        <div className="hidden lg:block mb-2">
-          <div className="flex items-center justify-between px-4 py-2 bg-[var(--card-bg)] text-xs font-medium text-[var(--card-fg)] border border-[var(--card-border)] rounded-lg">
-            {/* Budget Selector - Left side */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                Presupuesto:
-              </span>
-              <div className="w-64">
-                <Select value={selectedBudgetId} onValueChange={onBudgetChange}>
-                  <SelectTrigger className="w-full h-7 text-xs">
-                    <SelectValue placeholder="Selecciona un presupuesto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {budgets.map((budget: any) => (
-                      <SelectItem key={budget.id} value={budget.id}>
-                        <span className="text-left">{budget.name}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {/* Budget Action Buttons - Right side */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-                onClick={onEditBudget}
-              >
-                <Edit className="w-3 h-3" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                onClick={onDeleteBudget}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Show EmptyState when no tasks, but keep selector visible */}
       {(!budgetTasks || budgetTasks.length === 0) ? (
