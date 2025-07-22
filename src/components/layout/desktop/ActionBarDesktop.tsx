@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Search, Filter, X } from 'lucide-react'
+import React from 'react'
+import { Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { cn } from '@/lib/utils'
 
 interface ActionBarDesktopProps {
@@ -29,68 +29,27 @@ export function ActionBarDesktop({
   customActions = [],
   className
 }: ActionBarDesktopProps) {
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
-
-  const handleSearchClick = () => {
-    setIsSearchExpanded(true)
-    if (onSearchClick) {
-      onSearchClick()
-    }
-  }
-
-  const handleSearchClose = () => {
-    setIsSearchExpanded(false)
-    if (onSearchChange) {
-      onSearchChange('')
-    }
-  }
-
   return (
     <div 
       className={cn(
-        "hidden md:flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)] mb-6 transition-all duration-300",
+        "hidden md:flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)] mb-6",
         className
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Search expanded or empty */}
-      <div className="flex items-center flex-1">
-        {isSearchExpanded && (
-          <div className="relative flex-1 max-w-md mr-4">
-            <Input
-              type="text"
-              placeholder="Buscar tareas, rubros o fases..."
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="pr-12 h-9 bg-white rounded-full border-gray-300 focus:border-accent focus:ring-accent"
-              autoFocus
-            />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-              <Search className="h-4 w-4 text-gray-400" />
-              <button
-                onClick={handleSearchClose}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="h-3 w-3 text-gray-400" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Left side - Empty for spacing */}
+      <div className="flex-1"></div>
 
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
-        {/* Search button - hidden when expanded */}
-        {showSearch && !isSearchExpanded && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSearchClick}
-            className="h-9 px-3"
-          >
-            <Search className="h-4 w-4 mr-2" />
-            Buscar
-          </Button>
+        {/* Expandable Search Button */}
+        {showSearch && (
+          <ExpandableSearchButton
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            onSearchSubmit={onSearchClick}
+            placeholder="Buscar tareas, rubros o fases..."
+          />
         )}
 
         {/* Filters button */}

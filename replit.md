@@ -118,13 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 22, 2025. ACTIONBAR EXPANDABLE SEARCH FUNCTIONALITY COMPLETED: Implemented inline search expansion with icon positioning like reference design - COMPLETED
-  • Added expandable search: clicking "Buscar" expands input field with smooth transition
-  • Search icon moves to right side of input field when expanded, matching reference image
-  • Added close button (X) next to search icon for collapsing the expanded search
-  • Input field gets focus automatically and uses rounded design like reference
-  • Search button hides when expanded, appears when collapsed for clean UI state management
-  • Integrated with existing search functionality in ConstructionTasks page
+- July 22, 2025. EXPANDABLE SEARCH BUTTON COMPONENT COMPLETED: Created self-transforming button that expands into search input with smooth animations - COMPLETED
+  • Created ExpandableSearchButton component that transforms from button to search input in-place
+  • Button physically expands from compact state (w-auto) to search field (w-80) with transition-all duration-300
+  • Search icon smoothly moves from left to right side during expansion using CSS order properties
+  • Input field appears with opacity transition while button text fades out simultaneously
+  • Added ghost-search variant to button.tsx for consistent styling with existing ghost buttons
+  • Close button (X) appears only when expanded, positioned on the right after search icon
+  • Auto-focus and form submission support for complete search functionality
+  • Integrated into ActionBarDesktop replacing previous separate component approach
 - July 22, 2025. BUTTON SHADOW SYSTEM COMPLETED: All button variants now have consistent shadow system with normal and hover states - COMPLETED
   • Created --button-shadow-normal and --button-shadow-hover CSS variables for light/dark themes
   • Applied shadow-button-normal (half shadow) to all button variants by default
