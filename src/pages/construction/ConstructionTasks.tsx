@@ -142,16 +142,7 @@ export default function ConstructionTasks() {
 
 
   const headerProps = {
-    title: "Listado de Tareas",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    actions: [
-      <Button key="new-task" onClick={handleAddTask} className="h-8 px-3 text-sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Nueva Tarea
-      </Button>
-    ]
+    title: "Listado de Tareas"
   }
 
   if (isLoading) {
