@@ -515,40 +515,10 @@ export default function ConstructionSchedule() {
           title="No hay tareas en el cronograma"
           description="Comienza creando tareas para ver el cronograma del proyecto."
           action={
-            <div className="space-y-4 mt-4">
-              {/* Tabs dentro del Empty State */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
-                  <TabsTrigger 
-                    value="gantt" 
-                    className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-                  >
-                    <BarChart3 className="h-4 w-4" />
-                    Vista Gantt
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="table" 
-                    className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-                  >
-                    <Table className="h-4 w-4" />
-                    Listado de Tareas
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="analytics" 
-                    className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-                  >
-                    <Activity className="h-4 w-4" />
-                    Análisis Visual
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              
-              {/* Botón de acción */}
-              <Button onClick={handleAddTask}>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Tarea
-              </Button>
-            </div>
+            <Button onClick={handleAddTask}>
+              <Plus className="h-4 w-4 mr-2" />
+              Crear Primera Tarea
+            </Button>
           }
         />
       ) : (
