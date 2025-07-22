@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import UserSelector from "@/components/ui-custom/UserSelector";
-import { useCreateKanbanCard } from "@/hooks/use-kanban";
+import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +42,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const { toast } = useToast();
   const { setPanel } = useModalPanelStore();
   const createCardMutation = useCreateKanbanCard();
+  const updateCardMutation = useUpdateKanbanCard();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
@@ -72,6 +73,13 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
     }
   }, [userData?.user?.id, form, isEditing]);
 
+  // Set panel to edit mode when editing a card
+  useEffect(() => {
+    if (isEditing) {
+      setPanel('edit');
+    }
+  }, [isEditing, setPanel]);
+
   const handleClose = () => {
     form.reset();
     setPanel('edit'); // Reset to edit panel
@@ -79,35 +87,54 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   };
 
   const onSubmit = async (data: CardFormData) => {
-    if (!listId) {
-      toast({
-        title: "Error",
-        description: "No se pudo identificar la lista",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
-      await createCardMutation.mutateAsync({
-        list_id: listId,
-        title: data.title,
-        description: data.description || undefined,
-        created_by: data.created_by,
-        assigned_to: data.assigned_to || undefined,
-        due_date: data.due_date || undefined
-      });
-      
-      handleClose();
-      toast({
-        title: "Tarjeta creada",
-        description: "La tarjeta se ha creado exitosamente"
-      });
+      if (isEditing && card) {
+        // Update existing card
+        await updateCardMutation.mutateAsync({
+          id: card.id,
+          title: data.title,
+          description: data.description || undefined,
+          assigned_to: data.assigned_to || undefined,
+          due_date: data.due_date || undefined,
+          list_id: card.list_id
+        });
+        
+        handleClose();
+        toast({
+          title: "Tarjeta actualizada",
+          description: "La tarjeta se ha actualizado exitosamente"
+        });
+      } else {
+        // Create new card
+        if (!listId) {
+          toast({
+            title: "Error",
+            description: "No se pudo identificar la lista",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        await createCardMutation.mutateAsync({
+          list_id: listId,
+          title: data.title,
+          description: data.description || undefined,
+          created_by: data.created_by,
+          assigned_to: data.assigned_to || undefined,
+          due_date: data.due_date || undefined
+        });
+        
+        handleClose();
+        toast({
+          title: "Tarjeta creada",
+          description: "La tarjeta se ha creado exitosamente"
+        });
+      }
     } catch (error) {
-      console.error('Error creating card:', error);
+      console.error('Error saving card:', error);
       toast({
         title: "Error",
-        description: "No se pudo crear la tarjeta",
+        description: isEditing ? "No se pudo actualizar la tarjeta" : "No se pudo crear la tarjeta",
         variant: "destructive"
       });
     }
@@ -179,7 +206,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
               <FormControl>
                 <UserSelector
                   users={users}
-                  value={field.value}
+                  value={field.value || ''}
                   onChange={field.onChange}
                   placeholder="Sin asignar"
                 />
@@ -222,7 +249,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       onLeftClick={handleClose}
       rightLabel={isEditing ? 'Actualizar' : 'Crear Tarjeta'}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={createCardMutation.isPending}
+      showLoadingSpinner={createCardMutation.isPending || updateCardMutation.isPending}
     />
   );
 
