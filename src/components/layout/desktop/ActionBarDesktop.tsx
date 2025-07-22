@@ -106,7 +106,7 @@ export function ActionBarDesktop({
                 size="default"
               >
                 <LayoutGrid />
-                <span>Agrupar</span>
+                Agrupar
               </Button>
             </PopoverTrigger>
             <PopoverContent 
