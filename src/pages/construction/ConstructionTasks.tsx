@@ -207,7 +207,7 @@ export default function ConstructionTasks() {
             showGrouping
             groupingType={groupingType}
             onGroupingChange={setGroupingType}
-            primaryActionLabel="+ Nueva Tarea"
+            primaryActionLabel="Nueva Tarea"
             onPrimaryActionClick={handleAddTask}
           />
           

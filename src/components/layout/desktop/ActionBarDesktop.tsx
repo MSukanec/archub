@@ -51,9 +51,9 @@ export function ActionBarDesktop({
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Budget Selector, Search, then Grouping */}
+      {/* Left side - Budget Selector (casos puntuales) */}
       <div className="flex items-center gap-3">
-        {/* Budget Selector - FIRST (only for budgets page) */}
+        {/* Budget Selector - ONLY for specific cases like budgets page */}
         {budgetSelector && (
           <div className="flex items-center gap-2">
             <div className="w-64">
@@ -93,8 +93,11 @@ export function ActionBarDesktop({
             </div>
           </div>
         )}
+      </div>
 
-        {/* Expandable Search Button - SECOND */}
+      {/* Right side - SEARCH → GHOST BUTTONS → SECONDARY → PRIMARY */}
+      <div className="flex items-center gap-2">
+        {/* 1. SEARCH */}
         {showSearch && (
           <ExpandableSearchButton
             searchValue={searchValue}
@@ -104,7 +107,7 @@ export function ActionBarDesktop({
           />
         )}
 
-        {/* Grouping button - THIRD (after search) */}
+        {/* 2. GHOST BUTTONS */}
         {showGrouping && onGroupingChange && (
           <Popover>
             <PopoverTrigger asChild>
@@ -179,22 +182,19 @@ export function ActionBarDesktop({
             </PopoverContent>
           </Popover>
         )}
-      </div>
 
-      {/* Right side - Main actions */}
-      <div className="flex items-center gap-2">
-        {/* Custom actions */}
+        {/* 3. SECONDARY BUTTONS (Custom actions) */}
         {customActions.map((action, index) => (
           <div key={index}>{action}</div>
         ))}
 
-        {/* Primary action button */}
+        {/* 4. PRIMARY BUTTON */}
         {primaryActionLabel && onPrimaryActionClick && (
           <Button
             onClick={onPrimaryActionClick}
             className="h-9 px-4"
           >
-            <Plus />
+            <Plus className="w-4 h-4" />
             {primaryActionLabel}
           </Button>
         )}

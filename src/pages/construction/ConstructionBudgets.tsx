@@ -631,7 +631,6 @@ export default function ConstructionBudgets() {
         generateTaskDisplayName={generateTaskDisplayName}
         parameterValues={parameterValues}
         getUnitName={getUnitName}
-        handleUpdateQuantity={handleUpdateQuantity}
         handleDeleteTask={handleDeleteTask}
         handleAddTask={handleAddTask}
         onGroupingChange={setGroupingType}
@@ -642,26 +641,6 @@ export default function ConstructionBudgets() {
               queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
             }
           });
-        }}
-        // New props for budget selector
-        budgets={filteredBudgets}
-        selectedBudgetId={selectedBudgetId}
-        onBudgetChange={(budgetId) => {
-          console.log('Budget selector changed to:', budgetId);
-          setSelectedBudgetId(budgetId);
-          if (userData?.user?.id) {
-            updateBudgetPreferenceMutation.mutate(budgetId);
-          }
-        }}
-        onEditBudget={() => {
-          if (selectedBudget) {
-            openModal('budget', { budget: selectedBudget });
-          }
-        }}
-        onDeleteBudget={() => {
-          if (selectedBudget) {
-            handleDeleteBudget(selectedBudget);
-          }
         }}
       />
     );

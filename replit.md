@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. ACTIONBAR LAYOUT PERFECTED AND BUTTON STYLING COMPLETED: Finalized layout structure and ghost button appearance - COMPLETED
+  • Layout standardized to exact order: SEARCH → GHOST BUTTONS (icons only) → SECONDARY BUTTONS → PRIMARY BUTTONS
+  • Search button converted to icon-only display (removed "Buscar" text) with 8x8 sizing matching other ghost buttons
+  • All ghost buttons in ActionBar now display icons only without any text labels whatsoever
+  • Budget selector left on the left side only for specific cases like budgets page (casos puntuales)
+  • Eliminated "+" from "Nueva Tarea" button text in construction tasks page
+  • Cleaned up legacy BudgetTaskTableWithSelector component by removing unused budget selector props
+  • ActionBar right side now flows logically from search through different button types to primary action
 - July 22, 2025. CONSTRUCTION SCHEDULE ACTION BAR IMPLEMENTED: Added ActionBarDesktop to cronograma page with dual action buttons and search - COMPLETED
   • Integrated ActionBarDesktop component above tabs in construction schedule page
   • Primary action: "Nueva Tarea" button (green) for task creation

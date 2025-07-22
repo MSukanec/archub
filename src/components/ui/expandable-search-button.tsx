@@ -62,14 +62,11 @@ export function ExpandableSearchButton({
             "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
             "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
             // Width and gap changes only when expanded - MAINTAIN EXACT HEIGHT
-            isExpanded ? "w-80 !gap-1 overflow-hidden h-10" : "h-10"
+            isExpanded ? "w-80 !gap-1 overflow-hidden h-10" : "h-8 w-8 p-0"
           )}
         >
           {!isExpanded && (
-            <>
-              <Search />
-              Buscar
-            </>
+            <Search className="w-4 h-4" />
           )}
           
           {isExpanded && (
