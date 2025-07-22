@@ -89,37 +89,41 @@ export function Selector({
       
       {/* Expanded options */}
       {open && (
-        <div 
-          className="absolute top-full left-0 right-0 z-50 rounded-lg shadow-button-normal border overflow-hidden"
-          style={{ 
-            backgroundColor: 'var(--card-bg)',
-            borderColor: 'var(--card-border)',
-            marginTop: '-1px' // Overlap by 1px to eliminate any gap
-          }}
-        >
-          <div className="py-1">
-            {options.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => handleSelect(option.value)}
-                className={cn(
-                  "w-full text-left px-4 py-2 text-sm font-medium transition-colors",
-                  "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                  value === option.value && "bg-[var(--button-ghost-hover-bg)]"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-            
-            {options.length === 0 && (
-              <div className="px-4 py-2 text-sm text-[var(--button-ghost-text)]">
-                No hay opciones disponibles
-              </div>
-            )}
+        <>
+          {/* Invisible bridge to prevent hover gaps */}
+          <div className="absolute top-full left-0 right-0 h-1 z-40" />
+          
+          <div 
+            className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg shadow-button-normal border overflow-hidden"
+            style={{ 
+              backgroundColor: 'var(--card-bg)',
+              borderColor: 'var(--card-border)'
+            }}
+          >
+            <div className="py-1">
+              {options.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelect(option.value)}
+                  className={cn(
+                    "w-full text-left px-4 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    value === option.value && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+              
+              {options.length === 0 && (
+                <div className="px-4 py-2 text-sm text-[var(--button-ghost-text)]">
+                  No hay opciones disponibles
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
