@@ -90,10 +90,11 @@ export function Selector({
       {/* Expanded options */}
       {open && (
         <div 
-          className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg shadow-button-normal border overflow-hidden"
+          className="absolute top-full left-0 right-0 z-50 rounded-lg shadow-button-normal border overflow-hidden"
           style={{ 
             backgroundColor: 'var(--card-bg)',
-            borderColor: 'var(--card-border)'
+            borderColor: 'var(--card-border)',
+            marginTop: '-1px' // Overlap by 1px to eliminate any gap
           }}
         >
           <div className="py-1">
