@@ -82,9 +82,9 @@ export default function ProfileSettings() {
     setSecondarySidebarDocked(value)
   }
 
-  const handleThemeChange = (value: boolean) => {
+  const handleThemeChange = (isDarkMode: boolean) => {
     // Update theme immediately in UI
-    setTheme(value)
+    setTheme(isDarkMode ? 'dark' : 'light')
     // The auto-save system will handle the database update automatically
   }
 
@@ -175,7 +175,7 @@ export default function ProfileSettings() {
                   </div>
                 </div>
                 <Switch
-                  checked={userData?.preferences?.sidebar_docked || false}
+                  checked={sidebarDocked}
                   onCheckedChange={handleSidebarDockedChange}
                 />
               </div>
