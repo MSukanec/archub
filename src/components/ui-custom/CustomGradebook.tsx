@@ -25,11 +25,7 @@ interface AttendanceRecord {
 interface CustomGradebookProps {
   workers?: Worker[]
   attendance?: AttendanceRecord[]
-  startDate?: Date
-  endDate?: Date
   hideWeekends?: boolean
-  onStartDateChange?: (date: Date) => void
-  onEndDateChange?: (date: Date) => void
   onHideWeekendsChange?: (hideWeekends: boolean) => void
   onExportAttendance?: () => void
 }
@@ -37,14 +33,36 @@ interface CustomGradebookProps {
 const CustomGradebook: React.FC<CustomGradebookProps> = ({
   workers = [],
   attendance = [],
-  startDate = subDays(new Date(), 15), // Default: 15 days before today
-  endDate = addDays(new Date(), 15),   // Default: 15 days after today
   hideWeekends = false,
-  onStartDateChange,
-  onEndDateChange,
   onHideWeekendsChange,
   onExportAttendance
 }) => {
+  // Calculate date range automatically based on attendance data
+  const { startDate, endDate } = React.useMemo(() => {
+    if (!attendance || attendance.length === 0) {
+      // Default range if no attendance data
+      const today = new Date()
+      return {
+        startDate: subDays(today, 15),
+        endDate: addDays(today, 15)
+      }
+    }
+
+    // Find the earliest attendance date
+    const attendanceDates = attendance.map(record => new Date(record.day)).sort((a, b) => a.getTime() - b.getTime())
+    const firstAttendanceDate = attendanceDates[0]
+    
+    // Set start date as the first attendance date
+    const calculatedStartDate = firstAttendanceDate
+    // Set end date as exactly 1 year from the first attendance date
+    const calculatedEndDate = addDays(firstAttendanceDate, 365)
+
+    return {
+      startDate: calculatedStartDate,
+      endDate: calculatedEndDate
+    }
+  }, [attendance])
+
   // Generate date range
   const dateRange = React.useMemo(() => {
     const dates = eachDayOfInterval({ start: startDate, end: endDate })
@@ -110,58 +128,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Timeline element state - declared early to avoid reference errors
   const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
   
-  // Auto-center on today ONLY on initial load
-  const [hasInitialized, setHasInitialized] = React.useState(false)
-  React.useEffect(() => {
-    if (!hasInitialized) {
-      const today = startOfDay(new Date())
-      const newStart = subDays(today, 15)
-      const newEnd = addDays(today, 15)
-      onStartDateChange?.(newStart)
-      onEndDateChange?.(newEnd)
-      setHasInitialized(true)
-    }
-  }, [hasInitialized]) // Only run once on mount
-
-  // Navigate dates
-  const navigateDates = (direction: 'prev' | 'next') => {
-    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-    if (direction === 'prev') {
-      const newStart = addDays(startDate, -days)
-      const newEnd = addDays(endDate, -days)
-      onStartDateChange?.(newStart)
-      onEndDateChange?.(newEnd)
-    } else {
-      const newStart = addDays(startDate, days)
-      const newEnd = addDays(endDate, days)
-      onStartDateChange?.(newStart)
-      onEndDateChange?.(newEnd)
-    }
-  }
-
-  // Navigate to today
-  const navigateToToday = () => {
-    const today = startOfDay(new Date())
-    const newStart = subDays(today, 15)
-    const newEnd = addDays(today, 15)
-    onStartDateChange?.(newStart)
-    onEndDateChange?.(newEnd)
-    
-    // Manually center timeline after data update
-    setTimeout(() => {
-      if (timelineElement) {
-        const todayIndex = eachDayOfInterval({ start: newStart, end: newEnd }).findIndex(date => isToday(date))
-        if (todayIndex !== -1) {
-          const columnWidth = 40
-          const containerWidth = timelineElement.clientWidth
-          const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
-          timelineElement.scrollLeft = Math.max(0, scrollPosition)
-        }
-      }
-    }, 100)
-  }
-
-  // Manual center function for initial load
+  // Auto-center on today when component loads
   const centerTimelineOnToday = React.useCallback(() => {
     if (timelineElement && dateRange.length > 0) {
       const todayIndex = dateRange.findIndex(date => isToday(date))
@@ -174,27 +141,12 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     }
   }, [timelineElement, dateRange])
 
-  // Auto-center only on initial component load
+  // Auto-center on component load if today is in range
   React.useEffect(() => {
-    if (hasInitialized && timelineElement) {
+    if (timelineElement) {
       setTimeout(centerTimelineOnToday, 100)
     }
-  }, [hasInitialized, timelineElement, centerTimelineOnToday])
-
-  // Handle date input changes
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newStart = new Date(e.target.value)
-    if (!isNaN(newStart.getTime())) {
-      onStartDateChange?.(newStart)
-    }
-  }
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEnd = new Date(e.target.value)
-    if (!isNaN(newEnd.getTime())) {
-      onEndDateChange?.(newEnd)
-    }
-  }
+  }, [timelineElement, centerTimelineOnToday])
 
   // Drag functionality for timeline scrolling
   const [isDragging, setIsDragging] = React.useState(false)
@@ -298,44 +250,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Date Range Controls */}
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => navigateDates('prev')}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              
-              <div className="flex items-center gap-2">
-                <Label htmlFor="start-date" className="text-xs text-muted-foreground">Desde:</Label>
-                <input
-                  id="start-date"
-                  type="date"
-                  value={format(startDate, 'yyyy-MM-dd')}
-                  onChange={handleStartDateChange}
-                  className="text-xs border border-border rounded px-2 py-1 bg-background"
-                />
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Label htmlFor="end-date" className="text-xs text-muted-foreground">Hasta:</Label>
-                <input
-                  id="end-date"
-                  type="date"
-                  value={format(endDate, 'yyyy-MM-dd')}
-                  onChange={handleEndDateChange}
-                  className="text-xs border border-border rounded px-2 py-1 bg-background"
-                />
-              </div>
-              
-              <Button variant="outline" size="sm" onClick={() => navigateDates('next')}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-              
-              <Button variant="outline" size="sm" onClick={navigateToToday}>
-                <CalendarDays className="w-4 h-4 mr-1" />
-                Hoy
-              </Button>
-            </div>
-
             {/* Weekend Toggle */}
             <div className="flex items-center space-x-2">
               <Switch

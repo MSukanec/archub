@@ -155,6 +155,7 @@ function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: 
 export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedContactType, setSelectedContactType] = useState<string>("")
+  const [hideWeekends, setHideWeekends] = useState(false)
 
   const [location, navigate] = useLocation()
   const { data: userData } = useCurrentUser()
@@ -193,15 +194,6 @@ export default function ConstructionAttendance() {
     setSearchValue("")
     setSelectedContactType("")
     setHideWeekends(false)
-  }
-
-  // Center timeline on today
-  const handleTodayClick = () => {
-    const today = new Date()
-    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 15)
-    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 15)
-    setStartDate(startOfToday)
-    setEndDate(endOfToday)
   }
 
   // Toggle weekend visibility
@@ -334,9 +326,6 @@ export default function ConstructionAttendance() {
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             showGrouping={false}
-            onTodayClick={handleTodayClick}
-            hideWeekends={hideWeekends}
-            onToggleWeekends={handleToggleWeekends}
             customFilters={customFilters}
             onClearFilters={handleClearFilters}
           />
@@ -368,11 +357,7 @@ export default function ConstructionAttendance() {
           <CustomGradebook 
             workers={filteredWorkers}
             attendance={filteredAttendance}
-            startDate={startDate}
-            endDate={endDate}
             hideWeekends={hideWeekends}
-            onStartDateChange={setStartDate}
-            onEndDateChange={setEndDate}
             onHideWeekendsChange={setHideWeekends}
           />
         ) : (
