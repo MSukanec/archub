@@ -365,6 +365,26 @@ export default function ConstructionBudgets() {
     setDeletingBudget(budget)
   }
 
+  const handleEditBudget = () => {
+    if (selectedBudget) {
+      openModal('budget', { 
+        budget: selectedBudget,
+        isEditing: true 
+      })
+    }
+  }
+
+  const handleDeleteSelectedBudget = () => {
+    if (selectedBudget) {
+      handleDeleteBudget(selectedBudget)
+    }
+  }
+
+  const handleBudgetChange = (budgetId: string) => {
+    setSelectedBudgetId(budgetId)
+    updateBudgetPreferenceMutation.mutate(budgetId)
+  }
+
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
     console.log('Abrir modal de agregar tareas');
@@ -704,6 +724,13 @@ export default function ConstructionBudgets() {
               showGrouping={false}
               primaryActionLabel="Nuevo Presupuesto"
               onPrimaryActionClick={() => openModal('budget', {})}
+              budgetSelector={{
+                budgets: filteredBudgets,
+                selectedBudgetId,
+                onBudgetChange: handleBudgetChange,
+                onEditBudget: handleEditBudget,
+                onDeleteBudget: handleDeleteSelectedBudget
+              }}
             />
 
             {/* Budget Tasks Table - Direct without Card wrapper */}

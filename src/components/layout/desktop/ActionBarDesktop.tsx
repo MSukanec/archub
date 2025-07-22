@@ -1,9 +1,18 @@
 import React from 'react'
-import { LayoutGrid, Plus } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+
+interface BudgetSelectorProps {
+  budgets: any[]
+  selectedBudgetId: string
+  onBudgetChange: (budgetId: string) => void
+  onEditBudget: () => void
+  onDeleteBudget: () => void
+}
 
 interface ActionBarDesktopProps {
   showSearch?: boolean
@@ -16,6 +25,7 @@ interface ActionBarDesktopProps {
   primaryActionLabel?: string
   onPrimaryActionClick?: () => void
   customActions?: React.ReactNode[]
+  budgetSelector?: BudgetSelectorProps
   className?: string
 }
 
@@ -30,6 +40,7 @@ export function ActionBarDesktop({
   primaryActionLabel,
   onPrimaryActionClick,
   customActions = [],
+  budgetSelector,
   className
 }: ActionBarDesktopProps) {
   return (
@@ -40,9 +51,53 @@ export function ActionBarDesktop({
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Grouping and Search */}
-      <div className="flex items-center gap-2">
-        {/* Grouping button - FIRST */}
+      {/* Left side - Budget Selector (first), then Grouping */}
+      <div className="flex items-center gap-3">
+        {/* Budget Selector - FIRST (only for budgets page) */}
+        {budgetSelector && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+              Presupuesto:
+            </span>
+            <div className="w-64">
+              <Select value={budgetSelector.selectedBudgetId} onValueChange={budgetSelector.onBudgetChange}>
+                <SelectTrigger className="w-full h-8 text-sm">
+                  <SelectValue placeholder="Selecciona un presupuesto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {budgetSelector.budgets.map((budget: any) => (
+                    <SelectItem key={budget.id} value={budget.id}>
+                      <span className="text-left">{budget.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Budget Action Buttons */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={budgetSelector.onEditBudget}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                onClick={budgetSelector.onDeleteBudget}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Grouping button - SECOND */}
         {showGrouping && onGroupingChange && (
           <Popover>
             <PopoverTrigger asChild>
@@ -117,8 +172,11 @@ export function ActionBarDesktop({
             </PopoverContent>
           </Popover>
         )}
+      </div>
 
-        {/* Expandable Search Button - SECOND */}
+      {/* Right side - Search and Main actions */}
+      <div className="flex items-center gap-2">
+        {/* Expandable Search Button - moved to RIGHT side */}
         {showSearch && (
           <ExpandableSearchButton
             searchValue={searchValue}
@@ -127,10 +185,7 @@ export function ActionBarDesktop({
             placeholder="Buscar tareas, rubros o fases..."
           />
         )}
-      </div>
 
-      {/* Right side - Main actions */}
-      <div className="flex items-center gap-2">
         {/* Custom actions */}
         {customActions.map((action, index) => (
           <div key={index}>{action}</div>
