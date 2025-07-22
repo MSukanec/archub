@@ -87,8 +87,10 @@ export default function ProfileSettings() {
     if (userData?.preferences) {
       setSidebarDocked(userData.preferences.sidebar_docked || false)
       setTutorialMode(userData.preferences.tutorial !== false) // Default to true if not set
+      // Set theme from user preferences
+      setTheme(userData.preferences.theme === 'dark')
     }
-  }, [userData?.preferences])
+  }, [userData?.preferences, setTheme])
 
   const headerProps = {
     title: "Configuración",
@@ -156,7 +158,7 @@ export default function ProfileSettings() {
                 </div>
                 <Switch
                   checked={isDark}
-                  onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  onCheckedChange={(checked) => setTheme(checked)}
                 />
               </div>
               
