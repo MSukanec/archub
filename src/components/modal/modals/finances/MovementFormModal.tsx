@@ -1572,6 +1572,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     // Usar el tipo detectado basándose en la categoría actual
     if (isCurrentAportes) {
       console.log('Submitting as aportes form')
+      console.log('AportesFields - Currency data structure:', {
+        currencies: currencies?.[0], 
+        formData: aportesForm.getValues(),
+        formErrors: aportesForm.formState.errors,
+        isValid: aportesForm.formState.isValid
+      })
       aportesForm.handleSubmit(onSubmitAportes)()
     } else if (isCurrentAportesPropios) {
       console.log('Submitting as aportes propios form')
