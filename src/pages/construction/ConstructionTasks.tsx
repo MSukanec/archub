@@ -157,17 +157,6 @@ export default function ConstructionTasks() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Action Bar Desktop */}
-      <ActionBarDesktop
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        showGrouping
-        groupingType={groupingType}
-        onGroupingChange={setGroupingType}
-        primaryActionLabel="+ Nueva Tarea"
-        onPrimaryActionClick={handleAddTask}
-      />
-
       {/* Feature Introduction */}
       <FeatureIntroduction
         icon={<CheckSquare className="h-6 w-6" />}
@@ -210,22 +199,35 @@ export default function ConstructionTasks() {
           }
         />
       ) : (
-        <BudgetTable
-          budgetId=""
-          budgetTasks={filteredTasks}
-          isLoading={isLoading}
-          groupingType={groupingType}
-          selectedTasks={[]}
-          setSelectedTasks={() => {}}
-          generateTaskDisplayName={generateTaskDisplayName}
-          parameterValues={[]}
-          getUnitName={(unitId) => unitId || ''}
-          handleDeleteTask={handleDeleteTask}
-          handleAddTask={() => handleAddTask()}
-          onGroupingChange={setGroupingType}
-          mode="construction"
-          handleEditTask={handleEditTask}
-        />
+        <>
+          {/* Action Bar Desktop - solo cuando hay tareas */}
+          <ActionBarDesktop
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            showGrouping
+            groupingType={groupingType}
+            onGroupingChange={setGroupingType}
+            primaryActionLabel="+ Nueva Tarea"
+            onPrimaryActionClick={handleAddTask}
+          />
+          
+          <BudgetTable
+            budgetId=""
+            budgetTasks={filteredTasks}
+            isLoading={isLoading}
+            groupingType={groupingType}
+            selectedTasks={[]}
+            setSelectedTasks={() => {}}
+            generateTaskDisplayName={generateTaskDisplayName}
+            parameterValues={[]}
+            getUnitName={(unitId) => unitId || ''}
+            handleDeleteTask={handleDeleteTask}
+            handleAddTask={() => handleAddTask()}
+            onGroupingChange={setGroupingType}
+            mode="construction"
+            handleEditTask={handleEditTask}
+          />
+        </>
       )}
     </Layout>
   )

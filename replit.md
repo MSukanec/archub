@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. ACTIONBAR CONDITIONAL VISIBILITY COMPLETED: ActionBarDesktop now only appears when there are tasks, hidden in empty state - COMPLETED
+  • Moved ActionBarDesktop component inside the data condition in ConstructionTasks.tsx
+  • ActionBar no longer displays when tasks list is empty for cleaner empty state experience
+  • Preserved all functionality: search, grouping, and primary action button work when tasks exist
+  • Enhanced UX: empty state now shows clean interface without unnecessary action elements
+- July 22, 2025. HEADER BUTTONS FLATTENED: Implemented ghost-flat button variant for all header breadcrumb buttons - COMPLETED
+  • Created new "ghost-flat" button variant: transparent background, no shadows, no hover effects
+  • Applied ghost-flat to all header breadcrumb buttons: organization, project, and stage selectors
+  • Buttons now appear "flat" like breadcrumb text without shadows or 3D effects as requested
+  • Maintained all functionality while achieving flat visual appearance matching breadcrumb styling
 - July 22, 2025. EXPANDABLE SEARCH BUTTON REFINEMENT COMPLETED: Fixed styling consistency, smooth animations, and HTML structure - COMPLETED
   • Fixed HTML nesting issue: removed nested button elements preventing DOM validation warnings
   • Consistent ghost styling: both states use identical CSS variables for colors, fonts, and spacing
