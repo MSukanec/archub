@@ -149,6 +149,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Center on today when HOY button is triggered
   React.useEffect(() => {
     if (triggerTodayCenter && timelineElement) {
+      console.log('HOY button triggered, centering timeline on today')
       setTimeout(centerTimelineOnToday, 100)
     }
   }, [triggerTodayCenter, timelineElement, centerTimelineOnToday])
@@ -415,7 +416,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                     return (
                       <div 
                         key={`${contactType}-header-${date.getTime()}`} 
-                        className="flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0"
+                        className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
                         style={{ width: '65px', minWidth: '65px' }}
                       >
                         {/* Empty space for contact type header */}

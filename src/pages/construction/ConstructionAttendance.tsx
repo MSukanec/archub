@@ -196,6 +196,7 @@ export default function ConstructionAttendance() {
 
   // Navigate to today - centers view on today in gradebook
   const handleTodayClick = () => {
+    console.log('HOY button clicked, toggling triggerTodayCenter from', triggerTodayCenter, 'to', !triggerTodayCenter)
     // Toggle the trigger to force re-center on today
     setTriggerTodayCenter(prev => !prev)
   }
