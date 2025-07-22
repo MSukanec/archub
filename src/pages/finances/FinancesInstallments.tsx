@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Receipt, Edit, Trash2 } from 'lucide-react'
+import { Receipt, Edit, Trash2, Users, Coins, FileText, Filter, X, Search, Plus } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -81,6 +82,11 @@ interface InstallmentSummary {
 }
 
 export default function FinancesInstallments() {
+  const [searchValue, setSearchValue] = useState("")
+  const [activeTab, setActiveTab] = useState("clients")
+  const [filterByContact, setFilterByContact] = useState("all")
+  const [filterByCurrency, setFilterByCurrency] = useState("all")
+  
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
 
@@ -457,8 +463,50 @@ export default function FinancesInstallments() {
     return { clientSummary: [...sortedSummary, totalsRow], availableCurrencies: currencies }
   }, [projectClients, installments, allCurrencies])
 
-  // No filtering - show all installments
-  const filteredInstallments = installments
+  // Apply search and filters to installments
+  const filteredInstallments = installments.filter(installment => {
+    // Search filter
+    if (searchValue) {
+      const searchLower = searchValue.toLowerCase()
+      const contactName = installment.contact 
+        ? `${installment.contact.first_name} ${installment.contact.last_name} ${installment.contact.company_name || ''}`.toLowerCase()
+        : ''
+      const description = (installment.description || '').toLowerCase()
+      
+      if (!contactName.includes(searchLower) && !description.includes(searchLower)) {
+        return false
+      }
+    }
+    
+    // Contact filter
+    if (filterByContact !== 'all' && installment.contact_id !== filterByContact) {
+      return false
+    }
+    
+    // Currency filter
+    if (filterByCurrency !== 'all' && installment.currency_id !== filterByCurrency) {
+      return false
+    }
+    
+    return true
+  })
+
+  // Check if filters are active
+  const hasActiveFilters = searchValue !== "" || filterByContact !== "all" || filterByCurrency !== "all"
+
+  // Handler functions for ActionBar
+  const handleAddInstallment = () => {
+    openModal('installment', {
+      projectId: projectId || '',
+      organizationId: organizationId || ''
+    })
+  }
+
+  const handleClearFilters = () => {
+    setSearchValue("")
+    setFilterByContact("all")
+    setFilterByCurrency("all")
+  }
 
   const handleEdit = (installment: Installment) => {
     openModal('installment', {
@@ -1037,16 +1085,96 @@ export default function FinancesInstallments() {
           ]}
         />
 
-        {/* Show content only if there are installments */}
-        {installments.length > 0 ? (
+        {/* Conditional Content - EmptyState or ActionBar + Tabs */}
+        {installments.length === 0 ? (
+          <EmptyState
+            icon={<Receipt className="h-8 w-8" />}
+            title="Aún no hay compromisos registrados"
+            description="Esta sección muestra los compromisos de pago registrados en el proyecto."
+            action={
+              <Button onClick={handleAddInstallment}>
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Primer Compromiso
+              </Button>
+            }
+          />
+        ) : (
           <>
-            {/* Contact Summary Table (New simplified table) */}
-            {clientSummary.length > 0 && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold">Resumen por Cliente</h3>
-                  <p className="text-sm text-muted-foreground">Resumen general por cliente con monto total y aporte dolarizado</p>
-                </div>
+            {/* Action Bar Desktop with Tabs */}
+            <ActionBarDesktop
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              primaryActionLabel="Nuevo Compromiso"
+              onPrimaryActionClick={handleAddInstallment}
+              hasActiveFilters={hasActiveFilters}
+              customActions={[
+                // Filter by Contact dropdown
+                <Select key="contact-filter" value={filterByContact} onValueChange={setFilterByContact}>
+                  <SelectTrigger className="h-9 w-[200px]">
+                    <SelectValue placeholder="Filtrar por contacto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los contactos</SelectItem>
+                    {projectClients.map(client => (
+                      <SelectItem key={client.contact.id} value={client.contact.id}>
+                        {client.contact.company_name || client.contact.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>,
+                
+                // Filter by Currency dropdown
+                <Select key="currency-filter" value={filterByCurrency} onValueChange={setFilterByCurrency}>
+                  <SelectTrigger className="h-9 w-[150px]">
+                    <SelectValue placeholder="Filtrar por moneda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las monedas</SelectItem>
+                    {currencies.map(currency => (
+                      <SelectItem key={currency.id} value={currency.id}>
+                        {currency.code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>,
+                
+                // Clear filters button (only show when filters are active)
+                ...(hasActiveFilters ? [
+                  <Button
+                    key="clear-filters"
+                    onClick={handleClearFilters}
+                    variant="ghost"
+                    className="h-9 px-3"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpiar filtros
+                  </Button>
+                ] : [])
+              ]}
+              tabs={[
+                {
+                  value: "clients",
+                  label: "Resumen por Cliente",
+                  icon: <Users className="h-4 w-4" />
+                },
+                {
+                  value: "currencies",
+                  label: "Detalle por Moneda",
+                  icon: <Coins className="h-4 w-4" />
+                },
+                {
+                  value: "details",
+                  label: "Detalle de Compromisos",
+                  icon: <FileText className="h-4 w-4" />
+                }
+              ]}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+
+            {/* Tab Content Based on activeTab */}
+            <div className="space-y-4">
+              {activeTab === "clients" && clientSummary.length > 0 && (
                 <Table
                   data={clientSummary}
                   columns={contactSummaryColumns}
@@ -1058,16 +1186,9 @@ export default function FinancesInstallments() {
                     />
                   )}
                 />
-              </div>
-            )}
+              )}
 
-            {/* Detailed Summary Table by Currency */}
-            {clientSummary.length > 0 && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold">Detalle por Moneda</h3>
-                  <p className="text-sm text-muted-foreground">Totales detallados por cliente, moneda y billetera</p>
-                </div>
+              {activeTab === "currencies" && clientSummary.length > 0 && (
                 <Table
                   data={clientSummary}
                   columns={summaryColumns}
@@ -1076,42 +1197,39 @@ export default function FinancesInstallments() {
                     <CurrencyDetailCard item={item} />
                   )}
                 />
-              </div>
-            )}
+              )}
 
-            {/* Detailed Table */}
-            {filteredInstallments.length > 0 ? (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold">Detalle de Compromisos</h3>
-                  <p className="text-sm text-muted-foreground">Todos los compromisos de pago registrados en el proyecto</p>
-                </div>
-                <Table
-                  data={filteredInstallments}
-                  columns={detailColumns}
-                  defaultSort={{ key: 'movement_date', direction: 'desc' }}
-                  renderCard={(item) => (
-                    <InstallmentDetailCard 
-                      item={item}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  )}
-                />
-              </div>
-            ) : (
-              <EmptyState
-                title="No se encontraron compromisos"
-                description="No hay compromisos de pago registrados para mostrar"
-              />
-            )}
+              {activeTab === "details" && (
+                filteredInstallments.length > 0 ? (
+                  <Table
+                    data={filteredInstallments}
+                    columns={detailColumns}
+                    defaultSort={{ key: 'movement_date', direction: 'desc' }}
+                    renderCard={(item) => (
+                      <InstallmentDetailCard 
+                        item={item}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    )}
+                  />
+                ) : (
+                  <EmptyState
+                    title="No se encontraron compromisos"
+                    description="No hay compromisos que coincidan con los filtros aplicados"
+                    action={
+                      hasActiveFilters ? (
+                        <Button onClick={handleClearFilters} variant="outline">
+                          <X className="h-4 w-4 mr-2" />
+                          Limpiar filtros
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                )
+              )}
+            </div>
           </>
-        ) : (
-          /* EmptyState takes full available space when no installments exist */
-          <EmptyState
-            title="Aún no hay compromisos registrados"
-            description="Esta sección muestra los compromisos de pago registrados en el proyecto"
-          />
         )}
 
       </div>
