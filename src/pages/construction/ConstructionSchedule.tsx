@@ -524,8 +524,8 @@ export default function ConstructionSchedule() {
                 variant="secondary" 
                 className="h-9 px-4"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Fase
+                <Plus />
+                + Crear Fase
               </Button>
             ]}
           />
