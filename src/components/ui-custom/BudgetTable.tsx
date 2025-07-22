@@ -172,26 +172,6 @@ export function BudgetTable({
     return <div className="p-4 text-center text-sm text-muted-foreground">Cargando tareas...</div>;
   }
 
-  if (!budgetTasks || budgetTasks.length === 0) {
-    return (
-      <EmptyState
-        icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
-        title="No hay tareas en este presupuesto"
-        description="Comienza agregando la primera tarea para gestionar los costos y materiales"
-        action={
-          <Button 
-            size="sm" 
-            onClick={() => handleAddTask(budgetId)}
-            className="h-8 px-3 text-xs"
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Agregar Tarea
-          </Button>
-        }
-      />
-    );
-  }
-
   // Calculate totals for TOTAL row (using the totalQuantity already calculated above)
 
   // Total budget amount (placeholder since we don't have real pricing yet)
@@ -377,70 +357,89 @@ export function BudgetTable({
         </div>
       </div>
 
-      {/* Desktop Table View - Using Table.tsx structure */}
-      <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
-        {/* Column Headers - Different layouts for budget vs construction mode */}
-        {mode === 'construction' ? (
-          // Construction mode columns: Checks (5%), Fase (5%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (5%)
-          <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-               style={{ gridTemplateColumns: `5% 5% 10% 1fr 5% 5% 5% 5%` }}>
-            <div className="flex items-center justify-center">
-              <input
-                type="checkbox"
-                checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-                  } else {
-                    setSelectedTasks([]);
-                  }
-                }}
-                className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
-              />
-            </div>
-            <div className="text-left">Fase</div>
-            <div className="text-left">Rubro</div>
-            <div className="text-left">Tarea</div>
-            <div className="text-left">Unidad</div>
-            <div className="text-left">Cantidad</div>
-            <div className="text-left">Fechas</div>
-            <div className="text-left">Progreso</div>
-          </div>
-        ) : (
-          // Budget mode columns (original)
-          <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-               style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
-            <div className="flex items-center justify-center">
-              <input
-                type="checkbox"
-                checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-                  } else {
-                    setSelectedTasks([]);
-                  }
-                }}
-                className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
-              />
-            </div>
-            <div className="text-left">ID</div>
-            {groupingType === 'none' && (
-              <div className="text-left">Rubro</div>
+      {/* Show EmptyState when no tasks, but keep selector visible */}
+      {(!budgetTasks || budgetTasks.length === 0) ? (
+        <EmptyState
+          icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
+          title="No hay tareas en este presupuesto"
+          description="Comienza agregando la primera tarea para gestionar los costos y materiales"
+          action={
+            <Button 
+              size="sm" 
+              onClick={() => handleAddTask(budgetId)}
+              className="h-8 px-3 text-xs"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Agregar Tarea
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          {/* Desktop Table View - Using Table.tsx structure */}
+          <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
+            {/* Column Headers - Different layouts for budget vs construction mode */}
+            {mode === 'construction' ? (
+              // Construction mode columns: Checks (5%), Fase (5%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (5%)
+              <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+                   style={{ gridTemplateColumns: `5% 5% 10% 1fr 5% 5% 5% 5%` }}>
+                <div className="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                      } else {
+                        setSelectedTasks([]);
+                      }
+                    }}
+                    className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
+                  />
+                </div>
+                <div className="text-left">Fase</div>
+                <div className="text-left">Rubro</div>
+                <div className="text-left">Tarea</div>
+                <div className="text-left">Unidad</div>
+                <div className="text-left">Cantidad</div>
+                <div className="text-left">Fechas</div>
+                <div className="text-left">Progreso</div>
+              </div>
+            ) : (
+              // Budget mode columns (original)
+              <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+                   style={{ gridTemplateColumns: `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%` }}>
+                <div className="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedTasks(budgetTasks?.map(task => task.id) || []);
+                      } else {
+                        setSelectedTasks([]);
+                      }
+                    }}
+                    className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
+                  />
+                </div>
+                <div className="text-left">ID</div>
+                {groupingType === 'none' && (
+                  <div className="text-left">Rubro</div>
+                )}
+                <div className="text-left">Tarea</div>
+                <div className="text-left">Unid.</div>
+                <div className="text-left">Cant.</div>
+                <div className="text-left">M.O.</div>
+                <div className="text-left">Mat.</div>
+                <div className="text-left">Subtotal</div>
+                <div className="text-left">% Inc.</div>
+                <div className="text-left">Acc.</div>
+              </div>
             )}
-            <div className="text-left">Tarea</div>
-            <div className="text-left">Unid.</div>
-            <div className="text-left">Cant.</div>
-            <div className="text-left">M.O.</div>
-            <div className="text-left">Mat.</div>
-            <div className="text-left">Subtotal</div>
-            <div className="text-left">% Inc.</div>
-            <div className="text-left">Acc.</div>
-          </div>
-        )}
 
-        {/* Table Rows - Using div structure like Table.tsx */}
-        <div>
+            {/* Table Rows - Using div structure like Table.tsx */}
+            <div>
             {Object.entries(groupedTasks).map(([rubroName, tasks], rubroIndex) => {
               const rubroSubtotal = tasks.reduce((sum, task) => sum + 0, 0);
               const rubroPercentage = totalBudgetAmount > 0 ? (rubroSubtotal / totalBudgetAmount) * 100 : 0;
@@ -700,42 +699,44 @@ export function BudgetTable({
                 </>
               )}
             </div>
+          </div>
         </div>
-      </div>
 
-      {/* Mobile Cards View - Following Table.tsx structure */}
-      <div className="lg:hidden space-y-2">
-        {budgetTasks?.map((task: any) => {
-          const processedName = generateTaskDisplayName(task.task, parameterValues);
-          const unitName = getUnitName(task.task?.unit_id);
-          return (
-            <BudgetTaskCard
-              key={task.id}
-              task={task}
-              processedName={processedName}
-              unitName={unitName}
-              onEdit={(taskToEdit: any) => {
-                console.log('Edit task mobile:', taskToEdit);
-                // TODO: Implement edit functionality
-              }}
-              onDelete={handleDeleteTask}
-            />
-          );
-        })}
-        
-        {/* Mobile Total Card - without Card component */}
-        <div className="border-2 border-accent bg-accent/5 rounded-lg">
-          <div className="p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">TOTAL</span>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-semibold">$0</span>
-                <span className="text-xs text-muted-foreground">100.0%</span>
+        {/* Mobile Cards View - Following Table.tsx structure */}
+        <div className="lg:hidden space-y-2">
+          {budgetTasks?.map((task: any) => {
+            const processedName = generateTaskDisplayName(task.task, parameterValues);
+            const unitName = getUnitName(task.task?.unit_id);
+            return (
+              <BudgetTaskCard
+                key={task.id}
+                task={task}
+                processedName={processedName}
+                unitName={unitName}
+                onEdit={(taskToEdit: any) => {
+                  console.log('Edit task mobile:', taskToEdit);
+                  // TODO: Implement edit functionality
+                }}
+                onDelete={handleDeleteTask}
+              />
+            );
+          })}
+          
+          {/* Mobile Total Card - without Card component */}
+          <div className="border-2 border-accent bg-accent/5 rounded-lg">
+            <div className="p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold">TOTAL</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold">$0</span>
+                  <span className="text-xs text-muted-foreground">100.0%</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
