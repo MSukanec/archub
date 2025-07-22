@@ -52,6 +52,10 @@
   --secondary-card-fg: hsl(0, 0%, 35%);
   --secondary-card-border: hsl(0, 0%, 50%);
 
+  /* Button Shadows */
+  --button-shadow-normal: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --button-shadow-hover: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+
   /* Buttons - Primary */
   --button-primary-bg: hsl(76, 100%, 40%);
   --button-primary-text: hsl(0, 0%, 100%);
@@ -171,6 +175,10 @@
 }
 
 .dark {
+  /* Button Shadows */
+  --button-shadow-normal: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --button-shadow-hover: 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+
   /* Layout */
   --layout-bg: hsl(0, 0%, 20%);
   --layout-text: hsl(0, 0%, 90%);
@@ -369,6 +377,17 @@
 [data-avatar],
 .avatar {
   border: 3px solid var(--card-border) !important;
+}
+
+/* Button Shadow Styles - All variants get shadow */
+@layer components {
+  .shadow-button-normal {
+    box-shadow: var(--button-shadow-normal);
+  }
+  
+  .shadow-button-hover {
+    box-shadow: var(--button-shadow-hover);
+  }
 }
 
 @layer base {
