@@ -42,13 +42,13 @@ export function Selector({
           type="button"
           disabled={disabled}
           className={cn(
-            // Base button styling identical to secondary variant
+            // Base button styling identical to ghost variant
             "inline-flex items-center justify-between whitespace-nowrap transition-all duration-150",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
             "disabled:pointer-events-none disabled:opacity-60",
-            // Secondary button styling exactly from buttonVariants
-            "bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] border border-[var(--button-secondary-border)]",
-            "hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-secondary-hover-text)] hover:border-[var(--button-secondary-hover-border)]",
+            // Ghost button styling exactly from buttonVariants
+            "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
+            "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
             "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
             "text-sm font-medium",
             "w-full min-w-0", // Full width and allow text truncation
@@ -61,21 +61,24 @@ export function Selector({
       </PopoverTrigger>
       
       <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-1" 
-        align="start"
+        align="start" 
+        className="w-48 p-0 rounded-lg shadow-button-normal border"
+        style={{ 
+          backgroundColor: 'var(--card-bg)',
+          borderColor: 'var(--card-border)'
+        }}
         sideOffset={4}
       >
-        <div className="space-y-1">
+        <div className="py-1">
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => handleSelect(option.value)}
               className={cn(
-                "w-full text-left px-3 py-2 text-sm rounded-md transition-colors",
-                "hover:bg-accent hover:text-accent-foreground",
-                "focus:bg-accent focus:text-accent-foreground focus:outline-none",
-                value === option.value && "bg-accent text-accent-foreground"
+                "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                value === option.value && "bg-[var(--button-ghost-hover-bg)]"
               )}
             >
               {option.label}
@@ -83,7 +86,7 @@ export function Selector({
           ))}
           
           {options.length === 0 && (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
+            <div className="px-3 py-2 text-sm text-[var(--button-ghost-text)]">
               No hay opciones disponibles
             </div>
           )}
