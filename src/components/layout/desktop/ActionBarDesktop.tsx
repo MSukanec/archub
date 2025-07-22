@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutGrid, Plus, Edit, Trash2 } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2, Calendar, CalendarX, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -36,6 +36,12 @@ interface ActionBarDesktopProps {
   tabs?: Tab[]
   activeTab?: string
   onTabChange?: (value: string) => void
+  // Ghost buttons for attendance page
+  onTodayClick?: () => void
+  hideWeekends?: boolean
+  onToggleWeekends?: (hide: boolean) => void
+  customFilters?: React.ReactNode
+  onClearFilters?: () => void
   className?: string
 }
 
@@ -54,6 +60,11 @@ export function ActionBarDesktop({
   tabs,
   activeTab,
   onTabChange,
+  onTodayClick,
+  hideWeekends = false,
+  onToggleWeekends,
+  customFilters,
+  onClearFilters,
   className
 }: ActionBarDesktopProps) {
   return (
@@ -198,6 +209,74 @@ export function ActionBarDesktop({
                 >
                   Fases y Rubros
                 </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* HOY Button - For attendance page */}
+        {onTodayClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={onTodayClick}
+            title="Ir a Hoy"
+          >
+            <Calendar className="w-4 h-4" />
+          </Button>
+        )}
+
+        {/* Toggle Weekends Button - For attendance page */}
+        {onToggleWeekends && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "h-8 w-8 p-0",
+              hideWeekends && "bg-[var(--button-ghost-hover-bg)]"
+            )}
+            onClick={() => onToggleWeekends(!hideWeekends)}
+            title={hideWeekends ? "Mostrar fines de semana" : "Ocultar fines de semana"}
+          >
+            {hideWeekends ? <CalendarX className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
+          </Button>
+        )}
+
+        {/* Custom Filters Popover */}
+        {customFilters && onClearFilters && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              align="start" 
+              className="w-auto p-4 rounded-lg shadow-button-normal border"
+              style={{ 
+                backgroundColor: 'var(--card-bg)',
+                borderColor: 'var(--card-border)'
+              }}
+            >
+              <div className="space-y-4">
+                {customFilters}
+                
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onClearFilters}
+                    className="flex items-center gap-1"
+                  >
+                    <X className="w-3 h-3" />
+                    Limpiar filtros
+                  </Button>
+                </div>
               </div>
             </PopoverContent>
           </Popover>

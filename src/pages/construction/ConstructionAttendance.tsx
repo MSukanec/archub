@@ -198,6 +198,20 @@ export default function ConstructionAttendance() {
     setHideWeekends(false)
   }
 
+  // Center timeline on today
+  const handleTodayClick = () => {
+    const today = new Date()
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 15)
+    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 15)
+    setStartDate(startOfToday)
+    setEndDate(endOfToday)
+  }
+
+  // Toggle weekend visibility
+  const handleToggleWeekends = (hide: boolean) => {
+    setHideWeekends(hide)
+  }
+
   // Calculate summary statistics
   const stats = useMemo(() => {
     const totalWorkers = filteredWorkers.length
@@ -338,6 +352,10 @@ export default function ConstructionAttendance() {
           <ActionBarDesktop
             searchValue={searchValue}
             onSearchChange={setSearchValue}
+            showGrouping={false}
+            onTodayClick={handleTodayClick}
+            hideWeekends={hideWeekends}
+            onToggleWeekends={handleToggleWeekends}
             customFilters={customFilters}
             onClearFilters={handleClearFilters}
           />
