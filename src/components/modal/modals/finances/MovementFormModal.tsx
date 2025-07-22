@@ -88,6 +88,7 @@ const aportesFormSchema = z.object({
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
+  subcategory_id: z.string().optional(), // Agregar subcategoría para aportes
   // Campos para aportes
   contact_id: z.string().min(1, 'Cliente es requerido'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
@@ -1302,6 +1303,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         wallet_id: data.wallet_id,
         type_id: data.type_id,
         category_id: data.category_id,
+        subcategory_id: data.subcategory_id || null, // Agregar subcategoría
         contact_id: data.contact_id, // Este campo guardará cliente_id o socio_id
         exchange_rate: data.exchange_rate || null // Agregar cotización opcional
       }
@@ -1580,6 +1582,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormTypeId = form.watch('type_id')
       const mainFormCreatedBy = form.watch('created_by')
       const mainFormMovementDate = form.watch('movement_date')
+      const mainFormSubcategoryId = form.watch('subcategory_id')
       
       if (mainFormTypeId) {
         console.log('Synchronizing type_id before submit:', mainFormTypeId)
@@ -1594,6 +1597,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (mainFormMovementDate) {
         console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
         aportesForm.setValue('movement_date', mainFormMovementDate)
+      }
+      
+      if (mainFormSubcategoryId) {
+        console.log('Synchronizing subcategory_id before submit:', mainFormSubcategoryId)
+        aportesForm.setValue('subcategory_id', mainFormSubcategoryId)
       }
       
       console.log('AportesFields - Currency data structure:', {
