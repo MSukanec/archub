@@ -167,10 +167,13 @@ export default function ConstructionTasks() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Action Bar Desktop */}
       <ActionBarDesktop
-        title="Listado de Tareas"
-        searchValue={searchValue}
-        onSearch={setSearchValue}
-        searchPlaceholder="Buscar tareas..."
+        onSearchClick={() => {
+          // Activar el campo de búsqueda del header
+          const headerSearchInput = document.querySelector('input[type="text"]');
+          if (headerSearchInput) {
+            (headerSearchInput as HTMLInputElement).focus();
+          }
+        }}
         onFilterClick={() => console.log('Abrir filtros')}
         primaryActionLabel="+ Nueva Tarea"
         onPrimaryActionClick={handleAddTask}

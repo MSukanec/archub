@@ -1,14 +1,11 @@
 import React from 'react'
 import { Search, Filter } from 'lucide-react'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface ActionBarDesktopProps {
-  title?: string
-  searchValue?: string
-  onSearch?: (value: string) => void
-  searchPlaceholder?: string
+  showSearch?: boolean
+  onSearchClick?: () => void
   showFilters?: boolean
   onFilterClick?: () => void
   primaryActionLabel?: string
@@ -18,10 +15,8 @@ interface ActionBarDesktopProps {
 }
 
 export function ActionBarDesktop({
-  title,
-  searchValue = '',
-  onSearch,
-  searchPlaceholder = 'Buscar...',
+  showSearch = true,
+  onSearchClick,
   showFilters = true,
   onFilterClick,
   primaryActionLabel,
@@ -37,34 +32,29 @@ export function ActionBarDesktop({
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Title and Search */}
-      <div className="flex items-center gap-4 flex-1">
-        {title && (
-          <h1 className="text-lg font-semibold text-[var(--card-fg)] whitespace-nowrap">
-            {title}
-          </h1>
-        )}
-        
-        {onSearch && (
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => onSearch(e.target.value)}
-              className="pl-10 h-9"
-            />
-          </div>
-        )}
+      {/* Left side - Empty for spacing */}
+      <div className="flex-1">
       </div>
 
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
+        {/* Search button */}
+        {showSearch && onSearchClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onSearchClick}
+            className="h-9 px-3"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Buscar
+          </Button>
+        )}
+
         {/* Filters button */}
         {showFilters && onFilterClick && (
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={onFilterClick}
             className="h-9 px-3"
