@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. CONSTRUCTION SCHEDULE ACTION BAR IMPLEMENTED: Added ActionBarDesktop to cronograma page with dual action buttons and search - COMPLETED
+  • Integrated ActionBarDesktop component above tabs in construction schedule page
+  • Primary action: "Nueva Tarea" button (green) for task creation
+  • Secondary action: "Crear Fase" button (outline) positioned left of primary button
+  • Search functionality integrated with existing search state and filtering logic
+  • Action bar only appears when tasks exist, hidden in empty state for clean UX
+  • Removed duplicate search and action buttons from header, now centralized in ActionBar
+  • Consistent styling with construction tasks page using same ActionBarDesktop component
 - July 22, 2025. EXPANDABLE SEARCH BUTTON REFINEMENT COMPLETED: Fixed styling consistency, smooth animations, and HTML structure - COMPLETED
   • Fixed HTML nesting issue: removed nested button elements preventing DOM validation warnings
   • Consistent ghost styling: both states use identical CSS variables for colors, fonts, and spacing

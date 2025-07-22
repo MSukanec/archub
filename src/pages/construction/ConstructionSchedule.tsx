@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table, Edit, Trash2 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import ProgressCurve from '@/components/charts/gantt/ProgressCurve'
 import BurndownChart from '@/components/charts/gantt/BurndownChart'
@@ -225,8 +226,8 @@ export default function ConstructionSchedule() {
         project_id: task.project_id || '',
         task_id: task.task_id,
         task_code: task.task?.code || '',
-        start_date: task.start_date,
-        end_date: task.end_date,
+        start_date: task.start_date || null,
+        end_date: task.end_date || null,
         duration_in_days: task.duration_in_days,
         quantity: task.quantity || 0,
         phase_instance_id: task.phase_instance_id || '',
@@ -237,9 +238,9 @@ export default function ConstructionSchedule() {
         unit_name: task.task?.unit_name || '',
         unit_symbol: task.task?.unit_symbol || '',
         display_name: task.task?.processed_display_name || task.task?.display_name || task.task?.code || '',
-        subcategory_id: task.task?.subcategory_id || '',
-        subcategory_name: task.task?.subcategory_name || '',
-        category_id: task.task?.category_id || '',
+        subcategory_id: '',
+        subcategory_name: '',
+        category_id: '',
         category_name: task.task?.category_name || '',
         rubro_id: task.task?.rubro_id || '',
         rubro_name: task.task?.rubro_name || '',
@@ -451,21 +452,7 @@ export default function ConstructionSchedule() {
   }, [filteredTasks, projectPhases]);
 
   const headerProps = {
-    title: "Cronograma de Construcción",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    actions: [
-      <Button key="new-phase" onClick={handleAddPhase} variant="outline" className="h-8 px-3 text-sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Crear Fase
-      </Button>,
-
-      <Button key="new-task" onClick={handleAddTask} className="h-8 px-3 text-sm">
-        <Plus className="h-4 w-4 mr-2" />
-        Nueva Tarea
-      </Button>
-    ]
+    title: "Cronograma de Construcción"
   }
 
   if (isLoading) {
@@ -508,7 +495,7 @@ export default function ConstructionSchedule() {
         ]}
       />
 
-      {/* Conditional Content - EmptyState or Tabs */}
+      {/* Conditional Content - EmptyState or ActionBar + Tabs */}
       {filteredTasks.length === 0 ? (
         <EmptyState
           icon={<Calendar className="h-8 w-8" />}
@@ -522,7 +509,31 @@ export default function ConstructionSchedule() {
           }
         />
       ) : (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <>
+          {/* Action Bar Desktop */}
+          <ActionBarDesktop
+            title="Cronograma"
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            primaryAction={{
+              label: "Nueva Tarea",
+              icon: <Plus className="h-4 w-4" />,
+              onClick: handleAddTask
+            }}
+            customActions={[
+              <Button 
+                key="create-phase"
+                onClick={handleAddPhase} 
+                variant="outline" 
+                className="h-10 px-4"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Fase
+              </Button>
+            ]}
+          />
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
             <TabsTrigger 
               value="gantt" 
@@ -617,6 +628,7 @@ export default function ConstructionSchedule() {
             </div>
           </TabsContent>
         </Tabs>
+        </>
       )}
     </Layout>
   )
