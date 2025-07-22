@@ -154,9 +154,6 @@ function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: 
 
 export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
-  const [startDate, setStartDate] = useState(new Date())
-  const [endDate, setEndDate] = useState(new Date(new Date().setDate(new Date().getDate() + 30)))
-  const [hideWeekends, setHideWeekends] = useState(false)
   const [selectedContactType, setSelectedContactType] = useState<string>("")
 
   const [location, navigate] = useLocation()
