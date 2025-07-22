@@ -404,23 +404,9 @@ export function BudgetTable({
           <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
             {/* Column Headers - Different layouts for budget vs construction mode */}
             {mode === 'construction' ? (
-              // Construction mode columns: Checks (5%), Fase (5%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (5%)
+              // Construction mode columns: Fase (10%), Rubro (10%), Tarea (resto), Unidad (5%), Cantidad (5%), Fechas (5%), Progreso (10%)
               <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
-                   style={{ gridTemplateColumns: `5% 5% 10% 1fr 5% 5% 5% 5%` }}>
-                <div className="flex items-center justify-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedTasks.length === (budgetTasks?.length || 0) && (budgetTasks?.length || 0) > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTasks(budgetTasks?.map(task => task.id) || []);
-                      } else {
-                        setSelectedTasks([]);
-                      }
-                    }}
-                    className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
-                  />
-                </div>
+                   style={{ gridTemplateColumns: `10% 10% 1fr 5% 5% 5% 10%` }}>
                 <div className="text-left">Fase</div>
                 <div className="text-left">Rubro</div>
                 <div className="text-left">Tarea</div>
@@ -477,10 +463,9 @@ export function BudgetTable({
                       "grid gap-4 px-4 py-3 bg-[var(--accent)] text-xs font-medium text-white border-b border-[var(--table-row-border)]"
                     )} style={{ 
                       gridTemplateColumns: mode === 'construction' 
-                        ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                        ? `10% 10% 1fr 5% 5% 5% 10%` 
                         : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
                     }}>
-                      <div></div>
                       {mode === 'construction' ? (
                         <>
                           <div></div>
@@ -532,24 +517,9 @@ export function BudgetTable({
                            )}
                            style={{ 
                              gridTemplateColumns: mode === 'construction' 
-                               ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                               ? `10% 10% 1fr 5% 5% 5% 10%` 
                                : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
                            }}>
-                        
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedTasks.includes(task.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedTasks([...selectedTasks, task.id]);
-                              } else {
-                                setSelectedTasks(selectedTasks.filter(id => id !== task.id));
-                              }
-                            }}
-                            className="h-3 w-3 rounded accent-[hsl(var(--accent))]"
-                          />
-                        </div>
                         
                         {mode === 'construction' ? (
                           <>
@@ -694,22 +664,22 @@ export function BudgetTable({
             <div className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
                  style={{ 
                    gridTemplateColumns: mode === 'construction' 
-                     ? `5% 5% 10% 1fr 5% 5% 5% 5%` 
+                     ? `10% 10% 1fr 5% 5% 5% 10%` 
                      : `5% 5% ${groupingType === 'none' ? '10% ' : ''}1fr 5% 5% 5% 5% 5% 5% 5%`
                  }}>
-              <div></div>
               {mode === 'construction' ? (
                 <>
                   <div></div>
                   <div className="text-xs font-semibold">TOTAL</div>
                   <div className="text-xs font-semibold">{budgetTasks?.length || 0} tareas</div>
                   <div></div>
-                  <div className="text-xs font-semibold">{totalQuantity}</div>
+                  <div></div>
                   <div></div>
                   <div></div>
                 </>
               ) : (
                 <>
+                  <div></div>
                   <div className="text-xs font-semibold">TOTAL</div>
                   {groupingType === 'none' && <div></div>}
                   <div></div>
