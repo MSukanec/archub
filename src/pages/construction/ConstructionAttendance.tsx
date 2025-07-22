@@ -10,10 +10,12 @@ import { useEffect } from 'react'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { Users, Download, Calendar, CalendarDays, FileText, Clock, BarChart3, Filter } from 'lucide-react'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { Users, Download, Calendar, CalendarDays, FileText, Clock, BarChart3, Filter, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { format } from 'date-fns'
 import { useLocation } from 'wouter'
 import { Link } from 'wouter'
@@ -189,6 +191,13 @@ export default function ConstructionAttendance() {
     return attendance.filter(record => filteredWorkerIds.has(record.workerId))
   }, [attendance, filteredWorkers])
 
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSearchValue("")
+    setSelectedContactType("")
+    setHideWeekends(false)
+  }
+
   // Calculate summary statistics
   const stats = useMemo(() => {
     const totalWorkers = filteredWorkers.length
@@ -243,46 +252,44 @@ export default function ConstructionAttendance() {
     }
   ], [stats])
 
-  const headerProps = {
-    title: "Asistencia",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    onClearFilters: () => {
-      setSearchValue("")
-      setSelectedContactType("")
-    },
-    customFilters: (
-      <div className="space-y-3">
-        <div>
-          <Label className="text-xs font-medium mb-1">Tipo de Trabajador</Label>
-          <Select value={selectedContactType} onValueChange={setSelectedContactType}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Todos los tipos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todos los tipos</SelectItem>
-              {contactTypes.map(type => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
+  // Custom filters for ActionBar
+  const customFilters = (
+    <div className="flex gap-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Tipo de Trabajador</Label>
+        <Select value={selectedContactType} onValueChange={setSelectedContactType}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Todos los tipos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los tipos</SelectItem>
+            {contactTypes.map(type => (
+              <SelectItem key={type.id} value={type.id}>
+                {type.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Opciones de vista</Label>
         <div className="flex items-center space-x-2">
           <Switch
             id="hide-weekends"
             checked={hideWeekends}
             onCheckedChange={setHideWeekends}
           />
-          <Label htmlFor="hide-weekends" className="text-xs">
+          <Label htmlFor="hide-weekends" className="text-sm">
             Ocultar fines de semana
           </Label>
         </div>
       </div>
-    )
+    </div>
+  )
+
+  const headerProps = {
+    title: "Asistencia"
   }
 
   if (isLoading) {
@@ -325,6 +332,16 @@ export default function ConstructionAttendance() {
             }
           ]}
         />
+
+        {/* ActionBar - Only show when there's data */}
+        {filteredWorkers.length > 0 && (
+          <ActionBarDesktop
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            customFilters={customFilters}
+            onClearFilters={handleClearFilters}
+          />
+        )}
 
         {/* Dynamic Statistics Cards - Only show when there's data */}
         {filteredWorkers.length > 0 && (
