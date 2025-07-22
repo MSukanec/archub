@@ -53,22 +53,22 @@ export function ExpandableSearchButton({
           type={isExpanded ? "submit" : "button"}
           onClick={handleClick}
           className={cn(
-            // Base styles matching ghost button exactly - using gap-2 like regular ghost button
-            "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium",
+            // EXACT COPY from button.tsx ghost variant - line by line identical
+            "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
+            "disabled:pointer-events-none disabled:opacity-60",
+            "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
             "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
             "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
             "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
-            "disabled:pointer-events-none disabled:opacity-60",
-            "transition-all duration-200 ease-out overflow-hidden",
-            // Use gap-2 when collapsed (like regular ghost button), no gap when expanded
-            isExpanded ? "w-80" : "w-auto gap-2"
+            // Only add width transition when expanded
+            isExpanded ? "w-80 !gap-0 overflow-hidden" : ""
           )}
         >
           {/* Search Icon - moves to right when expanded */}
           <Search 
             className={cn(
-              "h-4 w-4 shrink-0 transition-all duration-200 ease-out",
+              "transition-all duration-200 ease-out",
               isExpanded ? "order-2" : "order-1"
             )} 
           />
@@ -108,7 +108,7 @@ export function ExpandableSearchButton({
               }}
               className="order-3 p-1 hover:bg-[var(--button-ghost-hover-bg)] rounded-full transition-colors shrink-0 cursor-pointer"
             >
-              <X className="h-3 w-3 text-[var(--button-ghost-text)]" />
+              <X className="h-3 w-3 text-[var(--button-ghost-text)] shrink-0" />
             </div>
           )}
         </button>
