@@ -155,6 +155,7 @@ export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedContactType, setSelectedContactType] = useState<string>("")
   const [hideWeekends, setHideWeekends] = useState(false)
+  const [triggerTodayCenter, setTriggerTodayCenter] = useState(false)
 
   const [location, navigate] = useLocation()
   const { data: userData } = useCurrentUser()
@@ -198,6 +199,12 @@ export default function ConstructionAttendance() {
   // Toggle weekend visibility
   const handleToggleWeekends = (hide: boolean) => {
     setHideWeekends(hide)
+  }
+
+  // Navigate to today - centers view on today in gradebook
+  const handleTodayClick = () => {
+    // Toggle the trigger to force re-center on today
+    setTriggerTodayCenter(prev => !prev)
   }
 
   // Calculate summary statistics
@@ -324,6 +331,7 @@ export default function ConstructionAttendance() {
             showGrouping={false}
             customFilters={customFilters}
             onClearFilters={handleClearFilters}
+            onTodayClick={handleTodayClick}
           />
         )}
 
@@ -355,6 +363,7 @@ export default function ConstructionAttendance() {
             attendance={filteredAttendance}
             hideWeekends={hideWeekends}
             onHideWeekendsChange={setHideWeekends}
+            triggerTodayCenter={triggerTodayCenter}
           />
         ) : (
           <EmptyState

@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutGrid, Plus, Edit, Trash2, X, Filter, RotateCcw } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -39,6 +39,8 @@ interface ActionBarDesktopProps {
   // Custom filters and clear function
   customFilters?: React.ReactNode
   onClearFilters?: () => void
+  // Today button for gradebook pages
+  onTodayClick?: () => void
   className?: string
 }
 
@@ -59,6 +61,7 @@ export function ActionBarDesktop({
   onTabChange,
   customFilters,
   onClearFilters,
+  onTodayClick,
   className
 }: ActionBarDesktopProps) {
   return (
@@ -237,6 +240,20 @@ export function ActionBarDesktop({
           </Popover>
         )}
 
+        {/* Today Button - For gradebook pages */}
+        {onTodayClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2"
+            onClick={onTodayClick}
+            title="Ir a hoy"
+          >
+            <CalendarDays className="w-4 h-4 mr-1" />
+            Hoy
+          </Button>
+        )}
+
         {/* Clear Filters Button */}
         {onClearFilters && (
           <Button
@@ -246,7 +263,7 @@ export function ActionBarDesktop({
             onClick={onClearFilters}
             title="Limpiar filtros"
           >
-            <RotateCcw className="w-4 h-4" />
+            <X className="w-4 h-4" />
           </Button>
         )}
 

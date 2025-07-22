@@ -28,6 +28,7 @@ interface CustomGradebookProps {
   hideWeekends?: boolean
   onHideWeekendsChange?: (hideWeekends: boolean) => void
   onExportAttendance?: () => void
+  triggerTodayCenter?: boolean
 }
 
 const CustomGradebook: React.FC<CustomGradebookProps> = ({
@@ -35,7 +36,8 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   attendance = [],
   hideWeekends = false,
   onHideWeekendsChange,
-  onExportAttendance
+  onExportAttendance,
+  triggerTodayCenter = false
 }) => {
   // Calculate date range automatically based on attendance data
   const { startDate, endDate } = React.useMemo(() => {
@@ -147,6 +149,13 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       setTimeout(centerTimelineOnToday, 100)
     }
   }, [timelineElement, centerTimelineOnToday])
+
+  // Center on today when triggered from parent component
+  React.useEffect(() => {
+    if (triggerTodayCenter && timelineElement) {
+      setTimeout(centerTimelineOnToday, 100)
+    }
+  }, [triggerTodayCenter, timelineElement, centerTimelineOnToday])
 
   // Drag functionality for timeline scrolling
   const [isDragging, setIsDragging] = React.useState(false)
