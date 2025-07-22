@@ -46,13 +46,13 @@ export function GanttDependencies({
   }>>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  console.log('GanttDependencies rendering with:', {
-    dependenciesCount: dependencies.length,
-    dataCount: data.length,
-    timelineWidth,
-    totalDays,
-    arrowPathsCount: arrowPaths.length
-  });
+  // console.log('GanttDependencies rendering with:', {
+  //   dependenciesCount: dependencies.length,
+  //   dataCount: data.length,
+  //   timelineWidth,
+  //   totalDays,
+  //   arrowPathsCount: arrowPaths.length
+  // });
 
   // Función para obtener las coordenadas de una tarea en el sistema de coordenadas del SVG
   const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
@@ -122,39 +122,43 @@ export function GanttDependencies({
   // Calcular flechas con timing correcto y actualización por scroll
   useEffect(() => {
     if (!dependencies.length) {
-      console.log('GanttDependencies: No dependencies to render');
       setArrowPaths([]);
       return;
     }
 
-    console.log('GanttDependencies: Starting calculation for dependencies:', dependencies.length);
-
     const calculateArrows = () => {
-      console.log('GanttDependencies: Calculating arrows...');
+      // Primero, obtener los IDs de las tareas que están realmente renderizadas
+      const renderedTaskIds = new Set(
+        data.filter(item => item.type === 'task').map(item => item.id)
+      );
       
-      // Verificar que todas las tareas estén renderizadas
-      const allTasksRendered = dependencies.every(dep => {
+      // Filtrar dependencias para incluir solo las que tienen ambas tareas renderizadas
+      const validDependencies = dependencies.filter(dep => {
+        return renderedTaskIds.has(dep.predecessor_task_id) && 
+               renderedTaskIds.has(dep.successor_task_id);
+      });
+
+      if (!validDependencies.length) {
+        setArrowPaths([]);
+        return;
+      }
+      
+      // Verificar que todas las tareas válidas estén renderizadas en el DOM
+      const allTasksRendered = validDependencies.every(dep => {
         const predecessorEl = document.querySelector(`[data-task-id="${dep.predecessor_task_id}"]`);
         const successorEl = document.querySelector(`[data-task-id="${dep.successor_task_id}"]`);
-        console.log(`Task elements: ${dep.predecessor_task_id} = ${!!predecessorEl}, ${dep.successor_task_id} = ${!!successorEl}`);
         return predecessorEl && successorEl;
       });
 
       if (!allTasksRendered) {
-        console.log('GanttDependencies: Not all tasks rendered yet, waiting...');
         return;
       }
-
-      console.log('GanttDependencies: All tasks found, calculating paths...');
       
-      const paths = dependencies.map(dep => {
+      const paths = validDependencies.map(dep => {
         const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
         const toCoords = getTaskPosition(dep.successor_task_id, 'input');
 
-        console.log(`Coordinates for ${dep.predecessor_task_id} -> ${dep.successor_task_id}:`, { fromCoords, toCoords });
-
         if (!fromCoords || !toCoords) {
-          console.log('Missing coordinates, skipping dependency');
           return null;
         }
 
@@ -166,7 +170,6 @@ export function GanttDependencies({
         };
       }).filter(Boolean);
 
-      console.log('GanttDependencies: Generated paths:', paths.length);
       setArrowPaths(paths as any);
     };
 

@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. GANTT DEPENDENCY ARROWS CRITICAL BUG FIXED: Resolved issue where dependency arrows disappeared when tasks were deleted or in different phases - COMPLETED
+  • Root cause identified: Dependencies were referencing deleted/non-existent tasks causing DOM element lookup failures
+  • Implemented data validation system: only process dependencies where both predecessor and successor tasks exist in current rendered data
+  • Added defensive filtering: dependencies checked against renderedTaskIds set before DOM element lookup
+  • Enhanced error handling: system gracefully handles orphaned dependencies without breaking arrow rendering
+  • Dependencies now display correctly: valid arrows appear immediately, invalid dependencies are silently filtered out
+  • Improved performance: eliminated unnecessary DOM queries for non-existent tasks
+  • System maintains stability during task deletion, phase expansion/collapse, and data filtering operations
 - July 21, 2025. FINAL ANALYSIS CHARTS PERFECTION AND LAYOUT REORGANIZATION COMPLETED: Fixed grid lines visibility, eliminated hardcoded colors, removed unwanted codes, and reorganized chart layout - COMPLETED
   • GRID LINES FINALLY VISIBLE: Changed from strokeOpacity={0.5} to className="opacity-30" and stroke="var(--chart-grid-text)" matching OrganizationActivityChart pattern
   • HEATMAP COLORS FIXED: Eliminated all hardcoded colors, now uses proper CSS variables [background-color:var(--chart-1)] through [background-color:var(--chart-5)]
