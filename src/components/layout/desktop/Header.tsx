@@ -222,7 +222,7 @@ export function Header({
         {/* Mobile Avatar Button - visible only on mobile, positioned left */}
         <div className="md:hidden pl-2">
           <Button
-            variant="ghost"
+            variant="ghost-flat"
             size="icon"
             onClick={() => navigate('/profile')}
             className="h-10 w-10 p-0 hover:bg-transparent"
@@ -248,7 +248,7 @@ export function Header({
           {/* Organization Button - ALWAYS visible */}
           <div className="flex items-center">
             <Button
-              variant="ghost"
+              variant="ghost-flat"
               className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
               onClick={() => {
                 setSidebarContext('organization');
@@ -261,7 +261,7 @@ export function Header({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="ghost"
+                  variant="ghost-flat"
                   size="icon"
                   className="h-8 w-6 p-0 hover:bg-transparent"
                 >
@@ -305,7 +305,7 @@ export function Header({
             
             <div className="flex items-center">
               <Button
-                variant="ghost"
+                variant="ghost-flat"
                 className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
                 onClick={() => {
                   if (localSelectedProject === null) {
@@ -327,7 +327,7 @@ export function Header({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="ghost-flat"
                     size="icon"
                     className="h-8 w-6 p-0 hover:bg-transparent"
                   >
@@ -385,7 +385,7 @@ export function Header({
               
               <div className="flex items-center">
                 <Button
-                  variant="ghost"
+                  variant="ghost-flat"
                   className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
                   onClick={() => {
                     // Navigate to current stage dashboard
@@ -404,7 +404,7 @@ export function Header({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="ghost"
+                      variant="ghost-flat"
                       size="icon"
                       className="h-8 w-6 p-0 hover:bg-transparent"
                     >
@@ -460,7 +460,7 @@ export function Header({
               <span className="text-[var(--menues-fg)] opacity-70">/</span>
               <div className="flex items-center">
                 <Button
-                  variant="ghost"
+                  variant="ghost-flat"
                   className="h-8 px-2 text-sm font-medium text-[var(--menues-fg)] hover:bg-transparent hover:text-[var(--menues-fg)]"
                   onClick={() => {
                     // Navigate to current section dashboard
@@ -476,7 +476,7 @@ export function Header({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="ghost"
+                      variant="ghost-flat"
                       size="icon"
                       className="h-8 w-6 p-0 hover:bg-transparent"
                     >
@@ -590,7 +590,7 @@ export function Header({
       <div className="flex items-center gap-2 ml-auto pr-2">
         {/* Mobile Menu Button - visible on mobile only, positioned on the right */}
         <Button
-          variant="ghost"
+          variant="ghost-flat"
           size="icon"
           onClick={openMenu}
           className="md:hidden h-10 w-10 p-0 hover:bg-transparent"
@@ -603,7 +603,7 @@ export function Header({
             <div className="relative">
               {!isSearchOpen ? (
                 <Button
-                  variant="ghost"
+                  variant="ghost-flat"
                   size="icon"
                   onClick={() => setIsSearchOpen(true)}
                   className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
@@ -627,7 +627,7 @@ export function Header({
                     }}
                   />
                   <Button
-                    variant="ghost"
+                    variant="ghost-flat"
                     size="icon"
                     onClick={() => {
                       onSearchChange?.("")
@@ -646,7 +646,7 @@ export function Header({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="ghost"
+                  variant="ghost-flat"
                   size="icon"
                   className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"
                 >
@@ -673,7 +673,7 @@ export function Header({
 
           {onClearFilters && (
             <Button
-              variant="ghost"
+              variant="ghost-flat"
               size="icon"
               onClick={onClearFilters}
               className="h-8 w-8 hover:bg-[var(--button-ghost-hover-bg)]"

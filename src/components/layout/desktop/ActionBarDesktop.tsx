@@ -1,5 +1,5 @@
 import React from 'react'
-import { Package } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -35,7 +35,7 @@ export function ActionBarDesktop({
   return (
     <div 
       className={cn(
-        "hidden md:flex items-center justify-between px-0 py-3 border-b border-[var(--card-border)] mb-6",
+        "hidden md:flex items-center justify-between px-4 py-3 rounded-lg border border-[var(--card-border)] mb-6 shadow-lg",
         className
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
@@ -50,7 +50,7 @@ export function ActionBarDesktop({
                 variant="ghost"
                 size="default"
               >
-                <Package />
+                <LayoutGrid />
                 Agrupar
               </Button>
             </PopoverTrigger>
