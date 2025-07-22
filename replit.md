@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. CONSTRUCTION TASKS PAGE STANDARDIZED TO BUDGETTABLE COMPONENT: Successfully migrated from Table.tsx to BudgetTable.tsx maintaining same functionality - COMPLETED
+  • Replaced Table component import with BudgetTable component in ConstructionTasks.tsx for visual consistency across construction pages
+  • Maintained all existing columns: Rubro, Tarea, Unidad, Cantidad, Progreso, Fase, Fechas, Acciones
+  • Preserved all functionality: edit task modal, delete confirmation, progress bars, date formatting, search filtering
+  • Enhanced UI consistency: Construction Tasks page now matches visual styling of Construction Budgets page
+  • Component standardization achieved: both construction management pages use same table structure and behavior
 - July 22, 2025. BUDGET AUTO-SELECTION LOGIC COMPLETELY FIXED: Resolved critical bug where "Selecciona un presupuesto" message appeared when projects had available budgets - COMPLETED
   • Root cause identified: faulty conditional logic in useEffect prevented budget auto-selection when last_budget_id didn't exist in current project
   • Fixed budget selection workflow: removed problematic "else if (!selectedBudgetId)" condition that blocked automatic selection

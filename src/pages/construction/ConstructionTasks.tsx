@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, CheckSquare, Edit, Trash2, Calendar, Clock, MapPin, User } from 'lucide-react'
-import { Table } from '@/components/ui-custom/Table'
+import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
@@ -301,7 +301,7 @@ export default function ConstructionTasks() {
           }
         />
       ) : (
-        <Table
+        <BudgetTable
           data={tableData}
           columns={tableColumns}
         />
