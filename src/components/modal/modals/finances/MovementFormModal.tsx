@@ -627,7 +627,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         c.currency?.id === editingMovement.currency_id
       )
       const matchingWallet = wallets?.find(w => 
-        w.wallet_id === editingMovement.wallet_id
+        w.id === editingMovement.wallet_id
       )
       
       console.log('Loading editing movement:', {
@@ -853,8 +853,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           type_id: editingMovement.type_id || '',
           category_id: editingMovement.category_id || '',
           contact_id: editingMovement.contact_id || '',
-          currency_id: matchingCurrency?.currency_id || editingMovement.currency_id || '',
-          wallet_id: matchingWallet?.wallet_id || editingMovement.wallet_id || '',
+          currency_id: editingMovement.currency_id || '',
+          wallet_id: editingMovement.wallet_id || '',
           amount: editingMovement.amount || 0,
           exchange_rate: editingMovement.exchange_rate || undefined
         })
