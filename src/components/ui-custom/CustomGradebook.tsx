@@ -415,7 +415,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                     return (
                       <div 
                         key={`${contactType}-header-${date.getTime()}`} 
-                        className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)] text-white' : ''}`}
+                        className="flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0"
                         style={{ width: '65px', minWidth: '65px' }}
                       >
                         {/* Empty space for contact type header */}
