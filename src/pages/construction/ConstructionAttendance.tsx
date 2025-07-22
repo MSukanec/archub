@@ -154,7 +154,6 @@ function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: 
 
 export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
-  const [hideWeekends, setHideWeekends] = useState(false)
   const [selectedContactType, setSelectedContactType] = useState<string>("")
 
   const [location, navigate] = useLocation()
@@ -174,32 +173,6 @@ export default function ConstructionAttendance() {
   const { workers, attendance } = useMemo(() => {
     return transformAttendanceData(attendanceData, selectedContactType || undefined)
   }, [attendanceData, selectedContactType])
-
-  // Calculate automatic date range based on first attendance record
-  const { calculatedStartDate, calculatedEndDate } = useMemo(() => {
-    if (attendanceData.length === 0) {
-      const today = new Date()
-      return {
-        calculatedStartDate: today,
-        calculatedEndDate: new Date(today.getFullYear() + 3, today.getMonth(), today.getDate())
-      }
-    }
-
-    // Find the earliest attendance date
-    const dates = attendanceData
-      .map(item => item.site_log?.log_date)
-      .filter(Boolean)
-      .map(date => new Date(date))
-      .sort((a, b) => a.getTime() - b.getTime())
-
-    const firstDate = dates[0] || new Date()
-    const endDate = new Date(firstDate.getFullYear() + 3, firstDate.getMonth(), firstDate.getDate())
-
-    return {
-      calculatedStartDate: firstDate,
-      calculatedEndDate: endDate
-    }
-  }, [attendanceData])
 
   // Filter workers based on search
   const filteredWorkers = useMemo(() => {
@@ -222,10 +195,13 @@ export default function ConstructionAttendance() {
     setHideWeekends(false)
   }
 
-  // Center timeline on today (for ActionBar button)
+  // Center timeline on today
   const handleTodayClick = () => {
-    // This will be handled by CustomGradebook internally
-    // Just a placeholder for ActionBar compatibility
+    const today = new Date()
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 15)
+    const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 15)
+    setStartDate(startOfToday)
+    setEndDate(endOfToday)
   }
 
   // Toggle weekend visibility
@@ -392,9 +368,11 @@ export default function ConstructionAttendance() {
           <CustomGradebook 
             workers={filteredWorkers}
             attendance={filteredAttendance}
-            startDate={calculatedStartDate}
-            endDate={calculatedEndDate}
+            startDate={startDate}
+            endDate={endDate}
             hideWeekends={hideWeekends}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
             onHideWeekendsChange={setHideWeekends}
           />
         ) : (

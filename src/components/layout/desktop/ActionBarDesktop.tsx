@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutGrid, Plus, Edit, Trash2, Calendar, CalendarOff, X, Filter, RotateCcw } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2, X, Filter, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -36,10 +36,7 @@ interface ActionBarDesktopProps {
   tabs?: Tab[]
   activeTab?: string
   onTabChange?: (value: string) => void
-  // Ghost buttons for attendance page
-  onTodayClick?: () => void
-  hideWeekends?: boolean
-  onToggleWeekends?: (hide: boolean) => void
+  // Custom filters and clear function
   customFilters?: React.ReactNode
   onClearFilters?: () => void
   className?: string
@@ -60,9 +57,6 @@ export function ActionBarDesktop({
   tabs,
   activeTab,
   onTabChange,
-  onTodayClick,
-  hideWeekends = false,
-  onToggleWeekends,
   customFilters,
   onClearFilters,
   className
@@ -214,34 +208,7 @@ export function ActionBarDesktop({
           </Popover>
         )}
 
-        {/* HOY Button - For attendance page */}
-        {onTodayClick && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            onClick={onTodayClick}
-            title="Ir a Hoy"
-          >
-            <Calendar className="w-4 h-4" />
-          </Button>
-        )}
 
-        {/* Toggle Weekends Button - For attendance page */}
-        {onToggleWeekends && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "h-8 w-8 p-0",
-              hideWeekends && "bg-green-500 hover:bg-green-600 text-white"
-            )}
-            onClick={() => onToggleWeekends(!hideWeekends)}
-            title={hideWeekends ? "Mostrar fines de semana" : "Ocultar fines de semana"}
-          >
-            <CalendarOff className="w-4 h-4" />
-          </Button>
-        )}
 
         {/* Custom Filters Popover */}
         {customFilters && (
