@@ -14,6 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
+  const [groupingType, setGroupingType] = useState('none')
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -169,7 +170,9 @@ export default function ConstructionTasks() {
       <ActionBarDesktop
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        onFilterClick={() => console.log('Abrir filtros')}
+        showGrouping
+        groupingType={groupingType}
+        onGroupingChange={setGroupingType}
         primaryActionLabel="+ Nueva Tarea"
         onPrimaryActionClick={handleAddTask}
       />

@@ -327,35 +327,42 @@ export function BudgetTable({
                       <Filter className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent align="end" className="w-48 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <PopoverContent 
+                    align="end" 
+                    className="w-48 p-0 rounded-lg shadow-button-normal border"
+                    style={{ 
+                      backgroundColor: 'var(--card-bg)',
+                      borderColor: 'var(--card-border)'
+                    }}
+                  >
                     <div className="py-1">
                       <button
                         onClick={() => onGroupingChange?.('none')}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm font-medium text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                       >
                         Sin agrupar
                       </button>
                       <button
                         onClick={() => onGroupingChange?.('rubros')}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm font-medium text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                       >
                         Agrupar por Rubros
                       </button>
                       <button
                         onClick={() => onGroupingChange?.('phases')}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm font-medium text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                       >
                         Agrupar por Fases
                       </button>
                       <button
                         onClick={() => onGroupingChange?.('rubros-phases')}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm font-medium text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                       >
                         Rubros y Fases
                       </button>
                       <button
                         onClick={() => onGroupingChange?.('phases-rubros')}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm font-medium text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                       >
                         Fases y Rubros
                       </button>

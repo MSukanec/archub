@@ -2,6 +2,7 @@ import React from 'react'
 import { Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
 interface ActionBarDesktopProps {
@@ -9,8 +10,9 @@ interface ActionBarDesktopProps {
   searchValue?: string
   onSearchChange?: (value: string) => void
   onSearchClick?: () => void
-  showFilters?: boolean
-  onFilterClick?: () => void
+  showGrouping?: boolean
+  groupingType?: string
+  onGroupingChange?: (type: string) => void
   primaryActionLabel?: string
   onPrimaryActionClick?: () => void
   customActions?: React.ReactNode[]
@@ -22,8 +24,9 @@ export function ActionBarDesktop({
   searchValue = '',
   onSearchChange,
   onSearchClick,
-  showFilters = true,
-  onFilterClick,
+  showGrouping = true,
+  groupingType = 'none',
+  onGroupingChange,
   primaryActionLabel,
   onPrimaryActionClick,
   customActions = [],
@@ -52,17 +55,81 @@ export function ActionBarDesktop({
           />
         )}
 
-        {/* Filters button */}
-        {showFilters && onFilterClick && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onFilterClick}
-            className="h-9 px-3"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
-          </Button>
+        {/* Grouping button */}
+        {showGrouping && onGroupingChange && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 px-3"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Agrupar
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              align="end" 
+              className="w-48 p-0 rounded-lg shadow-button-normal border"
+              style={{ 
+                backgroundColor: 'var(--card-bg)',
+                borderColor: 'var(--card-border)'
+              }}
+            >
+              <div className="py-1">
+                <button
+                  onClick={() => onGroupingChange('none')}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    groupingType === 'none' && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  Sin agrupar
+                </button>
+                <button
+                  onClick={() => onGroupingChange('rubros')}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    groupingType === 'rubros' && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  Agrupar por Rubros
+                </button>
+                <button
+                  onClick={() => onGroupingChange('phases')}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    groupingType === 'phases' && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  Agrupar por Fases
+                </button>
+                <button
+                  onClick={() => onGroupingChange('rubros-phases')}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    groupingType === 'rubros-phases' && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  Rubros y Fases
+                </button>
+                <button
+                  onClick={() => onGroupingChange('phases-rubros')}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    groupingType === 'phases-rubros' && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  Fases y Rubros
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         )}
 
         {/* Custom actions */}

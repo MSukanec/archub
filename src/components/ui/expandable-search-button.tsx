@@ -54,7 +54,7 @@ export function ExpandableSearchButton({
           onClick={handleClick}
           className={cn(
             // Base styles matching ghost button exactly
-            "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium",
+            "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium",
             "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
             "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
             "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
@@ -69,7 +69,7 @@ export function ExpandableSearchButton({
           <Search 
             className={cn(
               "h-4 w-4 shrink-0 transition-all duration-200 ease-out",
-              isExpanded ? "order-2" : "order-1"
+              isExpanded ? "order-2" : "order-1 mr-2"
             )} 
           />
           
@@ -100,17 +100,16 @@ export function ExpandableSearchButton({
           
           {/* Close Button - only visible when expanded */}
           {isExpanded && (
-            <button
-              type="button"
+            <div
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
                 handleClose()
               }}
-              className="order-3 p-1 hover:bg-gray-100 rounded-full transition-colors shrink-0"
+              className="order-3 p-1 hover:bg-[var(--button-ghost-hover-bg)] rounded-full transition-colors shrink-0 cursor-pointer"
             >
-              <X className="h-3 w-3 text-gray-400" />
-            </button>
+              <X className="h-3 w-3 text-[var(--button-ghost-text)]" />
+            </div>
           )}
         </button>
       </form>
