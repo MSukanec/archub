@@ -35,12 +35,16 @@ export function Selector({
     setOpen(false)
   }
 
+  const handleMouseEnter = () => {
+    setOpen(true)
+  }
+
   const handleMouseLeave = () => {
     setOpen(false)
   }
 
   return (
-    <div onMouseLeave={handleMouseLeave}>
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
@@ -72,7 +76,7 @@ export function Selector({
             backgroundColor: 'var(--card-bg)',
             borderColor: 'var(--card-border)'
           }}
-          sideOffset={4}
+          sideOffset={2}
         >
           <div className="py-1">
             {options.map((option) => (
