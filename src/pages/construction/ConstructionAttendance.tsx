@@ -266,39 +266,23 @@ export default function ConstructionAttendance() {
     }
   ], [stats])
 
-  // Custom filters for ActionBar
+  // Custom filters for ActionBar - Only contact type filter
   const customFilters = (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Tipo de Trabajador</Label>
-        <Select value={selectedContactType} onValueChange={setSelectedContactType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Todos los tipos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos los tipos</SelectItem>
-            {contactTypes.map(type => (
-              <SelectItem key={type.id} value={type.id}>
-                {type.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Opciones de vista</Label>
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="hide-weekends"
-            checked={hideWeekends}
-            onCheckedChange={setHideWeekends}
-          />
-          <Label htmlFor="hide-weekends" className="text-sm">
-            Ocultar fines de semana
-          </Label>
-        </div>
-      </div>
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">Tipo de Trabajador</Label>
+      <Select value={selectedContactType} onValueChange={setSelectedContactType}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Todos los tipos" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Todos los tipos</SelectItem>
+          {contactTypes.map(type => (
+            <SelectItem key={type.id} value={type.id}>
+              {type.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 

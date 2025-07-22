@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutGrid, Plus, Edit, Trash2, Calendar, CalendarX, X } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2, Calendar, CalendarOff, X, Filter, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -234,17 +234,17 @@ export function ActionBarDesktop({
             size="sm"
             className={cn(
               "h-8 w-8 p-0",
-              hideWeekends && "bg-[var(--button-ghost-hover-bg)]"
+              hideWeekends && "bg-green-500 hover:bg-green-600 text-white"
             )}
             onClick={() => onToggleWeekends(!hideWeekends)}
             title={hideWeekends ? "Mostrar fines de semana" : "Ocultar fines de semana"}
           >
-            {hideWeekends ? <CalendarX className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
+            <CalendarOff className="w-4 h-4" />
           </Button>
         )}
 
         {/* Custom Filters Popover */}
-        {customFilters && onClearFilters && (
+        {customFilters && (
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -252,34 +252,35 @@ export function ActionBarDesktop({
                 size="sm"
                 className="h-8 w-8 p-0"
               >
-                <LayoutGrid className="w-4 h-4" />
+                <Filter className="w-4 h-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent 
               align="start" 
-              className="w-auto p-4 rounded-lg shadow-button-normal border"
+              className="w-48 p-0 rounded-lg shadow-button-normal border"
               style={{ 
                 backgroundColor: 'var(--card-bg)',
                 borderColor: 'var(--card-border)'
               }}
             >
-              <div className="space-y-4">
+              <div className="p-3">
                 {customFilters}
-                
-                <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onClearFilters}
-                    className="flex items-center gap-1"
-                  >
-                    <X className="w-3 h-3" />
-                    Limpiar filtros
-                  </Button>
-                </div>
               </div>
             </PopoverContent>
           </Popover>
+        )}
+
+        {/* Clear Filters Button */}
+        {onClearFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={onClearFilters}
+            title="Limpiar filtros"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
         )}
 
         {/* 3. SECONDARY BUTTONS (Custom actions) */}
