@@ -35,7 +35,7 @@ export function ActionBarDesktop({
   return (
     <div 
       className={cn(
-        "hidden md:flex items-center justify-between px-4 py-3 rounded-lg border border-[var(--card-border)] mb-6 shadow-lg",
+        "hidden md:flex items-center justify-between px-4 py-3 rounded-lg mb-6 shadow-lg",
         className
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
