@@ -8,7 +8,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
-import { Package, Search, Calculator, Boxes, BarChart3, Layers, Filter } from 'lucide-react'
+import { Package, Search, Calculator, Boxes, BarChart3, Layers, Filter, X } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -182,6 +182,10 @@ export default function ConstructionMaterials() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      style={{
+                        backgroundColor: selectedCategory ? 'var(--accent)' : undefined,
+                        color: selectedCategory ? 'var(--accent-foreground)' : undefined
+                      }}
                     >
                       <Filter className="w-4 h-4" />
                     </Button>
@@ -212,7 +216,17 @@ export default function ConstructionMaterials() {
                       ))}
                     </div>
                   </PopoverContent>
-                </Popover>
+                </Popover>,
+                <Button
+                  key="clear-filters"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={handleClearFilters}
+                  disabled={!selectedCategory && !searchValue}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               ]}
             />
             
