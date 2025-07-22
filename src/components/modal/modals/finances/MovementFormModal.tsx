@@ -1288,11 +1288,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         throw new Error('Organization ID not found')
       }
 
+      // Mapear created_by de user_id a organization_member.id
+      const createdByMember = members?.find(m => m.user_id === data.created_by)?.id || data.created_by
+
       const movementData = {
         organization_id: userData.organization.id,
         project_id: form.watch('project_id') || null, // Usar project_id del formulario
         movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: data.created_by,
+        created_by: createdByMember,
         description: data.description || 'Aporte',
         amount: data.amount,
         currency_id: data.currency_id,
@@ -1572,6 +1575,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     // Usar el tipo detectado basándose en la categoría actual
     if (isCurrentAportes) {
       console.log('Submitting as aportes form')
+      
+      // CRITICAL: Sincronizar type_id del formulario principal antes de enviar
+      const mainFormTypeId = form.watch('type_id')
+      if (mainFormTypeId) {
+        console.log('Synchronizing type_id before submit:', mainFormTypeId)
+        aportesForm.setValue('type_id', mainFormTypeId)
+      }
+      
       console.log('AportesFields - Currency data structure:', {
         currencies: currencies?.[0], 
         formData: aportesForm.getValues(),
@@ -1823,6 +1834,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   
                   // Detectar el tipo específico de aportes
                   const isAportesCategory = viewMode === "aportes"
+                  
+                  // CRITICAL: Sincronizar type_id del formulario principal al formulario de aportes
+                  const currentTypeId = form.watch('type_id')
+                  if (currentTypeId && isAportesCategory) {
+                    console.log('Synchronizing type_id to aportes form in edit mode:', currentTypeId)
+                    aportesForm.setValue('type_id', currentTypeId)
+                  }
                   const isAportesPropiosCategory = viewMode === "aportes_propios"
                   const isRetirosPropiosCategory = viewMode === "retiros_propios"
                   
