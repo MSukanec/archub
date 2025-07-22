@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. CURRENCY FIELD "SIN NOMBRE" BUG COMPLETELY RESOLVED: Fixed critical recurring issue where currency fields showed "Sin nombre" instead of proper currency names - COMPLETED
+  • Root cause identified: inconsistent wallet mapping logic in movement editing (w.wallet_id vs w.id)
+  • Fixed wallet structure mapping in MovementFormModal.tsx lines 632 and 859-860
+  • Corrected currency field display in AportesFields.tsx, AportesPropiosFields.tsx, and RetirosPropiosFields.tsx
+  • All movement forms now consistently use orgCurrency.currency?.name structure for proper currency name display
+  • Currency dropdown now correctly shows "Dólar Estadounidense (US$)" and "Peso Argentino ($)" instead of "Sin nombre ($)"
+  • Movement editing and updating for APORTES DE TERCEROS category working correctly after currency structure fixes
 - July 22, 2025. COMPROMISOS DE PAGO FIXED TO USE CORRECT APORTES DE TERCEROS ID: Corrected installments filtering to use proper "Aportes de Terceros" subcategory ID f3b96eda-15d5-4c96-ade7-6f53685115d3 instead of deprecated "Cuotas" ID e675eb59-3717-4451-89eb-0d838388238f - COMPLETED
   • Fixed movement_view data structure implementation for contact_name, contact_company_name, currency_symbol, wallet_name fields
   • Updated all table columns and card components to use flattened fields from movement_view instead of nested object references
