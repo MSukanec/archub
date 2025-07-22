@@ -69,23 +69,17 @@ export default function ProfileSettings() {
     },
   })
 
-  // Set up debounced auto-save with 3 second delay
+  // Set up debounced auto-save with 1 second delay for faster saving
   const { isSaving } = useDebouncedAutoSave({
     data: settingsData,
     saveFn: async (data) => { await saveSettingsMutation.mutateAsync(data); },
-    delay: 3000,
+    delay: 1000,
     enabled: !!userData
   })
 
   const handleSidebarDockedChange = (value: boolean) => {
     setSidebarDocked(value)
     setSecondarySidebarDocked(value)
-  }
-
-  const handleThemeChange = (isDarkMode: boolean) => {
-    // Update theme immediately in UI
-    setTheme(isDarkMode ? 'dark' : 'light')
-    // The auto-save system will handle the database update automatically
   }
 
   // Load settings data
@@ -162,7 +156,7 @@ export default function ProfileSettings() {
                 </div>
                 <Switch
                   checked={isDark}
-                  onCheckedChange={handleThemeChange}
+                  onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                 />
               </div>
               
