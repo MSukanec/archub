@@ -53,7 +53,7 @@ export function ExpandableSearchButton({
           type={isExpanded ? "submit" : "button"}
           onClick={handleClick}
           className={cn(
-            // Base styles matching ghost button exactly
+            // Base styles matching ghost button exactly - using gap-2 like regular ghost button
             "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium",
             "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
             "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
@@ -61,15 +61,15 @@ export function ExpandableSearchButton({
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
             "disabled:pointer-events-none disabled:opacity-60",
             "transition-all duration-200 ease-out overflow-hidden",
-            // Width transition
-            isExpanded ? "w-80" : "w-auto"
+            // Use gap-2 when collapsed (like regular ghost button), no gap when expanded
+            isExpanded ? "w-80" : "w-auto gap-2"
           )}
         >
           {/* Search Icon - moves to right when expanded */}
           <Search 
             className={cn(
               "h-4 w-4 shrink-0 transition-all duration-200 ease-out",
-              isExpanded ? "order-2" : "order-1 mr-2"
+              isExpanded ? "order-2" : "order-1"
             )} 
           />
           
@@ -92,7 +92,7 @@ export function ExpandableSearchButton({
             placeholder={placeholder}
             className={cn(
               "bg-transparent border-none outline-none text-sm font-medium",
-              "text-[var(--button-ghost-text)] placeholder:text-gray-400",
+              "text-[var(--button-ghost-text)] placeholder-ghost-text",
               "transition-all duration-200 ease-out",
               isExpanded ? "opacity-100 flex-1 order-1" : "opacity-0 w-0 pointer-events-none"
             )}

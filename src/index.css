@@ -594,3 +594,9 @@ input[type="number"] {
     -ms-text-size-adjust: 100% !important;
   }
 }
+
+/* Placeholder text color matching ghost button text */
+.placeholder-ghost-text::placeholder {
+  color: var(--button-ghost-text);
+  opacity: 0.7;
+}
