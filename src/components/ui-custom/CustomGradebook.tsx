@@ -406,7 +406,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
-            scrollbarWidth: 'thin',
+            scrollbarWidth: 'thick',
             scrollbarColor: 'var(--accent) var(--table-header-bg)'
           }}
           onScroll={(e) => {
