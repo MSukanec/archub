@@ -161,11 +161,20 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {currencies?.map((orgCurrency) => (
-                    <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                      {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                    </SelectItem>
-                  ))}
+                  {currencies?.map((orgCurrency) => {
+                    console.log('AportesFields Currency data structure:', {
+                      orgCurrency,
+                      currency: orgCurrency.currency,
+                      name: orgCurrency.currency?.name,
+                      symbol: orgCurrency.currency?.symbol,
+                      id: orgCurrency.currency?.id
+                    })
+                    return (
+                      <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                        {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               <FormMessage />
