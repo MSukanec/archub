@@ -40,36 +40,22 @@ export function ActionBarDesktop({
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Empty for spacing */}
-      <div className="flex-1"></div>
-
-      {/* Right side - Actions */}
+      {/* Left side - Grouping and Search */}
       <div className="flex items-center gap-2">
-        {/* Expandable Search Button */}
-        {showSearch && (
-          <ExpandableSearchButton
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            onSearchSubmit={onSearchClick}
-            placeholder="Buscar tareas, rubros o fases..."
-          />
-        )}
-
-        {/* Grouping button */}
+        {/* Grouping button - FIRST */}
         {showGrouping && onGroupingChange && (
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-9 px-3"
+                size="default"
               >
                 <Filter />
                 Agrupar
               </Button>
             </PopoverTrigger>
             <PopoverContent 
-              align="end" 
+              align="start" 
               className="w-48 p-0 rounded-lg shadow-button-normal border"
               style={{ 
                 backgroundColor: 'var(--card-bg)',
@@ -132,6 +118,19 @@ export function ActionBarDesktop({
           </Popover>
         )}
 
+        {/* Expandable Search Button - SECOND */}
+        {showSearch && (
+          <ExpandableSearchButton
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            onSearchSubmit={onSearchClick}
+            placeholder="Buscar tareas, rubros o fases..."
+          />
+        )}
+      </div>
+
+      {/* Right side - Main actions */}
+      <div className="flex items-center gap-2">
         {/* Custom actions */}
         {customActions.map((action, index) => (
           <div key={index}>{action}</div>

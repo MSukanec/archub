@@ -47,7 +47,7 @@ export function ExpandableSearchButton({
   }, [isExpanded])
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative shrink-0", className)}>
       <form onSubmit={handleSubmit}>
         <button
           type={isExpanded ? "submit" : "button"}
@@ -61,8 +61,8 @@ export function ExpandableSearchButton({
             "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
             "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
             "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-            // Only add width transition when expanded
-            isExpanded ? "w-80 !gap-0 overflow-hidden" : ""
+            // Width and gap changes only when expanded
+            isExpanded ? "w-80 !gap-1 overflow-hidden" : ""
           )}
         >
           {!isExpanded && (
