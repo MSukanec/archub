@@ -112,6 +112,11 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   const groupedWorkers = React.useMemo(() => {
     const groups: { [key: string]: Worker[] } = {}
     
+    // If no workers, return empty groups but preserve structure for timeline
+    if (workers.length === 0) {
+      return {}
+    }
+    
     workers.forEach(worker => {
       const contactType = worker.contactType || 'Sin tipo'
       if (!groups[contactType]) {
@@ -128,21 +133,13 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   
   // Center timeline on today - for both initial load and HOY button
   const centerTimelineOnToday = React.useCallback(() => {
-    console.log('centerTimelineOnToday called', { 
-      timelineElement: !!timelineElement, 
-      dateRangeLength: dateRange.length,
-      todayIndex: dateRange.findIndex(date => isToday(date))
-    })
     if (timelineElement && dateRange.length > 0) {
       const todayIndex = dateRange.findIndex(date => isToday(date))
       if (todayIndex !== -1) {
         const columnWidth = 65 // Updated to match new column width
         const containerWidth = timelineElement.clientWidth
         const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
-        console.log('Scrolling to position:', scrollPosition, 'today index:', todayIndex)
         timelineElement.scrollLeft = Math.max(0, scrollPosition)
-      } else {
-        console.log('Today not found in date range')
       }
     }
   }, [timelineElement, dateRange])
@@ -157,7 +154,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Center on today when HOY button is triggered (responds to any change in triggerTodayCenter)
   React.useEffect(() => {
     if (timelineElement) {
-      console.log('HOY button triggered, centering timeline on today')
       setTimeout(centerTimelineOnToday, 100)
     }
   }, [triggerTodayCenter, timelineElement, centerTimelineOnToday])
@@ -364,42 +360,49 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
         <div className="flex-shrink-0 w-64 bg-[var(--table-header-bg)] border-r border-border overflow-hidden">
           {/* Personnel List - grouped by contact type */}
           <div>
-              {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
-                <div key={contactType}>
-                  {/* Contact Type Header */}
-                  <div className="h-12 px-4 bg-[var(--table-row-bg)] border-b border-[var(--table-row-border)] flex items-center">
-                    <span className="text-xs font-medium uppercase tracking-wider text-[var(--table-row-fg)]">
-                      {contactType} ({workersInGroup.length})
-                    </span>
-                  </div>
-                  
-                  {/* Workers in this contact type */}
-                  {workersInGroup.map((worker, workerIndex) => {
-                    const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
-                    const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
-                    const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+              {Object.entries(groupedWorkers).length > 0 ? (
+                Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
+                  <div key={contactType}>
+                    {/* Contact Type Header */}
+                    <div className="h-12 px-4 bg-[var(--table-row-bg)] border-b border-[var(--table-row-border)] flex items-center">
+                      <span className="text-xs font-medium uppercase tracking-wider text-[var(--table-row-fg)]">
+                        {contactType} ({workersInGroup.length})
+                      </span>
+                    </div>
                     
-                    return (
-                      <div key={worker.id} className={`h-12 px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
-                        <Avatar className="h-8 w-8 flex-shrink-0">
-                          <AvatarImage src={worker.avatar_url} alt={worker.name} />
-                          <AvatarFallback className="text-xs font-medium">
-                            {getInitials(worker.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="ml-3">
-                          <div className="text-sm font-medium text-[var(--table-row-fg)]">{worker.name}</div>
+                    {/* Workers in this contact type */}
+                    {workersInGroup.map((worker, workerIndex) => {
+                      const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
+                      const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
+                      const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                      
+                      return (
+                        <div key={worker.id} className={`h-12 px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
+                          <Avatar className="h-8 w-8 flex-shrink-0">
+                            <AvatarImage src={worker.avatar_url} alt={worker.name} />
+                            <AvatarFallback className="text-xs font-medium">
+                              {getInitials(worker.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="ml-3">
+                            <div className="text-sm font-medium text-[var(--table-row-fg)]">{worker.name}</div>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                ))
+              ) : (
+                <div className="h-32 flex items-center justify-center text-[var(--table-row-fg)] text-sm">
+                  No se encontraron resultados
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
         {/* Timeline Content with synchronized scrolling */}
         <div 
+          ref={setTimelineElement}
           className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
@@ -415,60 +418,66 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
         >
           <div style={{ width: `${dateRange.length * 65}px` }}>
             {/* Timeline Content - matching Gantt design */}
-            {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
-              <div key={contactType}>
-                {/* Contact Type Header Row */}
-                <div className="h-12 border-b border-[var(--table-row-border)] bg-[var(--table-row-bg)] flex">
-                  {dateRange.map((date) => {
-                    const isTodayDate = isToday(date)
+            {Object.entries(groupedWorkers).length > 0 ? (
+              Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
+                <div key={contactType}>
+                  {/* Contact Type Header Row */}
+                  <div className="h-12 border-b border-[var(--table-row-border)] bg-[var(--table-row-bg)] flex">
+                    {dateRange.map((date) => {
+                      const isTodayDate = isToday(date)
+                      return (
+                        <div 
+                          key={`${contactType}-header-${date.getTime()}`} 
+                          className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
+                          style={{ width: '65px', minWidth: '65px' }}
+                        >
+                          {/* Empty space for contact type header */}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  
+                  {/* Worker Rows for this contact type */}
+                  {workersInGroup.map((worker, workerIndex) => {
+                    const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
+                    const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
+                    const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                    
                     return (
                       <div 
-                        key={`${contactType}-header-${date.getTime()}`} 
-                        className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
-                        style={{ width: '65px', minWidth: '65px' }}
+                        key={worker.id} 
+                        className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}
                       >
-                        {/* Empty space for contact type header */}
+                        {dateRange.map((date) => {
+                          const status = getAttendanceStatus(worker.id, date)
+                          const isWeekendDay = isWeekend(date)
+                          const isTodayDate = isToday(date)
+                          return (
+                            <div 
+                              key={`${worker.id}-${date.getTime()}`} 
+                              className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
+                              style={{ width: '65px', minWidth: '65px' }}
+                            >
+                              <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)}`}>
+                                {isWeekendDay && (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <span className="text-xs text-gray-400">×</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                    )
+                    );
                   })}
                 </div>
-                
-                {/* Worker Rows for this contact type */}
-                {workersInGroup.map((worker, workerIndex) => {
-                  const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
-                  const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
-                  const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
-                  
-                  return (
-                    <div 
-                      key={worker.id} 
-                      className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}
-                    >
-                      {dateRange.map((date) => {
-                        const status = getAttendanceStatus(worker.id, date)
-                        const isWeekendDay = isWeekend(date)
-                        const isTodayDate = isToday(date)
-                        return (
-                          <div 
-                            key={`${worker.id}-${date.getTime()}`} 
-                            className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
-                            style={{ width: '65px', minWidth: '65px' }}
-                          >
-                            <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)}`}>
-                              {isWeekendDay && (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-xs text-gray-400">×</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  );
-                })}
+              ))
+            ) : (
+              <div className="h-32 flex items-center justify-center">
+                <span className="text-[var(--table-row-fg)] text-sm">No se encontraron resultados</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

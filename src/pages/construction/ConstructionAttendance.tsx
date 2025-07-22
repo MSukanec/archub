@@ -196,7 +196,6 @@ export default function ConstructionAttendance() {
 
   // Navigate to today - centers view on today in gradebook
   const handleTodayClick = () => {
-    console.log('HOY button clicked, toggling triggerTodayCenter from', triggerTodayCenter, 'to', !triggerTodayCenter)
     // Toggle the trigger to force re-center on today
     setTriggerTodayCenter(prev => !prev)
   }
@@ -265,8 +264,8 @@ export default function ConstructionAttendance() {
           ]}
         />
 
-        {/* ActionBar - Only show when there's data */}
-        {filteredWorkers.length > 0 && (
+        {/* ActionBar - Only show when there's original data */}
+        {workers.length > 0 && (
           <ActionBarDesktop
             searchValue={searchValue}
             onSearchChange={setSearchValue}
@@ -277,10 +276,8 @@ export default function ConstructionAttendance() {
           />
         )}
 
-
-
-        {/* Gradebook Component */}
-        {filteredWorkers.length > 0 ? (
+        {/* Gradebook Component - Show always if there's original data, even if filtered workers is empty */}
+        {workers.length > 0 ? (
           <CustomGradebook 
             workers={filteredWorkers}
             attendance={filteredAttendance}
