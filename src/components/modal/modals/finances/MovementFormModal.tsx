@@ -161,7 +161,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const queryClient = useQueryClient()
 
   // Verificar si todos los datos críticos están cargados
-  const isDataLoading = isUserDataLoading || isMembersLoading || isCurrenciesLoading || isWalletsLoading || isOrganizationConceptsLoading
+  const isDataLoading = isUserDataLoading || isMembersLoading || isCurrenciesLoading || isWalletsLoading || isOrganizationConceptsLoading || !userData || !members || !currencies || !wallets || !organizationConcepts
+  
+  // Debug: Log loading state
+  React.useEffect(() => {
+    console.log('Modal loading state:', {
+      isUserDataLoading,
+      isMembersLoading,
+      isCurrenciesLoading,
+      isWalletsLoading,
+      isOrganizationConceptsLoading,
+      hasUserData: !!userData,
+      hasMembers: !!members,
+      hasCurrencies: !!currencies,
+      hasWallets: !!wallets,
+      hasOrganizationConcepts: !!organizationConcepts,
+      isDataLoading
+    })
+  }, [isDataLoading, userData, members, currencies, wallets, organizationConcepts])
 
   // LOG: Categorías de aportes ya configuradas - NO modificar base de datos
   React.useEffect(() => {
@@ -2193,7 +2210,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   )
 
   // Si los datos aún están cargando, mostrar estado de carga
-  if (isDataLoading || !userData || !members || !currencies || !wallets || !organizationConcepts) {
+  if (isDataLoading) {
     const loadingViewPanel = (
       <div className="flex items-center justify-center h-48">
         <div className="text-center">
