@@ -53,8 +53,8 @@ export function ExpandableSearchButton({
           type={isExpanded ? "submit" : "button"}
           onClick={handleClick}
           className={cn(
-            // EXACT COPY from button.tsx ghost variant but with smaller text
-            "inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium transition-all duration-150",
+            // EXACT COPY from button.tsx ghost variant - line by line identical
+            "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
             "disabled:pointer-events-none disabled:opacity-60",
             "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -80,7 +80,7 @@ export function ExpandableSearchButton({
                 value={searchValue}
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 placeholder={placeholder}
-                className="bg-transparent border-none outline-none text-xs font-medium text-[var(--button-ghost-text)] placeholder-ghost-text flex-1 order-1"
+                className="bg-transparent border-none outline-none text-sm font-medium text-[var(--button-ghost-text)] placeholder-ghost-text flex-1 order-1"
               />
               <Search className="order-2" />
               <div
