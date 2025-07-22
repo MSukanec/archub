@@ -8,6 +8,7 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function ConstructionTasks() {
