@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { CardDetailsModal } from '@/modals/CardDetailsModal';
+
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -21,7 +21,7 @@ import { Card } from '@/components/ui/card';
 
 function TasksContent() {
 
-  const [selectedCard, setSelectedCard] = useState<any>(null);
+
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   const { setActions, setShowActionBar } = useMobileActionBar();
   const { openModal } = useGlobalModalStore();
@@ -91,8 +91,7 @@ function TasksContent() {
   }, [setActions, setShowActionBar]);
 
   const handleEditBoard = (board: any) => {
-    setEditingBoard(board);
-    setShowEditBoardModal(true);
+    openModal('board', { board: board, isEditing: true });
   };
 
   const handleDeleteBoard = (boardId: string) => {
@@ -347,22 +346,13 @@ function TasksContent() {
             onCreateList={() => openModal('list', { boardId: currentBoardId })}
             onDeleteList={handleDeleteList}
             onDeleteCard={handleDeleteCard}
-            onCardEdit={setSelectedCard}
+            onCardEdit={(card) => openModal('card', { card: card, isEditing: true })}
             loading={listsLoading || cardsLoading}
           />
         )}
       </div>
 
-      {/* Modals */}
 
-      {/* Card Details Modal - OUTSIDE Layout to fix z-index issues */}
-      {selectedCard && (
-        <CardDetailsModal
-          card={selectedCard}
-          open={!!selectedCard}
-          onClose={() => setSelectedCard(null)}
-        />
-      )}
     </Layout>
   );
 }
