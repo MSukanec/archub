@@ -18,7 +18,7 @@ export function Tabs({ tabs, value, onValueChange, className }: TabsProps) {
   return (
     <div 
       className={cn(
-        "inline-flex items-center rounded-lg p-1 gap-1",
+        "inline-flex items-center rounded-lg gap-0.5",
         "bg-[var(--button-ghost-bg)] border border-[var(--card-border)]",
         "shadow-button-normal",
         className
@@ -30,7 +30,7 @@ export function Tabs({ tabs, value, onValueChange, className }: TabsProps) {
           onClick={() => onValueChange(tab.value)}
           className={cn(
             "inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150",
-            "px-3 py-1.5 rounded-md",
+            "px-2 py-1 rounded-md h-8",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
             "disabled:pointer-events-none disabled:opacity-60",
             "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
