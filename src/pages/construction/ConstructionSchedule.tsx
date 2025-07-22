@@ -228,7 +228,7 @@ export default function ConstructionSchedule() {
         task_code: task.task?.code || '',
         start_date: task.start_date || null,
         end_date: task.end_date || null,
-        duration_in_days: task.duration_in_days,
+        duration_in_days: task.duration_in_days || null,
         quantity: task.quantity || 0,
         phase_instance_id: task.phase_instance_id || '',
         phase_name: task.phase_name || '',
@@ -512,14 +512,11 @@ export default function ConstructionSchedule() {
         <>
           {/* Action Bar Desktop */}
           <ActionBarDesktop
-            title="Cronograma"
             searchValue={searchValue}
             onSearchChange={setSearchValue}
-            primaryAction={{
-              label: "Nueva Tarea",
-              icon: <Plus className="h-4 w-4" />,
-              onClick: handleAddTask
-            }}
+            showGrouping={false}
+            primaryActionLabel="Nueva Tarea"
+            onPrimaryActionClick={handleAddTask}
             customActions={[
               <Button 
                 key="create-phase"
