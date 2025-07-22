@@ -126,32 +126,32 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Timeline element state - declared early to avoid reference errors
   const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
   
-  // Auto-center on today when component loads
-  const centerTimelineOnToday = React.useCallback(() => {
+  // Auto-position 3 days before today when component loads or when HOY button is clicked
+  const positionTimelineBeforeToday = React.useCallback(() => {
     if (timelineElement && dateRange.length > 0) {
       const todayIndex = dateRange.findIndex(date => isToday(date))
       if (todayIndex !== -1) {
-        const columnWidth = 40
-        const containerWidth = timelineElement.clientWidth
-        const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
+        const columnWidth = 65 // Updated to match new column width
+        const targetIndex = Math.max(0, todayIndex - 3) // Position 3 days before today
+        const scrollPosition = targetIndex * columnWidth
         timelineElement.scrollLeft = Math.max(0, scrollPosition)
       }
     }
   }, [timelineElement, dateRange])
 
-  // Auto-center on component load if today is in range
+  // Auto-position on component load
   React.useEffect(() => {
     if (timelineElement) {
-      setTimeout(centerTimelineOnToday, 100)
+      setTimeout(positionTimelineBeforeToday, 100)
     }
-  }, [timelineElement, centerTimelineOnToday])
+  }, [timelineElement, positionTimelineBeforeToday])
 
-  // Center on today when triggered from parent component
+  // Position 3 days before today when HOY button is triggered
   React.useEffect(() => {
     if (triggerTodayCenter && timelineElement) {
-      setTimeout(centerTimelineOnToday, 100)
+      setTimeout(positionTimelineBeforeToday, 100)
     }
-  }, [triggerTodayCenter, timelineElement, centerTimelineOnToday])
+  }, [triggerTodayCenter, timelineElement, positionTimelineBeforeToday])
 
   // Drag functionality for timeline scrolling
   const [isDragging, setIsDragging] = React.useState(false)
