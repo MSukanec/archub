@@ -13,7 +13,6 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Users, Download, Calendar, CalendarDays, FileText, Clock, BarChart3, Filter, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { format } from 'date-fns'
@@ -257,22 +256,19 @@ export default function ConstructionAttendance() {
 
   // Custom filters for ActionBar - Only contact type filter
   const customFilters = (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">Tipo de Trabajador</Label>
-      <Select value={selectedContactType} onValueChange={setSelectedContactType}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Todos los tipos" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="">Todos los tipos</SelectItem>
-          {contactTypes.map(type => (
-            <SelectItem key={type.id} value={type.id}>
-              {type.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={selectedContactType} onValueChange={setSelectedContactType}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Todos los tipos" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="">Todos los tipos</SelectItem>
+        {contactTypes.map(type => (
+          <SelectItem key={type.id} value={type.id}>
+            {type.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 
   const headerProps = {
