@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Selector } from '@/components/ui-custom/Selector'
 import { cn } from '@/lib/utils'
 
 interface BudgetSelectorProps {
@@ -79,18 +79,16 @@ export function ActionBarDesktop({
         {budgetSelector && (
           <div className="flex items-center gap-2">
             <div className="w-64">
-              <Select value={budgetSelector.selectedBudgetId} onValueChange={budgetSelector.onBudgetChange}>
-                <SelectTrigger className="w-full h-8 text-sm">
-                  <SelectValue placeholder="Selecciona un presupuesto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {budgetSelector.budgets.map((budget: any) => (
-                    <SelectItem key={budget.id} value={budget.id}>
-                      <span className="text-left">{budget.name}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Selector
+                options={budgetSelector.budgets.map((budget: any) => ({
+                  value: budget.id,
+                  label: budget.name
+                }))}
+                value={budgetSelector.selectedBudgetId}
+                onValueChange={budgetSelector.onBudgetChange}
+                placeholder="Selecciona un presupuesto"
+                className="h-8"
+              />
             </div>
             
             {/* Budget Action Buttons */}
