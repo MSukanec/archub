@@ -35,7 +35,7 @@ export function ActionBarDesktop({
   return (
     <div 
       className={cn(
-        "hidden md:flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)] mb-6",
+        "hidden md:flex items-center justify-between px-0 py-3 border-b border-[var(--card-border)] mb-6",
         className
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
@@ -48,7 +48,7 @@ export function ActionBarDesktop({
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                size="default"
+                size="sm"
               >
                 <Filter />
                 Agrupar
