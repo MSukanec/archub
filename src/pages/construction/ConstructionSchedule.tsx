@@ -524,7 +524,7 @@ export default function ConstructionSchedule() {
               <Button 
                 key="create-phase"
                 onClick={handleAddPhase} 
-                variant="outline" 
+                variant="secondary" 
                 className="h-10 px-4"
               >
                 <Plus className="h-4 w-4 mr-2" />
