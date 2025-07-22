@@ -20,11 +20,13 @@ export default function ProfileSettings() {
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
+  const [tutorialMode, setTutorialMode] = useState(true)
 
   // Settings data object for debounced auto-save
   const settingsData = {
     sidebarDocked,
-    theme: isDark ? 'dark' : 'light'
+    theme: isDark ? 'dark' : 'light',
+    tutorial: tutorialMode
   }
 
   // Auto-save mutation for settings data
@@ -34,11 +36,13 @@ export default function ProfileSettings() {
       
       // Handle user_preferences updates
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
-          data.theme !== userData?.preferences?.theme) {
+          data.theme !== userData?.preferences?.theme ||
+          data.tutorial !== userData?.preferences?.tutorial) {
         
         const preferencesUpdates = {
           sidebar_docked: data.sidebarDocked,
           theme: data.theme,
+          tutorial: data.tutorial,
         }
         
         const { error: preferencesError } = await supabase!
@@ -86,10 +90,11 @@ export default function ProfileSettings() {
 
   // Load settings data
   useEffect(() => {
-    if (userData) {
-      setSidebarDocked(userData.preferences?.sidebar_docked || false)
+    if (userData?.preferences) {
+      setSidebarDocked(userData.preferences.sidebar_docked || false)
+      setTutorialMode(userData.preferences.tutorial !== false) // Default to true if not set
     }
-  }, [userData])
+  }, [userData?.preferences])
 
   const headerProps = {
     title: "Configuración",
@@ -172,6 +177,41 @@ export default function ProfileSettings() {
                 <Switch
                   checked={userData?.preferences?.sidebar_docked || false}
                   onCheckedChange={handleSidebarDockedChange}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        {/* Tutorial Section */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Tutorial</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configura la experiencia de nuevo usuario.
+              </p>
+            </div>
+
+            {/* Right Column - Form Fields */}
+            <div className="space-y-6">
+              {/* Modo nuevo usuario */}
+              <div className="flex items-center justify-between py-2">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Modo nuevo usuario</Label>
+                  <div className="text-xs text-muted-foreground">
+                    Mostrar ayudas y explicaciones en toda la aplicación
+                  </div>
+                </div>
+                <Switch
+                  checked={tutorialMode}
+                  onCheckedChange={setTutorialMode}
                 />
               </div>
             </div>

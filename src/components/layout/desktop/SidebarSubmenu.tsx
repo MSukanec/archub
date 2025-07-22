@@ -94,6 +94,7 @@ export function SidebarSubmenu() {
   const submenuContent = {
     'perfil': [
       { icon: UserCircle, label: 'Datos Básicos', href: '/profile' },
+      { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
     ],
     
     'organizacion': [

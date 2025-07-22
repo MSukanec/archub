@@ -459,9 +459,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           )}
         </div>
 
-        {/* Footer with 4 icon buttons - Fixed at bottom */}
+        {/* Footer with 3 icon buttons - Fixed at bottom */}
         <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {/* Project Selector Button */}
             <div className="relative">
               <button
@@ -562,17 +562,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
             >
               <User className="h-6 w-6" />
-            </button>
-
-            {/* Settings Button */}
-            <button
-              onClick={() => {
-                navigate('/profile/settings');
-                onClose();
-              }}
-              className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-            >
-              <Settings className="h-6 w-6" />
             </button>
           </div>
         </div>

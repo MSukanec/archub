@@ -439,21 +439,11 @@ export function Sidebar() {
           <SidebarButton
             icon={<UserCircle className="w-[18px] h-[18px]" />}
             label="Mi Perfil"
-            isActive={activeSidebarSection === 'perfil' || location === '/profile'}
+            isActive={activeSidebarSection === 'perfil' || location.startsWith('/profile')}
             isExpanded={isExpanded}
             onClick={() => handleMainSectionClick('perfil', '/profile')}
             avatarUrl={userData?.user?.avatar_url}
             userFullName={userData?.user?.full_name}
-            variant="main"
-          />
-          
-          {/* Settings */}
-          <SidebarButton
-            icon={<Settings className="w-[18px] h-[18px]" />}
-            label="Configuración"
-            isActive={activeSidebarSection === 'configuracion' || location === '/profile/settings'}
-            isExpanded={isExpanded}
-            onClick={() => handleMainSectionClick('configuracion', '/profile/settings')}
             variant="main"
           />
         </div>

@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. PROFILE SIDEBAR CORRECTED AND TUTORIAL SYSTEM COMPLETED: Fixed Settings button placement and created tutorial mode functionality - COMPLETED
+  • Moved "Preferencias" button from main sidebar to profile sidebar (below "Datos Básicos") as user specified
+  • Created new "Tutorial" section in ProfileSettings.tsx with switch for new user mode to hide FEATURES components
+  • Extended user_preferences table support to include tutorial column for controlling feature visibility
+  • Updated mobile menu to remove separate Settings button, maintaining "Preferencias" option in profile submenu navigation
+  • Profile sidebar now has both "Datos Básicos" and "Preferencias" options working correctly with proper navigation
+  • Tutorial switch controls FEATURES component visibility across all pages, stored in user_preferences.tutorial column with default true value
 - July 22, 2025. CONSTRUCTION TASKS PAGE STANDARDIZED TO BUDGETTABLE COMPONENT: Successfully migrated from Table.tsx to BudgetTable.tsx maintaining same functionality - COMPLETED
   • Replaced Table component import with BudgetTable component in ConstructionTasks.tsx for visual consistency across construction pages
   • Maintained all existing columns: Rubro, Tarea, Unidad, Cantidad, Progreso, Fase, Fechas, Acciones
