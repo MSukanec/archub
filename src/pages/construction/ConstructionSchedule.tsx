@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table, Edit, Trash2 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -510,7 +509,7 @@ export default function ConstructionSchedule() {
         />
       ) : (
         <>
-          {/* Action Bar Desktop */}
+          {/* Action Bar Desktop with Tabs */}
           <ActionBarDesktop
             searchValue={searchValue}
             onSearchChange={setSearchValue}
@@ -528,36 +527,31 @@ export default function ConstructionSchedule() {
                 Crear Fase
               </Button>
             ]}
+            tabs={[
+              {
+                value: "gantt",
+                label: "Vista Gantt",
+                icon: <BarChart3 className="h-4 w-4" />
+              },
+              {
+                value: "table",
+                label: "Listado de Tareas",
+                icon: <Table className="h-4 w-4" />
+              },
+              {
+                value: "analytics",
+                label: "Análisis Visual",
+                icon: <Activity className="h-4 w-4" />
+              }
+            ]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
           />
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
-            <TabsTrigger 
-              value="gantt" 
-              className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Vista Gantt
-            </TabsTrigger>
-            <TabsTrigger 
-              value="table" 
-              className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-            >
-              <Table className="h-4 w-4" />
-              Listado de Tareas
-            </TabsTrigger>
-            <TabsTrigger 
-              value="analytics" 
-              className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-            >
-              <Activity className="h-4 w-4" />
-              Análisis Visual
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Tab Content - Vista Gantt */}
-          <TabsContent value="gantt" className="space-y-4">
-            <GanttContainer
+          {/* Tab Content Based on activeTab */}
+          <div className="space-y-4">
+            {activeTab === "gantt" && (
+              <GanttContainer
               data={ganttData}
               dependencies={dependencies}
               allTasks={processedTasks}
@@ -577,11 +571,10 @@ export default function ConstructionSchedule() {
                 }
               }}
             />
-          </TabsContent>
+            )}
 
-          {/* Tab Content - Segunda Vista */}
-          <TabsContent value="table" className="space-y-4">
-            <BudgetTable
+            {activeTab === "table" && (
+              <BudgetTable
               budgetId="construction-tasks"
               budgetTasks={budgetTasks}
               isLoading={isLoading}
@@ -597,34 +590,35 @@ export default function ConstructionSchedule() {
               mode="construction"
               handleEditTask={handleEditTask}
             />
-          </TabsContent>
+            )}
 
-          {/* Tab Content - Análisis Visual */}
-          <TabsContent value="analytics" className="space-y-4">
-            {/* Primera fila - 3 columnas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <ProgressCurve data={processedTasks} />
-              <BurndownChart data={processedTasks} />
-              <WorkloadOverTime data={processedTasks} />
-            </div>
-            
-            {/* Segunda fila - 4 columnas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-              <TasksByPhase data={processedTasks} />
-              <DurationByRubro data={processedTasks} />
-              <StatusBreakdown data={processedTasks} />
-              <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
-            </div>
-            
-            {/* Tercera fila - Heatmap (1 col) y Red (3 cols) */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-              <WeeklyProgressHeatmap data={processedTasks} />
-              <div className="xl:col-span-3">
-                <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+            {activeTab === "analytics" && (
+              <div className="space-y-4">
+                {/* Primera fila - 3 columnas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <ProgressCurve data={processedTasks} />
+                  <BurndownChart data={processedTasks} />
+                  <WorkloadOverTime data={processedTasks} />
+                </div>
+                
+                {/* Segunda fila - 4 columnas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  <TasksByPhase data={processedTasks} />
+                  <DurationByRubro data={processedTasks} />
+                  <StatusBreakdown data={processedTasks} />
+                  <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
+                </div>
+                
+                {/* Tercera fila - Heatmap (1 col) y Red (3 cols) */}
+                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+                  <WeeklyProgressHeatmap data={processedTasks} />
+                  <div className="xl:col-span-3">
+                    <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            )}
+          </div>
         </>
       )}
     </Layout>

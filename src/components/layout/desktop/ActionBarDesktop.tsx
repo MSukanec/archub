@@ -2,6 +2,7 @@ import React from 'react'
 import { LayoutGrid, Plus, Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
+import { Tabs } from '@/components/ui-custom/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
@@ -12,6 +13,12 @@ interface BudgetSelectorProps {
   onBudgetChange: (budgetId: string) => void
   onEditBudget: () => void
   onDeleteBudget: () => void
+}
+
+interface Tab {
+  value: string
+  label: string
+  icon?: React.ReactNode
 }
 
 interface ActionBarDesktopProps {
@@ -26,6 +33,9 @@ interface ActionBarDesktopProps {
   onPrimaryActionClick?: () => void
   customActions?: React.ReactNode[]
   budgetSelector?: BudgetSelectorProps
+  tabs?: Tab[]
+  activeTab?: string
+  onTabChange?: (value: string) => void
   className?: string
 }
 
@@ -41,6 +51,9 @@ export function ActionBarDesktop({
   onPrimaryActionClick,
   customActions = [],
   budgetSelector,
+  tabs,
+  activeTab,
+  onTabChange,
   className
 }: ActionBarDesktopProps) {
   return (
@@ -51,8 +64,17 @@ export function ActionBarDesktop({
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Budget Selector (casos puntuales) */}
+      {/* Left side - Tabs OR Budget Selector (casos puntuales) */}
       <div className="flex items-center gap-3">
+        {/* Tabs - For pages with tab navigation like cronograma */}
+        {tabs && activeTab && onTabChange && (
+          <Tabs
+            tabs={tabs}
+            value={activeTab}
+            onValueChange={onTabChange}
+          />
+        )}
+        
         {/* Budget Selector - ONLY for specific cases like budgets page */}
         {budgetSelector && (
           <div className="flex items-center gap-2">
