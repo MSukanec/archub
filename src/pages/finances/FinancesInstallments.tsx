@@ -234,10 +234,39 @@ export default function FinancesInstallments() {
     enabled: !!supabase
   })
 
+  // Get organization wallets to map wallet names
+  const { data: organizationWallets = [] } = useQuery({
+    queryKey: ['organization-wallets', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      const { data, error } = await supabase
+        .from('organization_wallets')
+        .select(`
+          id,
+          wallets!inner(
+            id,
+            name
+          )
+        `)
+        .eq('organization_id', organizationId)
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
+  // Helper function to get wallet name by ID
+  const getWalletName = (walletId: string) => {
+    const wallet = organizationWallets.find(w => w.id === walletId)
+    return wallet?.wallets?.name || 'Sin billetera'
+  }
+
   // Calculate total contributed (dollarized)
   const totalContributedDollarized = installments.reduce((sum, installment) => {
     const amount = installment.amount || 0
-    const currencyCode = installment.currency?.code || 'N/A'
+    const currencyCode = installment.currency_code || 'N/A'
     
     if (currencyCode === 'USD') {
       return sum + amount
@@ -956,7 +985,7 @@ export default function FinancesInstallments() {
       label: "Billetera",
       width: "16.7%",
       render: (item: any) => (
-        <div className="text-sm">{item.wallet_name || 'Sin billetera'}</div>
+        <div className="text-sm">{getWalletName(item.wallet_id)}</div>
       )
     },
     {
@@ -1105,7 +1134,10 @@ export default function FinancesInstallments() {
                     defaultSort={{ key: 'movement_date', direction: 'desc' }}
                     renderCard={(item) => (
                       <InstallmentDetailCard 
-                        item={item}
+                        item={{
+                          ...item,
+                          wallet_name: getWalletName(item.wallet_id)
+                        }}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                       />
