@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutGrid } from 'lucide-react'
+import { LayoutGrid, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -142,6 +142,7 @@ export function ActionBarDesktop({
             onClick={onPrimaryActionClick}
             className="h-9 px-4"
           >
+            <Plus />
             {primaryActionLabel}
           </Button>
         )}
