@@ -97,19 +97,14 @@ function useContactTypes() {
   })
 }
 
-// Transform attendance data for gradebook display with contact type filtering
-function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: string) {
+// Transform attendance data for gradebook display
+function transformAttendanceData(attendanceData: any[]) {
   if (!attendanceData || attendanceData.length === 0) return { workers: [], attendance: [] }
 
-  // Get unique workers with contact type filtering
+  // Get unique workers (no filtering here, filtering will be done later)
   const workersMap = new Map()
   attendanceData.forEach(attendance => {
     if (attendance.contact) {
-      // Filter by contact type if selected
-      if (selectedContactTypeId && attendance.contact.contact_type_id !== selectedContactTypeId) {
-        return
-      }
-
       const workerId = attendance.contact.id
       const workerName = `${attendance.contact.first_name || ''} ${attendance.contact.last_name || ''}`.trim()
       const contactTypeName = attendance.contact.contact_type?.name || 'Sin tipo'
@@ -171,16 +166,27 @@ export default function ConstructionAttendance() {
   }, [])
 
   const { workers, attendance } = useMemo(() => {
-    return transformAttendanceData(attendanceData, selectedContactType || undefined)
-  }, [attendanceData, selectedContactType])
+    return transformAttendanceData(attendanceData) // Remove contact type filter from here
+  }, [attendanceData])
 
-  // Filter workers based on search
+  // Filter workers based on search AND contact type
   const filteredWorkers = useMemo(() => {
-    if (!searchValue.trim()) return workers
-    return workers.filter(worker => 
-      worker.name.toLowerCase().includes(searchValue.toLowerCase())
-    )
-  }, [workers, searchValue])
+    let filtered = workers
+    
+    // Filter by contact type
+    if (selectedContactType) {
+      filtered = filtered.filter(worker => worker.contactTypeId === selectedContactType)
+    }
+    
+    // Filter by search
+    if (searchValue.trim()) {
+      filtered = filtered.filter(worker => 
+        worker.name.toLowerCase().includes(searchValue.toLowerCase())
+      )
+    }
+    
+    return filtered
+  }, [workers, searchValue, selectedContactType])
 
   // Filter attendance data for filtered workers
   const filteredAttendance = useMemo(() => {
