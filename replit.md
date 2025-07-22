@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. COMPROMISOS DE PAGO UPDATED TO APORTES DE TERCEROS: Changed installments logic to filter by "Aportes de Terceros" subcategory instead of deprecated "Cuotas" - COMPLETED
+  • Updated filtering logic from subcategory "Cuotas" (e675eb59-3717-4451-89eb-0d838388238f) to "Aportes de Terceros" (f3b96eda-15d5-4c96-ade7-6f53685115d3)
+  • New path: INGRESOS > APORTES > APORTES DE TERCEROS instead of deprecated CUOTAS category
+  • All three tabs now correctly sum movements from Aportes de Terceros subcategory
+  • Tab 1: Resumen por Cliente aggregates all project clients with their Aportes de Terceros totals
+  • Tab 2: Detalle por Moneda groups by currency for Aportes de Terceros movements
+  • Tab 3: Detalle de Compromisos shows individual Aportes de Terceros movements
+  • Maintains same filtering by organization, project, and now uses correct subcategory_id
 - July 22, 2025. FINANCES MOVEMENTS ACTIONBAR INTEGRATION COMPLETED: Successfully implemented ActionBarDesktop component in financial movements page - COMPLETED
   • Migrated search functionality from header to ActionBar with full search filtering capability
   • Moved custom filters system (type, category, favorites, scope) from header to ActionBar dropdown

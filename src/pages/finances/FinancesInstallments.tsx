@@ -149,9 +149,9 @@ export default function FinancesInstallments() {
     enabled: !!organizationId && !!supabase
   })
 
-  // Get cuotas concept ID from movement concepts
-  const { data: cuotasConcept } = useQuery({
-    queryKey: ['cuotas-concept', organizationId],
+  // Get Aportes de Terceros concept ID from movement concepts
+  const { data: aportesDeTerrerosConcept } = useQuery({
+    queryKey: ['aportes-de-terceros-concept', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return null
       
@@ -159,37 +159,37 @@ export default function FinancesInstallments() {
         .from('movement_concepts')
         .select('id, name')
         .eq('organization_id', organizationId)
-        .eq('name', 'Cuotas')
+        .eq('name', 'Aportes de Terceros')
 
       if (error) {
-        console.error('Error fetching cuotas concept:', error)
+        console.error('Error fetching Aportes de Terceros concept:', error)
         return null
       }
 
       if (!data || data.length === 0) {
-        console.log('No Cuotas concept found, looking for existing movements with subcategory_id e675eb59-3717-4451-89eb-0d838388238f')
+        console.log('No Aportes de Terceros concept found, using hardcoded ID f3b96eda-15d5-4c96-ade7-6f53685115d3')
         // Return the hardcoded ID that we know exists
-        return { id: 'e675eb59-3717-4451-89eb-0d838388238f', name: 'Cuotas' }
+        return { id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3', name: 'Aportes de Terceros' }
       }
 
-      console.log('Found Cuotas concept:', data[0])
+      console.log('Found Aportes de Terceros concept:', data[0])
       return data[0]
     },
     enabled: !!organizationId && !!supabase
   })
 
-  // Get installments (movements filtered by cuotas concept)
+  // Get installments (movements filtered by Aportes de Terceros concept)
   const { data: installments = [], isLoading } = useQuery({
-    queryKey: ['installments', organizationId, projectId, cuotasConcept?.id],
+    queryKey: ['installments', organizationId, projectId, aportesDeTerrerosConcept?.id],
     queryFn: async () => {
-      if (!supabase || !organizationId || !projectId || !cuotasConcept) return []
+      if (!supabase || !organizationId || !projectId || !aportesDeTerrerosConcept) return []
 
       console.log('Found concepts:', {
         ingresos: '8862eee7-dd00-4f01-9335-5ea0070d3403',
-        cuotas: cuotasConcept.id
+        aportesDeTerreros: aportesDeTerrerosConcept.id
       })
 
-      // Get movements filtered by cuotas concept and project
+      // Get movements filtered by Aportes de Terceros concept and project
       const { data: movements, error } = await supabase
         .from('movements')
         .select(`
@@ -206,7 +206,7 @@ export default function FinancesInstallments() {
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
-        .eq('subcategory_id', cuotasConcept.id)
+        .eq('subcategory_id', aportesDeTerrerosConcept.id)
         .order('movement_date', { ascending: false })
 
       if (error) {
@@ -311,7 +311,7 @@ export default function FinancesInstallments() {
       
       return result
     },
-    enabled: !!organizationId && !!projectId && !!cuotasConcept?.id
+    enabled: !!organizationId && !!projectId && !!aportesDeTerrerosConcept?.id
   })
 
   // Get organization currencies for read-only display
