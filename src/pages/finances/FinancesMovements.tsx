@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Layout } from "@/components/layout/desktop/Layout";
+import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1267,51 +1268,54 @@ export default function Movements() {
   const headerProps = {
     title: "Movimientos",
     icon: DollarSign,
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    customFilters,
-    onClearFilters: handleClearFilters,
-    actions: [
-      ...(selectedMovements.length > 0 ? [
-        <Button
-          key="delete-selected"
-          variant="ghost"
-          size="icon"
-          onClick={handleDeleteSelected}
-          disabled={deleteMultipleMovementsMutation.isPending}
-          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      ] : []),
-      <CustomRestricted 
-        key="import-movements"
-        functionName="Importación de Excel"
-        reason="general_mode"
-      >
-        <Button
-          variant="outline"
-          onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-          className="h-8"
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          Importar desde Excel
-        </Button>
-      </CustomRestricted>,
+  };
+
+  // Preparar acciones personalizadas para el ActionBar
+  const customActions = [
+    ...(selectedMovements.length > 0 ? [
       <Button
-        key="new-movement"
-        onClick={() => openModal('movement')}
+        key="delete-selected"
+        variant="ghost"
+        size="icon"
+        onClick={handleDeleteSelected}
+        disabled={deleteMultipleMovementsMutation.isPending}
+        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+        title="Eliminar seleccionados"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    ] : []),
+    <CustomRestricted 
+      key="import-movements"
+      functionName="Importación de Excel"
+      reason="general_mode"
+    >
+      <Button
+        variant="outline"
+        onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
         className="h-8"
       >
-        <Plus className="mr-2 h-4 w-4" />
-        Nuevo movimiento
-      </Button>,
-    ],
-  };
+        <Upload className="mr-2 h-4 w-4" />
+        Importar desde Excel
+      </Button>
+    </CustomRestricted>
+  ];
 
   return (
     <Layout headerProps={headerProps} wide={true}>
+      {/* ActionBar Desktop */}
+      {processedMovements.length > 0 && (
+        <ActionBarDesktop
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          onClearFilters={handleClearFilters}
+          primaryActionLabel="Nuevo movimiento"
+          onPrimaryActionClick={() => openModal('movement')}
+          customActions={customActions}
+        />
+      )}
+
       {/* Feature Introduction */}
       <FeatureIntroduction
         title="Gestión de Movimientos Financieros"
