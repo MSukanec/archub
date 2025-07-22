@@ -154,7 +154,6 @@ function transformAttendanceData(attendanceData: any[], selectedContactTypeId?: 
 export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedContactType, setSelectedContactType] = useState<string>("")
-  const [hideWeekends, setHideWeekends] = useState(false)
   const [triggerTodayCenter, setTriggerTodayCenter] = useState(false)
 
   const [location, navigate] = useLocation()
@@ -193,12 +192,6 @@ export default function ConstructionAttendance() {
   const handleClearFilters = () => {
     setSearchValue("")
     setSelectedContactType("")
-    setHideWeekends(false)
-  }
-
-  // Toggle weekend visibility
-  const handleToggleWeekends = (hide: boolean) => {
-    setHideWeekends(hide)
   }
 
   // Navigate to today - centers view on today in gradebook
@@ -207,59 +200,7 @@ export default function ConstructionAttendance() {
     setTriggerTodayCenter(prev => !prev)
   }
 
-  // Calculate summary statistics
-  const stats = useMemo(() => {
-    const totalWorkers = filteredWorkers.length
-    const totalAttendanceRecords = filteredAttendance.length
-    const fullDayAttendance = filteredAttendance.filter(a => a.status === 'full').length
-    const halfDayAttendance = filteredAttendance.filter(a => a.status === 'half').length
-    
-    // Calculate unique active days
-    const uniqueDates = new Set()
-    attendanceData.forEach(item => {
-      if (item.site_log?.log_date) {
-        uniqueDates.add(item.site_log.log_date)
-      }
-    })
-    const activeDays = uniqueDates.size
-    
-    return {
-      totalWorkers,
-      totalAttendanceRecords,
-      fullDayAttendance,
-      halfDayAttendance,
-      activeDays,
-      attendanceRate: totalAttendanceRecords > 0 ? Math.round((fullDayAttendance / totalAttendanceRecords) * 100) : 0
-    }
-  }, [filteredWorkers, filteredAttendance, attendanceData])
 
-  // Generate statistics cards dynamically
-  const statisticsCards = useMemo(() => [
-    {
-      title: "Total Asistencia",
-      value: stats.totalWorkers,
-      icon: Users,
-      description: "Asistencia registrada"
-    },
-    {
-      title: "Días Activos",
-      value: stats.activeDays,
-      icon: CalendarDays,
-      description: "Días con asistencia"
-    },
-    {
-      title: "Jornadas Completas",
-      value: stats.fullDayAttendance,
-      icon: Calendar,
-      description: `De ${stats.totalAttendanceRecords} registros`
-    },
-    {
-      title: "Tasa Completa",
-      value: `${stats.attendanceRate}%`,
-      icon: Users,
-      description: "Jornadas completas vs total"
-    }
-  ], [stats])
 
   // Custom filters for ActionBar - Only contact type filter
   const customFilters = (
@@ -335,34 +276,13 @@ export default function ConstructionAttendance() {
           />
         )}
 
-        {/* Dynamic Statistics Cards - Only show when there's data */}
-        {filteredWorkers.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {statisticsCards.map((card, index) => {
-              const IconComponent = card.icon
-              return (
-                <Card key={index}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                    <IconComponent className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{card.value}</div>
-                    <p className="text-xs text-muted-foreground">{card.description}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        )}
+
 
         {/* Gradebook Component */}
         {filteredWorkers.length > 0 ? (
           <CustomGradebook 
             workers={filteredWorkers}
             attendance={filteredAttendance}
-            hideWeekends={hideWeekends}
-            onHideWeekendsChange={setHideWeekends}
             triggerTodayCenter={triggerTodayCenter}
           />
         ) : (

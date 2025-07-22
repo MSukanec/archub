@@ -25,8 +25,6 @@ interface AttendanceRecord {
 interface CustomGradebookProps {
   workers?: Worker[]
   attendance?: AttendanceRecord[]
-  hideWeekends?: boolean
-  onHideWeekendsChange?: (hideWeekends: boolean) => void
   onExportAttendance?: () => void
   triggerTodayCenter?: boolean
 }
@@ -34,8 +32,6 @@ interface CustomGradebookProps {
 const CustomGradebook: React.FC<CustomGradebookProps> = ({
   workers = [],
   attendance = [],
-  hideWeekends = false,
-  onHideWeekendsChange,
   onExportAttendance,
   triggerTodayCenter = false
 }) => {
@@ -68,8 +64,8 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Generate date range
   const dateRange = React.useMemo(() => {
     const dates = eachDayOfInterval({ start: startDate, end: endDate })
-    return hideWeekends ? dates.filter(date => !isWeekend(date)) : dates
-  }, [startDate, endDate, hideWeekends])
+    return dates
+  }, [startDate, endDate])
 
   // Generate month headers for timeline
   const monthHeaders = React.useMemo(() => {
@@ -223,7 +219,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   }
 
   const getAttendanceColor = (status: string | null, isWeekendDay: boolean) => {
-    if (isWeekendDay && !hideWeekends) {
+    if (isWeekendDay) {
       return "bg-gray-100 opacity-50"
     }
     switch (status) {
@@ -259,18 +255,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Weekend Toggle */}
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="hide-weekends"
-                checked={hideWeekends}
-                onCheckedChange={onHideWeekendsChange}
-              />
-              <Label htmlFor="hide-weekends" className="text-sm">
-                Ocultar fines de semana
-              </Label>
-            </div>
-
             {/* Export Button */}
             {onExportAttendance && (
               <Button onClick={onExportAttendance} variant="outline" size="sm">
@@ -466,7 +450,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                               return (
                                 <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/50 border-x-2 border-[var(--accent)]' : ''}`}>
                                   <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                                    {isWeekendDay && !hideWeekends && (
+                                    {isWeekendDay && (
                                       <div className="w-full h-full flex items-center justify-center">
                                         <span className="text-xs text-gray-400">×</span>
                                       </div>

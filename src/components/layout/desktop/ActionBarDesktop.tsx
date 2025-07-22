@@ -240,20 +240,6 @@ export function ActionBarDesktop({
           </Popover>
         )}
 
-        {/* Today Button - For gradebook pages */}
-        {onTodayClick && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2"
-            onClick={onTodayClick}
-            title="Ir a hoy"
-          >
-            <CalendarDays className="w-4 h-4 mr-1" />
-            Hoy
-          </Button>
-        )}
-
         {/* Clear Filters Button */}
         {onClearFilters && (
           <Button
@@ -280,6 +266,20 @@ export function ActionBarDesktop({
           >
             <Plus className="w-4 h-4" />
             {primaryActionLabel}
+          </Button>
+        )}
+
+        {/* Today Button - For gradebook pages (rightmost position) */}
+        {onTodayClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2"
+            onClick={onTodayClick}
+            title="Ir a hoy"
+          >
+            <CalendarDays className="w-4 h-4 mr-1" />
+            Hoy
           </Button>
         )}
       </div>
