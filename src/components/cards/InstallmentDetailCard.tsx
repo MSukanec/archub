@@ -8,18 +8,12 @@ interface InstallmentDetailCardProps {
     movement_date: string;
     amount: number;
     description?: string;
-    contact?: {
-      first_name?: string;
-      last_name?: string;
-      company_name?: string;
-    };
-    currency?: {
-      code: string;
-      symbol: string;
-    };
-    wallet?: {
-      name: string;
-    };
+    contact_name?: string;
+    contact_company?: string;
+    currency_code?: string;
+    currency_symbol?: string;
+    wallet_name?: string;
+    exchange_rate?: number;
   };
   onEdit?: (item: any) => void;
   onDelete?: (item: any) => void;
@@ -32,7 +26,7 @@ export default function InstallmentDetailCard({
   onDelete, 
   onToggleFavorite 
 }: InstallmentDetailCardProps) {
-  if (!item.contact) {
+  if (!item.contact_name) {
     return (
       <div className="p-4 bg-card border border-border rounded-lg">
         <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -40,11 +34,10 @@ export default function InstallmentDetailCard({
     );
   }
 
-  const displayName = item.contact.company_name || 
-                     `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim();
-  const initials = item.contact.company_name 
-    ? item.contact.company_name.charAt(0).toUpperCase()
-    : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase();
+  const displayName = item.contact_company || item.contact_name || 'Sin nombre';
+  const initials = item.contact_company 
+    ? item.contact_company.charAt(0).toUpperCase()
+    : (item.contact_name?.split(' ').map(n => n[0]).join('') || 'SC').toUpperCase();
 
   const formattedDate = format(new Date(item.movement_date), "dd MMM yyyy", { locale: es });
 
@@ -64,9 +57,9 @@ export default function InstallmentDetailCard({
 
         {/* Right side: Wallet and Currency/Amount */}
         <div className="text-right">
-          <div className="text-sm">{item.wallet?.name || '-'}</div>
+          <div className="text-sm">{item.wallet_name || '-'}</div>
           <div className="font-medium">
-            {item.currency?.code || ''} {item.currency?.symbol || '$'}{item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            {item.currency_code || ''} {item.currency_symbol || '$'}{item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
         </div>
       </div>

@@ -455,7 +455,7 @@ export default function FinancesInstallments() {
     </div>
   )
 
-  const handleEdit = (installment: Installment) => {
+  const handleEdit = (installment: any) => {
     openModal('installment', {
       projectId: projectId || '',
       organizationId: organizationId || '',
@@ -463,7 +463,7 @@ export default function FinancesInstallments() {
     })
   }
 
-  const handleDelete = (installment: Installment) => {
+  const handleDelete = (installment: any) => {
     const contactName = installment.contact_name 
       ? (installment.contact_company || installment.contact_name)
       : 'Sin contacto'
@@ -500,7 +500,7 @@ export default function FinancesInstallments() {
     })
   }
 
-  const handleCardClick = (installment: Installment) => {
+  const handleCardClick = (installment: any) => {
     handleEdit(installment)
   }
 
@@ -919,30 +919,23 @@ export default function FinancesInstallments() {
       key: "contact",
       label: "Contacto",
       width: "16.7%",
-      render: (item: Installment) => {
-        if (!item.contact) {
+      render: (item: any) => {
+        if (!item.contact_name) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        const displayName = item.contact.company_name || 
-                           `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
-        const initials = item.contact.company_name 
-          ? item.contact.company_name.charAt(0).toUpperCase()
-          : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
+        const displayName = item.contact_company || item.contact_name || 'Sin nombre'
+        const initials = item.contact_company 
+          ? item.contact_company.charAt(0).toUpperCase()
+          : (item.contact_name?.split(' ').map((n: string) => n[0]).join('') || 'SC').toUpperCase()
 
         return (
           <div className="flex items-center gap-2">
             <Avatar className="w-8 h-8">
-              <AvatarImage src={item.contact.avatar_url || ''} />
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div>
               <div className="text-sm font-medium">{displayName}</div>
-              {item.contact.company_name && (
-                <div className="text-xs text-muted-foreground">
-                  {item.contact.first_name} {item.contact.last_name}
-                </div>
-              )}
             </div>
           </div>
         )
@@ -952,9 +945,9 @@ export default function FinancesInstallments() {
       key: "currency",
       label: "Moneda",
       width: "16.7%",
-      render: (item: Installment) => (
+      render: (item: any) => (
         <Badge variant="outline" className="text-xs">
-          {item.currency?.code || 'N/A'}
+          {item.currency_code || 'N/A'}
         </Badge>
       )
     },
@@ -962,8 +955,8 @@ export default function FinancesInstallments() {
       key: "wallet",
       label: "Billetera",
       width: "16.7%",
-      render: (item: Installment) => (
-        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
+      render: (item: any) => (
+        <div className="text-sm">{item.wallet_name || 'Sin billetera'}</div>
       )
     },
     {
@@ -972,8 +965,8 @@ export default function FinancesInstallments() {
       width: "16.65%",
       sortable: true,
       sortType: "number" as const,
-      render: (item: Installment) => {
-        const symbol = item.currency?.symbol || '$'
+      render: (item: any) => {
+        const symbol = item.currency_symbol || '$'
         return (
           <div className="text-sm font-medium text-green-600">
             {symbol}{Math.abs(item.amount || 0).toLocaleString('es-AR')}
@@ -987,12 +980,12 @@ export default function FinancesInstallments() {
       width: "16.65%",
       sortable: true,
       sortType: "number" as const,
-      render: (item: Installment) => {
+      render: (item: any) => {
         if (!item.exchange_rate) {
           return <div className="text-sm text-muted-foreground">-</div>
         }
         
-        const symbol = item.currency?.symbol || '$'
+        const symbol = item.currency_symbol || '$'
         return (
           <div className="text-sm">
             {symbol}{item.exchange_rate.toLocaleString('es-AR')}
