@@ -223,7 +223,7 @@ export default function ConstructionTasks() {
           budgetId=""
           budgetTasks={filteredTasks}
           isLoading={isLoading}
-          groupingType="none"
+          groupingType={groupingType}
           selectedTasks={[]}
           setSelectedTasks={() => {}}
           generateTaskDisplayName={generateTaskDisplayName}
@@ -231,6 +231,7 @@ export default function ConstructionTasks() {
           getUnitName={(unitId) => unitId || ''}
           handleDeleteTask={handleDeleteTask}
           handleAddTask={() => handleAddTask()}
+          onGroupingChange={setGroupingType}
           mode="construction"
           handleEditTask={handleEditTask}
         />
