@@ -195,150 +195,24 @@ export default function FinancesInstallments() {
         subcategory_id: aportesDeTerrerosConcept.id
       })
 
-      // Get movements filtered by Aportes de Terceros concept and project
+      // Use the new movement_view - much simpler query with all joins already done!
       const { data: movements, error } = await supabase
-        .from('movements')
-        .select(`
-          id,
-          movement_date,
-          amount,
-          description,
-          contact_id,
-          currency_id,
-          wallet_id,
-          project_id,
-          created_by,
-          exchange_rate,
-          subcategory_id
-        `)
+        .from('movement_view')
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
         .eq('subcategory_id', aportesDeTerrerosConcept.id)
         .order('movement_date', { ascending: false })
 
-      console.log('Movements query result:', { movements, error })
+      console.log('Movement view result:', { movements, error, count: movements?.length })
 
       if (error) {
-        console.error('Error fetching installments:', error)
+        console.error('Error fetching installments from view:', error)
         throw error
       }
 
-      if (!movements || movements.length === 0) {
-        // Let's check if there are any movements with the old cuotas ID for debugging
-        const { data: oldMovements } = await supabase
-          .from('movements')
-          .select('id, subcategory_id')
-          .eq('organization_id', organizationId)
-          .eq('project_id', projectId)
-          .eq('subcategory_id', 'e675eb59-3717-4451-89eb-0d838388238f')
-        
-        console.log('Checking old cuotas movements:', oldMovements)
-        
-        // Also check all movements for this project to see what subcategory_ids exist
-        const { data: allMovements } = await supabase
-          .from('movements')
-          .select('id, subcategory_id')
-          .eq('organization_id', organizationId)
-          .eq('project_id', projectId)
-          .limit(10)
-        
-        console.log('All movements in project (sample):', allMovements)
-        
-        return []
-      }
-
-      // Get related data
-      const contactIds = Array.from(new Set(movements.map(m => m.contact_id).filter(Boolean)))
-      const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
-      const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
-      const creatorIds = Array.from(new Set(movements.map(m => m.created_by).filter(Boolean)))
-
-      const promises = []
-      
-      // Only fetch contacts if there are contact IDs
-      if (contactIds.length > 0) {
-        promises.push(
-          supabase
-            .from('contacts')
-            .select('id, first_name, last_name, company_name')
-            .eq('organization_id', organizationId)
-            .in('id', contactIds)
-        )
-      } else {
-        promises.push(Promise.resolve({ data: [] }))
-      }
-      
-      promises.push(
-        supabase
-          .from('currencies')
-          .select('id, name, code, symbol')
-          .in('id', currencyIds),
-        
-        supabase
-          .from('organization_wallets')
-          .select(`
-            wallets!inner (
-              id,
-              name
-            )
-          `)
-          .eq('organization_id', organizationId)
-          .in('wallet_id', walletIds),
-          
-        // Get users data separately
-        creatorIds.length > 0 
-          ? supabase
-              .from('users')
-              .select('id, full_name, email')
-              .in('id', creatorIds)
-          : Promise.resolve({ data: [] })
-      )
-
-      const [contactsResult, currenciesResult, walletsResult, usersResult] = await Promise.all(promises)
-
-      console.log('Contacts result:', contactsResult)
-      console.log('Contact IDs to fetch:', contactIds)
-      console.log('Currencies result:', currenciesResult)
-      console.log('Wallets result:', walletsResult)
-      console.log('Users result:', usersResult)
-
-      // Create lookup maps
-      const contactsMap = new Map()
-      contactsResult.data?.forEach((contact: any) => {
-        contactsMap.set(contact.id, contact)
-      })
-
-      const currenciesMap = new Map()
-      currenciesResult.data?.forEach((currency: any) => {
-        currenciesMap.set(currency.id, currency)
-      })
-
-      const walletsMap = new Map()
-      walletsResult.data?.forEach((item: any) => {
-        if (item.wallets) {
-          walletsMap.set(item.wallets.id, item.wallets)
-        }
-      })
-
-      const usersMap = new Map()
-      usersResult.data?.forEach((user: any) => {
-        usersMap.set(user.id, user)
-      })
-
-      // Transform data with related information
-      const result = movements.map(movement => ({
-        ...movement,
-        contact: contactsMap.get(movement.contact_id),
-        currency: currenciesMap.get(movement.currency_id),
-        wallet: walletsMap.get(movement.wallet_id),
-        creator: usersMap.get(movement.created_by)
-      })) as Installment[]
-
-      console.log('Installments result:', result)
-      console.log('Contacts map:', contactsMap)
-      console.log('Users map:', usersMap)
-      
-      return result
+      // The view already includes all the joined data, so just return the movements!
+      return movements || []
     },
     enabled: !!organizationId && !!projectId && !!aportesDeTerrerosConcept?.id
   })
@@ -498,8 +372,8 @@ export default function FinancesInstallments() {
     // Search filter
     if (searchValue) {
       const searchLower = searchValue.toLowerCase()
-      const contactName = installment.contact 
-        ? `${installment.contact.first_name} ${installment.contact.last_name} ${installment.contact.company_name || ''}`.toLowerCase()
+      const contactName = installment.contact_name 
+        ? `${installment.contact_name} ${installment.contact_company || ''}`.toLowerCase()
         : ''
       const description = (installment.description || '').toLowerCase()
       
@@ -590,14 +464,14 @@ export default function FinancesInstallments() {
   }
 
   const handleDelete = (installment: Installment) => {
-    const contactName = installment.contact 
-      ? (installment.contact.company_name || `${installment.contact.first_name} ${installment.contact.last_name}`)
+    const contactName = installment.contact_name 
+      ? (installment.contact_company || installment.contact_name)
       : 'Sin contacto'
     
     openModal('delete-confirmation', {
       title: 'Eliminar Compromiso',
       message: `¿Estás seguro de que deseas eliminar el compromiso de pago de ${contactName}?`,
-      itemName: `${contactName} - ${installment.currency?.symbol || '$'}${installment.amount}`,
+      itemName: `${contactName} - ${installment.currency_symbol || '$'}${installment.amount}`,
       onConfirm: async () => {
         try {
           const { error } = await supabase
