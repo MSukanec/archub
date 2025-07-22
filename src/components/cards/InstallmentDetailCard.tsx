@@ -9,7 +9,7 @@ interface InstallmentDetailCardProps {
     amount: number;
     description?: string;
     contact_name?: string;
-    contact_company?: string;
+    contact_company_name?: string;
     currency_code?: string;
     currency_symbol?: string;
     wallet_name?: string;
@@ -34,9 +34,9 @@ export default function InstallmentDetailCard({
     );
   }
 
-  const displayName = item.contact_company || item.contact_name || 'Sin nombre';
-  const initials = item.contact_company 
-    ? item.contact_company.charAt(0).toUpperCase()
+  const displayName = item.contact_company_name || item.contact_name || 'Sin nombre';
+  const initials = item.contact_company_name 
+    ? item.contact_company_name.charAt(0).toUpperCase()
     : (item.contact_name?.split(' ').map(n => n[0]).join('') || 'SC').toUpperCase();
 
   const formattedDate = format(new Date(item.movement_date), "dd MMM yyyy", { locale: es });

@@ -465,7 +465,7 @@ export default function FinancesInstallments() {
 
   const handleDelete = (installment: any) => {
     const contactName = installment.contact_name 
-      ? (installment.contact_company || installment.contact_name)
+      ? (installment.contact_company_name || installment.contact_name)
       : 'Sin contacto'
     
     openModal('delete-confirmation', {
@@ -474,7 +474,7 @@ export default function FinancesInstallments() {
       itemName: `${contactName} - ${installment.currency_symbol || '$'}${installment.amount}`,
       onConfirm: async () => {
         try {
-          const { error } = await supabase
+          const { error } = await supabase!
             .from('movements')
             .delete()
             .eq('id', installment.id)
@@ -794,14 +794,14 @@ export default function FinancesInstallments() {
                       const clientInstallments = installments.filter(installment => installment.contact_id === item.contact_id)
                       
                       for (const installment of clientInstallments) {
-                        await supabase
+                        await supabase!
                           .from('movements')
                           .delete()
                           .eq('id', installment.id)
                       }
 
                       // Then remove client from project
-                      await supabase
+                      await supabase!
                         .from('project_clients')
                         .delete()
                         .eq('client_id', item.contact_id)
@@ -924,9 +924,9 @@ export default function FinancesInstallments() {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        const displayName = item.contact_company || item.contact_name || 'Sin nombre'
-        const initials = item.contact_company 
-          ? item.contact_company.charAt(0).toUpperCase()
+        const displayName = item.contact_company_name || item.contact_name || 'Sin nombre'
+        const initials = item.contact_company_name 
+          ? item.contact_company_name.charAt(0).toUpperCase()
           : (item.contact_name?.split(' ').map((n: string) => n[0]).join('') || 'SC').toUpperCase()
 
         return (
