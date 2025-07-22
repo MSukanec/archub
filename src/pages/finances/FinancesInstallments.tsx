@@ -1153,17 +1153,6 @@ export default function FinancesInstallments() {
               customFilters={customFilters}
               onClearFilters={handleClearFilters}
               hasActiveFilters={hasActiveFilters}
-              customActions={[
-                <Button
-                  key="import"
-                  onClick={() => {/* TODO: Implement import */}}
-                  variant="secondary"
-                  className="h-9 px-4"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importar
-                </Button>
-              ]}
               tabs={[
                 {
                   value: "clients",
