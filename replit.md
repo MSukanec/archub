@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. CANCEL BUTTON STANDARDIZATION COMPLETED: Changed all cancel buttons to use secondary variant for consistent styling - COMPLETED
+  • Updated AlertDialogCancel in alert-dialog.tsx from "outline" to "secondary" variant
+  • All FormModalFooter cancel buttons already use secondary variant correctly
+  • FormModalStepFooter cancel buttons also use secondary variant
+  • Unified cancel button styling: all cancel/cancelar buttons now use consistent secondary appearance
 - July 22, 2025. MODAL CLOSE BUTTON FLATTENED: Changed modal close button (X) to use ghost-flat variant without hover translateY effect - COMPLETED
   • Updated FormModalLayout.tsx close button from "ghost" to "ghost-flat" variant
   • Eliminated unwanted downward movement on hover for modal close buttons
