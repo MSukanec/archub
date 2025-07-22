@@ -8,13 +8,16 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
-import { Package, Search, Calculator, Boxes, BarChart3, Layers } from 'lucide-react'
+import { Package, Search, Calculator, Boxes, BarChart3, Layers, Filter } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 export default function ConstructionMaterials() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
+  const [selectedCategory, setSelectedCategory] = useState("")
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: materials = [], isLoading: materialsLoading } = useConstructionMaterials(
@@ -27,12 +30,17 @@ export default function ConstructionMaterials() {
     setSidebarContext('construction')
   }, [])
 
+  // Get unique categories for filter
+  const uniqueCategories = [...new Set(materials.map(m => m.category_name))].sort()
+
   // Filter and sort materials
   const filteredMaterials = materials
-    .filter((material) =>
-      material.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      material.category_name.toLowerCase().includes(searchValue.toLowerCase())
-    )
+    .filter((material) => {
+      const matchesSearch = material.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        material.category_name.toLowerCase().includes(searchValue.toLowerCase())
+      const matchesCategory = !selectedCategory || material.category_name === selectedCategory
+      return matchesSearch && matchesCategory
+    })
     .sort((a, b) => {
       if (sortBy === 'name') return a.name.localeCompare(b.name)
       if (sortBy === 'category') return a.category_name.localeCompare(b.category_name)
@@ -44,6 +52,7 @@ export default function ConstructionMaterials() {
   const handleClearFilters = () => {
     setSearchValue("")
     setSortBy("category")
+    setSelectedCategory("")
   }
 
   // Custom filters for the header
@@ -166,6 +175,45 @@ export default function ConstructionMaterials() {
               searchValue={searchValue}
               onSearchChange={setSearchValue}
               showGrouping={false}
+              customActions={[
+                <Popover key="category-filter">
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                    >
+                      <Filter className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    align="start" 
+                    className="w-48 p-0 rounded-lg shadow-button-normal border"
+                    style={{ 
+                      backgroundColor: 'var(--card-bg)',
+                      borderColor: 'var(--card-border)'
+                    }}
+                  >
+                    <div className="py-1">
+                      <button
+                        onClick={() => setSelectedCategory('')}
+                        className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] ${!selectedCategory ? 'bg-[var(--button-ghost-hover-bg)]' : ''}`}
+                      >
+                        Todas las categorías
+                      </button>
+                      {uniqueCategories.map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => setSelectedCategory(category)}
+                          className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] ${selectedCategory === category ? 'bg-[var(--button-ghost-hover-bg)]' : ''}`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ]}
             />
             
             <Table
