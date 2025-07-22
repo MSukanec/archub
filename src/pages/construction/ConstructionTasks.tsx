@@ -5,6 +5,7 @@ import { Plus, CheckSquare, Calendar, MapPin, User } from 'lucide-react'
 import { BudgetTable } from '@/components/ui-custom/BudgetTable'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -164,6 +165,17 @@ export default function ConstructionTasks() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
+      {/* Action Bar Desktop */}
+      <ActionBarDesktop
+        title="Listado de Tareas"
+        searchValue={searchValue}
+        onSearch={setSearchValue}
+        searchPlaceholder="Buscar tareas..."
+        onFilterClick={() => console.log('Abrir filtros')}
+        primaryActionLabel="+ Nueva Tarea"
+        onPrimaryActionClick={handleAddTask}
+      />
+
       {/* Feature Introduction */}
       <FeatureIntroduction
         icon={<CheckSquare className="h-6 w-6" />}

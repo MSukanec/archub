@@ -118,6 +118,20 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. ACTIONBARDESKTOP COMPONENT AND LAYOUT BACKGROUND UPDATE COMPLETED: Created new reusable ActionBarDesktop component and changed layout background to card color - COMPLETED
+  • Created ActionBarDesktop.tsx component in src/components/layout/desktop/ with comprehensive prop system for customization
+  • Component features: title display, search input with icon, filters button, primary action button, custom actions array
+  • Responsive design: hidden on mobile (hidden md:flex), uses card background color var(--card-bg)
+  • Implemented as example in ConstructionTasks.tsx with search functionality, filters, and "Nueva Tarea" button
+  • Changed main layout background from --layout-bg to --card-bg for better visual consistency
+  • ActionBar positioned above content with proper spacing, border, and card-style appearance
+  • Ready for reuse across all construction pages: Bitácora, Cronograma, Presupuestos, Materials, etc.
+- July 22, 2025. TUTORIAL MODE BUG RESOLVED: FeatureIntroduction components now properly hide when tutorial mode is disabled - COMPLETED
+  • Fixed FeatureIntroduction.tsx to check user_preferences.tutorial and return null when tutorial = false
+  • Added useCurrentUser hook integration for real-time preference checking
+  • Tutorial switch now successfully controls FEATURES component visibility across all pages
+  • Components properly disappear when "Modo nuevo usuario" is turned off in profile settings
+  • System automatically hides help components when users want cleaner interface experience
 - July 22, 2025. PROFILE SIDEBAR CORRECTED AND TUTORIAL SYSTEM COMPLETED: Fixed Settings button placement and created tutorial mode functionality - COMPLETED
   • Moved "Preferencias" button from main sidebar to profile sidebar (below "Datos Básicos") as user specified
   • Created new "Tutorial" section in ProfileSettings.tsx with switch for new user mode to hide FEATURES components
