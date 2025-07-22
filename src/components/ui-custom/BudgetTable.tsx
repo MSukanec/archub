@@ -357,23 +357,147 @@ export function BudgetTable({
         </div>
       </div>
 
-      {/* Show EmptyState when no tasks, but keep selector visible */}
+      {/* Table structure always visible, EmptyState replaces content when no tasks */}
       {(!budgetTasks || budgetTasks.length === 0) ? (
-        <EmptyState
-          icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
-          title="No hay tareas en este presupuesto"
-          description="Comienza agregando la primera tarea para gestionar los costos y materiales"
-          action={
-            <Button 
-              size="sm" 
-              onClick={() => handleAddTask(budgetId)}
-              className="h-8 px-3 text-xs"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Agregar Tarea
-            </Button>
-          }
-        />
+        <>
+          {/* Desktop Table Header - Always show */}
+          <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
+            {/* Control Bar - Search and Grouping */}
+            <div className="flex items-center justify-between px-4 py-2 bg-[var(--card-bg)] border-b border-[var(--card-border)]">
+              {/* Left side - Search and Grouping */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setShowSearch(!showSearch)}
+                >
+                  <Search className="w-3 h-3" />
+                </Button>
+                
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+                      <Filter className="w-3 h-3 mr-1" />
+                      {groupingType === 'none' ? 'Sin agrupar' : 
+                       groupingType === 'rubros' ? 'Por rubros' :
+                       groupingType === 'phases' ? 'Por fases' :
+                       groupingType === 'rubros-phases' ? 'Rubros y fases' :
+                       'Fases y rubros'}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => onGroupingChange?.('none')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Sin agrupar
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('rubros')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Agrupar por Rubros
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('phases')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Agrupar por Fases
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('rubros-phases')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Rubros y Fases
+                      </button>
+                      <button
+                        onClick={() => onGroupingChange?.('phases-rubros')}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        Fases y Rubros
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+                  onClick={() => onAddTasks?.()}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  AGREGAR TAREAS
+                </Button>
+              </div>
+            </div>
+            
+            {/* EmptyState inside table structure */}
+            <div className="p-8">
+              <EmptyState
+                icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
+                title="No hay tareas en este presupuesto"
+                description="Comienza agregando la primera tarea para gestionar los costos y materiales"
+                action={
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAddTask(budgetId)}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Agregar Tarea
+                  </Button>
+                }
+              />
+            </div>
+          </div>
+          
+          {/* Mobile view - Same pattern */}
+          <div className="lg:hidden">
+            {/* Mobile control bar */}
+            <div className="flex items-center justify-between px-4 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Search className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Filter className="w-3 h-3" />
+                </Button>
+              </div>
+              <Button
+                variant="default"
+                size="sm"
+                className="h-7 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+                onClick={() => onAddTasks?.()}
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                AGREGAR TAREAS
+              </Button>
+            </div>
+            
+            {/* EmptyState for mobile */}
+            <div className="border-x border-b border-[var(--card-border)] rounded-b-lg p-6">
+              <EmptyState
+                icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
+                title="No hay tareas en este presupuesto"
+                description="Comienza agregando la primera tarea para gestionar los costos y materiales"
+                action={
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAddTask(budgetId)}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Agregar Tarea
+                  </Button>
+                }
+              />
+            </div>
+          </div>
+        </>
       ) : (
         <>
           {/* Desktop Table View - Using Table.tsx structure */}
