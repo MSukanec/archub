@@ -84,9 +84,9 @@ export function RetirosPropiosFields({ form, currencies, wallets, members, conce
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {currencies?.map((currency) => (
-                    <SelectItem key={currency.currency_id} value={currency.currency_id}>
-                      {currency.currency?.name || 'Sin nombre'}
+                  {currencies?.map((orgCurrency) => (
+                    <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                      {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
                     </SelectItem>
                   ))}
                 </SelectContent>

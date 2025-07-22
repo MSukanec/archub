@@ -161,9 +161,9 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {currencies?.map((currency) => (
-                    <SelectItem key={currency.id} value={currency.id}>
-                      {currency.name || 'Sin nombre'}
+                  {currencies?.map((orgCurrency) => (
+                    <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                      {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
                     </SelectItem>
                   ))}
                 </SelectContent>
