@@ -244,62 +244,122 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">Registro de Asistencia</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {workers.length} trabajadores • {dateRange.length} días
-            </p>
+    <div className="relative border border-border rounded-lg overflow-hidden bg-card">
+      {/* Header with title and export */}
+      <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">Registro de Asistencia</h3>
+          <p className="text-sm text-[var(--table-header-fg)]">
+            {workers.length} trabajadores • {dateRange.length} días
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Legend */}
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[var(--accent)]"></div>
+              <span className="text-[var(--table-header-fg)]">Jornada completa</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <span className="text-[var(--table-header-fg)]">Media jornada</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+              <span className="text-[var(--table-header-fg)]">Ausente</span>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-            {/* Export Button */}
-            {onExportAttendance && (
-              <Button onClick={onExportAttendance} variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Exportar
-              </Button>
-            )}
+
+          {/* Export Button */}
+          {onExportAttendance && (
+            <Button onClick={onExportAttendance} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+          )}
+        </div>
+      </div>
+      {/* Unified Header Row - matching Gantt design */}
+      <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
+        {/* Left Panel Header - Personnel */}
+        <div className="flex-shrink-0 w-64 border-r border-[var(--table-header-border)] h-14 flex bg-[var(--table-header-bg)]">
+          <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] uppercase tracking-wider">
+            Personal / Asistencia
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span>Jornada completa</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span>Media jornada</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-            <span>Ausente</span>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="p-0">
-        <div className="flex border-t relative max-w-full overflow-hidden">
-          {/* Fixed Personnel Names Column */}
-          <div className="flex-shrink-0 w-64 bg-background border-r">
-            {/* Header - matching timeline header height exactly (25px + 40px) */}
-            <div className="bg-muted/50 border-b h-[65px] flex items-end px-6 pb-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Asistencia
-              </span>
+        {/* Timeline Header - Days */}
+        <div 
+          className="flex-1 overflow-x-auto" 
+          id="timeline-header-scroll"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+          onScroll={(e) => {
+            const contentScroll = document.getElementById('timeline-content-scroll');
+            if (contentScroll) {
+              contentScroll.scrollLeft = e.currentTarget.scrollLeft;
+            }
+          }}
+        >
+          <style>
+            {`
+              #timeline-header-scroll::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
+          <div style={{ width: `${dateRange.length * 40}px` }}>
+            {/* Month Headers Row */}
+            <div className="flex h-6">
+              {monthHeaders.map((monthHeader, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
+                  style={{ width: `${monthHeader.span * 40}px` }}
+                >
+                  <span className="capitalize">{monthHeader.month}</span>
+                </div>
+              ))}
             </div>
             
-            {/* Personnel List - grouped by contact type */}
-            <div>
+            {/* Days Row */}
+            <div className="flex h-8 border-t border-[var(--table-header-border)]">
+              {dateRange.map((date) => {
+                const isTodayDate = isToday(date)
+                const isWeekendDay = isWeekend(date)
+                return (
+                  <div 
+                    key={date.getTime()} 
+                    className={`flex items-center justify-center text-xs font-medium border-r border-[var(--table-header-border)]/30 last:border-r-0 ${
+                      isWeekendDay 
+                        ? 'text-[var(--table-header-fg)]/60' 
+                        : 'text-[var(--table-header-fg)]'
+                    } ${isTodayDate ? 'bg-[var(--accent)] text-white' : ''}`}
+                    style={{ width: '40px', minWidth: '40px' }}
+                  >
+                    {format(date, 'EEE d', { locale: es })}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative flex">
+        {/* Fixed Personnel Names Column */}
+        <div className="flex-shrink-0 w-64 bg-[var(--table-header-bg)] border-r border-border overflow-hidden">
+          {/* Personnel List - grouped by contact type */}
+          <div>
               {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                 <div key={contactType}>
                   {/* Contact Type Header */}
-                  <div className="h-[20px] px-6 bg-muted/80 border-b border-border flex items-center">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="h-12 px-4 bg-[var(--accent)] text-white border-b border-[var(--table-row-border)] flex items-center">
+                    <span className="text-xs font-medium uppercase tracking-wider">
                       {contactType} ({workersInGroup.length})
                     </span>
                   </div>
@@ -311,7 +371,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                     const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
                     
                     return (
-                      <div key={worker.id} className={`h-[65px] px-6 bg-background hover:bg-muted/50 flex items-center ${shouldShowBorder ? 'border-b border-border' : ''}`}>
+                      <div key={worker.id} className={`h-12 px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarImage src={worker.avatar_url} alt={worker.name} />
                           <AvatarFallback className="text-xs font-medium">
@@ -319,7 +379,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                           </AvatarFallback>
                         </Avatar>
                         <div className="ml-3">
-                          <div className="text-sm font-medium">{worker.name}</div>
+                          <div className="text-sm font-medium text-[var(--table-row-fg)]">{worker.name}</div>
                         </div>
                       </div>
                     );
@@ -329,148 +389,81 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             </div>
           </div>
 
-          {/* Timeline Column with Drag Navigation */}
-          <div className="flex-1 relative min-w-0 group">
-            {/* Left Hover Area - Almost invisible, smooth scroll on hover */}
-            <div
-              className="absolute left-0 z-20 w-[15px] h-full bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
-              style={{ 
-                top: '65px',
-                height: `calc(100% - 65px)`
-              }}
-              onMouseEnter={() => startSmoothScroll('left')}
-              onMouseLeave={stopSmoothScroll}
-            >
-              <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
-                <ChevronLeft className="w-3 h-3 text-muted-foreground" />
-              </div>
-            </div>
-
-            {/* Right Hover Area - Almost invisible, smooth scroll on hover */}
-            <div
-              className="absolute right-0 z-20 w-[15px] h-full bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
-              style={{ 
-                top: '65px',
-                height: `calc(100% - 65px)`
-              }}
-              onMouseEnter={() => startSmoothScroll('right')}
-              onMouseLeave={stopSmoothScroll}
-            >
-              <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
-                <ChevronRight className="w-3 h-3 text-muted-foreground" />
-              </div>
-            </div>
-
-            {/* Scrollable Timeline - hidden scrollbar */}
-            <div 
-              ref={(el) => {
-                // Set timeline element for both auto-scroll and drag functionality
-                setTimelineElement(el)
-                
-                // Only auto-center when explicitly requested (initial load or "Hoy" button)
-                // This prevents unwanted centering during drag operations
-              }}
-              className={`overflow-x-auto ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-                userSelect: isDragging ? 'none' : 'auto'
-              }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseLeave}
-            >
-              <table 
-                style={{ 
-                  minWidth: `${dateRange.length * 40}px`,
-                  width: `${dateRange.length * 40}px`
-                }}
-              >
-                {/* Timeline Header with Month Row */}
-                <thead className="bg-muted/50 border-b">
-                  {/* Month Headers Row */}
-                  <tr className="h-[25px] border-b border-border/30">
-                    {monthHeaders.map((monthHeader, index) => (
-                      <th 
-                        key={index}
-                        colSpan={monthHeader.span}
-                        className="px-1 text-center text-xs font-medium text-muted-foreground bg-muted/30 border-r border-border/20"
+        {/* Timeline Content with synchronized scrolling */}
+        <div 
+          className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
+          id="timeline-content-scroll"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'var(--accent) var(--table-header-bg)'
+          }}
+          onScroll={(e) => {
+            const headerScroll = document.getElementById('timeline-header-scroll');
+            if (headerScroll) {
+              headerScroll.scrollLeft = e.currentTarget.scrollLeft;
+            }
+          }}
+        >
+          <div style={{ width: `${dateRange.length * 40}px` }}>
+            {/* Timeline Content - matching Gantt design */}
+            {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
+              <div key={contactType}>
+                {/* Contact Type Header Row */}
+                <div className="h-12 border-b border-[var(--table-row-border)] bg-[var(--accent)]/30 flex">
+                  {dateRange.map((date) => {
+                    const isTodayDate = isToday(date)
+                    return (
+                      <div 
+                        key={`${contactType}-header-${date.getTime()}`} 
+                        className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)] text-white' : ''}`}
+                        style={{ width: '40px', minWidth: '40px' }}
                       >
-                        <span className="capitalize">{monthHeader.month}</span>
-                      </th>
-                    ))}
-                  </tr>
-                  
-                  {/* Days Row */}
-                  <tr className="h-[40px]">
-                    {dateRange.map((date) => {
-                      const isTodayDate = isToday(date)
-                      return (
-                        <th key={date.getTime()} className={`px-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-[var(--accent)]/50 text-[var(--accent)] border-x-2 border-[var(--accent)]' : 'text-muted-foreground'}`}>
-                          <div className="flex flex-col items-center">
-                            <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
-                            <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
-                          </div>
-                        </th>
-                      )
-                    })}
-                  </tr>
-                </thead>
+                        {/* Empty space for contact type header */}
+                      </div>
+                    )
+                  })}
+                </div>
                 
-                {/* Timeline Body - matching grouped personnel structure */}
-                <tbody className="bg-background">
-                  {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
-                    <React.Fragment key={contactType}>
-                      {/* Contact Type Header Row */}
-                      <tr className="h-[20px] bg-muted/80 border-b border-border">
-                        {dateRange.map((date) => {
-                          const isTodayDate = isToday(date)
-                          return (
-                            <td key={`${contactType}-header-${date.getTime()}`} className={`px-3 text-center bg-muted/80 ${isTodayDate ? 'bg-[var(--accent)]/10 border-x-2 border-[var(--accent)]' : ''}`}>
-                              {/* Empty cells for contact type header */}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                      
-                      {/* Worker Rows for this contact type */}
-                      {workersInGroup.map((worker, workerIndex) => {
-                        const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
-                        const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
-                        const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
-                        
+                {/* Worker Rows for this contact type */}
+                {workersInGroup.map((worker, workerIndex) => {
+                  const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
+                  const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
+                  const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                  
+                  return (
+                    <div 
+                      key={worker.id} 
+                      className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}
+                    >
+                      {dateRange.map((date) => {
+                        const status = getAttendanceStatus(worker.id, date)
+                        const isWeekendDay = isWeekend(date)
+                        const isTodayDate = isToday(date)
                         return (
-                          <tr key={worker.id} className={`h-[65px] hover:bg-muted/50 ${shouldShowBorder ? 'border-b border-border' : ''}`}>
-                            {dateRange.map((date) => {
-                              const status = getAttendanceStatus(worker.id, date)
-                              const isWeekendDay = isWeekend(date)
-                              const isTodayDate = isToday(date)
-                              return (
-                                <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/50 border-x-2 border-[var(--accent)]' : ''}`}>
-                                  <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                                    {isWeekendDay && (
-                                      <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-xs text-gray-400">×</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        );
+                          <div 
+                            key={`${worker.id}-${date.getTime()}`} 
+                            className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
+                            style={{ width: '40px', minWidth: '40px' }}
+                          >
+                            <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)}`}>
+                              {isWeekendDay && (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="text-xs text-gray-400">×</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
                       })}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
