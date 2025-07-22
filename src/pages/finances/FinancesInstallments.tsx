@@ -82,7 +82,6 @@ interface InstallmentSummary {
 
 export default function FinancesInstallments() {
   const { data: userData } = useCurrentUser()
-  const [searchValue, setSearchValue] = useState("")
   const { openModal } = useGlobalModalStore()
 
   const queryClient = useQueryClient()
@@ -458,15 +457,8 @@ export default function FinancesInstallments() {
     return { clientSummary: [...sortedSummary, totalsRow], availableCurrencies: currencies }
   }, [projectClients, installments, allCurrencies])
 
-  // Filter installments based on search
-  const filteredInstallments = installments.filter(installment => {
-    const searchLower = searchValue.toLowerCase()
-    const contactName = installment.contact?.company_name || 
-                       `${installment.contact?.first_name || ''} ${installment.contact?.last_name || ''}`.trim()
-    
-    return contactName.toLowerCase().includes(searchLower) ||
-           installment.description?.toLowerCase().includes(searchLower)
-  })
+  // No filtering - show all installments
+  const filteredInstallments = installments
 
   const handleEdit = (installment: Installment) => {
     openModal('installment', {
@@ -515,13 +507,6 @@ export default function FinancesInstallments() {
 
   const handleCardClick = (installment: Installment) => {
     handleEdit(installment)
-  }
-
-  const handleCreateNew = () => {
-    openModal('installment', {
-      projectId: projectId || '',
-      organizationId: organizationId || ''
-    })
   }
 
 
@@ -1024,19 +1009,7 @@ export default function FinancesInstallments() {
   ]
 
   const headerProps = {
-    title: "Compromisos de Pago",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    actions: [(
-      <Button 
-        key="add-installment"
-        className="h-8 px-3 text-sm"
-        onClick={handleCreateNew}
-      >
-        Agregar Compromiso
-      </Button>
-    )]
+    title: "Compromisos de Pago"
   }
 
   if (isLoading) {
@@ -1129,7 +1102,7 @@ export default function FinancesInstallments() {
             ) : (
               <EmptyState
                 title="No se encontraron compromisos"
-                description="Intenta con otros términos de búsqueda"
+                description="No hay compromisos de pago registrados para mostrar"
               />
             )}
           </>
@@ -1137,12 +1110,7 @@ export default function FinancesInstallments() {
           /* EmptyState takes full available space when no installments exist */
           <EmptyState
             title="Aún no hay compromisos registrados"
-            description="Comienza registrando el primer compromiso de pago de un cliente al proyecto"
-            action={
-              <Button onClick={handleCreateNew} className="mt-4">
-                Agregar Primer Compromiso
-              </Button>
-            }
+            description="Esta sección muestra los compromisos de pago registrados en el proyecto"
           />
         )}
 
