@@ -76,7 +76,7 @@
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
-  --button-ghost-text: hsl(0, 0%, 35%);
+  --button-ghost-text: hsl(0, 0%, 50%);
   --button-ghost-border: transparent;
   --button-ghost-hover-bg: transparent;
   --button-ghost-hover-text: hsl(0, 0%, 20%);

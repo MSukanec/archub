@@ -118,13 +118,19 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 22, 2025. ACTIONBARDESKTOP COMPONENT REFINEMENT COMPLETED: Updated ActionBarDesktop with search button, ghost styling, and removed title/search field - COMPLETED
-  • Added search button to left of filters button with same functionality as header search
-  • Changed both search and filters buttons to ghost variant for cleaner appearance
-  • Removed title display and inline search field as requested - simplified to just action buttons
-  • Search button focuses header search input for unified search experience
-  • ActionBar now shows: [empty space] - [Search] [Filters] [Custom Actions] [Primary Action]
-  • Component optimized for clean, minimal appearance with consistent button styling
+- July 22, 2025. ACTIONBAR EXPANDABLE SEARCH FUNCTIONALITY COMPLETED: Implemented inline search expansion with icon positioning like reference design - COMPLETED
+  • Added expandable search: clicking "Buscar" expands input field with smooth transition
+  • Search icon moves to right side of input field when expanded, matching reference image
+  • Added close button (X) next to search icon for collapsing the expanded search
+  • Input field gets focus automatically and uses rounded design like reference
+  • Search button hides when expanded, appears when collapsed for clean UI state management
+  • Integrated with existing search functionality in ConstructionTasks page
+- July 22, 2025. BUTTON SHADOW SYSTEM COMPLETED: All button variants now have consistent shadow system with normal and hover states - COMPLETED
+  • Created --button-shadow-normal and --button-shadow-hover CSS variables for light/dark themes
+  • Applied shadow-button-normal (half shadow) to all button variants by default
+  • Applied shadow-button-hover (full shadow) on hover state for all variants
+  • All button types (default, destructive, outline, secondary, ghost) now have consistent shadow behavior
+  • Enhanced with hover translateY effect for professional button interaction feedback
 - July 22, 2025. ACTIONBARDESKTOP COMPONENT AND LAYOUT BACKGROUND UPDATE COMPLETED: Created new reusable ActionBarDesktop component and changed layout background to card color - COMPLETED
   • Created ActionBarDesktop.tsx component in src/components/layout/desktop/ with comprehensive prop system for customization
   • Component features: title display, search input with icon, filters button, primary action button, custom actions array
