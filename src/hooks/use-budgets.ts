@@ -47,6 +47,7 @@ export function useBudgets(projectId?: string) {
 
 export function useCreateBudget() {
   const queryClient = useQueryClient()
+  const { data: userData } = useCurrentUser()
 
   return useMutation({
     mutationFn: async (budgetData: Omit<Budget, 'id' | 'created_at'> & { created_at: string }) => {
@@ -63,11 +64,34 @@ export function useCreateBudget() {
       if (error) throw error
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      // Establecer automáticamente el nuevo presupuesto como activo en user_preferences
+      if (userData?.user?.id && userData?.preferences?.id) {
+        try {
+          console.log('🔄 Auto-activating new budget:', data.id)
+          
+          const { error: preferencesError } = await supabase
+            .from('user_preferences')
+            .update({ last_budget_id: data.id })
+            .eq('id', userData.preferences.id)
+            .eq('user_id', userData.user.id)
+
+          if (preferencesError) {
+            console.error('Error updating budget preference:', preferencesError)
+          } else {
+            console.log('✅ New budget automatically activated:', data.id)
+          }
+        } catch (error) {
+          console.error('Error auto-activating budget:', error)
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['budgets'] })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      
       toast({
         title: "Presupuesto creado",
-        description: "El presupuesto ha sido creado correctamente",
+        description: "El presupuesto ha sido creado y activado automáticamente",
       })
     },
     onError: (error) => {
