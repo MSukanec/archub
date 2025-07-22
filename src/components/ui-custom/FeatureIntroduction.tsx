@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { HelpCircle, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 interface FeatureItem {
   icon: React.ReactNode
@@ -25,7 +26,13 @@ export function FeatureIntroduction({
   onDismiss,
   className
 }: FeatureIntroductionProps) {
+  const { data: userData } = useCurrentUser()
   const [isExpanded, setIsExpanded] = useState(false)
+
+  // Hide component if tutorial mode is disabled
+  if (userData?.preferences?.tutorial === false) {
+    return null
+  }
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded)
