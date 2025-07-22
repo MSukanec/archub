@@ -248,7 +248,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       {/* Header with title and export */}
       <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Registro de Asistencia</h3>
+          <h3 className="text-sm text-[var(--table-header-fg)]">Registro de Asistencia</h3>
           <p className="text-sm text-[var(--table-header-fg)]">
             {workers.length} trabajadores • {dateRange.length} días
           </p>
@@ -311,14 +311,14 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               }
             `}
           </style>
-          <div style={{ width: `${dateRange.length * 40}px` }}>
+          <div style={{ width: `${dateRange.length * 30}px` }}>
             {/* Month Headers Row */}
             <div className="flex h-6">
               {monthHeaders.map((monthHeader, index) => (
                 <div 
                   key={index}
                   className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
-                  style={{ width: `${monthHeader.span * 40}px` }}
+                  style={{ width: `${monthHeader.span * 30}px` }}
                 >
                   <span className="capitalize">{monthHeader.month}</span>
                 </div>
@@ -338,7 +338,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                         ? 'text-[var(--table-header-fg)]/60' 
                         : 'text-[var(--table-header-fg)]'
                     } ${isTodayDate ? 'bg-[var(--accent)] text-white' : ''}`}
-                    style={{ width: '40px', minWidth: '40px' }}
+                    style={{ width: '30px', minWidth: '30px' }}
                   >
                     {format(date, 'EEE d', { locale: es })}
                   </div>
@@ -404,19 +404,19 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             }
           }}
         >
-          <div style={{ width: `${dateRange.length * 40}px` }}>
+          <div style={{ width: `${dateRange.length * 30}px` }}>
             {/* Timeline Content - matching Gantt design */}
             {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
               <div key={contactType}>
                 {/* Contact Type Header Row */}
-                <div className="h-12 border-b border-[var(--table-row-border)] bg-[var(--accent)]/30 flex">
+                <div className="h-12 border-b border-[var(--table-row-border)] bg-[var(--table-header-bg)] flex">
                   {dateRange.map((date) => {
                     const isTodayDate = isToday(date)
                     return (
                       <div 
                         key={`${contactType}-header-${date.getTime()}`} 
                         className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)] text-white' : ''}`}
-                        style={{ width: '40px', minWidth: '40px' }}
+                        style={{ width: '30px', minWidth: '30px' }}
                       >
                         {/* Empty space for contact type header */}
                       </div>
@@ -443,9 +443,9 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                           <div 
                             key={`${worker.id}-${date.getTime()}`} 
                             className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
-                            style={{ width: '40px', minWidth: '40px' }}
+                            style={{ width: '30px', minWidth: '30px' }}
                           >
-                            <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)}`}>
+                            <div className={`w-5 h-5 rounded-full ${getAttendanceColor(status, isWeekendDay)}`}>
                               {isWeekendDay && (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <span className="text-xs text-gray-400">×</span>
