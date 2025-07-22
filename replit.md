@@ -118,13 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 22, 2025. BUDGET TABLE EMPTYSTATE INTEGRATION COMPLETED: Fixed EmptyState to be part of table structure instead of separate element - COMPLETED
-  • EmptyState now appears within table structure with toolbar visible (search, filters, AGREGAR TAREAS button)
-  • Budget selector remains visible above table structure as required
-  • Table structure (header, toolbar) always renders, EmptyState replaces content area when no tasks exist
-  • Both mobile and desktop views maintain consistent integration pattern
-  • Eliminated floating EmptyState that was covering functional elements like budget selector
-  • Enhanced UX: users see complete table interface with all tools available even when no tasks exist
 - July 22, 2025. GANTT DEPENDENCY ARROWS CRITICAL BUG FIXED: Resolved issue where dependency arrows disappeared when tasks were deleted or in different phases - COMPLETED
   • Root cause identified: Dependencies were referencing deleted/non-existent tasks causing DOM element lookup failures
   • Implemented data validation system: only process dependencies where both predecessor and successor tasks exist in current rendered data
