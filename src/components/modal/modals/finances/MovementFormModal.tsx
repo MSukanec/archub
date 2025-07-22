@@ -428,8 +428,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     
     // Inicializar PROYECTO (solo si no está editando)
     if (!editingMovement && userData?.preferences?.last_project_id !== undefined) {
-      if (form.watch('project_id') === undefined) {
+      // Si hay proyecto activo, usar ese proyecto automáticamente
+      if (userData.preferences.last_project_id) {
         form.setValue('project_id', userData.preferences.last_project_id)
+      } else if (form.watch('project_id') === undefined) {
+        // Solo en modo General permitir selección libre
+        form.setValue('project_id', null)
       }
     }
     
@@ -1719,42 +1723,44 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         </div>
       </div>
 
-      {/* Selector de proyecto */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Proyecto
-        </label>
-        <Select 
-          onValueChange={(value) => {
-            const projectId = value === 'general' ? null : value
-            form.setValue('project_id', projectId)
-          }} 
-          value={form.watch('project_id') || 'general'}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar proyecto..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="general">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                <span>General</span>
-              </div>
-            </SelectItem>
-            {projects?.map((project) => (
-              <SelectItem key={project.id} value={project.id}>
+      {/* Selector de proyecto - Solo mostrar en modo GENERAL (sin proyecto activo) */}
+      {!userData?.preferences?.last_project_id && !editingMovement && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Proyecto
+          </label>
+          <Select 
+            onValueChange={(value) => {
+              const projectId = value === 'general' ? null : value
+              form.setValue('project_id', projectId)
+            }} 
+            value={form.watch('project_id') || 'general'}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar proyecto..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="general">
                 <div className="flex items-center gap-2">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
-                    style={{ backgroundColor: project.color || '#000000' }}
-                  ></div>
-                  <span>{project.name}</span>
+                  <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                  <span>General</span>
                 </div>
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+              {projects?.map((project) => (
+                <SelectItem key={project.id} value={project.id}>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-2 h-2 rounded-full" 
+                      style={{ backgroundColor: project.color || '#000000' }}
+                    ></div>
+                    <span>{project.name}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Selector de tipo de movimiento - CENTRALIZADO */}
       <div className="space-y-2">
