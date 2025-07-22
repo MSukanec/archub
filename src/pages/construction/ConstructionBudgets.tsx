@@ -286,16 +286,22 @@ export default function ConstructionBudgets() {
             setSelectedBudgetId(userData.preferences.last_budget_id);
             console.log('Budget selector initialized with last_budget_id:', userData.preferences.last_budget_id);
           }
-        } else if (!selectedBudgetId) {
-          // Si el último presupuesto no existe y no hay selección actual, seleccionar el primero
+        } else {
+          // Si el último presupuesto no existe, seleccionar el primero
           setSelectedBudgetId(budgets[0].id);
           updateBudgetPreferenceMutation.mutate(budgets[0].id);
+          console.log('Last budget not found, selecting first budget:', budgets[0].id);
         }
-      } else if (!selectedBudgetId) {
-        // Si no hay last_budget_id y no hay selección actual, seleccionar el primero
+      } else {
+        // Si no hay last_budget_id, seleccionar el primero
         setSelectedBudgetId(budgets[0].id);
         updateBudgetPreferenceMutation.mutate(budgets[0].id);
+        console.log('No last budget ID, selecting first budget:', budgets[0].id);
       }
+    } else if (budgets.length === 0 && selectedBudgetId) {
+      // Si no hay presupuestos, limpiar la selección
+      setSelectedBudgetId('');
+      console.log('No budgets available, clearing selection');
     }
   }, [budgets, userData?.preferences?.last_budget_id, userData?.preferences?.id]);
 
@@ -318,8 +324,8 @@ export default function ConstructionBudgets() {
     }
   }, [filteredBudgets.length, selectedBudgetId]);
 
-  // Get selected budget
-  const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId);
+  // Get selected budget - with fallback to first budget if selected doesn't exist
+  const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId) || filteredBudgets[0];
 
   // Delete budget mutation
   const deleteBudgetMutation = useMutation({

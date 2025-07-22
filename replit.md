@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. BUDGET AUTO-SELECTION LOGIC COMPLETELY FIXED: Resolved critical bug where "Selecciona un presupuesto" message appeared when projects had available budgets - COMPLETED
+  • Root cause identified: faulty conditional logic in useEffect prevented budget auto-selection when last_budget_id didn't exist in current project
+  • Fixed budget selection workflow: removed problematic "else if (!selectedBudgetId)" condition that blocked automatic selection
+  • Enhanced fallback system: selectedBudget now uses first available budget if current selection doesn't exist in filtered results
+  • Improved project switching behavior: automatically selects first budget when switching to project where previous selection doesn't exist
+  • Added comprehensive logging for budget selection states: "Last budget not found, selecting first budget" messages for debugging
+  • System now guarantees: if budgets exist, one is always selected; if no budgets exist, EmptyState shows; never shows selection prompt when budgets are available
+  • Fixed UI separation: EmptyState appears immediately after budget selector without interfering gray action bars
+  • Enhanced user experience: seamless project navigation with consistent budget selection behavior```
 - July 22, 2025. GANTT DEPENDENCY ARROWS CRITICAL BUG FIXED: Resolved issue where dependency arrows disappeared when tasks were deleted or in different phases - COMPLETED
   • Root cause identified: Dependencies were referencing deleted/non-existent tasks causing DOM element lookup failures
   • Implemented data validation system: only process dependencies where both predecessor and successor tasks exist in current rendered data
