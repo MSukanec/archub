@@ -45,7 +45,8 @@ import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
 import OrganizationTasks from "@/pages/organization/OrganizationTasks";
 import OrganizationManagement from "@/pages/organization/OrganizationList";
 
-import Profile from "@/pages/others/Profile";
+import ProfileBasicData from "@/pages/profile/ProfileBasicData";
+import ProfileSettings from "@/pages/profile/ProfileSettings";
 import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/others/SelectMode";
 
@@ -240,10 +241,15 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        {/* Other Routes */}
+        {/* Profile Routes */}
         <Route path="/profile">
           <ProtectedRoute>
-            <Profile />
+            <ProfileBasicData />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/profile/settings">
+          <ProtectedRoute>
+            <ProfileSettings />
           </ProtectedRoute>
         </Route>
 

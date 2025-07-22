@@ -4,9 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, UserCircle, Shield } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -18,8 +16,6 @@ import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { useSidebarStore, useSecondarySidebarStore } from '@/stores/sidebarStore'
-import { useThemeStore } from '@/stores/themeStore'
 
 interface Country {
   id: string;
@@ -27,11 +23,9 @@ interface Country {
   code: string;
 }
 
-export default function Profile() {
+export default function ProfileBasicData() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
-  const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore()
-  const { isDark, setTheme } = useThemeStore()
   const [, navigate] = useLocation()
   
   // Function to get user mode info
@@ -56,9 +50,6 @@ export default function Profile() {
   const [birthdate, setBirthdate] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [showAvatarUpload, setShowAvatarUpload] = useState(false)
-  const [sidebarDocked, setSidebarDocked] = useState(false)
-
-
 
   // Profile data object for debounced auto-save
   const profileData = {
@@ -66,127 +57,75 @@ export default function Profile() {
     lastName,
     country,
     birthdate,
-    avatarUrl,
-    sidebarDocked,
-    theme: isDark ? 'dark' : 'light'
+    avatarUrl
   }
 
   // Auto-save mutation for profile data
   const saveProfileMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
-      if (!userData?.user?.id || !supabase) return;
-
-      // Update user_data table
-      if (dataToSave.firstName !== undefined || dataToSave.lastName !== undefined || 
-          dataToSave.country !== undefined || dataToSave.birthdate !== undefined) {
-        const userDataFields = {
-          first_name: dataToSave.firstName,
-          last_name: dataToSave.lastName,
-          country: dataToSave.country,
-          birthdate: dataToSave.birthdate,
-          updated_at: new Date().toISOString(),
-        };
-
-        // Remove undefined values
-        const cleanUserData = Object.fromEntries(
-          Object.entries(userDataFields).filter(([_, value]) => value !== undefined)
-        );
-
-        if (Object.keys(cleanUserData).length > 0) {
-          const { error: userDataError } = await supabase
-            .from('user_data')
-            .update(cleanUserData)
-            .eq('user_id', userData.user.id);
-
-          if (userDataError) throw userDataError;
+    mutationFn: async (data: typeof profileData) => {
+      console.log('Saving profile data:', data)
+      
+      const updates: any = {}
+      
+      // Handle user_data updates
+      if (data.firstName !== userData?.user_data?.first_name ||
+          data.lastName !== userData?.user_data?.last_name ||
+          data.country !== userData?.user_data?.country ||
+          data.birthdate !== userData?.user_data?.birthdate) {
+        
+        const userDataUpdates = {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          country: data.country || null,
+          birthdate: data.birthdate || null,
         }
+        
+        const { error: userDataError } = await supabase!
+          .from('user_data')
+          .update(userDataUpdates)
+          .eq('user_id', userData?.user?.id)
+        
+        if (userDataError) throw userDataError
       }
-
-      // Update users table for avatar
-      if (dataToSave.avatarUrl !== undefined) {
-        const { error: userError } = await supabase
-          .from('users')
-          .update({ avatar_url: dataToSave.avatarUrl })
-          .eq('id', userData.user.id);
-
-        if (userError) throw userError;
+      
+      // Handle avatar URL update if changed
+      if (data.avatarUrl !== userData?.user?.avatar_url) {
+        const { error: avatarError } = await supabase!.auth.updateUser({
+          data: { avatar_url: data.avatarUrl }
+        })
+        
+        if (avatarError) throw avatarError
       }
-
-      // Update preferences table
-      if (dataToSave.sidebarDocked !== undefined || dataToSave.theme !== undefined) {
-        const preferencesFields = {
-          sidebar_docked: dataToSave.sidebarDocked,
-          theme: dataToSave.theme,
-          updated_at: new Date().toISOString(),
-        };
-
-        // Remove undefined values
-        const cleanPreferences = Object.fromEntries(
-          Object.entries(preferencesFields).filter(([_, value]) => value !== undefined)
-        );
-
-        if (Object.keys(cleanPreferences).length > 0) {
-          const { error: preferencesError } = await supabase
-            .from('user_preferences')
-            .update(cleanPreferences)
-            .eq('user_id', userData.user.id);
-
-          if (preferencesError) throw preferencesError;
-        }
-      }
+      
+      return data
+    },
+    onSuccess: () => {
+      console.log('Auto-save completed successfully')
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
     onError: (error) => {
+      console.error('Auto-save error:', error)
       toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios automáticamente",
-        variant: "destructive"
-      });
-    }
-  });
+        title: "Error",
+        description: "No se pudieron guardar los cambios automáticamente.",
+        variant: "destructive",
+      })
+    },
+  })
 
-  // Auto-save hook with proper configuration
+  // Set up debounced auto-save with 3 second delay
   const { isSaving } = useDebouncedAutoSave({
-    data: {
-      firstName,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-      sidebarDocked,
-      theme: isDark ? 'dark' : 'light'
-    },
-    saveFn: async (data) => {
-      await saveProfileMutation.mutateAsync(data);
-      
-      // Show success toast
-      toast({
-        title: "Datos guardados",
-        description: "Los cambios se han guardado automáticamente",
-      });
-      
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    },
-    delay: 750,
-    enabled: !!userData?.user?.id
-  });
+    data: profileData,
+    saveFn: async (data) => { await saveProfileMutation.mutateAsync(data); },
+    delay: 3000,
+    enabled: !!userData
+  })
 
-  // Simple state setters (auto-save handles the persistence)
+  // Handle changes
   const handleFirstNameChange = (value: string) => setFirstName(value)
   const handleLastNameChange = (value: string) => setLastName(value)
   const handleCountryChange = (value: string) => setCountry(value)
   const handleBirthdateChange = (value: string) => setBirthdate(value)
-
-  const handleSidebarDockedChange = (value: boolean) => {
-    setSidebarDocked(value)
-    setSecondarySidebarDocked(value)
-  }
-
-  const handleThemeChange = (value: boolean) => {
-    // Update theme immediately in UI
-    setTheme(value)
-    // The auto-save system will handle the database update automatically
-  }
 
   // Countries query
   const { data: countries = [] } = useQuery<Country[]>({
@@ -208,7 +147,6 @@ export default function Profile() {
       setCountry(userData.user_data?.country || '')
       setBirthdate(userData.user_data?.birthdate || '')
       setAvatarUrl(userData.user?.avatar_url || '')
-      setSidebarDocked(userData.preferences?.sidebar_docked || false)
     }
   }, [userData])
 
@@ -269,11 +207,6 @@ export default function Profile() {
               icon: <Camera className="h-4 w-4" />,
               title: "Avatar y Personalización", 
               description: "Sube y personaliza tu foto de perfil para identificarte mejor en la plataforma."
-            },
-            {
-              icon: <Settings className="h-4 w-4" />,
-              title: "Preferencias de Aplicación",
-              description: "Configura el tema visual (claro/oscuro) y el comportamiento de la barra lateral según tus preferencias."
             },
             {
               icon: <Shield className="h-4 w-4" />,
@@ -450,55 +383,6 @@ export default function Profile() {
                     onChange={(e) => handleBirthdateChange(e.target.value)}
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <hr className="border-t border-[var(--section-divider)] my-8" />
-
-        {/* Preferencias Section */}
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Preferencias</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Configura las preferencias de tu aplicación.
-              </p>
-            </div>
-
-            {/* Right Column - Form Fields */}
-            <div className="space-y-6">
-              {/* Tema */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Modo oscuro</Label>
-                  <div className="text-xs text-muted-foreground">
-                    Cambiar entre tema claro y oscuro
-                  </div>
-                </div>
-                <Switch
-                  checked={isDark}
-                  onCheckedChange={handleThemeChange}
-                />
-              </div>
-              
-              {/* Sidebar fixed */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Sidebar fijo</Label>
-                  <div className="text-xs text-muted-foreground">
-                    Mantener el sidebar siempre visible
-                  </div>
-                </div>
-                <Switch
-                  checked={userData?.preferences?.sidebar_docked || false}
-                  onCheckedChange={handleSidebarDockedChange}
-                />
               </div>
             </div>
           </div>
