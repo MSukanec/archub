@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. COMPROMISOS DE PAGO FIXED TO USE CORRECT APORTES DE TERCEROS ID: Corrected installments filtering to use proper "Aportes de Terceros" subcategory ID f3b96eda-15d5-4c96-ade7-6f53685115d3 instead of deprecated "Cuotas" ID e675eb59-3717-4451-89eb-0d838388238f - COMPLETED
+  • Fixed movement_view data structure implementation for contact_name, contact_company_name, currency_symbol, wallet_name fields
+  • Updated all table columns and card components to use flattened fields from movement_view instead of nested object references
+  • Corrected InstallmentDetailCard component to display proper contact and financial data
+  • Updated handleEdit, handleDelete, handleCardClick functions to work with new data structure
+  • Fixed null safety issues with supabase references throughout the component
 - July 22, 2025. COMPROMISOS DE PAGO UPDATED TO APORTES DE TERCEROS: Changed installments logic to filter by "Aportes de Terceros" subcategory instead of deprecated "Cuotas" - COMPLETED
   • Updated filtering logic from subcategory "Cuotas" (e675eb59-3717-4451-89eb-0d838388238f) to "Aportes de Terceros" (f3b96eda-15d5-4c96-ade7-6f53685115d3)
   • New path: INGRESOS > APORTES > APORTES DE TERCEROS instead of deprecated CUOTAS category

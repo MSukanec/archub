@@ -167,9 +167,9 @@ export default function FinancesInstallments() {
       }
 
       if (!data || data.length === 0) {
-        console.log('No Aportes de Terceros concept found, using existing movements ID e675eb59-3717-4451-89eb-0d838388238f')
-        // Return the ID that we know has actual movements in the database
-        return { id: 'e675eb59-3717-4451-89eb-0d838388238f', name: 'Aportes de Terceros' }
+        console.log('No Aportes de Terceros concept found, using correct movements ID f3b96eda-15d5-4c96-ade7-6f53685115d3')
+        // Return the correct ID for Aportes de Terceros subcategory
+        return { id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3', name: 'Aportes de Terceros' }
       }
 
       console.log('Found Aportes de Terceros concept:', data[0])
