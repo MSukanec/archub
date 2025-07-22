@@ -60,7 +60,7 @@ export function ExpandableSearchButton({
             "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
             "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
             "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
-            "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+            "rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 group",
             // Width and gap changes only when expanded - MAINTAIN EXACT HEIGHT
             isExpanded ? "w-80 !gap-1 overflow-hidden h-10" : "h-10"
           )}
@@ -68,7 +68,7 @@ export function ExpandableSearchButton({
           {!isExpanded && (
             <>
               <Search />
-              Buscar
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Buscar</span>
             </>
           )}
           
