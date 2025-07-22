@@ -65,51 +65,35 @@ export function ExpandableSearchButton({
             isExpanded ? "w-80 !gap-0 overflow-hidden" : ""
           )}
         >
-          {/* Search Icon - moves to right when expanded */}
-          <Search 
-            className={cn(
-              "transition-all duration-200 ease-out",
-              isExpanded ? "order-2" : "order-1"
-            )} 
-          />
+          {!isExpanded && (
+            <>
+              <Search />
+              Buscar
+            </>
+          )}
           
-          {/* Button Text - only visible when collapsed */}
-          <span 
-            className={cn(
-              "transition-all duration-200 ease-out",
-              isExpanded ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"
-            )}
-          >
-            Buscar
-          </span>
-          
-          {/* Input Field - only visible when expanded */}
-          <input
-            ref={inputRef}
-            type="text"
-            value={searchValue}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-            placeholder={placeholder}
-            className={cn(
-              "bg-transparent border-none outline-none text-sm font-medium",
-              "text-[var(--button-ghost-text)] placeholder-ghost-text",
-              "transition-all duration-200 ease-out",
-              isExpanded ? "opacity-100 flex-1 order-1" : "opacity-0 w-0 pointer-events-none"
-            )}
-          />
-          
-          {/* Close Button - only visible when expanded */}
           {isExpanded && (
-            <div
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                handleClose()
-              }}
-              className="order-3 p-1 hover:bg-[var(--button-ghost-hover-bg)] rounded-full transition-colors shrink-0 cursor-pointer"
-            >
-              <X className="h-3 w-3 text-[var(--button-ghost-text)] shrink-0" />
-            </div>
+            <>
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchValue}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                placeholder={placeholder}
+                className="bg-transparent border-none outline-none text-sm font-medium text-[var(--button-ghost-text)] placeholder-ghost-text flex-1 order-1"
+              />
+              <Search className="order-2" />
+              <div
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  handleClose()
+                }}
+                className="order-3 p-1 hover:bg-[var(--button-ghost-hover-bg)] rounded-full transition-colors shrink-0 cursor-pointer"
+              >
+                <X className="h-3 w-3 text-[var(--button-ghost-text)] shrink-0" />
+              </div>
+            </>
           )}
         </button>
       </form>

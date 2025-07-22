@@ -64,7 +64,7 @@ export function ActionBarDesktop({
                 size="sm"
                 className="h-9 px-3"
               >
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter />
                 Agrupar
               </Button>
             </PopoverTrigger>
