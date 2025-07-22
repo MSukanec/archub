@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. FINANCES MOVEMENTS ACTIONBAR INTEGRATION COMPLETED: Successfully implemented ActionBarDesktop component in financial movements page - COMPLETED
+  • Migrated search functionality from header to ActionBar with full search filtering capability
+  • Moved custom filters system (type, category, favorites, scope) from header to ActionBar dropdown
+  • Transferred action buttons from header to ActionBar: "Nuevo movimiento" (primary), "Importar" (secondary), delete selected (conditional)
+  • ActionBar only appears when movements exist for clean empty state UX consistency
+  • Header simplified to display only title and icon following established pattern
+  • Changed import button from "Importar desde Excel" to "Importar" with secondary variant styling
+  • Maintained all existing functionality: search, filters, modal opening, bulk operations
+  • Achieved visual consistency across all construction and finance pages using same ActionBarDesktop component
 - July 22, 2025. CRONOGRAMA TABS INTEGRATED INTO ACTIONBAR: Successfully moved tabs from separate component to ActionBar left side with ghost styling consistency - COMPLETED
   • Created custom Tabs component in src/components/ui-custom/Tabs.tsx with ghost button styling matching ActionBar
   • Added tabs support to ActionBarDesktop.tsx with Tab interface and rendering logic

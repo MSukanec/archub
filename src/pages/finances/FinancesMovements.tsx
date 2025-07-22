@@ -1291,12 +1291,12 @@ export default function Movements() {
       reason="general_mode"
     >
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
         className="h-8"
       >
         <Upload className="mr-2 h-4 w-4" />
-        Importar desde Excel
+        Importar
       </Button>
     </CustomRestricted>
   ];
