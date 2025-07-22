@@ -192,16 +192,17 @@ export default function FinancesInstallments() {
       console.log('Querying movements with:', {
         organizationId,
         projectId,
-        subcategory_id: aportesDeTerrerosConcept.id
+        category_id: aportesDeTerrerosConcept.id
       })
 
       // Use the new movement_view - much simpler query with all joins already done!
+      // Changed from subcategory_id to category_id to filter by "Aportes de Terceros" category
       const { data: movements, error } = await supabase
         .from('movement_view')
         .select('*')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
-        .eq('subcategory_id', aportesDeTerrerosConcept.id)
+        .eq('category_id', aportesDeTerrerosConcept.id)
         .order('movement_date', { ascending: false })
 
       console.log('Movement view result:', { movements, error, count: movements?.length })
