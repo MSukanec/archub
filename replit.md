@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 22, 2025. CRONOGRAMA TABS INTEGRATED INTO ACTIONBAR: Successfully moved tabs from separate component to ActionBar left side with ghost styling consistency - COMPLETED
+  • Created custom Tabs component in src/components/ui-custom/Tabs.tsx with ghost button styling matching ActionBar
+  • Added tabs support to ActionBarDesktop.tsx with Tab interface and rendering logic
+  • Integrated tabs into ConstructionSchedule.tsx ActionBar: Vista Gantt, Listado de Tareas, Análisis Visual
+  • Eliminated original shadcn/ui Tabs components and TabsList/TabsTrigger implementation
+  • Maintained all tab functionality while achieving consistent ghost styling across ActionBar
+  • Fixed tab styling issues: preserved rounded borders on active state, reduced padding for compact appearance
+  • Tabs positioned on left side of ActionBar as specified, only appearing for cronograma page
 - July 22, 2025. ACTIONBAR LAYOUT PERFECTED AND BUTTON STYLING COMPLETED: Finalized layout structure and ghost button appearance - COMPLETED
   • Layout standardized to exact order: SEARCH → GHOST BUTTONS (icons only) → SECONDARY BUTTONS → PRIMARY BUTTONS
   • Search button converted to icon-only display (removed "Buscar" text) with 8x8 sizing matching other ghost buttons
