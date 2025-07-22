@@ -30,13 +30,13 @@ export function Tabs({ tabs, value, onValueChange, className }: TabsProps) {
           onClick={() => onValueChange(tab.value)}
           className={cn(
             "inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150",
-            "px-3 py-1.5 h-8 rounded-md",
+            "px-3 py-1.5 h-8",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0",
             "disabled:pointer-events-none disabled:opacity-60",
             "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
             value === tab.value
-              ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm"
-              : "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
+              ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm rounded-lg"
+              : "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-md"
           )}
         >
           {tab.icon}
