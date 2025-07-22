@@ -236,7 +236,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       amount: 0,
       exchange_rate: undefined,
@@ -244,8 +244,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       subcategory_id: '',
-      currency_id: '',
-      wallet_id: '',
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
     }
   })
 
@@ -283,13 +283,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       category_id: '',
       contact_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -299,13 +299,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(aportesPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       category_id: '',
       member_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -315,13 +315,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     resolver: zodResolver(retirosPropriosFormSchema),
     defaultValues: {
       movement_date: new Date(),
-      created_by: '',
+      created_by: userData?.user?.id || '',
       description: '',
       type_id: '',
       category_id: '',
       member_id: '',
-      currency_id: userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id || '',
-      wallet_id: userData?.organization_preferences?.default_wallet || wallets?.[0]?.id || '',
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
       exchange_rate: undefined
     }
@@ -405,20 +405,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     if (!members || !userData?.user?.id || !currencies || !wallets || editingMovement) return
     
     const currentMember = members.find(m => m.user_id === userData.user.id)
-    const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
-    
-    // Encontrar la billetera por defecto correcta
-    const defaultWalletRelationId = userData?.organization_preferences?.default_wallet 
-    const defaultWalletObject = wallets?.find(w => w.wallet_id === defaultWalletRelationId)
-    const defaultWallet = defaultWalletObject?.id || wallets?.[0]?.id
+    const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
+    const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
     
     console.log('Initializing default values:', {
       currentMember: currentMember?.id,
       defaultCurrency,
-      defaultWalletRelationId,
       defaultWallet,
       walletsAvailable: wallets?.length,
-      hasOrgPreferences: !!userData?.organization_preferences
+      hasOrgPreferences: !!userData?.organization?.preferences
     })
     
     if (currentMember) {
