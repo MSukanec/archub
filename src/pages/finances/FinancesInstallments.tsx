@@ -189,6 +189,12 @@ export default function FinancesInstallments() {
         aportesDeTerreros: aportesDeTerrerosConcept.id
       })
 
+      console.log('Querying movements with:', {
+        organizationId,
+        projectId,
+        subcategory_id: aportesDeTerrerosConcept.id
+      })
+
       // Get movements filtered by Aportes de Terceros concept and project
       const { data: movements, error } = await supabase
         .from('movements')
@@ -202,12 +208,15 @@ export default function FinancesInstallments() {
           wallet_id,
           project_id,
           created_by,
-          exchange_rate
+          exchange_rate,
+          subcategory_id
         `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
         .eq('subcategory_id', aportesDeTerrerosConcept.id)
         .order('movement_date', { ascending: false })
+
+      console.log('Movements query result:', { movements, error })
 
       if (error) {
         console.error('Error fetching installments:', error)
@@ -215,6 +224,26 @@ export default function FinancesInstallments() {
       }
 
       if (!movements || movements.length === 0) {
+        // Let's check if there are any movements with the old cuotas ID for debugging
+        const { data: oldMovements } = await supabase
+          .from('movements')
+          .select('id, subcategory_id')
+          .eq('organization_id', organizationId)
+          .eq('project_id', projectId)
+          .eq('subcategory_id', 'e675eb59-3717-4451-89eb-0d838388238f')
+        
+        console.log('Checking old cuotas movements:', oldMovements)
+        
+        // Also check all movements for this project to see what subcategory_ids exist
+        const { data: allMovements } = await supabase
+          .from('movements')
+          .select('id, subcategory_id')
+          .eq('organization_id', organizationId)
+          .eq('project_id', projectId)
+          .limit(10)
+        
+        console.log('All movements in project (sample):', allMovements)
+        
         return []
       }
 
