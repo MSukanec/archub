@@ -1576,11 +1576,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     if (isCurrentAportes) {
       console.log('Submitting as aportes form')
       
-      // CRITICAL: Sincronizar type_id del formulario principal antes de enviar
+      // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
+      const mainFormCreatedBy = form.watch('created_by')
+      const mainFormMovementDate = form.watch('movement_date')
+      
       if (mainFormTypeId) {
         console.log('Synchronizing type_id before submit:', mainFormTypeId)
         aportesForm.setValue('type_id', mainFormTypeId)
+      }
+      
+      if (mainFormCreatedBy) {
+        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
+        aportesForm.setValue('created_by', mainFormCreatedBy)
+      }
+      
+      if (mainFormMovementDate) {
+        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
+        aportesForm.setValue('movement_date', mainFormMovementDate)
       }
       
       console.log('AportesFields - Currency data structure:', {
