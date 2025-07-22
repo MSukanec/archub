@@ -66,13 +66,7 @@ export default function ConstructionMaterials() {
   )
 
   const headerProps = {
-    title: "Materiales",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    showFilters: true,
-    customFilters,
-    onClearFilters: handleClearFilters
+    title: "Materiales"
   }
 
   // Table columns configuration

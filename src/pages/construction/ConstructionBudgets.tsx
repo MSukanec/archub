@@ -1,4 +1,5 @@
 import { Layout } from '@/components/layout/desktop/Layout'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -411,21 +412,9 @@ export default function ConstructionBudgets() {
 
 
 
-  const actions = [
-    <Button 
-      key="new-budget"
-      className="h-8 px-3 text-sm"
-      onClick={() => openModal('budget', {})}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Nuevo Presupuesto
-    </Button>
-  ]
-
   const headerProps = {
     icon: Calculator,
-    title: "Presupuestos",
-    actions
+    title: "Presupuestos"
   }
 
   if (isLoading || budgetsLoading) {
@@ -708,9 +697,14 @@ export default function ConstructionBudgets() {
           />
         ) : (
           <>
-
-
-
+            {/* Action Bar Desktop - Only visible when data exists */}
+            <ActionBarDesktop
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              showGrouping={false}
+              primaryActionLabel="Nuevo Presupuesto"
+              onPrimaryActionClick={() => openModal('budget', {})}
+            />
 
             {/* Budget Tasks Table - Direct without Card wrapper */}
             {selectedBudget ? (
