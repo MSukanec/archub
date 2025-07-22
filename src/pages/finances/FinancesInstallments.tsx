@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Receipt, Edit, Trash2, Users, Coins, FileText, Filter, X, Search, Plus } from 'lucide-react'
+import { Receipt, Edit, Trash2, Users, Coins, FileText, Filter, X, Search, Plus, Upload } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -507,6 +508,49 @@ export default function FinancesInstallments() {
     setFilterByContact("all")
     setFilterByCurrency("all")
   }
+
+  // Custom filters component
+  const customFilters = (
+    <div className="space-y-4">
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por contacto
+        </Label>
+        <Select value={filterByContact} onValueChange={setFilterByContact}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todos los contactos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los contactos</SelectItem>
+            {projectClients.map(client => (
+              <SelectItem key={client.contact.id} value={client.contact.id}>
+                {client.contact.company_name || client.contact.full_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por moneda
+        </Label>
+        <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las monedas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las monedas</SelectItem>
+            {currencies.map(currency => (
+              <SelectItem key={currency.id} value={currency.id}>
+                {currency.code}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
 
   const handleEdit = (installment: Installment) => {
     openModal('installment', {
@@ -1106,50 +1150,19 @@ export default function FinancesInstallments() {
               onSearchChange={setSearchValue}
               primaryActionLabel="Nuevo Compromiso"
               onPrimaryActionClick={handleAddInstallment}
+              customFilters={customFilters}
+              onClearFilters={handleClearFilters}
               hasActiveFilters={hasActiveFilters}
               customActions={[
-                // Filter by Contact dropdown
-                <Select key="contact-filter" value={filterByContact} onValueChange={setFilterByContact}>
-                  <SelectTrigger className="h-9 w-[200px]">
-                    <SelectValue placeholder="Filtrar por contacto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los contactos</SelectItem>
-                    {projectClients.map(client => (
-                      <SelectItem key={client.contact.id} value={client.contact.id}>
-                        {client.contact.company_name || client.contact.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>,
-                
-                // Filter by Currency dropdown
-                <Select key="currency-filter" value={filterByCurrency} onValueChange={setFilterByCurrency}>
-                  <SelectTrigger className="h-9 w-[150px]">
-                    <SelectValue placeholder="Filtrar por moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las monedas</SelectItem>
-                    {currencies.map(currency => (
-                      <SelectItem key={currency.id} value={currency.id}>
-                        {currency.code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>,
-                
-                // Clear filters button (only show when filters are active)
-                ...(hasActiveFilters ? [
-                  <Button
-                    key="clear-filters"
-                    onClick={handleClearFilters}
-                    variant="ghost"
-                    className="h-9 px-3"
-                  >
-                    <X className="h-4 w-4" />
-                    Limpiar filtros
-                  </Button>
-                ] : [])
+                <Button
+                  key="import"
+                  onClick={() => {/* TODO: Implement import */}}
+                  variant="secondary"
+                  className="h-9 px-4"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar
+                </Button>
               ]}
               tabs={[
                 {
