@@ -508,53 +508,77 @@ export default function ConstructionSchedule() {
         ]}
       />
 
-      {/* Tabs Container */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
-          <TabsTrigger 
-            value="gantt" 
-            className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Vista Gantt
-          </TabsTrigger>
-          <TabsTrigger 
-            value="table" 
-            className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-          >
-            <Table className="h-4 w-4" />
-            Listado de Tareas
-          </TabsTrigger>
-          <TabsTrigger 
-            value="analytics" 
-            className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
-          >
-            <Activity className="h-4 w-4" />
-            Análisis Visual
-          </TabsTrigger>
-        </TabsList>
+      {/* Conditional Content - EmptyState or Tabs */}
+      {filteredTasks.length === 0 ? (
+        <EmptyState
+          icon={<Calendar className="h-8 w-8" />}
+          title="No hay tareas en el cronograma"
+          description="Comienza creando tareas para ver el cronograma del proyecto."
+          action={
+            <div className="space-y-4 mt-4">
+              {/* Tabs dentro del Empty State */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
+                  <TabsTrigger 
+                    value="gantt" 
+                    className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    Vista Gantt
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="table" 
+                    className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+                  >
+                    <Table className="h-4 w-4" />
+                    Listado de Tareas
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analytics" 
+                    className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+                  >
+                    <Activity className="h-4 w-4" />
+                    Análisis Visual
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              {/* Botón de acción */}
+              <Button onClick={handleAddTask}>
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Primera Tarea
+              </Button>
+            </div>
+          }
+        />
+      ) : (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 border bg-card p-1 rounded-lg">
+            <TabsTrigger 
+              value="gantt" 
+              className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Vista Gantt
+            </TabsTrigger>
+            <TabsTrigger 
+              value="table" 
+              className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+            >
+              <Table className="h-4 w-4" />
+              Listado de Tareas
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="flex items-center gap-2 bg-transparent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-md transition-all duration-200"
+            >
+              <Activity className="h-4 w-4" />
+              Análisis Visual
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Tab Content - Vista Gantt */}
-        <TabsContent value="gantt" className="space-y-4">
-          {ganttData.length === 0 ? (
-            <EmptyState
-              icon={<Calendar className="h-8 w-8" />}
-              title="No hay tareas en el cronograma"
-              description="Comienza creando tareas para ver el cronograma del proyecto."
-              action={
-                <div className="flex gap-2 mt-4">
-                  <Button onClick={handleAddTask} variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Crear Primera Tarea
-                  </Button>
-                  <Button onClick={handleAddTask}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nueva Tarea
-                  </Button>
-                </div>
-              }
-            />
-          ) : (
+          {/* Tab Content - Vista Gantt */}
+          <TabsContent value="gantt" className="space-y-4">
             <GanttContainer
               data={ganttData}
               dependencies={dependencies}
@@ -575,24 +599,10 @@ export default function ConstructionSchedule() {
                 }
               }}
             />
-          )}
-        </TabsContent>
+          </TabsContent>
 
-        {/* Tab Content - Segunda Vista */}
-        <TabsContent value="table" className="space-y-4">
-          {filteredTasks.length === 0 ? (
-            <EmptyState
-              icon={<CheckSquare className="h-8 w-8" />}
-              title="No hay tareas en el proyecto"
-              description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
-              action={
-                <Button onClick={handleAddTask} className="mt-4">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Crear Primera Tarea
-                </Button>
-              }
-            />
-          ) : (
+          {/* Tab Content - Segunda Vista */}
+          <TabsContent value="table" className="space-y-4">
             <BudgetTable
               budgetId="construction-tasks"
               budgetTasks={budgetTasks}
@@ -609,35 +619,35 @@ export default function ConstructionSchedule() {
               mode="construction"
               handleEditTask={handleEditTask}
             />
-          )}
-        </TabsContent>
+          </TabsContent>
 
-        {/* Tab Content - Análisis Visual */}
-        <TabsContent value="analytics" className="space-y-4">
-          {/* Primera fila - 3 columnas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <ProgressCurve data={processedTasks} />
-            <BurndownChart data={processedTasks} />
-            <WorkloadOverTime data={processedTasks} />
-          </div>
-          
-          {/* Segunda fila - 4 columnas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            <TasksByPhase data={processedTasks} />
-            <DurationByRubro data={processedTasks} />
-            <StatusBreakdown data={processedTasks} />
-            <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
-          </div>
-          
-          {/* Tercera fila - Heatmap (1 col) y Red (3 cols) */}
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-            <WeeklyProgressHeatmap data={processedTasks} />
-            <div className="xl:col-span-3">
-              <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+          {/* Tab Content - Análisis Visual */}
+          <TabsContent value="analytics" className="space-y-4">
+            {/* Primera fila - 3 columnas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <ProgressCurve data={processedTasks} />
+              <BurndownChart data={processedTasks} />
+              <WorkloadOverTime data={processedTasks} />
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+            
+            {/* Segunda fila - 4 columnas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <TasksByPhase data={processedTasks} />
+              <DurationByRubro data={processedTasks} />
+              <StatusBreakdown data={processedTasks} />
+              <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
+            </div>
+            
+            {/* Tercera fila - Heatmap (1 col) y Red (3 cols) */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+              <WeeklyProgressHeatmap data={processedTasks} />
+              <div className="xl:col-span-3">
+                <DependencyNetwork data={processedTasks} dependencies={dependencies} />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      )}
     </Layout>
   )
 }
