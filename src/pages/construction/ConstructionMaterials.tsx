@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -165,11 +166,20 @@ export default function ConstructionMaterials() {
             description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
           />
         ) : (
-          <Table
-            data={filteredMaterials}
-            columns={columns}
-            isLoading={materialsLoading}
-          />
+          <>
+            {/* Action Bar Desktop - Only visible when data exists */}
+            <ActionBarDesktop
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              showGrouping={false}
+            />
+            
+            <Table
+              data={filteredMaterials}
+              columns={columns}
+              isLoading={materialsLoading}
+            />
+          </>
         )}
       </div>
     </Layout>
