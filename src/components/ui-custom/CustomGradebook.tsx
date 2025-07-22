@@ -1,11 +1,9 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, ChevronLeft, ChevronRight, Download, CalendarDays } from 'lucide-react'
-import { format, addDays, eachDayOfInterval, isWeekend, isToday, startOfDay, subDays } from 'date-fns'
+import { Download } from 'lucide-react'
+import { format, eachDayOfInterval, isWeekend, isToday } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 interface Worker {
@@ -28,8 +26,6 @@ interface CustomGradebookProps {
   startDate?: Date
   endDate?: Date
   hideWeekends?: boolean
-  onStartDateChange?: (date: Date) => void
-  onEndDateChange?: (date: Date) => void
   onHideWeekendsChange?: (hideWeekends: boolean) => void
   onExportAttendance?: () => void
 }
@@ -37,11 +33,9 @@ interface CustomGradebookProps {
 const CustomGradebook: React.FC<CustomGradebookProps> = ({
   workers = [],
   attendance = [],
-  startDate = subDays(new Date(), 15), // Default: 15 days before today
-  endDate = addDays(new Date(), 15),   // Default: 15 days after today
+  startDate = new Date(),
+  endDate = new Date(new Date().getFullYear() + 3, new Date().getMonth(), new Date().getDate()),
   hideWeekends = false,
-  onStartDateChange,
-  onEndDateChange,
   onHideWeekendsChange,
   onExportAttendance
 }) => {
@@ -107,93 +101,13 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     return groups
   }, [workers])
 
-  // Timeline element state - declared early to avoid reference errors
+  // Timeline element state
   const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
-  
-  // Auto-center on today ONLY on initial load
-  const [hasInitialized, setHasInitialized] = React.useState(false)
-  React.useEffect(() => {
-    if (!hasInitialized) {
-      const today = startOfDay(new Date())
-      const newStart = subDays(today, 15)
-      const newEnd = addDays(today, 15)
-      onStartDateChange?.(newStart)
-      onEndDateChange?.(newEnd)
-      setHasInitialized(true)
-    }
-  }, [hasInitialized]) // Only run once on mount
 
-  // Navigate dates
-  const navigateDates = (direction: 'prev' | 'next') => {
-    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-    if (direction === 'prev') {
-      const newStart = addDays(startDate, -days)
-      const newEnd = addDays(endDate, -days)
-      onStartDateChange?.(newStart)
-      onEndDateChange?.(newEnd)
-    } else {
-      const newStart = addDays(startDate, days)
-      const newEnd = addDays(endDate, days)
-      onStartDateChange?.(newStart)
-      onEndDateChange?.(newEnd)
-    }
-  }
-
-  // Navigate to today
-  const navigateToToday = () => {
-    const today = startOfDay(new Date())
-    const newStart = subDays(today, 15)
-    const newEnd = addDays(today, 15)
-    onStartDateChange?.(newStart)
-    onEndDateChange?.(newEnd)
-    
-    // Manually center timeline after data update
-    setTimeout(() => {
-      if (timelineElement) {
-        const todayIndex = eachDayOfInterval({ start: newStart, end: newEnd }).findIndex(date => isToday(date))
-        if (todayIndex !== -1) {
-          const columnWidth = 40
-          const containerWidth = timelineElement.clientWidth
-          const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
-          timelineElement.scrollLeft = Math.max(0, scrollPosition)
-        }
-      }
-    }, 100)
-  }
-
-  // Manual center function for initial load
-  const centerTimelineOnToday = React.useCallback(() => {
-    if (timelineElement && dateRange.length > 0) {
-      const todayIndex = dateRange.findIndex(date => isToday(date))
-      if (todayIndex !== -1) {
-        const columnWidth = 40
-        const containerWidth = timelineElement.clientWidth
-        const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
-        timelineElement.scrollLeft = Math.max(0, scrollPosition)
-      }
-    }
-  }, [timelineElement, dateRange])
-
-  // Auto-center only on initial component load
-  React.useEffect(() => {
-    if (hasInitialized && timelineElement) {
-      setTimeout(centerTimelineOnToday, 100)
-    }
-  }, [hasInitialized, timelineElement, centerTimelineOnToday])
-
-  // Handle date input changes
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newStart = new Date(e.target.value)
-    if (!isNaN(newStart.getTime())) {
-      onStartDateChange?.(newStart)
-    }
-  }
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEnd = new Date(e.target.value)
-    if (!isNaN(newEnd.getTime())) {
-      onEndDateChange?.(newEnd)
-    }
+  // Get attendance status for a specific worker and date
+  const getAttendanceStatus = (workerId: string, day: string) => {
+    const record = attendance.find(a => a.workerId === workerId && a.day === day)
+    return record?.status || null
   }
 
   // Drag functionality for timeline scrolling
@@ -255,12 +169,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
     }
   }, [])
 
-  const getAttendanceStatus = (workerId: string, date: Date) => {
-    const dayString = format(date, 'yyyy-MM-dd')
-    const record = attendance.find(a => a.workerId === workerId && a.day === dayString)
-    return record?.status || null
-  }
-
   const getAttendanceColor = (status: string | null, isWeekendDay: boolean) => {
     if (isWeekendDay && !hideWeekends) {
       return "bg-gray-100 opacity-50"
@@ -284,8 +192,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       .slice(0, 2)
   }
 
-
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -297,65 +203,13 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Date Range Controls */}
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => navigateDates('prev')}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              
-              <div className="flex items-center gap-2">
-                <Label htmlFor="start-date" className="text-xs text-muted-foreground">Desde:</Label>
-                <input
-                  id="start-date"
-                  type="date"
-                  value={format(startDate, 'yyyy-MM-dd')}
-                  onChange={handleStartDateChange}
-                  className="text-xs border border-border rounded px-2 py-1 bg-background"
-                />
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Label htmlFor="end-date" className="text-xs text-muted-foreground">Hasta:</Label>
-                <input
-                  id="end-date"
-                  type="date"
-                  value={format(endDate, 'yyyy-MM-dd')}
-                  onChange={handleEndDateChange}
-                  className="text-xs border border-border rounded px-2 py-1 bg-background"
-                />
-              </div>
-              
-              <Button variant="outline" size="sm" onClick={() => navigateDates('next')}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-              
-              <Button variant="outline" size="sm" onClick={navigateToToday}>
-                <CalendarDays className="w-4 h-4 mr-1" />
-                Hoy
-              </Button>
-            </div>
-
-            {/* Weekend Toggle */}
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="hide-weekends"
-                checked={hideWeekends}
-                onCheckedChange={onHideWeekendsChange}
-              />
-              <Label htmlFor="hide-weekends" className="text-sm">
-                Ocultar fines de semana
-              </Label>
-            </div>
-
-            {/* Export Button */}
-            {onExportAttendance && (
-              <Button onClick={onExportAttendance} variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Exportar
-              </Button>
-            )}
-          </div>
+          {/* Export Button */}
+          {onExportAttendance && (
+            <Button onClick={onExportAttendance} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+          )}
         </div>
 
         {/* Legend */}
@@ -370,196 +224,145 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-            <span>Ausente</span>
+            <span>Sin asistencia</span>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="flex border-t relative max-w-full overflow-hidden">
-          {/* Fixed Personnel Names Column */}
-          <div className="flex-shrink-0 w-64 bg-background border-r">
-            {/* Header - matching timeline header height exactly (25px + 40px) */}
-            <div className="bg-muted/50 border-b h-[65px] flex items-end px-6 pb-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Asistencia
-              </span>
+        <div className="relative">
+          {/* Gradebook Header */}
+          <div className="flex border-b bg-muted/50">
+            {/* Workers column header */}
+            <div className="min-w-[300px] p-4 border-r font-medium bg-background">
+              Trabajadores
             </div>
             
-            {/* Personnel List - grouped by contact type */}
-            <div>
-              {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
-                <div key={contactType}>
-                  {/* Contact Type Header */}
-                  <div className="h-[20px] px-6 bg-muted/80 border-b border-border flex items-center">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {contactType} ({workersInGroup.length})
-                    </span>
-                  </div>
-                  
-                  {/* Workers in this contact type */}
-                  {workersInGroup.map((worker, workerIndex) => {
-                    const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
-                    const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
-                    const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
-                    
-                    return (
-                      <div key={worker.id} className={`h-[65px] px-6 bg-background hover:bg-muted/50 flex items-center ${shouldShowBorder ? 'border-b border-border' : ''}`}>
-                        <Avatar className="h-8 w-8 flex-shrink-0">
-                          <AvatarImage src={worker.avatar_url} alt={worker.name} />
-                          <AvatarFallback className="text-xs font-medium">
-                            {getInitials(worker.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="ml-3">
-                          <div className="text-sm font-medium">{worker.name}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
+            {/* Month headers */}
+            <div className="flex">
+              {monthHeaders.map((header, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-center font-medium text-sm bg-muted/30 border-r min-h-[56px] capitalize"
+                  style={{ width: `${header.span * 40}px` }}
+                >
+                  {header.month}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Timeline Column with Drag Navigation */}
-          <div className="flex-1 relative min-w-0 group">
-            {/* Left Hover Area - Almost invisible, smooth scroll on hover */}
-            <div
-              className="absolute left-0 z-20 w-[15px] h-full bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
-              style={{ 
-                top: '65px',
-                height: `calc(100% - 65px)`
-              }}
-              onMouseEnter={() => startSmoothScroll('left')}
-              onMouseLeave={stopSmoothScroll}
-            >
-              <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
-                <ChevronLeft className="w-3 h-3 text-muted-foreground" />
-              </div>
-            </div>
-
-            {/* Right Hover Area - Almost invisible, smooth scroll on hover */}
-            <div
-              className="absolute right-0 z-20 w-[15px] h-full bg-transparent hover:bg-muted/10 transition-all duration-300 cursor-pointer"
-              style={{ 
-                top: '65px',
-                height: `calc(100% - 65px)`
-              }}
-              onMouseEnter={() => startSmoothScroll('right')}
-              onMouseLeave={stopSmoothScroll}
-            >
-              <div className="w-full h-full flex items-center justify-center opacity-0 hover:opacity-30 transition-opacity duration-300">
-                <ChevronRight className="w-3 h-3 text-muted-foreground" />
-              </div>
-            </div>
-
-            {/* Scrollable Timeline - hidden scrollbar */}
+          {/* Date headers row */}
+          <div className="flex border-b bg-background">
+            {/* Empty cell for workers column */}
+            <div className="min-w-[300px] border-r"></div>
+            
+            {/* Timeline scroll container */}
             <div 
-              ref={(el) => {
-                // Set timeline element for both auto-scroll and drag functionality
-                setTimelineElement(el)
-                
-                // Only auto-center when explicitly requested (initial load or "Hoy" button)
-                // This prevents unwanted centering during drag operations
-              }}
-              className={`overflow-x-auto ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-                userSelect: isDragging ? 'none' : 'auto'
-              }}
+              ref={setTimelineElement}
+              className="flex overflow-x-auto scrollbar-hide"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseLeave}
+              style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
             >
-              <table 
-                style={{ 
-                  minWidth: `${dateRange.length * 40}px`,
-                  width: `${dateRange.length * 40}px`
-                }}
-              >
-                {/* Timeline Header with Month Row */}
-                <thead className="bg-muted/50 border-b">
-                  {/* Month Headers Row */}
-                  <tr className="h-[25px] border-b border-border/30">
-                    {monthHeaders.map((monthHeader, index) => (
-                      <th 
-                        key={index}
-                        colSpan={monthHeader.span}
-                        className="px-1 text-center text-xs font-medium text-muted-foreground bg-muted/30 border-r border-border/20"
-                      >
-                        <span className="capitalize">{monthHeader.month}</span>
-                      </th>
-                    ))}
-                  </tr>
-                  
-                  {/* Days Row */}
-                  <tr className="h-[40px]">
-                    {dateRange.map((date) => {
-                      const isTodayDate = isToday(date)
-                      return (
-                        <th key={date.getTime()} className={`px-3 text-center text-xs font-medium uppercase tracking-wider min-w-[40px] relative ${isTodayDate ? 'bg-[var(--accent)]/50 text-[var(--accent)] border-x-2 border-[var(--accent)]' : 'text-muted-foreground'}`}>
-                          <div className="flex flex-col items-center">
-                            <span className={isTodayDate ? 'font-bold' : ''}>{format(date, 'dd')}</span>
-                            <span className={`text-[10px] ${isTodayDate ? 'font-semibold' : ''}`}>{format(date, 'EEE', { locale: es })}</span>
-                          </div>
-                        </th>
-                      )
-                    })}
-                  </tr>
-                </thead>
+              {/* Left scroll zone */}
+              <div
+                className="absolute left-0 top-0 w-8 h-full z-10 pointer-events-auto"
+                onMouseEnter={() => startSmoothScroll('left')}
+                onMouseLeave={stopSmoothScroll}
+              />
+              
+              {/* Right scroll zone */}
+              <div
+                className="absolute right-0 top-0 w-8 h-full z-10 pointer-events-auto"
+                onMouseEnter={() => startSmoothScroll('right')}
+                onMouseLeave={stopSmoothScroll}
+              />
+
+              {dateRange.map((date, index) => {
+                const isWeekendDay = isWeekend(date)
+                const isTodayDate = isToday(date)
                 
-                {/* Timeline Body - matching grouped personnel structure */}
-                <tbody className="bg-background">
-                  {Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
-                    <React.Fragment key={contactType}>
-                      {/* Contact Type Header Row */}
-                      <tr className="h-[20px] bg-muted/80 border-b border-border">
-                        {dateRange.map((date) => {
-                          const isTodayDate = isToday(date)
-                          return (
-                            <td key={`${contactType}-header-${date.getTime()}`} className={`px-3 text-center bg-muted/80 ${isTodayDate ? 'bg-[var(--accent)]/10 border-x-2 border-[var(--accent)]' : ''}`}>
-                              {/* Empty cells for contact type header */}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                      
-                      {/* Worker Rows for this contact type */}
-                      {workersInGroup.map((worker, workerIndex) => {
-                        const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
-                        const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
-                        const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                return (
+                  <div
+                    key={index}
+                    className={`
+                      min-w-[40px] h-12 flex flex-col items-center justify-center text-xs border-r
+                      ${isTodayDate ? 'bg-[var(--accent)] text-white font-medium' : 'bg-background'}
+                      ${isWeekendDay ? 'bg-muted/50' : ''}
+                    `}
+                  >
+                    <div className="leading-none">{format(date, 'd')}</div>
+                    <div className="leading-none text-[10px] opacity-70">
+                      {format(date, 'EEE', { locale: es }).slice(0, 3)}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Workers rows */}
+          <div className="max-h-[600px] overflow-y-auto">
+            {Object.entries(groupedWorkers).map(([contactType, groupWorkers]) => (
+              <div key={contactType}>
+                {/* Group header */}
+                <div className="flex bg-muted/30 border-b font-medium text-sm">
+                  <div className="min-w-[300px] p-3 border-r">
+                    {contactType}
+                  </div>
+                  <div className="flex-1"></div>
+                </div>
+
+                {/* Workers in this group */}
+                {groupWorkers.map((worker) => (
+                  <div key={worker.id} className="flex border-b hover:bg-muted/20">
+                    {/* Worker info */}
+                    <div className="min-w-[300px] p-3 border-r flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={worker.avatar_url} />
+                        <AvatarFallback className="text-xs">
+                          {getInitials(worker.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{worker.name}</span>
+                    </div>
+                    
+                    {/* Attendance cells */}
+                    <div className="flex">
+                      {dateRange.map((date, dateIndex) => {
+                        const dayString = format(date, 'yyyy-MM-dd')
+                        const status = getAttendanceStatus(worker.id, dayString)
+                        const isWeekendDay = isWeekend(date)
                         
                         return (
-                          <tr key={worker.id} className={`h-[65px] hover:bg-muted/50 ${shouldShowBorder ? 'border-b border-border' : ''}`}>
-                            {dateRange.map((date) => {
-                              const status = getAttendanceStatus(worker.id, date)
-                              const isWeekendDay = isWeekend(date)
-                              const isTodayDate = isToday(date)
-                              return (
-                                <td key={`${worker.id}-${date.getTime()}`} className={`px-3 text-center relative ${isTodayDate ? 'bg-[var(--accent)]/50 border-x-2 border-[var(--accent)]' : ''}`}>
-                                  <div className={`w-6 h-6 rounded-full mx-auto ${getAttendanceColor(status, isWeekendDay)}`}>
-                                    {isWeekendDay && !hideWeekends && (
-                                      <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-xs text-gray-400">×</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        );
+                          <div
+                            key={dateIndex}
+                            className={`
+                              min-w-[40px] h-12 border-r flex items-center justify-center
+                              ${getAttendanceColor(status, isWeekendDay)}
+                            `}
+                          >
+                            {status === 'full' && (
+                              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                              </div>
+                            )}
+                            {status === 'half' && (
+                              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                              </div>
+                            )}
+                          </div>
+                        )
                       })}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </CardContent>
