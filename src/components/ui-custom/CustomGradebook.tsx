@@ -126,32 +126,32 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   // Timeline element state - declared early to avoid reference errors
   const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
   
-  // Auto-position 3 days before today when component loads or when HOY button is clicked
-  const positionTimelineBeforeToday = React.useCallback(() => {
+  // Center timeline on today - for both initial load and HOY button
+  const centerTimelineOnToday = React.useCallback(() => {
     if (timelineElement && dateRange.length > 0) {
       const todayIndex = dateRange.findIndex(date => isToday(date))
       if (todayIndex !== -1) {
         const columnWidth = 65 // Updated to match new column width
-        const targetIndex = Math.max(0, todayIndex - 3) // Position 3 days before today
-        const scrollPosition = targetIndex * columnWidth
+        const containerWidth = timelineElement.clientWidth
+        const scrollPosition = (todayIndex * columnWidth) - (containerWidth / 2) + (columnWidth / 2)
         timelineElement.scrollLeft = Math.max(0, scrollPosition)
       }
     }
   }, [timelineElement, dateRange])
 
-  // Auto-position on component load
+  // Auto-center on component load
   React.useEffect(() => {
     if (timelineElement) {
-      setTimeout(positionTimelineBeforeToday, 100)
+      setTimeout(centerTimelineOnToday, 100)
     }
-  }, [timelineElement, positionTimelineBeforeToday])
+  }, [timelineElement, centerTimelineOnToday])
 
-  // Position 3 days before today when HOY button is triggered
+  // Center on today when HOY button is triggered
   React.useEffect(() => {
     if (triggerTodayCenter && timelineElement) {
-      setTimeout(positionTimelineBeforeToday, 100)
+      setTimeout(centerTimelineOnToday, 100)
     }
-  }, [triggerTodayCenter, timelineElement, positionTimelineBeforeToday])
+  }, [triggerTodayCenter, timelineElement, centerTimelineOnToday])
 
   // Drag functionality for timeline scrolling
   const [isDragging, setIsDragging] = React.useState(false)
