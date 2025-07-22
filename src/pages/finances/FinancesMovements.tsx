@@ -1301,6 +1301,13 @@ export default function Movements() {
     </CustomRestricted>
   ];
 
+  // Detectar si hay filtros activos
+  const hasActiveFilters = searchValue.trim() !== "" || 
+                          filterByType !== "all" || 
+                          filterByCategory !== "all" || 
+                          filterByFavorites !== "all" || 
+                          filterByScope !== "all";
+
   return (
     <Layout headerProps={headerProps} wide={true}>
       {/* ActionBar Desktop */}
@@ -1310,6 +1317,7 @@ export default function Movements() {
           onSearchChange={setSearchValue}
           customFilters={customFilters}
           onClearFilters={handleClearFilters}
+          hasActiveFilters={hasActiveFilters}
           primaryActionLabel="Nuevo movimiento"
           onPrimaryActionClick={() => openModal('movement')}
           customActions={customActions}

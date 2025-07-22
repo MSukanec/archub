@@ -39,6 +39,7 @@ interface ActionBarDesktopProps {
   // Custom filters and clear function
   customFilters?: React.ReactNode
   onClearFilters?: () => void
+  hasActiveFilters?: boolean
   // Today button for gradebook pages
   onTodayClick?: () => void
   className?: string
@@ -61,6 +62,7 @@ export function ActionBarDesktop({
   onTabChange,
   customFilters,
   onClearFilters,
+  hasActiveFilters = false,
   onTodayClick,
   className
 }: ActionBarDesktopProps) {
@@ -220,7 +222,10 @@ export function ActionBarDesktop({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className={cn(
+                  "h-8 w-8 p-0",
+                  hasActiveFilters && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
+                )}
               >
                 <Filter className="w-4 h-4" />
               </Button>
