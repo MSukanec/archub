@@ -515,7 +515,7 @@ export default function ConstructionSchedule() {
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             showGrouping={false}
-            primaryActionLabel="+ Nueva Tarea"
+            primaryActionLabel="Nueva Tarea"
             onPrimaryActionClick={handleAddTask}
             customActions={[
               <Button 
@@ -525,7 +525,7 @@ export default function ConstructionSchedule() {
                 className="h-9 px-4"
               >
                 <Plus />
-                + Crear Fase
+                Crear Fase
               </Button>
             ]}
           />
