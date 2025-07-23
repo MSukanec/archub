@@ -37,6 +37,7 @@ import {
   FileCode,
   Crown,
   User,
+  Library,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -279,11 +280,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     obra: [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-      { icon: Calendar, label: 'Cronograma', href: '/construction/schedule' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Asistencia', href: '/construction/personnel' },
+      { icon: Library, label: 'Librería', href: '/construction/library' },
     ],
     finanzas: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },

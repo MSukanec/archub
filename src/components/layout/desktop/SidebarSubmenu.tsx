@@ -47,7 +47,8 @@ import {
   Brush,
   UserCircle,
   HandCoins,
-  Settings
+  Settings,
+  Library
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -127,11 +128,11 @@ export function SidebarSubmenu() {
     'obra': [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard', requiresProject: true },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
-      { icon: Calendar, label: 'Cronograma', href: '/construction/schedule', requiresProject: true },
       { icon: Package, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
       { icon: Users, label: 'Asistencia', href: '/construction/personnel', requiresProject: true },
+      { icon: Library, label: 'Librería', href: '/construction/library', requiresProject: true },
     ],
 
     'finanzas': [
