@@ -128,6 +128,7 @@ Archub is a modern construction management platform built with a React frontend 
   • Added stepDescription support with dynamic descriptions for each step explaining user actions
   • System now successfully saves: template parameters, positions, option groups, and generated template names
   • Complete data persistence workflow: template creation → unit selection → parameter configuration → final save to Supabase
+  • PREVIEW STYLING UPDATED: Modified preview section to match title text size and use dashed accent border as requested
 - July 23, 2025. TASK TEMPLATE MODAL UI REDESIGN COMPLETED: Eliminated all Card components and adopted standard modal layout matching movement modals design patterns - COMPLETED
   • Removed Card and CardContent wrappers from all 3 steps following user request for consistent modal styling
   • Step 1: Clean title/description layout with background section for template details

@@ -663,8 +663,8 @@ export function TaskTemplateFormModal({
               </p>
             </div>
             
-            <div className="text-sm bg-muted/30 p-3 rounded border">
-              <span className="font-medium">
+            <div className="text-sm font-medium bg-muted/30 p-3 rounded border-2 border-dashed border-[var(--accent)]">
+              <span>
                 {generatePreview()}
               </span>
             </div>
