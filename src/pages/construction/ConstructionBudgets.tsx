@@ -679,14 +679,13 @@ export default function ConstructionBudgets() {
         renderCard={(item) => (
           <BudgetTaskCard
             task={item}
-            generateTaskDisplayName={generateTaskDisplayName}
-            getUnitName={getUnitName}
+            processedName={generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+            unitName={getUnitName(item.task?.unit_id)}
             onEdit={() => openModal('budget-task-form', { 
               budgetTask: item,
               mode: 'edit'
             })}
             onDelete={() => handleDeleteTask(item.id)}
-            onUpdateQuantity={(newQuantity) => handleUpdateQuantity(item.id, newQuantity)}
           />
         )}
       />
@@ -950,14 +949,13 @@ export default function ConstructionBudgets() {
           renderCard={(item) => (
             <BudgetTaskCard
               task={item}
-              generateTaskDisplayName={generateTaskDisplayName}
-              getUnitName={getUnitName}
+              processedName={generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+              unitName={getUnitName(item.task?.unit_id)}
               onEdit={() => openModal('budget-task-form', { 
                 budgetTask: item,
                 mode: 'edit'
               })}
               onDelete={() => handleDeleteTask(item.id)}
-              onUpdateQuantity={(newQuantity) => handleUpdateQuantity(item.id, newQuantity)}
             />
           )}
         />
