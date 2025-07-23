@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -21,13 +21,18 @@ interface Tab {
   icon?: React.ReactNode
 }
 
+interface FeatureItem {
+  icon: React.ReactNode
+  title: string
+  description: string
+}
+
 interface ActionBarDesktopProps {
   // Header section (new)
   title?: string
   icon?: React.ReactNode
-  // Expandable info section
-  expandableContent?: React.ReactNode
-  expandableDescription?: string
+  // Expandable info section (now using FeatureIntroduction format)
+  features?: FeatureItem[]
   // Action bar functionality
   showSearch?: boolean
   searchValue?: string
@@ -55,8 +60,7 @@ interface ActionBarDesktopProps {
 export function ActionBarDesktop({
   title,
   icon,
-  expandableContent,
-  expandableDescription,
+  features,
   showSearch = true,
   searchValue = '',
   onSearchChange,
@@ -105,41 +109,40 @@ export function ActionBarDesktop({
                 )}
               </div>
               
-              {/* Expandable button - Only show if expandableContent exists */}
-              {(expandableContent || expandableDescription) && (
+              {/* Expandable button - Only show if features exists */}
+              {features && features.length > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground p-2"
+                  title={isExpanded ? 'Ocultar información' : 'Click para más información'}
                 >
-                  <span className="text-sm mr-2">
-                    {isExpanded ? 'Ocultar información' : 'Click para más información'}
-                  </span>
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4" />
-                  )}
+                  <HelpCircle className="w-4 h-4" />
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Expandable Content */}
-          {isExpanded && (expandableContent || expandableDescription) && (
+          {/* Expandable Content - Features Grid */}
+          {isExpanded && features && features.length > 0 && (
             <div className="px-4 pb-3">
-              <div className="rounded-lg p-4" style={{ backgroundColor: "var(--muted-bg)" }}>
-                {expandableDescription && (
-                  <p className="text-muted-foreground mb-3">
-                    {expandableDescription}
-                  </p>
-                )}
-                {expandableContent && (
-                  <div className="text-muted-foreground">
-                    {expandableContent}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-1 text-primary">
+                      {feature.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-foreground mb-1">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           )}

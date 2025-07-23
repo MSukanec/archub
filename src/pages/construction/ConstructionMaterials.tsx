@@ -185,27 +185,28 @@ export default function ConstructionMaterials() {
             <ActionBarDesktop
               title="Materiales de Construcción"
               icon={<Package className="w-6 h-6" />}
-              expandableDescription="Esta página muestra todos los materiales necesarios calculados automáticamente desde las tareas de construcción del proyecto."
-              expandableContent={
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Calculator className="w-4 h-4" />
-                    <span className="text-sm">Cálculo automático de cantidades basado en tareas</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Boxes className="w-4 h-4" />
-                    <span className="text-sm">Organización por categoría y rubro</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    <span className="text-sm">Control de materiales por comprar vs necesarios</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4" />
-                    <span className="text-sm">Filtros por categoría y agrupación flexible</span>
-                  </div>
-                </div>
-              }
+              features={[
+                {
+                  icon: <Calculator className="w-4 h-4" />,
+                  title: "Cálculo Automático",
+                  description: "Las cantidades se calculan automáticamente basándose en las tareas de construcción del proyecto."
+                },
+                {
+                  icon: <Boxes className="w-4 h-4" />,
+                  title: "Organización por Categoría",
+                  description: "Los materiales se organizan por categoría y rubro para una mejor gestión."
+                },
+                {
+                  icon: <BarChart3 className="w-4 h-4" />,
+                  title: "Control de Compras",
+                  description: "Seguimiento de materiales por comprar versus materiales necesarios del proyecto."
+                },
+                {
+                  icon: <Layers className="w-4 h-4" />,
+                  title: "Filtros Flexibles",
+                  description: "Sistema de filtros por categoría y agrupación para encontrar materiales específicos."
+                }
+              ]}
               searchValue={searchValue}
               onSearchChange={setSearchValue}
               customFilters={customFilters}
