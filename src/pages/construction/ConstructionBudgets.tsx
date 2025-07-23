@@ -703,6 +703,22 @@ export default function ConstructionBudgets() {
               showGrouping={false}
               primaryActionLabel="Nuevo Presupuesto"
               onPrimaryActionClick={() => openModal('budget', {})}
+              customActions={selectedBudget ? [
+                <Button 
+                  key="nueva-tarea"
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => openModal('budget-task-bulk-add', { 
+                    budgetId: selectedBudget.id,
+                    onSuccess: () => {
+                      queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
+                    }
+                  })}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva Tarea
+                </Button>
+              ] : []}
               budgetSelector={{
                 budgets: filteredBudgets,
                 selectedBudgetId,

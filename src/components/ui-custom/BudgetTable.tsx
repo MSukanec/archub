@@ -214,7 +214,7 @@ export function BudgetTable({
           action={
             <Button 
               size="sm" 
-              onClick={() => handleAddTask(budgetId)}
+              onClick={() => onAddTasks?.()}
               className="h-8 px-3 text-xs"
             >
               <Plus className="w-3 h-3 mr-1" />
