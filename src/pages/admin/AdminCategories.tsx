@@ -4,7 +4,7 @@ import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, X } from 'lucid
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+// AlertDialog components replaced with unified DeleteConfirmationModal
 import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -37,9 +37,7 @@ export default function AdminCategories() {
   // Template modal task group states - NEW: Para manejar plantillas de task groups
   const [templateTaskGroup, setTemplateTaskGroup] = useState<TaskGroupAdmin | null>(null);
   
-  // Delete confirmation states
-  const [deleteCategoryId, setDeleteCategoryId] = useState<string | null>(null);
-  const [deleteTaskGroupId, setDeleteTaskGroupId] = useState<string | null>(null);
+  // No need for delete confirmation states anymore - handled by global modal
 
   const { data: categories = [], isLoading, error, isError, refetch } = useTaskCategoriesAdmin();
   const { data: allCategories = [] } = useAllTaskCategories();
@@ -209,16 +207,19 @@ export default function AdminCategories() {
   };
 
   // Handle delete category
-  const handleDeleteCategory = async () => {
-    if (!deleteCategoryId) return;
-    
-    try {
-      await deleteCategoryMutation.mutateAsync(deleteCategoryId);
-    } catch (error) {
-      console.error('Error deleting category:', error);
-    } finally {
-      setDeleteCategoryId(null);
-    }
+  const handleDeleteCategory = (categoryId: string, categoryName: string) => {
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: '¿Eliminar categoría?',
+      description: 'Esta acción no se puede deshacer. La categoría y todas sus subcategorías serán eliminadas permanentemente.',
+      onConfirm: async () => {
+        try {
+          await deleteCategoryMutation.mutateAsync(categoryId);
+        } catch (error) {
+          console.error('Error deleting category:', error);
+        }
+      }
+    });
   };
 
   // Handle template action - DEPRECATED: solo para categorías finales (3 letras)
@@ -252,16 +253,19 @@ export default function AdminCategories() {
   };
 
   // Handle delete task group
-  const handleDeleteTaskGroup = async () => {
-    if (!deleteTaskGroupId) return;
-    
-    try {
-      await deleteTaskGroupMutation.mutateAsync(deleteTaskGroupId);
-    } catch (error) {
-      console.error('Error deleting task group:', error);
-    } finally {
-      setDeleteTaskGroupId(null);
-    }
+  const handleDeleteTaskGroup = (taskGroupId: string, taskGroupName: string) => {
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: '¿Eliminar grupo de tareas?',
+      description: 'Esta acción no se puede deshacer. El grupo de tareas será eliminado permanentemente.',
+      onConfirm: async () => {
+        try {
+          await deleteTaskGroupMutation.mutateAsync(taskGroupId);
+        } catch (error) {
+          console.error('Error deleting task group:', error);
+        }
+      }
+    });
   };
 
   // Clear filters
@@ -436,11 +440,24 @@ export default function AdminCategories() {
               expandedCategories={expandedCategories}
               onToggleExpanded={toggleCategoryExpansion}
               onEdit={handleEditCategory}
-              onDelete={setDeleteCategoryId}
+              onDelete={(categoryId) => {
+                const category = filteredCategories.find(c => c.id === categoryId);
+                handleDeleteCategory(categoryId, category?.name || '');
+              }}
               onTemplate={handleTemplateAction}
               onAddTaskGroup={handleAddTaskGroup}
               onEditTaskGroup={handleEditTaskGroup}
-              onDeleteTaskGroup={setDeleteTaskGroupId}
+              onDeleteTaskGroup={(taskGroupId) => {
+                // Find task group name from categories
+                let taskGroupName = '';
+                filteredCategories.forEach(cat => {
+                  if (cat.taskGroups) {
+                    const tg = cat.taskGroups.find(tg => tg.id === taskGroupId);
+                    if (tg) taskGroupName = tg.name;
+                  }
+                });
+                handleDeleteTaskGroup(taskGroupId, taskGroupName);
+              }}
               onTaskGroupTemplate={handleTaskGroupTemplate}
             />
           )}
@@ -481,41 +498,7 @@ export default function AdminCategories() {
         />
       )}
 
-      {/* Delete Category Confirmation Dialog */}
-      <AlertDialog open={!!deleteCategoryId} onOpenChange={() => setDeleteCategoryId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La categoría y todas sus subcategorías serán eliminadas permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteCategory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Task Group Confirmation Dialog */}
-      <AlertDialog open={!!deleteTaskGroupId} onOpenChange={() => setDeleteTaskGroupId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar grupo de tareas?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El grupo de tareas será eliminado permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTaskGroup} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete confirmations are now handled by the global DeleteConfirmationModal through ModalFactory */}
     </>
   );
 }
