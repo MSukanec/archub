@@ -677,63 +677,62 @@ export function TaskTemplateFormModal({
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-1">
-                <Label>Parámetro</Label>
-                <ComboBox
-                  value={newParameterId}
-                  onValueChange={(value) => {
-                    setNewParameterId(value);
-                    setNewOptionGroupId('');
-                  }}
-                  options={availableParameters.map((parameter) => ({
-                    value: parameter.id,
-                    label: `${parameter.label || parameter.name} (${parameter.type})`
-                  }))}
-                  placeholder="Buscar parámetro..."
-                  searchPlaceholder="Escribir para buscar..."
-                  emptyMessage="No se encontraron parámetros"
-                  className="w-full"
-                />
-              </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Parámetro</Label>
+                  <ComboBox
+                    value={newParameterId}
+                    onValueChange={(value) => {
+                      setNewParameterId(value);
+                      setNewOptionGroupId('');
+                    }}
+                    options={availableParameters.map((parameter) => ({
+                      value: parameter.id,
+                      label: `${parameter.label || parameter.name} (${parameter.type})`
+                    }))}
+                    placeholder="Buscar parámetro..."
+                    searchPlaceholder="Escribir para buscar..."
+                    emptyMessage="No se encontraron parámetros"
+                    className="w-full"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label>Grupo de Opciones</Label>
-                <Select 
-                  value={newOptionGroupId} 
-                  onValueChange={setNewOptionGroupId}
-                  disabled={!newParameterId || parameterOptionGroups.length === 0}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      !newParameterId 
-                        ? "Primero selecciona parámetro"
-                        : parameterOptionGroups.length === 0
-                        ? "Sin grupos disponibles"
-                        : "Seleccionar grupo"
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {parameterOptionGroups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label>Grupo de Opciones</Label>
+                  <Select 
+                    value={newOptionGroupId} 
+                    onValueChange={setNewOptionGroupId}
+                    disabled={!newParameterId || parameterOptionGroups.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !newParameterId 
+                          ? "Primero selecciona parámetro"
+                          : parameterOptionGroups.length === 0
+                          ? "Sin grupos disponibles"
+                          : "Seleccionar grupo"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parameterOptionGroups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label>&nbsp;</Label>
-                <Button 
-                  onClick={handleAddParameter}
-                  disabled={!newParameterId}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar
-                </Button>
-              </div>
+              <Button 
+                onClick={handleAddParameter}
+                disabled={!newParameterId}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar
+              </Button>
             </div>
 
             {/* Lista de parámetros con drag & drop */}
