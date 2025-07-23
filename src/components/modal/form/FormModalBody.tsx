@@ -7,14 +7,25 @@ interface FormModalBodyProps {
   children: ReactNode;
   columns?: number;
   className?: string;
+  paddingX?: string; // Padding horizontal (left/right)
+  paddingY?: string; // Padding vertical (top/bottom)
 }
 
-export default function FormModalBody({ children, columns = 2, className }: FormModalBodyProps) {
+export default function FormModalBody({ 
+  children, 
+  columns = 2, 
+  className,
+  paddingX = "px-2",
+  paddingY = "py-2"
+}: FormModalBodyProps) {
+  // Determine padding classes
+  const paddingClasses = className?.includes("p-0") ? "" : `${paddingX} ${paddingY}`;
+  
   return (
     <div className="flex-1 overflow-y-auto">
       <div className={cn(
         "gap-6 text-sm",
-        className?.includes("p-0") ? "" : "p-2",
+        paddingClasses,
         columns === 1 ? "flex flex-col space-y-6" : "grid grid-cols-1 lg:grid-cols-2",
         className
       )}>
