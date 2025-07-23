@@ -22,19 +22,23 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useProjectClients } from '@/hooks/use-project-clients'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
+  created_by: z.string().min(1, 'Creador es requerido'),
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
   contact_id: z.string().min(1, 'Cliente es requerido'),
   subcategory_id: z.string().min(1, 'Subcategoría es requerida'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
-  description: z.string().optional(),
   exchange_rate: z.number().optional(),
+  description: z.string().optional(),
 })
 
 type InstallmentForm = z.infer<typeof installmentSchema>
@@ -58,19 +62,23 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const form = useForm<InstallmentForm>({
     resolver: zodResolver(installmentSchema),
     defaultValues: {
+      created_by: '',
       movement_date: new Date(),
       contact_id: '',
       subcategory_id: '',
       currency_id: '',
+      wallet_id: '',
       amount: 0,
-      description: '',
       exchange_rate: undefined,
+      description: '',
     }
   })
 
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
   const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
+  const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
+  const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   
   // Hook para obtener subcategorías de "Aportes de Terceros"
   const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
@@ -102,7 +110,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   })
   
   // Loading state for all necessary data
-  const isLoading = currenciesLoading || clientsLoading || subcategoriesLoading
+  const isLoading = currenciesLoading || clientsLoading || subcategoriesLoading || membersLoading || walletsLoading
 
   // Inicializar panel en modo edit para nuevos compromisos
   React.useEffect(() => {
@@ -120,13 +128,15 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
       form.reset({
+        created_by: editingInstallment.created_by || '',
         movement_date: installmentDate,
         contact_id: editingInstallment.contact_id || '',
         subcategory_id: editingInstallment.subcategory_id || '',
         currency_id: editingInstallment.currency_id || '',
+        wallet_id: editingInstallment.wallet_id || '',
         amount: editingInstallment.amount || 0,
-        description: editingInstallment.description || '',
         exchange_rate: editingInstallment.exchange_rate || undefined,
+        description: editingInstallment.description || '',
       })
       
       console.log('Form reset with values:', {
@@ -143,11 +153,31 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   // Inicializar valores por defecto
   React.useEffect(() => {
-    if (!editingInstallment && currencies && currencies.length > 0) {
+    if (!editingInstallment) {
+      // Seleccionar usuario actual como creador
+      if (userData?.user?.id && members) {
+        const currentMember = members.find(m => m.user_id === userData.user.id)
+        if (currentMember) {
+          form.setValue('created_by', currentMember.id)
+        }
+      }
+      
       // Usar la primera moneda disponible por defecto
-      form.setValue('currency_id', currencies[0].id)
+      if (currencies && currencies.length > 0) {
+        form.setValue('currency_id', currencies[0].id)
+      }
+      
+      // Usar la billetera por defecto
+      if (wallets) {
+        const defaultWallet = wallets.find(w => w.is_default)
+        if (defaultWallet) {
+          form.setValue('wallet_id', defaultWallet.id)
+        } else if (wallets.length > 0) {
+          form.setValue('wallet_id', wallets[0].id)
+        }
+      }
     }
-  }, [currencies, editingInstallment, form])
+  }, [currencies, wallets, members, userData, editingInstallment, form])
 
   // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
@@ -177,38 +207,16 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
       const typeId = ingresosType?.id
 
-      // Buscar el member del usuario actual
-      const { data: currentMember } = await supabase!
-        .from('organization_members')
-        .select('id')
-        .eq('organization_id', userData.organization.id)
-        .eq('user_id', userData.user.id)
-        .single()
 
-      if (!currentMember) {
-        throw new Error('Usuario no encontrado en la organización')
-      }
-
-      // Usar la billetera por defecto
-      const { data: defaultWallet } = await supabase!
-        .from('organization_wallets')
-        .select('id')
-        .eq('organization_id', userData.organization.id)
-        .eq('is_default', true)
-        .single()
-
-      if (!defaultWallet) {
-        throw new Error('No se encontró billetera por defecto')
-      }
 
       const movementData = {
         organization_id: userData.organization.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: currentMember.id,
+        created_by: data.created_by,
         contact_id: data.contact_id,
         currency_id: data.currency_id,
-        wallet_id: defaultWallet.id,
+        wallet_id: data.wallet_id,
         amount: data.amount,
         description: data.description || null,
         exchange_rate: data.exchange_rate || null,
@@ -318,49 +326,82 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Fila 1: Fecha */}
-          <div className="grid grid-cols-1 gap-4">
-            <FormField
-              control={form.control}
-              name="movement_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha *</FormLabel>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              placeholder="Seleccionar fecha"
-                              value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
-                              className="pl-10"
-                              readOnly
-                          />
-                          <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        </div>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+          {/* 1. Creador */}
+          <FormField
+            control={form.control}
+            name="created_by"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Creador *</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar creador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members?.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarFallback className="text-xs">
+                                {member.first_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>
+                              {`${member.first_name || ''} ${member.last_name || ''}`.trim()}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        {/* Fila 2: Cliente */}
+          {/* 2. Fecha */}
+          <FormField
+            control={form.control}
+            name="movement_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha *</FormLabel>
+                <FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            placeholder="Seleccionar fecha"
+                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pl-10"
+                            readOnly
+                        />
+                        <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date('1900-01-01')
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 3. Cliente */}
         <FormField
           control={form.control}
           name="contact_id"
@@ -374,7 +415,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                   </SelectTrigger>
                   <SelectContent>
                     {projectClients?.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
+                      <SelectItem key={client.id} value={client.contact.id}>
                         {client.contact?.full_name || client.contact?.company_name || `${client.contact?.first_name || ''} ${client.contact?.last_name || ''}`.trim()}
                       </SelectItem>
                     ))}
@@ -386,7 +427,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           )}
         />
 
-        {/* Fila 2.5: Subcategoría */}
+        {/* 4. Subcategoría */}
         <FormField
           control={form.control}
           name="subcategory_id"
@@ -412,7 +453,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           )}
         />
 
-        {/* Fila 3: Moneda y Monto */}
+        {/* 5. Moneda - Billetera */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -441,6 +482,34 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
           <FormField
             control={form.control}
+            name="wallet_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Billetera *</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar billetera" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {wallets?.map((wallet) => (
+                        <SelectItem key={wallet.id} value={wallet.id}>
+                          {wallet.wallets?.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* 6. Monto - Cotización */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
@@ -460,30 +529,29 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cotización (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    placeholder="Ej: 1.0000"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        {/* Fila 4: Cotización */}
-        <FormField
-          control={form.control}
-          name="exchange_rate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cotización (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.0001"
-                  placeholder="Ej: 1.0000"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Fila 5: Descripción */}
+        {/* 7. Descripción */}
         <FormField
           control={form.control}
           name="description"
