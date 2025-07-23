@@ -410,9 +410,10 @@ export function TaskTemplateFormModal({
                         <SelectValue placeholder="Seleccionar unidad" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="">Sin unidad</SelectItem>
                         {units.map((unit) => (
                           <SelectItem key={unit.id} value={unit.id}>
-                            {unit.name} ({unit.symbol})
+                            {unit.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
