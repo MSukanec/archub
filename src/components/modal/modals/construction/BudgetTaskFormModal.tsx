@@ -8,7 +8,7 @@ import { TaskSelectionTable, SelectedTask } from '@/components/ui-custom/TaskSel
 import { useBudgetTasks } from '@/hooks/use-budget-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-interface BudgetTaskBulkAddModalProps {
+interface BudgetTaskFormModalProps {
   modalData?: {
     budgetId?: string;
     onSuccess?: () => void;
@@ -16,7 +16,7 @@ interface BudgetTaskBulkAddModalProps {
   onClose: () => void;
 }
 
-export function BudgetTaskBulkAddModal({ modalData, onClose }: BudgetTaskBulkAddModalProps) {
+export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalProps) {
   const { budgetId, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
