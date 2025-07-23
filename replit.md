@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. TASK CATEGORY MODAL MIGRATION COMPLETED: Successfully migrated task category modal from legacy system to new FormModalLayout architecture - COMPLETED
+  • Created TaskCategoryFormModal.tsx in src/components/modal/modals/admin/ following FormModalLayout pattern
+  • Updated ModalFactory.tsx to include 'task-category' type and proper modal routing
+  • Migrated AdminCategories.tsx from local modal state to useGlobalModalStore system
+  • Fixed modal rendering issue by setting isEditing={true} to ensure editPanel displays correctly
+  • Eliminated NewAdminTaskCategoryModal.tsx legacy file from src/modals/admin/
+  • Modal now uses centralized global state and consistent FormModalLayout structure
+  • Enhanced user experience: category creation and editing now follows standardized modal patterns
+  • System architecture improved: all admin modals now use unified FormModalLayout approach
 - July 23, 2025. ACTIONBAR BUTTON SIZING STANDARDIZED: Eliminated all hardcoded button sizes in ActionBarDesktop component to ensure consistent default sizing across all pages - COMPLETED
   • Removed all size="sm" and h-8 hardcoded classes from ActionBarDesktop.tsx component
   • All buttons (ghost, secondary, primary) now use default button component sizing consistently
