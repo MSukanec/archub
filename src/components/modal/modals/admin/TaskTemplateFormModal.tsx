@@ -164,21 +164,61 @@ export function TaskTemplateFormModal({
   // Create template mutation
   const createTemplateMutation = useMutation({
     mutationFn: async () => {
-      const templateData = {
-        name: taskGroupName || categoryName || 'Plantilla',
-        description: `Plantilla para ${taskGroupName || categoryName}`,
-        category_id: categoryId,
-        task_group_id: taskGroupId || null
-      };
+      if (taskGroupId) {
+        // Create template for task group
+        // First get the category code through the task group
+        const { data: groupData, error: groupError } = await supabase
+          .from('task_groups')
+          .select(`
+            category_id,
+            task_categories!inner (
+              code
+            )
+          `)
+          .eq('id', taskGroupId)
+          .single();
 
-      const { data, error } = await supabase
-        .from('task_templates')
-        .insert(templateData)
-        .select()
-        .single();
+        if (groupError) throw groupError;
+        
+        const categoryCode = groupData.task_categories.code;
 
-      if (error) throw error;
-      return data;
+        const insertData = {
+          name_template: `${taskGroupName}.`,
+          task_group_id: taskGroupId,
+          task_code: categoryCode
+        };
+
+        const { data, error } = await supabase
+          .from('task_templates')
+          .insert(insertData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        // Update the template_id in task_groups
+        const { error: updateError } = await supabase
+          .from('task_groups')
+          .update({ template_id: data.id })
+          .eq('id', taskGroupId);
+        
+        if (updateError) throw updateError;
+        
+        return data;
+      } else {
+        // Create template for category
+        const { data, error } = await supabase
+          .from('task_templates')
+          .insert({
+            name_template: `${categoryName}.`,
+            task_code: categoryCode || 'DEFAULT'
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
