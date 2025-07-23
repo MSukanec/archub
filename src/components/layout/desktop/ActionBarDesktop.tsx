@@ -141,7 +141,7 @@ export function ActionBarDesktop({
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-8 p-0"
+                className="h-8 w-8 p-0"
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
