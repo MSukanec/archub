@@ -723,7 +723,8 @@ export function TaskTemplateFormModal({
                 </Select>
               </div>
               
-              <div className="flex items-end md:col-span-1">
+              <div className="space-y-2">
+                <Label>&nbsp;</Label>
                 <Button 
                   onClick={handleAddParameter}
                   disabled={!newParameterId}
