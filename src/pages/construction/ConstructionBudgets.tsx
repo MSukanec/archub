@@ -541,7 +541,7 @@ export default function ConstructionBudgets() {
               {item.task?.task_code || '-'}
             </span>
             <span className="text-xs">
-              {generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+              {item.task?.display_name || '-'}
             </span>
           </div>
         )
@@ -679,7 +679,7 @@ export default function ConstructionBudgets() {
         renderCard={(item) => (
           <BudgetTaskCard
             task={item}
-            processedName={generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+            processedName={item.task?.display_name || '-'}
             unitName={getUnitName(item.task?.unit_id)}
             onEdit={() => openModal('budget-task-form', { 
               budgetTask: item,
@@ -791,7 +791,7 @@ export default function ConstructionBudgets() {
               {item.task?.task_code || '-'}
             </span>
             <span className="text-xs">
-              {generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+              {item.task?.display_name || '-'}
             </span>
           </div>
         )
@@ -929,7 +929,7 @@ export default function ConstructionBudgets() {
           renderCard={(item) => (
             <BudgetTaskCard
               task={item}
-              processedName={generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+              processedName={item.task?.display_name || '-'}
               unitName={getUnitName(item.task?.unit_id)}
               onEdit={() => openModal('budget-task-form', { 
                 budgetTask: item,
