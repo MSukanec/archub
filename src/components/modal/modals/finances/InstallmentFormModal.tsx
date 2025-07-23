@@ -223,17 +223,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         throw new Error('Subcategoría no encontrada')
       }
 
-      // Buscar el tipo "Ingresos" para este movimiento
-      const { data: ingresosType } = await supabase!
-        .from('movement_concepts')
-        .select('id')
-        .eq('organization_id', userData.organization.id)
-        .eq('name', 'Ingresos')
-        .maybeSingle()
-
-      const typeId = ingresosType?.id
-
-
+      // Usar el ID conocido del tipo "Ingresos" (concepto de sistema)
+      const typeId = '8862eee7-dd00-4f01-9335-5ea0070d3403'
 
       const movementData = {
         organization_id: userData.organization.id,
