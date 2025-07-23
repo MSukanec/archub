@@ -186,6 +186,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true} // Siempre abrir en modo edición
     />
   );
 }
