@@ -712,7 +712,6 @@ export default function ConstructionBudgets() {
                 <Button 
                   key="nuevo-presupuesto"
                   variant="secondary" 
-                  size="sm"
                   onClick={() => openModal('budget', {})}
                 >
                   <Plus className="w-4 h-4 mr-2" />
