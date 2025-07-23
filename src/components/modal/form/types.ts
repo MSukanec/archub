@@ -1,4 +1,4 @@
-export type ModalType = "member" | "movement" | "movement-concept" | "organization-movement-concept" | "movement-import" | "bitacora" | "contact" | "gallery" | "board" | "card" | "list" | "project" | "project-client" | "document-upload" | "document-folder" | "budget" | "construction-task" | "construction-task-schedule" | "delete-confirmation" | "organization" | "installment" | "material-form" | "material-category-form" | "dependency-connection" | "phase" | "construction-phase" | "budget-task-bulk-add" | "task-category";
+export type ModalType = "member" | "movement" | "movement-concept" | "organization-movement-concept" | "movement-import" | "bitacora" | "contact" | "gallery" | "board" | "card" | "list" | "project" | "project-client" | "document-upload" | "document-folder" | "budget" | "construction-task" | "construction-task-schedule" | "delete-confirmation" | "organization" | "installment" | "material-form" | "material-category-form" | "dependency-connection" | "phase" | "construction-phase" | "budget-task-bulk-add" | "task-category" | "task-group";
 
 export interface ModalData {
   [key: string]: any;

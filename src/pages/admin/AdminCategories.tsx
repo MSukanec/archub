@@ -14,8 +14,17 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskGroup } from '@/hooks/use-task-groups';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { NewTaskGroupModal, TaskGroup } from '@/modals/admin/NewTaskGroupModal';
+// NewTaskGroupModal replaced with TaskGroupFormModal in global modal system
 import TaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal';
+
+// Import TaskGroup type since it's still used in handleEditTaskGroup
+export interface TaskGroup {
+  id: string;
+  name: string;
+  category_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,10 +38,7 @@ export default function AdminCategories() {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [templateCategory, setTemplateCategory] = useState<TaskCategoryAdmin | null>(null);
   
-  // Task Group modal states
-  const [isTaskGroupModalOpen, setIsTaskGroupModalOpen] = useState(false);
-  const [editingTaskGroup, setEditingTaskGroup] = useState<TaskGroup | null>(null);
-  const [taskGroupCategory, setTaskGroupCategory] = useState<TaskCategoryAdmin | null>(null);
+  // No need for task group modal states anymore - handled by global modal
   
   // Template modal task group states - NEW: Para manejar plantillas de task groups
   const [templateTaskGroup, setTemplateTaskGroup] = useState<TaskGroupAdmin | null>(null);
@@ -240,16 +246,21 @@ export default function AdminCategories() {
 
   // Handle add task group
   const handleAddTaskGroup = (category: TaskCategoryAdmin) => {
-    setTaskGroupCategory(category);
-    setEditingTaskGroup(null);
-    setIsTaskGroupModalOpen(true);
+    openModal('task-group', {
+      categoryId: category.id,
+      categoryName: category.name,
+      isEditing: false
+    });
   };
 
   // Handle edit task group
   const handleEditTaskGroup = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
-    setTaskGroupCategory(category);
-    setEditingTaskGroup(taskGroup);
-    setIsTaskGroupModalOpen(true);
+    openModal('task-group', {
+      categoryId: category.id,
+      categoryName: category.name,
+      taskGroup: taskGroup,
+      isEditing: true
+    });
   };
 
   // Handle delete task group
@@ -483,20 +494,7 @@ export default function AdminCategories() {
         />
       )}
 
-      {/* Task Group Modal */}
-      {taskGroupCategory && (
-        <NewTaskGroupModal
-          open={isTaskGroupModalOpen}
-          onClose={() => {
-            setIsTaskGroupModalOpen(false);
-            setEditingTaskGroup(null);
-            setTaskGroupCategory(null);
-          }}
-          categoryId={taskGroupCategory.id}
-          categoryName={taskGroupCategory.name}
-          taskGroup={editingTaskGroup || undefined}
-        />
-      )}
+      {/* Task Group Modal now handled by global ModalFactory */}
 
       {/* Delete confirmations are now handled by the global DeleteConfirmationModal through ModalFactory */}
     </>
