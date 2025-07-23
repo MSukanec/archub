@@ -183,6 +183,8 @@ export default function ConstructionMaterials() {
           <>
             {/* Action Bar Desktop - Only visible when data exists */}
             <ActionBarDesktop
+              title="Materiales de Construcción"
+              icon={<Package className="w-6 h-6" />}
               searchValue={searchValue}
               onSearchChange={setSearchValue}
               customFilters={customFilters}

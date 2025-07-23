@@ -22,6 +22,10 @@ interface Tab {
 }
 
 interface ActionBarDesktopProps {
+  // Header section (new)
+  title?: string
+  icon?: React.ReactNode
+  // Action bar functionality
   showSearch?: boolean
   searchValue?: string
   onSearchChange?: (value: string) => void
@@ -46,6 +50,8 @@ interface ActionBarDesktopProps {
 }
 
 export function ActionBarDesktop({
+  title,
+  icon,
   showSearch = true,
   searchValue = '',
   onSearchChange,
@@ -69,13 +75,37 @@ export function ActionBarDesktop({
   return (
     <div 
       className={cn(
-        "hidden md:flex items-center justify-between px-4 py-3 rounded-lg border border-[var(--card-border)] mb-6 shadow-lg",
+        "hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg",
         className
       )}
       style={{ backgroundColor: "var(--card-bg)" }}
     >
-      {/* Left side - Tabs OR Budget Selector (casos puntuales) */}
-      <div className="flex items-center gap-3">
+      {/* Top Row - Title and Icon */}
+      {(title || icon) && (
+        <>
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-3">
+              {icon && (
+                <div className="text-accent">
+                  {icon}
+                </div>
+              )}
+              {title && (
+                <h2 className="text-xl font-semibold text-foreground">
+                  {title}
+                </h2>
+              )}
+            </div>
+          </div>
+          {/* Divider line */}
+          <div className="border-t border-[var(--card-border)]" />
+        </>
+      )}
+
+      {/* Bottom Row - ActionBar Content */}
+      <div className="flex items-center justify-between px-4 py-3">
+        {/* Left side - Tabs OR Budget Selector (casos puntuales) */}
+        <div className="flex items-center gap-3">
         {/* Tabs - For pages with tab navigation like cronograma */}
         {tabs && activeTab && onTabChange && (
           <Tabs
@@ -275,6 +305,7 @@ export function ActionBarDesktop({
             Hoy
           </Button>
         )}
+        </div>
       </div>
     </div>
   )
