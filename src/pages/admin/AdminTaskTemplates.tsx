@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import { NewTaskTemplateModal } from '@/modals/admin/NewTaskTemplateModal'
+import NewTaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal'
 import { useTaskTemplatesAdmin, useDeleteTaskTemplate, type TaskTemplate } from '@/hooks/use-task-templates-admin'
 
 import { Plus, Edit, Trash2, Settings, Eye, FileCode, Code, Calendar } from 'lucide-react'
@@ -148,7 +148,7 @@ export default function AdminTaskTemplates() {
         <div className="flex items-center gap-2">
           <Code className="w-4 h-4 text-muted-foreground" />
           <span className="text-xs font-mono bg-muted px-2 py-1 rounded">
-            {template.code_prefix || template.code}
+            {template.code}
           </span>
         </div>
       )
@@ -280,10 +280,12 @@ export default function AdminTaskTemplates() {
       </div>
 
       {/* Create/Edit Modal */}
-      <NewTaskTemplateModal
+      <NewTaskTemplateEditorModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        template={editingTemplate || undefined}
+        categoryId={editingTemplate?.category_id || ""}
+        categoryCode={editingTemplate?.code || ""}
+        categoryName={editingTemplate?.task_categories?.name || ""}
       />
 
       {/* Delete Confirmation Dialog */}
