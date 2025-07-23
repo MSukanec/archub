@@ -337,7 +337,8 @@ export default function FinancesInstallments() {
       }
       
       const commitmentPercentage = totalCommittedAmountUSD > 0 ? (committedAmountUSD / totalCommittedAmountUSD) * 100 : 0
-      const contributionPercentage = totalDollarizedAmount > 0 ? ((item.dollarizedTotal || 0) / totalDollarizedAmount) * 100 : 0
+      // Calculate what percentage the client has paid of their own committed amount
+      const contributionPercentage = committedAmountUSD > 0 ? ((item.dollarizedTotal || 0) / committedAmountUSD) * 100 : 0
       
       return {
         ...item,
@@ -356,6 +357,9 @@ export default function FinancesInstallments() {
     // Calculate total remaining amount
     const totalRemainingAmount = totalCommittedAmountUSD - totalDollarizedAmount
     
+    // Calculate overall completion percentage
+    const overallCompletionPercentage = totalCommittedAmountUSD > 0 ? (totalDollarizedAmount / totalCommittedAmountUSD) * 100 : 0
+    
     // Add totals row
     const totalsRow = {
       isTotal: true,
@@ -365,7 +369,7 @@ export default function FinancesInstallments() {
       dollarizedTotal: 0,
       client: null,
       commitmentPercentage: 100,
-      contributionPercentage: 100,
+      contributionPercentage: overallCompletionPercentage,
       totalCommittedAmount: totalCommittedAmountUSD,
       totalDollarizedAmount: totalDollarizedAmount,
       totalRemainingAmount: totalRemainingAmount
@@ -687,7 +691,8 @@ export default function FinancesInstallments() {
       width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
-          return <div className="text-sm font-bold">100%</div>
+          const overallPercentage = item.contributionPercentage || 0
+          return <div className="text-sm font-bold">{overallPercentage.toFixed(1)}%</div>
         }
         
         const dollarizedTotal = item.dollarizedTotal || 0
