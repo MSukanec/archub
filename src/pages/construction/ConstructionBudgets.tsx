@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Plus, Calculator, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useModal } from '@/components/modal/form/ModalFactory';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 export default function ConstructionBudgets() {
-  const { openModal } = useModal();
   const [searchValue, setSearchValue] = useState('');
   const [groupingType, setGroupingType] = useState('none');
 
@@ -49,7 +48,7 @@ export default function ConstructionBudgets() {
           groupingType={groupingType}
           onGroupingChange={setGroupingType}
           primaryActionLabel="Nuevo Presupuesto"
-          onPrimaryActionClick={() => openModal('budget', {})}
+          onPrimaryActionClick={() => console.log('Nuevo presupuesto')}
           customActions={[
             <Button 
               key="nueva-tarea"
@@ -60,6 +59,19 @@ export default function ConstructionBudgets() {
               Nueva Tarea
             </Button>
           ]}
+        />
+
+        {/* Empty State */}
+        <EmptyState
+          icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
+          title="No hay presupuestos creados"
+          description="Comienza creando tu primer presupuesto para gestionar los costos del proyecto"
+          action={
+            <Button onClick={() => console.log('Crear primer presupuesto')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Crear Primer Presupuesto
+            </Button>
+          }
         />
       </div>
     </Layout>
