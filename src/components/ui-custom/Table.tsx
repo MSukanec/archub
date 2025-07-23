@@ -315,7 +315,7 @@ export function Table<T = any>({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
-      <div className="hidden lg:block overflow-hidden rounded-t-lg border border-[var(--table-header-border)]">
+      <div className="hidden lg:block overflow-hidden rounded-lg border border-[var(--table-header-border)] shadow-sm">
         {/* Column Headers */}
         <div
           className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
@@ -459,9 +459,9 @@ export function Table<T = any>({
           {renderFooterRow && (
             <div className={cn(
               "grid gap-4 px-4 py-3",
-              mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
-              mode === "construction" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
-              mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
+              mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
+              mode === "construction" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
+              mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
               "text-xs font-medium"
             )}
             style={{ gridTemplateColumns: getGridTemplateColumns() }}
