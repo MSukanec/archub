@@ -413,10 +413,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Solo escuchar cambios del formulario principal para simplificar
   React.useEffect(() => {
-    if (typeId && !editingMovement) {
+    if (typeId) {
       handleTypeChange(typeId)
     }
-  }, [typeId, editingMovement?.id])
+  }, [typeId])
 
   // Inicializar valores por defecto cuando los datos estén listos
   React.useEffect(() => {
@@ -500,8 +500,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Efecto para detectar los 3 tipos de aportes cuando se selecciona una categoría
   React.useEffect(() => {
-    // NO ejecutar este efecto cuando estamos editando un movimiento
-    if (editingMovement) return
+    // Ejecutar tanto en creación como en edición, pero con diferente lógica
     
     const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id')
     if (categoryId && categories) {
@@ -525,70 +524,72 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setMovementType('retiros_propios')
         }
         
-        // Solo sincronizar valores en modo nuevo movimiento
-        if (!editingMovement) {
-          const currentMember = members?.find(m => m.user_id === userData?.user?.id)?.id
+        // Sincronizar valores tanto en modo nuevo como en edición
+        const currentValues = {
+          created_by: form.watch('created_by') || aportesForm.watch('created_by') || aportesPropriosForm.watch('created_by') || retirosPropriosForm.watch('created_by'),
+          movement_date: form.watch('movement_date') || aportesForm.watch('movement_date') || aportesPropriosForm.watch('movement_date') || retirosPropriosForm.watch('movement_date'),
+          amount: form.watch('amount') || aportesForm.watch('amount') || aportesPropriosForm.watch('amount') || retirosPropriosForm.watch('amount'),
+          currency_id: form.watch('currency_id') || aportesForm.watch('currency_id') || aportesPropriosForm.watch('currency_id') || retirosPropriosForm.watch('currency_id'),
+          wallet_id: form.watch('wallet_id') || aportesForm.watch('wallet_id') || aportesPropriosForm.watch('wallet_id') || retirosPropriosForm.watch('wallet_id'),
+          description: form.watch('description') || aportesForm.watch('description') || aportesPropriosForm.watch('description') || retirosPropriosForm.watch('description'),
+          exchange_rate: form.watch('exchange_rate') || aportesForm.watch('exchange_rate') || aportesPropriosForm.watch('exchange_rate') || retirosPropriosForm.watch('exchange_rate')
+        }
+        
+        // En modo edición preservar campos, en modo nuevo usar defaults
+        const preserveValues = !!editingMovement
+        const currentMember = members?.find(m => m.user_id === userData?.user?.id)?.id
+        
+        // Obtener los valores por defecto desde organization_preferences o usar el primero disponible
+        const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
+        const defaultWallet = userData?.organization_preferences?.default_wallet || wallets?.[0]?.id
+        
+        if (isAportesCategory) {
+          // APORTES: Cliente + Cotización
+          console.log('Setting aportes form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
-          // Obtener los valores por defecto desde organization_preferences o usar el primero disponible
-          const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
-          const defaultWallet = userData?.organization_preferences?.default_wallet || wallets?.[0]?.id
+          aportesForm.setValue('type_id', form.watch('type_id'))
+          aportesForm.setValue('category_id', categoryId)
+          aportesForm.setValue('description', preserveValues ? currentValues.description : '')
+          aportesForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
+          aportesForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
+          aportesForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          aportesForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) aportesForm.setValue('exchange_rate', currentValues.exchange_rate)
           
-
+          // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+          form.setValue('category_id', categoryId)
+        } else if (isAportesPropiosCategory) {
+          // APORTES PROPIOS: Socio + Cotización
+          console.log('Setting aportes propios form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
-          if (isAportesCategory) {
-            // APORTES: Cliente + Cotización
-            
-            aportesForm.setValue('type_id', form.watch('type_id'))
-            aportesForm.setValue('category_id', categoryId)
-            aportesForm.setValue('description', '')
-            if (currentMember) aportesForm.setValue('created_by', currentMember)
-            if (defaultCurrency) aportesForm.setValue('currency_id', defaultCurrency)
-            if (defaultWallet) aportesForm.setValue('wallet_id', defaultWallet)
-            aportesForm.setValue('contact_id', '') // Limpiar cliente
-            aportesForm.setValue('amount', 0) // Establecer cantidad inicial
-            
-            // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
-            form.setValue('category_id', categoryId)
-          } else if (isAportesPropiosCategory) {
-            // APORTES PROPIOS: Socio + Cotización
-            aportesPropriosForm.setValue('type_id', form.watch('type_id'))
-            aportesPropriosForm.setValue('category_id', categoryId)
-            aportesPropriosForm.setValue('description', '')
-            if (currentMember) aportesPropriosForm.setValue('created_by', currentMember)
-            if (defaultCurrency) aportesPropriosForm.setValue('currency_id', defaultCurrency)
-            if (defaultWallet) aportesPropriosForm.setValue('wallet_id', defaultWallet)
-            aportesPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
-            aportesPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
-            
-            // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
-            form.setValue('category_id', categoryId)
-          } else if (isRetirosPropiosCategory) {
-            // RETIROS PROPIOS: Socio + Cotización
-            console.log('Initializing retiros propios form with values:', {
-              typeId: form.watch('type_id'),
-              categoryId,
-              currentMember,
-              defaultCurrency,
-              defaultWallet,
-              currencies: currencies?.slice(0, 2),
-              wallets: wallets?.slice(0, 2)
-            })
-            
-            retirosPropriosForm.setValue('type_id', form.watch('type_id'))
-            retirosPropriosForm.setValue('category_id', categoryId)
-            retirosPropriosForm.setValue('description', '')
-            if (currentMember) retirosPropriosForm.setValue('created_by', currentMember)
-            if (defaultCurrency) retirosPropriosForm.setValue('currency_id', defaultCurrency)
-            if (defaultWallet) {
-              console.log('Setting default wallet for retiros propios:', defaultWallet)
-              retirosPropriosForm.setValue('wallet_id', defaultWallet)
-            }
-            retirosPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
-            retirosPropriosForm.setValue('amount', 0) // Establecer cantidad inicial
-            
-            // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
-            form.setValue('category_id', categoryId)
-          }
+          aportesPropriosForm.setValue('type_id', form.watch('type_id'))
+          aportesPropriosForm.setValue('category_id', categoryId)
+          aportesPropriosForm.setValue('description', preserveValues ? currentValues.description : '')
+          aportesPropriosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
+          aportesPropriosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
+          aportesPropriosForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          aportesPropriosForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) aportesPropriosForm.setValue('exchange_rate', currentValues.exchange_rate)
+          aportesPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
+          
+          // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+          form.setValue('category_id', categoryId)
+        } else if (isRetirosPropiosCategory) {
+          // RETIROS PROPIOS: Socio + Cotización
+          console.log('Setting retiros propios form with preserved values:', preserveValues ? currentValues : 'using defaults')
+          
+          retirosPropriosForm.setValue('type_id', form.watch('type_id'))
+          retirosPropriosForm.setValue('category_id', categoryId)
+          retirosPropriosForm.setValue('description', preserveValues ? currentValues.description : '')
+          retirosPropriosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
+          retirosPropriosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
+          retirosPropriosForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          retirosPropriosForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) retirosPropriosForm.setValue('exchange_rate', currentValues.exchange_rate)
+          retirosPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
+          
+          // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+          form.setValue('category_id', categoryId)
         }
       } else {
         // Si no es una categoría de aportes, permitir regresar al formulario normal
