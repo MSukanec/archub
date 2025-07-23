@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, GripVertical, Plus, FileText, X, CheckCircle2, Settings } from 'lucide-react';
@@ -676,27 +677,24 @@ export function TaskTemplateFormModal({
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-1">
                 <Label>Parámetro</Label>
-                <Select 
-                  value={newParameterId} 
+                <ComboBox
+                  value={newParameterId}
                   onValueChange={(value) => {
                     setNewParameterId(value);
                     setNewOptionGroupId('');
                   }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar parámetro" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableParameters.map((parameter) => (
-                      <SelectItem key={parameter.id} value={parameter.id}>
-                        {parameter.label || parameter.name} ({parameter.type})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={availableParameters.map((parameter) => ({
+                    value: parameter.id,
+                    label: `${parameter.label || parameter.name} (${parameter.type})`
+                  }))}
+                  placeholder="Buscar parámetro..."
+                  searchPlaceholder="Escribir para buscar..."
+                  emptyMessage="No se encontraron parámetros"
+                  className="w-full"
+                />
               </div>
 
               <div className="space-y-2">
@@ -725,7 +723,7 @@ export function TaskTemplateFormModal({
                 </Select>
               </div>
               
-              <div className="flex items-end">
+              <div className="flex items-end md:col-span-1">
                 <Button 
                   onClick={handleAddParameter}
                   disabled={!newParameterId}
