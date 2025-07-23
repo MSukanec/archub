@@ -538,7 +538,6 @@ export default function ConstructionBudgets() {
         render: (item: any) => (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              {item.task?.task_code || '-'}
             </span>
             <span className="text-xs">
               {item.task?.display_name || '-'}
@@ -584,7 +583,7 @@ export default function ConstructionBudgets() {
         label: 'Subtotal',
         width: '5%',
         render: (item: any) => (
-          <span className="text-xs text-green-600 font-medium">
+          <span className="text-xs text-xs">
             ${((item.quantity || 0) * (item.task?.unit_cost || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
         )
@@ -644,14 +643,12 @@ export default function ConstructionBudgets() {
 
     // Función para renderizar header de grupo
     const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
-      const groupTotal = groupRows.reduce((sum, task) => 
-        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
-      );
 
       return (
         <>
           <div className="text-xs font-medium">{groupKey}</div>
           <div className="text-xs">{groupRows.length} tareas</div>
+          <div></div>
           <div></div>
           <div></div>
           <div></div>
@@ -788,7 +785,6 @@ export default function ConstructionBudgets() {
         render: (item: any) => (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              {item.task?.task_code || '-'}
             </span>
             <span className="text-xs">
               {item.task?.display_name || '-'}
@@ -834,7 +830,7 @@ export default function ConstructionBudgets() {
         label: 'Subtotal',
         width: '5%',
         render: (item: any) => (
-          <span className="text-xs text-green-600 font-medium">
+          <span className="text-xs text-xs">
             ${((item.quantity || 0) * (item.task?.unit_cost || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
         )
@@ -884,9 +880,6 @@ export default function ConstructionBudgets() {
           <div></div>
           <div></div>
           <div></div>
-          <div className="text-xs font-medium text-green-600">
-            ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-          </div>
           <div></div>
         </>
       );
@@ -894,14 +887,12 @@ export default function ConstructionBudgets() {
 
     // Función para renderizar header de grupo
     const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
-      const groupTotal = groupRows.reduce((sum, task) => 
-        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
-      );
 
       return (
         <>
           <div className="text-xs font-medium">{groupKey}</div>
           <div className="text-xs">{groupRows.length} tareas</div>
+          <div></div>
           <div></div>
           <div></div>
           <div></div>
