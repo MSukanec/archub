@@ -4,9 +4,24 @@ import { useState } from 'react'
 import { Plus, Calculator, BarChart3 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { useModal } from '@/components/modal/form/ModalFactory'
 
 export default function ConstructionBudgets() {
   const [searchValue, setSearchValue] = useState("")
+  const { openModal } = useModal()
+
+  // Para este ejemplo, usaremos un budgetId temporal
+  // En una implementación real, esto vendría de la selección del usuario
+  const budgetId = "example-budget-id"
+
+  const handleOpenTaskModal = () => {
+    openModal('budget-task-bulk-add', {
+      budgetId,
+      onSuccess: () => {
+        console.log('Tareas agregadas exitosamente')
+      }
+    })
+  }
 
   const headerProps = {
     title: "Presupuestos de Construcción",
@@ -23,11 +38,11 @@ export default function ConstructionBudgets() {
     onClearFilters: () => setSearchValue(""),
     actions: (
       <div className="flex gap-2">
-        <Button variant="secondary">
+        <Button variant="secondary" onClick={handleOpenTaskModal}>
           <Plus className="w-4 h-4 mr-2" />
           Nueva Tarea
         </Button>
-        <Button>
+        <Button onClick={() => console.log('Nuevo presupuesto')}>
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Presupuesto
         </Button>
