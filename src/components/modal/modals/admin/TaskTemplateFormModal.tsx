@@ -546,104 +546,107 @@ export function TaskTemplateFormModal({
 
       case 3:
         return (
-          <div className="space-y-6">
-            {/* Vista previa de la plantilla */}
+          <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-medium mb-2">Vista Previa de la Plantilla</h4>
-              <p className="text-sm text-muted-foreground mb-3">
+              <h3 className="text-lg font-semibold">Vista Previa de la Plantilla</h3>
+              <p className="text-sm text-muted-foreground">
                 Así se verá el nombre de la tarea generada
               </p>
-              <div className="text-sm bg-muted/30 p-3 rounded border">
-                <span className="font-medium">
-                  {(() => {
-                    const baseName = taskGroupName || categoryName;
-                    if (templateParameters.length === 0) {
-                      return `${baseName}.`;
-                    }
-                    const parameterPlaceholders = templateParameters
-                      .map(tp => `{{${availableParameters.find(p => p.id === tp.parameter_id)?.name || 'parámetro'}}}`)
-                      .join(' ');
-                    return `${baseName} ${parameterPlaceholders}.`;
-                  })()}
-                </span>
-              </div>
+            </div>
+            
+            <div className="text-sm bg-muted/30 p-3 rounded border">
+              <span className="font-medium">
+                {(() => {
+                  const baseName = taskGroupName || categoryName;
+                  if (templateParameters.length === 0) {
+                    return `${baseName}.`;
+                  }
+                  const parameterPlaceholders = templateParameters
+                    .map(tp => `{{${availableParameters.find(p => p.id === tp.parameter_id)?.name || 'parámetro'}}}`)
+                    .join(' ');
+                  return `${baseName} ${parameterPlaceholders}.`;
+                })()}
+              </span>
             </div>
 
-            {/* Agregar Parámetros */}
             <div>
-              <h4 className="text-sm font-medium mb-2">Agregar Parámetros</h4>
-              <p className="text-sm text-muted-foreground mb-3">
+              <h3 className="text-lg font-semibold">Agregar Parámetros</h3>
+              <p className="text-sm text-muted-foreground">
                 Define los parámetros que se mostrarán al crear tareas
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Parámetro</Label>
-                  <Select 
-                    value={newParameterId} 
-                    onValueChange={(value) => {
-                      setNewParameterId(value);
-                      setNewOptionGroupId('');
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar parámetro" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableParameters.map((parameter) => (
-                        <SelectItem key={parameter.id} value={parameter.id}>
-                          {parameter.label || parameter.name} ({parameter.type})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Parámetro</Label>
+                <Select 
+                  value={newParameterId} 
+                  onValueChange={(value) => {
+                    setNewParameterId(value);
+                    setNewOptionGroupId('');
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar parámetro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableParameters.map((parameter) => (
+                      <SelectItem key={parameter.id} value={parameter.id}>
+                        {parameter.label || parameter.name} ({parameter.type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-2">
-                  <Label>Grupo de Opciones</Label>
-                  <Select 
-                    value={newOptionGroupId} 
-                    onValueChange={setNewOptionGroupId}
-                    disabled={!newParameterId || parameterOptionGroups.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={
-                        !newParameterId 
-                          ? "Primero selecciona parámetro"
-                          : parameterOptionGroups.length === 0
-                          ? "Sin grupos disponibles"
-                          : "Seleccionar grupo"
-                      } />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {parameterOptionGroups.map((group) => (
-                        <SelectItem key={group.id} value={group.id}>
-                          {group.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-end">
-                  <Button 
-                    onClick={handleAddParameter}
-                    disabled={!newParameterId}
-                    className="w-full"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar
-                  </Button>
-                </div>
+              <div className="space-y-2">
+                <Label>Grupo de Opciones</Label>
+                <Select 
+                  value={newOptionGroupId} 
+                  onValueChange={setNewOptionGroupId}
+                  disabled={!newParameterId || parameterOptionGroups.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      !newParameterId 
+                        ? "Primero selecciona parámetro"
+                        : parameterOptionGroups.length === 0
+                        ? "Sin grupos disponibles"
+                        : "Seleccionar grupo"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parameterOptionGroups.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-end">
+                <Button 
+                  onClick={handleAddParameter}
+                  disabled={!newParameterId}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar
+                </Button>
               </div>
             </div>
 
             {/* Lista de parámetros con drag & drop */}
             {templateParameters.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-2">Parámetros Configurados</h4>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Arrastra para reordenar los parámetros
-                </p>
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold">Parámetros Configurados</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Arrastra para reordenar los parámetros
+                  </p>
+                </div>
+                
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
@@ -668,7 +671,7 @@ export function TaskTemplateFormModal({
                     </div>
                   </SortableContext>
                 </DndContext>
-              </div>
+              </>
             )}
           </div>
         );
