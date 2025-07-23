@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/desktop/Layout';
 import { Plus, Calculator, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useModal } from '@/components/modal/ModalFactory';
-import { FeatureIntroduction } from '@/components/ui/feature-introduction';
+import { useModal } from '@/components/modal/form/ModalFactory';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 export default function ConstructionBudgets() {
