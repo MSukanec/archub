@@ -10,6 +10,7 @@ import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { ComboBox } from "@/components/ui-custom/ComboBoxWrite"
 
 interface ReplacementOption {
   label: string
@@ -99,7 +100,7 @@ export default function DeleteConfirmationModal({
     }
     
     if (mode === 'replace') {
-      return actionType === 'delete' ? 'Eliminar categoría' : 'Reemplazar categoría'
+      return actionType === 'delete' ? 'Eliminar material' : 'Reemplazar material'
     }
     
     return destructiveActionText
@@ -175,26 +176,22 @@ export default function DeleteConfirmationModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="delete">Eliminar definitivamente</SelectItem>
-                <SelectItem value="replace">Reemplazar por otra</SelectItem>
+                <SelectItem value="replace">Reemplazar por otro</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {actionType === 'replace' && (
             <div className="space-y-2">
-              <Label htmlFor="replacement-category">¿Por cuál categoría querés reemplazarla?</Label>
-              <Select value={selectedReplacementId} onValueChange={setSelectedReplacementId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar categoría de reemplazo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredReplacementOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="replacement-category">¿Por cuál material querés reemplazarlo?</Label>
+              <ComboBox
+                value={selectedReplacementId}
+                onValueChange={setSelectedReplacementId}
+                options={filteredReplacementOptions}
+                placeholder="Seleccionar material de reemplazo"
+                searchPlaceholder="Buscar material..."
+                emptyMessage="No se encontraron materiales."
+              />
             </div>
           )}
         </div>
@@ -219,7 +216,7 @@ export default function DeleteConfirmationModal({
             <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
             <p className="text-sm text-destructive font-medium">
               {actionType === 'replace' 
-                ? 'Esta acción reemplazará todos los usos de la categoría actual'
+                ? 'Esta acción reemplazará todos los usos del material actual'
                 : 'Esta acción no se puede deshacer'
               }
             </p>

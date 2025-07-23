@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. ADMIN MATERIALS DELETION SYSTEM COMPLETELY FIXED: Successfully implemented working material deletion functionality with proper replacement modal system - COMPLETED
+  • CRITICAL HOOK IMPLEMENTED: Created useDeleteMaterial hook in use-materials.ts with proper Supabase delete operation and cache invalidation
+  • LEGACY MODAL SYSTEM ELIMINATED: Removed obsolete AlertDialog code and deletingMaterial state variables from AdminMaterials.tsx
+  • REPLACEMENT MODAL ENHANCED: Updated DeleteConfirmationModal to use ComboBoxWrite instead of basic Select for better search functionality
+  • MATERIALS DATA INTEGRATION: AdminMaterials now passes complete materials list as replacementOptions to deletion modal
+  • UI TEXT CONSISTENCY: Changed all modal text from "categoría" to "material" for proper context (buttons, labels, warning messages)
+  • MODAL WORKFLOW IMPROVED: Users can now choose between "Eliminar definitivamente" or "Reemplazar por otro" with full material search
+  • COMPLETE FUNCTIONALITY: Deletion works correctly with toast notifications, cache updates, and proper error handling
+  • CENTRALIZED MODAL SYSTEM: All deletion operations now use unified ModalFactory with 'delete-confirmation' type instead of individual modals
 - July 23, 2025. TASK TEMPLATE MODAL SUBMIT FUNCTIONALITY COMPLETELY FIXED: Successfully implemented complete data saving system for task template modal - COMPLETED
   • CRITICAL BUG RESOLVED: Fixed submit function not saving data to Supabase by implementing saveParametersMutation
   • Added generatePreview() function to create dynamic template names like "Test {{brick-type}}."

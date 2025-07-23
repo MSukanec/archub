@@ -67,6 +67,14 @@ export default function AdminMaterials() {
   }
 
   const handleDelete = (material: Material) => {
+    // Crear lista de materiales disponibles para reemplazo (excluyendo el actual)
+    const replacementOptions = materials
+      .filter(m => m.id !== material.id)
+      .map(m => ({
+        value: m.id,
+        label: m.name
+      }))
+
     openModal('delete-confirmation', {
       mode: 'replace',
       title: 'Eliminar Material',
@@ -74,6 +82,14 @@ export default function AdminMaterials() {
       itemName: material.name,
       destructiveActionText: 'Eliminar Material',
       onDelete: () => deleteMaterialMutation.mutate(material.id),
+      onReplace: (newMaterialId: string) => {
+        // Aquí puedes implementar la lógica de reemplazo si es necesaria
+        console.log('Reemplazar material', material.id, 'por', newMaterialId)
+        // Por ahora solo eliminamos el material actual
+        deleteMaterialMutation.mutate(material.id)
+      },
+      replacementOptions,
+      currentCategoryId: material.id,
       isLoading: deleteMaterialMutation.isPending
     })
   }
