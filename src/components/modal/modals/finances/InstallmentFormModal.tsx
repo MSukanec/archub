@@ -89,33 +89,29 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       // Usar el ID conocido de "Aportes de Terceros"
       const aportesDeTerrcerosId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
       
-      // Primero verificar que el concepto padre existe
-      const { data: parentConcept } = await supabase
+      // Buscar TODOS los conceptos de la organización para debug
+      const { data: allConcepts } = await supabase
         .from('movement_concepts')
-        .select('*')
-        .eq('id', aportesDeTerrcerosId)
+        .select('id, name, parent_id')
         .eq('organization_id', organizationId)
-        .single()
-      
-      console.log('Parent concept (Aportes de Terceros):', parentConcept)
-      
-      // Obtener subcategorías directamente
-      const { data: subcats } = await supabase
-        .from('movement_concepts')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('parent_id', aportesDeTerrcerosId)
         .order('name')
       
-      console.log('Subcategories fetched for Aportes de Terceros:', subcats)
+      console.log('All concepts in organization:', allConcepts)
+      console.log('Looking for children of:', aportesDeTerrcerosId)
       
-      // Si no hay subcategorías, crear una por defecto
-      if (!subcats || subcats.length === 0) {
-        console.log('No subcategories found, using parent concept as option')
+      // Buscar conceptos que tengan como padre "Aportes de Terceros"
+      const childConcepts = allConcepts?.filter(concept => concept.parent_id === aportesDeTerrcerosId) || []
+      
+      console.log('Child concepts found:', childConcepts)
+      
+      // Si no hay hijos, usar el concepto padre mismo
+      if (childConcepts.length === 0) {
+        const parentConcept = allConcepts?.find(concept => concept.id === aportesDeTerrcerosId)
+        console.log('No children found, using parent:', parentConcept)
         return parentConcept ? [parentConcept] : []
       }
       
-      return subcats || []
+      return childConcepts
     },
     enabled: !!organizationId && !!supabase
   })
