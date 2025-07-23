@@ -80,30 +80,30 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   
+  // Debug logs
+  React.useEffect(() => {
+    console.log('Currencies data:', currencies)
+    console.log('Subcategories data:', subcategories)
+  }, [currencies, subcategories])
+  
   // Hook para obtener subcategorías de "Aportes de Terceros"
   const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
     queryKey: ['aportes-terceros-subcategories', organizationId],
     queryFn: async () => {
       if (!supabase) return []
       
-      // Buscar la categoría "Aportes de Terceros"
-      const { data: categories } = await supabase
-        .from('movement_concepts')
-        .select('id')
-        .eq('organization_id', organizationId)
-        .eq('name', 'Aportes de Terceros')
-        .maybeSingle()
+      // Usar el ID conocido de "Aportes de Terceros"
+      const aportesDeTerrcerosId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
       
-      if (!categories) return []
-      
-      // Obtener subcategorías
+      // Obtener subcategorías directamente
       const { data: subcats } = await supabase
         .from('movement_concepts')
         .select('*')
         .eq('organization_id', organizationId)
-        .eq('parent_id', categories.id)
+        .eq('parent_id', aportesDeTerrcerosId)
         .order('name')
       
+      console.log('Subcategories fetched for Aportes de Terceros:', subcats)
       return subcats || []
     },
     enabled: !!organizationId && !!supabase
