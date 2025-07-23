@@ -118,14 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 23, 2025. BUDGET TABLE DISPLAY SYSTEM COMPLETELY FIXED: Resolved all budget table display issues and syntax errors preventing page rendering - COMPLETED
-  • TAREAS COLUMN FINALIZED: Display shows only task display_name without codes or additional processing for cleaner appearance
-  • TOTALS REPOSITIONED: Fixed totals calculation to appear in correct TAREAS column instead of RUBRO column
-  • COLOR STYLING REMOVED: Eliminated green colors from subtotals and grouping headers for neutral, professional appearance
-  • DELETE MODAL INTEGRATION: Successfully integrated DeleteConfirmationModal.tsx with useDeleteConfirmation hook for proper confirmation workflow
-  • BUTTON STYLING CORRECTED: Fixed ghost buttons to be square and consistent with search component dimensions throughout ActionBarDesktop
-  • JSX SYNTAX ERRORS RESOLVED: Corrected multiple syntax issues including double closing braces and extra empty lines that prevented page rendering
-  • PAGE FUNCTIONALITY RESTORED: Budget table now displays correctly with all intended features working properly
 - July 23, 2025. ACTIONBAR BUTTON SIZING STANDARDIZED: Eliminated all hardcoded button sizes in ActionBarDesktop component to ensure consistent default sizing across all pages - COMPLETED
   • Removed all size="sm" and h-8 hardcoded classes from ActionBarDesktop.tsx component
   • All buttons (ghost, secondary, primary) now use default button component sizing consistently

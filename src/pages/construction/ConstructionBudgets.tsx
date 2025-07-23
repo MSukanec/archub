@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+
 import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
@@ -14,16 +16,21 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Table } from '@/components/ui-custom/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+
 import { useBudgets } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
+
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
-import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
+
 import { Input } from '@/components/ui/input'
+
 import { validateUserDataForDatabaseOperation, logDatabaseOperation } from '@/utils/databaseSafety'
+
+
 // Hook para obtener valores de parámetros con expression_template
 const useTaskParameterValues = () => {
   return useQuery({
@@ -48,6 +55,7 @@ const useTaskParameterValues = () => {
     }
   });
 };
+
 // Función para procesar el display_name con expression_templates (igual que en el modal)
 async function processDisplayName(displayName: string, paramValues: any): Promise<string> {
   if (!displayName || !paramValues || !supabase) return displayName;
@@ -97,6 +105,7 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
   // Clean up multiple spaces and trim the final result
   return processed.replace(/\s+/g, ' ').trim();
 }
+
 // Función para generar el nombre completo de la tarea usando los datos ya procesados
 function generateTaskDisplayName(task: any, parameterValues: any[] = []): string {
   if (!task) return 'Sin nombre';
@@ -104,6 +113,7 @@ function generateTaskDisplayName(task: any, parameterValues: any[] = []): string
   // Usar display_name que ya fue procesado por el hook useBudgetTasks
   return task.display_name || task.name || 'Sin nombre';
 }
+
 interface Budget {
   id: string
   name: string
@@ -115,6 +125,7 @@ interface Budget {
   created_by: string
   group_tasks_by_rubro?: boolean
 }
+
 interface BudgetTask {
   id: string
   budget_id: string
@@ -134,21 +145,29 @@ interface BudgetTask {
     unit_id: string | null
   }
 }
+
+
+
 export default function ConstructionBudgets() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
+
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
+
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
+
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
   }, [])
+
+
   
   // Hook para obtener unidades
   const { data: units = [] } = useQuery({
@@ -157,23 +176,28 @@ export default function ConstructionBudgets() {
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
+
       const { data, error } = await supabase
         .from("units")
         .select("*")
         .order("name", { ascending: true });
+
       if (error) {
         console.error("Error fetching units:", error);
         throw error;
       }
+
       return data || [];
     },
   });
+
   // Función para obtener el nombre de la unidad por ID
   const getUnitName = (unitId: string | null) => {
     if (!unitId) return '-';
     const unit = units.find(u => u.id === unitId);
     return unit?.name || '-';
   };
+
   // Obtener parámetros para generar nombres de tareas
   const { data: parameterValues = [] } = useQuery({
     queryKey: ['task-parameter-values', userData?.organization?.id],
@@ -190,6 +214,9 @@ export default function ConstructionBudgets() {
     },
     enabled: !!userData?.organization?.id
   });
+
+
+
   // Mutación para actualizar last_budget_id en user_preferences
   const updateBudgetPreferenceMutation = useMutation({
     mutationFn: async (budgetId: string) => {
@@ -248,6 +275,7 @@ export default function ConstructionBudgets() {
       });
     }
   });
+
   // Inicializar selectedBudgetId con last_budget_id de preferences
   useEffect(() => {
     if (budgets.length > 0 && userData?.preferences) {
@@ -277,6 +305,7 @@ export default function ConstructionBudgets() {
       console.log('No budgets available, clearing selection');
     }
   }, [budgets, userData?.preferences?.last_budget_id, userData?.preferences?.id]);
+
   // Filter and sort budgets
   const filteredBudgets = budgets
     .filter((budget: Budget) =>
@@ -288,14 +317,17 @@ export default function ConstructionBudgets() {
       if (sortBy === 'status') return a.status.localeCompare(b.status)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
+
   // Only reset budget selection when there are no budgets available
   useEffect(() => {
     if (filteredBudgets.length === 0 && selectedBudgetId !== '') {
       setSelectedBudgetId('');
     }
   }, [filteredBudgets.length, selectedBudgetId]);
+
   // Get selected budget - with fallback to first budget if selected doesn't exist
   const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId) || filteredBudgets[0];
+
   // Delete budget mutation
   const deleteBudgetMutation = useMutation({
     mutationFn: async (budgetId: string) => {
@@ -305,6 +337,7 @@ export default function ConstructionBudgets() {
         .from('budgets')
         .delete()
         .eq('id', budgetId)
+
       if (error) throw error
     },
     onSuccess: () => {
@@ -324,11 +357,14 @@ export default function ConstructionBudgets() {
       })
     }
   })
+
   // Local grouping state (no database persistence needed)
   const [groupingType, setGroupingType] = useState<string>('none')
+
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
   }
+
   const handleEditBudget = () => {
     if (selectedBudget) {
       openModal('budget', { 
@@ -337,15 +373,18 @@ export default function ConstructionBudgets() {
       })
     }
   }
+
   const handleDeleteSelectedBudget = () => {
     if (selectedBudget) {
       handleDeleteBudget(selectedBudget)
     }
   }
+
   const handleBudgetChange = (budgetId: string) => {
     setSelectedBudgetId(budgetId)
     updateBudgetPreferenceMutation.mutate(budgetId)
   }
+
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
     console.log('Abrir modal de agregar tareas');
@@ -356,6 +395,7 @@ export default function ConstructionBudgets() {
       }
     });
   }
+
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
@@ -365,6 +405,7 @@ export default function ConstructionBudgets() {
         .from('budget_tasks')
         .delete()
         .eq('id', taskId)
+
       if (error) throw error
     },
     onSuccess: () => {
@@ -383,25 +424,19 @@ export default function ConstructionBudgets() {
       })
     }
   })
+
   // Handle delete task
-  const { showDeleteConfirmation } = useDeleteConfirmation()
-  
   const handleDeleteTask = (taskId: string) => {
-    const task = budgetTasks?.find(t => t.id === taskId)
-    const taskName = task?.task?.display_name || 'esta tarea'
-    
-    showDeleteConfirmation({
-      title: 'Eliminar tarea del presupuesto',
-      description: `¿Estás seguro de que deseas eliminar "${taskName}" del presupuesto?`,
-      itemName: taskName,
-      mode: 'simple',
-      onConfirm: () => deleteTaskMutation.mutate(taskId)
-    })
+    deleteTaskMutation.mutate(taskId)
   }
+
+
+
   const headerProps = {
     icon: Calculator,
     title: "Presupuestos"
   }
+
   if (isLoading || budgetsLoading) {
     return (
       <Layout wide={true} headerProps={headerProps}>
@@ -411,6 +446,7 @@ export default function ConstructionBudgets() {
       </Layout>
     )
   }
+
   // Budget Task Table Component using reusable BudgetTable
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
     const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask, deleteBudgetTask } = useBudgetTasks(budgetId);
@@ -419,11 +455,13 @@ export default function ConstructionBudgets() {
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
     // Use local grouping state
+
     // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
       try {
         const task = budgetTasks?.find(t => t.id === taskId);
         if (!task) return;
+
         await updateBudgetTask.mutateAsync({
           id: taskId,
           budget_id: budgetId,
@@ -444,51 +482,45 @@ export default function ConstructionBudgets() {
         });
       }
     };
-    const { showDeleteConfirmation: showTaskDeleteConfirmation } = useDeleteConfirmation()
-    const handleDeleteTask = (taskId: string) => {
-      const task = budgetTasks?.find(t => t.id === taskId)
-      const taskName = task?.task?.display_name || "esta tarea"
-      
-      showTaskDeleteConfirmation({
-        title: "Eliminar tarea del presupuesto",
-        description: `¿Estás seguro de que deseas eliminar "${taskName}" del presupuesto?`,
-        itemName: taskName,
-        mode: "simple",
-        onConfirm: async () => {
-          try {
-            if (!supabase) throw new Error("Supabase client not available");
-            
-            const { error } = await supabase
-              .from("budget_tasks")
-              .delete()
-              .eq("id", taskId);
-            if (error) throw error;
-            queryClient.invalidateQueries({ queryKey: ["budget-tasks", budgetId] });
-            
-            toast({
-              title: "Tarea eliminada",
-              description: "La tarea se eliminó del presupuesto correctamente",
-            });
-          } catch (error) {
-            console.error("Error deleting task:", error);
-            toast({
-              title: "Error",
-              description: "No se pudo eliminar la tarea",
-              variant: "destructive",
-            });
-          }
-        }
-      })
+
+    const handleDeleteTask = async (taskId: string) => {
+      try {
+        if (!supabase) throw new Error('Supabase client not available');
+        
+        const { error } = await supabase
+          .from('budget_tasks')
+          .delete()
+          .eq('id', taskId);
+
+        if (error) throw error;
+
+        queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+        
+        toast({
+          title: "Tarea eliminada",
+          description: "La tarea se eliminó del presupuesto correctamente",
+        });
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo eliminar la tarea",
+          variant: "destructive",
+        });
+      }
     };
+
     const handleAddTask = (budgetId: string) => {
       // TODO: Abrir modal de agregar tareas
       console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
     };
+
     const getUnitName = (unitId: string | null): string => {
       if (!unitId) return '-';
       const unit = units.find(u => u.id === unitId);
       return unit?.name || '-';
     };
+
     // Definir columnas para el componente Table
     const columns = [
       {
@@ -586,12 +618,14 @@ export default function ConstructionBudgets() {
         )
       }
     ];
+
     // Función para renderizar la fila de totales
     const renderFooterRow = () => {
       const totalTasks = budgetTasks?.length || 0;
       const totalCost = budgetTasks?.reduce((sum, task) => 
         sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
       ) || 0;
+
       return (
         <>
           <div className="text-xs font-medium">TOTAL</div>
@@ -605,9 +639,11 @@ export default function ConstructionBudgets() {
           <div></div>
         </>
       );
-          <div></div>
+    };
+
     // Función para renderizar header de grupo
     const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
+
       return (
         <>
           <div className="text-xs font-medium">{groupKey}</div>
@@ -616,9 +652,14 @@ export default function ConstructionBudgets() {
           <div></div>
           <div></div>
           <div></div>
+          <div className="text-xs font-medium">
+            ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </div>
+          <div></div>
         </>
       );
     };
+
     return (
       <Table
         columns={columns}
@@ -647,6 +688,7 @@ export default function ConstructionBudgets() {
       />
     );
   }
+
   // Budget Task Table with Selector Component 
   function BudgetTaskTableWithSelector({ 
     budgetId, 
@@ -661,11 +703,13 @@ export default function ConstructionBudgets() {
     const { data: parameterValues = [] } = useTaskParameterValues();
     const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+
     // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
       try {
         const task = budgetTasks?.find(t => t.id === taskId);
         if (!task) return;
+
         await updateBudgetTask.mutateAsync({
           id: taskId,
           budget_id: budgetId,
@@ -686,6 +730,7 @@ export default function ConstructionBudgets() {
         });
       }
     };
+
     const handleDeleteTask = async (taskId: string) => {
       try {
         if (!supabase) throw new Error('Supabase client not available');
@@ -694,7 +739,9 @@ export default function ConstructionBudgets() {
           .from('budget_tasks')
           .delete()
           .eq('id', taskId);
+
         if (error) throw error;
+
         queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
         
         toast({
@@ -710,14 +757,17 @@ export default function ConstructionBudgets() {
         });
       }
     };
+
     const handleAddTask = (budgetId: string) => {
       console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
     };
+
     const getUnitName = (unitId: string | null): string => {
       if (!unitId) return '-';
       const unit = units.find(u => u.id === unitId);
       return unit?.name || '-';
     };
+
     // Definir columnas para el componente Table
     const columns = [
       {
@@ -815,12 +865,14 @@ export default function ConstructionBudgets() {
         )
       }
     ];
+
     // Función para renderizar la fila de totales
     const renderFooterRow = () => {
       const totalTasks = budgetTasks?.length || 0;
       const totalCost = budgetTasks?.reduce((sum, task) => 
         sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
       ) || 0;
+
       return (
         <>
           <div className="text-xs font-medium">TOTAL</div>
@@ -832,8 +884,10 @@ export default function ConstructionBudgets() {
         </>
       );
     };
+
     // Función para renderizar header de grupo
     const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
+
       return (
         <>
           <div className="text-xs font-medium">{groupKey}</div>
@@ -842,10 +896,14 @@ export default function ConstructionBudgets() {
           <div></div>
           <div></div>
           <div></div>
+          <div className="text-xs font-medium">
+            ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </div>
           <div></div>
         </>
       );
     };
+
     return (
       <Table
           columns={columns}
@@ -874,6 +932,7 @@ export default function ConstructionBudgets() {
         />
     );
   }
+
   return (
     <Layout wide={true} headerProps={headerProps}>
       <div className="space-y-6">
@@ -904,6 +963,7 @@ export default function ConstructionBudgets() {
             }
           ]}
         />
+
         {filteredBudgets.length === 0 ? (
           <EmptyState
             icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
@@ -955,6 +1015,7 @@ export default function ConstructionBudgets() {
                 onDeleteBudget: handleDeleteSelectedBudget
               }}
             />
+
             {/* Budget Tasks Table - Direct without Card wrapper */}
             {selectedBudget ? (
               <BudgetTaskTableWithSelector 
@@ -970,6 +1031,10 @@ export default function ConstructionBudgets() {
           </>
         )}
       </div>
+
+
+
+
     </Layout>
-  );
+  )
 }
