@@ -143,8 +143,7 @@ export function ActionBarDesktop({
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
+                className="w-10 p-0"
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
@@ -221,9 +220,8 @@ export function ActionBarDesktop({
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
                 className={cn(
-                  "h-8 w-8 p-0",
+                  "w-10 p-0",
                   hasActiveFilters && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
                 )}
               >
@@ -249,8 +247,7 @@ export function ActionBarDesktop({
         {onClearFilters && (
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
+            className="w-10 p-0"
             onClick={onClearFilters}
             title="Limpiar filtros"
           >
@@ -267,7 +264,6 @@ export function ActionBarDesktop({
         {primaryActionLabel && onPrimaryActionClick && (
           <Button
             onClick={onPrimaryActionClick}
-            className="h-8"
           >
             <Plus className="w-4 h-4 mr-2" />
             {primaryActionLabel}
@@ -278,8 +274,6 @@ export function ActionBarDesktop({
         {onTodayClick && (
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 px-2"
             onClick={onTodayClick}
             title="Ir a hoy"
           >

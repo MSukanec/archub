@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. ACTIONBAR BUTTON SIZING STANDARDIZED: Eliminated all hardcoded button sizes in ActionBarDesktop component to ensure consistent default sizing across all pages - COMPLETED
+  • Removed all size="sm" and h-8 hardcoded classes from ActionBarDesktop.tsx component
+  • All buttons (ghost, secondary, primary) now use default button component sizing consistently
+  • Fixed inconsistent button heights between primary action and secondary action buttons
+  • Change applied globally to all pages using ActionBarDesktop: construction tasks, budgets, schedule, finances movements
+  • Enhanced visual consistency: all ActionBar buttons maintain same height using component defaults instead of hardcoded values
 - July 23, 2025. CONSTRUCTION LIBRARY PAGE COMPLETED: Successfully created new ConstructionLibrary.tsx page displaying all construction tasks from task_generated_view - COMPLETED
   • TASK LIBRARY HOOK IMPLEMENTED: Created useTaskLibrary hook for fetching and managing task library data with proper TypeScript interfaces
   • NAVIGATION INTEGRATION COMPLETED: Added "Librería" option to construction sidebar (desktop and mobile) and created corresponding route in App.tsx
