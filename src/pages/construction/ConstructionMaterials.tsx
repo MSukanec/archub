@@ -18,6 +18,7 @@ export default function ConstructionMaterials() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [groupBy, setGroupBy] = useState("none")
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: materials = [], isLoading: materialsLoading } = useConstructionMaterials(
@@ -31,7 +32,7 @@ export default function ConstructionMaterials() {
   }, [])
 
   // Get unique categories for filter
-  const uniqueCategories = [...new Set(materials.map(m => m.category_name))].sort()
+  const uniqueCategories = Array.from(new Set(materials.map(m => m.category_name))).sort()
 
   // Filter and sort materials
   const filteredMaterials = materials
@@ -55,24 +56,34 @@ export default function ConstructionMaterials() {
     setSelectedCategory("")
   }
 
-  // Custom filters for the header
+  // Custom filters for ActionBar (like in movements page)
   const customFilters = (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
+    <div className="space-y-4">
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por categoría
+        </Label>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las categorías" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="category">Categoría</SelectItem>
-            <SelectItem value="name">Nombre</SelectItem>
-            <SelectItem value="quantity">Cantidad</SelectItem>
+            <SelectItem value="">Todas las categorías</SelectItem>
+            {uniqueCategories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
     </div>
   )
+
+  // Detect active filters
+  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== ""
+
+
 
   const headerProps = {
     title: "Materiales"
@@ -174,60 +185,13 @@ export default function ConstructionMaterials() {
             <ActionBarDesktop
               searchValue={searchValue}
               onSearchChange={setSearchValue}
-              showGrouping={false}
-              customActions={[
-                <Popover key="category-filter">
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      style={{
-                        backgroundColor: selectedCategory ? 'var(--accent)' : undefined,
-                        color: selectedCategory ? 'var(--accent-foreground)' : undefined
-                      }}
-                    >
-                      <Filter className="w-4 h-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    align="start" 
-                    className="w-48 p-0 rounded-lg shadow-button-normal border"
-                    style={{ 
-                      backgroundColor: 'var(--card-bg)',
-                      borderColor: 'var(--card-border)'
-                    }}
-                  >
-                    <div className="py-1">
-                      <button
-                        onClick={() => setSelectedCategory('')}
-                        className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] ${!selectedCategory ? 'bg-[var(--button-ghost-hover-bg)]' : ''}`}
-                      >
-                        Todas las categorías
-                      </button>
-                      {uniqueCategories.map((category) => (
-                        <button
-                          key={category}
-                          onClick={() => setSelectedCategory(category)}
-                          className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] ${selectedCategory === category ? 'bg-[var(--button-ghost-hover-bg)]' : ''}`}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>,
-                <Button
-                  key="clear-filters"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={handleClearFilters}
-                  disabled={!selectedCategory && !searchValue}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              ]}
+              customFilters={customFilters}
+              onClearFilters={handleClearFilters}
+              hasActiveFilters={hasActiveFilters}
+              showGrouping={true}
+              groupingType={groupBy}
+              onGroupingChange={setGroupBy}
+              customActions={[]}
             />
             
             <Table

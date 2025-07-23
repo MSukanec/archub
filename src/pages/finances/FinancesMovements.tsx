@@ -1333,10 +1333,9 @@ export default function Movements() {
       <Button
         key="delete-selected"
         variant="ghost"
-        size="icon"
         onClick={handleDeleteSelected}
         disabled={deleteMultipleMovementsMutation.isPending}
-        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+        className="text-red-600 hover:text-red-700 hover:bg-red-50"
         title="Eliminar seleccionados"
       >
         <Trash2 className="h-4 w-4" />
@@ -1350,7 +1349,6 @@ export default function Movements() {
       <Button
         variant="secondary"
         onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-        className="h-8"
       >
         <Upload className="mr-2 h-4 w-4" />
         Importar
