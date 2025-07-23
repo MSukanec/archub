@@ -16,7 +16,7 @@ export default function FormModalBody({
   columns = 2, 
   className,
   paddingX = "px-2",
-  paddingY = "py-2"
+  paddingY = "py-4"
 }: FormModalBodyProps) {
   // Determine padding classes
   const paddingClasses = className?.includes("p-0") ? "" : `${paddingX} ${paddingY}`;

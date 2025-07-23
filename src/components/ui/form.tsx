@@ -74,13 +74,22 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 
 const FormItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & {
+    spacing?: "sm" | "md" | "lg"; // Control del espaciado entre label y campo
+  }
+>(({ className, spacing = "md", ...props }, ref) => {
   const id = React.useId()
+  
+  // Mapeo de espaciado
+  const spacingMap = {
+    sm: "space-y-1",  // 4px
+    md: "space-y-2",  // 8px  
+    lg: "space-y-3",  // 12px (original)
+  }
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn("space-y-3", className)} {...props} />
+      <div ref={ref} className={cn(spacingMap[spacing], className)} {...props} />
     </FormItemContext.Provider>
   )
 })
