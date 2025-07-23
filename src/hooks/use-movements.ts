@@ -95,6 +95,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           transfer_group_id
         `)
         .eq('organization_id', organizationId)
+        .order('movement_date', { ascending: false })
         .order('created_at', { ascending: false });
 
       // If project is specified, filter by project

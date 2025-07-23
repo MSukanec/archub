@@ -118,6 +118,18 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. CONSTRUCTION LIBRARY PAGE COMPLETED: Successfully created new ConstructionLibrary.tsx page displaying all construction tasks from task_generated_view - COMPLETED
+  • TASK LIBRARY HOOK IMPLEMENTED: Created useTaskLibrary hook for fetching and managing task library data with proper TypeScript interfaces
+  • NAVIGATION INTEGRATION COMPLETED: Added "Librería" option to construction sidebar (desktop and mobile) and created corresponding route in App.tsx
+  • BUDGETTABLE INTEGRATION: Successfully implemented BudgetTable component instead of regular table as requested by user
+  • FILTERING SYSTEM ADDED: Implemented category and subcategory filters for task library with proper state management
+  • Component follows established patterns with FeatureIntroduction, ActionBarDesktop, and filtering systems
+  • Library positioned below Asistencia in construction sidebar as specifically requested
+- July 23, 2025. MOVEMENTS TABLE SORTING FIXED: Corrected movement ordering to show most recent creation time first for same-date movements - COMPLETED
+  • Fixed hook use-movements.ts to order by movement_date DESC first, then created_at DESC as secondary criteria
+  • Eliminates issue where movements created on same date appeared in wrong chronological order
+  • New EGRESO entries now correctly appear above earlier TRANSFERENCIAS from same day
+  • Maintains proper chronological ordering within each date group
 - July 23, 2025. TABLA AUTO-UPDATE BUG FIXED Y COLUMNA TIPO AGREGADA: Corregido problema de actualización automática de tablas y agregada nueva columna para subcategorías - COMPLETED
   • NUEVA COLUMNA "TIPO": Agregada columna que muestra subcategorías como "Avance de Obra", "Anticipo", etc. después de "Contacto"
   • Redistribuidas las 6 columnas con anchos de 16.7% cada una: Fecha, Contacto, Tipo, Billetera, Monto, Cotización
