@@ -1643,9 +1643,63 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       aportesForm.handleSubmit(onSubmitAportes)()
     } else if (isCurrentAportesPropios) {
       console.log('Submitting as aportes propios form')
+      
+      // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
+      const mainFormTypeId = form.watch('type_id')
+      const mainFormCreatedBy = form.watch('created_by')
+      const mainFormMovementDate = form.watch('movement_date')
+      const mainFormDescription = form.watch('description')
+      
+      if (mainFormTypeId) {
+        console.log('Synchronizing type_id before submit:', mainFormTypeId)
+        aportesPropriosForm.setValue('type_id', mainFormTypeId)
+      }
+      
+      if (mainFormCreatedBy) {
+        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
+        aportesPropriosForm.setValue('created_by', mainFormCreatedBy)
+      }
+      
+      if (mainFormMovementDate) {
+        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
+        aportesPropriosForm.setValue('movement_date', mainFormMovementDate)
+      }
+      
+      if (mainFormDescription) {
+        console.log('Synchronizing description before submit:', mainFormDescription)
+        aportesPropriosForm.setValue('description', mainFormDescription)
+      }
+      
       aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
     } else if (isCurrentRetirosPropios) {
       console.log('Submitting as retiros propios form')
+      
+      // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
+      const mainFormTypeId = form.watch('type_id')
+      const mainFormCreatedBy = form.watch('created_by')
+      const mainFormMovementDate = form.watch('movement_date')
+      const mainFormDescription = form.watch('description')
+      
+      if (mainFormTypeId) {
+        console.log('Synchronizing type_id before submit:', mainFormTypeId)
+        retirosPropriosForm.setValue('type_id', mainFormTypeId)
+      }
+      
+      if (mainFormCreatedBy) {
+        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
+        retirosPropriosForm.setValue('created_by', mainFormCreatedBy)
+      }
+      
+      if (mainFormMovementDate) {
+        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
+        retirosPropriosForm.setValue('movement_date', mainFormMovementDate)
+      }
+      
+      if (mainFormDescription) {
+        console.log('Synchronizing description before submit:', mainFormDescription)
+        retirosPropriosForm.setValue('description', mainFormDescription)
+      }
+      
       retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
     } else {
       // Usar el movementType original para casos como conversión/transferencia
