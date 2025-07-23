@@ -907,34 +907,7 @@ export default function ConstructionBudgets() {
     };
 
     return (
-      <div>
-        {/* ActionBar con selector de agrupamiento */}
-        <ActionBarDesktop
-          filters={
-            <Select value={groupingType} onValueChange={setGroupingType}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Agrupar por..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin agrupar</SelectItem>
-                <SelectItem value="rubro_name">Agrupar por rubro</SelectItem>
-              </SelectContent>
-            </Select>
-          }
-          primaryAction={{
-            label: "Agregar Tareas",
-            onClick: () => {
-              openModal('budget-task-bulk-add', { 
-                budgetId: budgetId,
-                onSuccess: () => {
-                  queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
-                }
-              });
-            }
-          }}
-        />
-        
-        <Table
+      <Table
           columns={columns}
           data={budgetTasks || []}
           isLoading={isLoading}
@@ -959,7 +932,6 @@ export default function ConstructionBudgets() {
             />
           )}
         />
-      </div>
     );
   }
 
