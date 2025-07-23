@@ -118,13 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 23, 2025. CONSTRUCTION BUDGETS PAGE COMPLETELY CLEANED: Eliminated all problematic duplicate code and simplified page structure - COMPLETED
-  • Removed all complex logic, functions, and duplicate BudgetTaskTableWithSelector components causing edit conflicts
-  • Page now contains only FeatureIntroduction and ActionBarDesktop components as requested
-  • Fixed import errors: Layout from '@/components/layout/desktop/Layout' and useModal from '@/components/modal/form/ModalFactory'
-  • Eliminated over 500 lines of problematic code including budget selection, task management, and table rendering
-  • Clean foundation ready for new functionality without code duplication issues
-  • Application running successfully with simplified, maintainable structure
 - July 23, 2025. ACTIONBAR BUTTON SIZING STANDARDIZED: Eliminated all hardcoded button sizes in ActionBarDesktop component to ensure consistent default sizing across all pages - COMPLETED
   • Removed all size="sm" and h-8 hardcoded classes from ActionBarDesktop.tsx component
   • All buttons (ghost, secondary, primary) now use default button component sizing consistently
