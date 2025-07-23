@@ -238,11 +238,11 @@ export default function FinancesInstallments() {
   // Calculate total contributed (dollarized)
   const totalContributedDollarized = installments.reduce((sum, installment) => {
     const amount = installment.amount || 0
-    const currencyCode = installment.currency?.code || 'N/A'
+    const currencyCode = installment.currency_code || 'N/A'
     
     if (currencyCode === 'USD') {
       return sum + amount
-    } else if (currencyCode !== 'USD' && installment.exchange_rate) {
+    } else if (currencyCode === 'ARS' && installment.exchange_rate) {
       return sum + (amount / installment.exchange_rate)
     }
     
@@ -255,8 +255,8 @@ export default function FinancesInstallments() {
     
     // Track currencies from installments
     installments.forEach(installment => {
-      if (installment.currency?.code) {
-        currenciesSet.add(installment.currency.code)
+      if (installment.currency_code) {
+        currenciesSet.add(installment.currency_code)
       }
     })
     
@@ -271,19 +271,15 @@ export default function FinancesInstallments() {
         
         clientInstallments.forEach(installment => {
           const amount = installment.amount || 0
-          const currencyCode = installment.currency?.code || 'N/A'
+          const currencyCode = installment.currency_code || 'N/A'
           
+
           if (currencyCode === 'USD') {
             dollarizedTotal += amount
-          } else if (currencyCode !== 'USD' && installment.exchange_rate) {
-            // Convert from local currency to USD: amount_in_pesos / exchange_rate_pesos_per_usd
+          } else if (currencyCode === 'ARS' && installment.exchange_rate) {
+            // Convert from ARS to USD: amount_in_pesos / exchange_rate_pesos_per_usd
             const convertedAmount = amount / installment.exchange_rate
-            console.log(`Converting ${currencyCode} to USD:`, {
-              originalAmount: amount,
-              exchangeRate: installment.exchange_rate,
-              convertedAmount,
-              contact: client.contact?.first_name || client.contact?.company_name
-            })
+
             dollarizedTotal += convertedAmount
           }
         })
@@ -291,11 +287,15 @@ export default function FinancesInstallments() {
         // Group installments by currency
         const currencies: { [key: string]: { amount: number; currency: any } } = {}
         clientInstallments.forEach(installment => {
-          const currencyCode = installment.currency?.code || 'N/A'
+          const currencyCode = installment.currency_code || 'N/A'
           if (!currencies[currencyCode]) {
             currencies[currencyCode] = {
               amount: 0,
-              currency: installment.currency
+              currency: {
+                code: installment.currency_code,
+                symbol: installment.currency_symbol,
+                name: installment.currency_name
+              }
             }
           }
           currencies[currencyCode].amount += installment.amount || 0
