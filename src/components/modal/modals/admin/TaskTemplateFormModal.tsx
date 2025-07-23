@@ -17,10 +17,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, GripVertical, Plus, FileText, X, CheckCircle2, Settings } from 'lucide-react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import {
+  CSS,
+} from '@dnd-kit/utilities';
 
 interface TaskTemplateFormModalProps {
   categoryId?: string;
@@ -30,13 +45,13 @@ interface TaskTemplateFormModalProps {
   taskGroupName?: string;
 }
 
-interface SortableParameterProps {
-  parameter: TaskTemplateParameter & { task_parameter: TaskParameter };
+interface SortableParameterItemProps {
+  param: { id: string; parameter_id: string; template_id: string; position: number; option_group_id: string | null };
+  parameter: { id: string; name: string; label: string; type: string } | undefined;
   onRemove: (id: string) => void;
-  onToggleRequired: (id: string, required: boolean) => void;
 }
 
-function SortableParameter({ parameter, onRemove, onToggleRequired }: SortableParameterProps) {
+function SortableParameterItem({ param, parameter, onRemove }: SortableParameterItemProps) {
   const {
     attributes,
     listeners,
@@ -44,7 +59,7 @@ function SortableParameter({ parameter, onRemove, onToggleRequired }: SortablePa
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: parameter.id });
+  } = useSortable({ id: param.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -56,7 +71,7 @@ function SortableParameter({ parameter, onRemove, onToggleRequired }: SortablePa
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border"
+      className="flex items-center justify-between p-3 bg-muted/30 rounded border"
     >
       <div className="flex items-center gap-3 flex-1">
         <div {...attributes} {...listeners} className="cursor-grab">
@@ -64,25 +79,19 @@ function SortableParameter({ parameter, onRemove, onToggleRequired }: SortablePa
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{parameter.task_parameter.name}</span>
-            {parameter.required && <Badge variant="secondary" className="text-xs">Obligatorio</Badge>}
+            <span className="font-medium">{parameter?.label || parameter?.name || 'Parámetro desconocido'}</span>
+            <Badge variant="secondary" className="text-xs">{parameter?.type || 'text'}</Badge>
           </div>
-          <p className="text-sm text-muted-foreground">{parameter.task_parameter.description}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Checkbox
-          checked={parameter.required}
-          onCheckedChange={(checked) => onToggleRequired(parameter.id, checked as boolean)}
-        />
-        <Label className="text-sm">Obligatorio</Label>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onRemove(parameter.id)}
+          onClick={() => onRemove(param.id)}
           className="text-destructive hover:text-destructive"
         >
-          <Trash2 className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -102,9 +111,23 @@ export function TaskTemplateFormModal({
 
   // Template data
   const [selectedUnit, setSelectedUnit] = useState('');
-  const [templateParameters, setTemplateParameters] = useState<(TaskTemplateParameter & { task_parameter: TaskParameter })[]>([]);
+  const [templateParameters, setTemplateParameters] = useState<Array<{
+    id: string;
+    parameter_id: string;
+    template_id: string;
+    position: number;
+    option_group_id: string | null;
+  }>>([]);
   const [newParameterId, setNewParameterId] = useState('');
   const [newOptionGroupId, setNewOptionGroupId] = useState('');
+
+  // Drag & drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Fetch existing template
   const { data: template, isLoading: templateLoading } = useQuery({
@@ -349,10 +372,58 @@ export function TaskTemplateFormModal({
   React.useEffect(() => {
     if (template) {
       setSelectedUnit(template.unit_id || '');
-      setTemplateParameters(template.task_template_parameters || []);
+      // Convertir a la estructura esperada
+      const parameters = (template.task_template_parameters || []).map((tp, index) => ({
+        id: tp.id,
+        parameter_id: tp.parameter_id,
+        template_id: tp.template_id,
+        position: index,
+        option_group_id: tp.option_group_id
+      }));
+      setTemplateParameters(parameters);
       setCurrentStep(template.unit_id ? 3 : 2);
     }
   }, [template]);
+
+  // Función para agregar parámetro
+  const handleAddParameter = () => {
+    if (template?.id && newParameterId) {
+      const newParam = {
+        id: `temp-${Date.now()}`,
+        parameter_id: newParameterId,
+        template_id: template.id,
+        position: templateParameters.length,
+        option_group_id: newOptionGroupId || null,
+      };
+      setTemplateParameters(prev => [...prev, newParam]);
+      setNewParameterId('');
+      setNewOptionGroupId('');
+    }
+  };
+
+  // Función para remover parámetro
+  const handleRemoveParameter = (id: string) => {
+    setTemplateParameters(prev => prev.filter(p => p.id !== id));
+  };
+
+  // Función para drag & drop
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setTemplateParameters((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over?.id);
+
+        const reorderedItems = arrayMove(items, oldIndex, newIndex);
+        // Actualizar posiciones
+        return reorderedItems.map((item, index) => ({
+          ...item,
+          position: index
+        }));
+      });
+    }
+  };
 
   // Step configuration
   const stepConfig: StepModalConfig = {
@@ -477,152 +548,128 @@ export function TaskTemplateFormModal({
         return (
           <div className="space-y-6">
             {/* Vista previa de la plantilla */}
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div className="space-y-3 flex-1">
-                <div>
-                  <h4 className="text-sm font-medium">Vista Previa de la Plantilla</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Así se verá el nombre de la tarea generada
-                  </p>
-                </div>
-                <div className="text-sm bg-muted/30 p-3 rounded border">
-                  <span className="font-medium">
-                    {(() => {
-                      const baseName = taskGroupName || categoryName;
-                      if (templateParametersData.length === 0) {
-                        return `${baseName}.`;
-                      }
-                      const parameterPlaceholders = templateParametersData
-                        .map(tp => `{{${tp.task_parameters?.name || 'parámetro'}}}`)
-                        .join(' ');
-                      return `${baseName} ${parameterPlaceholders}.`;
-                    })()}
-                  </span>
-                </div>
+            <div>
+              <h4 className="text-sm font-medium mb-2">Vista Previa de la Plantilla</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Así se verá el nombre de la tarea generada
+              </p>
+              <div className="text-sm bg-muted/30 p-3 rounded border">
+                <span className="font-medium">
+                  {(() => {
+                    const baseName = taskGroupName || categoryName;
+                    if (templateParameters.length === 0) {
+                      return `${baseName}.`;
+                    }
+                    const parameterPlaceholders = templateParameters
+                      .map(tp => `{{${availableParameters.find(p => p.id === tp.parameter_id)?.name || 'parámetro'}}}`)
+                      .join(' ');
+                    return `${baseName} ${parameterPlaceholders}.`;
+                  })()}
+                </span>
               </div>
             </div>
-
-            <div className="border-t border-border"></div>
 
             {/* Agregar Parámetros */}
-            <div className="flex items-start gap-3">
-              <Settings className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div className="space-y-3 flex-1">
-                <div>
-                  <h4 className="text-sm font-medium">Agregar Parámetros</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Define los parámetros que se mostrarán al crear tareas
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Parámetro</Label>
-                    <Select 
-                      value={newParameterId} 
-                      onValueChange={(value) => {
-                        setNewParameterId(value);
-                        setNewOptionGroupId('');
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar parámetro" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableParameters.map((parameter) => (
-                          <SelectItem key={parameter.id} value={parameter.id}>
-                            {parameter.label || parameter.name} ({parameter.type})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Grupo de Opciones</Label>
-                    <Select 
-                      value={newOptionGroupId} 
-                      onValueChange={setNewOptionGroupId}
-                      disabled={!newParameterId || parameterOptionGroups.length === 0}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={
-                          !newParameterId 
-                            ? "Primero selecciona parámetro"
-                            : parameterOptionGroups.length === 0
-                            ? "Sin grupos disponibles"
-                            : "Seleccionar grupo"
-                        } />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {parameterOptionGroups.map((group) => (
-                          <SelectItem key={group.id} value={group.id}>
-                            {group.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="flex items-end">
-                    <Button 
-                      onClick={() => {
-                        if (template?.id && newParameterId) {
-                          const newParam = {
-                            id: `temp-${Date.now()}`,
-                            template_id: template.id,
-                            parameter_id: newParameterId,
-                            option_group_id: newOptionGroupId || null,
-                            position: templateParametersData.length,
-                            task_parameters: availableParameters.find(p => p.id === newParameterId)
-                          };
-                          setTemplateParameters(prev => [...prev, newParam as any]);
-                          setNewParameterId('');
-                          setNewOptionGroupId('');
-                        }
-                      }}
-                      disabled={!newParameterId}
-                      className="w-full"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Lista de parámetros */}
-                {templateParametersData.length > 0 && (
-                  <div className="mt-4">
-                    <Label className="text-sm font-medium mb-3 block">
-                      Parámetros configurados ({templateParametersData.length}):
-                    </Label>
-                    <div className="space-y-2">
-                      {templateParametersData.map((tp, index) => (
-                        <div key={tp.id} className="flex items-center justify-between p-3 bg-muted/30 rounded border">
-                          <div className="flex items-center space-x-3">
-                            <div className="text-sm font-medium">
-                              {index + 1}. {tp.task_parameters?.label || tp.task_parameters?.name}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              ({tp.task_parameters?.type})
-                            </div>
-                          </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              setTemplateParameters(prev => prev.filter(p => p.id !== tp.id));
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
+            <div>
+              <h4 className="text-sm font-medium mb-2">Agregar Parámetros</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Define los parámetros que se mostrarán al crear tareas
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Parámetro</Label>
+                  <Select 
+                    value={newParameterId} 
+                    onValueChange={(value) => {
+                      setNewParameterId(value);
+                      setNewOptionGroupId('');
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar parámetro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableParameters.map((parameter) => (
+                        <SelectItem key={parameter.id} value={parameter.id}>
+                          {parameter.label || parameter.name} ({parameter.type})
+                        </SelectItem>
                       ))}
-                    </div>
-                  </div>
-                )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Grupo de Opciones</Label>
+                  <Select 
+                    value={newOptionGroupId} 
+                    onValueChange={setNewOptionGroupId}
+                    disabled={!newParameterId || parameterOptionGroups.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !newParameterId 
+                          ? "Primero selecciona parámetro"
+                          : parameterOptionGroups.length === 0
+                          ? "Sin grupos disponibles"
+                          : "Seleccionar grupo"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parameterOptionGroups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleAddParameter}
+                    disabled={!newParameterId}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar
+                  </Button>
+                </div>
               </div>
             </div>
+
+            {/* Lista de parámetros con drag & drop */}
+            {templateParameters.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2">Parámetros Configurados</h4>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Arrastra para reordenar los parámetros
+                </p>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={templateParameters.map(p => p.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {templateParameters.map((param) => {
+                        const parameter = availableParameters.find(p => p.id === param.parameter_id);
+                        return (
+                          <SortableParameterItem
+                            key={param.id}
+                            param={param}
+                            parameter={parameter}
+                            onRemove={handleRemoveParameter}
+                          />
+                        );
+                      })}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              </div>
+            )}
           </div>
         );
 
