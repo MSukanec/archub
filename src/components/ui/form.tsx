@@ -77,7 +77,7 @@ const FormItem = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & {
     spacing?: "sm" | "md" | "lg"; // Control del espaciado entre label y campo
   }
->(({ className, spacing = "md", ...props }, ref) => {
+>(({ className, spacing = "sm", ...props }, ref) => {
   const id = React.useId()
   
   // Mapeo de espaciado

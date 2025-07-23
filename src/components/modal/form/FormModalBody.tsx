@@ -15,7 +15,7 @@ export default function FormModalBody({
   children, 
   columns = 2, 
   className,
-  paddingX = "px-2",
+  paddingX = "px-6",
   paddingY = "py-4"
 }: FormModalBodyProps) {
   // Determine padding classes

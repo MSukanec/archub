@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
-import { useMaterials, Material } from '@/hooks/use-materials'
+import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { Card } from '@/components/ui/card'
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
@@ -22,13 +22,12 @@ export default function AdminMaterials() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [categoryFilter, setCategoryFilter] = useState('all')
-  const [deletingMaterial, setDeletingMaterial] = useState<Material | null>(null)
   
   const { openModal } = useGlobalModalStore()
 
   // Fetch materials using the hook
   const { data: materials = [], isLoading } = useMaterials()
-  // Temporary placeholder until delete functionality is implemented
+  const deleteMaterialMutation = useDeleteMaterial()
 
   // Statistics calculations
   const totalMaterials = materials.length
@@ -68,19 +67,15 @@ export default function AdminMaterials() {
   }
 
   const handleDelete = (material: Material) => {
-    setDeletingMaterial(material)
-  }
-
-  const handleConfirmDelete = () => {
-    if (deletingMaterial) {
-      // Temporary placeholder for delete functionality
-      console.log('Delete material:', deletingMaterial.id)
-      toast({
-        title: "Función pendiente",
-        description: "La eliminación de materiales estará disponible próximamente"
-      })
-      setDeletingMaterial(null)
-    }
+    openModal('delete-confirmation', {
+      mode: 'replace',
+      title: 'Eliminar Material',
+      description: `¿Estás seguro que deseas eliminar el material "${material.name}"? Esta acción no se puede deshacer.`,
+      itemName: material.name,
+      destructiveActionText: 'Eliminar Material',
+      onDelete: () => deleteMaterialMutation.mutate(material.id),
+      isLoading: deleteMaterialMutation.isPending
+    })
   }
 
   const clearFilters = () => {
@@ -273,25 +268,7 @@ export default function AdminMaterials() {
         />
       </div>
 
-      <AlertDialog open={!!deletingMaterial} onOpenChange={() => setDeletingMaterial(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar material?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El material "{deletingMaterial?.name}" será eliminado permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
     </Layout>
   )
 }

@@ -133,3 +133,41 @@ export function useUpdateMaterial() {
     },
   })
 }
+
+export function useDeleteMaterial() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!supabase) throw new Error('Supabase client not available')
+
+      const { error } = await supabase
+        .from('materials')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('Error deleting material:', error)
+        throw error
+      }
+
+      return id
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      toast({
+        title: "Material eliminado",
+        description: "El material se ha eliminado exitosamente.",
+        variant: "default",
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting material:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el material.",
+        variant: "destructive",
+      })
+    },
+  })
+}
