@@ -105,7 +105,7 @@ export function ActionBarDesktop({
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
-                className="w-8 p-0"
+                size="icon-sm"
                 onClick={budgetSelector.onEditBudget}
               >
                 <Edit className="w-4 h-4" />
@@ -113,7 +113,8 @@ export function ActionBarDesktop({
               
               <Button
                 variant="ghost"
-                className="w-8 p-0 text-destructive hover:text-destructive"
+                size="icon-sm"
+                className="text-destructive hover:text-destructive"
                 onClick={budgetSelector.onDeleteBudget}
               >
                 <Trash2 className="w-4 h-4" />
@@ -141,7 +142,7 @@ export function ActionBarDesktop({
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-8 w-8 p-0"
+                size="icon-sm"
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
