@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -411,41 +411,35 @@ export function TaskTemplateFormModal({
         return (
           <div className="space-y-6">
             {template ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <FileText className="h-8 w-8 text-primary" />
-                    <div>
-                      <h3 className="text-lg font-semibold">Plantilla Creada</h3>
-                      <p className="text-sm text-muted-foreground">Ya existe una plantilla para esta grupo de tareas</p>
-                    </div>
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <FileText className="h-8 w-8 text-primary" />
+                  <div>
+                    <h3 className="text-lg font-semibold">Plantilla Creada</h3>
+                    <p className="text-sm text-muted-foreground">Ya existe una plantilla para esta grupo de tareas</p>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium">Grupo</Label>
-                      <p className="text-sm mt-1">{taskGroupName || categoryName}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Plantilla</Label>
-                      <p className="text-sm mt-1">{template.name}</p>
-                    </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Grupo</Label>
+                    <p className="text-sm mt-1">{taskGroupName || categoryName}</p>
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <Label className="text-sm font-medium">Plantilla</Label>
+                    <p className="text-sm mt-1">{template.name_template}</p>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="mb-4">
-                    <p className="text-base mb-2">No se ha creado ninguna plantilla para esta grupo de tareas</p>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Para: <strong>{taskGroupName || categoryName}</strong>
-                    </p>
-                  </div>
-                  
-
-                </CardContent>
-              </Card>
+              <div>
+                <div className="mb-4">
+                  <p className="text-base mb-2">No se ha creado ninguna plantilla para esta grupo de tareas</p>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Para: <strong>{taskGroupName || categoryName}</strong>
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         );
@@ -453,185 +447,177 @@ export function TaskTemplateFormModal({
       case 2:
         return (
           <div className="space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Seleccionar Unidad</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Elige la unidad de medida para esta plantilla
-                  </p>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="unit">Unidad de medida *</Label>
-                    <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar unidad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Sin unidad</SelectItem>
-                        {units.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Seleccionar Unidad</h3>
+              <p className="text-sm text-muted-foreground">
+                Elige la unidad de medida para esta plantilla
+              </p>
+            </div>
+            
+            <div>
+              <Label htmlFor="unit">Unidad de medida *</Label>
+              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar unidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Sin unidad</SelectItem>
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         );
 
       case 3:
         return (
           <div className="space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Configurar Parámetros</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Define los parámetros que se mostrarán al crear tareas con esta plantilla
-                  </p>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Configurar Parámetros</h3>
+              <p className="text-sm text-muted-foreground">
+                Define los parámetros que se mostrarán al crear tareas con esta plantilla
+              </p>
+            </div>
+            
+            {/* Agregar Parámetros */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">Agregar Parámetros</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Parámetro</Label>
+                  <Select 
+                    value={newParameterId} 
+                    onValueChange={(value) => {
+                      setNewParameterId(value);
+                      setNewOptionGroupId('');
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar parámetro" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableParameters.map((parameter) => (
+                        <SelectItem key={parameter.id} value={parameter.id}>
+                          {parameter.label || parameter.name} ({parameter.type})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Grupo de Opciones</Label>
+                  <Select 
+                    value={newOptionGroupId} 
+                    onValueChange={setNewOptionGroupId}
+                    disabled={!newParameterId || parameterOptionGroups.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !newParameterId 
+                          ? "Primero selecciona parámetro"
+                          : parameterOptionGroups.length === 0
+                          ? "Sin grupos disponibles"
+                          : "Seleccionar grupo"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parameterOptionGroups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
-                <div className="space-y-4">
-                  {/* Agregar Parámetros */}
-                  <div className="bg-card border border-border rounded-lg p-4">
-                    <h4 className="text-sm font-medium mb-3">Agregar Parámetros</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label>Parámetro</Label>
-                        <Select 
-                          value={newParameterId} 
-                          onValueChange={(value) => {
-                            setNewParameterId(value);
-                            setNewOptionGroupId('');
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar parámetro" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableParameters.map((parameter) => (
-                              <SelectItem key={parameter.id} value={parameter.id}>
-                                {parameter.label || parameter.name} ({parameter.type})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                <div className="flex items-end">
+                  <Button 
+                    onClick={() => {
+                      if (template?.id && newParameterId) {
+                        const newParam = {
+                          id: `temp-${Date.now()}`,
+                          template_id: template.id,
+                          parameter_id: newParameterId,
+                          option_group_id: newOptionGroupId || null,
+                          position: templateParametersData.length,
+                          task_parameters: availableParameters.find(p => p.id === newParameterId)
+                        };
+                        setTemplateParameters(prev => [...prev, newParam as any]);
+                        setNewParameterId('');
+                        setNewOptionGroupId('');
+                      }
+                    }}
+                    disabled={!newParameterId}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-                      <div className="space-y-2">
-                        <Label>Grupo de Opciones</Label>
-                        <Select 
-                          value={newOptionGroupId} 
-                          onValueChange={setNewOptionGroupId}
-                          disabled={!newParameterId || parameterOptionGroups.length === 0}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={
-                              !newParameterId 
-                                ? "Primero selecciona parámetro"
-                                : parameterOptionGroups.length === 0
-                                ? "Sin grupos disponibles"
-                                : "Seleccionar grupo"
-                            } />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {parameterOptionGroups.map((group) => (
-                              <SelectItem key={group.id} value={group.id}>
-                                {group.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="flex items-end">
-                        <Button 
+            {/* Lista de parámetros */}
+            {templateParametersData.length > 0 && (
+              <>
+                <div className="border-t border-border my-6"></div>
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">
+                    Parámetros de la plantilla ({templateParametersData.length}):
+                  </Label>
+                  <div className="space-y-2">
+                    {templateParametersData.map((tp, index) => (
+                      <div key={tp.id} className="flex items-center justify-between p-3 bg-muted/30 rounded border">
+                        <div className="flex items-center space-x-3">
+                          <div className="text-sm font-medium">
+                            {index + 1}. {tp.task_parameters?.label || tp.task_parameters?.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            ({tp.task_parameters?.type})
+                          </div>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
                           onClick={() => {
-                            if (template?.id && newParameterId) {
-                              const newParam = {
-                                id: `temp-${Date.now()}`,
-                                template_id: template.id,
-                                parameter_id: newParameterId,
-                                option_group_id: newOptionGroupId || null,
-                                position: templateParametersData.length,
-                                task_parameters: availableParameters.find(p => p.id === newParameterId)
-                              };
-                              setTemplateParameters(prev => [...prev, newParam as any]);
-                              setNewParameterId('');
-                              setNewOptionGroupId('');
-                            }
+                            setTemplateParameters(prev => prev.filter(p => p.id !== tp.id));
                           }}
-                          disabled={!newParameterId}
-                          className="w-full"
                         >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Agregar
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Lista de parámetros */}
-                  {templateParametersData.length > 0 && (
-                    <div className="bg-card border border-border rounded-lg p-4">
-                      <Label className="text-sm font-medium mb-3 block">
-                        Parámetros de la plantilla ({templateParametersData.length}):
-                      </Label>
-                      <div className="space-y-2">
-                        {templateParametersData.map((tp, index) => (
-                          <div key={tp.id} className="flex items-center justify-between p-3 bg-background rounded border">
-                            <div className="flex items-center space-x-3">
-                              <div className="text-sm font-medium">
-                                {index + 1}. {tp.task_parameters?.label || tp.task_parameters?.name}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                ({tp.task_parameters?.type})
-                              </div>
-                            </div>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => {
-                                setTemplateParameters(prev => prev.filter(p => p.id !== tp.id));
-                              }}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Vista previa */}
-                  <div className="bg-muted/30 rounded-lg border p-4">
-                    <Label className="text-sm font-medium mb-2 block">
-                      Vista previa de la plantilla:
-                    </Label>
-                    <div className="text-sm bg-background p-3 rounded border">
-                      <span className="font-medium">
-                        {(() => {
-                          const baseName = taskGroupName || categoryName;
-                          if (templateParametersData.length === 0) {
-                            return `${baseName}.`;
-                          }
-                          const parameterPlaceholders = templateParametersData
-                            .map(tp => `{{${tp.task_parameters?.name || 'parámetro'}}}`)
-                            .join(' ');
-                          return `${baseName} ${parameterPlaceholders}.`;
-                        })()}
-                      </span>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </>
+            )}
+
+            {/* Vista previa */}
+            <div className="border-t border-border my-6"></div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">
+                Vista previa de la plantilla:
+              </Label>
+              <div className="text-sm bg-muted/30 p-3 rounded border">
+                <span className="font-medium">
+                  {(() => {
+                    const baseName = taskGroupName || categoryName;
+                    if (templateParametersData.length === 0) {
+                      return `${baseName}.`;
+                    }
+                    const parameterPlaceholders = templateParametersData
+                      .map(tp => `{{${tp.task_parameters?.name || 'parámetro'}}}`)
+                      .join(' ');
+                    return `${baseName} ${parameterPlaceholders}.`;
+                  })()}
+                </span>
+              </div>
+            </div>
           </div>
         );
 
