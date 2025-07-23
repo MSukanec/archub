@@ -337,7 +337,7 @@ export function TaskTemplateFormModal({
               <Card>
                 <CardContent className="pt-6">
                   <div className="mb-4">
-                    <h3 className="text-lg font-semibold mb-2">No se ha creado ninguna plantilla para esta grupo de tareas</h3>
+                    <p className="text-base mb-2">No se ha creado ninguna plantilla para esta grupo de tareas</p>
                     <p className="text-sm text-muted-foreground mb-6">
                       Para: <strong>{taskGroupName || categoryName}</strong>
                     </p>
