@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. TABLA DETALLE DE COMPROMISOS MEJORADA: Optimizada tabla de compromisos de pago con formato mejorado y eliminación de columna redundante - COMPLETED
+  • Eliminada columna "Moneda" por redundancia con información ya presente en monto
+  • Columna "Cotización" ahora siempre muestra en pesos argentinos (ARS) independientemente de la moneda original
+  • Agregado espacio entre símbolo y monto: "$ 1.000.000" en lugar de "$1.000.000" para mejor legibilidad
+  • Redistribuidas columnas con anchos del 20% cada una: Fecha, Contacto, Billetera, Monto, Cotización
+  • InstallmentDetailCard actualizada con mismo formato: espacio en monto y cotización siempre en pesos
+  • Color verde aplicado a montos para mejor identificación visual
+  • Mejoras aplicadas tanto en vista desktop como mobile para consistencia visual```
 - July 22, 2025. CURRENCY FIELD "SIN NOMBRE" BUG COMPLETELY RESOLVED: Fixed critical recurring issue where currency fields showed "Sin nombre" instead of proper currency names - COMPLETED
   • Root cause identified: inconsistent wallet mapping logic in movement editing (w.wallet_id vs w.id)
   • Fixed wallet structure mapping in MovementFormModal.tsx lines 632 and 859-860

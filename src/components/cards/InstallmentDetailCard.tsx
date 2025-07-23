@@ -55,12 +55,17 @@ export default function InstallmentDetailCard({
           </div>
         </div>
 
-        {/* Right side: Wallet and Currency/Amount */}
+        {/* Right side: Wallet and Amount with exchange rate */}
         <div className="text-right">
           <div className="text-sm">{item.wallet_name || '-'}</div>
-          <div className="font-medium">
-            {item.currency_code || ''} {item.currency_symbol || '$'}{item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          <div className="font-medium text-green-600">
+            {item.currency_symbol || '$'} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
+          {item.exchange_rate && (
+            <div className="text-xs text-muted-foreground">
+              Cotización: $ {item.exchange_rate.toLocaleString('es-AR')}
+            </div>
+          )}
         </div>
       </div>
     </div>

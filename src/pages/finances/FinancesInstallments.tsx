@@ -899,12 +899,12 @@ export default function FinancesInstallments() {
     return [...baseColumns, ...currencyColumns]
   }, [availableCurrencies])
 
-  // Detailed table columns (Fecha, Contacto, Moneda, Billetera, Monto, Cotización)
+  // Detailed table columns (Fecha, Contacto, Billetera, Monto, Cotización)
   const detailColumns = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "16.7%",
+      width: "20%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Installment) => {
@@ -919,7 +919,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "16.7%",
+      width: "20%",
       render: (item: any) => {
         if (!item.contact_name) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -943,19 +943,9 @@ export default function FinancesInstallments() {
       }
     },
     {
-      key: "currency",
-      label: "Moneda",
-      width: "16.7%",
-      render: (item: any) => (
-        <Badge variant="outline" className="text-xs">
-          {item.currency_code || 'N/A'}
-        </Badge>
-      )
-    },
-    {
       key: "wallet",
       label: "Billetera",
-      width: "16.7%",
+      width: "20%",
       render: (item: any) => (
         <div className="text-sm">{item.wallet_name || 'Sin billetera'}</div>
       )
@@ -963,14 +953,14 @@ export default function FinancesInstallments() {
     {
       key: "amount",
       label: "Monto",
-      width: "16.65%",
+      width: "20%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
         const symbol = item.currency_symbol || '$'
         return (
           <div className="text-sm font-medium text-green-600">
-            {symbol}{Math.abs(item.amount || 0).toLocaleString('es-AR')}
+            {symbol} {Math.abs(item.amount || 0).toLocaleString('es-AR')}
           </div>
         )
       }
@@ -978,7 +968,7 @@ export default function FinancesInstallments() {
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "16.65%",
+      width: "20%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -986,10 +976,10 @@ export default function FinancesInstallments() {
           return <div className="text-sm text-muted-foreground">-</div>
         }
         
-        const symbol = item.currency_symbol || '$'
+        // Siempre mostrar cotización en pesos argentinos
         return (
           <div className="text-sm">
-            {symbol}{item.exchange_rate.toLocaleString('es-AR')}
+            $ {item.exchange_rate.toLocaleString('es-AR')}
           </div>
         )
       }
