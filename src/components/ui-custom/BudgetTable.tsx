@@ -213,11 +213,9 @@ export function BudgetTable({
           description="Comienza agregando la primera tarea para gestionar los costos y materiales"
           action={
             <Button 
-              size="sm" 
               onClick={() => onAddTasks?.()}
-              className="h-8 px-3 text-xs"
             >
-              <Plus className="w-3 h-3 mr-1" />
+              <Plus className="w-4 h-4 mr-2" />
               Agregar Tarea
             </Button>
           }

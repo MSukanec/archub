@@ -61,8 +61,8 @@ export default function DesignDashboard() {
           description="Comienza creando fases de diseño y documentos para ver el resumen completo del proyecto."
           action={
             <Link href="/design/documentation">
-              <Button className="h-8 px-3 text-sm">
-                <Plus className="h-3 w-3 mr-1" />
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
                 Crear Primer Documento
               </Button>
             </Link>

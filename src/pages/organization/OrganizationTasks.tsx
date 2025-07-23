@@ -227,8 +227,8 @@ function TasksContent() {
           title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
           action={
-            <Button onClick={() => openModal("board", {})} className="h-8 px-3 text-sm">
-              <Plus className="h-3 w-3 mr-1" />
+            <Button onClick={() => openModal("board", {})}>
+              <Plus className="h-4 w-4 mr-2" />
               Crear Tablero
             </Button>
           }
