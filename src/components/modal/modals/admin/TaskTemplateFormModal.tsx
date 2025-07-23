@@ -548,8 +548,8 @@ export function TaskTemplateFormModal({
         return (
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold">Vista Previa de la Plantilla</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-sm font-medium text-foreground">Vista Previa de la Plantilla</h3>
+              <p className="text-xs text-muted-foreground">
                 Así se verá el nombre de la tarea generada
               </p>
             </div>
@@ -570,8 +570,8 @@ export function TaskTemplateFormModal({
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold">Agregar Parámetros</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-sm font-medium text-foreground">Agregar Parámetros</h3>
+              <p className="text-xs text-muted-foreground">
                 Define los parámetros que se mostrarán al crear tareas
               </p>
             </div>
@@ -641,8 +641,8 @@ export function TaskTemplateFormModal({
             {templateParameters.length > 0 && (
               <>
                 <div>
-                  <h3 className="text-lg font-semibold">Parámetros Configurados</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-sm font-medium text-foreground">Parámetros Configurados</h3>
+                  <p className="text-xs text-muted-foreground">
                     Arrastra para reordenar los parámetros
                   </p>
                 </div>
