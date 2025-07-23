@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. TABLA AUTO-UPDATE BUG FIXED Y COLUMNA TIPO AGREGADA: Corregido problema de actualización automática de tablas y agregada nueva columna para subcategorías - COMPLETED
+  • NUEVA COLUMNA "TIPO": Agregada columna que muestra subcategorías como "Avance de Obra", "Anticipo", etc. después de "Contacto"
+  • Redistribuidas las 6 columnas con anchos de 16.7% cada una: Fecha, Contacto, Tipo, Billetera, Monto, Cotización
+  • Badge styling aplicado a subcategorías en columna "Tipo" con variant="secondary"
+  • InstallmentDetailCard actualizada para mostrar subcategoría como badge debajo de la fecha
+  • CACHE INVALIDATION CORREGIDA: Agregada invalidación de 'movement-view' query en todas las mutaciones de MovementFormModal
+  • Aplicado a: createMovementMutation, createConversionMutation, createTransferMutation, createAportesMutation, createAportesPropriosMutation, createRetirosPropriosMutation
+  • Las tablas ahora se actualizan automáticamente después de modificar subcategorías de movimientos sin requerir F5
 - July 23, 2025. TABLA DETALLE DE COMPROMISOS MEJORADA: Optimizada tabla de compromisos de pago con formato mejorado y eliminación de columna redundante - COMPLETED
   • Eliminada columna "Moneda" por redundancia con información ya presente en monto
   • Columna "Cotización" ahora siempre muestra en pesos argentinos (ARS) independientemente de la moneda original

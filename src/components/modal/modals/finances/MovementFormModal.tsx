@@ -1077,6 +1077,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
@@ -1206,6 +1207,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
@@ -1282,6 +1284,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
@@ -1352,6 +1355,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
@@ -1433,6 +1437,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: editingMovement ? 'Aporte Propio actualizado' : 'Aporte Propio registrado',
         description: editingMovement 
@@ -1496,6 +1504,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       toast({
         title: editingMovement ? 'Retiro Propio actualizado' : 'Retiro Propio registrado',
         description: editingMovement 
