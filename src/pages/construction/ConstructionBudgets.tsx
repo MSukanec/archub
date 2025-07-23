@@ -693,12 +693,19 @@ export default function ConstructionBudgets() {
   }
 
   // Budget Task Table with Selector Component 
-  function BudgetTaskTableWithSelector({ budgetId }: { budgetId: string }) {
+  function BudgetTaskTableWithSelector({ 
+    budgetId, 
+    groupingType, 
+    onGroupingChange 
+  }: { 
+    budgetId: string; 
+    groupingType: string; 
+    onGroupingChange: (type: string) => void; 
+  }) {
     const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask, deleteBudgetTask } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();
     const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
-    const [groupingType, setGroupingType] = useState('none');
 
     // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
@@ -989,7 +996,9 @@ export default function ConstructionBudgets() {
             <ActionBarDesktop
               searchValue={searchValue}
               onSearchChange={setSearchValue}
-              showGrouping={false}
+              showGrouping={selectedBudget ? true : false}
+              groupingType={groupingType}
+              onGroupingChange={setGroupingType}
               primaryActionLabel={selectedBudget ? "Nueva Tarea" : "Nuevo Presupuesto"}
               onPrimaryActionClick={selectedBudget ? () => openModal('budget-task-bulk-add', { 
                 budgetId: selectedBudget.id,
@@ -1018,7 +1027,11 @@ export default function ConstructionBudgets() {
 
             {/* Budget Tasks Table - Direct without Card wrapper */}
             {selectedBudget ? (
-              <BudgetTaskTableWithSelector budgetId={selectedBudget.id} />
+              <BudgetTaskTableWithSelector 
+                budgetId={selectedBudget.id} 
+                groupingType={groupingType}
+                onGroupingChange={setGroupingType}
+              />
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 Selecciona un presupuesto para ver sus tareas

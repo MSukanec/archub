@@ -105,8 +105,7 @@ export function ActionBarDesktop({
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
+                className="w-8 p-0"
                 onClick={budgetSelector.onEditBudget}
               >
                 <Edit className="w-4 h-4" />
@@ -114,8 +113,7 @@ export function ActionBarDesktop({
               
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                className="w-8 p-0 text-destructive hover:text-destructive"
                 onClick={budgetSelector.onDeleteBudget}
               >
                 <Trash2 className="w-4 h-4" />
