@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -14,6 +15,7 @@ interface InstallmentDetailCardProps {
     currency_symbol?: string;
     wallet_name?: string;
     exchange_rate?: number;
+    subcategory_name?: string;
   };
   onEdit?: (item: any) => void;
   onDelete?: (item: any) => void;
@@ -44,7 +46,7 @@ export default function InstallmentDetailCard({
   return (
     <div className="p-4 bg-card border border-border rounded-lg">
       <div className="flex items-center justify-between">
-        {/* Left side: Avatar, name and date */}
+        {/* Left side: Avatar, name, date and type */}
         <div className="flex items-center gap-3">
           <Avatar className="w-10 h-10">
             <AvatarFallback className="text-sm">{initials}</AvatarFallback>
@@ -52,6 +54,11 @@ export default function InstallmentDetailCard({
           <div>
             <div className="font-medium text-sm">{displayName}</div>
             <div className="text-xs text-muted-foreground">{formattedDate}</div>
+            {item.subcategory_name && (
+              <Badge variant="secondary" className="text-xs mt-1">
+                {item.subcategory_name}
+              </Badge>
+            )}
           </div>
         </div>
 

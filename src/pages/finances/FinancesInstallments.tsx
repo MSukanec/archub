@@ -899,12 +899,12 @@ export default function FinancesInstallments() {
     return [...baseColumns, ...currencyColumns]
   }, [availableCurrencies])
 
-  // Detailed table columns (Fecha, Contacto, Billetera, Monto, Cotización)
+  // Detailed table columns (Fecha, Contacto, Tipo, Billetera, Monto, Cotización)
   const detailColumns = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "20%",
+      width: "16.7%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Installment) => {
@@ -919,7 +919,7 @@ export default function FinancesInstallments() {
     {
       key: "contact",
       label: "Contacto",
-      width: "20%",
+      width: "16.7%",
       render: (item: any) => {
         if (!item.contact_name) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -943,9 +943,26 @@ export default function FinancesInstallments() {
       }
     },
     {
+      key: "subcategory",
+      label: "Tipo",
+      width: "16.7%",
+      sortable: true,
+      sortType: "text" as const,
+      render: (item: any) => {
+        const subcategoryName = item.subcategory_name || 'Sin especificar'
+        return (
+          <div className="text-sm">
+            <Badge variant="secondary" className="text-xs">
+              {subcategoryName}
+            </Badge>
+          </div>
+        )
+      }
+    },
+    {
       key: "wallet",
       label: "Billetera",
-      width: "20%",
+      width: "16.7%",
       render: (item: any) => (
         <div className="text-sm">{item.wallet_name || 'Sin billetera'}</div>
       )
@@ -953,7 +970,7 @@ export default function FinancesInstallments() {
     {
       key: "amount",
       label: "Monto",
-      width: "20%",
+      width: "16.65%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -968,7 +985,7 @@ export default function FinancesInstallments() {
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "20%",
+      width: "16.65%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
