@@ -14,8 +14,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskGroup } from '@/hooks/use-task-groups';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-// NewTaskGroupModal replaced with TaskGroupFormModal in global modal system
-import TaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal';
+// Task modals replaced with FormModalLayout components in global modal system
 
 // Import TaskGroup type since it's still used in handleEditTaskGroup
 export interface TaskGroup {
@@ -34,14 +33,7 @@ export default function AdminCategories() {
   // New modal system
   const { openModal } = useGlobalModalStore();
   
-  // Template modal states
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [templateCategory, setTemplateCategory] = useState<TaskCategoryAdmin | null>(null);
-  
-  // No need for task group modal states anymore - handled by global modal
-  
-  // Template modal task group states - NEW: Para manejar plantillas de task groups
-  const [templateTaskGroup, setTemplateTaskGroup] = useState<TaskGroupAdmin | null>(null);
+  // Template modal states migrated to global modal system
   
   // No need for delete confirmation states anymore - handled by global modal
 
@@ -231,17 +223,24 @@ export default function AdminCategories() {
   // Handle template action - DEPRECATED: solo para categorías finales (3 letras)
   const handleTemplateAction = (category: TaskCategoryAdmin) => {
     if (category.code && category.code.length === 3) {
-      setTemplateCategory(category);
-      setIsTemplateModalOpen(true);
+      openModal('task-template', {
+        categoryId: category.id,
+        categoryCode: category.code || '',
+        categoryName: category.name
+      });
     }
   };
 
   // Handle task group template action - NEW: plantillas ahora van a nivel de grupo
   const handleTaskGroupTemplate = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
-    // Usar la estructura correcta para task groups
-    setTemplateCategory(category); // Mantener la categoría padre
-    setTemplateTaskGroup(taskGroup); // Guardar el task group específico
-    setIsTemplateModalOpen(true);
+    // Usar el nuevo sistema global de modales
+    openModal('task-template', {
+      categoryId: category.id,
+      categoryCode: category.code || '',
+      categoryName: category.name,
+      taskGroupId: taskGroup.id,
+      taskGroupName: taskGroup.name
+    });
   };
 
   // Handle add task group
@@ -477,22 +476,7 @@ export default function AdminCategories() {
 
 
 
-      {/* Template Modal */}
-      {templateCategory && (
-        <TaskTemplateEditorModal
-          open={isTemplateModalOpen}
-          onClose={() => {
-            setIsTemplateModalOpen(false);
-            setTemplateCategory(null);
-            setTemplateTaskGroup(null);
-          }}
-          categoryId={templateCategory.id}
-          categoryCode={templateCategory.code || ''}
-          categoryName={templateCategory.name}
-          taskGroupId={templateTaskGroup?.id}
-          taskGroupName={templateTaskGroup?.name}
-        />
-      )}
+      {/* Template Modal now handled by global ModalFactory */}
 
       {/* Task Group Modal now handled by global ModalFactory */}
 

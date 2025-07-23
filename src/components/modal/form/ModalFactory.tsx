@@ -29,6 +29,7 @@ import { DependencyConnectionModal } from '../modals/construction/DependencyConn
 import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
 import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
 import { TaskGroupFormModal } from '../modals/admin/TaskGroupFormModal';
+import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -104,6 +105,14 @@ export function ModalFactory() {
       return <TaskCategoryFormModal modalData={data} onClose={closeModal} />;
     case 'task-group':
       return <TaskGroupFormModal modalData={data} onClose={closeModal} />;
+    case 'task-template':
+      return <TaskTemplateFormModal 
+        categoryId={data?.categoryId}
+        categoryCode={data?.categoryCode}
+        categoryName={data?.categoryName}
+        taskGroupId={data?.taskGroupId}
+        taskGroupName={data?.taskGroupName}
+      />;
     default:
       return null;
   }
