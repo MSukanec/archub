@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video, Clock, Settings } from "lucide-react";
+import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video, Clock, Settings, BarChart3 } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
@@ -177,6 +177,7 @@ export default function ConstructionLogs() {
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
+  const [activeTab, setActiveTab] = useState("bitacoras");
   
   const isMobile = useMobile();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -525,19 +526,27 @@ export default function ConstructionLogs() {
             onPrimaryActionClick={() => setShowNewSiteLogModal(true)}
             customFilters={customFilters}
             onClearFilters={clearFilters}
+            tabs={[
+              {
+                value: "bitacoras",
+                label: "Bitácoras",
+                icon: <FileText className="h-4 w-4" />
+              },
+              {
+                value: "graficos",
+                label: "Gráficos Avanzados",
+                icon: <BarChart3 className="h-4 w-4" />
+              }
+            ]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
           />
 
+          {/* Tab Content Based on activeTab */}
           <div className="space-y-6">
-            {/* Timeline Chart */}
-            <SiteLogTimelineChart 
-              data={siteLogTimelineData} 
-              isLoading={timelineLoading}
-              timePeriod={timePeriod}
-              onTimePeriodChange={setTimePeriod}
-            />
-            
-            <div className="space-y-3">
-            {filteredSiteLogs.map((siteLog: any) => {
+            {activeTab === "bitacoras" && (
+              <div className="space-y-3">
+                {filteredSiteLogs.map((siteLog: any) => {
               const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
               const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
               const isExpanded = expandedLogId === siteLog.id;
@@ -822,8 +831,21 @@ export default function ConstructionLogs() {
                   </Card>
                 </Collapsible>
               );
-            })}
-            </div>
+                })}
+              </div>
+            )}
+
+            {activeTab === "graficos" && (
+              <div className="space-y-6">
+                {/* Timeline Chart */}
+                <SiteLogTimelineChart 
+                  data={siteLogTimelineData} 
+                  isLoading={timelineLoading}
+                  timePeriod={timePeriod}
+                  onTimePeriodChange={setTimePeriod}
+                />
+              </div>
+            )}
           </div>
         </>
       )}
