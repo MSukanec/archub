@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. TOAST STYLING STANDARDIZED TO MATCH CARD RADIUS: Updated toast components to use same border-radius as cards for visual consistency - COMPLETED
+  • MAIN TOAST CONTAINER: Changed from rounded-md to rounded-[var(--radius-lg)] matching card styling
+  • TOAST ACTION BUTTONS: Updated ToastAction to use rounded-[var(--radius-lg)] for consistent button appearance
+  • TOAST CLOSE BUTTON: Modified ToastClose to use rounded-[var(--radius-lg)] instead of rounded-md
+  • VISUAL CONSISTENCY: All toast elements now match card border-radius (8px) for unified design system
 - July 23, 2025. CONSTRUCTION TASKS DELETION CONFIRMATION MODAL IMPLEMENTED: Fixed construction tasks page to show confirmation modal instead of direct deletion - COMPLETED
   • REPLACED DIRECT DELETION: Modified handleDeleteTask in ConstructionTasks.tsx to use DeleteConfirmationModal instead of immediate deletion
   • MODAL INTEGRATION: Added openModal('delete-confirmation') with proper task name display and confirmation workflow
