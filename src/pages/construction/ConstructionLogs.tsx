@@ -5,6 +5,7 @@ import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video, Clock, Settings } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -430,14 +431,7 @@ export default function ConstructionLogs() {
 
   const headerProps = {
     icon: FileText,
-    title: "Bitácora",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    showFilters: true,
-    customFilters,
-    onClearFilters: clearFilters,
-    actions
+    title: "Bitácora"
   };
 
   if (isLoading || siteLogsLoading) {
@@ -452,53 +446,87 @@ export default function ConstructionLogs() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Feature Introduction */}
-        <FeatureIntroduction
-          title="Bitácora de Obra"
-          icon={<FileText className="w-6 h-6" />}
-          features={[
-            {
-              icon: <StickyNote className="w-5 h-5" />,
-              title: "Registro Diario Completo",
-              description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
-            },
-            {
-              icon: <Camera className="w-5 h-5" />,
-              title: "Documentación Visual",
-              description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
-            },
-            {
-              icon: <Settings className="w-5 h-5" />,
-              title: "Control de Privacidad",
-              description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
-            },
-            {
-              icon: <Clock className="w-5 h-5" />,
-              title: "Seguimiento Temporal",
-              description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
-            }
-          ]}
-        />
+      {/* Feature Introduction - Mobile only */}
+      <FeatureIntroduction
+        title="Bitácora de Obra"
+        icon={<FileText className="w-6 h-6" />}
+        features={[
+          {
+            icon: <StickyNote className="w-5 h-5" />,
+            title: "Registro Diario Completo",
+            description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
+          },
+          {
+            icon: <Camera className="w-5 h-5" />,
+            title: "Documentación Visual",
+            description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
+          },
+          {
+            icon: <Settings className="w-5 h-5" />,
+            title: "Control de Privacidad",
+            description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
+          },
+          {
+            icon: <Clock className="w-5 h-5" />,
+            title: "Seguimiento Temporal",
+            description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
+          }
+        ]}
+      />
 
-        {filteredSiteLogs.length === 0 ? (
-          <EmptyState
-            icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-            title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-            description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-            }
-            action={
-              !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-                <Button onClick={() => setShowNewSiteLogModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Entrada
-                </Button>
-              )
-            }
+      {filteredSiteLogs.length === 0 ? (
+        <EmptyState
+          icon={<FileText className="w-12 h-12 text-muted-foreground" />}
+          title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+          description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+            ? 'Prueba ajustando los filtros de búsqueda' 
+            : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
+          }
+          action={
+            !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
+              <Button onClick={() => setShowNewSiteLogModal(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Primera Entrada
+              </Button>
+            )
+          }
+        />
+      ) : (
+        <>
+          {/* Action Bar Desktop - Only visible when data exists */}
+          <ActionBarDesktop
+            title="Bitácora de Construcción"
+            icon={<FileText className="w-6 h-6" />}
+            features={[
+              {
+                icon: <StickyNote className="w-5 h-5" />,
+                title: "Registro Diario Completo",
+                description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
+              },
+              {
+                icon: <Camera className="w-5 h-5" />,
+                title: "Documentación Visual",
+                description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
+              },
+              {
+                icon: <Settings className="w-5 h-5" />,
+                title: "Control de Privacidad",
+                description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
+              },
+              {
+                icon: <Clock className="w-5 h-5" />,
+                title: "Seguimiento Temporal",
+                description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
+              }
+            ]}
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            primaryActionLabel="Nueva Bitácora"
+            onPrimaryActionClick={() => setShowNewSiteLogModal(true)}
+            customFilters={customFilters}
+            onClearFilters={clearFilters}
           />
-        ) : (
+
           <div className="space-y-6">
             {/* Timeline Chart */}
             <SiteLogTimelineChart 
@@ -797,8 +825,8 @@ export default function ConstructionLogs() {
             })}
             </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Modal para nueva entrada */}
       {showNewSiteLogModal && (
