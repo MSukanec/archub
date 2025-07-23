@@ -104,16 +104,15 @@ export function ActionBarDesktop({
             {/* Budget Action Buttons */}
             <div className="flex items-center gap-1">
               <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
+                variant="ghost-icon"
                 onClick={budgetSelector.onEditBudget}
               >
                 <Edit className="w-4 h-4" />
               </Button>
               
               <Button
-                variant="ghost"
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                variant="ghost-icon"
+                className="text-destructive hover:text-destructive"
                 onClick={budgetSelector.onDeleteBudget}
               >
                 <Trash2 className="w-4 h-4" />
@@ -140,8 +139,7 @@ export function ActionBarDesktop({
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
+                variant="ghost-icon"
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
@@ -217,9 +215,8 @@ export function ActionBarDesktop({
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                variant="ghost"
+                variant="ghost-icon"
                 className={cn(
-                  "h-8 w-8 p-0",
                   hasActiveFilters && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
                 )}
               >
@@ -244,8 +241,7 @@ export function ActionBarDesktop({
         {/* Clear Filters Button */}
         {onClearFilters && (
           <Button
-            variant="ghost"
-            className="h-8 w-8 p-0"
+            variant="ghost-icon"
             onClick={onClearFilters}
             title="Limpiar filtros"
           >
