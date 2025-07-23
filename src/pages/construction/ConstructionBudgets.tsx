@@ -643,6 +643,9 @@ export default function ConstructionBudgets() {
 
     // Función para renderizar header de grupo
     const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
+      const groupTotal = groupRows.reduce((sum, task) => 
+        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+      );
 
       return (
         <>
@@ -887,6 +890,9 @@ export default function ConstructionBudgets() {
 
     // Función para renderizar header de grupo
     const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
+      const groupTotal = groupRows.reduce((sum, task) => 
+        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+      );
 
       return (
         <>
