@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -16,7 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, GripVertical, Plus, FileText } from 'lucide-react';
+import { Trash2, GripVertical, Plus, FileText, X, CheckCircle2, Settings } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -103,6 +103,8 @@ export function TaskTemplateFormModal({
   // Template data
   const [selectedUnit, setSelectedUnit] = useState('');
   const [templateParameters, setTemplateParameters] = useState<(TaskTemplateParameter & { task_parameter: TaskParameter })[]>([]);
+  const [newParameterId, setNewParameterId] = useState('');
+  const [newOptionGroupId, setNewOptionGroupId] = useState('');
 
   // Fetch existing template
   const { data: template, isLoading: templateLoading } = useQuery({
@@ -147,7 +149,7 @@ export function TaskTemplateFormModal({
     }
   });
 
-  // Fetch available parameters
+  // Fetch all available parameters
   const { data: availableParameters = [] } = useQuery({
     queryKey: ['task-parameters'],
     queryFn: async () => {
@@ -157,9 +159,67 @@ export function TaskTemplateFormModal({
         .order('name');
       
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
+
+  // Fetch option groups for selected parameter
+  const { data: parameterOptionGroups = [] } = useQuery({
+    queryKey: ['task-parameter-option-groups', newParameterId],
+    queryFn: async () => {
+      if (!newParameterId) return [];
+      
+      const { data, error } = await supabase
+        .from('task_parameter_option_groups')
+        .select('*')
+        .eq('parameter_id', newParameterId)
+        .order('name');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!newParameterId
+  });
+
+  // Fetch template parameters if template exists
+  const { data: templateParametersData = [], isLoading: parametersLoading } = useQuery({
+    queryKey: ['task-template-parameters', template?.id],
+    queryFn: async () => {
+      if (!template?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('task_template_parameters')
+        .select(`
+          id,
+          template_id,
+          parameter_id,
+          option_group_id,
+          position,
+          created_at,
+          updated_at,
+          task_parameters!inner (
+            id,
+            name,
+            label,
+            type,
+            expression_template
+          )
+        `)
+        .eq('template_id', template.id)
+        .order('position');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!template?.id
+  });
+
+  // Sync template parameters with local state
+  useEffect(() => {
+    if (templateParametersData && templateParametersData.length > 0) {
+      setTemplateParameters(templateParametersData);
+    }
+  }, [templateParametersData]);
 
   // Create template mutation
   const createTemplateMutation = useMutation({
@@ -438,76 +498,136 @@ export function TaskTemplateFormModal({
                 </div>
                 
                 <div className="space-y-4">
-                  {templateParameters.length > 0 && (
-                    <DndContext
-                      sensors={useSensors(
-                        useSensor(PointerSensor),
-                        useSensor(KeyboardSensor, {
-                          coordinateGetter: sortableKeyboardCoordinates,
-                        })
-                      )}
-                      collisionDetection={closestCenter}
-                      onDragEnd={(event) => {
-                        const { active, over } = event;
-                        if (active.id !== over?.id) {
-                          setTemplateParameters((items) => {
-                            const oldIndex = items.findIndex((item) => item.id === active.id);
-                            const newIndex = items.findIndex((item) => item.id === over?.id);
-                            return arrayMove(items, oldIndex, newIndex);
-                          });
-                        }
-                      }}
-                    >
-                      <SortableContext items={templateParameters} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-2">
-                          {templateParameters.map((param) => (
-                            <SortableParameter
-                              key={param.id}
-                              parameter={param}
-                              onRemove={(id) => {
-                                setTemplateParameters(params => params.filter(p => p.id !== id));
+                  {/* Agregar Parámetros */}
+                  <div className="bg-card border border-border rounded-lg p-4">
+                    <h4 className="text-sm font-medium mb-3">Agregar Parámetros</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Parámetro</Label>
+                        <Select 
+                          value={newParameterId} 
+                          onValueChange={(value) => {
+                            setNewParameterId(value);
+                            setNewOptionGroupId('');
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar parámetro" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableParameters.map((parameter) => (
+                              <SelectItem key={parameter.id} value={parameter.id}>
+                                {parameter.label || parameter.name} ({parameter.type})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Grupo de Opciones</Label>
+                        <Select 
+                          value={newOptionGroupId} 
+                          onValueChange={setNewOptionGroupId}
+                          disabled={!newParameterId || parameterOptionGroups.length === 0}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              !newParameterId 
+                                ? "Primero selecciona parámetro"
+                                : parameterOptionGroups.length === 0
+                                ? "Sin grupos disponibles"
+                                : "Seleccionar grupo"
+                            } />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {parameterOptionGroups.map((group) => (
+                              <SelectItem key={group.id} value={group.id}>
+                                {group.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="flex items-end">
+                        <Button 
+                          onClick={() => {
+                            if (template?.id && newParameterId) {
+                              const newParam = {
+                                id: `temp-${Date.now()}`,
+                                template_id: template.id,
+                                parameter_id: newParameterId,
+                                option_group_id: newOptionGroupId || null,
+                                position: templateParametersData.length,
+                                task_parameters: availableParameters.find(p => p.id === newParameterId)
+                              };
+                              setTemplateParameters(prev => [...prev, newParam as any]);
+                              setNewParameterId('');
+                              setNewOptionGroupId('');
+                            }
+                          }}
+                          disabled={!newParameterId}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lista de parámetros */}
+                  {templateParametersData.length > 0 && (
+                    <div className="bg-card border border-border rounded-lg p-4">
+                      <Label className="text-sm font-medium mb-3 block">
+                        Parámetros de la plantilla ({templateParametersData.length}):
+                      </Label>
+                      <div className="space-y-2">
+                        {templateParametersData.map((tp, index) => (
+                          <div key={tp.id} className="flex items-center justify-between p-3 bg-background rounded border">
+                            <div className="flex items-center space-x-3">
+                              <div className="text-sm font-medium">
+                                {index + 1}. {tp.task_parameters?.label || tp.task_parameters?.name}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                ({tp.task_parameters?.type})
+                              </div>
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                setTemplateParameters(prev => prev.filter(p => p.id !== tp.id));
                               }}
-                              onToggleRequired={(id, required) => {
-                                setTemplateParameters(params => 
-                                  params.map(p => p.id === id ? { ...p, required } : p)
-                                );
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </SortableContext>
-                    </DndContext>
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  
-                  <div>
-                    <Label>Agregar parámetro</Label>
-                    <Select onValueChange={(value) => {
-                      const parameter = availableParameters.find(p => p.id === value);
-                      if (parameter && !templateParameters.find(tp => tp.task_parameter_id === parameter.id)) {
-                        const newParam = {
-                          id: `temp-${Date.now()}`,
-                          task_template_id: template?.id || '',
-                          task_parameter_id: parameter.id,
-                          required: false,
-                          order_index: templateParameters.length,
-                          task_parameter: parameter
-                        };
-                        setTemplateParameters(prev => [...prev, newParam]);
-                      }
-                    }}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar parámetro" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableParameters
-                          .filter(param => !templateParameters.find(tp => tp.task_parameter_id === param.id))
-                          .map((param) => (
-                            <SelectItem key={param.id} value={param.id}>
-                              {param.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+
+                  {/* Vista previa */}
+                  <div className="bg-muted/30 rounded-lg border p-4">
+                    <Label className="text-sm font-medium mb-2 block">
+                      Vista previa de la plantilla:
+                    </Label>
+                    <div className="text-sm bg-background p-3 rounded border">
+                      <span className="font-medium">
+                        {(() => {
+                          const baseName = taskGroupName || categoryName;
+                          if (templateParametersData.length === 0) {
+                            return `${baseName}.`;
+                          }
+                          const parameterPlaceholders = templateParametersData
+                            .map(tp => `{{${tp.task_parameters?.name || 'parámetro'}}}`)
+                            .join(' ');
+                          return `${baseName} ${parameterPlaceholders}.`;
+                        })()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
