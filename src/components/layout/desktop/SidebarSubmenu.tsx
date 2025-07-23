@@ -128,6 +128,7 @@ export function SidebarSubmenu() {
     'obra': [
       { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard', requiresProject: true },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
+      { icon: Calendar, label: 'Cronograma', href: '/construction/schedule', requiresProject: true },
       { icon: Package, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
