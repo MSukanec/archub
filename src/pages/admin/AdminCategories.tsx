@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Package2, Settings, CheckCircle, XCircle, Filter } from 'lucide-react';
+import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 
@@ -271,28 +272,6 @@ export default function AdminCategories() {
   // Header props
   const headerProps = {
     title: "Gestión de Categorías",
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    showFilters: true,
-    filters: [
-      { 
-        label: "Todas", 
-        onClick: () => setTemplateFilter('all'),
-        isActive: templateFilter === 'all'
-      },
-      { 
-        label: "Con Plantilla", 
-        onClick: () => setTemplateFilter('with-template'),
-        isActive: templateFilter === 'with-template'
-      },
-      { 
-        label: "Sin Plantilla", 
-        onClick: () => setTemplateFilter('without-template'),
-        isActive: templateFilter === 'without-template'
-      }
-    ],
-    onClearFilters: clearFilters,
     actions: []
   };
 
@@ -320,33 +299,68 @@ export default function AdminCategories() {
             setIsCategoryModalOpen(true);
           }}
           customActions={[
-            <Button 
-              key="filter-all"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setTemplateFilter('all')}
-              className={templateFilter === 'all' ? 'bg-accent text-accent-foreground' : ''}
-            >
-              <Package2 className="w-4 h-4" />
-            </Button>,
-            <Button 
-              key="filter-with"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setTemplateFilter('with-template')}
-              className={templateFilter === 'with-template' ? 'bg-accent text-accent-foreground' : ''}
-            >
-              <CheckCircle className="w-4 h-4" />
-            </Button>,
-            <Button 
-              key="filter-without"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setTemplateFilter('without-template')}
-              className={templateFilter === 'without-template' ? 'bg-accent text-accent-foreground' : ''}
-            >
-              <XCircle className="w-4 h-4" />
-            </Button>
+            <TooltipProvider key="tooltip-provider">
+              <Tooltip key="filter-all">
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setTemplateFilter('all')}
+                    className={templateFilter === 'all' ? 'bg-accent text-accent-foreground' : ''}
+                  >
+                    <Package2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Todas</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip key="filter-with">
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setTemplateFilter('with-template')}
+                    className={templateFilter === 'with-template' ? 'bg-accent text-accent-foreground' : ''}
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Con Plantilla</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip key="filter-without">
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setTemplateFilter('without-template')}
+                    className={templateFilter === 'without-template' ? 'bg-accent text-accent-foreground' : ''}
+                  >
+                    <XCircle className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sin Plantilla</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip key="clear-filters">
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={clearFilters}
+                    className={searchTerm || templateFilter !== 'all' ? 'opacity-100' : 'opacity-50'}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Limpiar Filtros</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ]}
         />
 
