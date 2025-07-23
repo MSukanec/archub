@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. TASK TEMPLATE MODAL MIGRATION COMPLETED: Successfully migrated task template modal from legacy system to new FormModalStepFooter architecture - COMPLETED
+  • Created TaskTemplateFormModal.tsx in src/components/modal/modals/admin/ following FormModalStepFooter pattern with 3 steps
+  • Updated ModalFactory.tsx to include 'task-template' type and proper modal routing  
+  • Migrated AdminCategories.tsx from local modal state to useGlobalModalStore system
+  • Fixed modal structure: Step 1 (Plantilla Creada/Crear Plantilla), Step 2 (Seleccionar Unidad), Step 3 (Configurar Parámetros)
+  • Eliminated NewTaskTemplateEditorModal.tsx legacy file and all local modal references
+  • Modal now uses centralized global state and consistent FormModalStepFooter structure
+  • Enhanced user experience: template creation simplified with automatic naming, 3-step workflow for complete configuration
+  • System architecture improved: all admin task modals now use unified FormModalStepFooter approach for multi-step workflows
 - July 23, 2025. TASK CATEGORY MODAL MIGRATION COMPLETED: Successfully migrated task category modal from legacy system to new FormModalLayout architecture - COMPLETED
   • Created TaskCategoryFormModal.tsx in src/components/modal/modals/admin/ following FormModalLayout pattern
   • Updated ModalFactory.tsx to include 'task-category' type and proper modal routing

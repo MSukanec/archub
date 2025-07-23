@@ -101,8 +101,6 @@ export function TaskTemplateFormModal({
   const queryClient = useQueryClient();
 
   // Template data
-  const [templateName, setTemplateName] = useState('');
-  const [templateDescription, setTemplateDescription] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('');
   const [templateParameters, setTemplateParameters] = useState<(TaskTemplateParameter & { task_parameter: TaskParameter })[]>([]);
 
@@ -167,11 +165,10 @@ export function TaskTemplateFormModal({
   const createTemplateMutation = useMutation({
     mutationFn: async () => {
       const templateData = {
-        name: templateName,
-        description: templateDescription,
+        name: taskGroupName || categoryName || 'Plantilla',
+        description: `Plantilla para ${taskGroupName || categoryName}`,
         category_id: categoryId,
-        task_group_id: taskGroupId || null,
-        unit_id: selectedUnit
+        task_group_id: taskGroupId || null
       };
 
       const { data, error } = await supabase
@@ -251,8 +248,6 @@ export function TaskTemplateFormModal({
   // Set initial values when template loads
   React.useEffect(() => {
     if (template) {
-      setTemplateName(template.name);
-      setTemplateDescription(template.description || '');
       setSelectedUnit(template.unit_id || '');
       setTemplateParameters(template.task_template_parameters || []);
       setCurrentStep(template.unit_id ? 3 : 2);
@@ -279,12 +274,7 @@ export function TaskTemplateFormModal({
             variant: 'destructive'
           }
         } : {
-          cancelAction: { label: 'Cancelar', onClick: closeModal },
-          submitAction: { 
-            label: 'Crear Plantilla', 
-            onClick: () => createTemplateMutation.mutate(),
-            loading: createTemplateMutation.isPending
-          }
+          cancelAction: { label: 'Cancelar', onClick: closeModal }
         };
       case 2:
         return {
@@ -322,21 +312,19 @@ export function TaskTemplateFormModal({
                     <FileText className="h-8 w-8 text-primary" />
                     <div>
                       <h3 className="text-lg font-semibold">Plantilla Creada</h3>
-                      <p className="text-sm text-muted-foreground">Ya existe una plantilla para esta categoría</p>
+                      <p className="text-sm text-muted-foreground">Ya existe una plantilla para esta grupo de tareas</p>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-medium">Nombre</Label>
+                      <Label className="text-sm font-medium">Grupo</Label>
+                      <p className="text-sm mt-1">{taskGroupName || categoryName}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Plantilla</Label>
                       <p className="text-sm mt-1">{template.name}</p>
                     </div>
-                    {template.description && (
-                      <div>
-                        <Label className="text-sm font-medium">Descripción</Label>
-                        <p className="text-sm mt-1">{template.description}</p>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -350,27 +338,14 @@ export function TaskTemplateFormModal({
                     </p>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="templateName">Nombre de la plantilla *</Label>
-                      <Input
-                        id="templateName"
-                        value={templateName}
-                        onChange={(e) => setTemplateName(e.target.value)}
-                        placeholder="Ej: Cielorraso suspendido liso"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="templateDescription">Descripción</Label>
-                      <Textarea
-                        id="templateDescription"
-                        value={templateDescription}
-                        onChange={(e) => setTemplateDescription(e.target.value)}
-                        placeholder="Descripción opcional de la plantilla"
-                        rows={3}
-                      />
-                    </div>
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={() => createTemplateMutation.mutate()}
+                      disabled={createTemplateMutation.isPending}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      {createTemplateMutation.isPending ? 'Creando...' : 'Crear Plantilla'}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
