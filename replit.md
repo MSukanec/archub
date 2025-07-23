@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. CONSTRUCTION TASKS DELETION CONFIRMATION MODAL IMPLEMENTED: Fixed construction tasks page to show confirmation modal instead of direct deletion - COMPLETED
+  • REPLACED DIRECT DELETION: Modified handleDeleteTask in ConstructionTasks.tsx to use DeleteConfirmationModal instead of immediate deletion
+  • MODAL INTEGRATION: Added openModal('delete-confirmation') with proper task name display and confirmation workflow
+  • ENHANCED UX: Users now see confirmation dialog with task name before deletion instead of instant removal
+  • CONSISTENT BEHAVIOR: Construction tasks deletion now matches admin materials deletion workflow with unified modal system
+  • DESTRUCTIVE BUTTON STYLING FIXED: Updated destructive variant to use rounded-lg instead of rounded-md matching default button appearance
 - July 23, 2025. ADMIN MATERIALS DELETION SYSTEM COMPLETELY FIXED: Successfully implemented working material deletion functionality with proper replacement modal system - COMPLETED
   • CRITICAL HOOK IMPLEMENTED: Created useDeleteMaterial hook in use-materials.ts with proper Supabase delete operation and cache invalidation
   • LEGACY MODAL SYSTEM ELIMINATED: Removed obsolete AlertDialog code and deletingMaterial state variables from AdminMaterials.tsx

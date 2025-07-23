@@ -105,13 +105,25 @@ export default function ConstructionTasks() {
     })
   }
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = (taskId: string) => {
     if (!projectId || !organizationId) return
 
-    await deleteTask.mutateAsync({
-      id: taskId,
-      project_id: projectId,
-      organization_id: organizationId
+    // Encontrar la tarea para obtener su nombre
+    const task = processedTasks.find(t => t.id === taskId)
+    const taskName = task?.task?.display_name || 'Tarea sin nombre'
+
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar Tarea',
+      description: `¿Estás seguro que deseas eliminar la tarea "${taskName}"? Esta acción no se puede deshacer.`,
+      itemName: taskName,
+      destructiveActionText: 'Eliminar Tarea',
+      onDelete: () => deleteTask.mutate({
+        id: taskId,
+        project_id: projectId,
+        organization_id: organizationId
+      }),
+      isLoading: deleteTask.isPending
     })
   }
 
