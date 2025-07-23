@@ -711,7 +711,7 @@ export default function ConstructionBudgets() {
               customActions={selectedBudget ? [
                 <Button 
                   key="nuevo-presupuesto"
-                  variant="outline" 
+                  variant="secondary" 
                   size="sm"
                   onClick={() => openModal('budget', {})}
                 >
