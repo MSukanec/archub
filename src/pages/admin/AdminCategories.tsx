@@ -13,7 +13,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskGroup } from '@/hooks/use-task-groups';
-import { NewAdminTaskCategoryModal } from '@/modals/admin/NewAdminTaskCategoryModal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { NewTaskGroupModal, TaskGroup } from '@/modals/admin/NewTaskGroupModal';
 import TaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal';
 
@@ -22,9 +22,8 @@ export default function AdminCategories() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [templateFilter, setTemplateFilter] = useState<'all' | 'with-template' | 'without-template'>('all');
   
-  // Modal states
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<TaskCategoryAdmin | null>(null);
+  // New modal system
+  const { openModal } = useGlobalModalStore();
   
   // Template modal states
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -203,8 +202,10 @@ export default function AdminCategories() {
 
   // Handle edit category
   const handleEditCategory = (category: TaskCategoryAdmin) => {
-    setEditingCategory(category);
-    setIsCategoryModalOpen(true);
+    openModal('task-category', {
+      editingCategory: category,
+      isEditing: true
+    });
   };
 
   // Handle delete category
@@ -295,8 +296,10 @@ export default function AdminCategories() {
           showGrouping={false}
           primaryActionLabel="CREAR CATEGORÍA"
           onPrimaryActionClick={() => {
-            setEditingCategory(null);
-            setIsCategoryModalOpen(true);
+            openModal('task-category', {
+              editingCategory: null,
+              isEditing: false
+            });
           }}
           customActions={[
             <TooltipProvider key="tooltip-provider">
@@ -444,16 +447,7 @@ export default function AdminCategories() {
         </div>
       </Layout>
 
-      {/* Category Modal */}
-      <NewAdminTaskCategoryModal
-        open={isCategoryModalOpen}
-        onClose={() => {
-          setIsCategoryModalOpen(false);
-          setEditingCategory(null);
-        }}
-        category={editingCategory || undefined}
-        allCategories={allCategories}
-      />
+
 
       {/* Template Modal */}
       {templateCategory && (

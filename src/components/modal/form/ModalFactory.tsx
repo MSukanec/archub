@@ -27,6 +27,7 @@ import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { DependencyConnectionModal } from '../modals/construction/DependencyConnectionModal';
 import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
+import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -98,6 +99,8 @@ export function ModalFactory() {
       return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
     case 'budget-task-bulk-add':
       return <BudgetTaskFormModal modalData={data} onClose={closeModal} />;
+    case 'task-category':
+      return <TaskCategoryFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
