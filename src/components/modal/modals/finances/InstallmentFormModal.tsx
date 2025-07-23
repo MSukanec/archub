@@ -30,6 +30,7 @@ const installmentSchema = z.object({
     required_error: "Fecha es requerida",
   }),
   contact_id: z.string().min(1, 'Cliente es requerido'),
+  subcategory_id: z.string().min(1, 'Subcategoría es requerida'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   description: z.string().optional(),
@@ -59,6 +60,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     defaultValues: {
       movement_date: new Date(),
       contact_id: '',
+      subcategory_id: '',
       currency_id: '',
       amount: 0,
       description: '',
@@ -70,8 +72,37 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
   const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId)
   
+  // Hook para obtener subcategorías de "Aportes de Terceros"
+  const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
+    queryKey: ['aportes-terceros-subcategories', organizationId],
+    queryFn: async () => {
+      if (!supabase) return []
+      
+      // Buscar la categoría "Aportes de Terceros"
+      const { data: categories } = await supabase
+        .from('movement_concepts')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('name', 'Aportes de Terceros')
+        .maybeSingle()
+      
+      if (!categories) return []
+      
+      // Obtener subcategorías
+      const { data: subcats } = await supabase
+        .from('movement_concepts')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('parent_id', categories.id)
+        .order('name')
+      
+      return subcats || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+  
   // Loading state for all necessary data
-  const isLoading = currenciesLoading || clientsLoading
+  const isLoading = currenciesLoading || clientsLoading || subcategoriesLoading
 
   // Inicializar panel en modo edit para nuevos compromisos
   React.useEffect(() => {
@@ -91,6 +122,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       form.reset({
         movement_date: installmentDate,
         contact_id: editingInstallment.contact_id || '',
+        subcategory_id: editingInstallment.subcategory_id || '',
         currency_id: editingInstallment.currency_id || '',
         amount: editingInstallment.amount || 0,
         description: editingInstallment.description || '',
@@ -100,6 +132,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       console.log('Form reset with values:', {
         movement_date: installmentDate,
         contact_id: editingInstallment.contact_id,
+        subcategory_id: editingInstallment.subcategory_id,
         currency_id: editingInstallment.currency_id,
         amount: editingInstallment.amount,
         description: editingInstallment.description,
@@ -110,7 +143,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   // Inicializar valores por defecto
   React.useEffect(() => {
-    if (!editingInstallment && currencies?.length > 0) {
+    if (!editingInstallment && currencies && currencies.length > 0) {
       // Usar la primera moneda disponible por defecto
       form.setValue('currency_id', currencies[0].id)
     }
@@ -123,29 +156,29 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         throw new Error('Organization ID not found')
       }
 
-      // Buscar el tipo de concepto "Cuotas" o "Ingresos"
-      const { data: concepts } = await supabase
+      // Obtener la categoría padre de la subcategoría seleccionada
+      const { data: subcategory } = await supabase!
         .from('movement_concepts')
-        .select('*')
-        .eq('organization_id', userData.organization.id)
-        .eq('name', 'Cuotas')
-        .maybeSingle()
+        .select('parent_id')
+        .eq('id', data.subcategory_id)
+        .single()
 
-      let conceptId = concepts?.id
-
-      // Si no existe concepto "Cuotas", usar "Ingresos"
-      if (!conceptId) {
-        const { data: ingresosConcept } = await supabase
-          .from('movement_concepts')
-          .select('*')
-          .or(`name.eq.Ingresos,parent_id.eq.${userData.organization.id}`)
-          .maybeSingle()
-        
-        conceptId = ingresosConcept?.id
+      if (!subcategory) {
+        throw new Error('Subcategoría no encontrada')
       }
 
+      // Buscar el tipo "Ingresos" para este movimiento
+      const { data: ingresosType } = await supabase!
+        .from('movement_concepts')
+        .select('id')
+        .eq('organization_id', userData.organization.id)
+        .eq('name', 'Ingresos')
+        .maybeSingle()
+
+      const typeId = ingresosType?.id
+
       // Buscar el member del usuario actual
-      const { data: currentMember } = await supabase
+      const { data: currentMember } = await supabase!
         .from('organization_members')
         .select('id')
         .eq('organization_id', userData.organization.id)
@@ -157,7 +190,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       }
 
       // Usar la billetera por defecto
-      const { data: defaultWallet } = await supabase
+      const { data: defaultWallet } = await supabase!
         .from('organization_wallets')
         .select('id')
         .eq('organization_id', userData.organization.id)
@@ -179,13 +212,13 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         amount: data.amount,
         description: data.description || null,
         exchange_rate: data.exchange_rate || null,
-        type_id: conceptId,
-        category_id: null,
-        subcategory_id: null,
+        type_id: typeId,
+        category_id: subcategory.parent_id,
+        subcategory_id: data.subcategory_id,
       }
 
       if (editingInstallment) {
-        const { data: result, error } = await supabase
+        const { data: result, error } = await supabase!
           .from('movements')
           .update(movementData)
           .eq('id', editingInstallment.id)
@@ -195,7 +228,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         if (error) throw error
         return result
       } else {
-        const { data: result, error } = await supabase
+        const { data: result, error } = await supabase!
           .from('movements')
           .insert([movementData])
           .select()
@@ -341,8 +374,34 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                   </SelectTrigger>
                   <SelectContent>
                     {projectClients?.map(client => (
-                      <SelectItem key={client.contact_id} value={client.contact_id}>
-                        {client.contact.full_name || client.contact.company_name || `${client.contact.first_name || ''} ${client.contact.last_name || ''}`.trim()}
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.contact?.full_name || client.contact?.company_name || `${client.contact?.first_name || ''} ${client.contact?.last_name || ''}`.trim()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Fila 2.5: Subcategoría */}
+        <FormField
+          control={form.control}
+          name="subcategory_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subcategoría *</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar subcategoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcategories?.map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -369,7 +428,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                     <SelectContent>
                       {currencies?.map((currency) => (
                         <SelectItem key={currency.id} value={currency.id}>
-                          {currency.name} ({currency.code})
+                          {currency.currency?.name} ({currency.currency?.code})
                         </SelectItem>
                       ))}
                     </SelectContent>
