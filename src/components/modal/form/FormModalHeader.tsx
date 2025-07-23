@@ -4,7 +4,8 @@ import { LucideIcon } from 'lucide-react';
 
 interface FormModalHeaderProps {
   title?: string;
-  icon?: LucideIcon; // Volviendo al patrón original
+  description?: string; // Agregando descripción como en el legacy
+  icon?: LucideIcon;
   leftActions?: ReactNode;
   rightActions?: ReactNode;
   className?: string;
@@ -12,21 +13,29 @@ interface FormModalHeaderProps {
 
 export function FormModalHeader({
   title,
+  description,
   icon: Icon,
   leftActions,
   rightActions,
   className,
 }: FormModalHeaderProps) {
   return (
-    <div className={cn("px-2 py-2 flex items-center justify-between border-b border-[var(--card-border)] min-h-[56px]", className)}>
-      <div className="flex items-center gap-2">
+    <div className={cn("px-3 py-3 flex items-center justify-between border-b border-[var(--card-border)]", className)}>
+      <div className="flex items-center gap-2 flex-1">
         {leftActions}
         {title && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 pr-2">
             {Icon && (
               <Icon className="h-4 w-4 text-[var(--accent)]" />
             )}
-            <h2 className="text-sm font-medium text-foreground">{title}</h2>
+            <div className="flex-1">
+              <h2 className="text-sm font-medium text-[var(--card-fg)]">{title}</h2>
+              {description && (
+                <p className="text-xs text-[var(--text-muted)] leading-tight">
+                  {description}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>

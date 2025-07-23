@@ -16,32 +16,23 @@ export function FormModalStepHeader({
   className = ""
 }: FormModalStepHeaderProps) {
   return (
-    <div className={`px-4 py-3 border-b border-[var(--card-border)] ${className}`}>
+    <div className={`px-3 py-3 border-b border-[var(--card-border)] ${className}`}>
       <div className="flex items-center gap-3">
         {Icon && (
-          <Icon className="h-5 w-5 text-[var(--accent)]" />
+          <Icon className="h-4 w-4 text-[var(--accent)]" />
         )}
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-foreground">
+        <div className="flex-1 pr-2">
+          <h2 className="text-sm font-medium text-[var(--card-fg)]">
             {title}
           </h2>
           {stepConfig && (
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-sm text-muted-foreground">
-                Paso {stepConfig.currentStep} de {stepConfig.totalSteps}
-              </p>
-              {stepConfig.stepTitle && (
-                <>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <p className="text-sm text-muted-foreground">
-                    {stepConfig.stepTitle}
-                  </p>
-                </>
-              )}
-            </div>
+            <p className="text-xs text-[var(--text-muted)] leading-tight">
+              Paso {stepConfig.currentStep} de {stepConfig.totalSteps}
+              {stepConfig.stepTitle && ` • ${stepConfig.stepTitle}`}
+            </p>
           )}
           {stepConfig?.stepDescription && (
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
               {stepConfig.stepDescription}
             </p>
           )}

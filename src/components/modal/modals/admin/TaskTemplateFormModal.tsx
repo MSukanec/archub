@@ -429,7 +429,14 @@ export function TaskTemplateFormModal({
   const stepConfig: StepModalConfig = {
     currentStep,
     totalSteps: 3,
-    stepTitle: currentStep === 1 ? 'Crear Plantilla' : currentStep === 2 ? 'Seleccionar Unidad' : 'Configurar Parámetros'
+    stepTitle: currentStep === 1 ? 'Crear Plantilla' : currentStep === 2 ? 'Seleccionar Unidad' : 'Configurar Parámetros',
+    stepDescription: currentStep === 1 
+      ? template 
+        ? 'Gestiona la plantilla existente o elimínala para crear una nueva'
+        : 'Primero debes crear la plantilla básica para poder agregar parámetros'
+      : currentStep === 2 
+        ? 'Selecciona la unidad de medida que utilizará esta plantilla de tareas'
+        : 'Define los parámetros que se mostrarán al crear tareas con esta plantilla'
   };
 
   // Footer configuration
