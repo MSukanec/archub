@@ -368,6 +368,104 @@ export function TaskTemplateFormModal({
     }
   });
 
+  // Generate preview function (como en el modal legacy)
+  const generatePreview = () => {
+    const baseName = taskGroupName || categoryName;
+    
+    if (!template) return `${baseName}.`;
+    
+    if (templateParameters.length === 0) {
+      return `${baseName}.`;
+    }
+    
+    const parameterPlaceholders = templateParameters
+      .map(tp => {
+        const parameter = availableParameters.find(p => p.id === tp.parameter_id);
+        return `{{${parameter?.name || 'parámetro'}}}`;
+      })
+      .join(' ');
+    
+    return `${baseName} ${parameterPlaceholders}.`;
+  };
+
+  // Save parameters mutation
+  const saveParametersMutation = useMutation({
+    mutationFn: async () => {
+      if (!template?.id) throw new Error('No template found');
+      
+      console.log('💾 Iniciando guardado de plantilla:', template.id);
+      console.log('💾 Parámetros a guardar:', templateParameters);
+      
+      // First, delete existing parameters
+      const { error: deleteError } = await supabase
+        .from('task_template_parameters')
+        .delete()
+        .eq('template_id', template.id);
+      
+      if (deleteError) {
+        console.error('❌ Error eliminando parámetros existentes:', deleteError);
+        throw deleteError;
+      }
+      
+      // Then insert new parameters if any
+      if (templateParameters.length > 0) {
+        const parametersToInsert = templateParameters.map((param, index) => ({
+          template_id: template.id,
+          parameter_id: param.parameter_id,
+          position: index,
+          option_group_id: param.option_group_id
+        }));
+        
+        console.log('💾 Insertando nuevos parámetros:', parametersToInsert);
+        
+        const { error: insertError } = await supabase
+          .from('task_template_parameters')
+          .insert(parametersToInsert);
+        
+        if (insertError) {
+          console.error('❌ Error insertando parámetros:', insertError);
+          throw insertError;
+        }
+      }
+      
+      // Finally, update the template name with the generated preview
+      const finalName = generatePreview();
+      console.log('💾 Actualizando nombre plantilla a:', finalName);
+      
+      const { error: updateError } = await supabase
+        .from('task_templates')
+        .update({ name_template: finalName })
+        .eq('id', template.id);
+      
+      if (updateError) {
+        console.error('❌ Error actualizando nombre plantilla:', updateError);
+        throw updateError;
+      }
+      
+      console.log('✅ Plantilla guardada exitosamente');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-template', taskGroupId || categoryCode] });
+      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['task-templates'] });
+      toast({
+        title: "Plantilla guardada",
+        description: "La plantilla se ha guardado exitosamente con todos sus parámetros",
+        variant: "default"
+      });
+      closeModal();
+    },
+    onError: (error: any) => {
+      console.error('❌ Error general en saveParametersMutation:', error);
+      toast({
+        title: "Error al guardar",
+        description: error.message || "Error al guardar la plantilla",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Set initial values when template loads
   React.useEffect(() => {
     if (template) {
@@ -473,7 +571,11 @@ export function TaskTemplateFormModal({
         return {
           cancelAction: { label: 'Cancelar', onClick: closeModal },
           previousAction: { label: 'Anterior', onClick: () => setCurrentStep(2) },
-          submitAction: { label: 'Finalizar', onClick: closeModal }
+          submitAction: { 
+            label: 'Guardar Plantilla', 
+            onClick: () => saveParametersMutation.mutate(),
+            loading: saveParametersMutation.isPending
+          }
         };
       default:
         return {
@@ -563,16 +665,7 @@ export function TaskTemplateFormModal({
             
             <div className="text-sm bg-muted/30 p-3 rounded border">
               <span className="font-medium">
-                {(() => {
-                  const baseName = taskGroupName || categoryName;
-                  if (templateParameters.length === 0) {
-                    return `${baseName}.`;
-                  }
-                  const parameterPlaceholders = templateParameters
-                    .map(tp => `{{${availableParameters.find(p => p.id === tp.parameter_id)?.name || 'parámetro'}}}`)
-                    .join(' ');
-                  return `${baseName} ${parameterPlaceholders}.`;
-                })()}
+                {generatePreview()}
               </span>
             </div>
 
