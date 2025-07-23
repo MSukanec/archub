@@ -276,7 +276,15 @@ export default function FinancesInstallments() {
           if (currencyCode === 'USD') {
             dollarizedTotal += amount
           } else if (currencyCode !== 'USD' && installment.exchange_rate) {
-            dollarizedTotal += amount / installment.exchange_rate
+            // Convert from local currency to USD: amount_in_pesos / exchange_rate_pesos_per_usd
+            const convertedAmount = amount / installment.exchange_rate
+            console.log(`Converting ${currencyCode} to USD:`, {
+              originalAmount: amount,
+              exchangeRate: installment.exchange_rate,
+              convertedAmount,
+              contact: client.contact?.first_name || client.contact?.company_name
+            })
+            dollarizedTotal += convertedAmount
           }
         })
         
@@ -602,7 +610,7 @@ export default function FinancesInstallments() {
           <div className="text-sm">
             {committedAmount > 0 ? (
               <div className="font-medium text-blue-600">
-                {symbol}{committedAmount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                {symbol} {committedAmount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             ) : (
               <div className="text-muted-foreground text-xs">
