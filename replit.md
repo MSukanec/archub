@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. MODAL WIDTH STANDARDIZED TO 800PX MAX: Fixed modal width expansion issue by setting standard maximum width limit on desktop - COMPLETED
+  • DESKTOP WIDTH LIMIT: Changed FormModalLayout from md:max-w-screen-2xl to md:max-w-[800px] for consistent modal sizing
+  • PREVENTED INFINITE EXPANSION: Long text phrases no longer cause modals to expand beyond readable width
+  • MAINTAINED MOBILE EXPERIENCE: Mobile modals still use full viewport width (w-full h-full) for optimal touch interface
+  • STANDARDIZED UX: All modals now have consistent maximum width of 800px on desktop preventing text overflow issues
 - July 23, 2025. TOAST STYLING STANDARDIZED TO MATCH CARD RADIUS: Updated toast components to use same border-radius as cards for visual consistency - COMPLETED
   • MAIN TOAST CONTAINER: Changed from rounded-md to rounded-[var(--radius-lg)] matching card styling
   • TOAST ACTION BUTTONS: Updated ToastAction to use rounded-[var(--radius-lg)] for consistent button appearance
