@@ -1,5 +1,5 @@
-import React from 'react'
-import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays } from 'lucide-react'
+import React, { useState } from 'react'
+import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
@@ -25,6 +25,9 @@ interface ActionBarDesktopProps {
   // Header section (new)
   title?: string
   icon?: React.ReactNode
+  // Expandable info section
+  expandableContent?: React.ReactNode
+  expandableDescription?: string
   // Action bar functionality
   showSearch?: boolean
   searchValue?: string
@@ -52,6 +55,8 @@ interface ActionBarDesktopProps {
 export function ActionBarDesktop({
   title,
   icon,
+  expandableContent,
+  expandableDescription,
   showSearch = true,
   searchValue = '',
   onSearchChange,
@@ -72,6 +77,8 @@ export function ActionBarDesktop({
   onTodayClick,
   className
 }: ActionBarDesktopProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   return (
     <div 
       className={cn(
@@ -84,19 +91,59 @@ export function ActionBarDesktop({
       {(title || icon) && (
         <>
           <div className="px-4 py-3">
-            <div className="flex items-center gap-3">
-              {icon && (
-                <div className="text-accent">
-                  {icon}
-                </div>
-              )}
-              {title && (
-                <h2 className="text-xl font-semibold text-foreground">
-                  {title}
-                </h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {icon && (
+                  <div className="text-accent">
+                    {icon}
+                  </div>
+                )}
+                {title && (
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {title}
+                  </h2>
+                )}
+              </div>
+              
+              {/* Expandable button - Only show if expandableContent exists */}
+              {(expandableContent || expandableDescription) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <span className="text-sm mr-2">
+                    {isExpanded ? 'Ocultar información' : 'Click para más información'}
+                  </span>
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </Button>
               )}
             </div>
           </div>
+
+          {/* Expandable Content */}
+          {isExpanded && (expandableContent || expandableDescription) && (
+            <div className="px-4 pb-3">
+              <div className="rounded-lg p-4" style={{ backgroundColor: "var(--muted-bg)" }}>
+                {expandableDescription && (
+                  <p className="text-muted-foreground mb-3">
+                    {expandableDescription}
+                  </p>
+                )}
+                {expandableContent && (
+                  <div className="text-muted-foreground">
+                    {expandableContent}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Divider line */}
           <div className="border-t border-[var(--card-border)]" />
         </>
