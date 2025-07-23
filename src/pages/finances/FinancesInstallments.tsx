@@ -1018,7 +1018,7 @@ export default function FinancesInstallments() {
   ]
 
   const headerProps = {
-    title: "Compromisos de Pago"
+    title: "Aportes de Terceros"
   }
 
   if (isLoading) {
@@ -1037,10 +1037,10 @@ export default function FinancesInstallments() {
         {/* Feature Introduction */}
         <FeatureIntroduction
           icon={<Receipt className="h-6 w-6" />}
-          title="Gestión de Compromisos de Pago"
+          title="Gestión de Aportes de Terceros"
           features={[
-            { icon: <Receipt className="h-4 w-4" />, title: "Compromisos Detallados", description: "Registro detallado de compromisos financieros de clientes e inversores" },
-            { icon: <Receipt className="h-4 w-4" />, title: "Multi-moneda", description: "Seguimiento de aportes y pagos con múltiples monedas y cotizaciones" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Aportes Detallados", description: "Registro detallado de aportes financieros de clientes e inversores" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Multi-moneda", description: "Seguimiento de aportes con múltiples monedas y cotizaciones" },
             { icon: <Receipt className="h-4 w-4" />, title: "Análisis USD", description: "Cálculo automático de equivalencias en USD para análisis financiero" },
             { icon: <Receipt className="h-4 w-4" />, title: "Resúmenes", description: "Resúmenes por cliente con porcentajes de cumplimiento y montos restantes" }
           ]}

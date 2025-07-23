@@ -288,7 +288,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     finanzas: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: HandCoins, label: 'Compromisos de Pago', href: '/finances/installments' },
+      { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments' },
     ],
     diseno: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },

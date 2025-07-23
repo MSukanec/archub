@@ -80,12 +80,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   
-  // Debug logs
-  React.useEffect(() => {
-    console.log('Currencies data:', currencies)
-    console.log('Subcategories data:', subcategories)
-  }, [currencies, subcategories])
-  
   // Hook para obtener subcategorías de "Aportes de Terceros"
   const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
     queryKey: ['aportes-terceros-subcategories', organizationId],
@@ -94,6 +88,16 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       
       // Usar el ID conocido de "Aportes de Terceros"
       const aportesDeTerrcerosId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
+      
+      // Primero verificar que el concepto padre existe
+      const { data: parentConcept } = await supabase
+        .from('movement_concepts')
+        .select('*')
+        .eq('id', aportesDeTerrcerosId)
+        .eq('organization_id', organizationId)
+        .single()
+      
+      console.log('Parent concept (Aportes de Terceros):', parentConcept)
       
       // Obtener subcategorías directamente
       const { data: subcats } = await supabase
@@ -104,10 +108,23 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         .order('name')
       
       console.log('Subcategories fetched for Aportes de Terceros:', subcats)
+      
+      // Si no hay subcategorías, crear una por defecto
+      if (!subcats || subcats.length === 0) {
+        console.log('No subcategories found, using parent concept as option')
+        return parentConcept ? [parentConcept] : []
+      }
+      
       return subcats || []
     },
     enabled: !!organizationId && !!supabase
   })
+  
+  // Debug logs
+  React.useEffect(() => {
+    console.log('Currencies data:', currencies)
+    console.log('Subcategories data:', subcategories)
+  }, [currencies, subcategories])
   
   // Loading state for all necessary data
   const isLoading = currenciesLoading || clientsLoading || subcategoriesLoading || membersLoading || walletsLoading
@@ -459,7 +476,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                     <SelectContent>
                       {currencies?.map((currency) => (
                         <SelectItem key={currency.id} value={currency.id}>
-                          {currency.currency?.name} ({currency.currency?.code})
+                          {currency.name} ({currency.code})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -566,7 +583,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   const headerContent = (
     <FormModalHeader
-      title={editingInstallment ? "Editar Compromiso" : "Nuevo Compromiso"}
+      title={editingInstallment ? "Editar Aporte" : "Nuevo Aporte"}
       icon={DollarSign}
     />
   )
@@ -575,7 +592,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={editingInstallment ? "Actualizar" : "Guardar Compromiso"}
+      rightLabel={editingInstallment ? "Actualizar" : "Guardar Aporte"}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={createInstallmentMutation.isPending}
     />
