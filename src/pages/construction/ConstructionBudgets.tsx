@@ -701,22 +701,22 @@ export default function ConstructionBudgets() {
               searchValue={searchValue}
               onSearchChange={setSearchValue}
               showGrouping={false}
-              primaryActionLabel="Nuevo Presupuesto"
-              onPrimaryActionClick={() => openModal('budget', {})}
+              primaryActionLabel={selectedBudget ? "Nueva Tarea" : "Nuevo Presupuesto"}
+              onPrimaryActionClick={selectedBudget ? () => openModal('budget-task-bulk-add', { 
+                budgetId: selectedBudget.id,
+                onSuccess: () => {
+                  queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
+                }
+              }) : () => openModal('budget', {})}
               customActions={selectedBudget ? [
                 <Button 
-                  key="nueva-tarea"
+                  key="nuevo-presupuesto"
                   variant="outline" 
                   size="sm"
-                  onClick={() => openModal('budget-task-bulk-add', { 
-                    budgetId: selectedBudget.id,
-                    onSuccess: () => {
-                      queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
-                    }
-                  })}
+                  onClick={() => openModal('budget', {})}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Nueva Tarea
+                  Nuevo Presupuesto
                 </Button>
               ] : []}
               budgetSelector={{
