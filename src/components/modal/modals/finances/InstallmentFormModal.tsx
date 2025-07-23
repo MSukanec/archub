@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import UserSelector from '@/components/ui-custom/UserSelector'
 import { CalendarIcon, DollarSign, User, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
@@ -326,132 +326,122 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* 1. Creador */}
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creador *</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar creador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {members?.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarFallback className="text-xs">
-                                {member.first_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>
-                              {`${member.first_name || ''} ${member.last_name || ''}`.trim()}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* 2. Fecha */}
-          <FormField
-            control={form.control}
-            name="movement_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha *</FormLabel>
-                <FormControl>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            placeholder="Seleccionar fecha"
-                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
-                            className="pl-10"
-                            readOnly
-                        />
-                        <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      </div>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date('1900-01-01')
-                      }
-                      initialFocus
+          {/* 1. Creador - Fecha (inline) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="created_by"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <UserSelector
+                      users={members || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Creador"
+                      placeholder="Seleccionar creador"
+                      required={true}
                     />
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {/* 3. Cliente */}
-        <FormField
-          control={form.control}
-          name="contact_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cliente *</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projectClients?.map(client => (
-                      <SelectItem key={client.id} value={client.contact.id}>
-                        {client.contact?.full_name || client.contact?.company_name || `${client.contact?.first_name || ''} ${client.contact?.last_name || ''}`.trim()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="movement_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha *</FormLabel>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Seleccionar fecha"
+                              value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                              className="pl-10"
+                              readOnly
+                            />
+                            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          </div>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date('1900-01-01')
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        {/* 4. Subcategoría */}
-        <FormField
-          control={form.control}
-          name="subcategory_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subcategoría *</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar subcategoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subcategories?.map((subcategory) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* 2. Cliente - Concepto (inline) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="contact_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <UserSelector
+                      users={projectClients?.map(client => ({
+                        id: client.contact.id,
+                        full_name: client.contact?.full_name,
+                        first_name: client.contact?.first_name,
+                        last_name: client.contact?.last_name,
+                        company_name: client.contact?.company_name,
+                      })) || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Cliente"
+                      placeholder="Seleccionar cliente"
+                      required={true}
+                      showCompany={true}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="subcategory_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Concepto *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar concepto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subcategories?.map((subcategory) => (
+                          <SelectItem key={subcategory.id} value={subcategory.id}>
+                            {subcategory.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
         {/* 5. Moneda - Billetera */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
