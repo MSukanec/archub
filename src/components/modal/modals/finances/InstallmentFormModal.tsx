@@ -85,6 +85,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   // Cargar datos del movimiento en edición
   React.useEffect(() => {
     if (editingInstallment && currencies) {
+      console.log('Loading editing installment:', editingInstallment)
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
       form.reset({
@@ -94,6 +95,15 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         amount: editingInstallment.amount || 0,
         description: editingInstallment.description || '',
         exchange_rate: editingInstallment.exchange_rate || undefined,
+      })
+      
+      console.log('Form reset with values:', {
+        movement_date: installmentDate,
+        contact_id: editingInstallment.contact_id,
+        currency_id: editingInstallment.currency_id,
+        amount: editingInstallment.amount,
+        description: editingInstallment.description,
+        exchange_rate: editingInstallment.exchange_rate
       })
     }
   }, [editingInstallment, form, currencies])
