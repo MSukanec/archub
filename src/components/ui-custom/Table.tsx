@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, Fragment } from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -43,6 +43,14 @@ interface TableProps<T = any> {
   renderCard?: (item: T) => React.ReactNode;
   // Nuevo: Espaciado opcional para cards
   cardSpacing?: string;
+  // 🆕 NUEVAS FUNCIONALIDADES
+  // Fila de totales al final
+  renderFooterRow?: () => React.ReactNode;
+  // Agrupamiento por columna
+  groupBy?: keyof T | string;
+  renderGroupHeader?: (groupKey: string, groupRows: T[]) => React.ReactNode;
+  // Modos de visualización
+  mode?: "default" | "budget" | "construction";
 }
 
 export function Table<T = any>({
@@ -60,6 +68,11 @@ export function Table<T = any>({
   defaultSort,
   renderCard,
   cardSpacing = "space-y-2",
+  // 🆕 NUEVAS FUNCIONALIDADES
+  renderFooterRow,
+  groupBy,
+  renderGroupHeader,
+  mode = "default",
 }: TableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(
     defaultSort?.key || null,
@@ -92,59 +105,83 @@ export function Table<T = any>({
     }
   };
 
-  // Sort data
-  const sortedData = useMemo(() => {
-    if (!sortKey || !sortDirection) return data;
+  // 🆕 AGRUPAMIENTO DE DATOS
+  const groupedData = useMemo(() => {
+    const sortedData = (() => {
+      if (!sortKey || !sortDirection) return data;
 
-    return [...data].sort((a, b) => {
-      const column = columns.find((col) => col.key === sortKey);
-      const sortType = column?.sortType || "string";
+      return [...data].sort((a, b) => {
+        const column = columns.find((col) => col.key === sortKey);
+        const sortType = column?.sortType || "string";
 
-      const aValue = a[sortKey as keyof T];
-      const bValue = b[sortKey as keyof T];
+        const aValue = a[sortKey as keyof T];
+        const bValue = b[sortKey as keyof T];
 
-      // Handle null/undefined values
-      if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return sortDirection === "asc" ? -1 : 1;
-      if (bValue == null) return sortDirection === "asc" ? 1 : -1;
+        // Handle null/undefined values
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return sortDirection === "asc" ? -1 : 1;
+        if (bValue == null) return sortDirection === "asc" ? 1 : -1;
 
-      let comparison = 0;
+        let comparison = 0;
 
-      switch (sortType) {
-        case "number":
-          comparison = (Number(aValue) || 0) - (Number(bValue) || 0);
-          break;
-        case "date":
-          const dateA = new Date(String(aValue));
-          const dateB = new Date(String(bValue));
-          comparison = dateA.getTime() - dateB.getTime();
-          
-          // If dates are equal and we're sorting by movement_date, 
-          // use created_at as secondary criteria
-          if (comparison === 0 && sortKey === "movement_date") {
-            const createdA = new Date(String((a as any).created_at || aValue));
-            const createdB = new Date(String((b as any).created_at || bValue));
-            comparison = createdA.getTime() - createdB.getTime();
-          }
-          break;
-        case "string":
-        default:
-          comparison = String(aValue).localeCompare(String(bValue));
-          break;
+        switch (sortType) {
+          case "number":
+            comparison = (Number(aValue) || 0) - (Number(bValue) || 0);
+            break;
+          case "date":
+            const dateA = new Date(String(aValue));
+            const dateB = new Date(String(bValue));
+            comparison = dateA.getTime() - dateB.getTime();
+            
+            // If dates are equal and we're sorting by movement_date, 
+            // use created_at as secondary criteria
+            if (comparison === 0 && sortKey === "movement_date") {
+              const createdA = new Date(String((a as any).created_at || aValue));
+              const createdB = new Date(String((b as any).created_at || bValue));
+              comparison = createdA.getTime() - createdB.getTime();
+            }
+            break;
+          case "string":
+          default:
+            comparison = String(aValue).localeCompare(String(bValue));
+            break;
+        }
+
+        return sortDirection === "asc" ? comparison : -comparison;
+      });
+    })();
+
+    // Si no hay agrupamiento, devolver los datos como un solo grupo
+    if (!groupBy) {
+      return { 'all': sortedData };
+    }
+
+    // Agrupar datos por la clave especificada
+    const grouped = sortedData.reduce((acc, item) => {
+      const groupKey = String(item[groupBy as keyof T] || 'Sin grupo');
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
       }
+      acc[groupKey].push(item);
+      return acc;
+    }, {} as Record<string, T[]>);
 
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-  }, [data, sortKey, sortDirection, columns]);
+    return grouped;
+  }, [data, sortKey, sortDirection, columns, groupBy]);
 
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  // Aplanar datos agrupados para paginación
+  const flattenedData = useMemo(() => {
+    return Object.values(groupedData).flat();
+  }, [groupedData]);
+
+  // Pagination - usando flattenedData en lugar de sortedData
+  const totalPages = Math.ceil(flattenedData.length / itemsPerPage);
   const paginatedData = showPagination
-    ? sortedData.slice(
+    ? flattenedData.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage,
       )
-    : sortedData;
+    : flattenedData;
 
   const isItemSelected = (item: T) => {
     return selectedItems.some(
@@ -316,44 +353,122 @@ export function Table<T = any>({
           ))}
         </div>
 
-        {/* Table Rows */}
+        {/* Table Rows con agrupamiento */}
         <div>
-          {paginatedData.map((item, index) => (
-            <div
-              key={index}
-              className={cn(
-                "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
-                index < paginatedData.length - 1
-                  ? "border-b border-[var(--table-row-border)]"
-                  : "",
-                getRowClassName?.(item),
-              )}
-              style={{ gridTemplateColumns: getGridTemplateColumns() }}
+          {groupBy ? (
+            // Renderizado con agrupamiento
+            Object.entries(groupedData).map(([groupKey, groupRows]) => (
+              <Fragment key={groupKey}>
+                {/* Header de grupo */}
+                {renderGroupHeader && (
+                  <div className={cn(
+                    "grid gap-4 px-4 py-3",
+                    mode === "budget" && "bg-[var(--accent)] text-white border-b border-[var(--table-row-border)]",
+                    mode === "construction" && "bg-[var(--accent)] text-white border-b border-[var(--table-row-border)]",
+                    mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
+                    "text-xs font-medium"
+                  )}
+                  style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                  >
+                    {renderGroupHeader(groupKey, groupRows)}
+                  </div>
+                )}
+                
+                {/* Filas del grupo */}
+                {groupRows.map((item, index) => (
+                  <div
+                    key={getItemId(item)}
+                    className={cn(
+                      "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                      index < groupRows.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
+                      getRowClassName?.(item),
+                    )}
+                    style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                  >
+                    {selectable && (
+                      <div className="flex items-center justify-center">
+                        <Checkbox
+                          checked={isItemSelected(item)}
+                          onCheckedChange={(checked) =>
+                            handleSelectItem(item, checked as boolean)
+                          }
+                          aria-label={`Seleccionar fila ${index + 1}`}
+                          className="h-3 w-3"
+                        />
+                      </div>
+                    )}
+                    {columns.map((column) => (
+                      <div
+                        key={String(column.key)}
+                        className={cn(
+                          "text-xs flex items-center justify-start",
+                          mode === "budget" && "text-[var(--table-row-fg)]",
+                          mode === "construction" && "text-[var(--table-row-fg)]"
+                        )}
+                      >
+                        {column.render
+                          ? column.render(item)
+                          : String(item[column.key as keyof T] || "-")}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </Fragment>
+            ))
+          ) : (
+            // Renderizado sin agrupamiento (comportamiento original)
+            paginatedData.map((item, index) => (
+              <div
+                key={getItemId(item)}
+                className={cn(
+                  "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                  index < paginatedData.length - 1
+                    ? "border-b border-[var(--table-row-border)]"
+                    : "",
+                  getRowClassName?.(item),
+                )}
+                style={{ gridTemplateColumns: getGridTemplateColumns() }}
+              >
+                {selectable && (
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={isItemSelected(item)}
+                      onCheckedChange={(checked) =>
+                        handleSelectItem(item, checked as boolean)
+                      }
+                      aria-label={`Seleccionar fila ${index + 1}`}
+                      className="h-3 w-3"
+                    />
+                  </div>
+                )}
+                {columns.map((column) => (
+                  <div
+                    key={String(column.key)}
+                    className="text-xs flex items-center justify-start"
+                  >
+                    {column.render
+                      ? column.render(item)
+                      : String(item[column.key as keyof T] || "-")}
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+          
+          {/* 🆕 FILA DE TOTALES */}
+          {renderFooterRow && (
+            <div className={cn(
+              "grid gap-4 px-4 py-3",
+              mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
+              mode === "construction" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
+              mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
+              "text-xs font-medium"
+            )}
+            style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
-              {selectable && (
-                <div className="flex items-center justify-center">
-                  <Checkbox
-                    checked={isItemSelected(item)}
-                    onCheckedChange={(checked) =>
-                      handleSelectItem(item, checked as boolean)
-                    }
-                    aria-label={`Seleccionar fila ${index + 1}`}
-                    className="h-3 w-3"
-                  />
-                </div>
-              )}
-              {columns.map((column) => (
-                <div
-                  key={String(column.key)}
-                  className="text-xs flex items-center justify-start"
-                >
-                  {column.render
-                    ? column.render(item)
-                    : String(item[column.key as keyof T] || "-")}
-                </div>
-              ))}
+              {renderFooterRow()}
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -452,10 +567,10 @@ export function Table<T = any>({
               Mostrando{" "}
               {Math.min(
                 (currentPage - 1) * itemsPerPage + 1,
-                sortedData.length,
+                flattenedData.length,
               )}{" "}
-              a {Math.min(currentPage * itemsPerPage, sortedData.length)} de{" "}
-              {sortedData.length} entradas
+              a {Math.min(currentPage * itemsPerPage, flattenedData.length)} de{" "}
+              {flattenedData.length} entradas
             </div>
             <div className="flex items-center gap-1">
               <Button

@@ -14,7 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 // Removed CustomTable import as we now use BudgetTable
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { BudgetTable } from '@/components/ui-custom/BudgetTable'
+import { Table } from '@/components/ui-custom/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { useBudgets } from '@/hooks/use-budgets'
@@ -521,29 +521,174 @@ export default function ConstructionBudgets() {
       return unit?.name || '-';
     };
 
+    // Definir columnas para el componente Table
+    const columns = [
+      {
+        key: 'rubro_name',
+        label: 'Rubro',
+        width: '10%',
+        render: (item: any) => (
+          <span className="text-xs">{item.task?.rubro_name || '-'}</span>
+        )
+      },
+      {
+        key: 'display_name',
+        label: 'Tareas',
+        width: '1fr',
+        render: (item: any) => (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {item.task?.task_code || '-'}
+            </span>
+            <span className="text-xs">
+              {generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+            </span>
+          </div>
+        )
+      },
+      {
+        key: 'unit',
+        label: 'Unidad',
+        width: '5%',
+        render: (item: any) => (
+          <span className="text-xs">{getUnitName(item.task?.unit_id)}</span>
+        )
+      },
+      {
+        key: 'quantity',
+        label: 'Cantidad',
+        width: '5%',
+        render: (item: any) => (
+          <Input
+            type="number"
+            value={item.quantity || 0}
+            onChange={(e) => handleUpdateQuantity(item.id, parseFloat(e.target.value) || 0)}
+            className="h-7 text-xs"
+            step="0.01"
+            min="0"
+          />
+        )
+      },
+      {
+        key: 'unit_cost',
+        label: 'P.U.',
+        width: '5%',
+        render: (item: any) => (
+          <span className="text-xs">
+            ${(item.task?.unit_cost || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </span>
+        )
+      },
+      {
+        key: 'total_cost',
+        label: 'Subtotal',
+        width: '5%',
+        render: (item: any) => (
+          <span className="text-xs text-green-600 font-medium">
+            ${((item.quantity || 0) * (item.task?.unit_cost || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </span>
+        )
+      },
+      {
+        key: 'actions',
+        label: 'Acciones',
+        width: '5%',
+        sortable: false,
+        render: (item: any) => (
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('budget-task-form', { 
+                budgetTask: item,
+                mode: 'edit'
+              })}
+              className="h-6 w-6 p-0"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteTask(item.id)}
+              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        )
+      }
+    ];
+
+    // Función para renderizar la fila de totales
+    const renderFooterRow = () => {
+      const totalTasks = budgetTasks?.length || 0;
+      const totalCost = budgetTasks?.reduce((sum, task) => 
+        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+      ) || 0;
+
+      return (
+        <>
+          <div className="text-xs font-medium">TOTAL</div>
+          <div className="text-xs font-medium">{totalTasks} tareas</div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div className="text-xs font-medium text-green-600">
+            ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </div>
+          <div></div>
+        </>
+      );
+    };
+
+    // Función para renderizar header de grupo
+    const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
+      const groupTotal = groupRows.reduce((sum, task) => 
+        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+      );
+
+      return (
+        <>
+          <div className="text-xs font-medium">{groupKey}</div>
+          <div className="text-xs">{groupRows.length} tareas</div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div className="text-xs font-medium">
+            ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </div>
+          <div></div>
+        </>
+      );
+    };
+
     return (
-      <BudgetTable
-        budgetId={budgetId}
-        budgetTasks={budgetTasks}
+      <Table
+        columns={columns}
+        data={budgetTasks || []}
         isLoading={isLoading}
-        groupingType={groupingType}
-        selectedTasks={selectedTasks}
-        setSelectedTasks={setSelectedTasks}
-        generateTaskDisplayName={generateTaskDisplayName}
-        parameterValues={parameterValues}
-        getUnitName={getUnitName}
-        handleUpdateQuantity={handleUpdateQuantity}
-        handleDeleteTask={handleDeleteTask}
-        handleAddTask={handleAddTask}
-        onGroupingChange={setGroupingType}
-        onAddTasks={() => {
-          openModal('budget-task-bulk-add', { 
-            budgetId: budgetId,
-            onSuccess: () => {
-              queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
-            }
-          });
-        }}
+        mode="budget"
+        groupBy={groupingType !== 'none' ? 'rubro_name' : undefined}
+        renderGroupHeader={groupingType !== 'none' ? renderGroupHeader : undefined}
+        renderFooterRow={renderFooterRow}
+        selectable={true}
+        selectedItems={budgetTasks?.filter(task => selectedTasks.includes(task.id)) || []}
+        onSelectionChange={(selected) => setSelectedTasks(selected.map(task => task.id))}
+        getItemId={(item) => item.id}
+        renderCard={(item) => (
+          <BudgetTaskCard
+            task={item}
+            generateTaskDisplayName={generateTaskDisplayName}
+            getUnitName={getUnitName}
+            onEdit={() => openModal('budget-task-form', { 
+              budgetTask: item,
+              mode: 'edit'
+            })}
+            onDelete={() => handleDeleteTask(item.id)}
+            onUpdateQuantity={(newQuantity) => handleUpdateQuantity(item.id, newQuantity)}
+          />
+        )}
       />
     );
   }
@@ -620,29 +765,203 @@ export default function ConstructionBudgets() {
       return unit?.name || '-';
     };
 
+    // Definir columnas para el componente Table
+    const columns = [
+      {
+        key: 'rubro_name',
+        label: 'Rubro',
+        width: '10%',
+        render: (item: any) => (
+          <span className="text-xs">{item.task?.rubro_name || '-'}</span>
+        )
+      },
+      {
+        key: 'display_name',
+        label: 'Tareas',
+        width: '1fr',
+        render: (item: any) => (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {item.task?.task_code || '-'}
+            </span>
+            <span className="text-xs">
+              {generateTaskDisplayName(item.task?.display_name || '', item.task?.parameter_values)}
+            </span>
+          </div>
+        )
+      },
+      {
+        key: 'unit',
+        label: 'Unidad',
+        width: '5%',
+        render: (item: any) => (
+          <span className="text-xs">{getUnitName(item.task?.unit_id)}</span>
+        )
+      },
+      {
+        key: 'quantity',
+        label: 'Cantidad',
+        width: '5%',
+        render: (item: any) => (
+          <Input
+            type="number"
+            value={item.quantity || 0}
+            onChange={(e) => handleUpdateQuantity(item.id, parseFloat(e.target.value) || 0)}
+            className="h-7 text-xs"
+            step="0.01"
+            min="0"
+          />
+        )
+      },
+      {
+        key: 'unit_cost',
+        label: 'P.U.',
+        width: '5%',
+        render: (item: any) => (
+          <span className="text-xs">
+            ${(item.task?.unit_cost || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </span>
+        )
+      },
+      {
+        key: 'total_cost',
+        label: 'Subtotal',
+        width: '5%',
+        render: (item: any) => (
+          <span className="text-xs text-green-600 font-medium">
+            ${((item.quantity || 0) * (item.task?.unit_cost || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </span>
+        )
+      },
+      {
+        key: 'actions',
+        label: 'Acciones',
+        width: '5%',
+        sortable: false,
+        render: (item: any) => (
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('budget-task-form', { 
+                budgetTask: item,
+                mode: 'edit'
+              })}
+              className="h-6 w-6 p-0"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteTask(item.id)}
+              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        )
+      }
+    ];
+
+    // Función para renderizar la fila de totales
+    const renderFooterRow = () => {
+      const totalTasks = budgetTasks?.length || 0;
+      const totalCost = budgetTasks?.reduce((sum, task) => 
+        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+      ) || 0;
+
+      return (
+        <>
+          <div className="text-xs font-medium">TOTAL</div>
+          <div className="text-xs font-medium">{totalTasks} tareas</div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div className="text-xs font-medium text-green-600">
+            ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </div>
+          <div></div>
+        </>
+      );
+    };
+
+    // Función para renderizar header de grupo
+    const renderGroupHeader = (groupKey: string, groupRows: any[]) => {
+      const groupTotal = groupRows.reduce((sum, task) => 
+        sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+      );
+
+      return (
+        <>
+          <div className="text-xs font-medium">{groupKey}</div>
+          <div className="text-xs">{groupRows.length} tareas</div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div className="text-xs font-medium">
+            ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </div>
+          <div></div>
+        </>
+      );
+    };
+
     return (
-      <BudgetTable
-        budgetId={budgetId}
-        budgetTasks={budgetTasks}
-        isLoading={isLoading}
-        groupingType={groupingType}
-        selectedTasks={selectedTasks}
-        setSelectedTasks={setSelectedTasks}
-        generateTaskDisplayName={generateTaskDisplayName}
-        parameterValues={parameterValues}
-        getUnitName={getUnitName}
-        handleDeleteTask={handleDeleteTask}
-        handleAddTask={handleAddTask}
-        onGroupingChange={setGroupingType}
-        onAddTasks={() => {
-          openModal('budget-task-bulk-add', { 
-            budgetId: budgetId,
-            onSuccess: () => {
-              queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+      <div>
+        {/* ActionBar con selector de agrupamiento */}
+        <ActionBarDesktop
+          filters={
+            <Select value={groupingType} onValueChange={setGroupingType}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Agrupar por..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sin agrupar</SelectItem>
+                <SelectItem value="rubro_name">Agrupar por rubro</SelectItem>
+              </SelectContent>
+            </Select>
+          }
+          primaryAction={{
+            label: "Agregar Tareas",
+            onClick: () => {
+              openModal('budget-task-bulk-add', { 
+                budgetId: budgetId,
+                onSuccess: () => {
+                  queryClient.invalidateQueries({ queryKey: ['budget-tasks', budgetId] });
+                }
+              });
             }
-          });
-        }}
-      />
+          }}
+        />
+        
+        <Table
+          columns={columns}
+          data={budgetTasks || []}
+          isLoading={isLoading}
+          mode="budget"
+          groupBy={groupingType !== 'none' ? 'rubro_name' : undefined}
+          renderGroupHeader={groupingType !== 'none' ? renderGroupHeader : undefined}
+          renderFooterRow={renderFooterRow}
+          selectable={true}
+          selectedItems={budgetTasks?.filter(task => selectedTasks.includes(task.id)) || []}
+          onSelectionChange={(selected) => setSelectedTasks(selected.map(task => task.id))}
+          getItemId={(item) => item.id}
+          renderCard={(item) => (
+            <BudgetTaskCard
+              task={item}
+              generateTaskDisplayName={generateTaskDisplayName}
+              getUnitName={getUnitName}
+              onEdit={() => openModal('budget-task-form', { 
+                budgetTask: item,
+                mode: 'edit'
+              })}
+              onDelete={() => handleDeleteTask(item.id)}
+              onUpdateQuantity={(newQuantity) => handleUpdateQuantity(item.id, newQuantity)}
+            />
+          )}
+        />
+      </div>
     );
   }
 
