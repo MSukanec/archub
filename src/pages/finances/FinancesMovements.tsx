@@ -50,7 +50,8 @@ import { transformMovementToCard } from "@/utils/movementCardAdapter";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
-import { useOrganizationDefaultCurrency } from "@/hooks/use-currencies";
+import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hooks/use-currencies";
+import { useOrganizationWallets } from "@/hooks/use-organization-wallets";
 import { useProjectsMap } from "@/hooks/use-projects";
 import { ProjectBadge } from "@/components/ui-custom/ProjectBadge";
 import { getMovementFiles } from "@/lib/storage/uploadMovementFiles";
@@ -187,6 +188,8 @@ export default function Movements() {
             setFilterByCategory("all");
             setFilterByFavorites("all");
             setFilterByScope("all");
+            setFilterByCurrency("all");
+            setFilterByWallet("all");
           },
         }
       });
@@ -206,6 +209,8 @@ export default function Movements() {
   const [filterByCategory, setFilterByCategory] = useState("all");
   const [filterByFavorites, setFilterByFavorites] = useState("all");
   const [filterByScope, setFilterByScope] = useState("all");
+  const [filterByCurrency, setFilterByCurrency] = useState("all");
+  const [filterByWallet, setFilterByWallet] = useState("all");
 
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -222,6 +227,10 @@ export default function Movements() {
 
   // Get organization's default currency
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  
+  // Get organization currencies and wallets for filters
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
+  const { data: organizationWallets = [] } = useOrganizationWallets(organizationId);
   
   // Get projects map for the project badges (only when in GENERAL mode)
   const { data: projectsMap = {} } = useProjectsMap(organizationId);
@@ -642,9 +651,17 @@ export default function Movements() {
         filterByScope === "all" ||
         (filterByScope === "organization" && !movement.project_id) ||
         (filterByScope === "project" && movement.project_id);
+      
+      const matchesCurrency =
+        filterByCurrency === "all" ||
+        movement.movement_data?.currency?.name === filterByCurrency;
+      
+      const matchesWallet =
+        filterByWallet === "all" ||
+        movement.movement_data?.wallet?.name === filterByWallet;
 
       return (
-        matchesSearch && matchesType && matchesCategory && matchesFavorites && matchesScope
+        matchesSearch && matchesType && matchesCategory && matchesFavorites && matchesScope && matchesCurrency && matchesWallet
       );
     });
 
@@ -724,6 +741,44 @@ export default function Movements() {
           </SelectContent>
         </Select>
       </div>
+
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por moneda
+        </Label>
+        <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las monedas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las monedas</SelectItem>
+            {organizationCurrencies.map((orgCurrency) => (
+              <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.name}>
+                {orgCurrency.currency.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por billetera
+        </Label>
+        <Select value={filterByWallet} onValueChange={setFilterByWallet}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las billeteras" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las billeteras</SelectItem>
+            {organizationWallets.map((orgWallet) => (
+              <SelectItem key={orgWallet.id} value={orgWallet.wallets.name}>
+                {orgWallet.wallets.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 
@@ -732,6 +787,8 @@ export default function Movements() {
     setFilterByCategory("all");
     setFilterByFavorites("all");
     setFilterByScope("all");
+    setFilterByCurrency("all");
+    setFilterByWallet("all");
     setSearchValue("");
   };
 
@@ -1306,7 +1363,9 @@ export default function Movements() {
                           filterByType !== "all" || 
                           filterByCategory !== "all" || 
                           filterByFavorites !== "all" || 
-                          filterByScope !== "all";
+                          filterByScope !== "all" ||
+                          filterByCurrency !== "all" ||
+                          filterByWallet !== "all";
 
   return (
     <Layout headerProps={headerProps} wide={true}>
