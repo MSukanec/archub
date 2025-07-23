@@ -315,7 +315,7 @@ export function Table<T = any>({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
-      <div className="hidden lg:block overflow-hidden rounded-lg border border-[var(--table-header-border)] shadow-sm">
+      <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
         {/* Column Headers */}
         <div
           className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
