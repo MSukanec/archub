@@ -274,7 +274,12 @@ export function TaskTemplateFormModal({
             variant: 'destructive'
           }
         } : {
-          cancelAction: { label: 'Cancelar', onClick: closeModal }
+          cancelAction: { label: 'Cancelar', onClick: closeModal },
+          submitAction: { 
+            label: 'Crear Plantilla', 
+            onClick: () => createTemplateMutation.mutate(),
+            loading: createTemplateMutation.isPending
+          }
         };
       case 2:
         return {
@@ -338,15 +343,7 @@ export function TaskTemplateFormModal({
                     </p>
                   </div>
                   
-                  <div className="flex justify-center">
-                    <Button 
-                      onClick={() => createTemplateMutation.mutate()}
-                      disabled={createTemplateMutation.isPending}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      {createTemplateMutation.isPending ? 'Creando...' : 'Crear Plantilla'}
-                    </Button>
-                  </div>
+
                 </CardContent>
               </Card>
             )}
