@@ -144,36 +144,7 @@ export default function ConstructionMaterials() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
-        {/* Feature Introduction */}
-        <FeatureIntroduction
-          title="Gestión de Materiales"
-          icon={<Package className="w-6 h-6" />}
-          features={[
-            {
-              icon: <Calculator className="w-4 h-4" />,
-              title: "Cálculo Automático",
-              description: "Cantidades de materiales calculadas automáticamente basadas en las tareas del presupuesto."
-            },
-            {
-              icon: <Boxes className="w-4 h-4" />,
-              title: "Control de Inventario",
-              description: "Seguimiento de cantidades compradas vs. cantidades requeridas para cada material."
-            },
-            {
-              icon: <BarChart3 className="w-4 h-4" />,
-              title: "Análisis por Categoría",
-              description: "Organización de materiales por categorías para mejor gestión y análisis de costos."
-            },
-            {
-              icon: <Layers className="w-4 h-4" />,
-              title: "Planificación de Compras",
-              description: "Identificación clara de materiales faltantes y cantidades a comprar para el proyecto."
-            }
-          ]}
-        />
-
-        {filteredMaterials.length === 0 ? (
+      {filteredMaterials.length === 0 ? (
           <EmptyState
             icon={<Package className="w-8 h-8 text-muted-foreground" />}
             title="No hay materiales disponibles"
@@ -225,7 +196,6 @@ export default function ConstructionMaterials() {
             />
           </>
         )}
-      </div>
     </Layout>
   )
 }
