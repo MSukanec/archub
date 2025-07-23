@@ -266,6 +266,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       toast({
         title: editingInstallment ? 'Compromiso actualizado' : 'Compromiso registrado',
         description: editingInstallment 

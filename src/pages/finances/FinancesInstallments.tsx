@@ -502,6 +502,7 @@ export default function FinancesInstallments() {
           // Refrescar datos
           queryClient.invalidateQueries({ queryKey: ['installments'] })
           queryClient.invalidateQueries({ queryKey: ['movements'] })
+          queryClient.invalidateQueries({ queryKey: ['movement-view'] })
         } catch (error: any) {
           toast({
             variant: 'destructive',
