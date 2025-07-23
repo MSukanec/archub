@@ -118,6 +118,14 @@ export function Table<T = any>({
           const dateA = new Date(String(aValue));
           const dateB = new Date(String(bValue));
           comparison = dateA.getTime() - dateB.getTime();
+          
+          // If dates are equal and we're sorting by movement_date, 
+          // use created_at as secondary criteria
+          if (comparison === 0 && sortKey === "movement_date") {
+            const createdA = new Date(String((a as any).created_at || aValue));
+            const createdB = new Date(String((b as any).created_at || bValue));
+            comparison = createdA.getTime() - createdB.getTime();
+          }
           break;
         case "string":
         default:
