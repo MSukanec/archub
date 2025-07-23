@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Package2, Settings, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Package2, Settings, CheckCircle, XCircle, Filter } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { HierarchicalCategoryTree } from '@/components/ui-custom/HierarchicalCategoryTree';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 import { useDeleteTaskGroup } from '@/hooks/use-task-groups';
@@ -292,27 +293,7 @@ export default function AdminCategories() {
       }
     ],
     onClearFilters: clearFilters,
-    actions: [
-      <Button 
-        key="refetch"
-        onClick={() => refetch()}
-        variant="outline"
-        className="h-8 px-3 text-sm font-medium"
-      >
-        🔄 REFETCH
-      </Button>,
-      <Button 
-        key="create"
-        onClick={() => {
-          setEditingCategory(null);
-          setIsCategoryModalOpen(true);
-        }}
-        className="h-8 px-3 text-sm font-medium"
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        CREAR CATEGORÍA
-      </Button>
-    ]
+    actions: []
   };
 
   if (isLoading) {
@@ -328,6 +309,47 @@ export default function AdminCategories() {
   return (
     <>
       <Layout headerProps={headerProps}>
+        {/* Action Bar Desktop */}
+        <ActionBarDesktop
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          showGrouping={false}
+          primaryActionLabel="CREAR CATEGORÍA"
+          onPrimaryActionClick={() => {
+            setEditingCategory(null);
+            setIsCategoryModalOpen(true);
+          }}
+          customActions={[
+            <Button 
+              key="filter-all"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setTemplateFilter('all')}
+              className={templateFilter === 'all' ? 'bg-accent text-accent-foreground' : ''}
+            >
+              <Package2 className="w-4 h-4" />
+            </Button>,
+            <Button 
+              key="filter-with"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setTemplateFilter('with-template')}
+              className={templateFilter === 'with-template' ? 'bg-accent text-accent-foreground' : ''}
+            >
+              <CheckCircle className="w-4 h-4" />
+            </Button>,
+            <Button 
+              key="filter-without"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setTemplateFilter('without-template')}
+              className={templateFilter === 'without-template' ? 'bg-accent text-accent-foreground' : ''}
+            >
+              <XCircle className="w-4 h-4" />
+            </Button>
+          ]}
+        />
+
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
