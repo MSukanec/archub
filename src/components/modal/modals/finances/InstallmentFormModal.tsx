@@ -86,10 +86,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     queryFn: async () => {
       if (!supabase) return []
       
-      // Usar el ID conocido de "Aportes de Terceros"
-      const aportesDeTerrcerosId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
-      
-      // Buscar TODOS los conceptos de la organización para debug
+      // Buscar TODOS los conceptos de la organización
       const { data: allConcepts } = await supabase
         .from('movement_concepts')
         .select('id, name, parent_id')
@@ -97,18 +94,57 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         .order('name')
       
       console.log('All concepts in organization:', allConcepts)
-      console.log('Looking for children of:', aportesDeTerrcerosId)
       
-      // Buscar conceptos que tengan como padre "Aportes de Terceros"
+      // Primero intentar buscar "Aportes de Terceros" por nombre
+      let aportesDeTerrcerosId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
+      let aportesDeTerrcerosConcepto = allConcepts?.find(concept => concept.id === aportesDeTerrcerosId)
+      
+      // Si no existe por ID, buscar por nombre similar
+      if (!aportesDeTerrcerosConcepto) {
+        console.log('Aportes de Terceros ID not found, searching by name...')
+        aportesDeTerrcerosConcepto = allConcepts?.find(concept => 
+          concept.name.toLowerCase().includes('aporte') && 
+          (concept.name.toLowerCase().includes('tercero') || concept.name.toLowerCase().includes('cliente'))
+        )
+        
+        if (aportesDeTerrcerosConcepto) {
+          aportesDeTerrcerosId = aportesDeTerrcerosConcepto.id
+          console.log('Found similar concept:', aportesDeTerrcerosConcepto)
+        } else {
+          // Crear el concepto "Aportes de Terceros" 
+          console.log('Creating Aportes de Terceros concept...')
+          const ingresosId = allConcepts?.find(c => c.name === 'Ingresos')?.id || '8862eee7-dd00-4f01-9335-5ea0070d3403'
+          
+          const { data: newConcept, error } = await supabase
+            .from('movement_concepts')
+            .insert({
+              id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3',
+              name: 'Aportes de Terceros',
+              parent_id: ingresosId,
+              organization_id: organizationId,
+              view_mode: 'aportes'
+            })
+            .select()
+            .single()
+          
+          if (error) {
+            console.error('Error creating concept:', error)
+            return []
+          }
+          
+          aportesDeTerrcerosConcepto = newConcept
+          console.log('Created new concept:', newConcept)
+        }
+      }
+      
+      // Buscar conceptos hijos
       const childConcepts = allConcepts?.filter(concept => concept.parent_id === aportesDeTerrcerosId) || []
-      
       console.log('Child concepts found:', childConcepts)
       
-      // Si no hay hijos, usar el concepto padre mismo
+      // Si no hay hijos, usar el concepto padre
       if (childConcepts.length === 0) {
-        const parentConcept = allConcepts?.find(concept => concept.id === aportesDeTerrcerosId)
-        console.log('No children found, using parent:', parentConcept)
-        return parentConcept ? [parentConcept] : []
+        console.log('No children found, using parent concept')
+        return aportesDeTerrcerosConcepto ? [aportesDeTerrcerosConcepto] : []
       }
       
       return childConcepts
