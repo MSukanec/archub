@@ -214,6 +214,30 @@ export default function ConstructionTasks() {
         <>
           {/* Action Bar Desktop - solo cuando hay tareas */}
           <ActionBarDesktop
+            title="Listado de Tareas"
+            icon={<CheckSquare className="w-6 h-6" />}
+            features={[
+              {
+                icon: <CheckSquare className="w-4 h-4" />,
+                title: "Vista de Tabla Completa",
+                description: "Listado detallado con todas las tareas organizadas por rubro, unidad, cantidad y fase asignada."
+              },
+              {
+                icon: <Calendar className="w-4 h-4" />,
+                title: "Gestión de Fechas",
+                description: "Control de fechas de inicio, fin y progreso de cada tarea con vista temporal."
+              },
+              {
+                icon: <MapPin className="w-4 h-4" />,
+                title: "Organización por Fases",
+                description: "Agrupación automática por fases del proyecto con opciones de agrupamiento flexible."
+              },
+              {
+                icon: <User className="w-4 h-4" />,
+                title: "Control de Recursos",
+                description: "Gestión de cantidades, unidades y asignación de recursos para cada tarea."
+              }
+            ]}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             showGrouping

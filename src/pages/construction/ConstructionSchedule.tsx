@@ -511,6 +511,30 @@ export default function ConstructionSchedule() {
         <>
           {/* Action Bar Desktop with Tabs */}
           <ActionBarDesktop
+            title="Cronograma de Construcción"
+            icon={<Calendar className="w-6 h-6" />}
+            features={[
+              {
+                icon: <BarChart3 className="w-4 h-4" />,
+                title: "Vista Gantt Profesional",
+                description: "Cronograma visual con barras temporales, dependencias entre tareas y gestión de fechas tipo MS Project."
+              },
+              {
+                icon: <Activity className="w-4 h-4" />,
+                title: "Gestión por Fases",
+                description: "Organización jerárquica con fases expandibles/colapsables y cálculo automático de fechas."
+              },
+              {
+                icon: <CheckSquare className="w-4 h-4" />,
+                title: "Control de Dependencias",
+                description: "Visualización de precedencias con flechas SVG y arrastre automático de tareas dependientes."
+              },
+              {
+                icon: <Clock className="w-4 h-4" />,
+                title: "Análisis Visual Avanzado",
+                description: "9 gráficos profesionales: curva de progreso, burndown, heatmap semanal, red de dependencias."
+              }
+            ]}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
             showGrouping={false}

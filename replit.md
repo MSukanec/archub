@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 23, 2025. ACTIONBAR EXPANDABLE INFO SYSTEM COMPLETED: Enhanced ActionBarDesktop with expandable help information using FeatureIntroduction format - COMPLETED
+  • HELP ICON BUTTON: Added HelpCircle icon button replacing "Click para más información" text for cleaner UI
+  • FEATURES GRID INTEGRATION: Implemented FeatureIntroduction-style grid layout with two columns for expandable content
+  • FEATURES PROP SYSTEM: Added features array prop to ActionBarDesktop allowing any page to pass feature items with icon, title, description
+  • MOBILE RESTRICTION: Modified FeatureIntroduction to only appear on mobile (md:hidden) preventing duplication with ActionBar desktop functionality
+  • COMPONENT REUSABILITY: Enhanced ActionBarDesktop as universal component - any page using ActionBar can now add expandable help information
+  • EXAMPLE IMPLEMENTATION: Added 4 features to materials page demonstrating automatic calculation, organization, purchase control, and flexible filtering
+  • EXPANDABLE BEHAVIOR: Content expands between title and divider line exactly as requested, maintaining ActionBar structure integrity
 - July 23, 2025. MODAL WIDTH STANDARDIZED TO 800PX MAX: Fixed modal width expansion issue by setting standard maximum width limit on desktop - COMPLETED
   • DESKTOP WIDTH LIMIT: Changed FormModalLayout from md:max-w-screen-2xl to md:max-w-[800px] for consistent modal sizing
   • PREVENTED INFINITE EXPANSION: Long text phrases no longer cause modals to expand beyond readable width
