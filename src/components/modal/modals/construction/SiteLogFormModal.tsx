@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera } from "lucide-react";
+import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera, ArrowLeft } from "lucide-react";
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
@@ -19,6 +19,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useContacts } from "@/hooks/use-contacts";
 import { useGlobalModalStore } from "../../form/useGlobalModalStore";
+import { useModalPanelStore } from "../../form/modalPanelStore";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
@@ -74,6 +75,7 @@ interface SiteLogFormModalProps {
 export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
+  const { setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   const { data: currentUser } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
   const { data: contacts = [] } = useContacts();
@@ -82,12 +84,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [equipment, setEquipment] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
-  
-  // Estados para subsecciones
-  const [showEventsPanel, setShowEventsPanel] = useState(false);
-  const [showFilesPanel, setShowFilesPanel] = useState(false);
-  const [showAttendeesPanel, setShowAttendeesPanel] = useState(false);
-  const [showEquipmentPanel, setShowEquipmentPanel] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -450,104 +446,59 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             icon={<Camera />}
             title="Fotos y Videos"
             description="Adjunta archivos multimedia al registro"
-            onClick={() => setShowFilesPanel(!showFilesPanel)}
+            onClick={() => {
+              setCurrentSubform('files');
+              setPanel('subform');
+            }}
           />
           
-          {/* Panel expandible de archivos */}
-          {showFilesPanel && (
-            <div className="border border-border rounded-lg p-4 bg-muted/30">
-              <div className="space-y-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No hay archivos adjuntos</p>
-                  <p className="text-xs">Arrastra archivos aquí o haz clic para seleccionar</p>
+          {/* Lista de archivos agregados */}
+          {uploadedFiles.length > 0 && (
+            <div className="space-y-2">
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-sm">{file}</span>
+                  <Button variant="ghost" size="sm">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Eventos con FormSubsectionButton */}
+        {/* Eventos */}
         <Separator className="my-6" />
         <div className="space-y-4">
           <FormSubsectionButton
             icon={<Calendar />}
             title="Eventos"
             description="Registra eventos importantes del día"
-            onClick={() => setShowEventsPanel(!showEventsPanel)}
+            onClick={() => {
+              setCurrentSubform('events');
+              setPanel('subform');
+            }}
           />
           
-          {/* Panel expandible de eventos */}
-          {showEventsPanel && (
-            <div className="border border-border rounded-lg p-4 bg-muted/30">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium">Gestión de Eventos</h4>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={addEvent}
-                    className="h-8"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar Evento
-                  </Button>
+          {/* Lista de eventos agregados */}
+          {events.length > 0 && (
+            <div className="space-y-2">
+              {events.map((event, index) => (
+                <div key={event.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{event.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {event.time} {event.responsible && `- ${event.responsible}`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm">Editar</Button>
+                    <Button variant="ghost" size="sm" onClick={() => removeEvent(event.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                
-                {events.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No hay eventos registrados</p>
-                    <p className="text-xs">Haz clic en "Agregar Evento" para empezar</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {events.map((event, index) => (
-                      <div key={event.id} className="border rounded-lg p-4 space-y-4">
-                        <div className="flex justify-between items-start">
-                          <Badge variant="secondary">Evento {index + 1}</Badge>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeEvent(event.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium">Descripción</label>
-                            <Input
-                              value={event.description}
-                              onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
-                              placeholder="Descripción del evento"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Hora</label>
-                            <Input
-                              type="time"
-                              value={event.time}
-                              onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <label className="text-sm font-medium">Responsable</label>
-                          <Input
-                            value={event.responsible}
-                            onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
-                            placeholder="Nombre del responsable"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
           )}
         </div>
@@ -559,120 +510,34 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             icon={<Users />}
             title="Personal"
             description="Control de asistencia y personal en obra"
-            onClick={() => setShowAttendeesPanel(!showAttendeesPanel)}
+            onClick={() => {
+              setCurrentSubform('personal');
+              setPanel('subform');
+            }}
           />
           
-          {/* Panel expandible de personal */}
-          {showAttendeesPanel && (
-            <div className="border border-border rounded-lg p-4 bg-muted/30">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium">Gestión de Personal</h4>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={addAttendee}
-                    className="h-8"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar Asistente
-                  </Button>
-                </div>
-                
-                {attendees.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No hay personal registrado</p>
-                    <p className="text-xs">Haz clic en "Agregar Asistente" para empezar</p>
+          {/* Lista de personal agregado */}
+          {attendees.length > 0 && (
+            <div className="space-y-2">
+              {attendees.map((attendee, index) => (
+                <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">
+                      {contacts.find(c => c.id === attendee.contact_id)?.name || 'Sin contacto'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {attendee.arrival_time && attendee.departure_time && 
+                        `${attendee.arrival_time} - ${attendee.departure_time}`}
+                    </p>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {attendees.map((attendee, index) => (
-            <div key={attendee.id} className="border rounded-lg p-4 space-y-4">
-              <div className="flex justify-between items-start">
-                <Badge variant="secondary">Asistente {index + 1}</Badge>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeAttendee(attendee.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Contacto</label>
-                  <Select
-                    value={attendee.contact_id}
-                    onValueChange={(value) => updateAttendee(attendee.id, 'contact_id', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar contacto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contacts.map((contact: any) => (
-                        <SelectItem key={contact.id} value={contact.id}>
-                          {contact.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Tipo</label>
-                  <Select
-                    value={attendee.contact_type}
-                    onValueChange={(value) => updateAttendee(attendee.id, 'contact_type', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tipo de contacto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="worker">Trabajador</SelectItem>
-                      <SelectItem value="supervisor">Supervisor</SelectItem>
-                      <SelectItem value="engineer">Ingeniero</SelectItem>
-                      <SelectItem value="architect">Arquitecto</SelectItem>
-                      <SelectItem value="client">Cliente</SelectItem>
-                      <SelectItem value="supplier">Proveedor</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Hora llegada</label>
-                  <Input
-                    type="time"
-                    value={attendee.arrival_time}
-                    onChange={(e) => updateAttendee(attendee.id, 'arrival_time', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Hora salida</label>
-                  <Input
-                    type="time"
-                    value={attendee.departure_time}
-                    onChange={(e) => updateAttendee(attendee.id, 'departure_time', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Notas</label>
-                <Textarea
-                  value={attendee.notes}
-                  onChange={(e) => updateAttendee(attendee.id, 'notes', e.target.value)}
-                  placeholder="Notas sobre la asistencia..."
-                />
-                      </div>
-                    </div>
-                    ))}
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm">Editar</Button>
+                    <Button variant="ghost" size="sm" onClick={() => removeAttendee(attendee.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -684,110 +549,31 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             icon={<Wrench />}
             title="Maquinaria"
             description="Control de equipos y maquinaria utilizada"
-            onClick={() => setShowEquipmentPanel(!showEquipmentPanel)}
+            onClick={() => {
+              setCurrentSubform('equipment');
+              setPanel('subform');
+            }}
           />
           
-          {/* Panel expandible de maquinaria */}
-          {showEquipmentPanel && (
-            <div className="border border-border rounded-lg p-4 bg-muted/30">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium">Gestión de Maquinaria</h4>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={addEquipment}
-                    className="h-8"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar Equipo
-                  </Button>
+          {/* Lista de equipos agregados */}
+          {equipment.length > 0 && (
+            <div className="space-y-2">
+              {equipment.map((item, index) => (
+                <div key={item.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Cantidad: {item.quantity} {item.condition && `- ${item.condition}`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm">Editar</Button>
+                    <Button variant="ghost" size="sm" onClick={() => removeEquipment(item.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                
-                {equipment.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No hay equipos registrados</p>
-                    <p className="text-xs">Haz clic en "Agregar Equipo" para empezar</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {equipment.map((item, index) => (
-                      <div key={item.id} className="border rounded-lg p-4 space-y-4">
-                        <div className="flex justify-between items-start">
-                          <Badge variant="secondary">Equipo {index + 1}</Badge>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeEquipment(item.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium">Nombre</label>
-                            <Input
-                              value={item.name}
-                              onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
-                              placeholder="Nombre del equipo"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Cantidad</label>
-                            <Input
-                              type="number"
-                              min="1"
-                              value={item.quantity}
-                              onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium">Condición</label>
-                            <Select
-                              value={item.condition}
-                              onValueChange={(value) => updateEquipmentItem(item.id, 'condition', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Condición" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="excellent">Excelente</SelectItem>
-                                <SelectItem value="good">Buena</SelectItem>
-                                <SelectItem value="fair">Regular</SelectItem>
-                                <SelectItem value="poor">Mala</SelectItem>
-                                <SelectItem value="broken">Averiada</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Operador</label>
-                            <Input
-                              value={item.operator}
-                              onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
-                              placeholder="Nombre del operador"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <label className="text-sm font-medium">Notas</label>
-                          <Textarea
-                            value={item.notes}
-                            onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
-                            placeholder="Notas sobre el equipo..."
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
           )}
         </div>
@@ -795,12 +581,125 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     </Form>
   );
 
+  // Subform de Personal
+  const personalSubform = (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => setPanel('edit')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a la Bitácora
+        </Button>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay personal registrado</p>
+          <p className="text-xs">Agrega personal para controlar la asistencia</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Subform de Eventos
+  const eventsSubform = (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => setPanel('edit')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a la Bitácora
+        </Button>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay eventos registrados</p>
+          <p className="text-xs">Agrega eventos importantes del día</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Subform de Archivos
+  const filesSubform = (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => setPanel('edit')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a la Bitácora
+        </Button>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay archivos adjuntos</p>
+          <p className="text-xs">Sube fotos y videos del progreso</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Subform de Equipos
+  const equipmentSubform = (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => setPanel('edit')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a la Bitácora
+        </Button>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay equipos registrados</p>
+          <p className="text-xs">Agrega maquinaria y equipos utilizados</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Determinar qué subform mostrar
+  const getSubform = () => {
+    switch (currentSubform) {
+      case 'personal':
+        return personalSubform;
+      case 'events':
+        return eventsSubform;
+      case 'files':
+        return filesSubform;
+      case 'equipment':
+        return equipmentSubform;
+      default:
+        return null;
+    }
+  };
+
   return (
     <FormModalLayout
       columns={1}
       onClose={closeModal}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={getSubform()}
       isEditing={true}
       headerContent={
         <FormModalHeader
