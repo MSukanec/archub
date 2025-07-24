@@ -33,7 +33,12 @@ export function FormSubsectionButton({
     >
       {/* Main Button */}
       <button
-        onClick={onClick}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        }}
         disabled={disabled}
         className={cn(
           "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all duration-200",
@@ -65,20 +70,9 @@ export function FormSubsectionButton({
           </div>
         </div>
 
-        {/* Always Visible Add Button */}
+        {/* Always Visible Add Icon */}
         <div className="flex-shrink-0">
-          <Button
-            size="sm"
-            variant="secondary"
-            className="h-8 w-8 p-0 shadow-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick();
-            }}
-            disabled={disabled}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          <Plus className="h-4 w-4 text-muted-foreground" />
         </div>
       </button>
     </div>

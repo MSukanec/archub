@@ -82,6 +82,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [equipment, setEquipment] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  
+  // Estados para subsecciones
+  const [showEventsPanel, setShowEventsPanel] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -463,55 +466,85 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         <Separator className="my-6" />
         <div className="space-y-4">
           <FormSubsectionButton
-            icon={<Plus />}
+            icon={<Calendar />}
             title="Eventos"
             description="Registra eventos importantes del día"
-            onClick={addEvent}
+            onClick={() => setShowEventsPanel(!showEventsPanel)}
           />
           
-          {events.map((event, index) => (
-            <div key={event.id} className="border rounded-lg p-4 space-y-4">
-              <div className="flex justify-between items-start">
-                <Badge variant="secondary">Evento {index + 1}</Badge>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeEvent(event.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Descripción</label>
-                  <Input
-                    value={event.description}
-                    onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
-                    placeholder="Descripción del evento"
-                  />
+          {/* Panel expandible de eventos */}
+          {showEventsPanel && (
+            <div className="border border-border rounded-lg p-4 bg-muted/30">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Gestión de Eventos</h4>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={addEvent}
+                    className="h-8"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Evento
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Hora</label>
-                  <Input
-                    type="time"
-                    value={event.time}
-                    onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Responsable</label>
-                <Input
-                  value={event.responsible}
-                  onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
-                  placeholder="Nombre del responsable"
-                />
+                
+                {events.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No hay eventos registrados</p>
+                    <p className="text-xs">Haz clic en "Agregar Evento" para empezar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {events.map((event, index) => (
+                      <div key={event.id} className="border rounded-lg p-4 space-y-4">
+                        <div className="flex justify-between items-start">
+                          <Badge variant="secondary">Evento {index + 1}</Badge>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeEvent(event.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Descripción</label>
+                            <Input
+                              value={event.description}
+                              onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
+                              placeholder="Descripción del evento"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Hora</label>
+                            <Input
+                              type="time"
+                              value={event.time}
+                              onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-medium">Responsable</label>
+                          <Input
+                            value={event.responsible}
+                            onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
+                            placeholder="Nombre del responsable"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Personal */}
