@@ -27,14 +27,13 @@ const siteLogSchema = z.object({
   log_date: z.string().min(1, "La fecha es requerida"),
   entry_type: z.enum([
     'avance_de_obra',
-    'visita_tecnica', 
-    'problema_detectado',
-    'pedido_material',
-    'nota_climatica',
     'decision',
-    'inspeccion',
     'foto_diaria',
-    'registro_general'
+    'inspeccion',
+    'nota_climatica',
+    'pedido_material',
+    'problema_detectado',
+    'visita_tecnica'
   ]),
   weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable(),
   comments: z.string().optional(),
@@ -78,9 +77,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   // Mapear members para que funcionen con UserSelector
   const members = organizationMembers.map(member => ({
-    id: member.user_id,
+    id: member.user_id, // UserSelector busca por id, así que usamos user_id
     full_name: member.full_name,
-    email: member.email || member.user_id,
+    email: member.email,
     user_id: member.user_id
   }));
   
@@ -313,14 +312,13 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-                      <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-                      <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-                      <SelectItem value="pedido_material">Pedido Material</SelectItem>
-                      <SelectItem value="nota_climatica">Nota Climática</SelectItem>
                       <SelectItem value="decision">Decisión</SelectItem>
-                      <SelectItem value="inspeccion">Inspección</SelectItem>
                       <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-                      <SelectItem value="registro_general">Registro General</SelectItem>
+                      <SelectItem value="inspeccion">Inspección</SelectItem>
+                      <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                      <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                      <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                      <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -678,10 +676,11 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       }
       footerContent={
         <FormModalFooter
-          cancelLabel="Cancelar"
-          submitLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
-          onSubmit={form.handleSubmit(onSubmit)}
-          isLoading={isLoading}
+          leftLabel="Cancelar"
+          onLeftClick={closeModal}
+          rightLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
+          onRightClick={form.handleSubmit(onSubmit)}
+          showLoadingSpinner={isLoading}
         />
       }
     />
