@@ -18,6 +18,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useContacts } from "@/hooks/use-contacts";
 import { useGlobalModalStore } from "../../form/useGlobalModalStore";
+import { supabase } from "@/lib/supabase";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import UserSelector from "@/components/ui-custom/UserSelector";
 
@@ -79,6 +81,77 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [equipment, setEquipment] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+
+  const queryClient = useQueryClient();
+
+  // Mutación para crear/actualizar bitácoras
+  const siteLogMutation = useMutation({
+    mutationFn: async (formData: SiteLogFormData) => {
+      if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
+        throw new Error('No hay proyecto u organización seleccionada');
+      }
+
+      if (!supabase) {
+        throw new Error('Error de conexión con la base de datos');
+      }
+
+      // Encontrar el miembro de la organización seleccionado
+      const selectedMember = organizationMembers?.find(m => m.id === formData.created_by);
+      
+      const siteLogData = {
+        log_date: formData.log_date,
+        created_by: selectedMember?.user_id || currentUser?.user?.id || '',
+        entry_type: formData.entry_type,
+        weather: formData.weather,
+        comments: formData.comments,
+        is_public: true,
+        is_favorite: false,
+        project_id: currentUser?.preferences?.last_project_id || '',
+        organization_id: currentUser?.organization?.id || ''
+      };
+
+      let siteLogResult;
+      
+      if (data?.id) {
+        // Actualizando bitácora existente
+        siteLogResult = await supabase
+          .from('site_logs')
+          .update(siteLogData)
+          .eq('id', data.id)
+          .select()
+          .single();
+      } else {
+        // Creando nueva bitácora
+        siteLogResult = await supabase
+          .from('site_logs')
+          .insert([siteLogData])
+          .select()
+          .single();
+      }
+
+      if (siteLogResult.error) {
+        console.error('Error saving site log:', siteLogResult.error);
+        throw new Error(siteLogResult.error.message);
+      }
+
+      return siteLogResult.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+      toast({
+        title: data?.id ? "Bitácora actualizada" : "Bitácora creada",
+        description: data?.id ? "La bitácora se ha actualizado correctamente." : "La nueva bitácora se ha creado correctamente."
+      });
+      closeModal();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Ha ocurrido un error al guardar la bitácora.",
+        variant: "destructive"
+      });
+    }
+  });
 
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
@@ -191,33 +264,11 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   };
 
   const onSubmit = async (formData: SiteLogFormData) => {
-    try {
-      const siteLogData = {
-        ...formData,
-        files: uploadedFiles,
-        events,
-        attendees,
-        equipment
-      };
-
-      console.log("Guardando bitácora:", siteLogData);
-      
-      toast({
-        title: data?.id ? "Bitácora actualizada" : "Bitácora creada",
-        description: data?.id ? "La bitácora se ha actualizado correctamente." : "La nueva bitácora se ha creado correctamente."
-      });
-      
-      closeModal();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Ha ocurrido un error al guardar la bitácora.",
-        variant: "destructive"
-      });
-    }
+    console.log("Guardando bitácora:", formData);
+    siteLogMutation.mutate(formData);
   };
 
-  const isLoading = false;
+  const isLoading = siteLogMutation.isPending;
 
   const viewPanel = (
     <div className="space-y-6">
