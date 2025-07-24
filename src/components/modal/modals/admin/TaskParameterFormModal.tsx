@@ -283,12 +283,30 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Plantilla de frase</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="de {value}" 
-                    {...field} 
-                  />
-                </FormControl>
+                <div className="flex gap-2">
+                  <FormControl>
+                    <Input 
+                      placeholder="de {value}" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      const currentValue = field.value || '';
+                      const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || currentValue.length;
+                      const newValue = currentValue.slice(0, cursorPosition) + '{value}' + currentValue.slice(cursorPosition);
+                      field.onChange(newValue);
+                    }}
+                  >
+                    Insertar {'{value}'}
+                  </Button>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
+                </div>
                 <FormMessage />
               </FormItem>
             )}
