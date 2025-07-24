@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil, CheckSquare } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil, CheckSquare, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,8 +48,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [selectedTaskGroupId, setSelectedTaskGroupId] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
-  const [editingGroupName, setEditingGroupName] = useState('');
   
   const { toast } = useToast();
   
@@ -57,7 +55,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
   const updateMutation = useUpdateTaskParameter();
   const createGroupMutation = useCreateTaskParameterOptionGroup();
   const deleteGroupMutation = useDeleteTaskParameterOptionGroup();
-  const updateGroupMutation = useUpdateTaskParameterOptionGroup();
+  // Removed updateGroupMutation as group editing is no longer allowed
   
   // Load units for the selector
   const { data: units, isLoading: unitsLoading } = useUnits();
@@ -142,30 +140,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
     }
   };
 
-  const handleEditGroup = (group: any) => {
-    setEditingGroupId(group.id);
-    setEditingGroupName(group.task_group_id || '');
-  };
-
-  const handleSaveEditGroup = async () => {
-    if (!editingGroupId || !editingGroupName) return;
-    
-    try {
-      await updateGroupMutation.mutateAsync({
-        id: editingGroupId,
-        name: editingGroupName,
-      });
-      setEditingGroupId(null);
-      setEditingGroupName('');
-    } catch (error) {
-      console.error('Error updating group:', error);
-    }
-  };
-
-  const handleCancelEditGroup = () => {
-    setEditingGroupId(null);
-    setEditingGroupName('');
-  };
+  // Removed group editing functions as requested - groups only have check and delete buttons
 
   // Submit function
   const handleSubmit = async (data: TaskParameterFormData) => {
@@ -365,9 +340,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium">{group.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          ID: {group.task_group_id}
-                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -378,14 +350,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                             setIsAssignmentModalOpen(true);
                           }}
                         >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditGroup(group)}
-                        >
-                          <Edit className="h-4 w-4" />
+                          <Check className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
