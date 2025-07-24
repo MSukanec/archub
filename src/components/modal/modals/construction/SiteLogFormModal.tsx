@@ -85,6 +85,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   
   // Estados para subsecciones
   const [showEventsPanel, setShowEventsPanel] = useState(false);
+  const [showFilesPanel, setShowFilesPanel] = useState(false);
+  const [showAttendeesPanel, setShowAttendeesPanel] = useState(false);
+  const [showEquipmentPanel, setShowEquipmentPanel] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -443,23 +446,25 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         {/* Fotos y Videos */}
         <Separator className="my-6" />
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Camera className="w-4 h-4 text-accent" />
+          <FormSubsectionButton
+            icon={<Camera />}
+            title="Fotos y Videos"
+            description="Adjunta archivos multimedia al registro"
+            onClick={() => setShowFilesPanel(!showFilesPanel)}
+          />
+          
+          {/* Panel expandible de archivos */}
+          {showFilesPanel && (
+            <div className="border border-border rounded-lg p-4 bg-muted/30">
+              <div className="space-y-4">
+                <div className="text-center py-8 text-muted-foreground">
+                  <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No hay archivos adjuntos</p>
+                  <p className="text-xs">Arrastra archivos aquí o haz clic para seleccionar</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Fotos y Videos</h3>
-              <p className="text-xs text-muted-foreground">Adjunta archivos multimedia al registro</p>
-            </div>
-          </div>
-
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <Camera className="mx-auto h-12 w-12 text-gray-400" />
-            <div className="mt-4">
-              <p className="text-sm text-gray-600">Subir fotos y videos</p>
-              <p className="text-xs text-gray-500">Arrastra archivos aquí o haz clic para seleccionar</p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Eventos con FormSubsectionButton */}
@@ -550,22 +555,39 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         {/* Personal */}
         <Separator className="my-6" />
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Users className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Personal</h3>
-              <p className="text-xs text-muted-foreground">Control de asistencia y personal en obra</p>
-            </div>
-          </div>
-
-          <Button type="button" onClick={addAttendee} variant="outline" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Asistente
-          </Button>
+          <FormSubsectionButton
+            icon={<Users />}
+            title="Personal"
+            description="Control de asistencia y personal en obra"
+            onClick={() => setShowAttendeesPanel(!showAttendeesPanel)}
+          />
           
-          {attendees.map((attendee, index) => (
+          {/* Panel expandible de personal */}
+          {showAttendeesPanel && (
+            <div className="border border-border rounded-lg p-4 bg-muted/30">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Gestión de Personal</h4>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={addAttendee}
+                    className="h-8"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Asistente
+                  </Button>
+                </div>
+                
+                {attendees.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No hay personal registrado</p>
+                    <p className="text-xs">Haz clic en "Agregar Asistente" para empezar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {attendees.map((attendee, index) => (
             <div key={attendee.id} className="border rounded-lg p-4 space-y-4">
               <div className="flex justify-between items-start">
                 <Badge variant="secondary">Asistente {index + 1}</Badge>
@@ -645,102 +667,129 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                   onChange={(e) => updateAttendee(attendee.id, 'notes', e.target.value)}
                   placeholder="Notas sobre la asistencia..."
                 />
+                      </div>
+                    </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Maquinaria */}
         <Separator className="my-6" />
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Wrench className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Maquinaria</h3>
-              <p className="text-xs text-muted-foreground">Control de equipos y maquinaria utilizada</p>
-            </div>
-          </div>
-
-          <Button type="button" onClick={addEquipment} variant="outline" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Equipo
-          </Button>
+          <FormSubsectionButton
+            icon={<Wrench />}
+            title="Maquinaria"
+            description="Control de equipos y maquinaria utilizada"
+            onClick={() => setShowEquipmentPanel(!showEquipmentPanel)}
+          />
           
-          {equipment.map((item, index) => (
-            <div key={item.id} className="border rounded-lg p-4 space-y-4">
-              <div className="flex justify-between items-start">
-                <Badge variant="secondary">Equipo {index + 1}</Badge>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeEquipment(item.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Nombre</label>
-                  <Input
-                    value={item.name}
-                    onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
-                    placeholder="Nombre del equipo"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Cantidad</label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Condición</label>
-                  <Select
-                    value={item.condition}
-                    onValueChange={(value) => updateEquipmentItem(item.id, 'condition', value)}
+          {/* Panel expandible de maquinaria */}
+          {showEquipmentPanel && (
+            <div className="border border-border rounded-lg p-4 bg-muted/30">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Gestión de Maquinaria</h4>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={addEquipment}
+                    className="h-8"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Condición" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="excellent">Excelente</SelectItem>
-                      <SelectItem value="good">Buena</SelectItem>
-                      <SelectItem value="fair">Regular</SelectItem>
-                      <SelectItem value="poor">Mala</SelectItem>
-                      <SelectItem value="broken">Averiada</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Equipo
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Operador</label>
-                  <Input
-                    value={item.operator}
-                    onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
-                    placeholder="Nombre del operador"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">Notas</label>
-                <Textarea
-                  value={item.notes}
-                  onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
-                  placeholder="Notas sobre el equipo..."
-                />
+                
+                {equipment.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No hay equipos registrados</p>
+                    <p className="text-xs">Haz clic en "Agregar Equipo" para empezar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {equipment.map((item, index) => (
+                      <div key={item.id} className="border rounded-lg p-4 space-y-4">
+                        <div className="flex justify-between items-start">
+                          <Badge variant="secondary">Equipo {index + 1}</Badge>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeEquipment(item.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Nombre</label>
+                            <Input
+                              value={item.name}
+                              onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
+                              placeholder="Nombre del equipo"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Cantidad</label>
+                            <Input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">Condición</label>
+                            <Select
+                              value={item.condition}
+                              onValueChange={(value) => updateEquipmentItem(item.id, 'condition', value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Condición" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="excellent">Excelente</SelectItem>
+                                <SelectItem value="good">Buena</SelectItem>
+                                <SelectItem value="fair">Regular</SelectItem>
+                                <SelectItem value="poor">Mala</SelectItem>
+                                <SelectItem value="broken">Averiada</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Operador</label>
+                            <Input
+                              value={item.operator}
+                              onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
+                              placeholder="Nombre del operador"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-medium">Notas</label>
+                          <Textarea
+                            value={item.notes}
+                            onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
+                            placeholder="Notas sobre el equipo..."
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          ))}
+          )}
         </div>
       </form>
     </Form>

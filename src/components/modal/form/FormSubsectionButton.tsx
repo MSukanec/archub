@@ -72,7 +72,10 @@ export function FormSubsectionButton({
 
         {/* Always Visible Add Icon */}
         <div className="flex-shrink-0">
-          <Plus className="h-4 w-4 text-muted-foreground" />
+          <Plus className={cn(
+            "h-4 w-4 text-muted-foreground transition-colors duration-200",
+            isHovered && !disabled && "text-accent"
+          )} />
         </div>
       </button>
     </div>
