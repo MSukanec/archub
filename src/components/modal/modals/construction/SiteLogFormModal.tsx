@@ -626,6 +626,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       onClose={closeModal}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      isEditing={true}
       headerContent={
         <FormModalHeader
           title={data ? "Editar Bitácora" : "Nueva Bitácora"}
