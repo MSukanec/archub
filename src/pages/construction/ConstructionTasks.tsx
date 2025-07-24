@@ -64,9 +64,9 @@ export default function ConstructionTasks() {
         unit_name: task.task.unit_name || '',
         unit_symbol: task.task.unit_symbol || '',
         display_name: task.task.display_name || task.task.code || 'Tarea sin nombre',
-        subcategory_id: task.task.subcategory_id || '',
-        subcategory_name: task.task.subcategory_name || '',
-        category_id: task.task.category_id || '',
+        subcategory_id: task.task?.id || '',
+        subcategory_name: task.task?.category_name || '',
+        category_id: task.task?.id || '',
         category_name: task.task.category_name || '',
         rubro_id: task.task.rubro_id || '',
         rubro_name: task.task.rubro_name || '',
@@ -247,14 +247,15 @@ export default function ConstructionTasks() {
         />
       ) : (
         <BudgetTable
-          data={budgetTasks}
-          columns={columns}
+          tasks={processedTasks}
           onEditTask={handleEditTask}
           onDeleteTask={handleDeleteTask}
-          selectedTasks={selectedTasks}
-          onSelectedTasksChange={setSelectedTasks}
+          selectedTasks={[]}
+          onSelectedTasksChange={() => {}}
           groupingType={groupingType}
           onGroupingChange={setGroupingType}
+          searchValue={searchValue}
+          isLoading={isLoading}
         />
       )}
     </Layout>

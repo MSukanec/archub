@@ -97,7 +97,7 @@ export default function FinancesDashboard() {
   }
 
   const currentOrganization = userData?.organization;
-  const currentProject = userData?.project;
+  const currentProject = userData?.organizations?.[0]?.projects?.[0];
 
   return (
     <Layout headerProps={headerProps} wide={true}>

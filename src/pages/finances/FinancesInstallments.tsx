@@ -458,8 +458,8 @@ export default function FinancesInstallments() {
           <SelectContent>
             <SelectItem value="all">Todas las monedas</SelectItem>
             {currencies.map(currency => (
-              <SelectItem key={currency.id} value={currency.id}>
-                {currency.code}
+              <SelectItem key={currency?.id} value={currency?.id}>
+                {currency?.code}
               </SelectItem>
             ))}
           </SelectContent>
@@ -733,7 +733,7 @@ export default function FinancesInstallments() {
         // Convert committed amount to USD if necessary
         let committedAmountUSD = committedAmount
         if (item.client?.currency_id) {
-          const clientCurrency = currencies.find(c => c.id === item.client.currency_id)
+          const clientCurrency = currencies?.find(c => c?.id === item.client.currency_id)
           if (clientCurrency?.code !== 'USD') {
             // For now, we'll need an exchange rate to convert
             // In a real scenario, you might want to get this from the exchange rates table
