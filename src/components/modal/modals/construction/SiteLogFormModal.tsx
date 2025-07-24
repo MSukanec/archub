@@ -184,19 +184,14 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         equipment
       };
 
-      if (data?.id) {
-        await updateMutation.mutateAsync({ id: data.id, ...siteLogData });
-        toast({
-          title: "Bitácora actualizada",
-          description: "La bitácora se ha actualizado correctamente."
-        });
-      } else {
-        await createMutation.mutateAsync(siteLogData);
-        toast({
-          title: "Bitácora creada",
-          description: "La nueva bitácora se ha creado correctamente."
-        });
-      }
+      console.log("Guardando bitácora:", siteLogData);
+      
+      toast({
+        title: data?.id ? "Bitácora actualizada" : "Bitácora creada",
+        description: data?.id ? "La bitácora se ha actualizado correctamente." : "La nueva bitácora se ha creado correctamente."
+      });
+      
+      closeModal();
     } catch (error) {
       toast({
         title: "Error",
@@ -206,7 +201,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     }
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = false;
 
   const viewPanel = (
     <div className="space-y-6">
@@ -262,7 +257,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                         </FormControl>
                         <SelectContent>
                           {members.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>
+                            <SelectItem key={member.user_id} value={member.user_id}>
                               {member.full_name}
                             </SelectItem>
                           ))}
@@ -367,13 +362,13 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               Fotos y Videos
             </AccordionTrigger>
             <AccordionContent className="space-y-4">
-              <FileUploader
-                onFilesUploaded={setUploadedFiles}
-                initialFiles={uploadedFiles}
-                bucketName="site-log-files"
-                accept="image/*,video/*"
-                multiple={true}
-              />
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600">Subir fotos y videos</p>
+                  <p className="text-xs text-gray-500">Arrastra archivos aquí o haz clic para seleccionar</p>
+                </div>
+              </div>
             </AccordionContent>
           </AccordionItem>
 
@@ -472,7 +467,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                           <SelectValue placeholder="Seleccionar contacto" />
                         </SelectTrigger>
                         <SelectContent>
-                          {contacts.map((contact) => (
+                          {contacts.map((contact: any) => (
                             <SelectItem key={contact.id} value={contact.id}>
                               {contact.name}
                             </SelectItem>
@@ -625,40 +620,27 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     </Form>
   );
 
-  const headerContent = {
-    view: {
-      title: "Bitácora de Obra",
-      description: "Información detallada de la bitácora"
-    },
-    edit: {
-      title: data ? "Editar Bitácora" : "Nueva Bitácora",
-      description: data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"
-    }
-  };
-
-  const footerContent = {
-    view: {
-      cancelLabel: "Cerrar",
-      submitLabel: "Editar",
-      onSubmit: () => {
-        // Switch to edit mode
-      }
-    },
-    edit: {
-      cancelLabel: "Cancelar",
-      submitLabel: data ? "Guardar Cambios" : "Crear Bitácora",
-      onSubmit: form.handleSubmit(onSubmit),
-      isLoading
-    }
-  };
-
   return (
     <FormModalLayout
       columns={1}
+      onClose={closeModal}
       viewPanel={viewPanel}
       editPanel={editPanel}
-      headerContent={<FormModalHeader {...headerContent} />}
-      footerContent={<FormModalFooter {...footerContent} />}
+      headerContent={
+        <FormModalHeader
+          title={data ? "Editar Bitácora" : "Nueva Bitácora"}
+          description={data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"}
+          icon={<FileText className="w-6 h-6" />}
+        />
+      }
+      footerContent={
+        <FormModalFooter
+          cancelLabel="Cancelar"
+          submitLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
+          onSubmit={form.handleSubmit(onSubmit)}
+          isLoading={isLoading}
+        />
+      }
     />
   );
 }

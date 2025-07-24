@@ -25,7 +25,7 @@ import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
 import { SiteLogTimelineChart } from "@/components/charts/SiteLogTimelineChart";
 import { useNavigationStore } from '@/stores/navigationStore';
-import { NewSiteLogModal } from "@/modals/NewSiteLogModal";
+import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useMobile } from "@/hooks/use-mobile";
@@ -171,8 +171,7 @@ export default function ConstructionLogs() {
   const [filterByType, setFilterByType] = useState("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [publicOnly, setPublicOnly] = useState(false);
-  const [showNewSiteLogModal, setShowNewSiteLogModal] = useState(false);
-  const [editingSiteLog, setEditingSiteLog] = useState<any>(null);
+  const { openModal } = useGlobalModalStore();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
@@ -226,7 +225,7 @@ export default function ConstructionLogs() {
           id: 'create-log',
           icon: <Plus className="h-6 w-6" />,
           label: 'Nueva Bitácora',
-          onClick: () => setShowNewSiteLogModal(true)
+          onClick: () => openModal('site-log')
         },
         slot4: {
           id: 'filters',
@@ -423,7 +422,7 @@ export default function ConstructionLogs() {
     <Button 
       key="new-entry"
       className="h-8 px-3 text-sm"
-      onClick={() => setShowNewSiteLogModal(true)}
+      onClick={() => openModal('site-log')}
     >
       <Plus className="w-4 h-4 mr-2" />
       Nueva Bitácora
@@ -645,8 +644,7 @@ export default function ConstructionLogs() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setEditingSiteLog(siteLog);
-                            setShowNewSiteLogModal(true);
+                            openModal('site-log', { data: siteLog });
                           }}
                           className="h-8 w-8 p-0 hover:bg-transparent group"
                         >
@@ -850,17 +848,7 @@ export default function ConstructionLogs() {
         </>
       )}
 
-      {/* Modal para nueva entrada */}
-      {showNewSiteLogModal && (
-        <NewSiteLogModal
-          open={showNewSiteLogModal}
-          onClose={() => {
-            setShowNewSiteLogModal(false);
-            setEditingSiteLog(null);
-          }}
-          editingSiteLog={editingSiteLog}
-        />
-      )}
+
 
       {/* Diálogo de confirmación para eliminar */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
