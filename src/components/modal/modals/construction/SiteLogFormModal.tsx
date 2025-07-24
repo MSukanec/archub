@@ -589,114 +589,119 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   // Subform de Personal
   const personalSubform = (
-    <div className="space-y-6">
-      {/* Lista de personal agregado */}
-      {attendees.map((attendee, index) => (
-        <div key={index} className="border rounded-lg p-3 space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Personal #{index + 1}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                const newAttendees = attendees.filter((_, i) => i !== index);
-                setAttendees(newAttendees);
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
+        <div className="col-span-1">✓</div>
+        <div className="col-span-4">Personal</div>
+        <div className="col-span-3">Horario</div>
+        <div className="col-span-4">Descripción</div>
+      </div>
 
-          <div className="grid grid-cols-1 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Contacto</label>
-              <Select
-                value={attendee.contact_id}
-                onValueChange={(value) => {
-                  const newAttendees = [...attendees];
-                  newAttendees[index].contact_id = value;
-                  setAttendees(newAttendees);
-                }}
-              >
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Seleccionar contacto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {contacts?.map((contact: any) => (
-                    <SelectItem key={contact.id} value={contact.id}>
-                      {contact.first_name} {contact.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {/* Lista completa de contactos */}
+      <div className="space-y-2 max-h-96 overflow-y-auto">
+        {contacts?.map((contact: any) => {
+          const isPresent = attendees.some(a => a.contact_id === contact.id);
+          const attendeeData = attendees.find(a => a.contact_id === contact.id);
+          
+          return (
+            <div key={contact.id} className="grid grid-cols-12 gap-2 items-center py-2 border-b border-muted/30">
+              {/* Checkbox */}
+              <div className="col-span-1">
+                <input
+                  type="checkbox"
+                  checked={isPresent}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      // Agregar personal
+                      setAttendees([...attendees, {
+                        id: Date.now().toString(),
+                        contact_id: contact.id,
+                        contact_type: '',
+                        attendance_type: 'full',
+                        description: ''
+                      }]);
+                    } else {
+                      // Quitar personal
+                      setAttendees(attendees.filter(a => a.contact_id !== contact.id));
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Nombre del contacto */}
+              <div className="col-span-4">
+                <span className={`text-sm ${isPresent ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                  {contact.first_name} {contact.last_name}
+                </span>
+              </div>
+
+              {/* Selector de horario */}
+              <div className="col-span-3">
+                <Select
+                  value={attendeeData?.attendance_type || 'full'}
+                  onValueChange={(value) => {
+                    if (isPresent) {
+                      const newAttendees = attendees.map(a => 
+                        a.contact_id === contact.id 
+                          ? { ...a, attendance_type: value as 'full' | 'half' }
+                          : a
+                      );
+                      setAttendees(newAttendees);
+                    }
+                  }}
+                  disabled={!isPresent}
+                >
+                  <SelectTrigger className={`h-8 text-xs ${!isPresent ? 'opacity-50' : ''}`}>
+                    <SelectValue placeholder="Horario" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">Jornada Completa</SelectItem>
+                    <SelectItem value="half">Media Jornada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Campo de descripción */}
+              <div className="col-span-4">
+                <Input
+                  placeholder="Notas adicionales..."
+                  value={attendeeData?.description || ''}
+                  onChange={(e) => {
+                    if (isPresent) {
+                      const newAttendees = attendees.map(a => 
+                        a.contact_id === contact.id 
+                          ? { ...a, description: e.target.value }
+                          : a
+                      );
+                      setAttendees(newAttendees);
+                    }
+                  }}
+                  disabled={!isPresent}
+                  className={`h-8 text-xs ${!isPresent ? 'opacity-50' : ''}`}
+                />  
+              </div>
             </div>
+          );
+        })}
+      </div>
 
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Horario</label>
-              <Select
-                value={attendee.attendance_type}
-                onValueChange={(value) => {
-                  const newAttendees = [...attendees];
-                  newAttendees[index].attendance_type = value as 'full' | 'half';
-                  setAttendees(newAttendees);
-                }}
-              >
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Seleccionar horario" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="full">Jornada Completa</SelectItem>
-                  <SelectItem value="half">Media Jornada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
-            <Textarea
-              className="min-h-[60px] text-sm"
-              placeholder="Notas adicionales..."
-              value={attendee.description || ''}
-              onChange={(e) => {
-                const newAttendees = [...attendees];
-                newAttendees[index].description = e.target.value;
-                setAttendees(newAttendees);
-              }}
-            />
-          </div>
-        </div>
-      ))}
-
-      {/* Mostrar empty state solo si no hay personal */}
-      {attendees.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No hay personal registrado</p>
-          <p className="text-xs">Agrega personal para controlar la asistencia</p>
+      {/* Contador de personal presente */}
+      {attendees.length > 0 && (
+        <div className="text-sm text-muted-foreground text-center pt-2 border-t">
+          Personal presente: {attendees.length}
         </div>
       )}
 
-      {/* Botón para agregar personal */}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          setAttendees([...attendees, {
-            id: Date.now().toString(),
-            contact_id: '',
-            contact_type: '',
-            attendance_type: 'full',
-            description: ''
-          }]);
-        }}
-        className="w-full"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Agregar Personal
-      </Button>
+      {/* Empty state si no hay contactos */}
+      {!contacts || contacts.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay contactos disponibles</p>
+          <p className="text-xs">Agrega contactos en la sección de Contactos</p>
+        </div>
+      )}
     </div>
   );
 
@@ -809,10 +814,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             leftLabel="Cancelar"
             onLeftClick={closeModal}
             rightLabel={
-              currentSubform === 'personal' ? "Agregar Personal" :
+              currentSubform === 'personal' ? "Confirmar Asistencia" :
               currentSubform === 'events' ? "Agregar Evento" :
               currentSubform === 'files' ? "Agregar Fotos y Videos" :
-              currentSubform === 'equipment' ? "Agregar Maquinaria" : "Agregar"
+              currentSubform === 'equipment' ? "Agregar Maquinaria" : "Confirmar"
             }
             onRightClick={() => {
               // Agregar personal si hay datos válidos
