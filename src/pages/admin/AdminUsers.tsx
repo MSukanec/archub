@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Plus, MoreHorizontal, Edit, Trash2, Crown, Users, UserCheck, UserX, Building } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-// import { NewAdminUserModal } from '@/modals/admin/NewAdminUserModal'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 interface User {
   id: string
@@ -40,12 +40,11 @@ export default function AdminUsers() {
   const [sortBy, setSortBy] = useState('created_at')
   const [statusFilter, setStatusFilter] = useState('all')
   const [showActiveOnly, setShowActiveOnly] = useState(false)
-  const [newUserModalOpen, setNewUserModalOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { openModal } = useGlobalModalStore()
 
   // Fetch users with statistics
   const { data: users = [], isLoading } = useQuery({
@@ -161,8 +160,7 @@ export default function AdminUsers() {
   })
 
   const handleEdit = (user: User) => {
-    setEditingUser(user)
-    setNewUserModalOpen(true)
+    openModal('admin-user', { user, isEditing: true })
   }
 
   const handleDelete = (user: User) => {
@@ -307,7 +305,14 @@ export default function AdminUsers() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: []
+    actions: [
+      {
+        label: 'Nuevo Usuario',
+        icon: Plus,
+        onClick: () => openModal('admin-user', { isEditing: false }),
+        variant: 'default' as const
+      }
+    ]
   }
 
   return (
@@ -370,53 +375,7 @@ export default function AdminUsers() {
         />
       </div>
 
-      {/* Simple Edit Modal */}
-      {newUserModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Editar Usuario</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setNewUserModalOpen(false)
-                  setEditingUser(null)
-                }}
-              >
-                ×
-              </Button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Nombre:</label>
-                <p className="text-sm text-muted-foreground">{editingUser?.full_name || 'Sin nombre'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Email:</label>
-                <p className="text-sm text-muted-foreground">{editingUser?.email}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Estado:</label>
-                <p className="text-sm text-muted-foreground">
-                  {editingUser?.is_active ? 'Activo' : 'Inactivo'}
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setNewUserModalOpen(false)
-                  setEditingUser(null)
-                }}
-              >
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
         <AlertDialogContent>
