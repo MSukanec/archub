@@ -17,6 +17,7 @@ import { Plus, MoreHorizontal, Edit, Trash2, Crown, Users, UserCheck, UserX, Bui
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 
 interface User {
   id: string
@@ -299,18 +300,20 @@ export default function AdminUsers() {
   )
 
   const headerProps = {
-    title: 'Gestión de Usuarios',
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    customFilters,
-    onClearFilters: clearFilters,
-    actions: []
+    title: 'Gestión de Usuarios'
   }
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
+        {/* Action Bar */}
+        <ActionBarDesktop
+          showSearch={true}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          onClearFilters={clearFilters}
+        />
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-3">

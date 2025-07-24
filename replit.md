@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 24, 2025. ADMIN USERS ACTIONBAR INTEGRATION AND MODAL SIMPLIFICATION COMPLETED: Successfully implemented ActionBarDesktop and simplified user editing modal - COMPLETED
+  • ACTIONBAR IMPLEMENTATION: Added ActionBarDesktop component to AdminUsers page with search and custom filters functionality moved from header
+  • HEADER SIMPLIFICATION: Removed search, filters, and actions from header, maintaining only title for clean layout
+  • USER MODAL SIMPLIFICATION: Removed country, birthdate, and avatar_url fields from UserFormModal as requested by user
+  • CREATION FUNCTIONALITY REMOVED: Eliminated "Nuevo Usuario" button and createUserMutation since user only needs editing capability
+  • FORM STREAMLINED: Modal now only handles editing existing users with essential fields (full_name, email, first_name, last_name, is_active)
+  • IMPORTS CLEANUP: Removed unused imports (Calendar, Popover, date-fns, countries query) for cleaner codebase
+  • CONSISTENT PATTERN: AdminUsers page now follows same ActionBar pattern as other admin pages for unified UX
 - July 24, 2025. TASK PARAMETER MODALS NOMENCLATURE UPDATE COMPLETED: Updated field labels across all task parameter modals to use consistent naming conventions - COMPLETED
   • MODAL FIELD LABELS STANDARDIZED: Changed "Etiqueta" → "Nombre (visible)", "NOMBRE/Nombre (Clave)" → "Slug" in both TaskParameterFormModal and TaskParameterOptionFormModal
   • TABLE COLUMN HEADERS UPDATED: AdminTaskParameters page columns now display "Nombre (visible)" and "Slug" instead of previous labels
