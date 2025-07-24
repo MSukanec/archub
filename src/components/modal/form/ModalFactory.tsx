@@ -29,6 +29,7 @@ import { DependencyConnectionModal } from '../modals/construction/DependencyConn
 import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
 import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
 import { TaskGroupFormModal } from '../modals/admin/TaskGroupFormModal';
+import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 
 export function ModalFactory() {
@@ -105,6 +106,8 @@ export function ModalFactory() {
       return <TaskCategoryFormModal modalData={data} onClose={closeModal} />;
     case 'task-group':
       return <TaskGroupFormModal modalData={data} onClose={closeModal} />;
+    case 'task-parameter':
+      return <TaskParameterFormModal modalData={data} onClose={closeModal} />;
     case 'task-template':
       return <TaskTemplateFormModal 
         categoryId={data?.categoryId}
