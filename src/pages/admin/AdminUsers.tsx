@@ -168,6 +168,16 @@ export default function AdminUsers() {
     setDeletingUser(user)
   }
 
+  const handleDeleteDangerous = (user: User) => {
+    openModal('delete-confirmation', {
+      title: 'Desactivar Usuario',
+      description: `¿Estás seguro de que deseas desactivar al usuario "${user.full_name || user.email}"? Esta acción cambiará su estado a inactivo.`,
+      itemName: user.full_name || user.email,
+      onConfirm: () => deleteUserMutation.mutate(user.id),
+      dangerous: true
+    })
+  }
+
   const confirmDelete = () => {
     if (deletingUser) {
       deleteUserMutation.mutate(deletingUser.id)
@@ -185,7 +195,7 @@ export default function AdminUsers() {
     {
       key: 'created_at',
       label: 'Fecha de Registro',
-      width: '5%',
+      width: '16.66%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
@@ -195,7 +205,7 @@ export default function AdminUsers() {
     {
       key: 'last_activity_at',
       label: 'Última Actividad',
-      width: '5%',
+      width: '16.66%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(user.last_activity_at), 'dd/MM/yy', { locale: es })}
@@ -205,6 +215,7 @@ export default function AdminUsers() {
     {
       key: 'full_name',
       label: 'Usuario',
+      width: '16.66%',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -223,7 +234,7 @@ export default function AdminUsers() {
     {
       key: 'organizations_count',
       label: 'Organizaciones',
-      width: '5%',
+      width: '16.66%',
       render: (user: User) => (
         <div className="flex items-center gap-1">
           <Building className="h-3 w-3 text-muted-foreground" />
@@ -234,7 +245,7 @@ export default function AdminUsers() {
     {
       key: 'is_active',
       label: 'Estado',
-      width: '5%',
+      width: '16.66%',
       render: (user: User) => (
         <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
           {user.is_active ? 'Activo' : 'Inactivo'}
@@ -244,25 +255,26 @@ export default function AdminUsers() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '5%',
+      width: '16.66%',
       render: (user: User) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-              <MoreHorizontal className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleEdit(user)}>
-              <Edit className="mr-2 h-3 w-3" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDelete(user)} className="text-red-600">
-              <Trash2 className="mr-2 h-3 w-3" />
-              Desactivar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleEdit(user)}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleDeleteDangerous(user)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       )
     }
   ]
@@ -308,6 +320,8 @@ export default function AdminUsers() {
       <div className="space-y-6">
         {/* Action Bar */}
         <ActionBarDesktop
+          title="Gestión de Usuarios"
+          icon={<Users className="h-5 w-5" />}
           showSearch={true}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
