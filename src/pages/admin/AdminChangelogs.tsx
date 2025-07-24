@@ -7,11 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MoreHorizontal, FileText, Calendar, Users, BookOpen } from 'lucide-react';
+import { MoreHorizontal, FileText, Calendar, Users, BookOpen, Edit, Trash2 } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
@@ -82,6 +82,7 @@ export default function AdminChangelogs() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<string>('all');
   const { openModal } = useGlobalModalStore();
+  const queryClient = useQueryClient();
 
   const { data: changelogEntries = [], isLoading } = useAllChangelogEntries();
 
@@ -113,6 +114,30 @@ export default function AdminChangelogs() {
 
   const handleEdit = (entry: ChangelogEntry) => {
     openModal('changelog-entry', { entry, isEditing: true });
+  };
+
+  const handleDelete = (entry: ChangelogEntry) => {
+    openModal('delete-confirmation', {
+      title: 'Eliminar entrada del changelog',
+      description: '¿Estás seguro de que deseas eliminar esta entrada del changelog? Esta acción no se puede deshacer.',
+      itemName: entry.title,
+      destructiveActionText: 'Eliminar',
+      onConfirm: async () => {
+        if (!supabase) return;
+        
+        const { error } = await supabase
+          .from('changelog_entries')
+          .delete()
+          .eq('id', entry.id);
+        
+        if (error) {
+          console.error('Error deleting changelog entry:', error);
+        } else {
+          // Invalidar caché para actualizar la tabla
+          queryClient.invalidateQueries({ queryKey: ['admin-changelog-entries'] });
+        }
+      }
+    });
   };
 
   const getTypeBadgeVariant = (type: string) => {
@@ -153,6 +178,16 @@ export default function AdminChangelogs() {
       render: (entry: ChangelogEntry) => (
         <span className="text-sm">
           {format(new Date(entry.created_at), 'dd/MM/yyyy', { locale: es })}
+        </span>
+      )
+    },
+    {
+      key: 'change_date',
+      label: 'Fecha del Cambio',
+      width: '10%',
+      render: (entry: ChangelogEntry) => (
+        <span className="text-sm">
+          {format(new Date(entry.date), 'dd/MM/yyyy', { locale: es })}
         </span>
       )
     },
@@ -212,35 +247,28 @@ export default function AdminChangelogs() {
       )
     },
     {
-      key: 'date',
-      label: 'Fecha del Cambio',
-      width: '10%',
-      render: (entry: ChangelogEntry) => (
-        <span className="text-sm">
-          {format(new Date(entry.date), 'dd/MM/yyyy', { locale: es })}
-        </span>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
       width: '10%',
       render: (entry: ChangelogEntry) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleEdit(entry)}>
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEdit(entry)}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(entry)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       )
     }
   ];
