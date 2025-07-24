@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera, ArrowLeft } from "lucide-react";
+import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera, ArrowLeft, X } from "lucide-react";
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
@@ -516,25 +516,35 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           {/* Lista de personal agregado */}
           {attendees.length > 0 && (
             <div className="space-y-2">
-              {attendees.map((attendee, index) => (
-                <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">
-                      {contacts.find(c => c.id === attendee.contact_id)?.name || 'Sin contacto'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {attendee.arrival_time && attendee.departure_time && 
-                        `${attendee.arrival_time} - ${attendee.departure_time}`}
-                    </p>
+              {attendees.map((attendee, index) => {
+                const contact = contacts.find(c => c.id === attendee.contact_id);
+                const contactName = contact ? `${contact.first_name} ${contact.last_name}`.trim() : 'Sin contacto';
+                const attendanceText = attendee.attendance_type === 'full' ? 'Jornada Completa' : 'Media Jornada';
+                
+                return (
+                  <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{contactName}</p>
+                      <p className="text-xs text-muted-foreground">{attendanceText}</p>
+                      {attendee.description && (
+                        <p className="text-xs text-muted-foreground">{attendee.description}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          const newAttendees = attendees.filter((_, i) => i !== index);
+                          setAttendees(newAttendees);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">Editar</Button>
-                    <Button variant="ghost" size="sm" onClick={() => removeAttendee(attendee.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -580,13 +590,113 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   // Subform de Personal
   const personalSubform = (
     <div className="space-y-6">
-      <div className="space-y-4">
+      {/* Lista de personal agregado */}
+      {attendees.map((attendee, index) => (
+        <div key={index} className="border rounded-lg p-3 space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Personal #{index + 1}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const newAttendees = attendees.filter((_, i) => i !== index);
+                setAttendees(newAttendees);
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Contacto</label>
+              <Select
+                value={attendee.contact_id}
+                onValueChange={(value) => {
+                  const newAttendees = [...attendees];
+                  newAttendees[index].contact_id = value;
+                  setAttendees(newAttendees);
+                }}
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Seleccionar contacto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {contacts?.map((contact: any) => (
+                    <SelectItem key={contact.id} value={contact.id}>
+                      {contact.first_name} {contact.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Horario</label>
+              <Select
+                value={attendee.attendance_type}
+                onValueChange={(value) => {
+                  const newAttendees = [...attendees];
+                  newAttendees[index].attendance_type = value as 'full' | 'half';
+                  setAttendees(newAttendees);
+                }}
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Seleccionar horario" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full">Jornada Completa</SelectItem>
+                  <SelectItem value="half">Media Jornada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-muted-foreground">Descripción</label>
+            <Textarea
+              className="min-h-[60px] text-sm"
+              placeholder="Notas adicionales..."
+              value={attendee.description || ''}
+              onChange={(e) => {
+                const newAttendees = [...attendees];
+                newAttendees[index].description = e.target.value;
+                setAttendees(newAttendees);
+              }}
+            />
+          </div>
+        </div>
+      ))}
+
+      {/* Mostrar empty state solo si no hay personal */}
+      {attendees.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No hay personal registrado</p>
           <p className="text-xs">Agrega personal para controlar la asistencia</p>
         </div>
-      </div>
+      )}
+
+      {/* Botón para agregar personal */}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          setAttendees([...attendees, {
+            id: Date.now().toString(),
+            contact_id: '',
+            contact_type: '',
+            attendance_type: 'full',
+            description: ''
+          }]);
+        }}
+        className="w-full"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Agregar Personal
+      </Button>
     </div>
   );
 
@@ -681,7 +791,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Volver a la Bitácora
+                Volver
               </Button>
             }
           />
@@ -704,7 +814,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               currentSubform === 'files' ? "Agregar Fotos y Videos" :
               currentSubform === 'equipment' ? "Agregar Maquinaria" : "Agregar"
             }
-            onRightClick={() => setPanel('edit')}
+            onRightClick={() => {
+              // Agregar personal si hay datos válidos
+              if (currentSubform === 'personal' && attendees.length > 0) {
+                // Los datos ya están en attendees, solo regresamos al panel principal
+                setPanel('edit');
+              } else {
+                setPanel('edit');
+              }
+            }}
             showLoadingSpinner={false}
           />
         ) : (
