@@ -138,13 +138,13 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
   const viewPanel = (
     <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Etiqueta</h4>
-        <p className="text-muted-foreground mt-1">{option?.label || 'Sin etiqueta'}</p>
+        <h4 className="font-medium">Nombre (visible)</h4>
+        <p className="text-muted-foreground mt-1">{option?.label || 'Sin nombre'}</p>
       </div>
       
       <div>
-        <h4 className="font-medium">Valor (Clave)</h4>
-        <p className="text-muted-foreground mt-1 font-mono text-sm">{option?.name || 'Sin valor'}</p>
+        <h4 className="font-medium">Slug</h4>
+        <p className="text-muted-foreground mt-1 font-mono text-sm">{option?.name || 'Sin slug'}</p>
       </div>
     </div>
   );
@@ -159,7 +159,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
             name="label"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Etiqueta (Visible) *</FormLabel>
+                <FormLabel>Nombre (visible) *</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Ej: Ladrillo cerámico hueco" 
@@ -177,7 +177,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
             name="value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Valor (Clave) *</FormLabel>
+                <FormLabel>Slug *</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="ej: ladrillo-ceramico-hueco" 
@@ -185,7 +185,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
                   />
                 </FormControl>
                 <div className="text-sm text-muted-foreground">
-                  Se genera automáticamente basado en la etiqueta. Puedes modificarlo si es necesario.
+                  Se genera automáticamente basado en el nombre. Puedes modificarlo si es necesario.
                 </div>
                 <FormMessage />
               </FormItem>

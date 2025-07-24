@@ -4,7 +4,7 @@ import { Settings, Plus, Edit, Trash2, Eye, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+// AlertDialog imports removed - now using ModalFactory system
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
@@ -25,9 +25,7 @@ export default function AdminTaskParameters() {
   // Global modal store
   const { openModal } = useGlobalModalStore();
   
-  // Delete confirmation states
-  const [deleteParameterId, setDeleteParameterId] = useState<string | null>(null);
-  const [deleteOptionId, setDeleteOptionId] = useState<string | null>(null);
+  // Legacy delete confirmation states removed - now using ModalFactory
   
   // Removed old option modal states - now using ModalFactory
 
@@ -92,25 +90,7 @@ export default function AdminTaskParameters() {
     setSortBy('name_asc');
   };
 
-  // Handle parameter deletion
-  const handleDeleteParameter = async (parameterId: string) => {
-    try {
-      await deleteParameterMutation.mutateAsync(parameterId);
-      setDeleteParameterId(null);
-    } catch (error) {
-      console.error('Error deleting parameter:', error);
-    }
-  };
-
-  // Handle option deletion
-  const handleDeleteOption = async (optionId: string) => {
-    try {
-      await deleteOptionMutation.mutateAsync(optionId);
-      setDeleteOptionId(null);
-    } catch (error) {
-      console.error('Error deleting option:', error);
-    }
-  };
+  // Legacy delete handlers removed - now using ModalFactory with direct mutations
 
   // Helper functions for parameter type styling
   const getParameterTypeVariant = (type: string) => {
@@ -232,14 +212,14 @@ export default function AdminTaskParameters() {
     const columns = [
       {
         key: 'label',
-        label: 'Etiqueta',
+        label: 'Nombre (visible)',
         render: (value: TaskParameterOption) => (
           <div className="font-medium text-sm">{value.label}</div>
         )
       },
       {
         key: 'name',
-        label: 'Nombre',
+        label: 'Slug',
         render: (value: TaskParameterOption) => (
           <div className="text-sm text-muted-foreground">{value.name}</div>
         )
@@ -277,7 +257,16 @@ export default function AdminTaskParameters() {
               size="sm"
               variant="ghost"
               className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-              onClick={() => setDeleteOptionId(value.id)}
+              onClick={() => {
+                openModal('delete-confirmation', {
+                  title: 'Eliminar Opción',
+                  description: '¿Estás seguro de que deseas eliminar esta opción?',
+                  itemName: value.label,
+                  onConfirm: () => {
+                    deleteOptionMutation.mutate(value.id);
+                  }
+                });
+              }}
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -291,7 +280,6 @@ export default function AdminTaskParameters() {
       <Table
         data={parameterValues}
         columns={columns}
-        searchPlaceholder="Buscar opciones..."
       />
     );
   }
@@ -415,7 +403,18 @@ export default function AdminTaskParameters() {
                     size="sm"
                     variant="ghost"
                     className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                    onClick={() => setDeleteParameterId(selectedParameter?.id || '')}
+                    onClick={() => {
+                      if (selectedParameter) {
+                        openModal('delete-confirmation', {
+                          title: 'Eliminar Parámetro',
+                          description: 'Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones asociadas.',
+                          itemName: selectedParameter.label,
+                          onConfirm: () => {
+                            deleteParameterMutation.mutate(selectedParameter.id);
+                          }
+                        });
+                      }
+                    }}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -454,51 +453,7 @@ export default function AdminTaskParameters() {
         )}
       </div>
 
-      {/* Modals managed by ModalFactory */}
-      
-      {/* Option Modal now handled by ModalFactory */}
-
-      {/* Delete Parameter Confirmation */}
-      <AlertDialog open={deleteParameterId !== null} onOpenChange={() => setDeleteParameterId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar parámetro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones asociadas.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteParameterId && handleDeleteParameter(deleteParameterId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Option Confirmation */}
-      <AlertDialog open={deleteOptionId !== null} onOpenChange={() => setDeleteOptionId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar opción?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará la opción del parámetro.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteOptionId && handleDeleteOption(deleteOptionId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* All modals now managed by ModalFactory */}
     </Layout>
   );
 }
