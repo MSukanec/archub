@@ -165,21 +165,22 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     }
   });
 
-  // Setear el miembro de organización actual como creador cuando se carguen los datos
+  // Setear el miembro de organización actual como creador cuando se carguen los datos (solo si no hay data para editar)
   useEffect(() => {
-    if (members && members.length > 0 && currentUser?.user?.id && !form.watch('created_by')) {
+    if (!data && members && members.length > 0 && currentUser?.user?.id && !form.watch('created_by')) {
       const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
       if (currentMember) {
         form.setValue('created_by', currentMember.id);
       }
     }
-  }, [members, currentUser, form]);
+  }, [data, members, currentUser, form]);
 
   useEffect(() => {
     if (data) {
+      console.log('📝 Cargando datos para edición:', data);
       // Si estamos editando, cargar los datos existentes
       form.reset({
-        created_by: data.created_by || currentUser?.user?.id || "",
+        created_by: data.created_by || "", // Este ya es el organization_member.id correcto
         log_date: data.log_date || new Date().toISOString().split('T')[0],
         entry_type: data.entry_type || "avance_de_obra",
         weather: data.weather || null,
@@ -194,7 +195,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       setEquipment(data.equipment || []);
       setUploadedFiles(data.files || []);
     }
-  }, [data, currentUser, form]);
+  }, [data, form]);
 
   // Funciones para eventos
   const addEvent = () => {
