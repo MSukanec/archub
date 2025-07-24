@@ -306,12 +306,14 @@ export default function AdminUsers() {
     customFilters,
     onClearFilters: clearFilters,
     actions: [
-      {
-        label: 'Nuevo Usuario',
-        icon: Plus,
-        onClick: () => openModal('admin-user', { isEditing: false }),
-        variant: 'default' as const
-      }
+      <Button 
+        key="new-user"
+        onClick={() => openModal('admin-user', { isEditing: false })}
+        className="flex items-center gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Nuevo Usuario
+      </Button>
     ]
   }
 
