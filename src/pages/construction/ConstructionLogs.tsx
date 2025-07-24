@@ -73,10 +73,13 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .from('site_logs')
         .select(`
           *,
-          creator:users!created_by(
+          creator:organization_members(
             id,
-            full_name,
-            avatar_url
+            user:users(
+              id,
+              full_name,
+              avatar_url
+            )
           )
         `)
         .eq('project_id', projectId)
@@ -143,9 +146,14 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .select('*')
         .in('site_log_id', logIds);
 
-      // Combine data
+      // Combine data and fix creator structure
       const data = logsData.map(log => ({
         ...log,
+        creator: log.creator?.user ? {
+          id: log.creator.user.id,
+          full_name: log.creator.user.full_name,
+          avatar_url: log.creator.user.avatar_url
+        } : null,
         events: eventsData?.filter(event => event.site_log_id === log.id) || [],
         attendees: attendeesData?.filter(attendee => attendee.site_log_id === log.id) || [],
         equipment: equipmentData?.filter(equip => equip.site_log_id === log.id) || [],
