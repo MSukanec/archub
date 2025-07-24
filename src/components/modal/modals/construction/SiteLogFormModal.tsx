@@ -630,7 +630,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         <FormModalHeader
           title={data ? "Editar Bitácora" : "Nueva Bitácora"}
           description={data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"}
-          icon={<FileText className="w-6 h-6" />}
+          icon={FileText}
         />
       }
       footerContent={
