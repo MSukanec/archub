@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench } from "lucide-react";
+import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera } from "lucide-react";
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -233,389 +233,410 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Accordion type="multiple" defaultValue={["basic", "files", "events", "personnel", "equipment"]} className="w-full">
-          
-          {/* Información Básica */}
-          <AccordionItem value="basic">
-            <AccordionTrigger className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Información Básica
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="creator_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Creado por</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar creador" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {members.map((member) => (
-                            <SelectItem key={member.user_id} value={member.user_id}>
-                              {member.full_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        {/* Información Básica */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Calendar className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Información Básica</h3>
+              <p className="text-xs text-muted-foreground">Datos principales de la entrada de bitácora</p>
+            </div>
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="log_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha de bitácora</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="log_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de bitácora</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="daily">Diaria</SelectItem>
-                          <SelectItem value="weekly">Semanal</SelectItem>
-                          <SelectItem value="inspection">Inspección</SelectItem>
-                          <SelectItem value="incident">Incidente</SelectItem>
-                          <SelectItem value="milestone">Hito</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="weather_condition"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Condición climática</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar clima" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sunny">Soleado</SelectItem>
-                          <SelectItem value="cloudy">Nublado</SelectItem>
-                          <SelectItem value="rainy">Lluvioso</SelectItem>
-                          <SelectItem value="windy">Ventoso</SelectItem>
-                          <SelectItem value="stormy">Tormentoso</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="general_comments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Comentarios generales</FormLabel>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="creator_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Creado por</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Descripción general de las actividades del día..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar creador" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </AccordionContent>
-          </AccordionItem>
+                    <SelectContent>
+                      {members.map((member) => (
+                        <SelectItem key={member.user_id} value={member.user_id}>
+                          {member.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Fotos y Videos */}
-          <AccordionItem value="files">
-            <AccordionTrigger className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Fotos y Videos
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600">Subir fotos y videos</p>
-                  <p className="text-xs text-gray-500">Arrastra archivos aquí o haz clic para seleccionar</p>
+            <FormField
+              control={form.control}
+              name="log_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de bitácora</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="log_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de bitácora</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="daily">Diaria</SelectItem>
+                      <SelectItem value="weekly">Semanal</SelectItem>
+                      <SelectItem value="inspection">Inspección</SelectItem>
+                      <SelectItem value="incident">Incidente</SelectItem>
+                      <SelectItem value="milestone">Hito</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="weather_condition"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Condición climática</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar clima" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="sunny">Soleado</SelectItem>
+                      <SelectItem value="cloudy">Nublado</SelectItem>
+                      <SelectItem value="rainy">Lluvioso</SelectItem>
+                      <SelectItem value="windy">Ventoso</SelectItem>
+                      <SelectItem value="stormy">Tormentoso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="general_comments"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Comentarios generales</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Descripción general de las actividades del día..."
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Fotos y Videos */}
+        <Separator className="my-6" />
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Camera className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Fotos y Videos</h3>
+              <p className="text-xs text-muted-foreground">Adjunta archivos multimedia al registro</p>
+            </div>
+          </div>
+
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <Camera className="mx-auto h-12 w-12 text-gray-400" />
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">Subir fotos y videos</p>
+              <p className="text-xs text-gray-500">Arrastra archivos aquí o haz clic para seleccionar</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Eventos */}
+        <Separator className="my-6" />
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Plus className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Eventos</h3>
+              <p className="text-xs text-muted-foreground">Registra eventos importantes del día</p>
+            </div>
+          </div>
+
+          <Button type="button" onClick={addEvent} variant="outline" size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Evento
+          </Button>
+          
+          {events.map((event, index) => (
+            <div key={event.id} className="border rounded-lg p-4 space-y-4">
+              <div className="flex justify-between items-start">
+                <Badge variant="secondary">Evento {index + 1}</Badge>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeEvent(event.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Descripción</label>
+                  <Input
+                    value={event.description}
+                    onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
+                    placeholder="Descripción del evento"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Hora</label>
+                  <Input
+                    type="time"
+                    value={event.time}
+                    onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
+                  />
                 </div>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Eventos */}
-          <AccordionItem value="events">
-            <AccordionTrigger className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Eventos
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <Button type="button" onClick={addEvent} variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Agregar Evento
-              </Button>
               
-              {events.map((event, index) => (
-                <div key={event.id} className="border rounded-lg p-4 space-y-4">
-                  <div className="flex justify-between items-start">
-                    <Badge variant="secondary">Evento {index + 1}</Badge>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeEvent(event.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Descripción</label>
-                      <Input
-                        value={event.description}
-                        onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
-                        placeholder="Descripción del evento"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Hora</label>
-                      <Input
-                        type="time"
-                        value={event.time}
-                        onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium">Responsable</label>
-                    <Input
-                      value={event.responsible}
-                      onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
-                      placeholder="Nombre del responsable"
-                    />
-                  </div>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
+              <div>
+                <label className="text-sm font-medium">Responsable</label>
+                <Input
+                  value={event.responsible}
+                  onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
+                  placeholder="Nombre del responsable"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
 
-          {/* Personal */}
-          <AccordionItem value="personnel">
-            <AccordionTrigger className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Personal
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <Button type="button" onClick={addAttendee} variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Agregar Asistente
-              </Button>
-              
-              {attendees.map((attendee, index) => (
-                <div key={attendee.id} className="border rounded-lg p-4 space-y-4">
-                  <div className="flex justify-between items-start">
-                    <Badge variant="secondary">Asistente {index + 1}</Badge>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeAttendee(attendee.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Contacto</label>
-                      <Select
-                        value={attendee.contact_id}
-                        onValueChange={(value) => updateAttendee(attendee.id, 'contact_id', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar contacto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {contacts.map((contact: any) => (
-                            <SelectItem key={contact.id} value={contact.id}>
-                              {contact.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Tipo</label>
-                      <Select
-                        value={attendee.contact_type}
-                        onValueChange={(value) => updateAttendee(attendee.id, 'contact_type', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Tipo de contacto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="worker">Trabajador</SelectItem>
-                          <SelectItem value="supervisor">Supervisor</SelectItem>
-                          <SelectItem value="engineer">Ingeniero</SelectItem>
-                          <SelectItem value="architect">Arquitecto</SelectItem>
-                          <SelectItem value="client">Cliente</SelectItem>
-                          <SelectItem value="supplier">Proveedor</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Hora llegada</label>
-                      <Input
-                        type="time"
-                        value={attendee.arrival_time}
-                        onChange={(e) => updateAttendee(attendee.id, 'arrival_time', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Hora salida</label>
-                      <Input
-                        type="time"
-                        value={attendee.departure_time}
-                        onChange={(e) => updateAttendee(attendee.id, 'departure_time', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium">Notas</label>
-                    <Textarea
-                      value={attendee.notes}
-                      onChange={(e) => updateAttendee(attendee.id, 'notes', e.target.value)}
-                      placeholder="Notas adicionales..."
-                    />
-                  </div>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
+        {/* Personal */}
+        <Separator className="my-6" />
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Users className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Personal</h3>
+              <p className="text-xs text-muted-foreground">Control de asistencia y personal en obra</p>
+            </div>
+          </div>
 
-          {/* Maquinaria */}
-          <AccordionItem value="equipment">
-            <AccordionTrigger className="flex items-center gap-2">
-              <Wrench className="w-4 h-4" />
-              Maquinaria
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <Button type="button" onClick={addEquipment} variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Agregar Maquinaria
-              </Button>
+          <Button type="button" onClick={addAttendee} variant="outline" size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Asistente
+          </Button>
+          
+          {attendees.map((attendee, index) => (
+            <div key={attendee.id} className="border rounded-lg p-4 space-y-4">
+              <div className="flex justify-between items-start">
+                <Badge variant="secondary">Asistente {index + 1}</Badge>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeAttendee(attendee.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
               
-              {equipment.map((item, index) => (
-                <div key={item.id} className="border rounded-lg p-4 space-y-4">
-                  <div className="flex justify-between items-start">
-                    <Badge variant="secondary">Equipo {index + 1}</Badge>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeEquipment(item.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Nombre</label>
-                      <Input
-                        value={item.name}
-                        onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
-                        placeholder="Nombre del equipo"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Cantidad</label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Condición</label>
-                      <Select
-                        value={item.condition}
-                        onValueChange={(value) => updateEquipmentItem(item.id, 'condition', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Condición" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="excellent">Excelente</SelectItem>
-                          <SelectItem value="good">Buena</SelectItem>
-                          <SelectItem value="fair">Regular</SelectItem>
-                          <SelectItem value="poor">Mala</SelectItem>
-                          <SelectItem value="broken">Averiada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Operador</label>
-                      <Input
-                        value={item.operator}
-                        onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
-                        placeholder="Nombre del operador"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium">Notas</label>
-                    <Textarea
-                      value={item.notes}
-                      onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
-                      placeholder="Notas sobre el equipo..."
-                    />
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Contacto</label>
+                  <Select
+                    value={attendee.contact_id}
+                    onValueChange={(value) => updateAttendee(attendee.id, 'contact_id', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar contacto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contacts.map((contact: any) => (
+                        <SelectItem key={contact.id} value={contact.id}>
+                          {contact.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                <div>
+                  <label className="text-sm font-medium">Tipo</label>
+                  <Select
+                    value={attendee.contact_type}
+                    onValueChange={(value) => updateAttendee(attendee.id, 'contact_type', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tipo de contacto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="worker">Trabajador</SelectItem>
+                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                      <SelectItem value="engineer">Ingeniero</SelectItem>
+                      <SelectItem value="architect">Arquitecto</SelectItem>
+                      <SelectItem value="client">Cliente</SelectItem>
+                      <SelectItem value="supplier">Proveedor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Hora llegada</label>
+                  <Input
+                    type="time"
+                    value={attendee.arrival_time}
+                    onChange={(e) => updateAttendee(attendee.id, 'arrival_time', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Hora salida</label>
+                  <Input
+                    type="time"
+                    value={attendee.departure_time}
+                    onChange={(e) => updateAttendee(attendee.id, 'departure_time', e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Notas</label>
+                <Textarea
+                  value={attendee.notes}
+                  onChange={(e) => updateAttendee(attendee.id, 'notes', e.target.value)}
+                  placeholder="Notas sobre la asistencia..."
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Maquinaria */}
+        <Separator className="my-6" />
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Wrench className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Maquinaria</h3>
+              <p className="text-xs text-muted-foreground">Control de equipos y maquinaria utilizada</p>
+            </div>
+          </div>
+
+          <Button type="button" onClick={addEquipment} variant="outline" size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Equipo
+          </Button>
+          
+          {equipment.map((item, index) => (
+            <div key={item.id} className="border rounded-lg p-4 space-y-4">
+              <div className="flex justify-between items-start">
+                <Badge variant="secondary">Equipo {index + 1}</Badge>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeEquipment(item.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Nombre</label>
+                  <Input
+                    value={item.name}
+                    onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
+                    placeholder="Nombre del equipo"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Cantidad</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Condición</label>
+                  <Select
+                    value={item.condition}
+                    onValueChange={(value) => updateEquipmentItem(item.id, 'condition', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Condición" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="excellent">Excelente</SelectItem>
+                      <SelectItem value="good">Buena</SelectItem>
+                      <SelectItem value="fair">Regular</SelectItem>
+                      <SelectItem value="poor">Mala</SelectItem>
+                      <SelectItem value="broken">Averiada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Operador</label>
+                  <Input
+                    value={item.operator}
+                    onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
+                    placeholder="Nombre del operador"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Notas</label>
+                <Textarea
+                  value={item.notes}
+                  onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
+                  placeholder="Notas sobre el equipo..."
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </form>
     </Form>
   );
