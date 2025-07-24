@@ -503,7 +503,7 @@ export default function ConstructionLogs() {
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         primaryActionLabel="Nueva Bitácora"
-        onPrimaryActionClick={() => setShowNewSiteLogModal(true)}
+        onPrimaryActionClick={() => openModal('site-log')}
         customFilters={customFilters}
         onClearFilters={clearFilters}
         tabs={[
@@ -532,7 +532,7 @@ export default function ConstructionLogs() {
           }
           action={
             !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-              <Button onClick={() => setShowNewSiteLogModal(true)}>
+              <Button onClick={() => openModal('site-log')}>
                 <Plus className="w-4 h-4 mr-2" />
                 Crear Primera Entrada
               </Button>
