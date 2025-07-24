@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, useTaskParameterOptionGroups, useTaskParameterOptionGroupItems, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { NewTaskParameterOptionModal } from '@/modals/admin/tasks/NewTaskParameterOptionModal';
+// Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 
 
 export default function AdminTaskParameters() {
@@ -29,9 +29,7 @@ export default function AdminTaskParameters() {
   const [deleteParameterId, setDeleteParameterId] = useState<string | null>(null);
   const [deleteOptionId, setDeleteOptionId] = useState<string | null>(null);
   
-  // States needed for old option modal system (to be migrated later)
-  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
-  const [editingOption, setEditingOption] = useState<TaskParameterOption | null>(null);
+  // Removed old option modal states - now using ModalFactory
 
   const { data: parameters = [], isLoading, error } = useTaskParametersAdmin();
   const deleteParameterMutation = useDeleteTaskParameter();
@@ -213,9 +211,11 @@ export default function AdminTaskParameters() {
               <Button 
                 size="sm" 
                 onClick={() => {
-                  setSelectedParameterId(parameter.parameter_id);
-                  setEditingOption(null);
-                  setIsOptionModalOpen(true);
+                  openModal('task-parameter-option', {
+                    parameterId: parameter.parameter_id,
+                    parameterLabel: parameter.label,
+                    option: null
+                  });
                 }}
                 className="h-8 px-3 text-xs"
               >
@@ -264,9 +264,11 @@ export default function AdminTaskParameters() {
               variant="ghost"
               className="h-6 w-6 p-0"
               onClick={() => {
-                setEditingOption(value);
-                setSelectedParameterId(parameter.parameter_id);
-                setIsOptionModalOpen(true);
+                openModal('task-parameter-option', {
+                  parameterId: parameter.parameter_id,
+                  parameterLabel: parameter.label,
+                  option: value
+                });
               }}
             >
               <Edit className="h-3 w-3" />
@@ -423,9 +425,11 @@ export default function AdminTaskParameters() {
                       size="sm"
                       className="h-7 px-2 text-xs"
                       onClick={() => {
-                        setSelectedParameterId(selectedParameter.parameter_id);
-                        setEditingOption(null);
-                        setIsOptionModalOpen(true);
+                        openModal('task-parameter-option', {
+                          parameterId: selectedParameter.parameter_id,
+                          parameterLabel: selectedParameter.label,
+                          option: null
+                        });
                       }}
                     >
                       <Plus className="w-3 h-3 mr-1" />
@@ -452,17 +456,7 @@ export default function AdminTaskParameters() {
 
       {/* Modals managed by ModalFactory */}
       
-      {/* Option Modal - temporary until migrated */}
-      <NewTaskParameterOptionModal
-        open={isOptionModalOpen}
-        onClose={() => {
-          setIsOptionModalOpen(false);
-          setEditingOption(null);
-        }}
-        parameterId={selectedParameterId}
-        parameterLabel={selectedParameter?.label || ''}
-        option={editingOption}
-      />
+      {/* Option Modal now handled by ModalFactory */}
 
       {/* Delete Parameter Confirmation */}
       <AlertDialog open={deleteParameterId !== null} onOpenChange={() => setDeleteParameterId(null)}>
