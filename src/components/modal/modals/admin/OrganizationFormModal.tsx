@@ -1,88 +1,102 @@
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { FormModalLayout } from '../../form/FormModalLayout'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
-import { Building } from 'lucide-react'
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Building } from 'lucide-react';
+import { FormModalHeader } from '../../form/FormModalHeader';
+import { FormModalFooter } from '../../form/FormModalFooter';
+import { FormModalLayout } from '../../form/FormModalLayout';
+import { useModalPanelStore } from '../../form/modalPanelStore';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   is_active: z.boolean(),
   plan_id: z.string().min(1, 'El plan es requerido')
-})
+});
 
-type OrganizationFormData = z.infer<typeof organizationSchema>
+type OrganizationFormData = z.infer<typeof organizationSchema>;
 
 interface Organization {
-  id: string
-  name: string
-  is_active: boolean
-  plan_id: string
+  id: string;
+  name: string;
+  is_active: boolean;
+  plan_id: string;
 }
 
 interface OrganizationFormModalProps {
   modalData?: {
-    organization?: Organization
-    isEditing?: boolean
-  }
-  onClose: () => void
+    organization?: Organization;
+    isEditing?: boolean;
+  };
+  onClose: () => void;
 }
 
 export function OrganizationFormModal({ modalData, onClose }: OrganizationFormModalProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  
-  const organization = modalData?.organization
-  const isEditing = modalData?.isEditing || false
+  const { organization, isEditing = false } = modalData || {};
+  const { currentPanel, setPanel } = useModalPanelStore();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // Fetch plans for select
   const { data: plans = [] } = useQuery({
     queryKey: ['admin-plans'],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized')
+      if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
         .from('plans')
         .select('id, name')
-        .order('name')
+        .order('name');
       
-      if (error) throw error
-      return data
+      if (error) throw error;
+      return data;
     }
-  })
+  });
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
     defaultValues: {
-      name: '',
-      is_active: true,
-      plan_id: ''
+      name: organization?.name || '',
+      is_active: organization?.is_active ?? true,
+      plan_id: organization?.plan_id || ''
     }
-  })
+  });
 
-  // Load organization data when editing
-  useEffect(() => {
-    if (isEditing && organization) {
+  React.useEffect(() => {
+    if (organization) {
       form.reset({
-        name: organization.name,
-        is_active: organization.is_active,
-        plan_id: organization.plan_id
-      })
+        name: organization.name || '',
+        is_active: organization.is_active ?? true,
+        plan_id: organization.plan_id || ''
+      });
+      setPanel('edit');
+    } else {
+      form.reset({
+        name: '',
+        is_active: true,
+        plan_id: ''
+      });
+      setPanel('edit');
     }
-  }, [isEditing, organization, form])
+  }, [organization, form, setPanel]);
+
+  const handleClose = () => {
+    form.reset();
+    setPanel('view');
+    onClose();
+  };
 
   const updateOrganizationMutation = useMutation({
     mutationFn: async (data: OrganizationFormData) => {
-      if (!supabase || !organization) throw new Error('Missing requirements')
+      if (!supabase) throw new Error('Supabase not initialized');
       
       const { error } = await supabase
         .from('organizations')
@@ -91,41 +105,41 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
           is_active: data.is_active,
           plan_id: data.plan_id
         })
-        .eq('id', organization.id)
+        .eq('id', organization!.id);
       
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
       toast({
         title: 'Organización actualizada',
-        description: 'La organización ha sido actualizada correctamente.'
-      })
-      onClose()
+        description: 'Los cambios se guardaron correctamente.'
+      });
+      handleClose();
     },
     onError: (error) => {
-      console.error('Error updating organization:', error)
+      console.error('Error updating organization:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la organización. Inténtalo de nuevo.',
         variant: 'destructive'
-      })
+      });
     }
-  })
+  });
 
   const onSubmit = async (data: OrganizationFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      updateOrganizationMutation.mutate(data)
+      await updateOrganizationMutation.mutateAsync(data);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const viewPanel = (
     <div className="space-y-4">
       <div>
-        <label className="text-sm font-medium">Nombre</label>
+        <label className="text-sm font-medium">Nombre de la Organización</label>
         <p className="text-sm text-muted-foreground mt-1">{organization?.name}</p>
       </div>
       <div>
@@ -135,7 +149,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
         </p>
       </div>
     </div>
-  )
+  );
 
   const editPanel = (
     <Form {...form}>
@@ -147,7 +161,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
             <FormItem>
               <FormLabel>Nombre de la Organización</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Nombre de la organización" />
+                <Input placeholder="Nombre de la organización" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -186,7 +200,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
               <div className="space-y-0.5">
                 <FormLabel>Estado Activo</FormLabel>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   La organización está activa y sus miembros pueden acceder
                 </div>
               </div>
@@ -201,31 +215,24 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
         />
       </form>
     </Form>
-  )
+  );
 
   const headerContent = (
-    <div className="flex items-center space-x-2">
-      <Building className="h-5 w-5" />
-      <span>{isEditing ? 'Editar Organización' : 'Ver Organización'}</span>
-    </div>
-  )
+    <FormModalHeader 
+      title={organization ? 'Editar Organización' : 'Ver Organización'}
+      icon={Building}
+    />
+  );
 
   const footerContent = (
-    <div className="flex justify-end space-x-2">
-      <Button variant="secondary" onClick={onClose}>
-        Cancelar
-      </Button>
-      {isEditing && (
-        <Button 
-          type="submit" 
-          onClick={form.handleSubmit(onSubmit)}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
-      )}
-    </div>
-  )
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel="Guardar Cambios"
+      onRightClick={form.handleSubmit(onSubmit)}
+      rightLoading={isLoading}
+    />
+  );
 
   return (
     <FormModalLayout
@@ -233,8 +240,8 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      onClose={onClose}
+      onClose={handleClose}
       isEditing={true}
     />
-  )
+  );
 }
