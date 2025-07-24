@@ -72,8 +72,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
   const { data: currentUser } = useCurrentUser();
-  const organizationId = currentUser?.last_organization_id;
-  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
+  const { data: organizationMembers = [] } = useOrganizationMembers();
   const { data: contacts = [] } = useContacts();
 
   // Mapear members para que funcionen con UserSelector
@@ -92,7 +91,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
-      created_by: currentUser?.id || "",
+      created_by: currentUser?.user?.id || "",
       log_date: new Date().toISOString().split('T')[0],
       entry_type: "avance_de_obra",
       weather: null,
@@ -661,31 +660,29 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     </Form>
   );
 
-  const headerContent = (
-    <FormModalHeader
-      title={data ? "Editar Bitácora" : "Nueva Bitácora"}
-      icon={FileText}
-    />
-  )
-
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={closeModal}
-      rightLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
-      onRightClick={form.handleSubmit(onSubmit)}
-      showLoadingSpinner={isLoading}
-    />
-  )
-
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={null}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
       onClose={closeModal}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      isEditing={true}
+      headerContent={
+        <FormModalHeader
+          title={data ? "Editar Bitácora" : "Nueva Bitácora"}
+          description={data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"}
+          icon={FileText}
+        />
+      }
+      footerContent={
+        <FormModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={closeModal}
+          rightLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
+          onRightClick={form.handleSubmit(onSubmit)}
+          showLoadingSpinner={isLoading}
+        />
+      }
     />
   );
 }
