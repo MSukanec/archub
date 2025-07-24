@@ -4,15 +4,16 @@ import { Table } from '@/components/ui-custom/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MoreHorizontal, Building, Crown, Filter } from 'lucide-react';
-import { NewAdminOrganizationModal } from '@/modals/admin/NewAdminOrganizationModal';
+import { Edit, Trash2, Building, Crown } from 'lucide-react';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { useToast } from '@/hooks/use-toast';
 
 interface Organization {
   id: string;
@@ -115,8 +116,10 @@ export default function AdminOrganizations() {
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [showModal, setShowModal] = useState(false);
-  const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { openModal } = useGlobalModalStore();
 
   const { data: organizations, isLoading } = useAllOrganizations();
 
@@ -128,23 +131,47 @@ export default function AdminOrganizations() {
     teams: organizations?.filter(org => org.plan?.name === 'Teams').length || 0
   };
 
-  const handleEdit = (organizationId: string) => {
-    const org = organizations?.find(o => o.id === organizationId);
-    if (org) {
-      setEditingOrganization(org);
-      setShowModal(true);
+  const handleEdit = (organization: Organization) => {
+    openModal('admin-organization', { organization, isEditing: true });
+  };
+
+  const handleDelete = (organization: Organization) => {
+    openModal('delete-confirmation', {
+      title: 'Desactivar Organización',
+      description: `¿Estás seguro de que deseas desactivar la organización "${organization.name}"? Esta acción cambiará su estado a inactivo.`,
+      itemName: organization.name,
+      onConfirm: () => deleteOrganizationMutation.mutate(organization.id),
+      dangerous: true
+    });
+  };
+
+  const deleteOrganizationMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('organizations')
+        .update({ is_active: false })
+        .eq('id', organizationId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
+      toast({
+        title: 'Organización desactivada',
+        description: 'La organización ha sido desactivada correctamente.'
+      });
+    },
+    onError: (error) => {
+      console.error('Error deactivating organization:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo desactivar la organización. Inténtalo de nuevo.',
+        variant: 'destructive'
+      });
     }
-  };
-
-  const handleDelete = (organizationId: string) => {
-    console.log('Delete organization:', organizationId);
-    // TODO: Implement delete functionality
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingOrganization(null);
-  };
+  });
 
   // Filtrar organizaciones
   const filteredOrganizations = organizations?.filter(org => {
@@ -213,38 +240,31 @@ export default function AdminOrganizations() {
   );
 
   const headerProps = {
-    title: "Gestión de Organizaciones",
-    icon: Building,
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    customFilters,
-    onClearFilters: handleClearFilters,
-    actions: []
+    title: "Gestión de Organizaciones"
   };
 
   const columns = [
     {
       key: 'created_at' as keyof Organization,
       label: 'Fecha',
-      width: '5%',
+      width: '14.28%',
       render: (org: Organization) => (
-        <div className="text-sm">
-          {format(new Date(org.created_at), 'dd MMM yyyy', { locale: es })}
-        </div>
+        <span className="text-xs text-muted-foreground">
+          {format(new Date(org.created_at), 'dd/MM/yy', { locale: es })}
+        </span>
       )
     },
     {
       key: 'name' as keyof Organization,
       label: 'Organización',
-      width: '35%',
+      width: '14.28%',
       render: (org: Organization) => (
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[var(--accent-bg)] rounded-lg flex items-center justify-center">
-            <Building className="w-4 h-4 text-[var(--accent)]" />
+          <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-lg flex items-center justify-center">
+            <Building className="w-3 h-3 text-[var(--accent)]" />
           </div>
-          <div>
-            <div className="font-medium text-sm">{org.name}</div>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">{org.name}</span>
             {org.is_system && (
               <Badge variant="secondary" className="text-xs">Sistema</Badge>
             )}
@@ -255,22 +275,20 @@ export default function AdminOrganizations() {
     {
       key: 'creator' as keyof Organization,
       label: 'Creador',
-      width: '30%',
+      width: '14.28%',
       render: (org: Organization) => (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
-            {org.creator?.full_name?.charAt(0) || org.creator?.email?.charAt(0) || '?'}
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
+            {org.creator?.full_name?.charAt(0) || '?'}
           </div>
-          <div className="text-sm">
-            {org.creator?.full_name || org.creator?.email || 'Sin asignar'}
-          </div>
+          <span className="text-xs">{org.creator?.full_name || 'Sin asignar'}</span>
         </div>
       )
     },
     {
       key: 'plan' as keyof Organization,
       label: 'Plan',
-      width: '5%',
+      width: '14.28%',
       render: (org: Organization) => (
         <Badge variant="outline" className="text-xs">
           {org.plan?.name || 'Sin plan'}
@@ -280,23 +298,15 @@ export default function AdminOrganizations() {
     {
       key: 'members_count' as keyof Organization,
       label: 'Miembros',
-      width: '5%',
+      width: '14.28%',
       render: (org: Organization) => (
-        <div className="text-sm">{org.members_count || 0}</div>
-      )
-    },
-    {
-      key: 'projects_count' as keyof Organization,
-      label: 'Proyectos',
-      width: '5%',
-      render: (org: Organization) => (
-        <div className="text-sm">{org.projects_count || 0}</div>
+        <span className="text-xs">{org.members_count || 0}</span>
       )
     },
     {
       key: 'is_active' as keyof Organization,
       label: 'Estado',
-      width: '5%',
+      width: '14.28%',
       render: (org: Organization) => (
         <Badge variant={org.is_active ? 'default' : 'secondary'} className="text-xs">
           {org.is_active ? 'Activa' : 'Inactiva'}
@@ -306,26 +316,26 @@ export default function AdminOrganizations() {
     {
       key: 'id' as keyof Organization,
       label: 'Acciones',
-      width: '5%',
+      width: '14.28%',
       render: (org: Organization) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleEdit(org.id)}>
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleDelete(org.id)}
-              className="text-red-600"
-            >
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleEdit(org)}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleDelete(org)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       )
     }
   ];
@@ -333,6 +343,16 @@ export default function AdminOrganizations() {
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Action Bar */}
+        <ActionBarDesktop
+          title="Gestión de Organizaciones"
+          icon={<Building className="h-5 w-5" />}
+          showSearch={true}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          onClearFilters={handleClearFilters}
+        />
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-3">
@@ -384,13 +404,7 @@ export default function AdminOrganizations() {
           className="min-h-[400px]"
         />
 
-        {showModal && (
-          <NewAdminOrganizationModal
-            open={showModal}
-            onClose={handleCloseModal}
-            organization={editingOrganization}
-          />
-        )}
+
       </div>
     </Layout>
   );
