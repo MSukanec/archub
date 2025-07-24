@@ -305,16 +305,7 @@ export default function AdminUsers() {
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [
-      <Button 
-        key="new-user"
-        onClick={() => openModal('admin-user', { isEditing: false })}
-        className="flex items-center gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nuevo Usuario
-      </Button>
-    ]
+    actions: []
   }
 
   return (
