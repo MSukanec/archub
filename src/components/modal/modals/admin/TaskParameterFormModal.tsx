@@ -221,7 +221,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             name="label"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Etiqueta (Visible) *</FormLabel>
+                <FormLabel>Nombre (visible) *</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Ej: Ladrillos y Bloques" 
@@ -239,7 +239,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre (Clave) *</FormLabel>
+                <FormLabel>Slug *</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Ej: brick-type" 
@@ -418,6 +418,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             setSelectedGroup(null);
           }}
           group={selectedGroup}
+          parameterLabel={parameter?.label || ''}
         />
       )}
     </div>
@@ -437,7 +438,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       onLeftClick={onClose}
       rightLabel={parameter ? "Actualizar" : "Guardar"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 

@@ -211,7 +211,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       onRightClick={() => {
         form.handleSubmit(handleSubmit)();
       }}
-      rightLoading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 

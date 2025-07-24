@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 24, 2025. TASK PARAMETER MODALS NOMENCLATURE UPDATE COMPLETED: Updated field labels across all task parameter modals to use consistent naming conventions - COMPLETED
+  • MODAL FIELD LABELS STANDARDIZED: Changed "Etiqueta" → "Nombre (visible)", "NOMBRE/Nombre (Clave)" → "Slug" in both TaskParameterFormModal and TaskParameterOptionFormModal
+  • TABLE COLUMN HEADERS UPDATED: AdminTaskParameters page columns now display "Nombre (visible)" and "Slug" instead of previous labels
+  • DELETION SYSTEM MODERNIZED: All delete operations in AdminTaskParameters now use unified ModalFactory with 'delete-confirmation' type instead of AlertDialog
+  • LEGACY MODAL CLEANUP: Removed all AlertDialog components and state variables, replaced with centralized modal system following README.md standards
+  • LSP ERRORS RESOLVED: Fixed rightLoading/isLoading prop inconsistencies and missing parameterLabel props across modals
+  • MODAL ARCHITECTURE COMPLIANCE: All modals now follow FormModalLayout pattern with proper isEditing={true} for direct edit mode access
 - July 24, 2025. TASK PARAMETER OPTION MODAL ARCHITECTURE CORRECTION COMPLETED: Fixed TaskParameterOptionFormModal.tsx to follow proper modal documentation standards from README.md - COMPLETED
   • ARCHITECTURE COMPLIANCE: Completely restructured modal to follow BoardFormModal.tsx pattern exactly as specified in src/components/modal/README.md
   • PROPER COMPONENT STRUCTURE: Uses FormModalLayout with separate viewPanel, editPanel, headerContent, footerContent objects instead of JSX nesting
