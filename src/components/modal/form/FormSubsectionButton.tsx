@@ -36,25 +36,19 @@ export function FormSubsectionButton({
         onClick={onClick}
         disabled={disabled}
         className={cn(
-          "w-full flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200",
+          "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all duration-200",
           "text-left bg-transparent hover:bg-accent/5",
-          "border-dashed border-border hover:border-accent",
+          "border-solid border-border hover:border-accent",
           "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-border",
           isHovered && !disabled && "border-accent shadow-sm"
         )}
       >
         {/* Icon */}
-        <div 
-          className={cn(
-            "flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200",
-            "bg-muted text-muted-foreground",
-            isHovered && !disabled && "bg-accent/10 text-accent"
-          )}
-        >
-          <div className="w-5 h-5 [&>svg]:w-5 [&>svg]:h-5">
+        <div className="flex-shrink-0 w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+          <div className="w-4 h-4 text-accent [&>svg]:w-4 [&>svg]:h-4">
             {icon}
-          </div>
+          </div>  
         </div>
 
         {/* Content */}
@@ -70,27 +64,23 @@ export function FormSubsectionButton({
             {description}
           </div>
         </div>
-      </button>
 
-      {/* Hover Add Button */}
-      <div className={cn(
-        "absolute right-2 top-1/2 -translate-y-1/2 transition-all duration-200",
-        "opacity-0 translate-x-2 pointer-events-none",
-        isHovered && !disabled && "opacity-100 translate-x-0 pointer-events-auto"
-      )}>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="h-8 w-8 p-0 shadow-sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-          disabled={disabled}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+        {/* Always Visible Add Button */}
+        <div className="flex-shrink-0">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 w-8 p-0 shadow-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+            disabled={disabled}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      </button>
     </div>
   );
 }
