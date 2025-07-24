@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 24, 2025. TASK PARAMETER OPTION MODAL ARCHITECTURE CORRECTION COMPLETED: Fixed TaskParameterOptionFormModal.tsx to follow proper modal documentation standards from README.md - COMPLETED
+  • ARCHITECTURE COMPLIANCE: Completely restructured modal to follow BoardFormModal.tsx pattern exactly as specified in src/components/modal/README.md
+  • PROPER COMPONENT STRUCTURE: Uses FormModalLayout with separate viewPanel, editPanel, headerContent, footerContent objects instead of JSX nesting
+  • UX IMPROVEMENTS MAINTAINED: Preserved {value} placeholder explanation and inline "Insertar {value}" button functionality
+  • MODAL FACTORY INTEGRATION: Modal works correctly with ModalFactory system using 'task-parameter-option' type
+  • README COMPLIANCE: Modal now follows mandatory structure: FormModalLayout → FormModalHeader/FormModalFooter objects → proper prop passing
+  • LEGACY SYSTEM ELIMINATION: Removed all references to old modal system from AdminTaskParameters.tsx
+  • CRITICAL FIX: Added isEditing={true} removal as per README guidelines for proper modal behavior
 - July 24, 2025. ALL CONSTRUCTION ACTIONBARS REPOSITIONED OUTSIDE EMPTYSTATES: Successfully restructured all construction pages to position ActionBar components outside of EmptyState conditionals - COMPLETED
   • UNIVERSAL POSITIONING: ActionBar components now appear FIRST on all construction pages: ConstructionTasks, ConstructionBudgets, ConstructionMaterials, ConstructionSchedule, ConstructionLogs
   • CONSISTENT LAYOUT STRUCTURE: All pages follow new pattern: ActionBar → EmptyState (if no data) → Page Content (if data available)

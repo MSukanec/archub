@@ -10,8 +10,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
+import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
+import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { useCreateTaskParameterOption, useUpdateTaskParameterOption, useTaskParameterOptionGroups, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 
 // Form schema
@@ -23,12 +24,7 @@ const taskParameterOptionSchema = z.object({
 
 type TaskParameterOptionFormData = z.infer<typeof taskParameterOptionSchema>;
 
-interface TaskParameterOptionFormModalProps {
-  modalType: 'task-parameter-option';
-}
-
-export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionFormModalProps) {
-  const { isOpen, modalData, onClose } = useGlobalModalStore();
+export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData: any; onClose: () => void }) {
   const { parameterId, parameterLabel, option }: { parameterId?: string; parameterLabel?: string; option?: TaskParameterOption } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -119,10 +115,10 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
     }
   };
 
-  const viewPanel = null; // No view mode needed for this modal
+  const viewPanel = null;
 
   const editPanel = (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           {/* Label Field */}
@@ -213,19 +209,33 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
     </div>
   );
 
+  const headerContent = (
+    <FormModalHeader 
+      title={option ? 'Editar Opción' : 'Nueva Opción'}
+      icon={Plus}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={option ? 'Guardar Cambios' : 'Crear Opción'}
+      onRightClick={() => {
+        form.handleSubmit(handleSubmit)();
+      }}
+      rightLoading={isSubmitting}
+    />
+  );
+
   return (
     <FormModalLayout
-      isOpen={isOpen && modalType === modalType}
-      onClose={onClose}
-      title={option ? 'Editar Opción' : 'Nueva Opción'}
-      description={`${option ? 'Modificar' : 'Agregar'} opción para el parámetro "${parameterLabel}"`}
-      isEditing={true}
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
-      onSubmit={form.handleSubmit(handleSubmit)}
-      submitLabel={option ? 'Guardar Cambios' : 'Crear Opción'}
-      isSubmitting={isSubmitting}
-      icon={Plus}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
     />
   );
 }
