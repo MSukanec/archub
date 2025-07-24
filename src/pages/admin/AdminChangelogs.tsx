@@ -12,7 +12,8 @@ import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MoreHorizontal, FileText, Calendar, Users, BookOpen } from 'lucide-react';
-import { NewAdminChangelogEntryModal } from '@/modals/admin/NewAdminChangelogEntryModal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 interface ChangelogEntry {
   id: string;
@@ -27,6 +28,7 @@ interface ChangelogEntry {
     id: string;
     full_name: string;
     email: string;
+    avatar_url?: string;
   } | null;
 }
 
@@ -61,7 +63,7 @@ function useAllChangelogEntries() {
       
       const usersResult = creatorIds.length > 0 ? await supabase!
         .from('users')
-        .select('id, full_name, email')
+        .select('id, full_name, email, avatar_url')
         .in('id', creatorIds) : { data: [], error: null };
 
       // Mapear entradas con sus creadores
@@ -79,8 +81,7 @@ export default function AdminChangelogs() {
   const [searchValue, setSearchValue] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<string>('all');
-  const [showModal, setShowModal] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<ChangelogEntry | null>(null);
+  const { openModal } = useGlobalModalStore();
 
   const { data: changelogEntries = [], isLoading } = useAllChangelogEntries();
 
@@ -111,13 +112,7 @@ export default function AdminChangelogs() {
   }, {} as Record<string, number>);
 
   const handleEdit = (entry: ChangelogEntry) => {
-    setEditingEntry(entry);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingEntry(null);
+    openModal('changelog-entry', { entry, isEditing: true });
   };
 
   const getTypeBadgeVariant = (type: string) => {
@@ -148,34 +143,6 @@ export default function AdminChangelogs() {
 
   const headerProps = {
     title: "Gestión de Changelog",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    showFilters: true,
-    filters: [
-      {
-        label: "Tipo",
-        onClick: () => {}
-      },
-      {
-        label: "Visibilidad", 
-        onClick: () => {}
-      }
-    ],
-    onClearFilters: () => {
-      setSearchValue('');
-      setTypeFilter('all');
-      setVisibilityFilter('all');
-    },
-    actions: [
-      <Button
-        key="new-entry"
-        onClick={() => setShowModal(true)}
-        className="h-8 px-3 text-sm"
-      >
-        Nueva Entrada
-      </Button>
-    ]
   };
 
   const columns = [
@@ -209,9 +176,28 @@ export default function AdminChangelogs() {
       label: 'Creador',
       width: '20%',
       render: (entry: ChangelogEntry) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{entry.creator?.full_name || 'Usuario'}</span>
-          <span className="text-xs text-muted-foreground">{entry.creator?.email}</span>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+            {entry.creator?.avatar_url ? (
+              <img 
+                src={entry.creator.avatar_url} 
+                alt={entry.creator.full_name || entry.creator.email}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-[var(--accent-bg)] flex items-center justify-center text-xs font-medium text-[var(--accent)]">
+                {entry.creator?.full_name?.charAt(0) || entry.creator?.email?.charAt(0) || '?'}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-xs font-medium truncate">
+              {entry.creator?.full_name || 'Sin nombre'}
+            </span>
+            <span className="text-xs text-muted-foreground truncate">
+              {entry.creator?.email || 'Sin email'}
+            </span>
+          </div>
         </div>
       )
     },
@@ -261,6 +247,18 @@ export default function AdminChangelogs() {
 
   return (
     <Layout headerProps={headerProps} wide>
+      {/* ActionBar */}
+      <ActionBarDesktop
+        title="Gestión de Changelog"
+        primaryAction={{
+          label: "Nueva Entrada",
+          onClick: () => openModal('changelog-entry', {})
+        }}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onFilterClick={() => {}}
+      />
+
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
@@ -321,13 +319,6 @@ export default function AdminChangelogs() {
         defaultSort={{ key: 'created_at', direction: 'desc' }}
       />
 
-      {/* Modal */}
-      {showModal && (
-        <NewAdminChangelogEntryModal
-          onClose={handleCloseModal}
-          editingEntry={editingEntry}
-        />
-      )}
     </Layout>
   );
 }

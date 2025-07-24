@@ -36,6 +36,7 @@ import { TaskParameterGroupAssignmentModal } from '../modals/admin/TaskParameter
 import { GeneratedTaskFormModal } from '../modals/admin/GeneratedTaskFormModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
+import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -131,6 +132,8 @@ export function ModalFactory() {
       return <UserFormModal modalData={data} onClose={closeModal} />;
     case 'admin-organization':
       return <OrganizationFormModal modalData={data} onClose={closeModal} />;
+    case 'changelog-entry':
+      return <ChangelogFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
