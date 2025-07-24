@@ -95,12 +95,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         throw new Error('Error de conexión con la base de datos');
       }
 
-      // Encontrar el miembro de la organización seleccionado
-      const selectedMember = members?.find((m: any) => m.id === formData.created_by);
-      
       const siteLogData = {
         log_date: formData.log_date,
-        created_by: selectedMember?.user_id || currentUser?.user?.id || '',
+        created_by: formData.created_by, // Este ya es el organization_member.id correcto
         entry_type: formData.entry_type,
         weather: formData.weather,
         comments: formData.comments,
@@ -156,7 +153,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
-      created_by: currentUser?.user?.id || "",
+      created_by: "", // Será seteado en useEffect cuando se carguen los members
       log_date: new Date().toISOString().split('T')[0],
       entry_type: "avance_de_obra",
       weather: null,
@@ -168,12 +165,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     }
   });
 
-  // Setear el usuario actual como creador cuando se carguen los datos
+  // Setear el miembro de organización actual como creador cuando se carguen los datos
   useEffect(() => {
-    if (currentUser?.user?.id && !form.watch('created_by')) {
-      form.setValue('created_by', currentUser.user.id);
+    if (members && members.length > 0 && currentUser?.user?.id && !form.watch('created_by')) {
+      const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
+      if (currentMember) {
+        form.setValue('created_by', currentMember.id);
+      }
     }
-  }, [currentUser, form]);
+  }, [members, currentUser, form]);
 
   useEffect(() => {
     if (data) {
