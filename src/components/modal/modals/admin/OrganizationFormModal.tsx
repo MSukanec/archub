@@ -230,12 +230,12 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       onLeftClick={handleClose}
       rightLabel="Guardar Cambios"
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={isLoading}
     />
   );
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}

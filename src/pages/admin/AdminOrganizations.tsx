@@ -31,6 +31,7 @@ interface Organization {
     id: string;
     full_name: string;
     email: string;
+    avatar_url?: string;
   } | null;
   members_count: number;
   projects_count: number;
@@ -72,7 +73,7 @@ function useAllOrganizations() {
           .in('id', planIds) : { data: [], error: null },
         creatorIds.length > 0 ? supabase!
           .from('users')
-          .select('id, full_name, email')
+          .select('id, full_name, email, avatar_url')
           .in('id', creatorIds) : { data: [], error: null }
       ]);
 
@@ -259,16 +260,11 @@ export default function AdminOrganizations() {
       label: 'Organización',
       width: '14.28%',
       render: (org: Organization) => (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[var(--accent-bg)] rounded-lg flex items-center justify-center">
-            <Building className="w-3 h-3 text-[var(--accent)]" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">{org.name}</span>
-            {org.is_system && (
-              <Badge variant="secondary" className="text-xs">Sistema</Badge>
-            )}
-          </div>
+        <div className="flex flex-col">
+          <span className="font-medium text-sm">{org.name}</span>
+          {org.is_system && (
+            <Badge variant="secondary" className="text-xs">Sistema</Badge>
+          )}
         </div>
       )
     },
@@ -277,11 +273,28 @@ export default function AdminOrganizations() {
       label: 'Creador',
       width: '14.28%',
       render: (org: Organization) => (
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-[var(--accent-bg)] rounded-full flex items-center justify-center text-xs">
-            {org.creator?.full_name?.charAt(0) || '?'}
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+            {org.creator?.avatar_url ? (
+              <img 
+                src={org.creator.avatar_url} 
+                alt={org.creator.full_name || org.creator.email}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-[var(--accent-bg)] flex items-center justify-center text-xs font-medium text-[var(--accent)]">
+                {org.creator?.full_name?.charAt(0) || org.creator?.email?.charAt(0) || '?'}
+              </div>
+            )}
           </div>
-          <span className="text-xs">{org.creator?.full_name || 'Sin asignar'}</span>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-xs font-medium truncate">
+              {org.creator?.full_name || 'Sin nombre'}
+            </span>
+            <span className="text-xs text-muted-foreground truncate">
+              {org.creator?.email || 'Sin email'}
+            </span>
+          </div>
         </div>
       )
     },
@@ -289,11 +302,20 @@ export default function AdminOrganizations() {
       key: 'plan' as keyof Organization,
       label: 'Plan',
       width: '14.28%',
-      render: (org: Organization) => (
-        <Badge variant="outline" className="text-xs">
-          {org.plan?.name || 'Sin plan'}
-        </Badge>
-      )
+      render: (org: Organization) => {
+        const planName = org.plan?.name || 'Sin plan';
+        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'outline';
+        
+        if (planName === 'Free') variant = 'secondary';
+        else if (planName === 'Pro') variant = 'default';
+        else if (planName === 'Teams') variant = 'destructive';
+        
+        return (
+          <Badge variant={variant} className="text-xs">
+            {planName}
+          </Badge>
+        );
+      }
     },
     {
       key: 'members_count' as keyof Organization,
