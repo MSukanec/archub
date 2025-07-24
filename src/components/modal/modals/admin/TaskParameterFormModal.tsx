@@ -200,7 +200,22 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                 <FormControl>
                   <Input 
                     placeholder="Ej: Ladrillos y Bloques" 
-                    {...field} 
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      // Auto-generate slug from label if creating new parameter
+                      if (!parameter) {
+                        const slug = e.target.value
+                          .toLowerCase()
+                          .normalize('NFD')
+                          .replace(/[\u0300-\u036f]/g, '') // Remove accents
+                          .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+                          .replace(/\s+/g, '-') // Replace spaces with hyphens
+                          .replace(/-+/g, '-') // Replace multiple hyphens with single
+                          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+                        form.setValue('name', slug);
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -217,10 +232,13 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                 <FormLabel>Slug *</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Ej: brick-type" 
+                    placeholder="ej: ladrillos-y-bloques" 
                     {...field} 
                   />
                 </FormControl>
+                <div className="text-sm text-muted-foreground">
+                  Se genera automáticamente basado en el nombre. Puedes modificarlo si es necesario.
+                </div>
                 <FormMessage />
               </FormItem>
             )}
