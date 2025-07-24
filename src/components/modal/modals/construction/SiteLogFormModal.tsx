@@ -95,6 +95,13 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     }
   });
 
+  // Setear el usuario actual como creador cuando se carguen los datos
+  useEffect(() => {
+    if (currentUser?.user?.id && !form.watch('created_by')) {
+      form.setValue('created_by', currentUser.user.id);
+    }
+  }, [currentUser, form]);
+
   useEffect(() => {
     if (data) {
       // Si estamos editando, cargar los datos existentes
