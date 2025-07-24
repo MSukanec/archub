@@ -72,7 +72,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
   const { data: currentUser } = useCurrentUser();
-  const { data: members = [] } = useOrganizationMembers();
+  const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
   const { data: contacts = [] } = useContacts();
   
   const [events, setEvents] = useState<any[]>([]);
