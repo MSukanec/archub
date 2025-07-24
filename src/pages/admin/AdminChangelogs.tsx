@@ -278,6 +278,7 @@ export default function AdminChangelogs() {
       {/* ActionBar */}
       <ActionBarDesktop
         title="Gestión de Changelog"
+        icon={<FileText className="w-5 h-5" />}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         primaryActionLabel="Nueva Entrada"
