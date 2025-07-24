@@ -1,28 +1,25 @@
 import { useState, useEffect } from 'react';
+import { Settings } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-import { CustomModalLayout } from '@/components/modal/legacy/CustomModalLayout';
-import { CustomModalHeader } from '@/components/modal/legacy/CustomModalHeader';
-import { CustomModalBody } from '@/components/modal/legacy/CustomModalBody';
-import { CustomModalFooter } from '@/components/modal/legacy/CustomModalFooter';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 
 import { useTaskParameterValues, useTaskParameterOptionGroupItems, useToggleTaskParameterOptionInGroup } from '@/hooks/use-task-parameters-admin';
 
 interface TaskParameterGroupAssignmentModalProps {
-  open: boolean;
+  modalData?: {
+    group: any;
+    parameterLabel: string;
+  };
   onClose: () => void;
-  group: any;
-  parameterLabel: string;
 }
 
-export function TaskParameterGroupAssignmentModal({
-  open,
-  onClose,
-  group,
-  parameterLabel
-}: TaskParameterGroupAssignmentModalProps) {
+export function TaskParameterGroupAssignmentModal({ modalData, onClose }: TaskParameterGroupAssignmentModalProps) {
+  const { group, parameterLabel } = modalData || {};
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -116,66 +113,72 @@ export function TaskParameterGroupAssignmentModal({
   const optionsCount = parameterValues?.length || 0;
   const selectedCount = selectedOptions.size;
 
-  return (
-    <CustomModalLayout
-      open={open}
-      onClose={onClose}
-      children={{
-        header: (
-          <CustomModalHeader
-            title={`Gestionar Grupo: ${group.name}`}
-            description={`Asignar opciones del parámetro "${parameterLabel}" al grupo`}
-            onClose={onClose}
-          />
-        ),
-        body: (
-          <CustomModalBody columns={1}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <span className="text-sm font-medium">Opciones seleccionadas</span>
-                <Badge variant="secondary">{selectedCount} de {optionsCount}</Badge>
+  const viewPanel = null; // No view mode needed for this modal
+  
+  const editPanel = (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <span className="text-sm font-medium">Opciones seleccionadas</span>
+        <Badge variant="secondary">{selectedCount} de {optionsCount}</Badge>
+      </div>
+      
+      {isLoadingValues ? (
+        <div className="text-center py-4 text-muted-foreground">
+          Cargando opciones...
+        </div>
+      ) : parameterValues && parameterValues.length > 0 ? (
+        <div className="space-y-3">
+          {parameterValues.map((option) => {
+            const isSelected = selectedOptions.has(option.id);
+            return (
+              <div key={option.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={(checked) => handleOptionToggle(option.id, !!checked)}
+                  />
+                  <span className="font-medium">{option.label}</span>
+                </div>
+                <span className="text-sm text-muted-foreground">({option.name})</span>
               </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-muted-foreground">
+          No hay opciones disponibles para este parámetro
+        </div>
+      )}
+    </div>
+  );
 
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {isLoadingValues || isLoadingItems ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Cargando opciones...
-                  </div>
-                ) : parameterValues && parameterValues.length > 0 ? (
-                  parameterValues.map((option) => (
-                    <div key={option.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                      <Checkbox
-                        id={option.id}
-                        checked={selectedOptions.has(option.id)}
-                        onCheckedChange={(checked) => handleOptionToggle(option.id, !!checked)}
-                      />
-                      <label htmlFor={option.id} className="flex-1 text-sm font-medium cursor-pointer">
-                        {option.label}
-                      </label>
-                      {option.name && (
-                        <span className="text-xs text-muted-foreground">({option.name})</span>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No hay opciones disponibles
-                  </div>
-                )}
-              </div>
-            </div>
-          </CustomModalBody>
-        ),
-        footer: (
-          <CustomModalFooter
-            onCancel={onClose}
-            saveText="Guardar"
-            showSave={true}
-            onSave={handleSave}
-            isLoading={isLoading}
-          />
-        ),
-      }}
+  const headerContent = (
+    <FormModalHeader 
+      title={`Gestionar Grupo: ${group?.name || ''}`}
+      description={`Asignar opciones del parámetro "${parameterLabel}" al grupo`}
+      icon={Settings}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel="Guardar"
+      onRightClick={handleSave}
+      rightLoading={isLoading}
+    />
+  );
+
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      isEditing={true}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
     />
   );
 }

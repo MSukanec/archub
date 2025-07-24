@@ -32,6 +32,7 @@ import { TaskGroupFormModal } from '../modals/admin/TaskGroupFormModal';
 import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
+import { TaskParameterGroupAssignmentModal } from '../modals/admin/TaskParameterGroupAssignmentModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -111,6 +112,8 @@ export function ModalFactory() {
       return <TaskParameterFormModal modalData={data} onClose={closeModal} />;
     case 'task-parameter-option':
       return <TaskParameterOptionFormModal modalType="task-parameter-option" />;
+    case 'task-parameter-group-assignment':
+      return <TaskParameterGroupAssignmentModal modalData={data} onClose={closeModal} />;
     case 'task-template':
       return <TaskTemplateFormModal 
         categoryId={data?.categoryId}

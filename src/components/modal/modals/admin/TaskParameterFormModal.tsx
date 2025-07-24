@@ -19,7 +19,7 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { useToast } from '@/hooks/use-toast';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskGroups } from '@/hooks/use-task-parameters-admin';
-import { TaskParameterGroupAssignmentModal } from '@/modals/admin/tasks/NewTaskParameterGroupAssignmentModal';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
@@ -44,8 +44,7 @@ interface TaskParameterFormModalProps {
 export function TaskParameterFormModal({ modalData, onClose }: TaskParameterFormModalProps) {
   const { parameter, onParameterCreated } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const { openModal } = useGlobalModalStore();
   const [selectedTaskGroupId, setSelectedTaskGroupId] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   
@@ -368,8 +367,10 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            setSelectedGroup(group);
-                            setIsAssignmentModalOpen(true);
+                            openModal('task-parameter-group-assignment', {
+                              group,
+                              parameterLabel: parameter?.label || ''
+                            });
                           }}
                         >
                           <Check className="h-4 w-4" />
@@ -396,18 +397,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
         </div>
       )}
 
-      {/* Assignment Modal */}
-      {isAssignmentModalOpen && selectedGroup && (
-        <TaskParameterGroupAssignmentModal
-          open={isAssignmentModalOpen}
-          onClose={() => {
-            setIsAssignmentModalOpen(false);
-            setSelectedGroup(null);
-          }}
-          group={selectedGroup}
-          parameterLabel={parameter?.label || ''}
-        />
-      )}
+      {/* Assignment Modal is now handled by ModalFactory */}
     </div>
   );
 
