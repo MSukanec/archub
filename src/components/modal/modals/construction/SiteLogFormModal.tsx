@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -20,14 +19,25 @@ import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useContacts } from "@/hooks/use-contacts";
 import { useGlobalModalStore } from "../../form/useGlobalModalStore";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
+import UserSelector from "@/components/ui-custom/UserSelector";
 
-// Schema basado en el modal original
+// Schema basado en el modal original con valores exactos del enum
 const siteLogSchema = z.object({
-  creator_id: z.string().min(1, "El creador es requerido"),
+  created_by: z.string().min(1, "El creador es requerido"),
   log_date: z.string().min(1, "La fecha es requerida"),
-  log_type: z.string().min(1, "El tipo de bitácora es requerido"),
-  weather_condition: z.string().optional(),
-  general_comments: z.string().optional(),
+  entry_type: z.enum([
+    'avance_de_obra',
+    'visita_tecnica', 
+    'problema_detectado',
+    'pedido_material',
+    'nota_climatica',
+    'decision',
+    'inspeccion',
+    'foto_diaria',
+    'registro_general'
+  ]),
+  weather: z.enum(['sunny', 'partly_cloudy', 'cloudy', 'rain', 'storm', 'snow', 'fog', 'windy', 'hail', 'none']).nullable(),
+  comments: z.string().optional(),
   files: z.array(z.string()).optional().default([]),
   events: z.array(z.object({
     id: z.string(),
@@ -63,8 +73,16 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
   const { data: currentUser } = useCurrentUser();
-  const { data: members = [] } = useOrganizationMembers();
+  const { data: organizationMembers = [] } = useOrganizationMembers();
   const { data: contacts = [] } = useContacts();
+
+  // Mapear members para que funcionen con UserSelector
+  const members = organizationMembers.map(member => ({
+    id: member.user_id,
+    full_name: member.full_name,
+    email: member.email || member.user_id,
+    user_id: member.user_id
+  }));
   
   const [events, setEvents] = useState<any[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
@@ -74,11 +92,11 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
-      creator_id: currentUser?.user?.id || "",
+      created_by: currentUser?.user?.id || "",
       log_date: new Date().toISOString().split('T')[0],
-      log_type: "",
-      weather_condition: "",
-      general_comments: "",
+      entry_type: "avance_de_obra",
+      weather: null,
+      comments: "",
       files: [],
       events: [],
       attendees: [],
@@ -90,11 +108,11 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     if (data) {
       // Si estamos editando, cargar los datos existentes
       form.reset({
-        creator_id: data.creator_id || currentUser?.user?.id || "",
+        created_by: data.created_by || currentUser?.user?.id || "",
         log_date: data.log_date || new Date().toISOString().split('T')[0],
-        log_type: data.log_type || "",
-        weather_condition: data.weather_condition || "",
-        general_comments: data.general_comments || "",
+        entry_type: data.entry_type || "avance_de_obra",
+        weather: data.weather || null,
+        comments: data.comments || "",
         files: data.files || [],
         events: data.events || [],
         attendees: data.attendees || [],
@@ -219,11 +237,11 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           </div>
           <div>
             <label className="text-sm font-medium">Tipo:</label>
-            <p className="text-sm text-muted-foreground">{data.log_type}</p>
+            <p className="text-sm text-muted-foreground">{data.entry_type}</p>
           </div>
           <div>
             <label className="text-sm font-medium">Comentarios:</label>
-            <p className="text-sm text-muted-foreground">{data.general_comments || "Sin comentarios"}</p>
+            <p className="text-sm text-muted-foreground">{data.comments || "Sin comentarios"}</p>
           </div>
         </div>
       )}
@@ -248,24 +266,18 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="creator_id"
+              name="created_by"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Creado por</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar creador" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {members.map((member) => (
-                        <SelectItem key={member.user_id} value={member.user_id}>
-                          {member.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <UserSelector
+                      users={members}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Seleccionar creador"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -289,7 +301,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="log_type"
+              name="entry_type"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de bitácora</FormLabel>
@@ -300,11 +312,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="daily">Diaria</SelectItem>
-                      <SelectItem value="weekly">Semanal</SelectItem>
-                      <SelectItem value="inspection">Inspección</SelectItem>
-                      <SelectItem value="incident">Incidente</SelectItem>
-                      <SelectItem value="milestone">Hito</SelectItem>
+                      <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+                      <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                      <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                      <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                      <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                      <SelectItem value="decision">Decisión</SelectItem>
+                      <SelectItem value="inspeccion">Inspección</SelectItem>
+                      <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+                      <SelectItem value="registro_general">Registro General</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -314,11 +330,11 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
             <FormField
               control={form.control}
-              name="weather_condition"
+              name="weather"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Condición climática</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar clima" />
@@ -326,10 +342,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="sunny">Soleado</SelectItem>
+                      <SelectItem value="partly_cloudy">Parcialmente Nublado</SelectItem>
                       <SelectItem value="cloudy">Nublado</SelectItem>
-                      <SelectItem value="rainy">Lluvioso</SelectItem>
+                      <SelectItem value="rain">Lluvia</SelectItem>
+                      <SelectItem value="storm">Tormenta</SelectItem>
+                      <SelectItem value="snow">Nieve</SelectItem>
+                      <SelectItem value="fog">Niebla</SelectItem>
                       <SelectItem value="windy">Ventoso</SelectItem>
-                      <SelectItem value="stormy">Tormentoso</SelectItem>
+                      <SelectItem value="hail">Granizo</SelectItem>
+                      <SelectItem value="none">Sin Especificar</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -340,7 +361,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
           <FormField
             control={form.control}
-            name="general_comments"
+            name="comments"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Comentarios generales</FormLabel>
