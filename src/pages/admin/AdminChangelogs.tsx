@@ -174,7 +174,7 @@ export default function AdminChangelogs() {
     {
       key: 'created_at',
       label: 'Fecha de Creación',
-      width: '10%',
+      width: '20%',
       render: (entry: ChangelogEntry) => (
         <span className="text-sm">
           {format(new Date(entry.created_at), 'dd/MM/yyyy', { locale: es })}
@@ -184,7 +184,7 @@ export default function AdminChangelogs() {
     {
       key: 'change_date',
       label: 'Fecha del Cambio',
-      width: '10%',
+      width: '20%',
       render: (entry: ChangelogEntry) => (
         <span className="text-sm">
           {format(new Date(entry.date), 'dd/MM/yyyy', { locale: es })}
@@ -194,7 +194,7 @@ export default function AdminChangelogs() {
     {
       key: 'title',
       label: 'Título',
-      width: '25%'
+      width: '35%'
     },
     {
       key: 'type',
@@ -203,46 +203,6 @@ export default function AdminChangelogs() {
       render: (entry: ChangelogEntry) => (
         <Badge variant={getTypeBadgeVariant(entry.type)}>
           {getTypeIcon(entry.type)} {entry.type}
-        </Badge>
-      )
-    },
-    {
-      key: 'creator',
-      label: 'Creador',
-      width: '20%',
-      render: (entry: ChangelogEntry) => (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-            {entry.creator?.avatar_url ? (
-              <img 
-                src={entry.creator.avatar_url} 
-                alt={entry.creator.full_name || entry.creator.email}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-[var(--accent-bg)] flex items-center justify-center text-xs font-medium text-[var(--accent)]">
-                {entry.creator?.full_name?.charAt(0) || entry.creator?.email?.charAt(0) || '?'}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-medium truncate">
-              {entry.creator?.full_name || 'Sin nombre'}
-            </span>
-            <span className="text-xs text-muted-foreground truncate">
-              {entry.creator?.email || 'Sin email'}
-            </span>
-          </div>
-        </div>
-      )
-    },
-    {
-      key: 'is_public',
-      label: 'Visibilidad',
-      width: '10%',
-      render: (entry: ChangelogEntry) => (
-        <Badge variant={entry.is_public ? 'default' : 'secondary'}>
-          {entry.is_public ? 'Pública' : 'Privada'}
         </Badge>
       )
     },
