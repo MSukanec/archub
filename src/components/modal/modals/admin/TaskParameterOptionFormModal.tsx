@@ -225,6 +225,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={closeModal}
+      isEditing={true}
     />
   );
 }
