@@ -7,25 +7,29 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
-import { useCreateTaskParameterOption, useUpdateTaskParameterOption, useTaskParameterOptionGroups, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 
 // Form schema
 const taskParameterOptionSchema = z.object({
   value: z.string().min(1, 'El valor es requerido'),
   label: z.string().min(1, 'La etiqueta es requerida'),
-  option_group_id: z.string().optional(),
 });
 
 type TaskParameterOptionFormData = z.infer<typeof taskParameterOptionSchema>;
 
-export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData: any; onClose: () => void }) {
-  const { parameterId, parameterLabel, option }: { parameterId?: string; parameterLabel?: string; option?: TaskParameterOption } = modalData || {};
+interface TaskParameterOptionFormModalProps {
+  modalType: 'task-parameter-option';
+}
+
+export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionFormModalProps) {
+  const { open, data, closeModal } = useGlobalModalStore();
+  const { parameterId, parameterLabel, option }: { parameterId?: string; parameterLabel?: string; option?: TaskParameterOption } = data || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { toast } = useToast();
@@ -33,15 +37,23 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
   const createMutation = useCreateTaskParameterOption();
   const updateMutation = useUpdateTaskParameterOption();
   
-  // Load option groups for this parameter
-  const { data: optionGroups = [], isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameterId || '');
-  
+  // Function to normalize label to value
+  const normalizeLabel = (label: string): string => {
+    return label
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/ñ/g, 'n')
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .trim()
+      .replace(/\s+/g, '-'); // Replace spaces with hyphens
+  };
+
   const form = useForm<TaskParameterOptionFormData>({
     resolver: zodResolver(taskParameterOptionSchema),
     defaultValues: {
       value: '',
       label: '',
-      option_group_id: '',
     },
   });
 
@@ -51,16 +63,24 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
       form.reset({
         value: option.name || '',
         label: option.label || '',
-        option_group_id: '',
       });
     } else {
       form.reset({
         value: '',
         label: '',
-        option_group_id: '',
       });
     }
   }, [option, form]);
+
+  // Watch label changes to auto-generate value
+  const watchedLabel = form.watch('label');
+  useEffect(() => {
+    // Only auto-generate if not editing (creating new option)
+    if (!option && watchedLabel) {
+      const normalizedValue = normalizeLabel(watchedLabel);
+      form.setValue('value', normalizedValue);
+    }
+  }, [watchedLabel, option, form]);
 
   const handleSubmit = async (data: TaskParameterOptionFormData) => {
     if (!parameterId) {
@@ -102,7 +122,7 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
         });
       }
       
-      onClose();
+      closeModal();
     } catch (error: any) {
       console.error('Error:', error);
       toast({
@@ -115,7 +135,19 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
     }
   };
 
-  const viewPanel = null;
+  const viewPanel = (
+    <div className="space-y-4">
+      <div>
+        <h4 className="font-medium">Etiqueta</h4>
+        <p className="text-muted-foreground mt-1">{option?.label || 'Sin etiqueta'}</p>
+      </div>
+      
+      <div>
+        <h4 className="font-medium">Valor (Clave)</h4>
+        <p className="text-muted-foreground mt-1 font-mono text-sm">{option?.name || 'Sin valor'}</p>
+      </div>
+    </div>
+  );
 
   const editPanel = (
     <div className="space-y-4">
@@ -146,59 +178,14 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Valor (Clave) *</FormLabel>
-                <div className="flex gap-2">
-                  <FormControl>
-                    <Input 
-                      placeholder="ej: ladrillo-ceramico-hueco" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      const currentValue = field.value || '';
-                      const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || currentValue.length;
-                      const newValue = currentValue.slice(0, cursorPosition) + '{value}' + currentValue.slice(cursorPosition);
-                      field.onChange(newValue);
-                    }}
-                  >
-                    Insertar {'{value}'}
-                  </Button>
-                </div>
+                <FormControl>
+                  <Input 
+                    placeholder="ej: ladrillo-ceramico-hueco" 
+                    {...field} 
+                  />
+                </FormControl>
                 <div className="text-sm text-muted-foreground">
-                  Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> si necesitas referenciar el valor dinámicamente. Ejemplo: "ladrillo-<code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>-hueco"
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Option Group Field */}
-          <FormField
-            control={form.control}
-            name="option_group_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grupo de Opciones (Opcional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar grupo (opcional)" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="z-[9999]">
-                    <SelectItem value="">Sin grupo</SelectItem>
-                    {optionGroups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="text-sm text-muted-foreground">
-                  Los grupos ayudan a organizar las opciones por categorías
+                  Se genera automáticamente basado en la etiqueta. Puedes modificarlo si es necesario.
                 </div>
                 <FormMessage />
               </FormItem>
@@ -219,7 +206,7 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
-      onLeftClick={onClose}
+      onLeftClick={closeModal}
       rightLabel={option ? 'Guardar Cambios' : 'Crear Opción'}
       onRightClick={() => {
         form.handleSubmit(handleSubmit)();
@@ -228,6 +215,8 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
     />
   );
 
+  if (!open || modalType !== 'task-parameter-option') return null;
+
   return (
     <FormModalLayout
       columns={1}
@@ -235,7 +224,7 @@ export function TaskParameterOptionFormModal({ modalData, onClose }: { modalData
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      onClose={onClose}
+      onClose={closeModal}
     />
   );
 }
