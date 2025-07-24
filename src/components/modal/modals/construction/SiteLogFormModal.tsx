@@ -96,7 +96,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       }
 
       // Encontrar el miembro de la organización seleccionado
-      const selectedMember = organizationMembers?.find(m => m.id === formData.created_by);
+      const selectedMember = members?.find((m: any) => m.id === formData.created_by);
       
       const siteLogData = {
         log_date: formData.log_date,
@@ -299,7 +299,16 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            form.handleSubmit(onSubmit)();
+          }
+        }}
+        className="space-y-6"
+      >
         {/* Información Básica */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
