@@ -75,7 +75,7 @@ interface SiteLogFormModalProps {
 export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
-  const { setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
+  const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   const { data: currentUser } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
   const { data: contacts = [] } = useContacts();
@@ -580,17 +580,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   // Subform de Personal
   const personalSubform = (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => setPanel('edit')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver a la Bitácora
-        </Button>
-      </div>
-      
       <div className="space-y-4">
         <div className="text-center py-8 text-muted-foreground">
           <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -604,17 +593,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   // Subform de Eventos
   const eventsSubform = (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => setPanel('edit')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver a la Bitácora
-        </Button>
-      </div>
-      
       <div className="space-y-4">
         <div className="text-center py-8 text-muted-foreground">
           <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -628,17 +606,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   // Subform de Archivos
   const filesSubform = (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => setPanel('edit')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver a la Bitácora
-        </Button>
-      </div>
-      
       <div className="space-y-4">
         <div className="text-center py-8 text-muted-foreground">
           <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -652,17 +619,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   // Subform de Equipos
   const equipmentSubform = (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => setPanel('edit')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver a la Bitácora
-        </Button>
-      </div>
-      
       <div className="space-y-4">
         <div className="text-center py-8 text-muted-foreground">
           <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -698,20 +654,68 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       subformPanel={getSubform()}
       isEditing={true}
       headerContent={
-        <FormModalHeader
-          title={data ? "Editar Bitácora" : "Nueva Bitácora"}
-          description={data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"}
-          icon={FileText}
-        />
+        currentPanel === 'subform' ? (
+          <FormModalHeader
+            title={
+              currentSubform === 'personal' ? "Personal" :
+              currentSubform === 'events' ? "Eventos" :
+              currentSubform === 'files' ? "Fotos y Videos" :
+              currentSubform === 'equipment' ? "Maquinaria" : "Bitácora"
+            }
+            description={
+              currentSubform === 'personal' ? "Gestiona el personal presente en obra" :
+              currentSubform === 'events' ? "Registra eventos importantes del día" :
+              currentSubform === 'files' ? "Sube archivos multimedia al registro" :
+              currentSubform === 'equipment' ? "Gestiona maquinaria y equipos utilizados" : "Bitácora de obra"
+            }
+            icon={
+              currentSubform === 'personal' ? Users :
+              currentSubform === 'events' ? Calendar :
+              currentSubform === 'files' ? Camera :
+              currentSubform === 'equipment' ? Wrench : FileText
+            }
+            leftActions={
+              <Button
+                variant="ghost"
+                onClick={() => setPanel('edit')}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver a la Bitácora
+              </Button>
+            }
+          />
+        ) : (
+          <FormModalHeader
+            title={data ? "Editar Bitácora" : "Nueva Bitácora"}
+            description={data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"}
+            icon={FileText}
+          />
+        )
       }
       footerContent={
-        <FormModalFooter
-          leftLabel="Cancelar"
-          onLeftClick={closeModal}
-          rightLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
-          onRightClick={form.handleSubmit(onSubmit)}
-          showLoadingSpinner={isLoading}
-        />
+        currentPanel === 'subform' ? (
+          <FormModalFooter
+            leftLabel="Cancelar"
+            onLeftClick={closeModal}
+            rightLabel={
+              currentSubform === 'personal' ? "Agregar Personal" :
+              currentSubform === 'events' ? "Agregar Evento" :
+              currentSubform === 'files' ? "Agregar Fotos y Videos" :
+              currentSubform === 'equipment' ? "Agregar Maquinaria" : "Agregar"
+            }
+            onRightClick={() => setPanel('edit')}
+            showLoadingSpinner={false}
+          />
+        ) : (
+          <FormModalFooter
+            leftLabel="Cancelar"
+            onLeftClick={closeModal}
+            rightLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
+            onRightClick={form.handleSubmit(onSubmit)}
+            showLoadingSpinner={isLoading}
+          />
+        )
       }
     />
   );
