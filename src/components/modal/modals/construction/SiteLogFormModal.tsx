@@ -72,16 +72,8 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
   const { data: currentUser } = useCurrentUser();
-  const { data: organizationMembers = [] } = useOrganizationMembers();
+  const { data: members = [] } = useOrganizationMembers();
   const { data: contacts = [] } = useContacts();
-
-  // Mapear members para que funcionen con UserSelector
-  const members = organizationMembers.map(member => ({
-    id: member.user_id, // UserSelector busca por id, así que usamos user_id
-    full_name: member.full_name,
-    email: member.email,
-    user_id: member.user_id
-  }));
   
   const [events, setEvents] = useState<any[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
@@ -271,9 +263,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                   <FormLabel>Creado por</FormLabel>
                   <FormControl>
                     <UserSelector
-                      users={members}
-                      value={field.value}
-                      onChange={field.onChange}
+                      users={members || []}
+                      value={form.watch('created_by')}
+                      onChange={(value) => form.setValue('created_by', value)}
                       placeholder="Seleccionar creador"
                     />
                   </FormControl>
