@@ -440,7 +440,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Fotos y Videos */}
-        <Separator className="my-6" />
         <div className="space-y-4">
           <FormSubsectionButton
             icon={<Camera />}
@@ -468,7 +467,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Eventos */}
-        <Separator className="my-6" />
         <div className="space-y-4">
           <FormSubsectionButton
             icon={<Calendar />}
@@ -504,7 +502,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Personal */}
-        <Separator className="my-6" />
         <div className="space-y-4">
           <FormSubsectionButton
             icon={<Users />}
@@ -543,7 +540,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Maquinaria */}
-        <Separator className="my-6" />
         <div className="space-y-4">
           <FormSubsectionButton
             icon={<Wrench />}
