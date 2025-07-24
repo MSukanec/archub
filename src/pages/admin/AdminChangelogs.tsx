@@ -278,13 +278,11 @@ export default function AdminChangelogs() {
       {/* ActionBar */}
       <ActionBarDesktop
         title="Gestión de Changelog"
-        primaryAction={{
-          label: "Nueva Entrada",
-          onClick: () => openModal('changelog-entry', {})
-        }}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        onFilterClick={() => {}}
+        primaryActionLabel="Nueva Entrada"
+        onPrimaryActionClick={() => openModal('changelog-entry', {})}
+        showGrouping={false}
       />
 
       {/* Statistics Cards */}
