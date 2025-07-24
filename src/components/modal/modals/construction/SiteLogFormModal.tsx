@@ -6,6 +6,7 @@ import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera } from "
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
+import { FormSubsectionButton } from "../../form/FormSubsectionButton";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -458,23 +459,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           </div>
         </div>
 
-        {/* Eventos */}
+        {/* Eventos con FormSubsectionButton */}
         <Separator className="my-6" />
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Plus className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Eventos</h3>
-              <p className="text-xs text-muted-foreground">Registra eventos importantes del día</p>
-            </div>
-          </div>
-
-          <Button type="button" onClick={addEvent} variant="outline" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Evento
-          </Button>
+          <FormSubsectionButton
+            icon={<Plus />}
+            title="Eventos"
+            description="Registra eventos importantes del día"
+            onClick={addEvent}
+          />
           
           {events.map((event, index) => (
             <div key={event.id} className="border rounded-lg p-4 space-y-4">
