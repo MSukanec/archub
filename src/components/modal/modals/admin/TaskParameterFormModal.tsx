@@ -190,120 +190,124 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          {/* Label Field */}
-          <FormField
-            control={form.control}
-            name="label"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre (visible) *</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ej: Ladrillos y Bloques" 
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      // Auto-generate slug from label if creating new parameter
-                      if (!parameter) {
-                        const slug = e.target.value
-                          .toLowerCase()
-                          .normalize('NFD')
-                          .replace(/[\u0300-\u036f]/g, '') // Remove accents
-                          .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-                          .replace(/\s+/g, '-') // Replace spaces with hyphens
-                          .replace(/-+/g, '-') // Replace multiple hyphens with single
-                          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-                        form.setValue('name', slug);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Name Field */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Slug *</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="ej: ladrillos-y-bloques" 
-                    {...field} 
-                  />
-                </FormControl>
-                <div className="text-sm text-muted-foreground">
-                  Se genera automáticamente basado en el nombre. Puedes modificarlo si es necesario.
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Type Field */}
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="z-[9999]">
-                    <SelectItem value="text">Texto</SelectItem>
-                    <SelectItem value="number">Número</SelectItem>
-                    <SelectItem value="select">Selección</SelectItem>
-                    <SelectItem value="boolean">Booleano</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Expression Template Field */}
-          <FormField
-            control={form.control}
-            name="expression_template"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plantilla de frase</FormLabel>
-                <div className="flex gap-2">
+          {/* Nombre y Slug inline */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="label"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre (visible) *</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="de {value}" 
+                      placeholder="Ej: Ladrillos y Bloques" 
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        // Auto-generate slug from label if creating new parameter
+                        if (!parameter) {
+                          const slug = e.target.value
+                            .toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '') // Remove accents
+                            .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+                            .replace(/\s+/g, '-') // Replace spaces with hyphens
+                            .replace(/-+/g, '-') // Replace multiple hyphens with single
+                            .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+                          form.setValue('name', slug);
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="ej: ladrillos-y-bloques" 
                       {...field} 
                     />
                   </FormControl>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      const currentValue = field.value || '';
-                      const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || currentValue.length;
-                      const newValue = currentValue.slice(0, cursorPosition) + '{value}' + currentValue.slice(cursorPosition);
-                      field.onChange(newValue);
-                    }}
-                  >
-                    Insertar {'{value}'}
-                  </Button>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="text-sm text-muted-foreground">
+            El Slug se genera automáticamente basado en el nombre. Puedes modificarlo si es necesario.
+          </div>
+
+          {/* Tipo y Plantilla inline */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="text">Texto</SelectItem>
+                      <SelectItem value="number">Número</SelectItem>
+                      <SelectItem value="select">Selección</SelectItem>
+                      <SelectItem value="boolean">Booleano</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="expression_template"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plantilla de frase</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input 
+                        placeholder="de {value}" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        const currentValue = field.value || '';
+                        const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || currentValue.length;
+                        const newValue = currentValue.slice(0, cursorPosition) + '{value}' + currentValue.slice(cursorPosition);
+                        field.onChange(newValue);
+                      }}
+                    >
+                      Insertar {'{value}'}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="text-sm text-muted-foreground">
+            Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
+          </div>
         </form>
       </Form>
 
