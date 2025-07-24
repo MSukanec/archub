@@ -12,20 +12,19 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import NewTaskTemplateEditorModal from '@/modals/admin/tasks/NewTaskTemplateEditorModal'
 import { useTaskTemplatesAdmin, useDeleteTaskTemplate, type TaskTemplate } from '@/hooks/use-task-templates-admin'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { Plus, Edit, Trash2, Settings, Eye, FileCode, Code, Calendar } from 'lucide-react'
 
 export default function AdminTaskTemplates() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingTemplate, setEditingTemplate] = useState<TaskTemplate | null>(null)
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<string>('created_at')
   const [searchValue, setSearchValue] = useState('')
 
   const { data: templates = [], isLoading } = useTaskTemplatesAdmin()
   const deleteTemplate = useDeleteTaskTemplate()
+  const { openModal } = useGlobalModalStore()
 
   // Filter and sort templates
   const filteredAndSortedTemplates = templates
@@ -49,8 +48,13 @@ export default function AdminTaskTemplates() {
     })
 
   const handleEdit = (template: TaskTemplate) => {
-    setEditingTemplate(template)
-    setIsModalOpen(true)
+    openModal('task-template', {
+      categoryId: template.category_id,
+      categoryCode: template.task_categories?.code || '',
+      categoryName: template.task_categories?.name || '',
+      editingTemplate: template,
+      isEditing: true
+    })
   }
 
   const handleDelete = async () => {
@@ -65,9 +69,12 @@ export default function AdminTaskTemplates() {
     }
   }
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-    setEditingTemplate(null)
+  const handleAddTemplate = () => {
+    // For now, we'll need to select a category first
+    toast({
+      title: "Selecciona una categoría",
+      description: "Ve a la página de Categorías de Tareas para crear plantillas específicas."
+    })
   }
 
   const handleViewParameters = (templateId: string) => {
@@ -219,7 +226,7 @@ export default function AdminTaskTemplates() {
         customFilters,
         onClearFilters: clearFilters,
         actions: [
-          <Button key="create" onClick={() => setIsModalOpen(true)}>
+          <Button key="create" onClick={handleAddTemplate}>
             <Plus className="w-4 h-4 mr-2" />
             Crear Plantilla
           </Button>
@@ -279,14 +286,7 @@ export default function AdminTaskTemplates() {
         />
       </div>
 
-      {/* Create/Edit Modal */}
-      <NewTaskTemplateEditorModal
-        open={isModalOpen}
-        onClose={handleCloseModal}
-        categoryId={editingTemplate?.category_id || ""}
-        categoryCode={editingTemplate?.code || ""}
-        categoryName={editingTemplate?.task_categories?.name || ""}
-      />
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
