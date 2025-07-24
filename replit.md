@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 24, 2025. TERMINOLOGY UPDATE OBRA TO CONSTRUCCIÓN COMPLETED: Successfully updated all references from "Obra" to "Construcción" throughout the application for consistent terminology - COMPLETED
+  • SIDEBAR NAVIGATION: Updated desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx to show "Construcción" instead of "Obra" in main menu
+  • SUBMENU LABELS: Changed "Resumen de Obra" to "Resumen de Construcción" in both desktop and mobile submenus
+  • HEADER BREADCRUMBS: Updated Header.tsx breadcrumb navigation to display "Construcción" instead of "Obra" in stage selector
+  • DROPDOWN MENUS: Fixed both stage selector dropdowns in header to show "Construcción" option instead of "Obra"
+  • PAGE TITLES: Updated ConstructionDashboard.tsx header title from "Resumen de Obra" to "Resumen de Construcción"
+  • FEATURE DESCRIPTIONS: Changed ConstructionLogs.tsx FeatureIntroduction title from "Bitácora de Obra" to "Bitácora de Construcción"
+  • CONTENT REFERENCES: Updated dashboard descriptions from "bitácora de obra" to "bitácora de construcción"
+  • COMMENTS: Fixed code comments from "Estado de Obra" to "Estado de Construcción"
+  • COMPREHENSIVE CHANGE: All UI elements, navigation, headers, breadcrumbs, and content now consistently use "Construcción" terminology
 - July 24, 2025. ADMIN USERS ACTIONBAR INTEGRATION AND MODAL SIMPLIFICATION COMPLETED: Successfully implemented ActionBarDesktop and simplified user editing modal - COMPLETED
   • ACTIONBAR IMPLEMENTATION: Added ActionBarDesktop component to AdminUsers page with search and custom filters functionality moved from header
   • HEADER SIMPLIFICATION: Removed search, filters, and actions from header, maintaining only title for clean layout

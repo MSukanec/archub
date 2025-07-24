@@ -14,7 +14,7 @@ export default function ConstructionDashboard() {
   }, [])
 
   const headerProps = {
-    title: "Resumen de Obra",
+    title: "Resumen de Construcción",
     showSearch: false,
     showFilters: false,
   }
@@ -136,7 +136,7 @@ export default function ConstructionDashboard() {
           </div>
         </div>
 
-        {/* Estado de Obra */}
+        {/* Estado de Construcción */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -145,7 +145,7 @@ export default function ConstructionDashboard() {
             <CardContent>
               <EmptyState 
                 title="Sin actividad registrada"
-                description="Comienza registrando entradas en la bitácora de obra para ver la actividad aquí."
+                description="Comienza registrando entradas en la bitácora de construcción para ver la actividad aquí."
                 action={
                   <button 
                     onClick={() => window.location.href = '/construction/logs'}

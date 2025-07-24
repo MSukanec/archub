@@ -456,7 +456,7 @@ export default function ConstructionLogs() {
     <Layout wide headerProps={headerProps}>
       {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
-        title="Bitácora de Obra"
+        title="Bitácora de Construcción"
         icon={<FileText className="w-6 h-6" />}
         features={[
           {

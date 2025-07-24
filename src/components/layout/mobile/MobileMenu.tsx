@@ -221,7 +221,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     { 
       id: 'obra', 
       icon: HardHat, 
-      label: 'Obra', 
+      label: 'Construcción', 
       defaultRoute: '/construction/dashboard',
       isActive: currentSidebarContext === 'construction' || location.startsWith('/construction')
     },
@@ -278,7 +278,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Images, label: 'Galería Multimedia', href: '/project/gallery' },
     ],
     obra: [
-      { icon: Home, label: 'Resumen de Obra', href: '/construction/dashboard' },
+      { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Calendar, label: 'Cronograma', href: '/construction/schedule' },
       { icon: Package, label: 'Materiales', href: '/construction/materials' },

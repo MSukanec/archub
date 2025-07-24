@@ -168,7 +168,7 @@ export function Header({
       'organization': 'Organización',
       'project': 'Proyecto',
       'design': 'Diseño', 
-      'construction': 'Obra',
+      'construction': 'Construcción',
       'finances': 'Finanzas',
       'commercialization': 'Comercialización',
       'data': 'Datos Básicos',
@@ -187,12 +187,12 @@ export function Header({
       '/finance/dashboard': 'Finanzas',
       '/movimientos': 'Finanzas',
       
-      // Obra accordion - NO mostrar "Obra" para páginas principales ya que está en el contexto de etapa
+      // Construcción accordion - NO mostrar "Construcción" para páginas principales ya que está en el contexto de etapa
       '/construction/logs': null,
       '/construction/budgets': null,
       '/construction/materials': null,
       '/construction/personnel': null,
-      // Galería NO debe tener accordion parent - el breadcrumb se forma con ORGANIZACIÓN / PROYECTO / ETAPA (Obra) / Galería
+      // Galería NO debe tener accordion parent - el breadcrumb se forma con ORGANIZACIÓN / PROYECTO / ETAPA (Construcción) / Galería
       // '/construction/gallery': removed - no accordion parent
       
       // Proyecto accordion (Design) - dashboard no debe mostrar "Proyecto" como accordion parent
@@ -396,7 +396,7 @@ export function Header({
                   }}
                 >
                   {currentSidebarContext === 'design' && 'Diseño'}
-                  {currentSidebarContext === 'construction' && 'Obra'}
+                  {currentSidebarContext === 'construction' && 'Construcción'}
                   {currentSidebarContext === 'finances' && 'Finanzas'}
                   {currentSidebarContext === 'commercialization' && 'Comercialización'}
                 </Button>
@@ -430,7 +430,7 @@ export function Header({
                         navigate('/construction/dashboard');
                       }}
                     >
-                      Obra
+                      Construcción
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
@@ -510,7 +510,7 @@ export function Header({
                         navigate('/construction/dashboard');
                       }}
                     >
-                      Obra
+                      Construcción
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
