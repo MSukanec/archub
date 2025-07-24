@@ -475,6 +475,54 @@ export default function ConstructionLogs() {
         ]}
       />
 
+      {/* Action Bar Desktop - siempre visible */}
+      <ActionBarDesktop
+        title="Bitácora de Construcción"
+        icon={<FileText className="w-6 h-6" />}
+        features={[
+          {
+            icon: <StickyNote className="w-5 h-5" />,
+            title: "Registro Diario Completo",
+            description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
+          },
+          {
+            icon: <Camera className="w-5 h-5" />,
+            title: "Documentación Visual",
+            description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
+          },
+          {
+            icon: <Settings className="w-5 h-5" />,
+            title: "Control de Privacidad",
+            description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
+          },
+          {
+            icon: <Clock className="w-5 h-5" />,
+            title: "Seguimiento Temporal",
+            description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
+          }
+        ]}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        primaryActionLabel="Nueva Bitácora"
+        onPrimaryActionClick={() => setShowNewSiteLogModal(true)}
+        customFilters={customFilters}
+        onClearFilters={clearFilters}
+        tabs={[
+          {
+            value: "bitacoras",
+            label: "Bitácoras",
+            icon: <FileText className="h-4 w-4" />
+          },
+          {
+            value: "graficos",
+            label: "Gráficos Avanzados",
+            icon: <BarChart3 className="h-4 w-4" />
+          }
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
       {filteredSiteLogs.length === 0 ? (
         <EmptyState
           icon={<FileText className="w-12 h-12 text-muted-foreground" />}
@@ -494,54 +542,6 @@ export default function ConstructionLogs() {
         />
       ) : (
         <>
-          {/* Action Bar Desktop - Only visible when data exists */}
-          <ActionBarDesktop
-            title="Bitácora de Construcción"
-            icon={<FileText className="w-6 h-6" />}
-            features={[
-              {
-                icon: <StickyNote className="w-5 h-5" />,
-                title: "Registro Diario Completo",
-                description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
-              },
-              {
-                icon: <Camera className="w-5 h-5" />,
-                title: "Documentación Visual",
-                description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
-              },
-              {
-                icon: <Settings className="w-5 h-5" />,
-                title: "Control de Privacidad",
-                description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
-              },
-              {
-                icon: <Clock className="w-5 h-5" />,
-                title: "Seguimiento Temporal",
-                description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
-              }
-            ]}
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            primaryActionLabel="Nueva Bitácora"
-            onPrimaryActionClick={() => setShowNewSiteLogModal(true)}
-            customFilters={customFilters}
-            onClearFilters={clearFilters}
-            tabs={[
-              {
-                value: "bitacoras",
-                label: "Bitácoras",
-                icon: <FileText className="h-4 w-4" />
-              },
-              {
-                value: "graficos",
-                label: "Gráficos Avanzados",
-                icon: <BarChart3 className="h-4 w-4" />
-              }
-            ]}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-
           {/* Tab Content Based on activeTab */}
           <div className="space-y-6">
             {activeTab === "bitacoras" && (

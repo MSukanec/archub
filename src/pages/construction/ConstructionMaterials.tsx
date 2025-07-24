@@ -144,58 +144,56 @@ export default function ConstructionMaterials() {
 
   return (
     <Layout headerProps={headerProps} wide>
+      {/* Action Bar Desktop - siempre visible */}
+      <ActionBarDesktop
+        title="Materiales de Construcción"
+        icon={<Package className="w-6 h-6" />}
+        features={[
+          {
+            icon: <Calculator className="w-4 h-4" />,
+            title: "Cálculo Automático",
+            description: "Las cantidades se calculan automáticamente basándose en las tareas de construcción del proyecto."
+          },
+          {
+            icon: <Boxes className="w-4 h-4" />,
+            title: "Organización por Categoría",
+            description: "Los materiales se organizan por categoría y rubro para una mejor gestión."
+          },
+          {
+            icon: <BarChart3 className="w-4 h-4" />,
+            title: "Control de Compras",
+            description: "Seguimiento de materiales por comprar versus materiales necesarios del proyecto."
+          },
+          {
+            icon: <Layers className="w-4 h-4" />,
+            title: "Filtros Flexibles",
+            description: "Sistema de filtros por categoría y agrupación para encontrar materiales específicos."
+          }
+        ]}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        customFilters={customFilters}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={hasActiveFilters}
+        showGrouping={true}
+        groupingType={groupBy}
+        onGroupingChange={setGroupBy}
+        customActions={[]}
+      />
+
       {filteredMaterials.length === 0 ? (
-          <EmptyState
-            icon={<Package className="w-8 h-8 text-muted-foreground" />}
-            title="No hay materiales disponibles"
-            description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
-          />
-        ) : (
-          <>
-            {/* Action Bar Desktop - Only visible when data exists */}
-            <ActionBarDesktop
-              title="Materiales de Construcción"
-              icon={<Package className="w-6 h-6" />}
-              features={[
-                {
-                  icon: <Calculator className="w-4 h-4" />,
-                  title: "Cálculo Automático",
-                  description: "Las cantidades se calculan automáticamente basándose en las tareas de construcción del proyecto."
-                },
-                {
-                  icon: <Boxes className="w-4 h-4" />,
-                  title: "Organización por Categoría",
-                  description: "Los materiales se organizan por categoría y rubro para una mejor gestión."
-                },
-                {
-                  icon: <BarChart3 className="w-4 h-4" />,
-                  title: "Control de Compras",
-                  description: "Seguimiento de materiales por comprar versus materiales necesarios del proyecto."
-                },
-                {
-                  icon: <Layers className="w-4 h-4" />,
-                  title: "Filtros Flexibles",
-                  description: "Sistema de filtros por categoría y agrupación para encontrar materiales específicos."
-                }
-              ]}
-              searchValue={searchValue}
-              onSearchChange={setSearchValue}
-              customFilters={customFilters}
-              onClearFilters={handleClearFilters}
-              hasActiveFilters={hasActiveFilters}
-              showGrouping={true}
-              groupingType={groupBy}
-              onGroupingChange={setGroupBy}
-              customActions={[]}
-            />
-            
-            <Table
-              data={filteredMaterials}
-              columns={columns}
-              isLoading={materialsLoading}
-            />
-          </>
-        )}
+        <EmptyState
+          icon={<Package className="w-8 h-8 text-muted-foreground" />}
+          title="No hay materiales disponibles"
+          description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
+        />
+      ) : (
+        <Table
+          data={filteredMaterials}
+          columns={columns}
+          isLoading={materialsLoading}
+        />
+      )}
     </Layout>
   )
 }

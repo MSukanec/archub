@@ -494,7 +494,70 @@ export default function ConstructionSchedule() {
         ]}
       />
 
-      {/* Conditional Content - EmptyState or ActionBar + Tabs */}
+      {/* Action Bar Desktop - siempre visible */}
+      <ActionBarDesktop
+        title="Cronograma de Construcción"
+        icon={<Calendar className="w-6 h-6" />}
+        features={[
+          {
+            icon: <BarChart3 className="w-4 h-4" />,
+            title: "Vista Gantt Profesional",
+            description: "Cronograma visual con barras temporales, dependencias entre tareas y gestión de fechas tipo MS Project."
+          },
+          {
+            icon: <Activity className="w-4 h-4" />,
+            title: "Gestión por Fases",
+            description: "Organización jerárquica con fases expandibles/colapsables y cálculo automático de fechas."
+          },
+          {
+            icon: <CheckSquare className="w-4 h-4" />,
+            title: "Control de Dependencias",
+            description: "Visualización de precedencias con flechas SVG y arrastre automático de tareas dependientes."
+          },
+          {
+            icon: <Clock className="w-4 h-4" />,
+            title: "Análisis Visual Avanzado",
+            description: "9 gráficos profesionales: curva de progreso, burndown, heatmap semanal, red de dependencias."
+          }
+        ]}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        showGrouping={false}
+        primaryActionLabel="Nueva Tarea"
+        onPrimaryActionClick={handleAddTask}
+        customActions={[
+          <Button 
+            key="create-phase"
+            onClick={handleAddPhase} 
+            variant="secondary" 
+            className="h-9 px-4"
+          >
+            <Plus />
+            Crear Fase
+          </Button>
+        ]}
+        tabs={[
+          {
+            value: "gantt",
+            label: "Vista Gantt",
+            icon: <BarChart3 className="h-4 w-4" />
+          },
+          {
+            value: "table",
+            label: "Listado de Tareas",
+            icon: <Table className="h-4 w-4" />
+          },
+          {
+            value: "analytics",
+            label: "Análisis Visual",
+            icon: <Activity className="h-4 w-4" />
+          }
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      {/* Conditional Content - EmptyState or Tab Content */}
       {filteredTasks.length === 0 ? (
         <EmptyState
           icon={<Calendar className="h-8 w-8" />}
@@ -509,69 +572,6 @@ export default function ConstructionSchedule() {
         />
       ) : (
         <>
-          {/* Action Bar Desktop with Tabs */}
-          <ActionBarDesktop
-            title="Cronograma de Construcción"
-            icon={<Calendar className="w-6 h-6" />}
-            features={[
-              {
-                icon: <BarChart3 className="w-4 h-4" />,
-                title: "Vista Gantt Profesional",
-                description: "Cronograma visual con barras temporales, dependencias entre tareas y gestión de fechas tipo MS Project."
-              },
-              {
-                icon: <Activity className="w-4 h-4" />,
-                title: "Gestión por Fases",
-                description: "Organización jerárquica con fases expandibles/colapsables y cálculo automático de fechas."
-              },
-              {
-                icon: <CheckSquare className="w-4 h-4" />,
-                title: "Control de Dependencias",
-                description: "Visualización de precedencias con flechas SVG y arrastre automático de tareas dependientes."
-              },
-              {
-                icon: <Clock className="w-4 h-4" />,
-                title: "Análisis Visual Avanzado",
-                description: "9 gráficos profesionales: curva de progreso, burndown, heatmap semanal, red de dependencias."
-              }
-            ]}
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            showGrouping={false}
-            primaryActionLabel="Nueva Tarea"
-            onPrimaryActionClick={handleAddTask}
-            customActions={[
-              <Button 
-                key="create-phase"
-                onClick={handleAddPhase} 
-                variant="secondary" 
-                className="h-9 px-4"
-              >
-                <Plus />
-                Crear Fase
-              </Button>
-            ]}
-            tabs={[
-              {
-                value: "gantt",
-                label: "Vista Gantt",
-                icon: <BarChart3 className="h-4 w-4" />
-              },
-              {
-                value: "table",
-                label: "Listado de Tareas",
-                icon: <Table className="h-4 w-4" />
-              },
-              {
-                value: "analytics",
-                label: "Análisis Visual",
-                icon: <Activity className="h-4 w-4" />
-              }
-            ]}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-
           {/* Tab Content Based on activeTab */}
           <div className="space-y-4">
             {activeTab === "gantt" && (
