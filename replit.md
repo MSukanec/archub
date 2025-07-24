@@ -125,6 +125,15 @@ Archub is a modern construction management platform built with a React frontend 
   • LEGACY MODAL CLEANUP: Removed all AlertDialog components and state variables, replaced with centralized modal system following README.md standards
   • LSP ERRORS RESOLVED: Fixed rightLoading/isLoading prop inconsistencies and missing parameterLabel props across modals
   • MODAL ARCHITECTURE COMPLIANCE: All modals now follow FormModalLayout pattern with proper isEditing={true} for direct edit mode access
+- July 24, 2025. GENERATED TASK MODAL MODERNIZATION COMPLETED: Successfully migrated generated task modal from legacy system to modern FormModalLayout architecture - COMPLETED
+  • COMPLETE MODAL RESTRUCTURING: Created GeneratedTaskFormModal.tsx in src/components/modal/modals/admin/ following BoardFormModal.tsx pattern exactly
+  • ARCHITECTURE COMPLIANCE: Uses FormModalLayout with separate viewPanel, editPanel, headerContent, footerContent objects instead of legacy CustomModal system
+  • MODALFACTORY INTEGRATION: Added 'generated-task' type to types.ts and ModalFactory.tsx for centralized modal management
+  • ADMIN PAGE INTEGRATION: Updated AdminGeneratedTasks.tsx to use useGlobalModalStore openModal() instead of local modal state
+  • LEGACY SYSTEM ELIMINATION: Removed src/modals/admin/tasks/NewAdminGeneratedTaskModal.tsx file and all legacy modal references
+  • UX IMPROVEMENTS: Maintained all existing functionality (template selection, parameter configuration, material management, task preview)
+  • TARGET ICON: Added Target icon to modal header for clear visual identification of task generation functionality
+  • FULL FEATURE PARITY: Preserved template selection, parameter configuration, task preview, material management, and public/private toggle
 - July 24, 2025. TASK PARAMETER GROUP ASSIGNMENT MODAL MODERNIZATION COMPLETED: Created new modal for managing parameter option groups following exact README.md architecture standards - COMPLETED
   • COMPLETE MODAL RESTRUCTURING: Created TaskParameterGroupAssignmentModal.tsx in src/components/modal/modals/admin/ following BoardFormModal.tsx pattern exactly
   • ARCHITECTURE COMPLIANCE: Uses FormModalLayout with separate viewPanel, editPanel, headerContent, footerContent objects instead of legacy CustomModal system

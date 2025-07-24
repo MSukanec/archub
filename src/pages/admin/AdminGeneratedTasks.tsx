@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import { NewAdminGeneratedTaskModal } from '@/modals/admin/tasks/NewAdminGeneratedTaskModal'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
@@ -44,8 +44,7 @@ export default function AdminGeneratedTasks() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
-  const [newGeneratedTaskModalOpen, setNewGeneratedTaskModalOpen] = useState(false)
-  const [editingGeneratedTask, setEditingGeneratedTask] = useState<GeneratedTask | null>(null)
+  const { openModal } = useGlobalModalStore()
   const [deletingGeneratedTask, setDeletingGeneratedTask] = useState<GeneratedTask | null>(null)
   const [processedTaskNames, setProcessedTaskNames] = useState<Record<string, string>>({})
 
@@ -130,8 +129,7 @@ export default function AdminGeneratedTasks() {
     })
 
   const handleEdit = (generatedTask: GeneratedTask) => {
-    setEditingGeneratedTask(generatedTask)
-    setNewGeneratedTaskModalOpen(true)
+    openModal('generated-task', { generatedTask })
   }
 
   const handleConfirmDelete = async () => {
@@ -272,10 +270,7 @@ export default function AdminGeneratedTasks() {
     actions: [
       <Button
         key="new-generated-task"
-        onClick={() => {
-          setEditingGeneratedTask(null)
-          setNewGeneratedTaskModalOpen(true)
-        }}
+        onClick={() => openModal('generated-task', {})}
         size="sm"
         className="gap-2"
       >
@@ -345,14 +340,7 @@ export default function AdminGeneratedTasks() {
         />
       </div>
 
-      <NewAdminGeneratedTaskModal
-        open={newGeneratedTaskModalOpen}
-        onClose={() => {
-          setNewGeneratedTaskModalOpen(false)
-          setEditingGeneratedTask(null)
-        }}
-        generatedTask={editingGeneratedTask}
-      />
+      {/* Modals are now handled by ModalFactory */}
 
       <AlertDialog open={!!deletingGeneratedTask} onOpenChange={() => setDeletingGeneratedTask(null)}>
         <AlertDialogContent>
