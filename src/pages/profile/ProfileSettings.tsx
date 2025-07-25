@@ -1,7 +1,8 @@
 import { Layout } from '@/components/layout/desktop/Layout'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Settings, UserCircle } from 'lucide-react'
+import { Settings, UserCircle, Palette, Shield, HelpCircle, Monitor } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -108,6 +109,37 @@ export default function ProfileSettings() {
 
   return (
     <Layout headerProps={headerProps}>
+      {/* ActionBar */}
+      <ActionBarDesktop
+        title="Preferencias"
+        icon={<Settings className="h-5 w-5" />}
+        showProjectSelector={false}
+        showSearch={false}
+        showGrouping={false}
+        features={[
+          {
+            icon: <Palette className="h-4 w-4" />,
+            title: "Tema Visual",
+            description: "Personaliza la apariencia de tu aplicación cambiando entre tema claro y oscuro según tu preferencia."
+          },
+          {
+            icon: <Monitor className="h-4 w-4" />, 
+            title: "Sidebar y Navegación",
+            description: "Configura el comportamiento de la barra lateral para mantenerla fija o permitir que se oculte automáticamente."
+          },
+          {
+            icon: <HelpCircle className="h-4 w-4" />,
+            title: "Modo Tutorial",
+            description: "Activa o desactiva las ayudas visuales y explicaciones para nuevos usuarios en toda la aplicación."
+          },
+          {
+            icon: <Shield className="h-4 w-4" />,
+            title: "Configuración Avanzada",
+            description: "Accede a opciones avanzadas de configuración y personalización de tu experiencia de usuario."
+          }
+        ]}
+      />
+
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Feature Introduction */}
         <FeatureIntroduction
@@ -129,8 +161,6 @@ export default function ProfileSettings() {
             Guardando...
           </div>
         )}
-
-        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Preferencias Section */}
         <div>
