@@ -1,4 +1,5 @@
 import { Layout } from '@/components/layout/desktop/Layout'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, MessageCircle } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, MessageCircle, Settings, Network, BarChart3 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -67,14 +68,16 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
           </div>
 
           {/* Plan */}
-          <div className="col-span-1 text-xs">
+          <div className="col-span-1">
             {organization.plan ? (
-              <div className="flex items-center gap-1">
-                <Crown className="w-3 h-3 text-yellow-500" />
-                <span>{organization.plan.name}</span>
-              </div>
+              <Badge variant="secondary" className="text-xs">
+                <Crown className="w-3 h-3 mr-1 text-yellow-500" />
+                {organization.plan.name}
+              </Badge>
             ) : (
-              <span className="text-muted-foreground">Sin plan</span>
+              <Badge variant="outline" className="text-xs">
+                Sin plan
+              </Badge>
             )}
           </div>
 
@@ -385,6 +388,37 @@ export default function OrganizationManagement() {
 
   return (
     <Layout headerProps={headerProps}>
+      {/* ActionBar */}
+      <ActionBarDesktop
+        title="Gestión de Organizaciones"
+        icon={<Building className="h-5 w-5" />}
+        showProjectSelector={false}
+        showSearch={false}
+        showGrouping={false}
+        features={[
+          {
+            icon: <Settings className="h-4 w-4" />,
+            title: "Administración de Organizaciones",
+            description: "Crea, edita y gestiona las organizaciones de las que formas parte, incluyendo configuración de roles y permisos."
+          },
+          {
+            icon: <Users className="h-4 w-4" />,
+            title: "Gestión de Miembros",
+            description: "Administra los miembros de cada organización, invita nuevos colaboradores y gestiona sus roles y permisos."
+          },
+          {
+            icon: <Crown className="h-4 w-4" />,
+            title: "Planes y Suscripciones",
+            description: "Visualiza y gestiona los planes de suscripción de tus organizaciones con diferentes niveles de funcionalidad."
+          },
+          {
+            icon: <BarChart3 className="h-4 w-4" />,
+            title: "Estadísticas y Análisis",
+            description: "Accede a métricas detalladas sobre el uso y rendimiento de cada organización en la plataforma."
+          }
+        ]}
+      />
+
       <div className="space-y-6">
         {/* Plan Card */}
         <Card className="bg-[var(--card-bg)] border border-[var(--card-border)]">
@@ -400,7 +434,7 @@ export default function OrganizationManagement() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
-                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
+                <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
                   <MessageCircle className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Chatear con nosotros</span>
                   <span className="sm:hidden">Chat</span>
