@@ -40,6 +40,7 @@ export default function ConstructionTasks() {
   console.log('ConstructionTasks - organizationId:', organizationId)
   console.log('ConstructionTasks - tasks data:', tasks)
   console.log('ConstructionTasks - tasks length:', tasks.length)
+  console.log('ConstructionTasks - filteredTasks length:', filteredTasks.length)
 
   // Filtrar tareas según búsqueda
   const filteredTasks = useMemo(() => {
@@ -270,7 +271,7 @@ export default function ConstructionTasks() {
         />
 
         {/* Table or Empty State */}
-        {filteredTasks.length === 0 ? (
+        {tasks.length === 0 ? (
           <EmptyState
             icon={<CheckSquare className="h-8 w-8" />}
             title="No hay tareas en el proyecto"
