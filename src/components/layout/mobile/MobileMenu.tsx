@@ -65,6 +65,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
+  // Estado local para forzar re-render
+  const [isClosing, setIsClosing] = useState(false);
+  
+  // Estado para determinar si estamos en menu principal o submenu
+  const [currentView, setCurrentView] = useState<'main' | string>('main');
+  
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -72,6 +78,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       document.body.style.overflow = 'unset';
     };
   }, []);
+  
+  // Resetear vista al main cuando se cierre el menú
+  const { isOpen } = useMobileMenuStore();
+  useEffect(() => {
+    if (!isOpen && currentView !== 'main') {
+      setCurrentView('main');
+    }
+  }, [isOpen, currentView]);
 
   const queryClient = useQueryClient();
 
@@ -321,8 +335,22 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     });
   }
 
-  // Estado para determinar si estamos en menu principal o submenu
-  const [currentView, setCurrentView] = useState<'main' | string>('main');
+  // Función para obtener el título de la vista actual
+  const getCurrentViewTitle = () => {
+    if (currentView === 'main') return 'Menú Principal';
+    
+    const titleMap = {
+      'perfil': 'Perfil',
+      'organizacion': 'Organización', 
+      'proyecto': 'Proyecto',
+      'construccion': 'Construcción',
+      'finanzas': 'Finanzas',
+      'diseno': 'Diseño',
+      'admin': 'Administración'
+    };
+    
+    return titleMap[currentView as keyof typeof titleMap] || 'Menú';
+  };
   
   // Función para manejar navegación desde menu principal a submenu
   const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
@@ -386,6 +414,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
         {/* Navigation Menu */}
         <div className="flex-1 px-4 py-2 overflow-y-auto">
+          {/* Título de la sección actual */}
+          <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
+            <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
+              {getCurrentViewTitle()}
+            </h2>
+          </div>
           {currentView === 'main' ? (
             // Menu principal - solo botones principales
             <nav className="space-y-2">
