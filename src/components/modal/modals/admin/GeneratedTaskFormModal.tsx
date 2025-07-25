@@ -192,8 +192,8 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   };
 
   // Handle parameter value changes
-  const handleParameterChange = (paramId: string, value: any) => {
-    const newParamValues = { ...paramValues, [paramId]: value };
+  const handleParameterChange = (paramKey: string, value: any) => {
+    const newParamValues = { ...paramValues, [paramKey]: value };
     setParamValues(newParamValues);
     form.setValue('param_values', newParamValues);
   };
@@ -370,23 +370,24 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                 {parameters && parameters.length > 0 && (
                   <div className="space-y-4">
                       {parameters.map((param) => {
-                        // Use id since that's the actual parameter ID from the transformed data
-                        const paramId = param.id;
-                        const currentValue = paramValues[paramId] || '';
+                        // Use parameter.name as key since param_values in task_generated stores by name, not ID
+                        const paramKey = param.name;
+                        const currentValue = paramValues[paramKey] || '';
                         
                         console.log('🔧 Rendering parameter field:', {
-                          paramId,
+                          paramId: param.id,
                           paramName: param.name,
+                          paramKey,
                           currentValue,
                           allParamValues: paramValues
                         });
                         
                         return (
                           <ParameterField
-                            key={paramId}
+                            key={param.id}
                             parameter={param}
                             value={currentValue}
-                            onChange={(value) => handleParameterChange(paramId, value)}
+                            onChange={(value) => handleParameterChange(paramKey, value)}
                           />
                         );
                       })}
