@@ -334,17 +334,7 @@ export function ActionBarDesktop({
           <div key={index}>{action}</div>
         ))}
 
-        {/* 4. PRIMARY BUTTON */}
-        {primaryActionLabel && onPrimaryActionClick && (
-          <Button
-            onClick={onPrimaryActionClick}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {primaryActionLabel}
-          </Button>
-        )}
-
-        {/* Today Button - For gradebook pages (rightmost position) */}
+        {/* Today Button - For gradebook pages */}
         {onTodayClick && (
           <Button
             variant="ghost"
@@ -353,6 +343,16 @@ export function ActionBarDesktop({
           >
             <CalendarDays className="w-4 h-4 mr-1" />
             Hoy
+          </Button>
+        )}
+
+        {/* 4. PRIMARY BUTTON (rightmost position) */}
+        {primaryActionLabel && onPrimaryActionClick && (
+          <Button
+            onClick={onPrimaryActionClick}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {primaryActionLabel}
           </Button>
         )}
         </div>

@@ -376,6 +376,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true}
     />
   )
 }

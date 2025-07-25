@@ -151,27 +151,30 @@ export default function MovementImportStepModal({ modalData, onClose }) {
 ✗ NO devolver JSX directo - siempre usar la estructura de objetos como props
 ✗ NO seguir patrones antiguos de CustomModal - usar solo FormModalLayout
 
-### ⚠️ CRÍTICO: Problema de viewPanel=null
+### ⚠️ CRÍTICO: Problema de viewPanel=null - MODO EDICIÓN OBLIGATORIO
 **PROBLEMA COMÚN**: Si un modal tiene `viewPanel={null}` y no especifica `isEditing={true}`, el FormModalLayout se abre por defecto en modo "view" y mostrará una pantalla vacía.
 
-**SOLUCIÓN REQUERIDA**: Para modales que solo necesitan modo edición (como formularios de creación):
+**SOLUCIÓN OBLIGATORIA**: TODOS los modales de creación DEBEN usar `isEditing={true}`:
 ```typescript
 return (
   <FormModalLayout
     viewPanel={null}           // ← Si esto es null
     editPanel={editPanel}      
-    isEditing={true}           // ← OBLIGATORIO agregar esto
+    isEditing={true}           // ← SIEMPRE OBLIGATORIO para modales de creación
     // ... resto de props
   />
 );
 ```
 
-**ALTERNATIVA**: Proporcionar un viewPanel válido con contenido de solo lectura.
+**REGLA FUNDAMENTAL**: 
+- **SIEMPRE usar `isEditing={true}` para modales de creación** (como AttendanceFormModal, TaskFormModal, etc.)
+- Los usuarios esperan crear/editar inmediatamente, NO ver una pantalla vacía
+- Solo omitir `isEditing={true}` cuando el modal específicamente necesite mostrar datos de solo lectura primero
 
 **CUÁNDO USAR CADA OPCIÓN**:
-- `isEditing={true}` → Para modales de formularios simples (crear/editar) que no necesitan modo vista
-- `viewPanel + editPanel` → Para modales que muestran datos existentes y permiten edición (ej: detalles de usuario)
-- Solo `editPanel` con `isEditing={true}` → Para modales de creación exclusivamente
+- `isEditing={true}` → **OBLIGATORIO** para todos los modales de creación/formularios
+- `viewPanel + editPanel` → Solo para modales que muestran datos existentes Y permiten edición
+- Solo `editPanel` con `isEditing={true}` → **PATRÓN RECOMENDADO** para modales de creación
 
 ### Para modales de pasos:
 ✗ NO usar viewPanel/editPanel con stepContent - son mutuamente excluyentes
