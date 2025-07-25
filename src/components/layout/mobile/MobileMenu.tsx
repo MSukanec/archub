@@ -344,8 +344,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       e.preventDefault();
       e.stopPropagation();
     }
+    console.log('🔴 handleCloseMenu called');
     closeMenu();
+    console.log('🔴 store closeMenu called');
     onClose();
+    console.log('🔴 onClose prop called');
   };
 
   const menuContent = (

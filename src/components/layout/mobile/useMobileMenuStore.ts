@@ -9,7 +9,14 @@ interface MobileMenuState {
 
 export const useMobileMenuStore = create<MobileMenuState>((set) => ({
   isOpen: false,
-  openMenu: () => set({ isOpen: true }),
-  closeMenu: () => set({ isOpen: false }),
+  openMenu: () => {
+    console.log('🟢 Store openMenu called');
+    set({ isOpen: true });
+  },
+  closeMenu: () => {
+    console.log('🔴 Store closeMenu called - setting isOpen to false');
+    set({ isOpen: false });
+    console.log('🔴 Store state updated');
+  },
   toggleMenu: () => set((state) => ({ isOpen: !state.isOpen })),
 }))
