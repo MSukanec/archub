@@ -359,8 +359,7 @@ export default function ConstructionLogs() {
   };
 
   const handleEditSiteLog = (siteLog: any) => {
-    setEditingSiteLog(siteLog);
-    setShowNewSiteLogModal(true);
+    openModal('site-log', { data: siteLog, isEditing: true });
   };
 
   const handleDeleteSiteLog = (siteLog: any) => {
