@@ -142,6 +142,8 @@ function TasksContent() {
 
 
 
+
+
   // Current board for display
   const currentBoard = boards.find(board => board.id === currentBoardId);
 
@@ -200,158 +202,106 @@ function TasksContent() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6 overflow-x-hidden">
-        {/* FeatureIntroduction */}
-        <FeatureIntroduction
-          title="Tareas para Hacer"
-          icon={<CheckSquare className="w-5 h-5" />}
-          features={[
-            {
-              icon: <Kanban className="w-5 h-5" />,
-              title: "Tableros Kanban organizados",
-              description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
-            },
-            {
-              icon: <List className="w-5 h-5" />,
-              title: "Listas flexibles y personalizables",
-              description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
-            },
-            {
-              icon: <CheckSquare className="w-5 h-5" />,
-              title: "Seguimiento de completitud",
-              description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
-            },
-            {
-              icon: <Plus className="w-5 h-5" />,
-              title: "Colaboración en equipo",
-              description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
-            }
-          ]}
-        />
+      {/* FeatureIntroduction */}
+      <FeatureIntroduction
+        title="Tareas para Hacer"
+        icon={<CheckSquare className="w-5 h-5" />}
+        features={[
+          {
+            icon: <Kanban className="w-5 h-5" />,
+            title: "Tableros Kanban organizados",
+            description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
+          },
+          {
+            icon: <List className="w-5 h-5" />,
+            title: "Listas flexibles y personalizables",
+            description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
+          },
+          {
+            icon: <CheckSquare className="w-5 h-5" />,
+            title: "Seguimiento de completitud",
+            description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
+          },
+          {
+            icon: <Plus className="w-5 h-5" />,
+            title: "Colaboración en equipo",
+            description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
+          }
+        ]}
+      />
 
-        {/* ActionBar Desktop */}
-        <ActionBarDesktop
-          title="Gestión de Tareas para Hacer"
-          icon={<CheckSquare className="w-5 h-5" />}
-          features={[
-            {
-              icon: <Kanban className="w-5 h-5" />,
-              title: "Organización visual tipo Kanban",
-              description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
-            },
-            {
-              icon: <List className="w-5 h-5" />,
-              title: "Múltiples tableros por organización",
-              description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
-            },
-            {
-              icon: <CheckSquare className="w-5 h-5" />,
-              title: "Colaboración y asignación de responsables",
-              description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
-            },
-            {
-              icon: <Plus className="w-5 h-5" />,
-              title: "Gestión flexible de contenido",
-              description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
+      {/* ActionBar Desktop */}
+      <ActionBarDesktop
+        title="Gestión de Tareas para Hacer"
+        icon={<CheckSquare className="w-5 h-5" />}
+        features={[
+          {
+            icon: <Kanban className="w-5 h-5" />,
+            title: "Organización visual tipo Kanban",
+            description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
+          },
+          {
+            icon: <List className="w-5 h-5" />,
+            title: "Múltiples tableros por organización",
+            description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
+          },
+          {
+            icon: <CheckSquare className="w-5 h-5" />,
+            title: "Colaboración y asignación de responsables",
+            description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
+          },
+          {
+            icon: <Plus className="w-5 h-5" />,
+            title: "Gestión flexible de contenido",
+            description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
+          }
+        ]}
+        primaryActionLabel="Nueva Lista"
+        onPrimaryActionClick={() => {
+          if (currentBoardId) {
+            openModal('list', { boardId: currentBoardId })
+          }
+        }}
+        customActions={[
+          <Button 
+            key="nuevo-tablero"
+            variant="secondary" 
+            onClick={() => openModal('board', {})}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Tablero
+          </Button>
+        ]}
+        budgetSelector={{
+          budgets: boards,
+          selectedBudgetId: currentBoardId || '',
+          onBudgetChange: handleBoardChange,
+          onEditBudget: () => {
+            if (selectedBoard) {
+              handleEditBoard(selectedBoard)
             }
-          ]}
-          primaryAction={{
-            label: "Nueva Lista",
-            onClick: () => openModal('list', { boardId: currentBoardId }),
-            disabled: !currentBoardId
-          }}
-          secondaryActions={[
-            {
-              label: "Nuevo Tablero",
-              onClick: () => openModal('board', {}),
-              icon: <Plus className="w-4 h-4" />
+          },
+          onDeleteBudget: () => {
+            if (currentBoardId) {
+              handleDeleteBoard(currentBoardId)
             }
-          ]}
-        />
-
-        {/* Board Selector Card */}
-        {boards.length > 0 && (
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">Tablero:</span>
-              <Select value={currentBoardId || undefined} onValueChange={handleBoardChange}>
-                <SelectTrigger className="flex-1 h-8">
-                  <SelectValue placeholder="Seleccionar tablero..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {boards.map((board) => (
-                    <SelectItem key={board.id} value={board.id}>
-                      {board.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {selectedBoard && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2"
-                    onClick={() => handleEditBoard(selectedBoard)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>¿Eliminar tablero?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Esta acción eliminará permanentemente el tablero "{selectedBoard.name}" y todas sus listas y tarjetas.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction 
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          onClick={() => handleDeleteBoard(selectedBoard.id)}
-                        >
-                          Eliminar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-              )}
-            </div>
-            
-            {selectedBoard?.description && (
-              <p className="text-sm text-muted-foreground mt-2">{selectedBoard.description}</p>
-            )}
-          </Card>
-        )}
+          }
+        }}
+      />
       
-        {selectedBoard && (
-          <KanbanBox 
-            lists={lists}
-            cards={cards}
-            boardId={currentBoardId || ''}
-            onCardMove={handleCardMove}
-            onCreateList={() => openModal('list', { boardId: currentBoardId })}
-            onDeleteList={handleDeleteList}
-            onDeleteCard={handleDeleteCard}
-            onCardEdit={(card) => openModal('card', { card: card, isEditing: true })}
-            loading={listsLoading || cardsLoading}
-          />
-        )}
-      </div>
-
-
+      {selectedBoard && (
+        <KanbanBox 
+          lists={lists}
+          cards={cards}
+          boardId={currentBoardId || ''}
+          onCardMove={handleCardMove}
+          onCreateList={() => openModal('list', { boardId: currentBoardId })}
+          onDeleteList={handleDeleteList}
+          onDeleteCard={handleDeleteCard}
+          onCardEdit={(card) => openModal('card', { card: card, isEditing: true })}
+          loading={listsLoading || cardsLoading}
+        />
+      )}
     </Layout>
   );
 }
