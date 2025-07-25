@@ -36,6 +36,7 @@ import { TaskParameterGroupAssignmentModal } from '../modals/admin/TaskParameter
 import { GeneratedTaskFormModal } from '../modals/admin/GeneratedTaskFormModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
+import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizationFormModal';
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogFormModal } from '../modals/construction/SiteLogFormModal';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
@@ -134,6 +135,8 @@ export function ModalFactory() {
       return <UserFormModal modalData={data} onClose={closeModal} />;
     case 'admin-organization':
       return <OrganizationFormModal modalData={data} onClose={closeModal} />;
+    case 'profile-organization':
+      return <ProfileOrganizationFormModal modalData={data} onClose={closeModal} />;
     case 'changelog-entry':
       return <ChangelogFormModal modalData={data} onClose={closeModal} />;
     case 'site-log':

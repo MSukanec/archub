@@ -281,9 +281,8 @@ export default function OrganizationManagement() {
   }
 
   const handleEdit = (organization: any) => {
-    openModal('organization', {
-      open: true,
-      editingOrganization: organization
+    openModal('profile-organization', {
+      organization: organization
     })
   }
 
