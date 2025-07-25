@@ -4,9 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { format, addDays } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { Calendar, CalendarDays, Users } from 'lucide-react'
+import { addDays } from 'date-fns'
+import { Calendar, Users } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -14,16 +13,14 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import UserSelector from '@/components/ui-custom/UserSelector'
+import DatePicker from '@/components/ui-custom/DatePicker'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useContacts } from '@/hooks/use-contacts'
-import { cn } from '@/lib/utils'
 
 const attendanceSchema = z.object({
   created_by: z.string().uuid('Selecciona quién creó este registro'),
@@ -211,38 +208,15 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fecha</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd/MM/yyyy", { locale: es })
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                      locale={es}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar fecha"
+                    disableFuture={true}
+                    minDate={new Date("1900-01-01")}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
