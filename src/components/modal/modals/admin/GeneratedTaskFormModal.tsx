@@ -161,7 +161,15 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
 
   // Initialize form when editing - convert compressed values to proper IDs
   useEffect(() => {
-    if (generatedTask && parameterOptions && Object.keys(parameterOptions).length > 0) {
+    if (generatedTask && parameterOptions && Object.keys(parameterOptions).length > 0 && parameters) {
+      console.log('🔧 Initializing edit mode with:', {
+        taskId: generatedTask.id,
+        templateId: generatedTask.template_id,
+        paramValues: generatedTask.param_values,
+        availableOptions: Object.keys(parameterOptions),
+        parametersCount: parameters.length
+      });
+      
       // Convert compressed param values to proper option IDs
       const convertedParamValues: Record<string, string> = {};
       
@@ -196,21 +204,37 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
             }
             
             convertedParamValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
+            
+            console.log('🔧 Parameter conversion:', {
+              paramName,
+              storedValue,
+              matchingOption: matchingOption?.label,
+              finalValue: convertedParamValues[paramName]
+            });
           } else {
             convertedParamValues[paramName] = storedValue.toString();
           }
         });
       }
       
-      setParamValues(convertedParamValues);
+      // Set all state variables first
       setSelectedTemplateId(generatedTask.template_id);
+      setParamValues(convertedParamValues);
       setCreatedTaskId(generatedTask.id);
       
+      // Then reset form with all values
       form.reset({
         template_id: generatedTask.template_id,
         is_public: generatedTask.is_public,
         param_values: convertedParamValues
       });
+      
+      console.log('🔧 Form initialized with values:', {
+        template_id: generatedTask.template_id,
+        param_values: convertedParamValues,
+        selectedTemplateId: generatedTask.template_id
+      });
+      
     } else if (!generatedTask) {
       setSelectedTemplateId('');
       setParamValues({});
@@ -227,9 +251,12 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   // Handle template selection
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId);
-    setParamValues({});
+    // Only clear param values if this is a new selection (not during initialization)
+    if (!isEditing || templateId !== generatedTask?.template_id) {
+      setParamValues({});
+      form.setValue('param_values', {});
+    }
     form.setValue('template_id', templateId);
-    form.setValue('param_values', {});
   };
 
   // Handle parameter value changes
@@ -374,7 +401,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Plantilla de Tarea *</FormLabel>
-                <Select onValueChange={handleTemplateChange} value={selectedTemplateId}>
+                <Select onValueChange={handleTemplateChange} value={field.value || selectedTemplateId}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar plantilla" />
