@@ -300,7 +300,7 @@ export function Sidebar() {
       label: 'Diseño', 
       defaultRoute: '/design/dashboard',
       isActive: activeSidebarSection === 'diseno' || location.startsWith('/design'),
-      restricted: true
+      generalModeRestricted: true
     },
     { 
       id: 'construccion', 
@@ -343,18 +343,7 @@ export function Sidebar() {
             {mainSidebarItems.map((item, index) => (
               <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button with potential restriction */}
-                {item.restricted ? (
-                  <CustomRestricted reason="coming_soon" functionName={item.label}>
-                    <SidebarButton
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      label={item.label}
-                      isActive={item.isActive}
-                      isExpanded={isExpanded}
-                      onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-                      variant="main"
-                    />
-                  </CustomRestricted>
-                ) : item.generalModeRestricted ? (
+                {item.generalModeRestricted ? (
                   <CustomRestricted reason="general_mode" functionName={item.label}>
                     <SidebarButton
                       icon={<item.icon className="w-[18px] h-[18px]" />}

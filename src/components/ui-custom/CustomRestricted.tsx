@@ -46,6 +46,14 @@ export function CustomRestricted({
   let restrictionKey = "";
 
   if (reason === "general_mode") {
+    // Debug logging temporal
+    console.log("🔍 CustomRestricted DEBUG:", {
+      reason,
+      selectedProjectId,
+      isRestricted: selectedProjectId === null,
+      functionName
+    });
+    
     // Verificar si estamos en modo general (sin proyecto seleccionado)
     if (selectedProjectId === null) {
       isRestricted = true;
