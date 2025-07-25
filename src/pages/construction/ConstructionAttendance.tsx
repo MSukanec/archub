@@ -270,17 +270,15 @@ export default function ConstructionAttendance() {
           ]}
         />
 
-        {/* ActionBar - Only show when there's original data */}
-        {workers.length > 0 && (
-          <ActionBarDesktop
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            showGrouping={false}
-            customFilters={customFilters}
-            onClearFilters={handleClearFilters}
-            onTodayClick={handleTodayClick}
-          />
-        )}
+        {/* ActionBar - Always visible */}
+        <ActionBarDesktop
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          showGrouping={false}
+          customFilters={customFilters}
+          onClearFilters={handleClearFilters}
+          onTodayClick={handleTodayClick}
+        />
 
         {/* Gradebook Component - Show always if there's original data, even if filtered workers is empty */}
         {workers.length > 0 ? (
