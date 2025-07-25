@@ -100,13 +100,22 @@ export function ConstructionTaskFormModal({
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      console.log('🔍 Cargando tareas para organización:', modalData.organizationId);
+      
       const { data, error } = await supabase
         .from('task_generated_view')
         .select('*')
         .eq('organization_id', modalData.organizationId)
         .order('display_name', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error cargando tareas:', error);
+        throw error;
+      }
+      
+      console.log('✅ Tareas cargadas:', data?.length || 0, 'tareas encontradas');
+      console.log('📋 Primeras 3 tareas:', data?.slice(0, 3));
+      
       return data || [];
     },
     enabled: !!modalData.organizationId && !!supabase
@@ -135,17 +144,23 @@ export function ConstructionTaskFormModal({
 
   // Filtrar tareas solo cuando hay búsqueda - SIEMPRE mostrar todas por defecto
   const filteredTasks = useMemo(() => {
+    console.log('🔄 Procesando filtros - Tareas totales:', tasks.length, 'Búsqueda:', searchQuery);
+    
     // Si no hay búsqueda, mostrar TODAS las tareas
     if (!searchQuery.trim()) {
+      console.log('✅ Sin filtros - Mostrando todas las tareas:', tasks.length);
       return tasks;
     }
     
     // Solo filtrar cuando hay texto de búsqueda
-    return tasks.filter(task => 
+    const filtered = tasks.filter(task => 
       task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.category_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
+    console.log('🔍 Con filtros - Tareas filtradas:', filtered.length);
+    return filtered;
   }, [tasks, searchQuery]);
 
   // Función para obtener la unidad de una tarea específica
