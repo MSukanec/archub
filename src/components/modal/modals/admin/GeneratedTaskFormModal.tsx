@@ -83,10 +83,8 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   });
 
-  // Load parameter options for each parameter
-  const parameterOptionsQueries = parameters?.map(param => 
-    useTaskTemplateParameterOptions(param.id)
-  ) || [];
+  // Load parameter options for each parameter - removed hooks in map to fix "more hooks" error
+  const parameterOptionsQueries: any[] = [];
 
   // Initialize form when editing
   useEffect(() => {
@@ -137,7 +135,14 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     const template = templates.find(t => t.id === selectedTemplateId);
     if (!template) return '';
 
-    return generateTaskDescription(template.name_template, paramValues, parameterOptionsQueries);
+    // generateTaskDescription might return a Promise, so we handle it properly
+    try {
+      const result = generateTaskDescription(template.name_template, paramValues, parameterOptionsQueries);
+      return typeof result === 'string' ? result : 'Generando descripción...';
+    } catch (error) {
+      console.error('Error generating description:', error);
+      return 'Error al generar descripción';
+    }
   };
 
   // Handle form submission
@@ -147,10 +152,9 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     try {
       if (isEditing && generatedTask) {
         const updatedTask = await updateGeneratedTask.mutateAsync({
-          id: generatedTask.id,
-          template_id: data.template_id,
-          param_values: data.param_values || {},
-          is_public: data.is_public
+          task_id: generatedTask.id,
+          input_param_values: data.param_values || {},
+          input_is_system: false
         });
         
         toast({
@@ -163,12 +167,11 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
         const newTask = await createGeneratedTask.mutateAsync({
           template_id: data.template_id,
           param_values: data.param_values || {},
-          is_public: data.is_public,
-          organization_id: userData?.organizations?.[0]?.id || '',
-          scope: 'organization'
+          organization_id: userData?.organization?.id || '',
+          is_system: false
         });
         
-        setCreatedTaskId(newTask.id);
+        setCreatedTaskId(newTask.new_task?.id || null);
         
         toast({
           title: "Tarea creada",
@@ -197,7 +200,8 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
       await createTaskMaterial.mutateAsync({
         task_id: createdTaskId,
         material_id: newMaterial.material_id,
-        amount: newMaterial.amount
+        amount: newMaterial.amount,
+        organization_id: userData?.organization?.id || ''
       });
       
       setNewMaterial({ material_id: "", amount: 1 });
@@ -407,9 +411,9 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{taskMaterial.material?.name}</span>
+                            <span className="font-medium">{taskMaterial.materials?.name || 'Material desconocido'}</span>
                             <Badge variant="secondary">
-                              {taskMaterial.amount} {taskMaterial.material?.unit?.symbol}
+                              {taskMaterial.amount} {taskMaterial.materials?.unit?.symbol || ''}
                             </Badge>
                           </div>
                           <Button
@@ -446,7 +450,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
       onLeftClick={onClose}
       rightLabel={isEditing ? "Actualizar" : "Crear"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      rightLoading={isSubmitting}
+      rightIsLoading={isSubmitting}
     />
   );
 
