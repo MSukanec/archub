@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. PLAN BADGES STANDARDIZATION AND ACTIVE CARD FIXES COMPLETED: Successfully fixed hardcoded badges, implemented consistent plan styling, and restored member avatars display - COMPLETED
+  • HARDCODED BADGE FIXED: Removed hardcoded "Free" badge from active organization card, now uses real data from userData.organization.plan?.name
+  • PLAN BADGE CONSISTENCY: Standardized all plan badges across ProfileOrganizations and AdminOrganizations to use same CSS variables (--plan-free-bg, --plan-pro-bg, --plan-teams-bg)
+  • ADMIN ORGANIZATIONS UPDATED: Plan column in admin page now uses consistent badge styling with CSS variables instead of variant-based colors
+  • MEMBER AVATARS RESTORED: Fixed null-safety issues in ActiveOrganizationMembersCard component and integrated useOrganizationMembers hook for real data
+  • VISUAL HIERARCHY IMPROVED: Active organization card now shows member avatars above plan badge above "ACTIVA" status badge in proper vertical alignment
+  • CROWN ICONS MAINTAINED: All plan badges consistently display Crown icon with appropriate background colors matching design system
 - July 25, 2025. ORGANIZATION ACTIVE CARD MEMBER AVATARS ENHANCED: Successfully added larger member avatars to the active organization card with improved visual hierarchy - COMPLETED
   • ACTIVE CARD AVATARS: Added ActiveOrganizationMembersCard component displaying member avatars at w-12 h-12 (double size of row avatars)
   • VISUAL POSITIONING: Positioned avatars above badge area on right side of active organization card for better visual balance

@@ -303,16 +303,26 @@ export default function AdminOrganizations() {
       label: 'Plan',
       width: '14.28%',
       render: (org: Organization) => {
-        const planName = org.plan?.name || 'Sin plan';
-        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'outline';
-        
-        if (planName === 'Free') variant = 'secondary';
-        else if (planName === 'Pro') variant = 'default';
-        else if (planName === 'Teams') variant = 'destructive';
-        
-        return (
-          <Badge variant={variant} className="text-xs">
-            {planName}
+        return org.plan ? (
+          <Badge 
+            variant="secondary" 
+            className="text-xs text-white" 
+            style={{
+              backgroundColor: org.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                             org.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                             org.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                             'var(--plan-free-bg)'
+            }}
+          >
+            {org.plan.name}
+          </Badge>
+        ) : (
+          <Badge 
+            variant="secondary" 
+            className="text-xs text-white" 
+            style={{ backgroundColor: 'var(--plan-free-bg)' }}
+          >
+            Free
           </Badge>
         );
       }
