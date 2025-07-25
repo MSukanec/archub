@@ -238,9 +238,18 @@ function TasksContent() {
               description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
             }
           ]}
-          primaryActionLabel="Nuevo Tablero"
-          onPrimaryActionClick={() => openModal('board', {})}
-          customActions={[]}
+          customActions={[
+            <CustomRestricted 
+              key="nuevo-tablero"
+              feature="max_kanban_boards" 
+              current={boards.length}
+            >
+              <Button onClick={() => openModal('board', {})}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Tablero
+              </Button>
+            </CustomRestricted>
+          ]}
         />
 
         <EmptyState
@@ -248,10 +257,15 @@ function TasksContent() {
           title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
           action={
-            <Button onClick={() => openModal("board", {})}>
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Tablero
-            </Button>
+            <CustomRestricted 
+              feature="max_kanban_boards" 
+              current={boards.length}
+            >
+              <Button onClick={() => openModal("board", {})}>
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Tablero
+              </Button>
+            </CustomRestricted>
           }
         />
       </Layout>
@@ -323,14 +337,19 @@ function TasksContent() {
           }
         }}
         customActions={[
-          <Button 
+          <CustomRestricted 
             key="nuevo-tablero"
-            variant="secondary" 
-            onClick={() => openModal('board', {})}
+            feature="max_kanban_boards" 
+            current={boards.length}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Tablero
-          </Button>
+            <Button 
+              variant="secondary" 
+              onClick={() => openModal('board', {})}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Tablero
+            </Button>
+          </CustomRestricted>
         ]}
         budgetSelector={{
           budgets: boards,

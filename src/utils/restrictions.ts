@@ -43,6 +43,11 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     backgroundColor: 'hsl(271, 76%, 53%)',
     borderColor: 'hsl(271, 76%, 53%)',
   },
+  max_kanban_boards: {
+    message: "Has alcanzado el límite máximo de tableros Kanban para tu plan actual.",
+    actionLabel: "Actualizar plan",
+    actionUrl: "/billing",
+  },
   custom_templates: {
     message: "Las plantillas personalizadas están disponibles en el plan PRO.",
     actionLabel: "Actualizar plan",
