@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. ORGANIZATION ACTIVE CARD MEMBER AVATARS ENHANCED: Successfully added larger member avatars to the active organization card with improved visual hierarchy - COMPLETED
+  • ACTIVE CARD AVATARS: Added ActiveOrganizationMembersCard component displaying member avatars at w-12 h-12 (double size of row avatars)
+  • VISUAL POSITIONING: Positioned avatars above badge area on right side of active organization card for better visual balance
+  • ENHANCED SIZE DISPLAY: Shows up to 4 member avatars with +N counter for additional members, using larger font sizing for improved readability
+  • LAYOUT REORGANIZATION: Restructured card layout with flex-col items-end for proper avatar placement above plan and status information
+  • BORDER STYLING: Member avatars use card background color border (--card-bg) for seamless integration with card design
 - July 25, 2025. PROFILE ORGANIZATIONS PAGE STANDARDIZATION COMPLETED: Successfully implemented ActionBar system, uniform column layout, and enhanced member avatar display - COMPLETED
   • ACTIONBAR INTEGRATION: Added ActionBarDesktop to ProfileOrganizations with "Gestión de Organizaciones" title, Building icon, and 4 detailed features about administration, members, plans, and analytics
   • COLUMN STANDARDIZATION: Changed from grid-cols-10 (5 cols for organization name) to grid-cols-6 with equal width distribution for all columns
