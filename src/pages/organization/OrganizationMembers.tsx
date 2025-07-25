@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import { MemberCard } from "@/components/cards/MemberCard";
 
@@ -226,8 +227,18 @@ export default function OrganizationMembers() {
         <ActionBarDesktop
           title="Gestión de Miembros"
           icon={<Users className="h-5 w-5" />}
-          primaryActionLabel="Invitar miembro"
-          onPrimaryActionClick={() => openModal('member')}
+          customActions={[
+            <CustomRestricted 
+              key="invite-member"
+              feature="max_members" 
+              current={members.length}
+            >
+              <Button onClick={() => openModal('member')}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invitar miembro
+              </Button>
+            </CustomRestricted>
+          ]}
           features={[
             {
               icon: <Users className="h-4 w-4" />,
