@@ -142,19 +142,15 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     return filtered;
   }, [tasks, searchQuery, rubroFilter]);
 
-  // Funciones de selección
-  const handleTaskSelection = (taskId: string, isSelected: boolean) => {
-    if (isSelected) {
-      const task = tasks?.find(t => t.id === taskId);
-      if (task && !selectedTasks.some(t => t.task_id === taskId)) {
-        setSelectedTasks(prev => [...prev, {
-          task_id: taskId,
-          quantity: 1,
-          phase_instance_id: ''
-        }]);
-      }
-    } else {
-      setSelectedTasks(prev => prev.filter(t => t.task_id !== taskId));
+  // Funciones de selección - siempre agrega, permite duplicados
+  const handleTaskSelection = (taskId: string) => {
+    const task = tasks?.find(t => t.id === taskId);
+    if (task) {
+      setSelectedTasks(prev => [...prev, {
+        task_id: taskId,
+        quantity: 1,
+        phase_instance_id: ''
+      }]);
     }
   };
 
@@ -302,24 +298,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
           {/* Filtros inline arriba */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="phaseFilter">Fase</Label>
-              <Select value={phaseFilter} onValueChange={setPhaseFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona una fase" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Todas las fases</SelectItem>
-                  {projectPhases.map(phase => (
-                    <SelectItem key={phase.phase?.id} value={phase.phase?.id || ''}>
-                      {phase.phase?.name || 'Sin nombre'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="rubroFilter">Filtrar</Label>
+              <Label htmlFor="rubroFilter">Filtrar por Rubro</Label>
               <ComboBox
                 value={rubroFilter}
                 onValueChange={setRubroFilter}
@@ -328,20 +307,19 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                 emptyText="No hay rubros disponibles"
               />
             </div>
-          </div>
-          
-          {/* Búsqueda */}
-          <div>
-            <Label htmlFor="search">Búsqueda</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="search"
-                placeholder="Buscar por nombre de tarea..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            
+            <div>
+              <Label htmlFor="search">Búsqueda</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Buscar por nombre de tarea..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
           </div>
 
@@ -378,13 +356,11 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                   </div>
                 ) : (
                   filteredTasks.map((task) => {
-                    const isSelected = selectedTasks.some(t => t.task_id === task.id);
-                    
                     return (
                       <div 
                         key={task.id} 
-                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isSelected ? 'bg-[hsl(var(--accent))]/10 border-l-4 border-l-[hsl(var(--accent))]' : ''}`}
-                        onClick={() => handleTaskSelection(task.id, !isSelected)}
+                        className="py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors"
+                        onClick={() => handleTaskSelection(task.id)}
                       >
                         <div className="text-sm leading-tight line-clamp-2">
                           {task.display_name || 'Sin nombre'}
@@ -430,20 +406,20 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     <div className="text-sm">Selecciona tareas de la columna izquierda</div>
                   </div>
                 ) : (
-                  selectedTasks.map((selectedTask) => {
+                  selectedTasks.map((selectedTask, index) => {
                     const task = tasks?.find(t => t.id === selectedTask.task_id);
                     if (!task) return null;
                     
                     return (
-                      <div key={selectedTask.task_id} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "auto 1fr auto auto"}}>
+                      <div key={`${selectedTask.task_id}-${index}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "auto 1fr auto auto"}}>
                         {/* Fase Select */}
                         <div className="w-20">
                           <select
                             value={selectedTask.phase_instance_id || ''}
                             onChange={(e) => {
                               setSelectedTasks(prev => 
-                                prev.map(t => 
-                                  t.task_id === selectedTask.task_id 
+                                prev.map((t, i) => 
+                                  i === index 
                                     ? { ...t, phase_instance_id: e.target.value }
                                     : t
                                 )
@@ -478,8 +454,8 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                             onChange={(e) => {
                               const newQuantity = parseFloat(e.target.value) || 0;
                               setSelectedTasks(prev => 
-                                prev.map(t => 
-                                  t.task_id === selectedTask.task_id 
+                                prev.map((t, i) => 
+                                  i === index 
                                     ? { ...t, quantity: newQuantity }
                                     : t
                                 )
@@ -497,7 +473,9 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            onClick={() => handleTaskSelection(selectedTask.task_id, false)}
+                            onClick={() => {
+                              setSelectedTasks(prev => prev.filter((_, i) => i !== index));
+                            }}
                           >
                             <X className="h-3 w-3" />
                           </Button>
