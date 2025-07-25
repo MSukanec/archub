@@ -356,11 +356,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
       <div 
-        className="fixed bottom-0 left-0 right-0 rounded-t-xl flex flex-col overflow-hidden"
+        className="fixed inset-0 flex flex-col overflow-hidden"
         style={{ 
-          backgroundColor: 'var(--menues-bg)', 
-          height: '85vh',
-          marginTop: '15vh'
+          backgroundColor: 'var(--menues-bg)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -398,7 +396,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   {item.restricted ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
+                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
                         disabled
                       >
                         <item.icon className="h-5 w-5" />
@@ -410,7 +408,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <button
                       onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
                       className={cn(
-                        "flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors",
+                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl transition-colors",
                         item.isActive 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
@@ -432,7 +430,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   {item.restricted ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        className="flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
+                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
                         disabled
                       >
                         <item.icon className="h-5 w-5" />
@@ -446,7 +444,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         onClose();
                       }}
                       className={cn(
-                        "flex w-full items-center gap-3 px-3 py-3 text-left text-base font-medium rounded-xl transition-colors",
+                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl transition-colors",
                         location === item.href 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
