@@ -122,18 +122,8 @@ export function HeaderMobile({
   return (
     <>
       <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-[var(--layout-border)] bg-[var(--layout-bg)]">
-        {/* Left: Menu Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={openMenu}
-          className="p-2"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
-
-        {/* Center: Title or Search */}
-        <div className="flex-1 flex items-center justify-center px-4">
+        {/* Left: Title */}
+        <div className="flex-1 flex items-center justify-start px-2">
           {showSearch && isSearchOpen ? (
             <div className="flex items-center space-x-2 w-full max-w-sm">
               <Input
@@ -161,14 +151,14 @@ export function HeaderMobile({
                   {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType)}
                 </div>
               )}
-              <h1 className="text-lg font-semibold text-[var(--layout-text)] truncate">
+              <h1 className="text-lg font-normal text-[var(--layout-text)] truncate">
                 {title || getCurrentSectionLabel()}
               </h1>
             </div>
           )}
         </div>
 
-        {/* Right: Search and Actions */}
+        {/* Right: Search, Actions and Menu Button */}
         <div className="flex items-center space-x-1">
           {showSearch && !isSearchOpen && (
             <Button
@@ -212,10 +202,23 @@ export function HeaderMobile({
           {actions.length > 0 && !isSearchOpen && (
             <div>{actions[0]}</div>
           )}
+
+          {/* Menu Button - Siempre a la derecha */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={openMenu}
+            className="p-2"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
         </div>
       </div>
 
-      {/* Mobile Menu renderizado desde Header.tsx - no duplicar aquí */}
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMenu} />
+      )}
     </>
   );
 }
