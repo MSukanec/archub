@@ -419,7 +419,7 @@ export function ConstructionTaskFormModal({
       <div className="flex-1 min-h-0">
         <div className="border-0 border-t border-b">
           {/* Table Header */}
-          <div className="grid gap-1.5 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 140px 1fr"}}>
+          <div className="grid gap-1.5 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 1fr"}}>
             <div className="flex items-center justify-start">
               <Checkbox
                 checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
@@ -432,7 +432,6 @@ export function ConstructionTaskFormModal({
                 }}
               />
             </div>
-            <div className="text-xs font-semibold">RUBRO</div>
             <div className="text-xs font-medium">TAREA</div>
           </div>
 
@@ -449,7 +448,7 @@ export function ConstructionTaskFormModal({
                   const selectedTask = selectedTasks.find(t => t.task_id === task.id);
                   
                   return (
-                    <div key={task.id} className="grid gap-1.5 py-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 140px 1fr"}}>
+                    <div key={task.id} className="grid gap-1.5 py-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 1fr"}}>
                       {/* Checkbox Column */}
                       <div className="flex items-start justify-start pt-1">
                         <Checkbox
@@ -458,21 +457,13 @@ export function ConstructionTaskFormModal({
                         />
                       </div>
 
-                      {/* Rubro Column - Optimizado */}
-                      <div>
-                        <div className="text-sm font-bold leading-tight">
-                          {task.rubro_name || 'Sin rubro'}
-                        </div>
-                      </div>
-
                       {/* Task Name Column */}
                       <div>
                         <div className="text-sm leading-tight line-clamp-2">
                           {task.display_name || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {task.category_name || 'Sin categoría'}
-                          {console.log('Task data for unit:', task)}
+                          <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
                         </div>
                       </div>
                     </div>
