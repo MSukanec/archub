@@ -85,9 +85,19 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   const { generatedTask } = modalData || {};
   const isEditing = !!generatedTask;
   
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const [paramValues, setParamValues] = useState<Record<string, any>>({});
-  const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
+  console.log('🔧 Modal opening with data:', {
+    isEditing,
+    generatedTask: generatedTask ? {
+      id: generatedTask.id,
+      template_id: generatedTask.template_id,
+      param_values: generatedTask.param_values
+    } : null
+  });
+  
+  // Initialize states with edit data immediately if available
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(generatedTask?.template_id || "");
+  const [paramValues, setParamValues] = useState<Record<string, any>>(generatedTask?.param_values || {});
+  const [createdTaskId, setCreatedTaskId] = useState<string | null>(generatedTask?.id || null);
   const [newMaterial, setNewMaterial] = useState<{ material_id: string; amount: number }>({
     material_id: "",
     amount: 1
@@ -111,9 +121,9 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   const form = useForm<GeneratedTaskFormData>({
     resolver: zodResolver(generatedTaskSchema),
     defaultValues: {
-      template_id: '',
-      is_public: false,
-      param_values: {}
+      template_id: generatedTask?.template_id || '',
+      is_public: generatedTask?.is_public || false,
+      param_values: generatedTask?.param_values || {}
     }
   });
 
@@ -159,55 +169,46 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   }, [parameters]);
 
-  // Initialize form when editing - SIMPLE approach like the original
+  // Convert param values when options are loaded (only needed for edit mode)
   useEffect(() => {
-    if (generatedTask) {
-      // FIRST: Set template and create task ID
-      setSelectedTemplateId(generatedTask.template_id);
-      setCreatedTaskId(generatedTask.id);
+    if (generatedTask && parameterOptions && Object.keys(parameterOptions).length > 0 && parameters) {
+      console.log('🔧 Converting param values for edit mode:', {
+        paramValues: generatedTask.param_values,
+        availableOptions: Object.keys(parameterOptions),
+        parametersCount: parameters.length
+      });
       
-      // SECOND: Set param values directly - store as IDs for Select components
-      if (generatedTask.param_values && parameterOptions && Object.keys(parameterOptions).length > 0) {
-        const convertedValues: Record<string, string> = {};
-        
-        Object.entries(generatedTask.param_values).forEach(([paramName, storedValue]) => {
-          const param = parameters?.find(p => p.name === paramName);
-          if (param && parameterOptions[param.id]) {
-            // Find matching option - this converts compressed values to IDs
-            const options = parameterOptions[param.id];
-            const matchingOption = options.find(opt => 
-              opt.id === storedValue || 
-              opt.label === storedValue ||
-              opt.label.toLowerCase().includes(storedValue.toString().toLowerCase())
-            );
-            
-            convertedValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
-          } else {
-            convertedValues[paramName] = storedValue.toString();
-          }
-        });
-        
+      const convertedValues: Record<string, string> = {};
+      
+      Object.entries(generatedTask.param_values || {}).forEach(([paramName, storedValue]) => {
+        const param = parameters?.find(p => p.name === paramName);
+        if (param && parameterOptions[param.id]) {
+          // Find matching option - this converts compressed values to IDs
+          const options = parameterOptions[param.id];
+          const matchingOption = options.find(opt => 
+            opt.id === storedValue || 
+            opt.label === storedValue ||
+            opt.label.toLowerCase().includes(storedValue.toString().toLowerCase())
+          );
+          
+          convertedValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
+          
+          console.log('🔧 Converted parameter:', {
+            paramName,
+            storedValue,
+            foundOption: matchingOption?.label,
+            convertedValue: convertedValues[paramName]
+          });
+        } else {
+          convertedValues[paramName] = storedValue.toString();
+        }
+      });
+      
+      // Only update if we actually converted something
+      if (Object.keys(convertedValues).length > 0) {
         setParamValues(convertedValues);
         form.setValue('param_values', convertedValues);
-      } else {
-        setParamValues(generatedTask.param_values || {});
-        form.setValue('param_values', generatedTask.param_values || {});
       }
-      
-      // THIRD: Set form values
-      form.setValue('template_id', generatedTask.template_id);
-      form.setValue('is_public', generatedTask.is_public);
-      
-    } else {
-      // Reset for create mode
-      setSelectedTemplateId('');
-      setParamValues({});
-      setCreatedTaskId(null);
-      form.reset({
-        template_id: '',
-        is_public: false,
-        param_values: {}
-      });
     }
   }, [generatedTask, parameterOptions, parameters, form]);
 
