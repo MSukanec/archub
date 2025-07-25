@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { AvatarUploader } from '@/components/ui-custom/AvatarUploader';
 import { Label } from '@/components/ui/label';
@@ -264,7 +265,7 @@ export default function OrganizationBasicData() {
   // Get organization initials for avatar fallback
   const getOrganizationInitials = () => {
     const name = organizationName || organizationInfo?.name || 'ORG';
-    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map((word: string) => word.charAt(0)).join('').toUpperCase().slice(0, 2);
   };
 
   // Set sidebar context
@@ -275,15 +276,42 @@ export default function OrganizationBasicData() {
   return (
     <Layout 
       headerProps={{ 
-        title: "Datos Básicos",
-        breadcrumb: [
-          { label: "Organización", href: "/organization/dashboard" },
-          { label: "Datos Básicos" }
-        ]
+        title: "Datos Básicos"
       }}
     >
       <div className="space-y-6">
-        {/* FeatureIntroduction */}
+        {/* ActionBar - Desktop Only */}
+        <ActionBarDesktop 
+          title="Datos Básicos"
+          icon={<Building2 className="h-5 w-5" />}
+          showProjectSelector={false}
+          showSearch={false}
+          showGrouping={false}
+          features={[
+            {
+              icon: <FileText className="w-4 h-4" />,
+              title: "Información completa de la organización",
+              description: "Centraliza toda la información fundamental de tu organización en un solo lugar. Desde nombre y descripción hasta datos fiscales, mantén todos los datos organizados y actualizados automáticamente."
+            },
+            {
+              icon: <Users className="w-4 h-4" />,
+              title: "Datos de contacto integrados",
+              description: "Almacena la información de contacto de la organización. Teléfonos, emails y sitio web siempre disponibles para todo el equipo cuando los necesiten."
+            },
+            {
+              icon: <MapPin className="w-4 h-4" />,
+              title: "Ubicación y datos legales",
+              description: "Define la ubicación exacta de la organización y los datos fiscales. Esta información se usa automáticamente en documentos oficiales y comunicaciones."
+            },
+            {
+              icon: <Globe className="w-4 h-4" />,
+              title: "Configuración automática",
+              description: "Guarda automáticamente los cambios mientras escribes. Sin necesidad de hacer clic en botones, toda la información se mantiene sincronizada."
+            }
+          ]}
+        />
+
+        {/* FeatureIntroduction - Mobile Only */}
         <FeatureIntroduction
           title="Datos Básicos"
           icon={<Building2 className="w-5 h-5" />}
@@ -302,6 +330,11 @@ export default function OrganizationBasicData() {
               icon: <MapPin className="w-5 h-5" />,
               title: "Ubicación y datos legales",
               description: "Define la ubicación exacta de la organización y los datos fiscales. Esta información se usa automáticamente en documentos oficiales y comunicaciones."
+            },
+            {
+              icon: <Globe className="w-5 h-5" />,
+              title: "Configuración automática",
+              description: "Guarda automáticamente los cambios mientras escribes. Sin necesidad de hacer clic en botones, toda la información se mantiene sincronizada."
             }
           ]}
         />
