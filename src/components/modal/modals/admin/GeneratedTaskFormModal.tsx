@@ -31,7 +31,7 @@ import {
 import { useMaterials } from '@/hooks/use-materials';
 import { useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useUpdateTaskMaterial } from '@/hooks/use-generated-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
+import { generateTaskDescription, generatePreviewDescription } from '@/utils/taskDescriptionGenerator';
 import { supabase } from '@/lib/supabase';
 
 // Simple ParameterField component - following original approach
@@ -239,34 +239,20 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     form.setValue('param_values', newParamValues);
   };
 
-  // Generate task description using the EXACT original approach
+  // Use the original working function from utils
   const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
     if (!parameters) return "Seleccione los parámetros para ver la vista previa";
 
     const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
     if (!currentTemplate) return "Seleccione una plantilla";
 
-    let fragments: string[] = [];
-
-    parameters
-      .sort((a, b) => a.position - b.position)
-      .forEach(param => {
-        const rawValue = paramValues[param.name];
-        if (!rawValue) return;
-
-        // Buscar label para select
-        let label = rawValue.toString();
-        const option = parameterOptions[param.id]?.find(opt => opt.id === rawValue);
-        if (option?.label) label = option.label;
-
-        // Aplicar plantilla del parámetro
-        const expr = param.expression_template || '{value}';
-        const fragment = expr.replace('{value}', label);
-
-        fragments.push(fragment);
-      });
-
-    return `${currentTemplate.name} ${fragments.join(' ')}.`.trim();
+    // Use the original working generatePreviewDescription function
+    return generatePreviewDescription(
+      currentTemplate.name || currentTemplate.name_template || "",
+      paramValues,
+      parameters,
+      parameterOptions
+    );
   };
 
   // Handle form submission
