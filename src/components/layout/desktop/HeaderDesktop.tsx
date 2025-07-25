@@ -118,7 +118,7 @@ export function HeaderDesktop({
   const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances");
 
   return (
-    <div className="hidden md:flex items-center justify-between h-14 px-6 border-b border-[var(--layout-border)] bg-[var(--layout-bg)]">
+    <div className="hidden md:flex items-center justify-between h-14 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)]">
       {/* Left: Breadcrumb */}
       <div className="flex items-center space-x-2 text-sm text-[var(--layout-text)]">
         {/* Organization */}

@@ -125,6 +125,8 @@ Archub is a modern construction management platform built with a React frontend 
   • POPOVER SIZING ENHANCED: Organization and Project selector popovers in mobile menu footer now occupy half screen height (h-[50vh]) instead of small max-h-48
   • HEADER.TSX CLEANUP: Removed unused Header.tsx component from desktop layout after confirming no dependencies
   • MOBILE BUTTON POSITIONING: Mobile menu button properly positioned on right side of header with Menu icon for easy access
+  • HEADER STYLING SYNCHRONIZED: HeaderMobile.tsx and HeaderDesktop.tsx now use same border color (var(--menues-border)) and padding (px-4) as MobileMenu for visual consistency
+  • TITLE STYLING IMPROVED: Mobile header title positioned left with font-normal (no bold) for cleaner appearance
   • CLEAN ARCHITECTURE: Separated mobile (HeaderMobile.tsx + MobileMenu.tsx) and desktop (HeaderDesktop.tsx) header systems for better maintainability
 - July 25, 2025. PLAN BADGES STANDARDIZATION AND ACTIVE CARD FIXES COMPLETED: Successfully fixed hardcoded badges, implemented consistent plan styling, and restored member avatars display - COMPLETED
   • HARDCODED BADGE FIXED: Removed hardcoded "Free" badge from active organization card, now uses real data from userData.organization.plan?.name
