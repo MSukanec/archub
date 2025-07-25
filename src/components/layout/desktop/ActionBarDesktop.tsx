@@ -6,6 +6,7 @@ import { Tabs } from '@/components/ui-custom/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Selector } from '@/components/ui-custom/Selector'
 import { ProjectSelector } from '@/components/navigation/ProjectSelector'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { cn } from '@/lib/utils'
 
 interface BudgetSelectorProps {
@@ -46,6 +47,12 @@ interface ActionBarDesktopProps {
   onGroupingChange?: (type: string) => void
   primaryActionLabel?: string
   onPrimaryActionClick?: () => void
+  primaryActionRestriction?: {
+    reason?: "coming_soon" | "general_mode" | string
+    feature?: string
+    current?: number
+    functionName?: string
+  }
   customActions?: React.ReactNode[]
   budgetSelector?: BudgetSelectorProps
   tabs?: Tab[]
@@ -74,6 +81,7 @@ export function ActionBarDesktop({
   onGroupingChange,
   primaryActionLabel,
   onPrimaryActionClick,
+  primaryActionRestriction,
   customActions = [],
   budgetSelector,
   tabs,
@@ -358,12 +366,19 @@ export function ActionBarDesktop({
 
         {/* 4. PRIMARY BUTTON (rightmost position) */}
         {primaryActionLabel && onPrimaryActionClick && (
-          <Button
-            onClick={onPrimaryActionClick}
+          <CustomRestricted
+            reason={primaryActionRestriction?.reason}
+            feature={primaryActionRestriction?.feature}
+            current={primaryActionRestriction?.current}
+            functionName={primaryActionRestriction?.functionName || primaryActionLabel}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            {primaryActionLabel}
-          </Button>
+            <Button
+              onClick={onPrimaryActionClick}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {primaryActionLabel}
+            </Button>
+          </CustomRestricted>
         )}
         </div>
       </div>

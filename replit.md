@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. PROJECT RESTRICTION APPLIED TO BITÁCORA BUTTONS: Successfully added general_mode restriction to "NUEVA BITÁCORA" button preventing use without project selection - COMPLETED
+  • ACTIONBAR RESTRICTION ENHANCED: Extended ActionBarDesktop component with primaryActionRestriction prop supporting reason, feature, current, and functionName parameters
+  • BITÁCORA BUTTON RESTRICTED: Applied reason="general_mode" restriction to primary action button in ConstructionLogs.tsx ActionBar
+  • EMPTYSTATE BUTTON RESTRICTED: Applied same restriction to "Crear Primera Entrada" button in EmptyState component
+  • RESTRICTION INTERFACE IMPLEMENTED: Added primaryActionRestriction interface to ActionBarDesktop for consistent restriction handling across all construction pages
+  • CUSTOMRESTRICTED INTEGRATION: Wrapped primary button with CustomRestricted component to show proper restriction popover when no project selected
+  • FUNCTIONALITY PRESERVED: All button functionality maintained while adding proper project selection requirement enforcement
 - July 25, 2025. ACTIVITY PAGE ACTIONBAR AND USERSELECTOR REFINEMENT COMPLETED: Successfully implemented ActionBar system in Organization Activity page and refined UserSelector component - COMPLETED
   • ACTIVITY ACTIONBAR INTEGRATED: Added complete ActionBarDesktop to OrganizationActivity.tsx with search functionality and member filtering capabilities
   • BUTTON ELIMINATION: Removed "VER MOVIMIENTOS" button from EmptyState as requested - page now shows clean empty state without unnecessary actions

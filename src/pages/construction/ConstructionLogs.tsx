@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -516,6 +517,10 @@ export default function ConstructionLogs() {
         onSearchChange={setSearchValue}
         primaryActionLabel="Nueva Bitácora"
         onPrimaryActionClick={() => openModal('site-log')}
+        primaryActionRestriction={{
+          reason: "general_mode",
+          functionName: "Nueva Bitácora"
+        }}
         customFilters={customFilters}
         onClearFilters={clearFilters}
         tabs={[
@@ -544,10 +549,12 @@ export default function ConstructionLogs() {
           }
           action={
             !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-              <Button onClick={() => openModal('site-log')}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Primera Entrada
-              </Button>
+              <CustomRestricted reason="general_mode" functionName="Crear Primera Entrada">
+                <Button onClick={() => openModal('site-log')}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Primera Entrada
+                </Button>
+              </CustomRestricted>
             )
           }
         />
