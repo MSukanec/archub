@@ -277,14 +277,7 @@ export default function AdminTaskParameters() {
               ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
             }
-            action={
-              !searchTerm && (
-                <Button onClick={() => openModal('task-parameter', {})}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primer Parámetro
-                </Button>
-              )
-            }
+
           />
         ) : (
           <>

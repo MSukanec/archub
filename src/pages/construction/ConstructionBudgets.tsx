@@ -518,14 +518,6 @@ export default function ConstructionBudgets() {
             ? 'Prueba ajustando los filtros de búsqueda' 
             : 'Comienza creando tu primer presupuesto para gestionar los costos del proyecto'
           }
-          action={
-            !searchValue && (
-              <Button onClick={() => openModal('budget', {})}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Primer Presupuesto
-              </Button>
-            )
-          }
         />
       ) : (
         <>
@@ -823,14 +815,7 @@ export default function ConstructionBudgets() {
             ? 'Prueba ajustando los filtros de búsqueda' 
             : 'Comienza creando tu primer presupuesto para gestionar los costos del proyecto'
           }
-          action={
-            !searchValue && (
-              <Button onClick={() => openModal('budget', {})}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Primer Presupuesto
-              </Button>
-            )
-          }
+
         />
       ) : (
         <>

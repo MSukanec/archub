@@ -1534,15 +1534,6 @@ export default function Movements() {
             icon={<DollarSign className="h-12 w-12" />}
             title="No hay movimientos registrados"
             description="Crea el primer movimiento del proyecto"
-            action={
-              <Button
-                onClick={() => openModal('movement')}
-                className="mt-4"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo movimiento
-              </Button>
-            }
           />
         }
       />

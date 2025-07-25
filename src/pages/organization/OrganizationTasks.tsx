@@ -256,17 +256,6 @@ function TasksContent() {
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
           title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
-          action={
-            <CustomRestricted 
-              feature="max_kanban_boards" 
-              current={boards.length}
-            >
-              <Button onClick={() => openModal("board", {})}>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Tablero
-              </Button>
-            </CustomRestricted>
-          }
         />
       </Layout>
     );

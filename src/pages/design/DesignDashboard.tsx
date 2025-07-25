@@ -222,13 +222,6 @@ export default function DesignDashboard() {
                 <EmptyState 
                   title="Sin fases de diseño"
                   description="Crea fases para organizar el proceso de diseño del proyecto."
-                  action={
-                    <Link href="/design/timeline">
-                      <Button variant="outline" size="sm">
-                        Ir a Cronograma
-                      </Button>
-                    </Link>
-                  }
                 />
               )}
             </CardContent>
@@ -273,13 +266,6 @@ export default function DesignDashboard() {
                 <EmptyState 
                   title="Sin documentos registrados"
                   description="Sube documentos de diseño para ver la actividad aquí."
-                  action={
-                    <Link href="/design/documentation">
-                      <Button variant="outline" size="sm">
-                        Ir a Documentación
-                      </Button>
-                    </Link>
-                  }
                 />
               )}
             </CardContent>

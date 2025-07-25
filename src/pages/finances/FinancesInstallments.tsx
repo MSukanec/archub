@@ -1052,12 +1052,6 @@ export default function FinancesInstallments() {
             icon={<Receipt className="h-8 w-8" />}
             title="Aún no hay compromisos registrados"
             description="Esta sección muestra los compromisos de pago registrados en el proyecto."
-            action={
-              <Button onClick={handleAddInstallment}>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primer Compromiso
-              </Button>
-            }
           />
         ) : (
           <>
@@ -1160,14 +1154,6 @@ export default function FinancesInstallments() {
                   <EmptyState
                     title="No se encontraron compromisos"
                     description="No hay compromisos que coincidan con los filtros aplicados"
-                    action={
-                      hasActiveFilters ? (
-                        <Button onClick={handleClearFilters} variant="outline">
-                          <X className="h-4 w-4 mr-2" />
-                          Limpiar filtros
-                        </Button>
-                      ) : undefined
-                    }
                   />
                 )
               )}

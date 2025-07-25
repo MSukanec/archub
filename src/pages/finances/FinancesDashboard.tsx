@@ -83,14 +83,6 @@ export default function FinancesDashboard() {
           icon={<DollarSign className="h-12 w-12" />}
           title="Sin movimientos financieros registrados"
           description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."
-          action={
-            <Link href="/finances/movements">
-              <Button className="h-8 px-3 text-sm">
-                <Plus className="h-3 w-3 mr-1" />
-                Crear Primer Movimiento
-              </Button>
-            </Link>
-          }
         />
       </Layout>
     )

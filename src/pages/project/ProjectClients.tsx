@@ -347,12 +347,6 @@ export default function ProjectClients() {
             icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
             title="No hay clientes agregados"
             description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
-            action={
-              <Button onClick={() => openModal('project-client')}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Agregar Primer Cliente
-              </Button>
-            }
           />
         )}
       </div>

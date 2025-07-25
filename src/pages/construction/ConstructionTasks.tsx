@@ -238,12 +238,6 @@ export default function ConstructionTasks() {
           icon={<CheckSquare className="h-8 w-8" />}
           title="No hay tareas en el proyecto"
           description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
-          action={
-            <Button onClick={handleAddTask} className="mt-4">
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Primera Tarea
-            </Button>
-          }
         />
       ) : (
         <BudgetTable

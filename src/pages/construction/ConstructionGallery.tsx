@@ -549,19 +549,6 @@ export default function ConstructionGallery() {
             icon={<Filter />}
             title="No se encontraron archivos"
             description="Intenta cambiar los filtros para ver más resultados"
-            action={
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setSearchTerm('');
-                  setFileTypeFilter('all');
-                  setEntryTypeFilter('all');
-                }}
-              >
-                <FilterX className="h-4 w-4 mr-2" />
-                Limpiar Filtros
-              </Button>
-            }
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">

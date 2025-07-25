@@ -146,14 +146,7 @@ export default function ConstructionDashboard() {
               <EmptyState 
                 title="Sin actividad registrada"
                 description="Comienza registrando entradas en la bitácora de construcción para ver la actividad aquí."
-                action={
-                  <button 
-                    onClick={() => window.location.href = '/construction/logs'}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    Ir a Bitácora
-                  </button>
-                }
+
               />
             </CardContent>
           </Card>
@@ -166,14 +159,7 @@ export default function ConstructionDashboard() {
               <EmptyState 
                 title="Sin presupuestos creados"
                 description="Crea presupuestos para organizar y controlar los costos de tu proyecto."
-                action={
-                  <button 
-                    onClick={() => window.location.href = '/construction/budgets'}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    Crear Presupuesto
-                  </button>
-                }
+
               />
             </CardContent>
           </Card>

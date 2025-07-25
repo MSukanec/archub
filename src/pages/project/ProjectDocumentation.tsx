@@ -329,15 +329,6 @@ export default function ProjectDocumentation() {
           icon={<Package className="w-12 h-12" />}
           title="No hay grupos de documentos"
           description="Sube documentos para crear grupos organizados dentro de esta carpeta."
-          action={
-            <button
-              onClick={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId })}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
-            >
-              <Upload className="w-4 h-4" />
-              Subir Documentos
-            </button>
-          }
         />
       );
     }
@@ -368,15 +359,6 @@ export default function ProjectDocumentation() {
           icon={<FileText className="w-12 h-12" />}
           title="No hay documentos"
           description="Este grupo aún no tiene documentos subidos."
-          action={
-            <button
-              onClick={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId, defaultGroupId: selectedGroupId })}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
-            >
-              <Upload className="w-4 h-4" />
-              Subir Documentos
-            </button>
-          }
         />
       );
     }

@@ -127,12 +127,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
         icon={<List className="w-8 h-8 text-muted-foreground" />}
         title="No hay listas en este tablero"
         description="Crea tu primera lista para comenzar a organizar tareas"
-        action={
-          <Button onClick={onCreateList} className="h-8 px-3 text-sm">
-            <Plus className="h-3 w-3 mr-1" />
-            Crear Lista
-          </Button>
-        }
       />
     );
   }

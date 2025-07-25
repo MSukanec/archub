@@ -47,11 +47,6 @@ export default function ProjectDashboard() {
         <EmptyState
           title="No hay proyecto seleccionado"
           description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
-          action={
-            <Button onClick={() => window.location.href = "/organization/projects"}>
-              Ver Proyectos
-            </Button>
-          }
         />
       </Layout>
     )

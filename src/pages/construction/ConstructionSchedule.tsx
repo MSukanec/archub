@@ -563,12 +563,6 @@ export default function ConstructionSchedule() {
           icon={<Calendar className="h-8 w-8" />}
           title="No hay tareas en el cronograma"
           description="Comienza creando tareas para ver el cronograma del proyecto."
-          action={
-            <Button onClick={handleAddTask}>
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Primera Tarea
-            </Button>
-          }
         />
       ) : (
         <>
