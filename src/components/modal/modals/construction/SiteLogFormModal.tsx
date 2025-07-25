@@ -112,12 +112,13 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
       let siteLogResult;
       
-      if (data?.id) {
+      const siteLogId = data?.data?.id || data?.id;
+      if (siteLogId) {
         // Actualizando bitácora existente
         siteLogResult = await supabase
           .from('site_logs')
           .update(siteLogData)
-          .eq('id', data.id)
+          .eq('id', siteLogId)
           .select()
           .single();
       } else {
@@ -138,9 +139,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+      const siteLogId = data?.data?.id || data?.id;
       toast({
-        title: data?.id ? "Bitácora actualizada" : "Bitácora creada",
-        description: data?.id ? "La bitácora se ha actualizado correctamente." : "La nueva bitácora se ha creado correctamente."
+        title: siteLogId ? "Bitácora actualizada" : "Bitácora creada",
+        description: siteLogId ? "La bitácora se ha actualizado correctamente." : "La nueva bitácora se ha creado correctamente."
       });
       closeModal();
     },
@@ -181,22 +183,26 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   useEffect(() => {
     if (data) {
       console.log('📝 Cargando datos para edición:', { data });
+      // Los datos pueden venir anidados en data.data, normalizar
+      const siteLogData = data.data || data;
+      console.log('📝 Datos normalizados:', { siteLogData });
+      
       // Si estamos editando, cargar los datos existentes
       form.reset({
-        created_by: data.created_by || "", // Este ya es el organization_member.id correcto
-        log_date: data.log_date || new Date().toISOString().split('T')[0],
-        entry_type: data.entry_type || "avance_de_obra",
-        weather: data.weather || null,
-        comments: data.comments || "",
-        files: data.files || [],
-        events: data.events || [],
-        attendees: data.attendees || [],
-        equipment: data.equipment || []
+        created_by: siteLogData.created_by || "", // Este ya es el organization_member.id correcto
+        log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
+        entry_type: siteLogData.entry_type || "avance_de_obra",
+        weather: siteLogData.weather || null,
+        comments: siteLogData.comments || "",
+        files: siteLogData.files || [],
+        events: siteLogData.events || [],
+        attendees: siteLogData.attendees || [],
+        equipment: siteLogData.equipment || []
       });
-      setEvents(data.events || []);
-      setAttendees(data.attendees || []);
-      setEquipment(data.equipment || []);
-      setUploadedFiles(data.files || []);
+      setEvents(siteLogData.events || []);
+      setAttendees(siteLogData.attendees || []);
+      setEquipment(siteLogData.equipment || []);
+      setUploadedFiles(siteLogData.files || []);
     }
   }, [data, form]);
 
@@ -286,15 +292,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium">Fecha:</label>
-            <p className="text-sm text-muted-foreground">{data.log_date}</p>
+            <p className="text-sm text-muted-foreground">{(data.data || data).log_date}</p>
           </div>
           <div>
             <label className="text-sm font-medium">Tipo:</label>
-            <p className="text-sm text-muted-foreground">{data.entry_type}</p>
+            <p className="text-sm text-muted-foreground">{(data.data || data).entry_type}</p>
           </div>
           <div>
             <label className="text-sm font-medium">Comentarios:</label>
-            <p className="text-sm text-muted-foreground">{data.comments || "Sin comentarios"}</p>
+            <p className="text-sm text-muted-foreground">{(data.data || data).comments || "Sin comentarios"}</p>
           </div>
         </div>
       )}
