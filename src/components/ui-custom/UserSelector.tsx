@@ -1,66 +1,72 @@
 import React from "react";
-import { FolderOpen } from "lucide-react";
+import { ChevronDown, User } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface Project {
+interface User {
   id: string;
-  name: string;
+  full_name: string;
+  email: string;
+  avatar_url?: string;
 }
 
 interface UserSelectorProps {
-  projects: Project[];
-  onProjectSelect: (projectId: string | null) => void;
-  isExpanded: boolean;
-  onToggle: () => void;
+  users: User[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
   className?: string;
 }
 
 export default function UserSelector({
-  projects,
-  onProjectSelect,
-  isExpanded,
-  onToggle,
+  users,
+  value,
+  onChange,
+  placeholder = "Seleccionar usuario",
   className = ""
 }: UserSelectorProps) {
-  return (
-    <div className={`relative ${className}`}>
-      <button
-        onClick={onToggle}
-        className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-      >
-        <FolderOpen className="h-6 w-6" />
-      </button>
+  const selectedUser = users.find(user => user.id === value);
 
-      {isExpanded && (
-        <div 
-          className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
-          style={{ 
-            backgroundColor: 'var(--menues-bg)',
-            borderColor: 'var(--menues-border)',
-          }}
-        >
-          <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
-            Proyecto
-          </div>
-          {/* Opción "General" */}
-          <button
-            onClick={() => onProjectSelect(null)}
-            className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-            style={{ color: 'var(--menues-fg)' }}
-          >
-            General
-          </button>
-          {projects?.map((project) => (
-            <button
-              key={project.id}
-              onClick={() => onProjectSelect(project.id)}
-              className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-              style={{ color: 'var(--menues-fg)' }}
-            >
-              {project.name}
-            </button>
-          ))}
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className={className}>
+        <div className="flex items-center gap-2">
+          {selectedUser ? (
+            <>
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={selectedUser.avatar_url} />
+                <AvatarFallback className="text-xs">
+                  {selectedUser.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate">{selectedUser.full_name || selectedUser.email}</span>
+            </>
+          ) : (
+            <>
+              <User className="w-4 h-4 text-muted-foreground" />
+              <span className="text-muted-foreground">{placeholder}</span>
+            </>
+          )}
         </div>
-      )}
-    </div>
+      </SelectTrigger>
+      <SelectContent>
+        {users.map((user) => (
+          <SelectItem key={user.id} value={user.id}>
+            <div className="flex items-center gap-2">
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={user.avatar_url} />
+                <AvatarFallback className="text-xs">
+                  {user.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-medium">{user.full_name || 'Sin nombre'}</span>
+                <span className="text-xs text-muted-foreground">{user.email}</span>
+              </div>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

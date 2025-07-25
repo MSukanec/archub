@@ -177,7 +177,8 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
       onLeftClick={handleClose}
       rightLabel={isEditing ? 'Actualizar' : 'Guardar'}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={createListMutation.isPending || updateListMutation.isPending}
+      showLoadingSpinner={createListMutation.isPending || updateListMutation.isPending}
+      submitDisabled={createListMutation.isPending || updateListMutation.isPending}
     />
   );
 
