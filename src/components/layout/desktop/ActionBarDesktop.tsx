@@ -5,6 +5,7 @@ import { ExpandableSearchButton } from '@/components/ui/expandable-search-button
 import { Tabs } from '@/components/ui-custom/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Selector } from '@/components/ui-custom/Selector'
+import { ProjectSelector } from '@/components/navigation/ProjectSelector'
 import { cn } from '@/lib/utils'
 
 interface BudgetSelectorProps {
@@ -107,20 +108,24 @@ export function ActionBarDesktop({
                     {title}
                   </h2>
                 )}
+                {/* Help button right next to title */}
+                {features && features.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-muted-foreground hover:text-foreground p-2"
+                    title={isExpanded ? 'Ocultar información' : 'Click para más información'}
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               
-              {/* Expandable button - Only show if features exists */}
-              {features && features.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-muted-foreground hover:text-foreground p-2"
-                  title={isExpanded ? 'Ocultar información' : 'Click para más información'}
-                >
-                  <HelpCircle className="w-4 h-4" />
-                </Button>
-              )}
+              {/* Project Selector where the help button was */}
+              <div className="flex items-center">
+                <ProjectSelector />
+              </div>
             </div>
           </div>
 
