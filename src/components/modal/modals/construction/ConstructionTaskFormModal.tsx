@@ -16,6 +16,10 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
+import { useTaskGroups } from "@/hooks/use-task-groups";
+import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-templates";
+import { generateTaskDescription } from "@/utils/taskDescriptionGenerator";
+import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,9 +65,25 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const [groupingType, setGroupingType] = useState('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Estados para el subform de creación de tareas
+  const [selectedTaskGroupId, setSelectedTaskGroupId] = useState('');
+  const [paramValues, setParamValues] = useState<Record<string, any>>({});
+  const [taskPreview, setTaskPreview] = useState('');
+  const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
+  
   const { userData, currentMember } = useCurrentUser();
   const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
+  
+  // Hooks para el subform de creación de tareas
+  const { data: taskGroups = [] } = useTaskGroups();
+  const { data: templates = [] } = useTaskTemplates();
+  const { data: parameters = [] } = useTaskTemplateParameters(
+    templates.find(t => t.task_group_id === selectedTaskGroupId)?.id || null
+  );
+  
+  // Mutation para crear tareas generadas
+  const createGeneratedTaskMutation = useCreateGeneratedTask();
 
   // Hook para el formulario
   const form = useForm<AddTaskFormData>({
@@ -75,6 +95,133 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   });
 
   const { handleSubmit, watch, setValue } = form;
+
+  // Cargar opciones de parámetros cuando se selecciona un template
+  useEffect(() => {
+    const loadParameterOptions = async () => {
+      if (parameters.length === 0) return;
+      
+      const optionsMap: Record<string, any[]> = {};
+      
+      for (const param of parameters) {
+        try {
+          const { data, error } = await supabase
+            .from('task_parameter_values')
+            .select('*')
+            .eq('parameter_id', param.id);
+          
+          if (!error && data) {
+            optionsMap[param.id] = data.map(option => ({
+              id: option.id,
+              value: option.id,
+              label: option.label
+            }));
+          }
+        } catch (error) {
+          console.error('Error loading parameter options:', error);
+        }
+      }
+      
+      setParameterOptions(optionsMap);
+    };
+    
+    loadParameterOptions();
+  }, [parameters]);
+
+  // Actualizar vista previa cuando cambien los parámetros
+  useEffect(() => {
+    const updatePreview = async () => {
+      if (!selectedTaskGroupId || parameters.length === 0) {
+        setTaskPreview('');
+        return;
+      }
+      
+      const selectedTemplate = templates.find(t => t.task_group_id === selectedTaskGroupId);
+      if (!selectedTemplate?.name_template) {
+        setTaskPreview('');
+        return;
+      }
+      
+      try {
+        const preview = await generateTaskDescription(
+          selectedTemplate.name_template,
+          paramValues,
+          parameters,
+          parameterOptions
+        );
+        setTaskPreview(preview);
+      } catch (error) {
+        console.error('Error generating preview:', error);
+        setTaskPreview(selectedTemplate.name_template);
+      }
+    };
+    
+    updatePreview();
+  }, [selectedTaskGroupId, paramValues, parameters, parameterOptions, templates]);
+
+  // Función para crear y agregar tarea al modal
+  const handleCreateAndAddTask = async () => {
+    if (!selectedTaskGroupId || !taskPreview || parameters.length === 0) {
+      toast({
+        title: "Error",
+        description: "Debes completar todos los parámetros antes de crear la tarea.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedTemplate = templates.find(t => t.task_group_id === selectedTaskGroupId);
+    if (!selectedTemplate) {
+      toast({
+        title: "Error", 
+        description: "No se encontró el template seleccionado.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const newTaskData = {
+        template_id: selectedTemplate.id,
+        param_values: paramValues,
+        organization_id: modalData.organizationId,
+        unit_id: selectedTemplate.unit_id,
+        task_group_id: selectedTaskGroupId
+      };
+
+      const newTask = await createGeneratedTaskMutation.mutateAsync(newTaskData);
+      
+      // Agregar la tarea recién creada a las tareas seleccionadas
+      const newSelectedTask = {
+        task_id: newTask.id,
+        quantity: 1
+      };
+      
+      setSelectedTasks(prev => [...prev, newSelectedTask]);
+      
+      // Limpiar el subform
+      setSelectedTaskGroupId('');
+      setParamValues({});
+      setTaskPreview('');
+      setParameterOptions({});
+      
+      // Volver al panel principal
+      setCurrentSubform(null);
+      
+      toast({
+        title: "Tarea creada exitosamente",
+        description: `La tarea "${taskPreview}" ha sido agregada a tu selección.`
+      });
+
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast({
+        title: "Error al crear tarea",
+        description: "Hubo un problema al crear la tarea. Intenta nuevamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Query para obtener TODAS las tareas (task library)
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
@@ -687,17 +834,141 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       <div className="text-center">
         <div className="text-lg font-semibold mb-2">Crear Nueva Tarea</div>
         <div className="text-sm text-muted-foreground mb-6">
-          Aquí podrás crear una nueva tarea personalizada para tu proyecto
+          Selecciona un grupo de tareas y configura los parámetros para crear una tarea personalizada
         </div>
       </div>
       
-      <div className="text-center py-12 text-muted-foreground">
-        <div className="text-sm">
-          Funcionalidad de creación de tareas en desarrollo
+      {/* Selector de Grupo de Tareas */}
+      <div className="space-y-4">
+        <Label>Seleccionar Grupo de Tareas</Label>
+        <Select value={selectedTaskGroupId} onValueChange={setSelectedTaskGroupId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Elige un grupo de tareas..." />
+          </SelectTrigger>
+          <SelectContent>
+            {taskGroups.map((group) => (
+              <SelectItem key={group.id} value={group.id}>
+                {group.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Parámetros del Template */}
+      {selectedTaskGroupId && parameters.length > 0 && (
+        <div className="space-y-4">
+          <Separator />
+          <Label>Configurar Parámetros</Label>
+          
+          {parameters.map((param) => (
+            <div key={param.id} className="space-y-2">
+              <Label htmlFor={param.id}>{param.label}</Label>
+              
+              {param.type === 'select' && parameterOptions[param.id] ? (
+                <Select 
+                  value={paramValues[param.name] || ''}
+                  onValueChange={(value) => {
+                    setParamValues(prev => ({
+                      ...prev,
+                      [param.name]: value
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={`Seleccionar ${param.label.toLowerCase()}...`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parameterOptions[param.id].map((option) => (
+                      <SelectItem key={option.id} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : param.type === 'boolean' ? (
+                <Select 
+                  value={paramValues[param.name] || ''}
+                  onValueChange={(value) => {
+                    setParamValues(prev => ({
+                      ...prev,
+                      [param.name]: value === 'true'
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Sí</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id={param.id}
+                  type={param.type === 'number' ? 'number' : 'text'}
+                  placeholder={`Ingrese ${param.label.toLowerCase()}...`}
+                  value={paramValues[param.name] || ''}
+                  onChange={(e) => {
+                    const value = param.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value;
+                    setParamValues(prev => ({
+                      ...prev,
+                      [param.name]: value
+                    }));
+                  }}
+                />
+              )}
+            </div>
+          ))}
         </div>
-        <div className="text-xs mt-2">
-          Esta característica estará disponible próximamente
+      )}
+
+      {/* Vista Previa */}
+      {taskPreview && (
+        <div className="space-y-4">
+          <Separator />
+          <Label>Vista Previa de la Tarea</Label>
+          <div className="p-4 bg-muted rounded-lg border-2 border-dashed border-accent">
+            <div className="text-sm font-medium text-accent-foreground">
+              {taskPreview}
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Información de desarrollo temporal */}
+      {selectedTaskGroupId && parameters.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <div className="text-sm">
+            Este grupo de tareas no tiene parámetros configurados
+          </div>
+        </div>
+      )}
+
+      {/* Botones de acción */}
+      <div className="flex gap-3 pt-4 border-t">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => setCurrentSubform(null)}
+          className="flex-1"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Volver
+        </Button>
+        
+        {selectedTaskGroupId && taskPreview && parameters.length > 0 && (
+          <Button
+            type="button"
+            onClick={handleCreateAndAddTask}
+            disabled={createGeneratedTaskMutation.isPending}
+            className="flex-1"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {createGeneratedTaskMutation.isPending ? 'Creando...' : 'Crear y Agregar'}
+          </Button>
+        )}
       </div>
     </div>
   );
