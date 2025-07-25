@@ -55,11 +55,24 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       if (!supabase) throw new Error('Supabase not initialized');
       
       // Usar construction_gantt_view simplificada - sin rubros por ahora
+      console.log('🔍 FETCHING CONSTRUCTION TASKS:', {
+        projectId,
+        organizationId,
+        enabled: !!projectId && !!organizationId
+      });
+      
       const { data: ganttData, error } = await supabase
         .from('construction_gantt_view')
         .select('*')
         .eq('project_id', projectId)
         .order('phase_position', { ascending: true });
+        
+      console.log('📊 CONSTRUCTION GANTT QUERY RESULT:', {
+        projectId,
+        dataLength: ganttData?.length || 0,
+        error: error?.message,
+        firstRecord: ganttData?.[0]
+      });
 
       if (error) {
         console.error('Error fetching construction gantt view:', error);
@@ -67,6 +80,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       }
 
       if (!ganttData || ganttData.length === 0) {
+        console.log('No construction tasks found for project:', projectId);
         return [];
       }
 
