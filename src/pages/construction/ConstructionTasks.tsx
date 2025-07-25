@@ -40,8 +40,6 @@ export default function ConstructionTasks() {
   console.log('ConstructionTasks - organizationId:', organizationId)
   console.log('ConstructionTasks - tasks data:', tasks)
   console.log('ConstructionTasks - tasks length:', tasks.length)
-  console.log('ConstructionTasks - columns defined:', columns.length)
-  console.log('ConstructionTasks - actions column exists:', columns.find(col => col.key === 'actions'))
 
   // Filtrar tareas según búsqueda
   const filteredTasks = useMemo(() => {
