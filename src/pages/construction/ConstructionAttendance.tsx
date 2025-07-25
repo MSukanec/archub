@@ -199,6 +199,24 @@ export default function ConstructionAttendance() {
     setTriggerTodayCenter(prev => !prev)
   }
 
+  // Handle editing attendance - opens modal with existing data
+  const handleEditAttendance = (workerId: string, date: Date, existingAttendance?: any) => {
+    // Find the worker details
+    const worker = filteredWorkers.find(w => w.id === workerId);
+    if (!worker) return;
+
+    // Open the attendance modal with editing data
+    openModal('attendance', {
+      isEditing: true,
+      editingData: {
+        contactId: workerId,
+        contactName: worker.name,
+        attendanceDate: date,
+        existingRecord: existingAttendance
+      }
+    });
+  }
+
 
 
   // Custom filters for ActionBar - Only contact type filter
@@ -304,6 +322,7 @@ export default function ConstructionAttendance() {
             workers={filteredWorkers}
             attendance={filteredAttendance}
             triggerTodayCenter={triggerTodayCenter}
+            onEditAttendance={handleEditAttendance}
           />
         ) : (
           <EmptyState

@@ -27,13 +27,15 @@ interface CustomGradebookProps {
   attendance?: AttendanceRecord[]
   onExportAttendance?: () => void
   triggerTodayCenter?: boolean
+  onEditAttendance?: (workerId: string, date: Date, existingAttendance?: any) => void // New prop for editing attendance
 }
 
 const CustomGradebook: React.FC<CustomGradebookProps> = ({
   workers = [],
   attendance = [],
   onExportAttendance,
-  triggerTodayCenter = false
+  triggerTodayCenter = false,
+  onEditAttendance
 }) => {
   // Calculate date range automatically based on attendance data
   const { startDate, endDate } = React.useMemo(() => {
@@ -406,7 +408,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
-            scrollbarWidth: 'thick',
+            scrollbarWidth: 'auto',
             scrollbarColor: 'var(--accent) var(--table-header-bg)'
           }}
           onScroll={(e) => {
@@ -458,13 +460,24 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                               className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
                               style={{ width: '65px', minWidth: '65px' }}
                             >
-                              <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)}`}>
-                                {isWeekendDay && (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-xs text-gray-400">×</span>
-                                  </div>
-                                )}
-                              </div>
+                              {isWeekendDay ? (
+                                <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} flex items-center justify-center`}>
+                                  <span className="text-xs text-gray-400">×</span>
+                                </div>
+                              ) : (
+                                <button
+                                  className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} hover:scale-110 transition-transform duration-200 cursor-pointer border-2 border-transparent hover:border-white/30`}
+                                  onClick={() => {
+                                    if (onEditAttendance) {
+                                      const attendanceRecord = attendance.find(a => 
+                                        a.workerId === worker.id && a.day === format(date, 'yyyy-MM-dd')
+                                      );
+                                      onEditAttendance(worker.id, date, attendanceRecord);
+                                    }
+                                  }}
+                                  title={`Editar asistencia de ${worker.name} - ${format(date, 'dd/MM/yyyy')}`}
+                                />
+                              )}
                             </div>
                           )
                         })}
