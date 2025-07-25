@@ -829,7 +829,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
   // Subform para crear nuevas tareas
   const createTaskSubform = (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Título de sección de plantilla sin separador */}
       <div className="col-span-2">
         <div className="flex items-center gap-3 mb-4">
@@ -845,7 +845,6 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
       {/* Selector de Grupo de Tareas */}
       <div className="col-span-2">
-        <Label>Grupo de Tareas *</Label>
         <Select value={selectedTaskGroupId} onValueChange={setSelectedTaskGroupId}>
           <SelectTrigger>
             <SelectValue placeholder="Elige un grupo de tareas..." />
