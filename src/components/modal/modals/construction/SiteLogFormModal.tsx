@@ -110,6 +110,8 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         organization_id: currentUser?.organization?.id || ''
       };
 
+      console.log('💾 Saving site log data:', siteLogData);
+
       let siteLogResult;
       
       const siteLogId = data?.data?.id || data?.id;
@@ -131,11 +133,48 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       }
 
       if (siteLogResult.error) {
-        console.error('Error saving site log:', siteLogResult.error);
+        console.error('❌ Error saving site log:', siteLogResult.error);
         throw new Error(siteLogResult.error.message);
       }
 
-      return siteLogResult.data;
+      const savedSiteLog = siteLogResult.data;
+      console.log('✅ Site log saved successfully:', savedSiteLog);
+
+      // Ahora guardar los attendees si existen
+      if (formData.attendees && formData.attendees.length > 0) {
+        console.log('👥 Saving attendees for site log:', savedSiteLog.id);
+        
+        // Primero eliminar attendees existentes si estamos actualizando
+        if (siteLogId) {
+          await supabase
+            .from('site_log_attendees')
+            .delete()
+            .eq('site_log_id', savedSiteLog.id);
+        }
+
+        // Insertar nuevos attendees
+        const attendeesToInsert = formData.attendees.map(attendee => ({
+          site_log_id: savedSiteLog.id,
+          contact_id: attendee.contact_id,
+          contact_type: attendee.contact_type,
+          arrival_time: attendee.arrival_time,
+          departure_time: attendee.departure_time,
+          notes: attendee.notes
+        }));
+
+        const { error: attendeesError } = await supabase
+          .from('site_log_attendees')
+          .insert(attendeesToInsert);
+
+        if (attendeesError) {
+          console.error('❌ Error saving attendees:', attendeesError);
+          // No throw aquí para no fallar todo el proceso
+        } else {
+          console.log('✅ Attendees saved successfully');
+        }
+      }
+
+      return savedSiteLog;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
@@ -175,6 +214,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     if (!data && members && members.length > 0 && currentUser?.user?.id && !form.watch('created_by')) {
       const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
       if (currentMember) {
+        console.log('🔍 Setting default creator:', currentMember);
         form.setValue('created_by', currentMember.id);
       }
     }
@@ -188,7 +228,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       console.log('📝 Datos normalizados:', { siteLogData });
       
       // Si estamos editando, cargar los datos existentes
-      form.reset({
+      const resetValues = {
         created_by: siteLogData.created_by || "", // Este ya es el organization_member.id correcto
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
         entry_type: siteLogData.entry_type || "avance_de_obra",
@@ -198,7 +238,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         events: siteLogData.events || [],
         attendees: siteLogData.attendees || [],
         equipment: siteLogData.equipment || []
-      });
+      };
+      console.log('🔄 Resetting form with values:', resetValues);
+      form.reset(resetValues);
       setEvents(siteLogData.events || []);
       setAttendees(siteLogData.attendees || []);
       setEquipment(siteLogData.equipment || []);
@@ -274,8 +316,21 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   };
 
   const onSubmit = async (formData: SiteLogFormData) => {
-    console.log("Guardando bitácora:", formData);
-    siteLogMutation.mutate(formData);
+    console.log("💾 Guardando bitácora:", formData);
+    console.log("👥 Personal a guardar:", attendees);
+    console.log("📅 Eventos a guardar:", events);
+    console.log("🔧 Equipamiento a guardar:", equipment);
+    
+    // Agregar los datos adicionales al formulario
+    const completeFormData = {
+      ...formData,
+      events: events,
+      attendees: attendees,
+      equipment: equipment
+    };
+    
+    console.log("📋 Datos completos a enviar:", completeFormData);
+    siteLogMutation.mutate(completeFormData);
   };
 
   const isLoading = siteLogMutation.isPending;
