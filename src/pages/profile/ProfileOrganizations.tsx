@@ -490,20 +490,6 @@ export default function OrganizationManagement() {
                 <div className="flex flex-col items-end gap-2">
                   {/* Avatares de miembros más grandes */}
                   <ActiveOrganizationMembersCard members={activeOrgMembers} />
-                  {/* Badge del plan arriba del estado */}
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs text-white" 
-                    style={{
-                      backgroundColor: userData.organization.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                                     userData.organization.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                                     userData.organization.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                                     'var(--plan-free-bg)'
-                    }}
-                  >
-                    <Crown className="w-3 h-3 mr-1" />
-                    {userData.organization.plan?.name || 'Free'}
-                  </Badge>
                   <Badge variant="default" className="bg-[var(--accent)] text-white">
                     ACTIVA
                   </Badge>
