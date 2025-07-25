@@ -256,7 +256,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
 
         // Buscar label para select
         let label = rawValue.toString();
-        const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
+        const option = parameterOptions[param.id]?.find(opt => opt.id === rawValue);
         if (option?.label) label = option.label;
 
         // Aplicar plantilla del parámetro
@@ -376,16 +376,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                 <Select onValueChange={handleTemplateChange} value={field.value || selectedTemplateId}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue 
-                        placeholder="Seleccionar plantilla"
-                        value={field.value || selectedTemplateId}
-                      >
-                        {/* Show the current template name if selected */}
-                        {(field.value || selectedTemplateId) && templates ? 
-                          templates.find(t => t.id === (field.value || selectedTemplateId))?.name || 'Plantilla seleccionada'
-                          : 'Seleccionar plantilla'
-                        }
-                      </SelectValue>
+                      <SelectValue placeholder="Seleccionar plantilla" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="z-[9999]">
