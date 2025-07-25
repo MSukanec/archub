@@ -11,7 +11,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter } from "lucide-react";
+import { Settings, Search, CheckSquare, Square, Filter, X } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
@@ -38,6 +38,7 @@ type AddTaskFormData = z.infer<typeof addTaskSchema>;
 interface SelectedTask {
   task_id: string;
   quantity: number;
+  phase_instance_id?: string;
 }
 
 interface ConstructionTaskFormModalProps {
@@ -415,11 +416,16 @@ export function ConstructionTaskFormModal({
         </div>
       </div>
 
-      {/* Área de tareas con scroll */}
-      <div className="flex-1 min-h-0">
-        <div className="border-0 border-t border-b">
+      {/* Layout de dos columnas */}
+      <div className="flex-1 min-h-0 grid grid-cols-2 gap-4">
+        {/* Columna Izquierda - Tareas Disponibles */}
+        <div className="border rounded-lg">
+          <div className="p-3 border-b bg-muted">
+            <h3 className="text-sm font-medium">Tareas Disponibles</h3>
+          </div>
+          
           {/* Table Header */}
-          <div className="grid gap-3 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 1fr"}}>
+          <div className="grid gap-3 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "auto 1fr"}}>
             <div className="flex items-center justify-start">
               <Checkbox
                 className="h-3.5 w-3.5"
@@ -437,7 +443,7 @@ export function ConstructionTaskFormModal({
           </div>
 
           {/* Table Body */}
-          <ScrollArea className="h-[400px]">
+          <ScrollArea className="h-[350px]">
             <div className="divide-y">
               {filteredTasks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
@@ -446,10 +452,9 @@ export function ConstructionTaskFormModal({
               ) : (
                 filteredTasks.map((task) => {
                   const isSelected = selectedTasks.some(t => t.task_id === task.id);
-                  const selectedTask = selectedTasks.find(t => t.task_id === task.id);
                   
                   return (
-                    <div key={task.id} className="grid gap-3 py-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 1fr"}}>
+                    <div key={task.id} className="grid gap-3 py-3 px-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 1fr"}}>
                       {/* Checkbox Column */}
                       <div className="flex items-start justify-start pt-1">
                         <Checkbox
@@ -467,6 +472,108 @@ export function ConstructionTaskFormModal({
                         <div className="text-xs text-muted-foreground mt-1">
                           <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
                         </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Columna Derecha - Tareas Seleccionadas */}
+        <div className="border rounded-lg">
+          <div className="p-3 border-b bg-muted">
+            <h3 className="text-sm font-medium">Tareas Seleccionadas ({selectedTasks.length})</h3>
+          </div>
+          
+          {/* Selected Tasks Header */}
+          <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "1fr auto auto auto"}}>
+            <div className="text-xs font-medium">TAREA</div>
+            <div className="text-xs font-medium w-16">CANT.</div>
+            <div className="text-xs font-medium w-20">FASE</div>
+            <div className="text-xs font-medium w-8"></div>
+          </div>
+
+          {/* Selected Tasks Body */}
+          <ScrollArea className="h-[350px]">
+            <div className="divide-y">
+              {selectedTasks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay tareas seleccionadas
+                </div>
+              ) : (
+                selectedTasks.map((selectedTask) => {
+                  const task = tasks?.find(t => t.id === selectedTask.task_id);
+                  if (!task) return null;
+                  
+                  return (
+                    <div key={selectedTask.task_id} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto auto auto"}}>
+                      {/* Task Name */}
+                      <div>
+                        <div className="text-sm leading-tight line-clamp-1">
+                          {task.display_name || 'Sin nombre'}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span>
+                        </div>
+                      </div>
+
+                      {/* Cantidad Input */}
+                      <div className="w-16">
+                        <Input
+                          type="number"
+                          value={selectedTask.quantity}
+                          onChange={(e) => {
+                            const newQuantity = parseFloat(e.target.value) || 0;
+                            setSelectedTasks(prev => 
+                              prev.map(t => 
+                                t.task_id === selectedTask.task_id 
+                                  ? { ...t, quantity: newQuantity }
+                                  : t
+                              )
+                            );
+                          }}
+                          className="h-8 text-xs"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+
+                      {/* Fase Select */}
+                      <div className="w-20">
+                        <select
+                          value={selectedTask.phase_instance_id || ''}
+                          onChange={(e) => {
+                            setSelectedTasks(prev => 
+                              prev.map(t => 
+                                t.task_id === selectedTask.task_id 
+                                  ? { ...t, phase_instance_id: e.target.value }
+                                  : t
+                              )
+                            );
+                          }}
+                          className="h-8 text-xs border rounded px-1 w-full"
+                        >
+                          <option value="">Fase</option>
+                          {projectPhases.map(phase => (
+                            <option key={phase.id} value={phase.id}>
+                              {phase.phase?.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Delete Button */}
+                      <div className="w-8">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleTaskSelection(selectedTask.task_id, false)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                   );
