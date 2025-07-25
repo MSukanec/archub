@@ -62,7 +62,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
-  const [expandedOrgSelector, setExpandedOrgSelector] = useState(false);
+
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
   // Estado local para forzar re-render
@@ -507,101 +507,56 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           )}
         </div>
 
-        {/* Footer with 2 icon buttons - Fixed at bottom */}
+        {/* Footer with project selector - Fixed at bottom */}
         <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Project Selector Button */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setExpandedOrgSelector(false); // Close organization selector
-                  setExpandedProjectSelector(!expandedProjectSelector);
-                }}
-                className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-              >
-                <FolderOpen className="h-6 w-6" />
-              </button>
+          {/* Project Selector Button - Full width */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setExpandedProjectSelector(!expandedProjectSelector);
+              }}
+              className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+            >
+              <FolderOpen className="h-6 w-6" />
+            </button>
 
-              {expandedProjectSelector && (
-                <div 
-                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
-                  style={{ 
-                    backgroundColor: 'var(--menues-bg)',
-                    borderColor: 'var(--menues-border)',
+            {expandedProjectSelector && (
+              <div 
+                className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
+                style={{ 
+                  backgroundColor: 'var(--menues-bg)',
+                  borderColor: 'var(--menues-border)',
+                }}
+              >
+                <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
+                  Proyecto
+                </div>
+                {/* Opción "General" */}
+                <button
+                  onClick={() => {
+                    projectMutation.mutate(null);
+                    setExpandedProjectSelector(false);
                   }}
+                  className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+                  style={{ color: 'var(--menues-fg)' }}
                 >
-                  <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
-                    Proyecto
-                  </div>
-                  {/* Opción "General" */}
+                  General
+                </button>
+                {projectsData?.map((project: any) => (
                   <button
+                    key={project.id}
                     onClick={() => {
-                      projectMutation.mutate(null);
+                      projectMutation.mutate(project.id);
                       setExpandedProjectSelector(false);
                     }}
                     className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
                     style={{ color: 'var(--menues-fg)' }}
                   >
-                    General
+                    {project.name}
                   </button>
-                  {projectsData?.map((project: any) => (
-                    <button
-                      key={project.id}
-                      onClick={() => {
-                        projectMutation.mutate(project.id);
-                        setExpandedProjectSelector(false);
-                      }}
-                      className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-                      style={{ color: 'var(--menues-fg)' }}
-                    >
-                      {project.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Organization Selector Button */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setExpandedProjectSelector(false); // Close project selector
-                  setExpandedOrgSelector(!expandedOrgSelector);
-                }}
-                className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-              >
-                <Building className="h-6 w-6" />
-              </button>
-
-              {expandedOrgSelector && (
-                <div 
-                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
-                  style={{ 
-                    backgroundColor: 'var(--menues-bg)',
-                    borderColor: 'var(--menues-border)',
-                  }}
-                >
-                  <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
-                    Organización
-                  </div>
-                  {sortedOrganizations.map((org: any) => (
-                    <button
-                      key={org.id}
-                      onClick={() => {
-                        organizationMutation.mutate(org.id);
-                        setExpandedOrgSelector(false);
-                      }}
-                      className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
-                      style={{ color: 'var(--menues-fg)' }}
-                    >
-                      {org.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

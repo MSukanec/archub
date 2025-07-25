@@ -1,70 +1,66 @@
-import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import React from "react";
+import { FolderOpen } from "lucide-react";
 
-interface User {
+interface Project {
   id: string;
-  user_id?: string; // Para organizationMembers que usan user_id
-  full_name?: string;
-  email?: string;
-  avatar_url?: string;
-  first_name?: string;
-  last_name?: string;
-  company_name?: string;
+  name: string;
 }
 
 interface UserSelectorProps {
-  users: User[];
-  value: string;
-  onChange: (value: string) => void;
-  label?: string;
-  placeholder?: string;
-  required?: boolean;
-  disabled?: boolean;
+  projects: Project[];
+  onProjectSelect: (projectId: string | null) => void;
+  isExpanded: boolean;
+  onToggle: () => void;
   className?: string;
-  showCompany?: boolean;
 }
 
 export default function UserSelector({
-  users = [],
-  value,
-  onChange,
-  label,
-  placeholder = "Seleccionar usuario",
-  required = false,
-  disabled = false,
-  className = "",
-  showCompany = false
+  projects,
+  onProjectSelect,
+  isExpanded,
+  onToggle,
+  className = ""
 }: UserSelectorProps) {
-  const selectedUser = users?.find(user => user.id === value);
-
-  const getUserDisplayName = (user: User) => {
-    const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
-    return showCompany && user.company_name ? `${fullName} (${user.company_name})` : fullName;
-  };
-
   return (
-    <div className={`space-y-2 ${className}`}>
-      {label && (
-        <Label>
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </Label>
-      )}
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger>
-          <SelectValue placeholder={placeholder}>
-            {selectedUser && getUserDisplayName(selectedUser)}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {users?.map((user) => (
-            <SelectItem key={user.id} value={user.id}>
-              {getUserDisplayName(user)}
-            </SelectItem>
+    <div className={`relative ${className}`}>
+      <button
+        onClick={onToggle}
+        className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+      >
+        <FolderOpen className="h-6 w-6" />
+      </button>
+
+      {isExpanded && (
+        <div 
+          className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
+          style={{ 
+            backgroundColor: 'var(--menues-bg)',
+            borderColor: 'var(--menues-border)',
+          }}
+        >
+          <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
+            Proyecto
+          </div>
+          {/* Opción "General" */}
+          <button
+            onClick={() => onProjectSelect(null)}
+            className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+            style={{ color: 'var(--menues-fg)' }}
+          >
+            General
+          </button>
+          {projects?.map((project) => (
+            <button
+              key={project.id}
+              onClick={() => onProjectSelect(project.id)}
+              className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-colors rounded-xl"
+              style={{ color: 'var(--menues-fg)' }}
+            >
+              {project.name}
+            </button>
           ))}
-        </SelectContent>
-      </Select>
+        </div>
+      )}
     </div>
   );
 }
