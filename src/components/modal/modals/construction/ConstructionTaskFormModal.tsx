@@ -18,7 +18,7 @@ import { useProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { useTaskGroups } from "@/hooks/use-task-groups";
 import { useTaskTemplates, useTaskTemplateParameters } from "@/hooks/use-task-templates";
-import { generateTaskDescription } from "@/utils/taskDescriptionGenerator";
+import { generateTaskDescription, generatePreviewDescription } from "@/utils/taskDescriptionGenerator";
 import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 
 import { toast } from "@/hooks/use-toast";
@@ -143,7 +143,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       }
       
       try {
-        const preview = await generateTaskDescription(
+        const preview = generatePreviewDescription(
           selectedTemplate.name_template,
           paramValues,
           parameters,
@@ -888,7 +888,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
             </div>
           </div>
 
-          {/* Parámetros dinámicos */}
+          {/* Parámetros dinámicos en dos columnas */}
           {parameters.map((param) => (
             <div key={param.id} className="space-y-2">
               <Label htmlFor={param.id}>{param.label}</Label>
