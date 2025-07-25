@@ -104,6 +104,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
+  const [hasInitialized, setHasInitialized] = useState(false);
   
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -179,8 +180,6 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   }, [parameters]);
 
   // Initialize edit mode values once when we have data
-  const [hasInitialized, setHasInitialized] = useState(false);
-  
   useEffect(() => {
     if (isEditing && generatedTask && !hasInitialized) {
       setSelectedTemplateId(generatedTask.template_id);
