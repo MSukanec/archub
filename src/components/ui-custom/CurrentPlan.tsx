@@ -56,14 +56,14 @@ export function CurrentPlan({
     return (
       <div className={cn(
         "w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
-        (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
-        userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
-        userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500",
+        (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--plan-free-bg)]",
+        userData?.plan?.name?.toLowerCase() === 'pro' && "border-[var(--plan-pro-bg)]",
+        userData?.plan?.name?.toLowerCase() === 'teams' && "border-[var(--plan-teams-bg)]",
         className
       )}>
-        {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--accent)] transition-all duration-150" />}
-        {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-blue-500 transition-all duration-150" />}
-        {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-purple-500 transition-all duration-150" />}
+        {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--plan-free-bg)] transition-all duration-150" />}
+        {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-[var(--plan-pro-bg)] transition-all duration-150" />}
+        {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-[var(--plan-teams-bg)] transition-all duration-150" />}
       </div>
     );
   }
@@ -71,9 +71,9 @@ export function CurrentPlan({
   return (
     <div className={cn(
       "w-full border-2 rounded-lg transition-all duration-150 ease-out",
-      (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
-      userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
-      userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500",
+      (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--plan-free-bg)]",
+      userData?.plan?.name?.toLowerCase() === 'pro' && "border-[var(--plan-pro-bg)]",
+      userData?.plan?.name?.toLowerCase() === 'teams' && "border-[var(--plan-teams-bg)]",
       styles.container,
       className
     )}>
@@ -82,9 +82,9 @@ export function CurrentPlan({
           "rounded-full border-2 bg-white flex items-center justify-center transition-all duration-150",
           styles.iconContainer
         )}>
-          {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className={cn(styles.icon, "text-[var(--accent)]")} />}
-          {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className={cn(styles.icon, "text-blue-500")} />}
-          {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className={cn(styles.icon, "text-purple-500")} />}
+          {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className={cn(styles.icon, "text-[var(--plan-free-bg)]")} />}
+          {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className={cn(styles.icon, "text-[var(--plan-pro-bg)]")} />}
+          {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className={cn(styles.icon, "text-[var(--plan-teams-bg)]")} />}
         </div>
         <span className={cn(styles.title, "font-medium text-gray-600")}>Plan actual:</span>
       </div>
@@ -93,9 +93,9 @@ export function CurrentPlan({
         <span className={cn(
           styles.planName,
           "font-semibold capitalize",
-          (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--accent)]",
-          userData?.plan?.name?.toLowerCase() === 'pro' && "text-blue-600",
-          userData?.plan?.name?.toLowerCase() === 'teams' && "text-purple-600"
+          (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "text-[var(--plan-free-bg)]",
+          userData?.plan?.name?.toLowerCase() === 'pro' && "text-[var(--plan-pro-bg)]",
+          userData?.plan?.name?.toLowerCase() === 'teams' && "text-[var(--plan-teams-bg)]"
         )}>
           {userData?.plan?.name || 'Free'}
         </span>
@@ -115,7 +115,7 @@ export function CurrentPlan({
           {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
             <button className={cn(
               "w-full rounded-lg font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-              "bg-[var(--accent)] hover:bg-[var(--accent)]/80",
+              "bg-[var(--plan-free-bg)] hover:bg-[var(--plan-free-bg)]/80",
               styles.button
             )}>
               <Zap className={styles.buttonIcon} />
@@ -123,19 +123,29 @@ export function CurrentPlan({
             </button>
           )}
           {userData?.plan?.name?.toLowerCase() === 'pro' && (
-            <button className={cn(
-              "w-full rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-              styles.button
-            )}>
+            <button 
+              className={cn(
+                "w-full rounded-lg font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
+                styles.button
+              )}
+              style={{backgroundColor: 'var(--plan-pro-bg)'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(213, 100%, 28%)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-pro-bg)'}
+            >
               <Crown className={styles.buttonIcon} />
               Actualizar a Teams
             </button>
           )}
           {userData?.plan?.name?.toLowerCase() === 'teams' && (
-            <button className={cn(
-              "w-full rounded-lg font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-              styles.button
-            )}>
+            <button 
+              className={cn(
+                "w-full rounded-lg font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
+                styles.button
+              )}
+              style={{backgroundColor: 'var(--plan-teams-bg)'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(271, 76%, 48%)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-teams-bg)'}
+            >
               <Zap className={styles.buttonIcon} />
               Plan Premium
             </button>

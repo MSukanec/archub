@@ -48,20 +48,20 @@ export default function Plan({ isExpanded }: PlanProps) {
             {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
               <button className={cn(
                 "w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-                "bg-[var(--accent)] hover:bg-[var(--accent)]/80"
+                "bg-[var(--plan-free-bg)] hover:bg-[var(--plan-free-bg)]/80"
               )}>
                 <Zap className="w-3 h-3" />
                 Actualizar a Pro
               </button>
             )}
             {userData?.plan?.name?.toLowerCase() === 'pro' && (
-              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]">
+              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" style={{backgroundColor: 'var(--plan-pro-bg)'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(213, 100%, 28%)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-pro-bg)'}>
                 <Crown className="w-3 h-3" />
                 Actualizar a Teams
               </button>
             )}
             {userData?.plan?.name?.toLowerCase() === 'teams' && (
-              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]">
+              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" style={{backgroundColor: 'var(--plan-teams-bg)'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(271, 76%, 48%)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-teams-bg)'}>
                 <Zap className="w-3 h-3" />
                 Plan Premium
               </button>
@@ -70,9 +70,9 @@ export default function Plan({ isExpanded }: PlanProps) {
         ) : (
           <div className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
-            (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
-            userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
-            userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
+            (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--plan-free-bg)]",
+            userData?.plan?.name?.toLowerCase() === 'pro' && "bg-[var(--plan-pro-bg)]",
+            userData?.plan?.name?.toLowerCase() === 'teams' && "bg-[var(--plan-teams-bg)]"
           )}>
             {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-white transition-all duration-150" />}
             {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-white transition-all duration-150" />}

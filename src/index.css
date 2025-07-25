@@ -153,6 +153,11 @@
   --table-row-border: hsl(0, 0%, 90%);
   --table-row-hover-bg: hsl(0, 0%, 98%);
 
+  /* Plan Colors */
+  --plan-free-bg: hsl(76, 100%, 40%);
+  --plan-pro-bg: hsl(213, 100%, 33%);
+  --plan-teams-bg: hsl(271, 76%, 53%);
+
 
 
   /* Borders and Rings */
@@ -343,6 +348,11 @@
   --table-row-fg: hsl(0, 0%, 90%);
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 15%);
+
+  /* Plan Colors (same for both themes) */
+  --plan-free-bg: hsl(76, 100%, 40%);
+  --plan-pro-bg: hsl(213, 100%, 33%);
+  --plan-teams-bg: hsl(271, 76%, 53%);
 
 
 

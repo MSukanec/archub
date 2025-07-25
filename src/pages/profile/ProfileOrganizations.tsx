@@ -21,6 +21,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
 
 // Componente para una sola tarjeta de organización
 
@@ -138,40 +139,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
   )
 }
 
-// Componente para mostrar avatares de miembros en la card activa
-function ActiveOrganizationMembersCard({ organizationId }: { organizationId: string }) {
-  const { data: members = [] } = useOrganizationMembers(organizationId)
 
-  if (members.length === 0) return null
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-muted-foreground">({members.length})</span>
-      <div className="flex -space-x-2">
-        {members.slice(0, 4).map((member, index) => (
-          <Avatar key={member.id} className="w-12 h-12 avatar-border" style={{border: '3px solid var(--card-bg)'}}>
-            {member.avatar_url ? (
-              <img 
-                src={member.avatar_url} 
-                alt={member.full_name || member.email} 
-                className="w-full h-full object-cover rounded-full"
-              />
-            ) : (
-              <AvatarFallback className="text-sm font-medium">
-                {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-        ))}
-        {members.length > 4 && (
-          <div className="w-12 h-12 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '3px solid var(--card-bg)'}}>
-            <span className="text-sm font-medium text-[var(--muted-foreground)]">+{members.length - 4}</span>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 export default function OrganizationManagement() {
   const [searchValue, setSearchValue] = useState("")
@@ -486,22 +454,41 @@ export default function OrganizationManagement() {
                     <p className="text-sm text-muted-foreground">
                       Creada el {format(new Date(userData.organization.created_at), 'dd/MM/yyyy', { locale: es })}
                     </p>
+                    {/* Badge del plan */}
+                    <div className="mt-2">
+                      {userData.organization.plan ? (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs text-white" 
+                          style={{
+                            backgroundColor: userData.organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                           userData.organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                           userData.organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                           'var(--plan-free-bg)'
+                          }}
+                        >
+                          <Crown className="w-3 h-3 mr-1" />
+                          {userData.organization.plan.name}
+                        </Badge>
+                      ) : (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs text-white" 
+                          style={{ backgroundColor: 'var(--plan-free-bg)' }}
+                        >
+                          <Crown className="w-3 h-3 mr-1" />
+                          Free
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  {/* Avatares de miembros más grandes */}
-                  <ActiveOrganizationMembersCard organizationId={userData.organization.id} />
-                  <div className="flex items-center gap-4">
-                    {userData.organization.plan && (
-                      <div className="flex items-center gap-2">
-                        <Crown className="w-4 h-4 text-yellow-500" />
-                        <span className="font-medium">{userData.organization.plan.name}</span>
-                      </div>
-                    )}
-                    <Badge variant={userData.organization.is_active ? "default" : "secondary"}>
-                      {userData.organization.is_active ? "Activa" : "Inactiva"}
-                    </Badge>
-                  </div>
+                  {/* Badge ACTIVA con avatares de miembros arriba */}
+                  <ActiveOrganizationMembersCard members={userData.organization.members || []} />
+                  <Badge variant="default" className="bg-[var(--accent)] text-white">
+                    ACTIVA
+                  </Badge>
                 </div>
               </div>
             </CardContent>
