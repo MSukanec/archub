@@ -9,7 +9,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -96,17 +96,29 @@ function TasksContent() {
   };
 
   const handleDeleteBoard = (boardId: string) => {
-    deleteBoardMutation.mutate(boardId, {
-      onSuccess: () => {
-        if (currentBoardId === boardId) {
-          const remainingBoards = boards.filter(b => b.id !== boardId);
-          if (remainingBoards.length > 0) {
-            setCurrentBoardId(remainingBoards[0].id);
-          } else {
-            setCurrentBoardId(null);
+    const boardToDelete = boards.find(b => b.id === boardId);
+    
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar tablero',
+      description: 'Esta acción eliminará permanentemente el tablero y todas las listas y tarjetas que contiene. Esta acción no se puede deshacer.',
+      itemName: boardToDelete?.name || 'tablero',
+      destructiveActionText: 'Eliminar tablero',
+      onConfirm: () => {
+        deleteBoardMutation.mutate(boardId, {
+          onSuccess: () => {
+            if (currentBoardId === boardId) {
+              const remainingBoards = boards.filter(b => b.id !== boardId);
+              if (remainingBoards.length > 0) {
+                setCurrentBoardId(remainingBoards[0].id);
+              } else {
+                setCurrentBoardId(null);
+              }
+            }
           }
-        }
-      }
+        });
+      },
+      isLoading: deleteBoardMutation.isPending
     });
   };
 
