@@ -141,26 +141,35 @@ export function ConstructionTaskFormModal({
 
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
 
-  // Filtrar tareas solo cuando hay búsqueda - SIEMPRE mostrar todas por defecto
+  // Obtener rubros únicos para el filtro
+  const rubroOptions = useMemo(() => {
+    const uniqueRubros = Array.from(new Set(tasks.map(task => task.rubro_name).filter(Boolean)));
+    return uniqueRubros.map(rubro => ({ value: rubro, label: rubro }));
+  }, [tasks]);
+
+  // Filtrar tareas con ambos filtros
   const filteredTasks = useMemo(() => {
-    console.log('🔄 Procesando filtros - Tareas totales:', tasks.length, 'Búsqueda:', searchQuery);
+    console.log('🔄 Procesando filtros - Tareas totales:', tasks.length, 'Búsqueda:', searchQuery, 'Rubro:', rubroFilter);
     
-    // Si no hay búsqueda, mostrar TODAS las tareas
-    if (!searchQuery.trim()) {
-      console.log('✅ Sin filtros - Mostrando todas las tareas:', tasks.length);
-      return tasks;
+    let filtered = tasks;
+    
+    // Filtro por rubro
+    if (rubroFilter) {
+      filtered = filtered.filter(task => task.rubro_name === rubroFilter);
     }
     
-    // Solo filtrar cuando hay texto de búsqueda
-    const filtered = tasks.filter(task => 
-      task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.category_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Filtro por búsqueda de texto
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(task => 
+        task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.category_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
     
-    console.log('🔍 Con filtros - Tareas filtradas:', filtered.length);
+    console.log('🔍 Tareas filtradas:', filtered.length);
     return filtered;
-  }, [tasks, searchQuery]);
+  }, [tasks, searchQuery, rubroFilter]);
 
   // Función para obtener la unidad de una tarea específica
   const getTaskUnit = (task: any) => {
@@ -349,23 +358,39 @@ export function ConstructionTaskFormModal({
           <Label>Seleccionar Tareas *</Label>
         </div>
 
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Buscar por nombre, rubro o categoría..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              ✕
-            </button>
-          )}
+        <div className="flex gap-3">
+          {/* Filtro por Rubro */}
+          <div className="w-48">
+            <ComboBox
+              value={rubroFilter}
+              onValueChange={setRubroFilter}
+              options={rubroOptions}
+              placeholder="Filtrar por rubro"
+              searchPlaceholder="Buscar rubro..."
+              emptyMessage="No se encontraron rubros"
+              className="text-xs"
+            />
+          </div>
+          
+          {/* Campo de búsqueda */}
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Buscar por nombre, rubro o categoría..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         {selectedTasks.length > 0 && (
