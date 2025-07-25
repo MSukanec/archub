@@ -34,7 +34,7 @@ export function CustomRestricted({
 
   // Datos del usuario para debug
   const { data: userData } = useCurrentUser();
-  
+
   // Verificar proyecto seleccionado
   const { selectedProjectId } = useProjectContext();
 
@@ -62,7 +62,9 @@ export function CustomRestricted({
 
       // Obtener plan igual que en usePlanFeatures
       const organizationId = userData?.preferences?.last_organization_id;
-      const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
+      const currentOrganization = userData?.organizations?.find(
+        (org) => org.id === organizationId,
+      );
       const currentPlan = currentOrganization?.plan;
 
       // Restringir si se alcanzó o superó el límite
@@ -85,48 +87,52 @@ export function CustomRestricted({
     return <>{children}</>;
   }
 
-
-
   // Plan restrictions (max_members, max_projects, etc.) apply to admins too
-  const isPlanRestriction = feature && (feature.startsWith('max_') || ['max_members', 'max_projects', 'max_organizations'].includes(feature));
+  const isPlanRestriction =
+    feature &&
+    (feature.startsWith("max_") ||
+      ["max_members", "max_projects", "max_organizations"].includes(feature));
 
   // Si es administrador, permitir acceso EXCEPTO para restricciones de plan y "general_mode"
   // Las restricciones de plan se aplican incluso a administradores
   if (isAdmin && reason !== "general_mode" && !isPlanRestriction) {
-
     return <>{children}</>;
   }
 
   // Lógica dinámica para determinar el plan objetivo
   let dynamicRestriction = getRestrictionMessage(restrictionKey);
-  
+
   // Para max_kanban_boards, determinar dinámicamente el plan objetivo
-  if (restrictionKey === 'max_kanban_boards') {
+  if (restrictionKey === "max_kanban_boards") {
     const organizationId = userData?.preferences?.last_organization_id;
-    const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
+    const currentOrganization = userData?.organizations?.find(
+      (org) => org.id === organizationId,
+    );
     const currentPlan = currentOrganization?.plan?.name;
-    
-    if (currentPlan === 'Free') {
+
+    if (currentPlan === "Free") {
       // Free → Pro
       dynamicRestriction = {
         ...dynamicRestriction,
-        message: "Has alcanzado el límite de 5 tableros Kanban de tu plan Free. Actualiza a Pro para 25 tableros.",
+        message:
+          "Has alcanzado el límite de 1 tablero Kanban de tu plan Free. Actualiza a Pro para 25 tableros.",
         actionLabel: "Actualizar a Pro",
-        planType: 'pro' as const,
-        iconColor: 'white',
-        backgroundColor: 'hsl(213, 100%, 30%)',
-        borderColor: 'hsl(213, 100%, 30%)',
+        planType: "pro" as const,
+        iconColor: "white",
+        backgroundColor: "hsl(213, 100%, 30%)",
+        borderColor: "hsl(213, 100%, 30%)",
       };
-    } else if (currentPlan === 'Pro') {
-      // Pro → Teams  
+    } else if (currentPlan === "Pro") {
+      // Pro → Teams
       dynamicRestriction = {
         ...dynamicRestriction,
-        message: "Has alcanzado el límite de 25 tableros Kanban de tu plan Pro. Actualiza a Teams para tableros ilimitados.",
+        message:
+          "Has alcanzado el límite de 25 tableros Kanban de tu plan Pro. Actualiza a Teams para tableros ilimitados.",
         actionLabel: "Actualizar a Teams",
-        planType: 'teams' as const,
-        iconColor: 'white',
-        backgroundColor: 'hsl(271, 76%, 53%)',
-        borderColor: 'hsl(271, 76%, 53%)',
+        planType: "teams" as const,
+        iconColor: "white",
+        backgroundColor: "hsl(271, 76%, 53%)",
+        borderColor: "hsl(271, 76%, 53%)",
       };
     }
   }
@@ -141,41 +147,55 @@ export function CustomRestricted({
   // Determinar icono y estilo según el tipo de restricción
   const isGeneralMode = restrictionKey === "general_mode";
   const BadgeIcon = isGeneralMode ? Building : Lock;
-  
+
   // Determinar estilo según el plan específico
-  let badgeStyle, popoverBgColor, popoverBorderColor, iconColor, textColor, subtextColor;
-  
+  let badgeStyle,
+    popoverBgColor,
+    popoverBorderColor,
+    iconColor,
+    textColor,
+    subtextColor;
+
   if (isGeneralMode) {
-    badgeStyle = { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' };
-    popoverBgColor = 'var(--accent)';
-    popoverBorderColor = 'var(--accent)';
-    iconColor = 'white';
-    textColor = 'white';
-    subtextColor = 'rgba(255, 255, 255, 0.8)';
-  } else if (dynamicRestriction.planType === 'teams') {
+    badgeStyle = {
+      backgroundColor: "var(--accent)",
+      borderColor: "var(--accent)",
+    };
+    popoverBgColor = "var(--accent)";
+    popoverBorderColor = "var(--accent)";
+    iconColor = "white";
+    textColor = "white";
+    subtextColor = "rgba(255, 255, 255, 0.8)";
+  } else if (dynamicRestriction.planType === "teams") {
     // Estilo específico para plan Teams (morado)
-    badgeStyle = { backgroundColor: dynamicRestriction.backgroundColor, borderColor: dynamicRestriction.borderColor };
+    badgeStyle = {
+      backgroundColor: dynamicRestriction.backgroundColor,
+      borderColor: dynamicRestriction.borderColor,
+    };
     popoverBgColor = dynamicRestriction.backgroundColor;
     popoverBorderColor = dynamicRestriction.borderColor;
-    iconColor = 'white';
-    textColor = 'white';
-    subtextColor = 'rgba(255, 255, 255, 0.9)';
-  } else if (dynamicRestriction.planType === 'pro') {
+    iconColor = "white";
+    textColor = "white";
+    subtextColor = "rgba(255, 255, 255, 0.9)";
+  } else if (dynamicRestriction.planType === "pro") {
     // Estilo específico para plan Pro (azul)
-    badgeStyle = { backgroundColor: dynamicRestriction.backgroundColor, borderColor: dynamicRestriction.borderColor };
+    badgeStyle = {
+      backgroundColor: dynamicRestriction.backgroundColor,
+      borderColor: dynamicRestriction.borderColor,
+    };
     popoverBgColor = dynamicRestriction.backgroundColor;
     popoverBorderColor = dynamicRestriction.borderColor;
-    iconColor = 'white';
-    textColor = 'white';
-    subtextColor = 'rgba(255, 255, 255, 0.9)';
+    iconColor = "white";
+    textColor = "white";
+    subtextColor = "rgba(255, 255, 255, 0.9)";
   } else {
     // Estilo por defecto (negro)
-    badgeStyle = { backgroundColor: 'black', borderColor: 'black' };
-    popoverBgColor = 'hsl(0, 0%, 10%)';
-    popoverBorderColor = 'hsl(0, 0%, 25%)';
-    iconColor = 'white';
-    textColor = 'hsl(0, 0%, 95%)';
-    subtextColor = 'hsl(0, 0%, 70%)';
+    badgeStyle = { backgroundColor: "black", borderColor: "black" };
+    popoverBgColor = "hsl(0, 0%, 10%)";
+    popoverBorderColor = "hsl(0, 0%, 25%)";
+    iconColor = "white";
+    textColor = "hsl(0, 0%, 95%)";
+    subtextColor = "hsl(0, 0%, 70%)";
   }
 
   return (
@@ -193,13 +213,13 @@ export function CustomRestricted({
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div 
+            <div
               className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
-              style={{ 
+              style={{
                 ...badgeStyle,
                 // Forzar que el badge siempre tenga fondo circular visible
                 border: `1px solid ${badgeStyle.borderColor}`,
-                backgroundColor: badgeStyle.backgroundColor
+                backgroundColor: badgeStyle.backgroundColor,
               }}
             >
               <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
@@ -212,7 +232,7 @@ export function CustomRestricted({
           style={{
             backgroundColor: popoverBgColor,
             border: `1px solid ${popoverBorderColor}`,
-            borderRadius: '16px'
+            borderRadius: "16px",
           }}
           side="top"
           sideOffset={-2}
@@ -220,59 +240,57 @@ export function CustomRestricted({
           onMouseLeave={() => setIsPopoverOpen(false)}
         >
           <div className="flex items-start gap-2">
-            <div 
+            <div
               className="rounded-full p-1 flex-shrink-0"
               style={{
-                backgroundColor: isGeneralMode 
-                  ? 'rgba(255, 255, 255, 0.2)' 
-                  : dynamicRestriction.planType === 'teams' 
-                  ? 'rgba(255, 255, 255, 0.2)' 
-                  : 'hsl(var(--accent), 0.2)',
+                backgroundColor: isGeneralMode
+                  ? "rgba(255, 255, 255, 0.2)"
+                  : dynamicRestriction.planType === "teams"
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "hsl(var(--accent), 0.2)",
               }}
             >
-              <BadgeIcon 
-                className="h-3 w-3" 
-                style={{ 
-                  color: isGeneralMode 
-                    ? 'white' 
-                    : dynamicRestriction.planType === 'teams' 
-                    ? 'white' 
-                    : 'hsl(var(--accent))' 
+              <BadgeIcon
+                className="h-3 w-3"
+                style={{
+                  color: isGeneralMode
+                    ? "white"
+                    : dynamicRestriction.planType === "teams"
+                      ? "white"
+                      : "hsl(var(--accent))",
                 }}
               />
             </div>
             <div className="flex-1">
-              <h4 
-                className="font-medium text-sm" 
-                style={{ color: textColor }}
-              >
-                {isGeneralMode 
-                  ? (functionName ? `${functionName} - Requiere Proyecto` : 'Requiere Proyecto')
-                  : (functionName ? `${functionName} - Función Bloqueada` : 'Función Bloqueada')
-                }
+              <h4 className="font-medium text-sm" style={{ color: textColor }}>
+                {isGeneralMode
+                  ? functionName
+                    ? `${functionName} - Requiere Proyecto`
+                    : "Requiere Proyecto"
+                  : functionName
+                    ? `${functionName} - Función Bloqueada`
+                    : "Función Bloqueada"}
               </h4>
-              <p 
-                className="text-xs mt-1"
-                style={{ color: subtextColor }}
-              >
-                {isGeneralMode 
-                  ? 'Esta sección está únicamente disponible con un proyecto seleccionado.'
-                  : dynamicRestriction.message
-                }
+              <p className="text-xs mt-1" style={{ color: subtextColor }}>
+                {isGeneralMode
+                  ? "Esta sección está únicamente disponible con un proyecto seleccionado."
+                  : dynamicRestriction.message}
               </p>
-              {!isGeneralMode && dynamicRestriction.actionLabel && dynamicRestriction.actionUrl && (
-                <button
-                  onClick={handleActionClick}
-                  className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-white/10"
-                  style={{ 
-                    color: 'white',
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                    backgroundColor: 'transparent'
-                  }}
-                >
-                  {dynamicRestriction.actionLabel}
-                </button>
-              )}
+              {!isGeneralMode &&
+                dynamicRestriction.actionLabel &&
+                dynamicRestriction.actionUrl && (
+                  <button
+                    onClick={handleActionClick}
+                    className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-white/10"
+                    style={{
+                      color: "white",
+                      borderColor: "rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    {dynamicRestriction.actionLabel}
+                  </button>
+                )}
             </div>
           </div>
         </PopoverContent>

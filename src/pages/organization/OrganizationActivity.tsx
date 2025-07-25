@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function OrganizationActivity() {
@@ -103,7 +104,7 @@ export default function OrganizationActivity() {
     setFilterByType('all');
   };
 
-  // Custom filters
+  // Custom filters para ActionBar
   const customFilters = (
     <div className="w-64 p-3 space-y-3">
       <div className="space-y-1.5">
@@ -122,13 +123,13 @@ export default function OrganizationActivity() {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Filtrar por tipo</Label>
+        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Filtrar por miembro</Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
           <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
+            <SelectItem value="all">Todos los miembros</SelectItem>
             <SelectItem value="create">Creaciones</SelectItem>
             <SelectItem value="update">Ediciones</SelectItem>
             <SelectItem value="delete">Eliminaciones</SelectItem>
@@ -138,20 +139,9 @@ export default function OrganizationActivity() {
     </div>
   );
 
-  // Header props
-  const headerProps = {
-    title: 'Actividad',
-    searchValue,
-    onSearchChange: setSearchValue,
-    searchPlaceholder: 'Buscar actividades...',
-    customFilters,
-    onClearFilters: clearFilters,
-    actions: []
-  };
-
   if (!organizationId) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout>
         <div className="text-center py-12 text-muted-foreground">
           <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
           <p className="text-sm">No hay organización seleccionada.</p>
@@ -249,12 +239,13 @@ export default function OrganizationActivity() {
   ];
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout>
       <div className="space-y-6">
-        {/* Feature Introduction */}
-        <FeatureIntroduction
+        {/* ActionBar Desktop */}
+        <ActionBarDesktop
           title="Actividad"
           icon={<Activity className="w-5 h-5" />}
+          showProjectSelector={false}
           features={[
             {
               icon: <Building className="w-5 h-5" />,
@@ -265,9 +256,44 @@ export default function OrganizationActivity() {
               icon: <Activity className="w-5 h-5" />,
               title: "Filtrado por miembro",
               description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
+            },
+            {
+              icon: <Search className="w-5 h-5" />,
+              title: "Búsqueda avanzada de actividades",
+              description: "Sistema de búsqueda que permite localizar actividades específicas por descripción, autor, tipo de acción o fecha. Incluye filtros para acotar resultados por período de tiempo, tipo de actividad y responsable de la acción."
+            },
+            {
+              icon: <Filter className="w-5 h-5" />,
+              title: "Organización temporal y filtrado",
+              description: "Las actividades se organizan cronológicamente con opciones de filtrado por miembro del equipo, tipo de acción (creación, edición, eliminación) y período temporal para facilitar el seguimiento y auditoría."
             }
           ]}
+          showSearch={true}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          onClearFilters={clearFilters}
         />
+
+        {/* Feature Introduction - Mobile only */}
+        <div className="md:hidden">
+          <FeatureIntroduction
+            title="Actividad"
+            icon={<Activity className="w-5 h-5" />}
+            features={[
+              {
+                icon: <Building className="w-5 h-5" />,
+                title: "Registro central de actividades",
+                description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
+              },
+              {
+                icon: <Activity className="w-5 h-5" />,
+                title: "Filtrado por miembro",
+                description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
+              }
+            ]}
+          />
+        </div>
 
         {/* Activity Chart and Table */}
         {isLoading ? (
@@ -280,24 +306,14 @@ export default function OrganizationActivity() {
             icon={<Activity className="w-12 h-12" />}
             title="No hay actividades registradas"
             description="Cuando se realicen acciones en la organización, aparecerán aquí."
-            action={
-              <button
-                onClick={() => navigate('/finances/movements')}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
-              >
-                Ver movimientos
-              </button>
-            }
           />
         ) : (
           <Table
             data={sortedActivities}
             columns={columns}
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
             emptyStateMessage="No se encontraron actividades"
-            showSearch={false} // Search is handled in header
-            showHeader={false} // Header is handled by Layout
+            showSearch={false} // Search is handled in ActionBar
+            showHeader={false} // Header is handled by ActionBar
           />
         )}
       </div>
