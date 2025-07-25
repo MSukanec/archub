@@ -331,11 +331,6 @@ export function ConstructionTaskFormModal({
     >
       {/* Sección fija superior */}
       <div className="flex-shrink-0 space-y-6">
-        {/* Título para toda la sección */}
-        <div>
-          <Label>Configuración de Tareas *</Label>
-        </div>
-
         {/* Tres columnas inline: Fase, Filtro Rubro, Búsqueda */}
         <div className="grid grid-cols-3 gap-4">
           {/* Columna 1: Phase Selection */}
@@ -421,7 +416,7 @@ export function ConstructionTaskFormModal({
       </div>
 
       {/* Área de tareas con scroll */}
-      <div className="flex-1 min-h-0 -mx-6">
+      <div className="flex-1 min-h-0">
         <div className="border-0 border-t border-b">
           {/* Table Header */}
           <div className="grid grid-cols-10 gap-2 py-3 bg-muted font-medium text-sm border-b">
