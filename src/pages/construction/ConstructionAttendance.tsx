@@ -205,6 +205,13 @@ export default function ConstructionAttendance() {
     const worker = filteredWorkers.find(w => w.id === workerId);
     if (!worker) return;
 
+    console.log('🔄 Opening attendance modal for editing:', {
+      workerId,
+      workerName: worker.name,
+      date,
+      existingAttendance
+    });
+
     // Open the attendance modal with editing data
     openModal('attendance', {
       isEditing: true,

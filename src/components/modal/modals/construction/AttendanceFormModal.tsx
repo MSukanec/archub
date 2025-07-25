@@ -39,6 +39,13 @@ interface AttendanceFormModalProps {
   modalData?: {
     attendance?: any
     mode?: 'create' | 'edit'
+    isEditing?: boolean
+    editingData?: {
+      contactId: string
+      contactName: string
+      attendanceDate: Date
+      existingRecord?: any
+    }
   }
   onClose: () => void
 }
@@ -57,23 +64,23 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
     id: member.id, // Usar member.id (organization_members.id)
-    full_name: `Usuario ${member.user_id.slice(0, 8)}`, // Temporal hasta obtener info del user
-    email: '',
-    avatar_url: ''
+    full_name: member.user?.full_name || `Usuario ${member.user_id.slice(0, 8)}`,
+    email: member.user?.email || '',
+    avatar_url: member.user?.avatar_url || ''
   }))
 
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => member.user_id === currentUser?.user?.id)
 
-  const isEditing = modalData?.mode === 'edit' && modalData?.attendance
-  const attendance = modalData?.attendance
+  const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && modalData?.attendance)
+  const attendance = modalData?.attendance || modalData?.editingData?.existingRecord
 
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
       created_by: currentUserMember?.id || '', // Usar member.id en lugar de user.id
-      attendance_date: isEditing ? new Date(attendance?.created_at) : new Date(),
-      contact_id: attendance?.contact_id || '',
+      attendance_date: modalData?.editingData?.attendanceDate || (isEditing ? new Date(attendance?.created_at) : new Date()),
+      contact_id: modalData?.editingData?.contactId || attendance?.contact_id || '',
       attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
       hours_worked: attendance?.hours_worked || 8,
       description: attendance?.description || ''
