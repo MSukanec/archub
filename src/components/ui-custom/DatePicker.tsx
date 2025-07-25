@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react'
+import { CalendarDays, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -56,8 +56,8 @@ export default function DatePicker({
           className={cn(
             // Exact SelectTrigger styles
             "flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60",
-            // Remove ALL button-specific styles
-            "shadow-none hover:bg-[var(--input-bg)] hover:text-foreground hover:border-[var(--input-border)]",
+            // Remove ALL button-specific styles and hover effects
+            "shadow-none hover:bg-[var(--input-bg)] hover:text-foreground hover:border-[var(--input-border)] hover:translate-y-0 hover:shadow-none",
             // Placeholder text styling
             !value && "text-[var(--input-placeholder)]",
             className
@@ -66,7 +66,7 @@ export default function DatePicker({
           <span className="truncate">
             {value ? format(value, "dd/MM/yyyy", { locale: es }) : placeholder}
           </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <CalendarDays className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

@@ -52,7 +52,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
 
   // Get organization members and contacts
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
-  const { data: contacts = [] } = useContacts(organizationId, undefined)
+  const { data: contacts = [] } = useContacts(organizationId)
 
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
