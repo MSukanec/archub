@@ -112,6 +112,11 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   const { data: parameters, isLoading: parametersLoading } = useTaskTemplateParameters(selectedTemplateId || null);
   const { data: materials } = useMaterials();
   const { data: taskMaterials } = useTaskMaterials(createdTaskId || generatedTask?.id || null);
+
+  // Debug logging para plantillas
+  console.log('🔍 Templates data:', { templates, templatesLoading, count: templates?.length });
+  console.log('🔍 Selected template ID:', selectedTemplateId);
+  console.log('🔍 Form template_id value:', form.getValues('template_id'));
   
   const createGeneratedTask = useCreateGeneratedTask();
   const updateGeneratedTask = useUpdateGeneratedTask();
