@@ -143,7 +143,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
             if (!error && data) {
               optionsMap[param.id] = data.map(option => ({
                 id: option.id,
-                value: option.id,
+                value: option.id, // THIS IS THE KEY - value should be the ID for the Select component
                 label: option.label
               }));
             }
@@ -159,94 +159,57 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   }, [parameters]);
 
-  // Initialize form when editing - convert compressed values to proper IDs
+  // Initialize form when editing - SIMPLE approach like the original
   useEffect(() => {
-    if (generatedTask && parameterOptions && Object.keys(parameterOptions).length > 0 && parameters) {
-      console.log('🔧 Initializing edit mode with:', {
-        taskId: generatedTask.id,
-        templateId: generatedTask.template_id,
-        paramValues: generatedTask.param_values,
-        availableOptions: Object.keys(parameterOptions),
-        parametersCount: parameters.length
-      });
-      
-      // Convert compressed param values to proper option IDs
-      const convertedParamValues: Record<string, string> = {};
-      
-      if (generatedTask.param_values) {
-        Object.entries(generatedTask.param_values).forEach(([paramName, storedValue]) => {
-          // Find the parameter by name
-          const param = parameters?.find(p => p.name === paramName);
-          if (param && parameterOptions[param.id]) {
-            const options = parameterOptions[param.id];
-            
-            // Try to find matching option by various methods
-            let matchingOption = options.find(opt => opt.id === storedValue);
-            
-            if (!matchingOption) {
-              matchingOption = options.find(opt => opt.label === storedValue);
-            }
-            
-            if (!matchingOption) {
-              // Fuzzy matching
-              const normalizeString = (str: string) => {
-                return str.toLowerCase()
-                  .replace(/\s+/g, '')
-                  .replace(/[áéíóú]/g, (char) => ({ á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' }[char] || char))
-                  .replace(/[,\.]/g, '');
-              };
-              
-              const normalizedStored = normalizeString(storedValue.toString());
-              matchingOption = options.find(opt => {
-                const normalizedLabel = normalizeString(opt.label);
-                return normalizedLabel.includes(normalizedStored) || normalizedStored.includes(normalizedLabel);
-              });
-            }
-            
-            convertedParamValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
-            
-            console.log('🔧 Parameter conversion:', {
-              paramName,
-              storedValue,
-              matchingOption: matchingOption?.label,
-              finalValue: convertedParamValues[paramName]
-            });
-          } else {
-            convertedParamValues[paramName] = storedValue.toString();
-          }
-        });
-      }
-      
-      // Set all state variables first
+    if (generatedTask) {
+      // FIRST: Set template and create task ID
       setSelectedTemplateId(generatedTask.template_id);
-      setParamValues(convertedParamValues);
       setCreatedTaskId(generatedTask.id);
       
-      // Then reset form with all values
-      form.reset({
-        template_id: generatedTask.template_id,
-        is_public: generatedTask.is_public,
-        param_values: convertedParamValues
-      });
+      // SECOND: Set param values directly - store as IDs for Select components
+      if (generatedTask.param_values && parameterOptions && Object.keys(parameterOptions).length > 0) {
+        const convertedValues: Record<string, string> = {};
+        
+        Object.entries(generatedTask.param_values).forEach(([paramName, storedValue]) => {
+          const param = parameters?.find(p => p.name === paramName);
+          if (param && parameterOptions[param.id]) {
+            // Find matching option - this converts compressed values to IDs
+            const options = parameterOptions[param.id];
+            const matchingOption = options.find(opt => 
+              opt.id === storedValue || 
+              opt.label === storedValue ||
+              opt.label.toLowerCase().includes(storedValue.toString().toLowerCase())
+            );
+            
+            convertedValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
+          } else {
+            convertedValues[paramName] = storedValue.toString();
+          }
+        });
+        
+        setParamValues(convertedValues);
+        form.setValue('param_values', convertedValues);
+      } else {
+        setParamValues(generatedTask.param_values || {});
+        form.setValue('param_values', generatedTask.param_values || {});
+      }
       
-      console.log('🔧 Form initialized with values:', {
-        template_id: generatedTask.template_id,
-        param_values: convertedParamValues,
-        selectedTemplateId: generatedTask.template_id
-      });
+      // THIRD: Set form values
+      form.setValue('template_id', generatedTask.template_id);
+      form.setValue('is_public', generatedTask.is_public);
       
-    } else if (!generatedTask) {
+    } else {
+      // Reset for create mode
       setSelectedTemplateId('');
       setParamValues({});
       setCreatedTaskId(null);
-      
       form.reset({
         template_id: '',
         is_public: false,
         param_values: {}
       });
     }
-  }, [generatedTask, form, parameters, parameterOptions]);
+  }, [generatedTask, parameterOptions, parameters, form]);
 
   // Handle template selection
   const handleTemplateChange = (templateId: string) => {
@@ -266,7 +229,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     form.setValue('param_values', newParamValues);
   };
 
-  // Generate task description using the original approach
+  // Generate task description using the EXACT original approach
   const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
     if (!parameters) return "Seleccione los parámetros para ver la vista previa";
 
@@ -281,10 +244,9 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
         const rawValue = paramValues[param.name];
         if (!rawValue) return;
 
-        // Buscar label para select - the value IS the option ID, so find the option
+        // Buscar label para select
         let label = rawValue.toString();
-        const options = parameterOptions[param.id] || [];
-        const option = options.find(opt => opt.id === rawValue);
+        const option = parameterOptions[param.id]?.find(opt => opt.value === rawValue);
         if (option?.label) label = option.label;
 
         // Aplicar plantilla del parámetro
@@ -294,7 +256,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
         fragments.push(fragment);
       });
 
-    return `${currentTemplate.name_template} ${fragments.join(' ')}.`.trim();
+    return `${currentTemplate.name} ${fragments.join(' ')}.`.trim();
   };
 
   // Handle form submission
@@ -410,7 +372,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                   <SelectContent className="z-[9999]">
                     {templates?.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
-                        {template.name_template}
+                        {template.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
