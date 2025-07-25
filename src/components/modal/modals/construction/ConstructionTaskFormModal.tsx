@@ -303,19 +303,19 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="phaseFilter">Fase</Label>
-              <ComboBox
-                value={phaseFilter}
-                onValueChange={setPhaseFilter}
-                options={[
-                  { label: "Todas las fases", value: "" },
-                  ...projectPhases.map(phase => ({
-                    label: phase.phase?.name || 'Sin nombre',
-                    value: phase.phase?.id || ''
-                  }))
-                ]}
-                placeholder="Selecciona una fase"
-                emptyText="No hay fases disponibles"
-              />
+              <Select value={phaseFilter} onValueChange={setPhaseFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona una fase" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas las fases</SelectItem>
+                  {projectPhases.map(phase => (
+                    <SelectItem key={phase.phase?.id} value={phase.phase?.id || ''}>
+                      {phase.phase?.name || 'Sin nombre'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
@@ -355,15 +355,6 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={handleSelectAll}
-                    className="h-6 px-2 text-xs"
-                  >
-                    Seleccionar todas
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
                     onClick={handleClearAll}
                     className="h-6 px-2 text-xs"
                   >
@@ -376,10 +367,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
               </div>
             </div>
             
-            {/* Table Header */}
-            <div className="py-2 px-3 bg-muted/50 font-medium text-xs border-b">
-              <div className="text-xs font-medium">TAREA (Click para seleccionar)</div>
-            </div>
+
 
             {/* Table Body */}
             <ScrollArea className="h-[400px]">
@@ -395,7 +383,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     return (
                       <div 
                         key={task.id} 
-                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isSelected ? 'bg-[hsl(var(--accent))]/10 border-l-4 border-l-[hsl(var(--accent))]' : ''}`}
                         onClick={() => handleTaskSelection(task.id, !isSelected)}
                       >
                         <div className="text-sm leading-tight line-clamp-2">
