@@ -215,8 +215,7 @@ export function HeaderMobile({
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMenu} />
+      {/* Mobile Menu renderizado desde Header.tsx - no duplicar aquí */}
     </>
   );
 }

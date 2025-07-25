@@ -57,9 +57,15 @@ export function Header({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
+  const [forceRender, setForceRender] = useState(0);
   
   // Debug log para verificar el estado del menú
   console.log('🟦 Header - isMobileMenuOpen:', isMobileMenuOpen);
+  
+  // Efecto para verificar cambios de estado
+  useEffect(() => {
+    console.log('🟦 Header - useEffect isMobileMenuOpen changed to:', isMobileMenuOpen);
+  }, [isMobileMenuOpen]);
 
 
   const [location, navigate] = useLocation();
@@ -704,6 +710,8 @@ export function Header({
         onClose={() => {
           console.log('🟡 Header onClose called');
           closeMenu();
+          // Forzar re-render
+          setForceRender(prev => prev + 1);
         }} 
         isOpen={isMobileMenuOpen} 
       />

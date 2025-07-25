@@ -373,8 +373,17 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       e.stopPropagation();
     }
     console.log('🔴 handleCloseMenu called');
+    console.log('🔴 Before close - isOpen:', isOpen);
     closeMenu();
     console.log('🔴 store closeMenu called');
+    
+    // Verificar el estado después del cierre
+    setTimeout(() => {
+      console.log('🔴 After 100ms - checking if menu closed');
+      const currentState = useMobileMenuStore.getState();
+      console.log('🔴 Current store state:', currentState.isOpen);
+    }, 100);
+    
     onClose();
     console.log('🔴 onClose prop called');
   };
@@ -515,7 +524,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               {expandedProjectSelector && (
                 <div 
-                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
                     borderColor: 'var(--menues-border)',
@@ -566,7 +575,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               {expandedOrgSelector && (
                 <div 
-                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg max-h-48 overflow-y-auto z-50 p-1"
+                  className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
                   style={{ 
                     backgroundColor: 'var(--menues-bg)',
                     borderColor: 'var(--menues-border)',
