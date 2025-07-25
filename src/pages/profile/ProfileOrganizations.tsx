@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, MessageCircle, Settings, Network, BarChart3 } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, Settings, Network, BarChart3 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -458,11 +458,6 @@ export default function OrganizationManagement() {
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
                     <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white border-white/20">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Chatear con nosotros</span>
-                      <span className="sm:hidden">Chat</span>
-                    </Button>
-                    <Button size="sm" className="w-full sm:w-auto bg-white text-gray-900 hover:bg-white/90">
                       Actualizar
                     </Button>
                   </div>
