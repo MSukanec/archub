@@ -295,6 +295,14 @@ export function Sidebar() {
       generalModeRestricted: true
     },
     { 
+      id: 'diseno', 
+      icon: Brush, 
+      label: 'Diseño', 
+      defaultRoute: '/design/dashboard',
+      isActive: activeSidebarSection === 'diseno' || location.startsWith('/design'),
+      restricted: true
+    },
+    { 
       id: 'construccion', 
       icon: HardHat, 
       label: 'Construcción', 
@@ -307,14 +315,6 @@ export function Sidebar() {
       label: 'Finanzas', 
       defaultRoute: '/finances/dashboard',
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
-    },
-    { 
-      id: 'diseno', 
-      icon: Brush, 
-      label: 'Diseño', 
-      defaultRoute: '/design/dashboard',
-      isActive: activeSidebarSection === 'diseno' || location.startsWith('/design'),
-      restricted: true
     },
     { 
       id: 'comercializacion', 

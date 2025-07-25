@@ -237,6 +237,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       isActive: currentSidebarContext === 'project' || location.startsWith('/project')
     },
     { 
+      id: 'diseno', 
+      icon: Brush, 
+      label: 'Diseño', 
+      defaultRoute: '/design/dashboard',
+      isActive: currentSidebarContext === 'design' || location.startsWith('/design'),
+      restricted: true
+    },
+    { 
       id: 'construccion', 
       icon: HardHat, 
       label: 'Construcción', 
@@ -250,15 +258,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       defaultRoute: '/finances/dashboard',
       isActive: currentSidebarContext === 'finances' || location.startsWith('/finances')
     },
-    { 
-      id: 'diseno', 
-      icon: Brush, 
-      label: 'Diseño', 
-      defaultRoute: '/design/dashboard',
-      isActive: currentSidebarContext === 'design' || location.startsWith('/design'),
-      restricted: true
-    },
-
     { 
       id: 'perfil', 
       icon: User, 
