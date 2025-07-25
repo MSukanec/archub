@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. MOBILE MENU CRITICAL BUG RESOLVED AND UI ENHANCEMENTS COMPLETED: Successfully fixed mobile menu closing issue and implemented section titles with popover sizing - COMPLETED
+  • DUPLICATE MENU ELIMINATION: Found and eliminated duplicate MobileMenu component rendering from HeaderMobile.tsx - menu was being rendered twice causing close malfunction
+  • MOBILE MENU CLOSING FIXED: Menu now closes correctly when clicking X button or navigating to pages after removing component duplication
+  • SECTION TITLES IMPLEMENTED: Added dynamic section titles at top of mobile menu ("Menú Principal", "Perfil", "Organización", "Proyecto", "Construcción", etc.)
+  • POPOVER SIZING ENHANCED: Organization and Project selector popovers in mobile menu footer now occupy half screen height (h-[50vh]) instead of small max-h-48
+  • HEADER.TSX CLEANUP: Removed unused Header.tsx component from desktop layout after confirming no dependencies
+  • MOBILE BUTTON POSITIONING: Mobile menu button properly positioned on right side of header with Menu icon for easy access
+  • CLEAN ARCHITECTURE: Separated mobile (HeaderMobile.tsx + MobileMenu.tsx) and desktop (HeaderDesktop.tsx) header systems for better maintainability
 - July 25, 2025. PLAN BADGES STANDARDIZATION AND ACTIVE CARD FIXES COMPLETED: Successfully fixed hardcoded badges, implemented consistent plan styling, and restored member avatars display - COMPLETED
   • HARDCODED BADGE FIXED: Removed hardcoded "Free" badge from active organization card, now uses real data from userData.organization.plan?.name
   • PLAN BADGE CONSISTENCY: Standardized all plan badges across ProfileOrganizations and AdminOrganizations to use same CSS variables (--plan-free-bg, --plan-pro-bg, --plan-teams-bg)

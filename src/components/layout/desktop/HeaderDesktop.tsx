@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Plus, Filter, X, Search, Building, Building2, Folder } from "lucide-react";
+import { ChevronDown, Plus, Filter, X, Search, Building, Building2, Folder, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,6 +22,9 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { ProjectSelector } from "@/components/navigation/ProjectSelector";
 import { useProjectContext } from "@/stores/projectContext";
 import { useEffect } from "react";
+import { useMobileMenuStore } from "@/components/layout/mobile/useMobileMenuStore";
+import { MobileMenu } from "@/components/layout/mobile/MobileMenu";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface HeaderDesktopProps {
   icon?: React.ComponentType<any> | React.ReactNode;
@@ -50,6 +53,8 @@ export function HeaderDesktop({
 }: HeaderDesktopProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
+  const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
+  const isMobile = useMobile();
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -223,6 +228,17 @@ export function HeaderDesktop({
 
       {/* Right: Filters and Actions */}
       <div className="flex items-center space-x-2">
+        {/* Mobile Menu Button - Solo visible en mobile */}
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={openMenu}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
         {/* Filters */}
         {showFilters && (filters.length > 0 || customFilters) && (
           <div className="flex items-center space-x-2">

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { SidebarSubmenu } from "./SidebarSubmenu";
-import { Header } from "./Header";
+// Header.tsx eliminado - HeaderMobile.tsx maneja mobile, HeaderDesktop se integra en páginas específicas
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
