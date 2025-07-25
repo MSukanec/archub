@@ -419,8 +419,8 @@ export function ConstructionTaskFormModal({
       <div className="flex-1 min-h-0">
         <div className="border-0 border-t border-b">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-2 py-2 bg-muted font-medium text-xs border-b">
-            <div className="col-span-1 flex items-center justify-start">
+          <div className="grid gap-1 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 140px 1fr"}}>
+            <div className="flex items-center justify-start">
               <Checkbox
                 checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
                 onCheckedChange={(checked) => {
@@ -432,8 +432,8 @@ export function ConstructionTaskFormModal({
                 }}
               />
             </div>
-            <div className="col-span-2 text-xs font-semibold">RUBRO</div>
-            <div className="col-span-9 text-xs font-medium">TAREA</div>
+            <div className="text-xs font-semibold">RUBRO</div>
+            <div className="text-xs font-medium">TAREA</div>
           </div>
 
           {/* Table Body */}
@@ -449,9 +449,9 @@ export function ConstructionTaskFormModal({
                   const selectedTask = selectedTasks.find(t => t.task_id === task.id);
                   
                   return (
-                    <div key={task.id} className="grid grid-cols-12 gap-2 py-3 hover:bg-muted/30">
+                    <div key={task.id} className="grid gap-1 py-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 140px 1fr"}}>
                       {/* Checkbox Column */}
-                      <div className="col-span-1 flex items-start justify-start pt-1">
+                      <div className="flex items-start justify-start pt-1">
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
@@ -459,14 +459,14 @@ export function ConstructionTaskFormModal({
                       </div>
 
                       {/* Rubro Column - Optimizado */}
-                      <div className="col-span-2">
+                      <div>
                         <div className="text-sm font-bold leading-tight">
                           {task.rubro_name || 'Sin rubro'}
                         </div>
                       </div>
 
                       {/* Task Name Column */}
-                      <div className="col-span-9">
+                      <div>
                         <div className="text-sm leading-tight line-clamp-2">
                           {task.display_name || 'Sin nombre'}
                         </div>
