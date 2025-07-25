@@ -339,7 +339,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const { closeMenu } = useMobileMenuStore();
   
-  const handleCloseMenu = () => {
+  const handleCloseMenu = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     closeMenu();
     onClose();
   };
@@ -430,9 +434,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     </CustomRestricted>
                   ) : (
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         navigate(item.href);
-                        onClose();
+                        handleCloseMenu();
                       }}
                       className={cn(
                         "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-colors",
