@@ -441,7 +441,7 @@ export function Sidebar() {
             label="Mi Perfil"
             isActive={activeSidebarSection === 'perfil' || location.startsWith('/profile')}
             isExpanded={isExpanded}
-            onClick={() => handleMainSectionClick('perfil', '/profile')}
+            onClick={() => handleMainSectionClick('perfil', '/profile/data')}
             avatarUrl={userData?.user?.avatar_url}
             userFullName={userData?.user?.full_name}
             variant="main"

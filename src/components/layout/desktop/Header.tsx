@@ -224,7 +224,7 @@ export function Header({
           <Button
             variant="ghost-flat"
             size="icon"
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/profile/data')}
             className="h-10 w-10 p-0 hover:bg-transparent"
           >
             <Avatar className="h-9 w-9">
