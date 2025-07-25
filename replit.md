@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. PROJECT RESTRICTION APPLIED TO ATTENDANCE BUTTONS: Successfully added general_mode restriction to "REGISTRAR ASISTENCIA" button preventing use without project selection - COMPLETED
+  • ATTENDANCE ACTIONBAR RESTRICTED: Applied primaryActionRestriction with reason="general_mode" to "Registrar Asistencia" button in ConstructionAttendance.tsx ActionBar
+  • ATTENDANCE EMPTYSTATE RESTRICTED: Applied CustomRestricted wrapper to "Registrar Asistencia" button in EmptyState component
+  • RESTRICTION CONSISTENCY: Both attendance registration buttons now follow same restriction pattern as bitácora buttons
+  • PROJECT VALIDATION ENFORCED: Users must select a project before being able to register attendance data
+  • PROPER ERROR MESSAGING: Restriction popover shows appropriate message about project requirement for attendance functionality
 - July 25, 2025. PROJECT RESTRICTION APPLIED TO BITÁCORA BUTTONS: Successfully added general_mode restriction to "NUEVA BITÁCORA" button preventing use without project selection - COMPLETED
   • ACTIONBAR RESTRICTION ENHANCED: Extended ActionBarDesktop component with primaryActionRestriction prop supporting reason, feature, current, and functionName parameters
   • BITÁCORA BUTTON RESTRICTED: Applied reason="general_mode" restriction to primary action button in ConstructionLogs.tsx ActionBar

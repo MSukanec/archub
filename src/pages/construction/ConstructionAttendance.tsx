@@ -10,6 +10,7 @@ import { useEffect } from 'react'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Users, Download, Calendar, CalendarDays, Clock, BarChart3, Filter, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -321,6 +322,10 @@ export default function ConstructionAttendance() {
           onTodayClick={handleTodayClick}
           primaryActionLabel="Registrar Asistencia"
           onPrimaryActionClick={() => openModal('attendance', {})}
+          primaryActionRestriction={{
+            reason: "general_mode",
+            functionName: "Registrar Asistencia"
+          }}
         />
 
         {/* Gradebook Component - Show always if there's original data, even if filtered workers is empty */}
@@ -337,10 +342,12 @@ export default function ConstructionAttendance() {
             title="Sin personal registrado"
             description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
             action={
-              <Button onClick={() => openModal('attendance', {})}>
-                <Users className="w-4 h-4 mr-2" />
-                Registrar Asistencia
-              </Button>
+              <CustomRestricted reason="general_mode" functionName="Registrar Asistencia">
+                <Button onClick={() => openModal('attendance', {})}>
+                  <Users className="w-4 h-4 mr-2" />
+                  Registrar Asistencia
+                </Button>
+              </CustomRestricted>
             }
           />
         )}
