@@ -143,8 +143,8 @@ export default function ConstructionTasks() {
     })
   }
 
-  // Definir columnas para la tabla
-  const columns = [
+  // Definir columnas base para la tabla
+  const baseColumns = [
     {
       key: 'phase',
       label: 'Fase',
@@ -200,6 +200,15 @@ export default function ConstructionTasks() {
       sortable: false
     }
   ]
+
+  // Filtrar columnas según el tipo de agrupación - ocultar columnas agrupadas
+  const columns = baseColumns.filter(column => {
+    if (groupingType === 'rubros' && column.key === 'rubro_name') return false;
+    if (groupingType === 'phases' && column.key === 'phase') return false;
+    if (groupingType === 'rubros-phases' && (column.key === 'rubro_name' || column.key === 'phase')) return false;
+    if (groupingType === 'phases-rubros' && (column.key === 'rubro_name' || column.key === 'phase')) return false;
+    return true;
+  });
 
   if (isLoading) {
     return (
