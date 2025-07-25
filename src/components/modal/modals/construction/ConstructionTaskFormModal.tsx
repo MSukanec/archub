@@ -296,7 +296,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const editPanel = (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
       {/* Layout de dos columnas principales */}
-      <div className="flex-1 min-h-0 grid grid-cols-2 gap-6 p-6">
+      <div className="flex-1 min-h-0 grid grid-cols-2 gap-6 p-4">
         {/* Columna Izquierda - Filtros y Tareas Disponibles */}
         <div className="flex flex-col space-y-4">
           {/* Filtros inline arriba */}
@@ -552,7 +552,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      className="max-w-[1440px] w-[1440px]"
+      className="max-w-[1200px] w-[1200px] p-0"
       isEditing={true}
     />
   );
