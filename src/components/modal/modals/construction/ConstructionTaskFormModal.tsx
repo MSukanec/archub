@@ -12,7 +12,6 @@ import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Settings, Search, CheckSquare, Square, Filter } from "lucide-react";
-import { useTaskSearch } from "@/hooks/use-task-search";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
@@ -95,13 +94,23 @@ export function ConstructionTaskFormModal({
     setPanel("edit");
   }, [setPanel]);
 
-  // Hook para búsqueda de tareas (buscar siempre si hay query o si estamos editando)
-  const { data: tasks = [], isLoading: tasksLoading } = useTaskSearch(
-    searchQuery, 
-    modalData.organizationId, 
-    { origin: 'all' },
-    searchQuery.length >= 3 || modalData.isEditing
-  );
+  // Hook para cargar TODAS las tareas SIEMPRE desde la librería
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['task-library', modalData.organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data, error } = await supabase
+        .from('task_generated_view')
+        .select('*')
+        .eq('organization_id', modalData.organizationId)
+        .order('display_name', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!modalData.organizationId && !!supabase
+  });
 
   // Hook para obtener las fases del proyecto
   const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useProjectPhases(modalData.projectId);
