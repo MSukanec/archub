@@ -134,8 +134,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       }
 
       if (isEditing && editingContact) {
-        if (!supabase) throw new Error('Supabase not initialized');
-        
         const { data: updatedContact, error } = await supabase
           .from('contacts')
           .update({
@@ -156,8 +154,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         if (error) throw error;
         return updatedContact;
       } else {
-        if (!supabase) throw new Error('Supabase not initialized');
-        
         const { data: newContact, error } = await supabase
           .from('contacts')
           .insert({
@@ -353,7 +349,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
       {/* FORM FIELDS - RESPONSIVE GRID LAYOUT */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
           {/* Nombre - Apellido */}
           <FormField
             control={form.control}
@@ -406,7 +402,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                 <FormLabel>Teléfono</FormLabel>
                 <FormControl>
                   <PhoneInput
-                    value={field.value || ''}
+                    value={field.value}
                     onChange={field.onChange}
                     placeholder="Número de teléfono"
                   />
@@ -524,7 +520,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           form.handleSubmit(onSubmit)();
         }
       }}
-      isLoading={createContactMutation.isPending}
+      rightLoading={createContactMutation.isPending}
     />
   );
 
