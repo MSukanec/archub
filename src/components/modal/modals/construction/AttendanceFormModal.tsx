@@ -188,7 +188,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Creado por y Fecha - Inline */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="created_by"
@@ -256,7 +256,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
         />
 
         {/* Horario */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="attendance_type"
