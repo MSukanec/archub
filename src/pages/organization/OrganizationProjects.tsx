@@ -24,6 +24,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 
 
 export default function OrganizationProjects() {
@@ -405,11 +406,49 @@ export default function OrganizationProjects() {
     <>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Feature Introduction */}
+        {/* ActionBar Desktop */}
+        <ActionBarDesktop
+          title="Gestión de Proyectos"
+          icon={<Folder className="w-5 h-5" />}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          primaryAction={{
+            label: "Nuevo Proyecto",
+            onClick: () => openModal('project', {}),
+            icon: <Plus className="w-5 h-5" />
+          }}
+          showProjectSelector={false}
+          features={[
+            {
+              icon: <Plus className="w-5 h-5" />,
+              title: "Crear y Gestionar Proyectos",
+              description: "Crea nuevos proyectos para tu organización definiendo nombre, tipología, modalidad y estado. Cada proyecto puede ser seleccionado como 'ACTIVO' para trabajar en él desde todas las secciones de la aplicación."
+            },
+            {
+              icon: <Settings className="w-5 h-5" />,
+              title: "Cambio de Proyecto Activo",
+              description: "Cambia entre proyectos activos desde el selector del header de forma rápida. También puedes seleccionar 'Todos los Proyectos' para ver información general de toda tu organización."
+            },
+            {
+              icon: <BarChart3 className="w-5 h-5" />,
+              title: "Estados y Filtros",
+              description: "Filtra proyectos por estado (Activo, Planificación, Completado, En Pausa) y ordena por nombre o fecha de creación para una mejor organización."
+            },
+            {
+              icon: <FileText className="w-5 h-5" />,
+              title: "Gestión Completa",
+              description: "Cada proyecto incluye módulos completos de Diseño, Construcción y Finanzas. Edita información básica, elimina proyectos y navega directamente a los datos del proyecto seleccionado."
+            }
+          ]}
+        />
+
+        {/* Feature Introduction - Solo móvil */}
         <FeatureIntroduction
           title="Proyectos"
           icon={<Folder className="w-5 h-5" />}
           features={projectFeatures}
+          className="md:hidden"
         />
 
         {/* General Mode Card */}
