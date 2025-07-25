@@ -385,11 +385,11 @@ export function ConstructionTaskFormModal({
       </div>
 
       {/* Optimized Tasks Table */}
-      <div className="flex-1 min-h-0">
-        <div className="border rounded-md">
+      <div className="flex-1 min-h-0 -mx-6">
+        <div className="border-0 border-t border-b">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-2 p-3 bg-muted font-medium text-sm border-b">
-            <div className="col-span-1 flex items-center justify-center">
+          <div className="grid grid-cols-10 gap-2 py-3 bg-muted font-medium text-sm border-b">
+            <div className="col-span-1 flex items-center justify-center pl-6">
               <Checkbox
                 checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
                 onCheckedChange={(checked) => {
@@ -402,8 +402,7 @@ export function ConstructionTaskFormModal({
               />
             </div>
             <div className="col-span-2">RUBRO</div>
-            <div className="col-span-7">TAREA</div>
-            <div className="col-span-2">CANTIDAD</div>
+            <div className="col-span-7 pr-6">TAREA</div>
           </div>
 
           {/* Table Body */}
@@ -419,55 +418,30 @@ export function ConstructionTaskFormModal({
                   const selectedTask = selectedTasks.find(t => t.task_id === task.id);
                   
                   return (
-                    <div key={task.id} className="grid grid-cols-12 gap-2 p-3 hover:bg-muted/30">
+                    <div key={task.id} className="grid grid-cols-10 gap-2 py-3 hover:bg-muted/30">
                       {/* Checkbox Column */}
-                      <div className="col-span-1 flex items-start justify-center pt-1">
+                      <div className="col-span-1 flex items-start justify-center pt-1 pl-6">
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
                         />
                       </div>
 
-                      {/* Rubro Column */}
+                      {/* Rubro Column - SOLO RUBRO */}
                       <div className="col-span-2">
                         <div className="text-sm font-medium leading-tight">
                           {task.rubro_name || 'Sin rubro'}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {task.category_name || ''}
-                        </div>
                       </div>
 
                       {/* Task Name Column */}
-                      <div className="col-span-7">
+                      <div className="col-span-7 pr-6">
                         <div className="text-sm leading-tight line-clamp-2">
                           {task.display_name || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
                           {task.category_name || 'Sin categoría'}
                         </div>
-                      </div>
-
-                      {/* Quantity Column */}
-                      <div className="col-span-2">
-                        {isSelected ? (
-                          <div className="relative">
-                            <input
-                              type="number"
-                              min="0.01"
-                              step="0.01"
-                              value={selectedTask?.quantity || 1}
-                              onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
-                              className="w-full px-2 py-1 pr-10 text-sm border border-input rounded bg-background"
-                              placeholder="1.00"
-                            />
-                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-                              {getTaskUnit(task)}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-muted-foreground">-</div>
-                        )}
                       </div>
                     </div>
                   );
