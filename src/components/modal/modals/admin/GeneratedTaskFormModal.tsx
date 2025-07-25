@@ -39,7 +39,17 @@ function ParameterField({ parameter, value, onChange }: {
   value: string, 
   onChange: (value: string) => void 
 }) {
-  const { data: options = [], isLoading } = useTaskTemplateParameterOptions(parameter.id);
+  const { data: options = [], isLoading, error } = useTaskTemplateParameterOptions(parameter.id);
+  
+  // Debug logging
+  console.log('🔍 ParameterField Debug:', {
+    parameterId: parameter.id,
+    parameterLabel: parameter.label,
+    optionsCount: options?.length || 0,
+    isLoading,
+    error: error?.message,
+    options: options
+  });
   
   return (
     <div className="space-y-2">
@@ -310,37 +320,34 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
 
           {/* Parameters Section */}
           {selectedTemplateId && (
-            <div className="space-y-6">
+            <>
               <Separator />
               
               {/* Section: Parámetros de la Plantilla */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center mt-0.5">
-                    <Target className="h-4 w-4 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                    <Target className="w-4 h-4 text-accent" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium">Parámetros de la Plantilla</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Configura los valores específicos para esta tarea
-                    </p>
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground">Parámetros de la Plantilla</h3>
+                    <p className="text-xs text-muted-foreground">Configura los valores específicos para esta tarea</p>
                   </div>
                 </div>
 
                 {/* Task Preview */}
-                <div className="ml-11 space-y-4">
-                  <div>
-                    <FormLabel className="text-sm font-medium">Vista Previa</FormLabel>
-                    <div className="mt-2 p-3 bg-muted rounded-lg border-l-4 border-accent">
-                      <p className="text-sm font-medium">
-                        {generateDescription() || 'Selecciona los parámetros para ver la vista previa'}
-                      </p>
-                    </div>
+                <div>
+                  <FormLabel className="text-sm font-medium">Vista Previa</FormLabel>
+                  <div className="mt-2 p-3 bg-muted rounded-lg border-l-4 border-accent">
+                    <p className="text-sm font-medium">
+                      {generateDescription() || 'Selecciona los parámetros para ver la vista previa'}
+                    </p>
                   </div>
+                </div>
 
-                  {/* Parameters */}
-                  {parameters && parameters.length > 0 && (
-                    <div className="space-y-4">
+                {/* Parameters */}
+                {parameters && parameters.length > 0 && (
+                  <div className="space-y-4">
                       {parameters.map((param) => (
                         <ParameterField
                           key={param.id}
@@ -351,31 +358,28 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                       ))}
                     </div>
                   )}
-                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* Materials Section - Only show for existing tasks */}
           {(createdTaskId || generatedTask) && (
-            <div className="space-y-4">
+            <>
               <Separator />
               
               {/* Section: Materiales de la Tarea */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center mt-0.5">
-                    <Plus className="h-4 w-4 text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                    <Plus className="w-4 h-4 text-accent" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium">Materiales de la Tarea</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Gestiona los materiales necesarios para esta tarea
-                    </p>
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground">Materiales de la Tarea</h3>
+                    <p className="text-xs text-muted-foreground">Gestiona los materiales necesarios para esta tarea</p>
                   </div>
                 </div>
 
-                <div className="ml-11 space-y-4">
+                <div className="space-y-4">
 
               {/* Add Material */}
               <Card>
@@ -444,7 +448,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
               )}
                 </div>
               </div>
-            </div>
+            </>
           )}
         </form>
       </Form>
