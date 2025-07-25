@@ -652,7 +652,6 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     </div>
                     <Button
                       type="button"
-                      variant="outline"
                       size="sm"
                       onClick={() => {
                         setCurrentSubform('create-task');
@@ -831,10 +830,13 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   // Subform para crear nuevas tareas
   const createTaskSubform = (
     <div className="space-y-6 p-6">
-      <div className="text-center">
-        <div className="text-lg font-semibold mb-2">Crear Nueva Tarea</div>
-        <div className="text-sm text-muted-foreground mb-6">
-          Selecciona un grupo de tareas y configura los parámetros para crear una tarea personalizada
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-lg font-semibold">
+          <Plus className="w-5 h-5 text-accent" />
+          Crear Nueva Tarea
+        </div>
+        <div className="text-sm text-muted-foreground">
+          La tarea se agregará a la biblioteca de tu organización y a este proyecto
         </div>
       </div>
       
