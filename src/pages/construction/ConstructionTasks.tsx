@@ -41,20 +41,51 @@ export default function ConstructionTasks() {
   console.log('ConstructionTasks - tasks data:', tasks)
   console.log('ConstructionTasks - tasks length:', tasks.length)
 
-  // Filtrar tareas según búsqueda
+  // Filtrar tareas según búsqueda y agregar groupKey
   const filteredTasks = useMemo(() => {
-    if (!searchValue.trim()) return tasks
+    let filtered = tasks
     
-    return tasks.filter(task => {
-      const displayName = task.task?.display_name || task.task?.code || ''
-      const rubroName = task.task?.rubro_name || ''
-      const categoryName = task.task?.category_name || ''
+    if (searchValue.trim()) {
+      filtered = tasks.filter(task => {
+        const displayName = task.task?.display_name || task.task?.code || ''
+        const rubroName = task.task?.rubro_name || ''
+        const categoryName = task.task?.category_name || ''
+        
+        return displayName.toLowerCase().includes(searchValue.toLowerCase()) ||
+          rubroName.toLowerCase().includes(searchValue.toLowerCase()) ||
+          categoryName.toLowerCase().includes(searchValue.toLowerCase())
+      })
+    }
+
+    // Agregar groupKey a cada tarea basado en el tipo de agrupación
+    return filtered.map(task => {
+      let groupKey = 'Sin grupo';
       
-      return displayName.toLowerCase().includes(searchValue.toLowerCase()) ||
-        rubroName.toLowerCase().includes(searchValue.toLowerCase()) ||
-        categoryName.toLowerCase().includes(searchValue.toLowerCase())
-    })
-  }, [tasks, searchValue])
+      switch (groupingType) {
+        case 'rubros':
+          groupKey = task.task?.rubro_name || 'Sin rubro';
+          break;
+        case 'phases':
+          groupKey = task.phase_name || 'Sin fase';
+          break;
+        case 'rubros-phases':
+          groupKey = `${task.task?.rubro_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
+          break;
+        case 'phases-rubros':
+          groupKey = `${task.phase_name || 'Sin fase'} - ${task.task?.rubro_name || 'Sin rubro'}`;
+          break;
+        default:
+          groupKey = 'Todas las tareas';
+      }
+
+      return {
+        ...task,
+        groupKey
+      };
+    });
+  }, [tasks, searchValue, groupingType])
+
+
 
   const handleAddTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
@@ -269,6 +300,12 @@ export default function ConstructionTasks() {
             columns={columns}
             data={filteredTasks}
             isLoading={isLoading}
+            groupBy={groupingType !== 'none' ? 'groupKey' : undefined}
+            renderGroupHeader={groupingType !== 'none' ? (groupKey: string, groupRows: any[]) => (
+              <div className="px-4 py-3 bg-accent text-accent-foreground text-sm font-medium border-b">
+                {groupKey} ({groupRows.length} tareas)
+              </div>
+            ) : undefined}
             emptyState={
               <EmptyState
                 icon={<CheckSquare className="h-8 w-8" />}
