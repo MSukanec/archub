@@ -35,6 +35,12 @@ export default function ConstructionTasks() {
     organizationId || ''
   )
 
+  // Debug: verificar datos de tareas
+  console.log('ConstructionTasks - projectId:', projectId)
+  console.log('ConstructionTasks - organizationId:', organizationId)
+  console.log('ConstructionTasks - tasks data:', tasks)
+  console.log('ConstructionTasks - tasks length:', tasks.length)
+
   // Filtrar tareas según búsqueda
   const filteredTasks = useMemo(() => {
     if (!searchValue.trim()) return tasks
@@ -83,7 +89,11 @@ export default function ConstructionTasks() {
       description: "¿Estás seguro de que deseas eliminar esta tarea de construcción?",
       itemName: taskName,
       onConfirm: async () => {
-        await deleteTask.mutateAsync(taskId)
+        await deleteTask.mutateAsync({
+          id: taskId,
+          project_id: projectId || '',
+          organization_id: organizationId || ''
+        })
       }
     })
   }
