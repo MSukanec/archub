@@ -39,11 +39,14 @@ function ParameterField({ parameter, value, onChange }: {
   value: string, 
   onChange: (value: string) => void 
 }) {
-  const { data: options = [], isLoading, error } = useTaskTemplateParameterOptions(parameter.id);
+  // Use parameter_id since that's the actual parameter ID, not the template parameter relation ID
+  const parameterId = parameter.parameter_id || parameter.id;
+  const { data: options = [], isLoading, error } = useTaskTemplateParameterOptions(parameterId);
   
   // Debug logging
   console.log('🔍 ParameterField Debug:', {
-    parameterId: parameter.id,
+    parameter: parameter,
+    parameterId: parameterId,
     parameterLabel: parameter.label,
     optionsCount: options?.length || 0,
     isLoading,
@@ -337,10 +340,11 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
 
                 {/* Task Preview */}
                 <div>
-                  <FormLabel className="text-sm font-medium">Vista Previa</FormLabel>
-                  <div className="mt-2 p-3 bg-muted rounded-lg border-l-4 border-accent">
+                  <FormLabel className="text-sm font-medium">Vista Previa de la Plantilla</FormLabel>
+                  <p className="text-xs text-muted-foreground mb-2">Así se verá el nombre de la tarea generada</p>
+                  <div className="mt-2 p-3 bg-muted rounded-lg border-2 border-dashed border-accent">
                     <p className="text-sm font-medium">
-                      {generateDescription() || 'Selecciona los parámetros para ver la vista previa'}
+                      {generateDescription() || 'Generando descripción...'}
                     </p>
                   </div>
                 </div>
@@ -348,14 +352,17 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                 {/* Parameters */}
                 {parameters && parameters.length > 0 && (
                   <div className="space-y-4">
-                      {parameters.map((param) => (
-                        <ParameterField
-                          key={param.id}
-                          parameter={param}
-                          value={paramValues[param.id] || ''}
-                          onChange={(value) => handleParameterChange(param.id, value)}
-                        />
-                      ))}
+                      {parameters.map((param) => {
+                        const paramId = param.parameter_id || param.id;
+                        return (
+                          <ParameterField
+                            key={paramId}
+                            parameter={param}
+                            value={paramValues[paramId] || ''}
+                            onChange={(value) => handleParameterChange(paramId, value)}
+                          />
+                        );
+                      })}
                     </div>
                   )}
               </div>
