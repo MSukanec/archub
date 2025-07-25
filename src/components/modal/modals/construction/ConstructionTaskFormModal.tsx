@@ -540,7 +540,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
       onRightClick={handleSubmit(onSubmit)}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 
@@ -553,6 +553,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       footerContent={footerContent}
       onClose={onClose}
       className="max-w-[1440px] w-[1440px]"
+      isEditing={true}
     />
   );
 }
