@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. NAVIGATION REORDERING AND ORGANIZATION TASKS ACTIONBAR COMPLETED: Successfully repositioned DISEÑO below PROYECTO and implemented ActionBar system in organization tasks page - COMPLETED
+  • MENU REORDERING: Changed navigation order in both mobile menu and desktop sidebar so DISEÑO appears after PROYECTO instead of after FINANZAS
+  • MOBILE MENU SHADOWS: Applied complete shadow system (shadow-button-normal, hover:shadow-button-hover) to all mobile menu buttons including disabled states
+  • ORGANIZATION TASKS RENAMED: Changed page title from "Tareas" to "Tareas para Hacer" throughout the application
+  • ACTIONBAR INTEGRATION: Added comprehensive ActionBarDesktop to organization tasks page with search, features expansion, and action buttons
+  • FEATURE DESCRIPTIONS: Implemented 4 detailed features covering Kanban organization, multiple boards, collaboration, and flexible content management
+  • BUTTON STANDARDIZATION: Moved creation buttons from header to ActionBar for consistent UX across all pages
+  • SHADOW CONSISTENCY: All mobile navigation buttons now match Button component shadow behavior with proper hover effects
 - July 25, 2025. MOBILE HEADER STICKY POSITIONING AND FOOTER SIMPLIFICATION COMPLETED: Fixed header positioning and streamlined mobile footer selector - COMPLETED
   • STICKY HEADER POSITIONING: HeaderMobile now uses sticky top-0 z-50 positioning to anchor at top of screen
   • LAYOUT COMPENSATION: Added pt-16 to main content area to account for sticky header height, while preserving md:pt-6 for desktop

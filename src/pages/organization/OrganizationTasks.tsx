@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
@@ -146,45 +147,17 @@ function TasksContent() {
 
   // Header configuration following ai-page-template.md
   const headerProps = {
-    title: "Tareas",
+    title: "Tareas para Hacer",
     showSearch: false,
-    actions: [
-      <CustomRestricted 
-        key="new-board"
-        feature="max_kanban_boards"
-        current={boards.length}
-      >
-        <Button 
-          className="h-8 px-3 text-sm"
-          onClick={() => openModal('board', {})}
-        >
-          <Plus className="h-3 w-3 mr-1" />
-          Nuevo Tablero
-        </Button>
-      </CustomRestricted>
-    ]
+    actions: []
   };
 
   // Loading state
   if (boardsLoading) {
     const loadingHeaderProps = {
-      title: "Tareas",
+      title: "Tareas para Hacer",
       showSearch: false,
-      actions: [
-        <CustomRestricted 
-          key="new-board"
-          feature="max_kanban_boards"
-          current={0}
-        >
-          <Button 
-            className="h-8 px-3 text-sm"
-            onClick={() => openModal("board", {})}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Nuevo Tablero
-          </Button>
-        </CustomRestricted>
-      ]
+      actions: []
     };
 
     return (
@@ -201,23 +174,9 @@ function TasksContent() {
   // Empty state with EmptyState
   if (boards.length === 0) {
     const emptyHeaderProps = {
-      title: "Tareas",
+      title: "Tareas para Hacer",
       showSearch: false,
-      actions: [
-        <CustomRestricted 
-          key="new-board"
-          feature="max_kanban_boards"
-          current={0}
-        >
-          <Button 
-            className="h-8 px-3 text-sm"
-            onClick={() => openModal("board", {})}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Nuevo Tablero
-          </Button>
-        </CustomRestricted>
-      ]
+      actions: []
     };
 
     return (
@@ -244,7 +203,7 @@ function TasksContent() {
       <div className="space-y-6 overflow-x-hidden">
         {/* FeatureIntroduction */}
         <FeatureIntroduction
-          title="Tareas"
+          title="Tareas para Hacer"
           icon={<CheckSquare className="w-5 h-5" />}
           features={[
             {
@@ -266,6 +225,46 @@ function TasksContent() {
               icon: <Plus className="w-5 h-5" />,
               title: "Colaboración en equipo",
               description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
+            }
+          ]}
+        />
+
+        {/* ActionBar Desktop */}
+        <ActionBarDesktop
+          title="Gestión de Tareas para Hacer"
+          icon={<CheckSquare className="w-5 h-5" />}
+          features={[
+            {
+              icon: <Kanban className="w-5 h-5" />,
+              title: "Organización visual tipo Kanban",
+              description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
+            },
+            {
+              icon: <List className="w-5 h-5" />,
+              title: "Múltiples tableros por organización",
+              description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
+            },
+            {
+              icon: <CheckSquare className="w-5 h-5" />,
+              title: "Colaboración y asignación de responsables",
+              description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
+            },
+            {
+              icon: <Plus className="w-5 h-5" />,
+              title: "Gestión flexible de contenido",
+              description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
+            }
+          ]}
+          primaryAction={{
+            label: "Nueva Lista",
+            onClick: () => openModal('list', { boardId: currentBoardId }),
+            disabled: !currentBoardId
+          }}
+          secondaryActions={[
+            {
+              label: "Nuevo Tablero",
+              onClick: () => openModal('board', {}),
+              icon: <Plus className="w-4 h-4" />
             }
           ]}
         />
