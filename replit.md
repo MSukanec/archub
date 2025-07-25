@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. CONSTRUCTION TASKS LISTADO COMPLETELY FIXED: Successfully migrated from BudgetTable to Table.tsx and resolved all data visibility issues - COMPLETED
+  • BUDGETTABLE ELIMINATED: Completely removed deprecated BudgetTable component from ConstructionTasks.tsx and replaced with modern Table.tsx component
+  • TABLE STRUCTURE IMPLEMENTED: Defined 8 columns (Rubro, Tarea, Unidad, Cantidad, Progreso, Fase, Fechas, Acciones) with proper render functions and widths
+  • DATA FLOW CORRECTED: Fixed Empty State condition from filteredTasks.length to tasks.length ensuring table displays when data exists
+  • CREAR FASE BUTTON ADDED: Implemented identical "Crear Fase" secondary button matching cronograma page with customActions in ActionBarDesktop
+  • CONSTRUCTION HOOK VERIFIED: Confirmed useConstructionTasks hook working correctly with construction_gantt_view returning proper task data structure
+  • ACTIONBAR INTEGRATION: Complete ActionBarDesktop with title, icon, 4 expandable features, search functionality, and proper button placement
+  • TABLE FUNCTIONALITY: Edit/delete buttons in actions column, search filtering, and proper data mapping from task.task nested structure
+  • JAVASCRIPT ERROR RESOLVED: Fixed 'Cannot access filteredTasks before initialization' error by removing premature console.log reference
 - July 25, 2025. PROJECT CREATION PLAN RESTRICTIONS PERFECTED: Successfully configured dynamic plan upgrade offers with proper limits and colors - COMPLETED
   • PLAN LIMITS CORRECTED: Free plan now allows 2 projects (restricted at 3rd), Pro allows 25 projects (restricted at 26th), Teams unlimited
   • DYNAMIC RESTRICTION LOGIC: Added max_projects dynamic restriction logic in CustomRestricted.tsx matching max_kanban_boards pattern
