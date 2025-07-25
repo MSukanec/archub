@@ -51,8 +51,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const queryClient = useQueryClient()
 
   // Get organization members and contacts
-  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId)
-  const { data: contacts = [] } = useContacts(organizationId)
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId!)
+  const { data: contacts = [] } = useContacts(organizationId!)
 
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
@@ -101,7 +101,6 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
       queryClient.invalidateQueries({ queryKey: ['construction-attendance'] })
       toast({
         title: 'Asistencia registrada',
@@ -138,11 +137,10 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
       queryClient.invalidateQueries({ queryKey: ['construction-attendance'] })
       toast({
         title: 'Asistencia actualizada',
-        description: 'La asistencia se ha actualizado correctamente'
+        description: 'La asistencia se ha actualizada correctamente'
       })
       onClose()
     },

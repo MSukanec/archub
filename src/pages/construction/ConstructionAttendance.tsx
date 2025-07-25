@@ -20,26 +20,20 @@ import { useLocation } from 'wouter'
 import { Link } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
-// Hook to fetch attendance data
+// Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
   return useQuery({
-    queryKey: ['personnel-attendance', projectId, organizationId],
+    queryKey: ['construction-attendance', projectId, organizationId],
     queryFn: async () => {
       if (!supabase || !projectId || !organizationId) return []
 
       console.log('Fetching attendance data for project:', projectId, 'in organization:', organizationId)
 
-      // Now that site_logs has organization_id, filter by both project and organization
+      // Query the new attendees table structure
       const { data: attendanceData, error } = await supabase
-        .from('site_log_attendees')
+        .from('attendees')
         .select(`
           *,
-          site_log:site_logs!site_log_id(
-            id,
-            log_date,
-            project_id,
-            organization_id
-          ),
           contact:contacts(
             id,
             first_name,
@@ -50,21 +44,24 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
               id,
               name
             )
+          ),
+          created_by_member:organization_members!created_by(
+            id,
+            email,
+            first_name,
+            last_name
           )
         `)
-        .eq('site_log.project_id', projectId)
-        .eq('site_log.organization_id', organizationId)
+        .eq('project_id', projectId)
 
       if (error) {
         console.error('Error fetching attendance data:', error)
         return []
       }
 
-      // Additional filter to ensure contacts belong to the same organization
+      // Filter to ensure contacts belong to the same organization
       const filteredData = (attendanceData || []).filter(item => 
-        item.contact?.organization_id === organizationId &&
-        item.site_log?.project_id === projectId &&
-        item.site_log?.organization_id === organizationId
+        item.contact?.organization_id === organizationId
       )
 
       console.log('Filtered attendance data:', filteredData.length, 'records')
@@ -125,9 +122,9 @@ function transformAttendanceData(attendanceData: any[]) {
   const attendance: any[] = []
 
   attendanceData.forEach(attendanceRecord => {
-    if (attendanceRecord.contact && attendanceRecord.site_log) {
+    if (attendanceRecord.contact) {
       const workerId = attendanceRecord.contact.id
-      const logDate = new Date(attendanceRecord.site_log.log_date)
+      const logDate = new Date(attendanceRecord.created_at)
       const day = format(logDate, 'yyyy-MM-dd') // Use full date format for matching
       
       // Map attendance_type to gradebook format
