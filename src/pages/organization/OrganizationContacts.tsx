@@ -20,7 +20,6 @@ import { useMobile } from '@/hooks/use-mobile'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 
 export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")

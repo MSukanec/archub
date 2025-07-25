@@ -24,7 +24,6 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 
 
 export default function OrganizationProjects() {
@@ -350,30 +349,6 @@ export default function OrganizationProjects() {
       </div>
     </div>
   )
-
-  // ActionBar features for projects management
-  const projectFeatures = [
-    {
-      icon: <Folder className="h-4 w-4" />,
-      title: "Organización centralizada",
-      description: "Organiza todos tus proyectos de construcción en un solo lugar con acceso fácil a cada detalle del proceso"
-    },
-    {
-      icon: <Settings className="h-4 w-4" />,
-      title: "Configuración por proyecto",
-      description: "Cada proyecto tiene su configuración independiente: fases, presupuestos, cronogramas y equipos de trabajo"
-    },
-    {
-      icon: <BarChart3 className="h-4 w-4" />,
-      title: "Seguimiento integral",
-      description: "Monitorea el progreso, gastos y rendimiento de cada proyecto con métricas detalladas y reportes automatizados"
-    },
-    {
-      icon: <Users className="h-4 w-4" />,
-      title: "Colaboración en equipo",
-      description: "Invita miembros específicos a cada proyecto y asigna roles y permisos según las necesidades del equipo"
-    }
-  ];
 
   const actions = [
     <CustomRestricted key="new-project" feature="max_projects" current={filteredProjects?.length || 0}>

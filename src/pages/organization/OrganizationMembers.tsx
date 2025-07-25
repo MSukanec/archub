@@ -30,7 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 function getInitials(name: string): string {
   return name
