@@ -59,14 +59,6 @@ export default function DesignDashboard() {
           icon={<Layers className="h-12 w-12" />}
           title="Sin actividad de diseño registrada"
           description="Comienza creando fases de diseño y documentos para ver el resumen completo del proyecto."
-          action={
-            <Link href="/design/documentation">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Primer Documento
-              </Button>
-            </Link>
-          }
         />
       </Layout>
     )

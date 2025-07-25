@@ -341,14 +341,6 @@ export default function ConstructionAttendance() {
             icon={<Users className="h-12 w-12" />}
             title="Sin personal registrado"
             description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
-            action={
-              <CustomRestricted reason="general_mode" functionName="Registrar Asistencia">
-                <Button onClick={() => openModal('attendance', {})}>
-                  <Users className="w-4 h-4 mr-2" />
-                  Registrar Asistencia
-                </Button>
-              </CustomRestricted>
-            }
           />
         )}
     </Layout>

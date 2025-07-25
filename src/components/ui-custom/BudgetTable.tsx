@@ -211,14 +211,6 @@ export function BudgetTable({
           icon={<Calculator className="w-8 h-8 text-muted-foreground" />}
           title="No hay tareas en este presupuesto"
           description="Comienza agregando la primera tarea para gestionar los costos y materiales"
-          action={
-            <Button 
-              onClick={() => onAddTasks?.()}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar Tarea
-            </Button>
-          }
         />
       ) : (
         <>

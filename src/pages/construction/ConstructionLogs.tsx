@@ -547,16 +547,6 @@ export default function ConstructionLogs() {
             ? 'Prueba ajustando los filtros de búsqueda' 
             : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
           }
-          action={
-            !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly && (
-              <CustomRestricted reason="general_mode" functionName="Crear Primera Entrada">
-                <Button onClick={() => openModal('site-log')}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Entrada
-                </Button>
-              </CustomRestricted>
-            )
-          }
         />
       ) : (
         <>

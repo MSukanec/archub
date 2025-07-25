@@ -186,24 +186,6 @@ export default function AdminTaskParameters() {
           icon={<Settings className="w-8 h-8 text-muted-foreground" />}
           title="No hay opciones en este parámetro"
           description="Comienza agregando la primera opción para este parámetro"
-          action={
-            parameter.type === 'select' && (
-              <Button 
-                size="sm" 
-                onClick={() => {
-                  openModal('task-parameter-option', {
-                    parameterId: parameter.parameter_id,
-                    parameterLabel: parameter.label,
-                    option: null
-                  });
-                }}
-                className="h-8 px-3 text-xs"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Agregar Opción
-              </Button>
-            )
-          }
         />
       );
     }

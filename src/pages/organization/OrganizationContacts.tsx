@@ -390,12 +390,6 @@ export default function OrganizationContacts() {
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"
-          action={
-            <Button onClick={() => openModal('contact', { isEditing: false })}>
-              <Plus className="w-4 h-4 mr-2" />
-              Crear contacto
-            </Button>
-          }
         />
       </Layout>
     )

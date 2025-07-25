@@ -506,12 +506,6 @@ export default function ConstructionGallery() {
             icon={<Images />}
             title="No hay archivos en la galería"
             description="Sube tu primer archivo para comenzar"
-            action={
-              <Button onClick={() => openModal('gallery')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Subir Archivo Multimedia
-              </Button>
-            }
           />
         </div>
       </Layout>

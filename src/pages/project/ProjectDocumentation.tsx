@@ -265,15 +265,6 @@ export default function ProjectDocumentation() {
           icon={<FolderOpen className="w-12 h-12" />}
           title="No hay carpetas de documentos"
           description="Comienza creando tu primera carpeta para organizar los documentos del proyecto."
-          action={
-            <button
-              onClick={() => openModal('document-folder-form', {})}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:opacity-90 transition-opacity"
-            >
-              <FolderPlus className="w-4 h-4" />
-              Crear Primera Carpeta
-            </button>
-          }
         />
       );
     }

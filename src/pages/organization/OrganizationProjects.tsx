@@ -500,16 +500,6 @@ export default function OrganizationProjects() {
               ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
             }
-            action={
-              !searchValue && filterByStatus === 'all' && (
-                <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-                  <Button onClick={() => openModal('project', {})}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear Primer Proyecto
-                  </Button>
-                </CustomRestricted>
-              )
-            }
           />
         )}
 
