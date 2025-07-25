@@ -308,62 +308,49 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
             )}
           />
 
-          {/* Public Toggle */}
-          <FormField
-            control={form.control}
-            name="is_public"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Tarea Pública</FormLabel>
-                  <div className="text-sm text-muted-foreground">
-                    Permitir que otras organizaciones usen esta tarea
+          {/* Parameters Section */}
+          {selectedTemplateId && (
+            <div className="space-y-6">
+              <Separator />
+              
+              {/* Section: Parámetros de la Plantilla */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center mt-0.5">
+                    <Target className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium">Parámetros de la Plantilla</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Configura los valores específicos para esta tarea
+                    </p>
                   </div>
                 </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
 
-          {/* Parameters Section */}
-          {parameters && parameters.length > 0 && (
-            <div className="space-y-4">
-              <Separator />
-              <div>
-                <h3 className="text-lg font-medium">Parámetros de la Plantilla</h3>
-                <p className="text-sm text-muted-foreground">
-                  Configura los valores específicos para esta tarea
-                </p>
-              </div>
-              
-              <div className="space-y-4">
-                {parameters.map((param) => (
-                  <ParameterField
-                    key={param.id}
-                    parameter={param}
-                    value={paramValues[param.id] || ''}
-                    onChange={(value) => handleParameterChange(param.id, value)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+                {/* Task Preview */}
+                <div className="ml-11 space-y-4">
+                  <div>
+                    <FormLabel className="text-sm font-medium">Vista Previa</FormLabel>
+                    <div className="mt-2 p-3 bg-muted rounded-lg border-l-4 border-accent">
+                      <p className="text-sm font-medium">
+                        {generateDescription() || 'Selecciona los parámetros para ver la vista previa'}
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Task Preview */}
-          {selectedTemplateId && (
-            <div className="space-y-2">
-              <Separator />
-              <div>
-                <FormLabel>Vista Previa de la Tarea</FormLabel>
-                <div className="p-3 bg-muted rounded-lg border-l-4 border-accent">
-                  <p className="text-sm font-medium">
-                    {generateDescription() || 'Configura los parámetros para ver la vista previa'}
-                  </p>
+                  {/* Parameters */}
+                  {parameters && parameters.length > 0 && (
+                    <div className="space-y-4">
+                      {parameters.map((param) => (
+                        <ParameterField
+                          key={param.id}
+                          parameter={param}
+                          value={paramValues[param.id] || ''}
+                          onChange={(value) => handleParameterChange(param.id, value)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -373,12 +360,22 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
           {(createdTaskId || generatedTask) && (
             <div className="space-y-4">
               <Separator />
-              <div>
-                <h3 className="text-lg font-medium">Materiales de la Tarea</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gestiona los materiales necesarios para esta tarea
-                </p>
-              </div>
+              
+              {/* Section: Materiales de la Tarea */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center mt-0.5">
+                    <Plus className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium">Materiales de la Tarea</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Gestiona los materiales necesarios para esta tarea
+                    </p>
+                  </div>
+                </div>
+
+                <div className="ml-11 space-y-4">
 
               {/* Add Material */}
               <Card>
@@ -428,7 +425,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{taskMaterial.materials?.name || 'Material desconocido'}</span>
                             <Badge variant="secondary">
-                              {taskMaterial.amount} {taskMaterial.materials?.unit?.symbol || ''}
+                              {taskMaterial.amount} {taskMaterial.materials?.units?.name || ''}
                             </Badge>
                           </div>
                           <Button
@@ -445,6 +442,8 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                   ))}
                 </div>
               )}
+                </div>
+              </div>
             </div>
           )}
         </form>
@@ -465,7 +464,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
       onLeftClick={onClose}
       rightLabel={isEditing ? "Actualizar" : "Crear"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      rightIsLoading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 

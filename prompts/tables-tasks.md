@@ -292,7 +292,6 @@ TABLA TASK_GROUPS:
 TABLA (VISTA) TASK_GENERATED_VIEW:
 
 [
-[
   {
     "column_name": "id",
     "data_type": "uuid"
