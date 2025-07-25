@@ -380,13 +380,15 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                   </div>
                 ) : (
                   filteredTasks.map((task) => {
+                    const isInUse = selectedTasks.some(t => t.task_id === task.id);
+                    
                     return (
                       <div 
                         key={task.id} 
-                        className="py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors"
+                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isInUse ? 'bg-[hsl(var(--accent))]/10 border-l-4 border-l-[hsl(var(--accent))]' : ''}`}
                         onClick={() => handleTaskSelection(task.id)}
                       >
-                        <div className="text-sm leading-tight line-clamp-2">
+                        <div className="text-sm leading-tight">
                           {task.display_name || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
@@ -460,7 +462,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
                         {/* Task Name */}
                         <div>
-                          <div className="text-sm leading-tight line-clamp-2">
+                          <div className="text-sm leading-tight">
                             {task.display_name || 'Sin nombre'}
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
