@@ -18,6 +18,7 @@ import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 
@@ -398,33 +399,90 @@ export default function OrganizationContacts() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* FeatureIntroduction */}
-        <FeatureIntroduction
-          title="Contactos"
-          icon={<Users className="w-5 h-5" />}
+        {/* ActionBar Desktop */}
+        <ActionBarDesktop
+          title="Gestión de Contactos"
+          icon={<Users className="w-6 h-6" />}
           features={[
             {
-              icon: <Building className="w-5 h-5" />,
+              icon: <Building className="w-4 h-4" />,
               title: "Gestión integral de personas",
               description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
             },
             {
-              icon: <UserCheck className="w-5 h-5" />,
+              icon: <UserCheck className="w-4 h-4" />,
               title: "Vinculación con usuarios de Archub",
               description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
             },
             {
-              icon: <Users className="w-5 h-5" />,
+              icon: <Users className="w-4 h-4" />,
               title: "Base fundamental para otras funciones",
               description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
             },
             {
-              icon: <Share2 className="w-5 h-5" />,
+              icon: <Share2 className="w-4 h-4" />,
               title: "Compartir información fácilmente",
               description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
             }
           ]}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          showFilters
+          customFilters={[
+            { 
+              label: `Orden: ${sortBy === 'name_asc' ? 'Nombre A-Z' : 
+                              sortBy === 'name_desc' ? 'Nombre Z-A' :
+                              sortBy === 'date_asc' ? 'Más antiguos' : 'Más recientes'}`, 
+              onClick: () => {
+                const nextSort = sortBy === 'name_asc' ? 'name_desc' : 
+                                sortBy === 'name_desc' ? 'date_asc' :
+                                sortBy === 'date_asc' ? 'date_desc' : 'name_asc'
+                setSortBy(nextSort)
+              }
+            },
+            { 
+              label: `Tipo: ${filterByType === 'all' ? 'Todos' : contactTypes.find(t => t.id === filterByType)?.name || 'Desconocido'}`, 
+              onClick: () => {
+                const currentIndex = filterByType === 'all' ? -1 : contactTypes.findIndex(t => t.id === filterByType)
+                const nextIndex = (currentIndex + 1) % (contactTypes.length + 1)
+                setFilterByType(nextIndex === contactTypes.length ? 'all' : contactTypes[nextIndex].id)
+              }
+            }
+          ]}
+          primaryActionLabel="Nuevo Contacto"
+          onPrimaryActionClick={() => openModal('contact', { isEditing: false })}
+          showProjectSelector={false}
         />
+
+        {/* FeatureIntroduction - Solo mobile */}
+        <div className="md:hidden">
+          <FeatureIntroduction
+            title="Contactos"
+            icon={<Users className="w-5 h-5" />}
+            features={[
+              {
+                icon: <Building className="w-5 h-5" />,
+                title: "Gestión integral de personas",
+                description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
+              },
+              {
+                icon: <UserCheck className="w-5 h-5" />,
+                title: "Vinculación con usuarios de Archub",
+                description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
+              },
+              {
+                icon: <Users className="w-5 h-5" />,
+                title: "Base fundamental para otras funciones",
+                description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
+              },
+              {
+                icon: <Share2 className="w-5 h-5" />,
+                title: "Compartir información fácilmente",
+                description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
+              }
+            ]}
+          />
+        </div>
 
         <Table
           data={filteredContacts}
