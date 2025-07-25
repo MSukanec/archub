@@ -192,12 +192,11 @@ export default function OrganizationMembers() {
   ];
 
   return (
-    <Layout headerProps={headerProps} breadcrumb={breadcrumb}>
-      <div className="space-y-6">
+    <Layout headerProps={headerProps}>
+      <div>
         {/* Feature Introduction - Mobile only */}
         <FeatureIntroduction
           title="Gestión de Miembros"
-          subtitle="(click para más información)"
           icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
           features={[
             {
@@ -227,11 +226,8 @@ export default function OrganizationMembers() {
         <ActionBarDesktop
           title="Gestión de Miembros"
           icon={<Users className="h-5 w-5" />}
-          primaryAction={{
-            label: "Invitar miembro",
-            onClick: () => openModal('member'),
-            icon: <UserPlus className="h-4 w-4" />
-          }}
+          primaryActionLabel="Invitar miembro"
+          onPrimaryActionClick={() => openModal('member')}
           features={[
             {
               icon: <Users className="h-4 w-4" />,
@@ -257,7 +253,7 @@ export default function OrganizationMembers() {
         />
 
         {/* Two Column Layout - Section descriptions left, content right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
           {/* Left Column - Section Description */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
@@ -296,20 +292,20 @@ export default function OrganizationMembers() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={member.users?.avatar_url} />
+                            <AvatarImage src={member.users?.[0]?.avatar_url} />
                             <AvatarFallback>
-                              {getInitials(member.users?.full_name || member.users?.email || 'U')}
+                              {getInitials(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">
-                                {member.users?.full_name || 'Sin nombre'}
+                                {member.users?.[0]?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {member.users?.email}
+                              {member.users?.[0]?.email}
                             </p>
                           </div>
                         </div>
@@ -325,10 +321,10 @@ export default function OrganizationMembers() {
                           </div>
 
                           <Badge 
-                            variant={getRoleBadgeVariant(member.roles?.name || '')}
-                            className={getRoleBadgeClassName(member.roles?.name || '')}
+                            variant={getRoleBadgeVariant(member.roles?.[0]?.name || '')}
+                            className={getRoleBadgeClassName(member.roles?.[0]?.name || '')}
                           >
-                            {member.roles?.name || 'Sin rol'}
+                            {member.roles?.[0]?.name || 'Sin rol'}
                           </Badge>
 
                           <DropdownMenu>
