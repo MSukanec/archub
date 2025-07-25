@@ -42,14 +42,14 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
       }}
     >
       <CardContent className="p-4">
-        <div className="grid grid-cols-10 gap-4 items-center">
+        <div className="grid grid-cols-6 gap-4 items-center">
           {/* Fecha */}
           <div className="col-span-1 text-xs text-muted-foreground">
             {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
           </div>
 
           {/* Organización */}
-          <div className="col-span-5 flex items-center gap-2">
+          <div className="col-span-1 flex items-center gap-2">
             <Avatar className="w-8 h-8 avatar-border">
               <AvatarFallback className="text-xs">
                 {organization.name?.substring(0, 2)?.toUpperCase() || 'ORG'}
@@ -87,9 +87,17 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
             <div className="flex -space-x-1">
               {members.slice(0, 3).map((member, index) => (
                 <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
-                  <AvatarFallback className="text-xs">
-                    {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
+                  {member.avatar_url ? (
+                    <img 
+                      src={member.avatar_url} 
+                      alt={member.full_name || member.email} 
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <AvatarFallback className="text-xs">
+                      {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               ))}
               {members.length > 3 && (
@@ -109,39 +117,17 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
 
           {/* Acciones */}
           <div className="col-span-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onEdit(organization)
-                  }}
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(organization)
-                  }}
-                  className="text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(organization)
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -482,9 +468,9 @@ export default function OrganizationManagement() {
         )}
 
         {/* Headers de columnas */}
-        <div className="grid grid-cols-10 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+        <div className="grid grid-cols-6 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-1">Fecha</div>
-          <div className="col-span-5">Organización</div>
+          <div className="col-span-1">Organización</div>
           <div className="col-span-1">Plan</div>
           <div className="col-span-1">Miembros</div>
           <div className="col-span-1">Estado</div>
