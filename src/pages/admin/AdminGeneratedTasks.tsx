@@ -19,6 +19,7 @@ import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
 import { useAllTaskParameterValues } from '@/hooks/use-task-parameters-admin'
 
 import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-react'
+import { NewAdminGeneratedTaskModal } from '@/modals/admin/tasks/NewAdminGeneratedTaskModal'
 
 interface GeneratedTask {
   id: string
@@ -47,6 +48,7 @@ export default function AdminGeneratedTasks() {
   const { openModal } = useGlobalModalStore()
   const [deletingGeneratedTask, setDeletingGeneratedTask] = useState<GeneratedTask | null>(null)
   const [processedTaskNames, setProcessedTaskNames] = useState<Record<string, string>>({})
+  const [isCreating, setIsCreating] = useState(false)
 
   // Real data from useGeneratedTasks hook
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
@@ -128,8 +130,10 @@ export default function AdminGeneratedTasks() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
+  const [editingGeneratedTask, setEditingGeneratedTask] = useState<GeneratedTask | null>(null)
+  
   const handleEdit = (generatedTask: GeneratedTask) => {
-    openModal('generated-task', { generatedTask })
+    setEditingGeneratedTask(generatedTask)
   }
 
   const handleConfirmDelete = async () => {
@@ -270,7 +274,7 @@ export default function AdminGeneratedTasks() {
     actions: [
       <Button
         key="new-generated-task"
-        onClick={() => openModal('generated-task', {})}
+        onClick={() => setIsCreating(true)}
         size="sm"
         className="gap-2"
       >
@@ -340,7 +344,15 @@ export default function AdminGeneratedTasks() {
         />
       </div>
 
-      {/* Modals are now handled by ModalFactory */}
+      {/* Original Modal */}
+      <NewAdminGeneratedTaskModal
+        isOpen={isCreating || !!editingGeneratedTask}
+        onClose={() => {
+          setIsCreating(false);
+          setEditingGeneratedTask(null);
+        }}
+        generatedTask={editingGeneratedTask || undefined}
+      />
 
       <AlertDialog open={!!deletingGeneratedTask} onOpenChange={() => setDeletingGeneratedTask(null)}>
         <AlertDialogContent>
