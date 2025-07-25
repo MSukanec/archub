@@ -194,6 +194,8 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     setParamValues({});
     form.setValue('template_id', templateId);
     form.setValue('param_values', {});
+    // Force update the field to sync with the select
+    form.trigger('template_id');
   };
 
   // Handle parameter value changes
@@ -323,12 +325,16 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Plantilla de Tarea *</FormLabel>
-                <Select onValueChange={handleTemplateChange} value={selectedTemplateId}>
+                <Select 
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    handleTemplateChange(value);
+                  }} 
+                  value={field.value || selectedTemplateId || ""}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar plantilla">
-                        {selectedTemplateId && templates?.find(t => t.id === selectedTemplateId)?.name}
-                      </SelectValue>
+                      <SelectValue placeholder="Seleccionar plantilla" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="z-[9999]">
