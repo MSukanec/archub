@@ -94,45 +94,28 @@ export function ConstructionTaskFormModal({
     setPanel("edit");
   }, [setPanel]);
 
-  // Hook para cargar TODAS las tareas del SISTEMA desde la tabla tasks
+  // Hook para cargar TODAS las tareas SIN FILTRAR
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['system-tasks'],
+    queryKey: ['all-tasks-no-filter'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 Cargando TODAS las tareas del sistema desde tabla tasks');
+      console.log('🔍 Cargando TODAS las tareas SIN FILTRAR');
       
-      const { data: systemTasks, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          rubros:rubro_id(name),
-          categories:category_id(name),
-          units:unit_id(name, symbol)
-        `)
-        .eq('is_system', true)
+      const { data: allTasks, error } = await supabase
+        .from('task_generated_view')
+        .select('*')
         .order('display_name', { ascending: true });
       
       if (error) {
-        console.error('❌ Error cargando tareas del sistema:', error);
+        console.error('❌ Error cargando tareas:', error);
         throw error;
       }
       
-      // Transformar a formato esperado
-      const transformedTasks = systemTasks?.map(task => ({
-        id: task.id,
-        display_name: task.display_name,
-        rubro_name: task.rubros?.name || 'Sin rubro',
-        category_name: task.categories?.name || 'Sin categoría',
-        unit_name: task.units?.name || 'ud',
-        unit_symbol: task.units?.symbol || 'ud',
-        is_system: task.is_system
-      })) || [];
+      console.log('✅ TODAS las tareas cargadas SIN FILTRO:', allTasks?.length || 0);
+      console.log('📋 Primeras 3 tareas:', allTasks?.slice(0, 3));
       
-      console.log('✅ Tareas del sistema cargadas:', transformedTasks.length);
-      console.log('📋 Primeras 3 tareas:', transformedTasks.slice(0, 3));
-      
-      return transformedTasks;
+      return allTasks || [];
     },
     enabled: !!supabase
   });
