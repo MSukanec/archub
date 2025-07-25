@@ -97,28 +97,7 @@ export function ConstructionTaskFormModal({
   }, [projectPhases]);
 
   // Hook para obtener la fase actual de la tarea cuando se está editando
-  const { data: currentPhaseTask } = useQuery({
-    queryKey: ['current-phase-task', modalData.editingTask?.id],
-    queryFn: async () => {
-      if (!modalData.editingTask?.id || !supabase) return null;
-
-      const { data, error } = await supabase
-        .from('construction_task_instances')
-        .select('project_phase_id')
-        .eq('id', modalData.editingTask.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching current phase task:', error);
-        return null;
-      }
-
-      console.log('Phase task query result:', data);
-      return data;
-    },
-    enabled: !!modalData.isEditing && !!modalData.editingTask?.id,
-    staleTime: 0 // Always refetch to ensure we have the latest data
-  });
+  // Ya tenemos la información en editingTask.phase_instance_id, no necesitamos query adicional
 
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
@@ -147,10 +126,10 @@ export function ConstructionTaskFormModal({
       form.reset({
         task_id: task.task_id || '',
         quantity: task.quantity || 1,
-        project_phase_id: currentPhaseTask?.project_phase_id || ''
+        project_phase_id: task.phase_instance_id || ''
       });
     }
-  }, [modalData.isEditing, modalData.editingTask, currentPhaseTask, form, setSearchQuery]);
+  }, [modalData.isEditing, modalData.editingTask, form]);
 
   // Agregar la tarea actual a las opciones si estamos editando y no está en la lista
   const enhancedTaskOptions = useMemo(() => {
@@ -214,7 +193,6 @@ export function ConstructionTaskFormModal({
         // Modo edición
         await updateTask.mutateAsync({
           id: modalData.editingTask.id,
-          task_id: data.task_id,
           quantity: data.quantity,
           project_phase_id: data.project_phase_id
         });
@@ -354,7 +332,7 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Agregar Tarea"}
       onRightClick={handleSubmit(onSubmit)}
-      rightLoading={isSubmitting}
+      rightDisabled={isSubmitting}
     />
   );
 

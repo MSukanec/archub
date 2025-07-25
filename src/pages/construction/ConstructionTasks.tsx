@@ -89,7 +89,7 @@ export default function ConstructionTasks() {
       projectId,
       organizationId,
       userId: userData?.user?.id,
-      taskData: task,
+      editingTask: task,
       isEditing: true
     })
   }
