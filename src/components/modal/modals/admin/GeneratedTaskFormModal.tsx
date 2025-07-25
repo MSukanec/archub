@@ -32,106 +32,29 @@ import { useMaterials } from '@/hooks/use-materials';
 import { useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useUpdateTaskMaterial } from '@/hooks/use-generated-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
+import { supabase } from '@/lib/supabase';
 
-// Component to handle individual parameter rendering with proper hook usage
-function ParameterField({ parameter, value, onChange }: { 
+// Simple ParameterField component - following original approach
+function ParameterField({ parameter, value, onChange, parameterOptions }: { 
   parameter: any, 
   value: string, 
-  onChange: (value: string) => void 
+  onChange: (value: string) => void,
+  parameterOptions: any[]
 }) {
-  // Use id since that's the actual parameter ID from the transformed data
-  const parameterId = parameter.id;
-  const { data: options = [], isLoading, error } = useTaskTemplateParameterOptions(parameterId);
-  
-  // Debug logging
-  console.log('🔍 ParameterField Debug:', {
-    parameter: parameter,
-    parameterId: parameterId,
-    parameterLabel: parameter.label,
-    optionsCount: options?.length || 0,
-    isLoading,
-    error: error?.message,
-    options: options,
-    queryEnabled: !!parameterId
-  });
-  
-  // Select-specific debug logging
-  console.log('🔧 Select Value Debug:', {
-    parameterName: parameter.name,
-    receivedValue: value,
-    optionsAvailable: options.length,
-    firstOptionValue: options[0]?.value,
-    firstOptionLabel: options[0]?.label,
-    valueMatchesAnyOption: options.some(opt => opt.value === value || opt.id === value),
-    allOptionValues: options.map(opt => ({ id: opt.id, value: opt.value, label: opt.label }))
-  });
-  
-  // Convert stored value (label) to option value (ID) for Select component
-  const findMatchingOption = () => {
-    if (!value || options.length === 0) return null;
-    
-    // First try to find by ID/value (exact match)
-    let match = options.find(opt => opt.value === value || opt.id === value);
-    
-    // If not found, try to find by label (exact match)
-    if (!match) {
-      match = options.find(opt => opt.label === value);
-    }
-    
-    // If still not found, try fuzzy matching for compressed values
-    if (!match) {
-      const normalizeString = (str: string) => {
-        return str.toLowerCase()
-          .replace(/\s+/g, '') // Remove spaces
-          .replace(/[áéíóú]/g, (char) => { // Remove accents
-            const accents = { á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' };
-            return accents[char] || char;
-          })
-          .replace(/[,\.]/g, ''); // Remove punctuation
-      };
-      
-      const normalizedValue = normalizeString(value);
-      match = options.find(opt => {
-        const normalizedLabel = normalizeString(opt.label);
-        return normalizedLabel.includes(normalizedValue) || normalizedValue.includes(normalizedLabel);
-      });
-    }
-    
-    return match;
-  };
-
-  const matchingOption = findMatchingOption();
-  const selectValue = matchingOption ? matchingOption.value : '';
-  
-  console.log('🔧 Value conversion:', {
-    storedValue: value,
-    matchingOption: matchingOption,
-    selectValue: selectValue,
-    optionLabels: options.map(opt => opt.label),
-    fuzzySearchApplied: !options.find(opt => opt.label === value) && !!matchingOption
-  });
-
-  const handleSelectChange = (selectedValue: string) => {
-    // Find the selected option and store its label (to maintain consistency with existing data)
-    const selectedOption = options.find(opt => opt.value === selectedValue || opt.id === selectedValue);
-    const valueToStore = selectedOption ? selectedOption.label : selectedValue;
-    onChange(valueToStore);
-  };
+  const options = parameterOptions || [];
 
   return (
     <div className="space-y-2">
       <FormLabel>{parameter.label}</FormLabel>
-      <Select value={selectValue} onValueChange={handleSelectChange}>
+      <Select value={value} onValueChange={onChange}>
         <SelectTrigger>
           <SelectValue placeholder={`Seleccionar ${parameter.label.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent className="z-[9999]">
-          {isLoading ? (
-            <SelectItem value="" disabled>Cargando opciones...</SelectItem>
-          ) : options.length > 0 ? (
+          {options.length > 0 ? (
             options.map((option: any) => (
-              <SelectItem key={option.id} value={option.value || option.id}>
-                {option.label || option.name}
+              <SelectItem key={option.id} value={option.id}>
+                {option.label}
               </SelectItem>
             ))
           ) : (
@@ -170,6 +93,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     amount: 1
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [parameterOptions, setParameterOptions] = useState<Record<string, any[]>>({});
   
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -203,31 +127,91 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     return [];
   };
 
-  // Initialize form when editing
+  // Load parameter options for all parameters
   useEffect(() => {
-    if (generatedTask) {
-      console.log('🔧 Edit mode - loading existing task:', {
-        task: generatedTask,
-        param_values: generatedTask.param_values,
-        template_id: generatedTask.template_id
-      });
+    if (parameters && parameters.length > 0) {
+      const loadOptions = async () => {
+        const optionsMap: Record<string, any[]> = {};
+        
+        for (const param of parameters) {
+          try {
+            const { data, error } = await supabase
+              .from('task_parameter_values')
+              .select('*')
+              .eq('parameter_id', param.id);
+            
+            if (!error && data) {
+              optionsMap[param.id] = data.map(option => ({
+                id: option.id,
+                value: option.id,
+                label: option.label
+              }));
+            }
+          } catch (error) {
+            console.error('Error loading options for parameter:', param.id, error);
+          }
+        }
+        
+        setParameterOptions(optionsMap);
+      };
       
+      loadOptions();
+    }
+  }, [parameters]);
+
+  // Initialize form when editing - convert compressed values to proper IDs
+  useEffect(() => {
+    if (generatedTask && parameterOptions && Object.keys(parameterOptions).length > 0) {
+      // Convert compressed param values to proper option IDs
+      const convertedParamValues: Record<string, string> = {};
+      
+      if (generatedTask.param_values) {
+        Object.entries(generatedTask.param_values).forEach(([paramName, storedValue]) => {
+          // Find the parameter by name
+          const param = parameters?.find(p => p.name === paramName);
+          if (param && parameterOptions[param.id]) {
+            const options = parameterOptions[param.id];
+            
+            // Try to find matching option by various methods
+            let matchingOption = options.find(opt => opt.id === storedValue);
+            
+            if (!matchingOption) {
+              matchingOption = options.find(opt => opt.label === storedValue);
+            }
+            
+            if (!matchingOption) {
+              // Fuzzy matching
+              const normalizeString = (str: string) => {
+                return str.toLowerCase()
+                  .replace(/\s+/g, '')
+                  .replace(/[áéíóú]/g, (char) => ({ á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' }[char] || char))
+                  .replace(/[,\.]/g, '');
+              };
+              
+              const normalizedStored = normalizeString(storedValue.toString());
+              matchingOption = options.find(opt => {
+                const normalizedLabel = normalizeString(opt.label);
+                return normalizedLabel.includes(normalizedStored) || normalizedStored.includes(normalizedLabel);
+              });
+            }
+            
+            convertedParamValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
+          } else {
+            convertedParamValues[paramName] = storedValue.toString();
+          }
+        });
+      }
+      
+      setParamValues(convertedParamValues);
       setSelectedTemplateId(generatedTask.template_id);
-      setParamValues(generatedTask.param_values || {});
       setCreatedTaskId(generatedTask.id);
       
       form.reset({
         template_id: generatedTask.template_id,
         is_public: generatedTask.is_public,
-        param_values: generatedTask.param_values || {}
+        param_values: convertedParamValues
       });
-      
-      console.log('🔧 Form reset with values:', {
-        paramValues: generatedTask.param_values,
-        formValues: form.getValues()
-      });
-    } else {
-      console.log('Create mode - resetting form');
+    } else if (!generatedTask) {
       setSelectedTemplateId('');
       setParamValues({});
       setCreatedTaskId(null);
@@ -238,7 +222,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
         param_values: {}
       });
     }
-  }, [generatedTask, form]);
+  }, [generatedTask, form, parameters, parameterOptions]);
 
   // Handle template selection
   const handleTemplateChange = (templateId: string) => {
@@ -255,38 +239,35 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     form.setValue('param_values', newParamValues);
   };
 
-  // Generate task description
-  const generateDescription = () => {
-    if (!selectedTemplateId || !templates || !parameters) return 'Generando descripción...';
-    
-    const template = templates.find(t => t.id === selectedTemplateId);
-    if (!template) return 'Template no encontrado';
+  // Generate task description using the original approach
+  const generateDescriptionWithExpressions = (paramValues: Record<string, any>) => {
+    if (!parameters) return "Seleccione los parámetros para ver la vista previa";
 
-    // Convert compressed param values to full labels for description generation
-    const expandedParamValues = { ...paramValues };
-    
-    parameters.forEach(param => {
-      const storedValue = paramValues[param.name];
-      if (storedValue) {
-        // Try to find the matching option to get the full label
-        const parameterId = param.id;
-        // We need to get the options for this parameter to do the conversion
-        // For now, keep the stored value but log the conversion attempt
-        console.log('🔧 Description generation - param conversion:', {
-          paramName: param.name,
-          storedValue: storedValue,
-          needsExpansion: true
-        });
-      }
-    });
+    const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
+    if (!currentTemplate) return "Seleccione una plantilla";
 
-    try {
-      const result = generateTaskDescription(template.name_template, expandedParamValues, []);
-      return typeof result === 'string' ? result : 'Generando descripción...';
-    } catch (error) {
-      console.error('Error generating description:', error);
-      return 'Error al generar descripción';
-    }
+    let fragments: string[] = [];
+
+    parameters
+      .sort((a, b) => a.position - b.position)
+      .forEach(param => {
+        const rawValue = paramValues[param.name];
+        if (!rawValue) return;
+
+        // Buscar label para select - the value IS the option ID, so find the option
+        let label = rawValue.toString();
+        const options = parameterOptions[param.id] || [];
+        const option = options.find(opt => opt.id === rawValue);
+        if (option?.label) label = option.label;
+
+        // Aplicar plantilla del parámetro
+        const expr = param.expression_template || '{value}';
+        const fragment = expr.replace('{value}', label);
+
+        fragments.push(fragment);
+      });
+
+    return `${currentTemplate.name_template} ${fragments.join(' ')}.`.trim();
   };
 
   // Handle form submission
@@ -435,7 +416,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                   <p className="text-xs text-muted-foreground mb-2">Así se verá el nombre de la tarea generada</p>
                   <div className="mt-2 p-3 bg-muted rounded-lg border-2 border-dashed border-accent">
                     <p className="text-sm font-medium">
-                      {generateDescription() || 'Generando descripción...'}
+                      {generateDescriptionWithExpressions(paramValues) || 'Generando descripción...'}
                     </p>
                   </div>
                 </div>
@@ -444,26 +425,16 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                 {parameters && parameters.length > 0 && (
                   <div className="space-y-4">
                       {parameters.map((param) => {
-                        // Use parameter.name as key since param_values in task_generated stores by name, not ID
-                        const paramKey = param.name;
-                        const storedValue = paramValues[paramKey] || '';
-                        
-                        // Need to convert the stored value to match option format
-                        // For now, pass the stored value directly and let ParameterField handle the conversion
-                        console.log('🔧 Rendering parameter field:', {
-                          paramId: param.id,
-                          paramName: param.name,
-                          paramKey,
-                          storedValue,
-                          allParamValues: paramValues
-                        });
+                        const currentValue = paramValues[param.name] || '';
+                        const options = parameterOptions[param.id] || [];
                         
                         return (
                           <ParameterField
                             key={param.id}
                             parameter={param}
-                            value={storedValue}
-                            onChange={(value) => handleParameterChange(paramKey, value)}
+                            value={currentValue}
+                            onChange={(value) => handleParameterChange(param.name, value)}
+                            parameterOptions={options}
                           />
                         );
                       })}
