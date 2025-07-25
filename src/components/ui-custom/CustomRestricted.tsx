@@ -102,6 +102,41 @@ export function CustomRestricted({
   // Lógica dinámica para determinar el plan objetivo
   let dynamicRestriction = getRestrictionMessage(restrictionKey);
 
+  // Para max_projects, determinar dinámicamente el plan objetivo
+  if (restrictionKey === "max_projects") {
+    const organizationId = userData?.preferences?.last_organization_id;
+    const currentOrganization = userData?.organizations?.find(
+      (org) => org.id === organizationId,
+    );
+    const currentPlan = currentOrganization?.plan?.name;
+
+    if (currentPlan === "Free") {
+      // Free → Pro
+      dynamicRestriction = {
+        ...dynamicRestriction,
+        message:
+          "Has alcanzado el límite de 2 proyectos de tu plan Free. Actualiza a Pro para 25 proyectos.",
+        actionLabel: "Actualizar a Pro",
+        planType: "pro" as const,
+        iconColor: "white",
+        backgroundColor: "hsl(213, 100%, 30%)",
+        borderColor: "hsl(213, 100%, 30%)",
+      };
+    } else if (currentPlan === "Pro") {
+      // Pro → Teams
+      dynamicRestriction = {
+        ...dynamicRestriction,
+        message:
+          "Has alcanzado el límite de 25 proyectos de tu plan Pro. Actualiza a Teams para proyectos ilimitados.",
+        actionLabel: "Actualizar a Teams",
+        planType: "teams" as const,
+        iconColor: "white",
+        backgroundColor: "hsl(271, 76%, 53%)",
+        borderColor: "hsl(271, 76%, 53%)",
+      };
+    }
+  }
+
   // Para max_kanban_boards, determinar dinámicamente el plan objetivo
   if (restrictionKey === "max_kanban_boards") {
     const organizationId = userData?.preferences?.last_organization_id;

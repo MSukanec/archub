@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. PROJECT CREATION PLAN RESTRICTIONS PERFECTED: Successfully configured dynamic plan upgrade offers with proper limits and colors - COMPLETED
+  • PLAN LIMITS CORRECTED: Free plan now allows 2 projects (restricted at 3rd), Pro allows 25 projects (restricted at 26th), Teams unlimited
+  • DYNAMIC RESTRICTION LOGIC: Added max_projects dynamic restriction logic in CustomRestricted.tsx matching max_kanban_boards pattern
+  • FREE TO PRO UPGRADE: When trying to create 3rd project, shows Pro upgrade offer with blue colors (hsl(213, 100%, 30%))
+  • PRO TO TEAMS UPGRADE: When trying to create 26th project, shows Teams upgrade offer with purple colors (hsl(271, 76%, 53%))
+  • PROPER COLOR SCHEME: Each restriction shows appropriate plan colors with white icon text and matching background/border colors
+  • USPLANFEATURES UPDATED: Modified limits in usePlanFeatures.ts to reflect correct project limits per plan tier
 - July 25, 2025. ORGANIZATION PROJECTS ACTIONBAR PRIMARY BUTTON FIXED: Successfully implemented proper project creation button with plan restrictions in ActionBar - COMPLETED
   • PRIMARY ACTION BUTTON ADDED: Changed from primaryAction object to primaryActionLabel/onPrimaryActionClick pattern for "Nuevo Proyecto" button in OrganizationProjects.tsx
   • PLAN RESTRICTION IMPLEMENTED: Added primaryActionRestriction with feature="max_projects", current=project count, and functionName="Crear Proyecto"
