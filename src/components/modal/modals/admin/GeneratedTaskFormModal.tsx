@@ -33,6 +33,39 @@ import { useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useUpda
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator';
 
+// Component to handle individual parameter rendering with proper hook usage
+function ParameterField({ parameter, value, onChange }: { 
+  parameter: any, 
+  value: string, 
+  onChange: (value: string) => void 
+}) {
+  const { data: options = [], isLoading } = useTaskTemplateParameterOptions(parameter.id);
+  
+  return (
+    <div className="space-y-2">
+      <FormLabel>{parameter.label}</FormLabel>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder={`Seleccionar ${parameter.label.toLowerCase()}`} />
+        </SelectTrigger>
+        <SelectContent className="z-[9999]">
+          {isLoading ? (
+            <SelectItem value="" disabled>Cargando opciones...</SelectItem>
+          ) : options.length > 0 ? (
+            options.map((option: any) => (
+              <SelectItem key={option.id} value={option.value || option.id}>
+                {option.label || option.name}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="" disabled>No hay opciones disponibles</SelectItem>
+          )}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 const generatedTaskSchema = z.object({
   template_id: z.string().min(1, 'La plantilla es requerida'),
   is_public: z.boolean(),
@@ -83,8 +116,15 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   });
 
-  // Load parameter options for each parameter - removed hooks in map to fix "more hooks" error
-  const parameterOptionsQueries: any[] = [];
+  // Load parameter options - using individual hooks to avoid conditional hook calls
+  const { data: templateParams } = useTaskTemplateParameters(selectedTemplateId || null);
+  
+  // We need to load options for each parameter, but we can't use hooks in a map
+  // Instead, we'll create a custom hook that handles this properly
+  const getParameterOptions = (paramId: string) => {
+    // This will be handled in the render loop below
+    return [];
+  };
 
   // Initialize form when editing
   useEffect(() => {
@@ -137,7 +177,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
 
     // generateTaskDescription might return a Promise, so we handle it properly
     try {
-      const result = generateTaskDescription(template.name_template, paramValues, parameterOptionsQueries);
+      const result = generateTaskDescription(template.name_template, paramValues, []);
       return typeof result === 'string' ? result : 'Generando descripción...';
     } catch (error) {
       console.error('Error generating description:', error);
@@ -302,39 +342,14 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
               </div>
               
               <div className="space-y-4">
-                {parameters.map((param, index) => {
-                  const optionsQuery = parameterOptionsQueries[index];
-                  const options = optionsQuery?.data || [];
-                  
-                  return (
-                    <div key={param.id} className="space-y-2">
-                      <FormLabel>{param.label}</FormLabel>
-                      {param.type === 'select' && options.length > 0 ? (
-                        <Select
-                          value={paramValues[param.id] || ''}
-                          onValueChange={(value) => handleParameterChange(param.id, value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={`Seleccionar ${param.label.toLowerCase()}`} />
-                          </SelectTrigger>
-                          <SelectContent className="z-[9999]">
-                            {options.map((option) => (
-                              <SelectItem key={option.id} value={option.id}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          placeholder={`Ingrese ${param.label.toLowerCase()}`}
-                          value={paramValues[param.id] || ''}
-                          onChange={(e) => handleParameterChange(param.id, e.target.value)}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                {parameters.map((param) => (
+                  <ParameterField
+                    key={param.id}
+                    parameter={param}
+                    value={paramValues[param.id] || ''}
+                    onChange={(value) => handleParameterChange(param.id, value)}
+                  />
+                ))}
               </div>
             </div>
           )}
