@@ -420,7 +420,7 @@ export function ConstructionTaskFormModal({
         <div className="border-0 border-t border-b">
           {/* Table Header */}
           <div className="grid grid-cols-10 gap-2 py-3 bg-muted font-medium text-sm border-b">
-            <div className="col-span-1 flex items-center justify-center pl-6">
+            <div className="col-span-1 flex items-center justify-start">
               <Checkbox
                 checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
                 onCheckedChange={(checked) => {
@@ -433,7 +433,7 @@ export function ConstructionTaskFormModal({
               />
             </div>
             <div className="col-span-2">RUBRO</div>
-            <div className="col-span-7 pr-6">TAREA</div>
+            <div className="col-span-7">TAREA</div>
           </div>
 
           {/* Table Body */}
@@ -451,7 +451,7 @@ export function ConstructionTaskFormModal({
                   return (
                     <div key={task.id} className="grid grid-cols-10 gap-2 py-3 hover:bg-muted/30">
                       {/* Checkbox Column */}
-                      <div className="col-span-1 flex items-start justify-center pt-1 pl-6">
+                      <div className="col-span-1 flex items-start justify-start pt-1">
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
@@ -466,7 +466,7 @@ export function ConstructionTaskFormModal({
                       </div>
 
                       {/* Task Name Column */}
-                      <div className="col-span-7 pr-6">
+                      <div className="col-span-7">
                         <div className="text-sm leading-tight line-clamp-2">
                           {task.display_name || 'Sin nombre'}
                         </div>
