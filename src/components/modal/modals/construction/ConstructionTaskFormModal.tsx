@@ -94,75 +94,47 @@ export function ConstructionTaskFormModal({
     setPanel("edit");
   }, [setPanel]);
 
-  // Hook para cargar TODAS las tareas SIEMPRE - probando múltiples fuentes
+  // Hook para cargar TODAS las tareas del SISTEMA desde la tabla tasks
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['all-tasks', modalData.organizationId],
+    queryKey: ['system-tasks'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 Buscando tareas para organización:', modalData.organizationId);
+      console.log('🔍 Cargando TODAS las tareas del sistema desde tabla tasks');
       
-      // Intentar primero task_generated_view
-      const { data: generatedTasks, error: generatedError } = await supabase
-        .from('task_generated_view')
-        .select('*')
-        .eq('organization_id', modalData.organizationId);
-      
-      console.log('📊 task_generated_view:', generatedTasks?.length || 0, 'tareas');
-      
-      // Intentar task_templates también
-      const { data: templates, error: templatesError } = await supabase
-        .from('task_templates')
+      const { data: systemTasks, error } = await supabase
+        .from('tasks')
         .select(`
           *,
-          units:unit_id(name, symbol),
+          rubros:rubro_id(name),
           categories:category_id(name),
-          rubros:rubro_id(name)
+          units:unit_id(name, symbol)
         `)
-        .eq('organization_id', modalData.organizationId);
+        .eq('is_system', true)
+        .order('display_name', { ascending: true });
       
-      console.log('📊 task_templates:', templates?.length || 0, 'templates');
-      
-      // Intentar tasks de sistema también
-      const { data: systemTasks, error: systemError } = await supabase
-        .from('task_generated_view')
-        .select('*')
-        .eq('is_system', true);
-      
-      console.log('📊 system tasks:', systemTasks?.length || 0, 'tareas del sistema');
-      
-      // Combinar todas las fuentes disponibles
-      let allTasks = [];
-      
-      if (generatedTasks?.length) {
-        allTasks = [...allTasks, ...generatedTasks];
+      if (error) {
+        console.error('❌ Error cargando tareas del sistema:', error);
+        throw error;
       }
       
-      if (templates?.length) {
-        // Convertir templates a formato compatible
-        const convertedTemplates = templates.map(template => ({
-          id: template.id,
-          display_name: template.name,
-          rubro_name: template.rubros?.name || 'Sin rubro',
-          category_name: template.categories?.name || 'Sin categoría',
-          unit_name: template.units?.name || 'ud',
-          unit_symbol: template.units?.symbol || 'ud',
-          organization_id: template.organization_id
-        }));
-        allTasks = [...allTasks, ...convertedTemplates];
-      }
+      // Transformar a formato esperado
+      const transformedTasks = systemTasks?.map(task => ({
+        id: task.id,
+        display_name: task.display_name,
+        rubro_name: task.rubros?.name || 'Sin rubro',
+        category_name: task.categories?.name || 'Sin categoría',
+        unit_name: task.units?.name || 'ud',
+        unit_symbol: task.units?.symbol || 'ud',
+        is_system: task.is_system
+      })) || [];
       
-      if (systemTasks?.length && allTasks.length === 0) {
-        // Solo usar tareas del sistema si no hay otras
-        allTasks = [...allTasks, ...systemTasks.slice(0, 20)]; // Limitar a 20
-      }
+      console.log('✅ Tareas del sistema cargadas:', transformedTasks.length);
+      console.log('📋 Primeras 3 tareas:', transformedTasks.slice(0, 3));
       
-      console.log('✅ Total tareas cargadas:', allTasks.length);
-      console.log('📋 Primeras 3 tareas:', allTasks.slice(0, 3));
-      
-      return allTasks;
+      return transformedTasks;
     },
-    enabled: !!modalData.organizationId && !!supabase
+    enabled: !!supabase
   });
 
   // Hook para obtener las fases del proyecto
