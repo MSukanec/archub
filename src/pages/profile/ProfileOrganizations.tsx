@@ -427,32 +427,50 @@ export default function OrganizationManagement() {
       />
 
       <div className="space-y-6">
-        {/* Plan Card */}
-        <Card className="bg-[var(--card-bg)] border border-[var(--card-border)]">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-1 flex-1 min-w-0">
-                <p className="text-sm text-muted-foreground">
-                  Tu aplicación está actualmente en el plan gratuito
-                </p>
-                <p className="text-xs text-muted-foreground break-words">
-                  Los planes pagos ofrecen límites de uso más altos, ramas adicionales y mucho más. 
-                  <span className="text-primary underline cursor-pointer ml-1">Aprende más aquí.</span>
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
-                <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Chatear con nosotros</span>
-                  <span className="sm:hidden">Chat</span>
-                </Button>
-                <Button size="sm" className="w-full sm:w-auto">
-                  Actualizar
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Plan Card con color del plan actual */}
+        {(() => {
+          const activeOrg = userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id) || userData?.organization;
+          const planName = activeOrg?.plan?.name?.toLowerCase() || 'free';
+          const planBgColor = planName === 'free' ? 'var(--plan-free-bg)' :
+                             planName === 'pro' ? 'var(--plan-pro-bg)' :
+                             planName === 'teams' ? 'var(--plan-teams-bg)' :
+                             'var(--plan-free-bg)';
+          const planDisplayName = planName === 'free' ? 'gratuito' :
+                                  planName === 'pro' ? 'Pro' :
+                                  planName === 'teams' ? 'Teams' :
+                                  'gratuito';
+          
+          return (
+            <Card 
+              className="border-0" 
+              style={{ backgroundColor: planBgColor }}
+            >
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <p className="text-sm text-white font-bold">
+                      Tu aplicación está actualmente en el plan {planDisplayName}
+                    </p>
+                    <p className="text-xs text-white/80 break-words">
+                      Los planes pagos ofrecen límites de uso más altos, ramas adicionales y mucho más. 
+                      <span className="text-white underline cursor-pointer ml-1">Aprende más aquí.</span>
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
+                    <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white border-white/20">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Chatear con nosotros</span>
+                      <span className="sm:hidden">Chat</span>
+                    </Button>
+                    <Button size="sm" className="w-full sm:w-auto bg-white text-gray-900 hover:bg-white/90">
+                      Actualizar
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Card con información de la organización seleccionada */}
         {(() => {
