@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. ORGANIZATION PROJECTS ACTIONBAR PRIMARY BUTTON FIXED: Successfully implemented proper project creation button with plan restrictions in ActionBar - COMPLETED
+  • PRIMARY ACTION BUTTON ADDED: Changed from primaryAction object to primaryActionLabel/onPrimaryActionClick pattern for "Nuevo Proyecto" button in OrganizationProjects.tsx
+  • PLAN RESTRICTION IMPLEMENTED: Added primaryActionRestriction with feature="max_projects", current=project count, and functionName="Crear Proyecto"
+  • CUSTOMRESTRICTED INTEGRATION: Primary button now properly restricts project creation based on plan limits (Free/Pro/Teams)
+  • ACTIONBAR CONSISTENCY: All organization pages now follow same ActionBarDesktop structure with proper restriction handling
+  • MODAL INTEGRATION: Button correctly opens 'project' modal for creating new projects when restrictions allow
 - July 25, 2025. COMPLETE EMPTYSTATE BUTTON ELIMINATION FINALIZED: Successfully completed systematic removal of ALL remaining action buttons from EmptyState components across entire application - COMPLETED
   • COMPREHENSIVE CLEANUP EXECUTED: Processed 25+ pages and components including ProjectDocumentation, FinancesMovements, FinancesInstallments, DesignDashboard, ProjectDashboard, ConstructionTasks, ConstructionGallery, AdminTaskParameters, KanbanBox, ConstructionBudgets, ConstructionDashboard
   • ZERO EXCEPTIONS CONFIRMED: Verified through comprehensive search that no EmptyState components contain action buttons anywhere in codebase

@@ -413,10 +413,12 @@ export default function OrganizationProjects() {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           customFilters={customFilters}
-          primaryAction={{
-            label: "Nuevo Proyecto",
-            onClick: () => openModal('project', {}),
-            icon: <Plus className="w-5 h-5" />
+          primaryActionLabel="Nuevo Proyecto"
+          onPrimaryActionClick={() => openModal('project', {})}
+          primaryActionRestriction={{
+            feature: "max_projects",
+            current: filteredProjects?.length || 0,
+            functionName: "Crear Proyecto"
           }}
           showProjectSelector={false}
           features={[
