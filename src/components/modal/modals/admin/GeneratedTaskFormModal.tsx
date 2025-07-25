@@ -73,9 +73,28 @@ function ParameterField({ parameter, value, onChange }: {
     // First try to find by ID/value (exact match)
     let match = options.find(opt => opt.value === value || opt.id === value);
     
-    // If not found, try to find by label (stored as label in param_values)
+    // If not found, try to find by label (exact match)
     if (!match) {
       match = options.find(opt => opt.label === value);
+    }
+    
+    // If still not found, try fuzzy matching for compressed values
+    if (!match) {
+      const normalizeString = (str: string) => {
+        return str.toLowerCase()
+          .replace(/\s+/g, '') // Remove spaces
+          .replace(/[áéíóú]/g, (char) => { // Remove accents
+            const accents = { á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' };
+            return accents[char] || char;
+          })
+          .replace(/[,\.]/g, ''); // Remove punctuation
+      };
+      
+      const normalizedValue = normalizeString(value);
+      match = options.find(opt => {
+        const normalizedLabel = normalizeString(opt.label);
+        return normalizedLabel.includes(normalizedValue) || normalizedValue.includes(normalizedLabel);
+      });
     }
     
     return match;
@@ -88,7 +107,8 @@ function ParameterField({ parameter, value, onChange }: {
     storedValue: value,
     matchingOption: matchingOption,
     selectValue: selectValue,
-    optionLabels: options.map(opt => opt.label)
+    optionLabels: options.map(opt => opt.label),
+    fuzzySearchApplied: !options.find(opt => opt.label === value) && !!matchingOption
   });
 
   const handleSelectChange = (selectedValue: string) => {
@@ -237,14 +257,31 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
 
   // Generate task description
   const generateDescription = () => {
-    if (!selectedTemplateId || !templates) return '';
+    if (!selectedTemplateId || !templates || !parameters) return 'Generando descripción...';
     
     const template = templates.find(t => t.id === selectedTemplateId);
-    if (!template) return '';
+    if (!template) return 'Template no encontrado';
 
-    // generateTaskDescription might return a Promise, so we handle it properly
+    // Convert compressed param values to full labels for description generation
+    const expandedParamValues = { ...paramValues };
+    
+    parameters.forEach(param => {
+      const storedValue = paramValues[param.name];
+      if (storedValue) {
+        // Try to find the matching option to get the full label
+        const parameterId = param.id;
+        // We need to get the options for this parameter to do the conversion
+        // For now, keep the stored value but log the conversion attempt
+        console.log('🔧 Description generation - param conversion:', {
+          paramName: param.name,
+          storedValue: storedValue,
+          needsExpansion: true
+        });
+      }
+    });
+
     try {
-      const result = generateTaskDescription(template.name_template, paramValues, []);
+      const result = generateTaskDescription(template.name_template, expandedParamValues, []);
       return typeof result === 'string' ? result : 'Generando descripción...';
     } catch (error) {
       console.error('Error generating description:', error);
