@@ -149,7 +149,12 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   // Initialize form when editing
   useEffect(() => {
     if (generatedTask) {
-      console.log('Edit mode - loading existing task:', generatedTask);
+      console.log('🔧 Edit mode - loading existing task:', {
+        task: generatedTask,
+        param_values: generatedTask.param_values,
+        template_id: generatedTask.template_id
+      });
+      
       setSelectedTemplateId(generatedTask.template_id);
       setParamValues(generatedTask.param_values || {});
       setCreatedTaskId(generatedTask.id);
@@ -158,6 +163,11 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
         template_id: generatedTask.template_id,
         is_public: generatedTask.is_public,
         param_values: generatedTask.param_values || {}
+      });
+      
+      console.log('🔧 Form reset with values:', {
+        paramValues: generatedTask.param_values,
+        formValues: form.getValues()
       });
     } else {
       console.log('Create mode - resetting form');
@@ -362,11 +372,20 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                       {parameters.map((param) => {
                         // Use id since that's the actual parameter ID from the transformed data
                         const paramId = param.id;
+                        const currentValue = paramValues[paramId] || '';
+                        
+                        console.log('🔧 Rendering parameter field:', {
+                          paramId,
+                          paramName: param.name,
+                          currentValue,
+                          allParamValues: paramValues
+                        });
+                        
                         return (
                           <ParameterField
                             key={paramId}
                             parameter={param}
-                            value={paramValues[paramId] || ''}
+                            value={currentValue}
                             onChange={(value) => handleParameterChange(paramId, value)}
                           />
                         );
