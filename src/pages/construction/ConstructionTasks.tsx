@@ -115,15 +115,15 @@ export default function ConstructionTasks() {
   // Definir columnas para la tabla
   const columns = [
     {
-      key: 'rubro_name',
-      label: 'Rubro',
-      render: (task: any) => task.task?.rubro_name || 'Sin rubro',
-      width: '10%'
-    },
-    {
       key: 'phase',
       label: 'Fase',
       render: (task: any) => task.phase_name || 'Sin fase',
+      width: '10%'
+    },
+    {
+      key: 'rubro_name',
+      label: 'Rubro',
+      render: (task: any) => task.task?.rubro_name || 'Sin rubro',
       width: '10%'
     },
     {
