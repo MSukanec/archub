@@ -124,43 +124,25 @@ export function ConstructionTaskFormModal({
 
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
 
-  // Filtrar y procesar todas las tareas disponibles
+  // Filtrar tareas solo cuando hay búsqueda - SIEMPRE mostrar todas por defecto
   const filteredTasks = useMemo(() => {
-    let filtered = tasks;
-    
-    // Filtro por búsqueda
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(task => 
-        task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.category_name?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    // Si no hay búsqueda, mostrar TODAS las tareas
+    if (!searchQuery.trim()) {
+      return tasks;
     }
     
-    // Filtro por rubro
-    if (rubroFilter) {
-      filtered = filtered.filter(task => task.rubro_name === rubroFilter);
-    }
-    
-    // Filtro por categoría
-    if (categoryFilter) {
-      filtered = filtered.filter(task => task.category_name === categoryFilter);
-    }
-    
-    return filtered;
-  }, [tasks, searchQuery, rubroFilter, categoryFilter]);
+    // Solo filtrar cuando hay texto de búsqueda
+    return tasks.filter(task => 
+      task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.category_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [tasks, searchQuery]);
 
-  // Obtener opciones únicas para filtros
-  const rubroOptions = useMemo(() => {
-    const rubros = Array.from(new Set(tasks.map(task => task.rubro_name).filter(Boolean)));
-    return rubros.sort();
-  }, [tasks]);
-
-  const categoryOptions = useMemo(() => {
-    const categories = Array.from(new Set(tasks.map(task => task.category_name).filter(Boolean)));
-    return categories.sort();
-  }, [tasks]);
+  // Función para obtener la unidad de una tarea específica
+  const getTaskUnit = (task: any) => {
+    return task.units?.name || task.unit_name || 'ud';
+  };
 
   // Funciones para manejar la selección de tareas
   const handleTaskSelection = (taskId: string, isSelected: boolean) => {
@@ -366,7 +348,7 @@ export function ConstructionTaskFormModal({
 
         <input
           type="text"
-          placeholder="Buscar tareas..."
+          placeholder="Buscar por nombre, rubro o categoría..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
@@ -436,25 +418,30 @@ export function ConstructionTaskFormModal({
                       {/* Task Name Column */}
                       <div className="col-span-7">
                         <div className="text-sm leading-tight line-clamp-2">
-                          {task.display_name || task.code || 'Sin nombre'}
+                          {task.display_name || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {task.code && `Código: ${task.code}`} • Unidad: {task.units?.name || 'ud'}
+                          {task.category_name || 'Sin categoría'}
                         </div>
                       </div>
 
                       {/* Quantity Column */}
                       <div className="col-span-2">
                         {isSelected ? (
-                          <input
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            value={selectedTask?.quantity || 1}
-                            onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
-                            className="w-full px-2 py-1 text-sm border border-input rounded bg-background"
-                            placeholder="1.00"
-                          />
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="0.01"
+                              step="0.01"
+                              value={selectedTask?.quantity || 1}
+                              onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
+                              className="w-full px-2 py-1 pr-10 text-sm border border-input rounded bg-background"
+                              placeholder="1.00"
+                            />
+                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                              {getTaskUnit(task)}
+                            </div>
+                          </div>
                         ) : (
                           <div className="text-sm text-muted-foreground">-</div>
                         )}
