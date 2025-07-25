@@ -56,6 +56,12 @@ export function ProjectSelector() {
   })
 
   const handleProjectSelect = (projectId: string | null) => {
+    console.log("🎯 ProjectSelector: Selecting project", { 
+      from: selectedProjectId, 
+      to: projectId,
+      projectName: projects.find(p => p.id === projectId)?.name || 'General'
+    });
+    
     // Don't change selection if clicking the same project
     if (selectedProjectId === projectId) {
       return
