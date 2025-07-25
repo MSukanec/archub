@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
@@ -230,6 +231,7 @@ export default function AdminGeneratedTasks() {
     }
   ]
 
+  // ActionBar configuration
   const customFilters = (
     <div className="w-[288px] space-y-4">
       <div className="space-y-2">
@@ -260,29 +262,45 @@ export default function AdminGeneratedTasks() {
     </div>
   )
 
-  const headerProps = {
-    title: 'Gestión de Tareas Generadas',
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    customFilters,
-    onClearFilters: clearFilters,
-    actions: [
-      <Button
-        key="new-generated-task"
-        onClick={() => openModal('generated-task', {})}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nueva Tarea Generada
-      </Button>
-    ]
-  }
+  const features = [
+    {
+      icon: <Target className="w-4 h-4" />,
+      title: "Gestión Avanzada de Tareas",
+      description: "Administra tareas generadas con parámetros dinámicos y configuraciones personalizables para optimizar los flujos de trabajo."
+    },
+    {
+      icon: <Zap className="w-4 h-4" />,
+      title: "Sistema de Plantillas",
+      description: "Crea y gestiona plantillas de tareas con parámetros configurables que se adaptan automáticamente a diferentes contextos."
+    },
+    {
+      icon: <CheckSquare className="w-4 h-4" />,
+      title: "Control de Visibilidad",
+      description: "Administra la visibilidad y alcance de las tareas generadas, controlando qué tareas son públicas o privadas en el sistema."
+    },
+    {
+      icon: <Clock className="w-4 h-4" />,
+      title: "Seguimiento Temporal",
+      description: "Monitorea la creación y modificación de tareas generadas con métricas detalladas y análisis de tendencias temporales."
+    }
+  ]
 
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout wide>
       <div className="space-y-6">
+        {/* ActionBar */}
+        <ActionBarDesktop
+          title="Gestión de Tareas Generadas"
+          icon={<Target className="w-5 h-5" />}
+          features={features}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          onClearFilters={clearFilters}
+          primaryActionLabel="Nueva Tarea Generada"
+          onPrimaryActionClick={() => openModal('generated-task', {})}
+        />
+
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-3">

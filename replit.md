@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. ADMIN GENERATED TASKS ACTIONBAR INTEGRATION COMPLETED: Successfully implemented ActionBarDesktop system in admin generated tasks page following established patterns - COMPLETED
+  • ACTIONBAR IMPLEMENTATION: Added complete ActionBarDesktop to AdminGeneratedTasks.tsx with title "Gestión de Tareas Generadas" and Target icon
+  • FEATURE DESCRIPTIONS: Implemented 4 detailed features covering advanced task management, template system, visibility control, and temporal tracking
+  • SEARCH AND FILTERS: Migrated search functionality and custom filters (type filtering, sorting) from legacy header system to ActionBar
+  • PRIMARY ACTION BUTTON: Added "Nueva Tarea Generada" primary action button that opens generated-task modal
+  • LAYOUT MODERNIZATION: Removed legacy headerProps from Layout component and integrated modern ActionBar architecture
+  • CONSISTENT PATTERN: AdminGeneratedTasks now follows same ActionBar pattern as all other admin and construction pages
+  • MODAL INTEGRATION: Maintained all existing modal functionality (edit, create, delete) with improved UX through ActionBar
 - July 25, 2025. CONSTRUCTION TASKS TABLE COLUMNS REORDERED: Changed column order to prioritize Fase first, then Rubro for better data organization - COMPLETED
   • COLUMN ORDER UPDATED: Modified table structure from (Rubro, Fase, Tarea, Unidad, Cantidad, Acciones) to (Fase, Rubro, Tarea, Unidad, Cantidad, Acciones)
   • FASE COLUMN PRIORITIZED: Moved Phase column to first position (10% width) for better project phase visibility
