@@ -431,10 +431,6 @@ export default function OrganizationManagement() {
         {(() => {
           const activeOrg = userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id) || userData?.organization;
           const planName = activeOrg?.plan?.name?.toLowerCase() || 'free';
-          const planBgColor = planName === 'free' ? 'var(--plan-free-bg)' :
-                             planName === 'pro' ? 'var(--plan-pro-bg)' :
-                             planName === 'teams' ? 'var(--plan-teams-bg)' :
-                             'var(--plan-free-bg)';
           const planDisplayName = planName === 'free' ? 'gratuito' :
                                   planName === 'pro' ? 'Pro' :
                                   planName === 'teams' ? 'Teams' :
@@ -442,8 +438,7 @@ export default function OrganizationManagement() {
           
           return (
             <Card 
-              className="border-0" 
-              style={{ backgroundColor: planBgColor }}
+              className={`border-0 plan-card-${planName}`}
             >
               <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

@@ -65,7 +65,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--card-bg)" }}
+      style={{ backgroundColor: "var(--layout-bg)" }}
     >
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
