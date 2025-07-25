@@ -5,7 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface User {
   id: string;
   full_name: string;
-  email: string;
   avatar_url?: string;
 }
 
@@ -33,7 +32,7 @@ export default function UserSelector({
           {selectedUser ? (
             <>
               <User className="w-4 h-4 text-muted-foreground" />
-              <span className="truncate">{selectedUser.full_name || selectedUser.email}</span>
+              <span className="truncate">{selectedUser.full_name || 'Sin nombre'}</span>
             </>
           ) : (
             <>
@@ -48,10 +47,7 @@ export default function UserSelector({
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground" />
-              <div className="flex flex-col">
-                <span className="font-medium">{user.full_name || 'Sin nombre'}</span>
-                <span className="text-xs text-muted-foreground">{user.email}</span>
-              </div>
+              <span className="font-medium">{user.full_name || 'Sin nombre'}</span>
             </div>
           </SelectItem>
         ))}

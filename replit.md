@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. ACTIVITY PAGE ACTIONBAR AND USERSELECTOR REFINEMENT COMPLETED: Successfully implemented ActionBar system in Organization Activity page and refined UserSelector component - COMPLETED
+  • ACTIVITY ACTIONBAR INTEGRATED: Added complete ActionBarDesktop to OrganizationActivity.tsx with search functionality and member filtering capabilities
+  • BUTTON ELIMINATION: Removed "VER MOVIMIENTOS" button from EmptyState as requested - page now shows clean empty state without unnecessary actions
+  • SEARCH AND FILTERS: Implemented search functionality and custom filters dropdown specifically for member filtering in activity tracking
+  • SHOWPROJECTSELECTOR DISABLED: Set showProjectSelector={false} for organization-level page consistency with other org pages
+  • USERSELECTOR SIMPLIFIED: Removed email display from UserSelector component - now shows only icon and name as specified
+  • INTERFACE CLEANUP: Updated TypeScript interface to remove email field and simplified dropdown options to display only essential user information
+  • MOBILE FEATUREINTRODUCTION: Maintained mobile-only FeatureIntroduction with md:hidden while desktop uses ActionBar expandable features
+  • FOUR FEATURE DESCRIPTIONS: Added comprehensive feature explanations covering activity registration, member filtering, advanced search, and temporal organization
 - July 25, 2025. NAVIGATION REORDERING AND ORGANIZATION TASKS ACTIONBAR COMPLETED: Successfully repositioned DISEÑO below PROYECTO and implemented ActionBar system in organization tasks page - COMPLETED
   • MENU REORDERING: Changed navigation order in both mobile menu and desktop sidebar so DISEÑO appears after PROYECTO instead of after FINANZAS
   • MOBILE MENU SHADOWS: Applied complete shadow system (shadow-button-normal, hover:shadow-button-hover) to all mobile menu buttons including disabled states
