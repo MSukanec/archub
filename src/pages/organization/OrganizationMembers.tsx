@@ -101,7 +101,6 @@ export default function OrganizationMembers() {
         .order('joined_at', { ascending: false });
       
       if (error) throw error;
-      console.log('🔍 Members data:', data);
       return data || [];
     },
     enabled: !!organizationId,
@@ -227,6 +226,7 @@ export default function OrganizationMembers() {
         <ActionBarDesktop
           title="Gestión de Miembros"
           icon={<Users className="h-5 w-5" />}
+          showProjectSelector={false}
           customActions={[
             <CustomRestricted 
               key="invite-member"
@@ -307,24 +307,20 @@ export default function OrganizationMembers() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={Array.isArray(member.users) ? member.users[0]?.avatar_url : member.users?.avatar_url} />
+                            <AvatarImage src={member.users?.avatar_url} />
                             <AvatarFallback>
-                              {getInitials(
-                                (Array.isArray(member.users) ? member.users[0]?.full_name : member.users?.full_name) || 
-                                (Array.isArray(member.users) ? member.users[0]?.email : member.users?.email) || 
-                                'U'
-                              )}
+                              {getInitials(member.users?.full_name || member.users?.email || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">
-                                {(Array.isArray(member.users) ? member.users[0]?.full_name : member.users?.full_name) || 'Sin nombre'}
+                                {member.users?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {Array.isArray(member.users) ? member.users[0]?.email : member.users?.email}
+                              {member.users?.email}
                             </p>
                           </div>
                         </div>
@@ -340,10 +336,10 @@ export default function OrganizationMembers() {
                           </div>
 
                           <Badge 
-                            variant={getRoleBadgeVariant((Array.isArray(member.roles) ? member.roles[0]?.name : member.roles?.name) || '')}
-                            className={getRoleBadgeClassName((Array.isArray(member.roles) ? member.roles[0]?.name : member.roles?.name) || '')}
+                            variant={getRoleBadgeVariant(member.roles?.name || '')}
+                            className={getRoleBadgeClassName(member.roles?.name || '')}
                           >
-                            {(Array.isArray(member.roles) ? member.roles[0]?.name : member.roles?.name) || 'Sin rol'}
+                            {member.roles?.name || 'Sin rol'}
                           </Badge>
 
                           <DropdownMenu>
