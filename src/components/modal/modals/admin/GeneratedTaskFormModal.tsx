@@ -113,11 +113,6 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
   const { data: materials } = useMaterials();
   const { data: taskMaterials } = useTaskMaterials(createdTaskId || generatedTask?.id || null);
 
-  // Debug logging para plantillas
-  console.log('🔍 Templates data:', { templates, templatesLoading, count: templates?.length });
-  console.log('🔍 Selected template ID:', selectedTemplateId);
-  console.log('🔍 Form template_id value:', form.getValues('template_id'));
-  
   const createGeneratedTask = useCreateGeneratedTask();
   const updateGeneratedTask = useUpdateGeneratedTask();
   const createTaskMaterial = useCreateTaskMaterial();
@@ -132,6 +127,11 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
       param_values: generatedTask?.param_values || {}
     }
   });
+
+  // Debug logging para plantillas (después de declarar form)
+  console.log('🔍 Templates data:', { templates, templatesLoading, count: templates?.length });
+  console.log('🔍 Selected template ID:', selectedTemplateId);
+  console.log('🔍 Form template_id value:', form.getValues('template_id'));
 
   // Simple form initialization without loops
   useEffect(() => {
