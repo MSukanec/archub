@@ -227,7 +227,7 @@ export default function ConstructionLibrary() {
       <div className="space-y-6">
         <ActionBarDesktop
           title="Análisis de Costos"
-          icon={BarChart3}
+          icon={<BarChart3 className="w-5 h-5" />}
           features={features}
           searchValue={searchValue}
           onSearchChange={setSearchValue}

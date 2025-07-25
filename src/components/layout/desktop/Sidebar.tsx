@@ -295,11 +295,11 @@ export function Sidebar() {
       generalModeRestricted: true
     },
     { 
-      id: 'obra', 
+      id: 'construccion', 
       icon: HardHat, 
-      label: 'Obra', 
+      label: 'Construcción', 
       defaultRoute: '/construction/dashboard',
-      isActive: activeSidebarSection === 'obra' || location.startsWith('/construction')
+      isActive: activeSidebarSection === 'construccion' || location.startsWith('/construction')
     },
     { 
       id: 'finanzas', 

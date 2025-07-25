@@ -48,8 +48,7 @@ import {
   Brush,
   UserCircle,
   HandCoins,
-  Settings,
-  Library
+  Settings
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -70,7 +69,7 @@ export function SidebarSubmenu() {
     if (location.startsWith('/organization')) return 'organizacion';
     if (location.startsWith('/project')) return 'proyecto';
     if (location.startsWith('/design')) return 'diseno';
-    if (location.startsWith('/construction')) return 'obra';
+    if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/commercialization')) return 'comercializacion';
     if (location.startsWith('/postsale')) return 'post-venta';
@@ -126,7 +125,7 @@ export function SidebarSubmenu() {
       { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon', requiresProject: true },
     ],
 
-    'obra': [
+    'construccion': [
       { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard', requiresProject: true },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
       { icon: Calendar, label: 'Cronograma', href: '/construction/schedule', requiresProject: true },
