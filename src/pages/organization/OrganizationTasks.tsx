@@ -183,6 +183,66 @@ function TasksContent() {
 
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
+        {/* FeatureIntroduction */}
+        <FeatureIntroduction
+          title="Tareas para Hacer"
+          icon={<CheckSquare className="w-5 h-5" />}
+          features={[
+            {
+              icon: <Kanban className="w-5 h-5" />,
+              title: "Tableros Kanban organizados",
+              description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
+            },
+            {
+              icon: <List className="w-5 h-5" />,
+              title: "Listas flexibles y personalizables",
+              description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
+            },
+            {
+              icon: <CheckSquare className="w-5 h-5" />,
+              title: "Seguimiento de completitud",
+              description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
+            },
+            {
+              icon: <Plus className="w-5 h-5" />,
+              title: "Colaboración en equipo",
+              description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
+            }
+          ]}
+        />
+
+        {/* ActionBar Desktop - ALWAYS VISIBLE */}
+        <ActionBarDesktop
+          title="Gestión de Tareas para Hacer"
+          icon={<CheckSquare className="w-5 h-5" />}
+          showProjectSelector={false}
+          features={[
+            {
+              icon: <Kanban className="w-5 h-5" />,
+              title: "Organización visual tipo Kanban",
+              description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
+            },
+            {
+              icon: <List className="w-5 h-5" />,
+              title: "Múltiples tableros por organización",
+              description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
+            },
+            {
+              icon: <CheckSquare className="w-5 h-5" />,
+              title: "Colaboración y asignación de responsables",
+              description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
+            },
+            {
+              icon: <Plus className="w-5 h-5" />,
+              title: "Gestión flexible de contenido",
+              description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
+            }
+          ]}
+          primaryActionLabel="Nuevo Tablero"
+          onPrimaryActionClick={() => openModal('board', {})}
+          customActions={[]}
+        />
+
         <EmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
           title="Aún no hay tareas!"
