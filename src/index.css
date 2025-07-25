@@ -185,6 +185,19 @@
   animation: border-glow 2s ease-in-out infinite;
 }
 
+/* Plan-specific card styles */
+.plan-card-free {
+  background-color: var(--plan-free-bg) !important;
+}
+
+.plan-card-pro {
+  background-color: var(--plan-pro-bg) !important;
+}
+
+.plan-card-teams {
+  background-color: var(--plan-teams-bg) !important;
+}
+
 /* Global checkbox styling with accent color */
 .checkbox-accent {
   background-color: var(--checkbox-bg);
@@ -247,7 +260,7 @@
   --secondary-sidebar-button-hover-fg: hsl(0, 0%, 97%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 14%);
+  --card-bg: hsl(0, 0%, 50%);
   --card-fg: hsl(0, 0%, 90%);
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(0, 0%, 20%);
