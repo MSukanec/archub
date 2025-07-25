@@ -56,11 +56,14 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
 
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
-    id: member.user_id,
+    id: member.id, // Usar member.id en lugar de member.user_id
     full_name: member.full_name || member.email || 'Usuario',
     email: member.email || '',
     avatar_url: member.avatar_url || ''
   }))
+
+  // Encontrar el member_id del usuario actual
+  const currentUserMember = organizationMembers.find(member => member.user_id === currentUser?.user?.id)
 
   const isEditing = modalData?.mode === 'edit' && modalData?.attendance
   const attendance = modalData?.attendance
@@ -68,10 +71,10 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
-      created_by: currentUser?.user?.id || '',
+      created_by: currentUserMember?.id || '', // Usar member.id en lugar de user.id
       attendance_date: isEditing ? new Date(attendance?.created_at) : new Date(),
       contact_id: attendance?.contact_id || '',
-      attendance_type: attendance?.attendance_type || '',
+      attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
       hours_worked: attendance?.hours_worked || 8,
       description: attendance?.description || ''
     }
