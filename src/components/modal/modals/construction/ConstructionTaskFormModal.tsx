@@ -11,7 +11,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter, X } from "lucide-react";
+import { Settings, Search, CheckSquare, Square, Filter, X, LayoutGrid } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const addTaskSchema = z.object({
   project_phase_id: z.string().min(1, "Debe seleccionar una fase de proyecto"),
@@ -56,6 +58,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState('');
   const [phaseFilter, setPhaseFilter] = useState('');
+  const [groupingType, setGroupingType] = useState('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { userData, currentMember } = useCurrentUser();
@@ -141,6 +144,43 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     console.log('🔍 Tareas filtradas:', filtered.length);
     return filtered;
   }, [tasks, searchQuery, rubroFilter]);
+
+  // Función para agrupar tareas
+  const groupedTasks = useMemo(() => {
+    if (!filteredTasks || groupingType === 'none') {
+      return [{ name: 'Sin agrupar', tasks: filteredTasks }];
+    }
+
+    const groups: { [key: string]: any[] } = {};
+
+    filteredTasks.forEach(task => {
+      let groupKey = 'Sin grupo';
+      
+      switch (groupingType) {
+        case 'rubros':
+          groupKey = task.rubro_name || 'Sin rubro';
+          break;
+        case 'phases':
+          groupKey = 'Todas las fases'; // Para modal no agrupamos por fases
+          break;
+        case 'rubros-phases':
+          groupKey = `${task.rubro_name || 'Sin rubro'}`;
+          break;
+        case 'phases-rubros':
+          groupKey = `${task.rubro_name || 'Sin rubro'}`;
+          break;
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(task);
+    });
+
+    return Object.entries(groups)
+      .map(([name, tasks]) => ({ name, tasks }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [filteredTasks, groupingType]);
 
   // Funciones de selección - siempre agrega, permite duplicados
   const handleTaskSelection = (taskId: string) => {
@@ -353,6 +393,86 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">Tareas Disponibles</h3>
                 <div className="flex items-center gap-2">
+                  {/* Botón de agrupación */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2"
+                      >
+                        <LayoutGrid className="w-4 h-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      align="start" 
+                      className="w-48 p-0 rounded-lg shadow-button-normal border"
+                      style={{ 
+                        backgroundColor: 'var(--card-bg)',
+                        borderColor: 'var(--card-border)'
+                      }}
+                    >
+                      <div className="py-1">
+                        <button
+                          type="button"
+                          onClick={() => setGroupingType('none')}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                            "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                            groupingType === 'none' && "bg-[var(--button-ghost-hover-bg)]"
+                          )}
+                        >
+                          Sin agrupar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGroupingType('rubros')}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                            "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                            groupingType === 'rubros' && "bg-[var(--button-ghost-hover-bg)]"
+                          )}
+                        >
+                          Agrupar por Rubros
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGroupingType('phases')}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                            "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                            groupingType === 'phases' && "bg-[var(--button-ghost-hover-bg)]"
+                          )}
+                        >
+                          Agrupar por Fases
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGroupingType('rubros-phases')}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                            "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                            groupingType === 'rubros-phases' && "bg-[var(--button-ghost-hover-bg)]"
+                          )}
+                        >
+                          Rubros y Fases
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGroupingType('phases-rubros')}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                            "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                            groupingType === 'phases-rubros' && "bg-[var(--button-ghost-hover-bg)]"
+                          )}
+                        >
+                          Fases y Rubros
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  
                   <Button
                     type="button"
                     variant="ghost"
@@ -379,24 +499,36 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
                   </div>
                 ) : (
-                  filteredTasks.map((task) => {
-                    const isInUse = selectedTasks.some(t => t.task_id === task.id);
-                    
-                    return (
-                      <div 
-                        key={task.id} 
-                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isInUse ? 'bg-accent/10 border-l-4 border-l-accent' : ''}`}
-                        onClick={() => handleTaskSelection(task.id)}
-                      >
-                        <div className="text-sm leading-tight">
-                          {task.display_name || 'Sin nombre'}
+                  groupedTasks.map((group) => (
+                    <div key={group.name}>
+                      {/* Mostrar header de grupo solo si hay agrupación */}
+                      {groupingType !== 'none' && (
+                        <div className="px-3 py-2 bg-accent text-accent-foreground text-sm font-medium border-b">
+                          {group.name} ({group.tasks.length} tareas)
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
-                        </div>
-                      </div>
-                    );
-                  })
+                      )}
+                      
+                      {/* Tareas del grupo */}
+                      {group.tasks.map((task) => {
+                        const isInUse = selectedTasks.some(t => t.task_id === task.id);
+                        
+                        return (
+                          <div 
+                            key={task.id} 
+                            className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isInUse ? 'bg-accent/10 border-l-4 border-l-accent' : ''}`}
+                            onClick={() => handleTaskSelection(task.id)}
+                          >
+                            <div className="text-sm leading-tight">
+                              {task.display_name || 'Sin nombre'}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
                 )}
               </div>
             </ScrollArea>
