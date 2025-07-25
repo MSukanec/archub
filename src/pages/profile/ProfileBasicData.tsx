@@ -197,6 +197,7 @@ export default function ProfileBasicData() {
       <ActionBarDesktop
         title="Mi Perfil"
         icon={<UserCircle className="h-5 w-5" />}
+        showProjectSelector={false}
         showSearch={false}
         showGrouping={false}
         features={[

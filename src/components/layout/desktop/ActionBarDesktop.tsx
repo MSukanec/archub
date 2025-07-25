@@ -34,6 +34,8 @@ interface ActionBarDesktopProps {
   icon?: React.ReactNode
   // Expandable info section (now using FeatureIntroduction format)
   features?: FeatureItem[]
+  // Project selector control
+  showProjectSelector?: boolean
   // Action bar functionality
   showSearch?: boolean
   searchValue?: string
@@ -62,6 +64,7 @@ export function ActionBarDesktop({
   title,
   icon,
   features,
+  showProjectSelector = true,
   showSearch = true,
   searchValue = '',
   onSearchChange,
@@ -123,9 +126,11 @@ export function ActionBarDesktop({
               </div>
               
               {/* Project Selector where the help button was */}
-              <div className="flex items-center">
-                <ProjectSelector />
-              </div>
+              {showProjectSelector && (
+                <div className="flex items-center">
+                  <ProjectSelector />
+                </div>
+              )}
             </div>
           </div>
 
