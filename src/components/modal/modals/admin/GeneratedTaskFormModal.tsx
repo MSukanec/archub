@@ -127,6 +127,15 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   });
 
+  // Ensure form is initialized with correct values when generatedTask loads
+  useEffect(() => {
+    if (generatedTask) {
+      form.setValue('template_id', generatedTask.template_id);
+      form.setValue('is_public', generatedTask.is_public || false);
+      form.setValue('param_values', generatedTask.param_values || {});
+    }
+  }, [generatedTask, form]);
+
   // Load parameter options - using individual hooks to avoid conditional hook calls
   const { data: templateParams } = useTaskTemplateParameters(selectedTemplateId || null);
   
@@ -367,7 +376,16 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                 <Select onValueChange={handleTemplateChange} value={field.value || selectedTemplateId}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar plantilla" />
+                      <SelectValue 
+                        placeholder="Seleccionar plantilla"
+                        value={field.value || selectedTemplateId}
+                      >
+                        {/* Show the current template name if selected */}
+                        {(field.value || selectedTemplateId) && templates ? 
+                          templates.find(t => t.id === (field.value || selectedTemplateId))?.name || 'Plantilla seleccionada'
+                          : 'Seleccionar plantilla'
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="z-[9999]">
