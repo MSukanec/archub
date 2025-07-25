@@ -6,10 +6,14 @@ import {
   Users, 
   UserCheck, 
   Clock, 
-  MoreHorizontal
+  MoreHorizontal,
+  UserPlus,
+  Shield,
+  Activity
 } from "lucide-react";
 
 import { Layout } from "@/components/layout/desktop/Layout";
+import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -179,16 +183,7 @@ export default function OrganizationMembers() {
 
   const headerProps = {
     title: "Miembros",
-    description: "Gestiona los miembros de tu organización",
-    actions: [
-      <Button 
-        key="invite"
-        onClick={() => openModal('member')}
-        className="bg-accent text-accent-foreground hover:bg-accent/90"
-      >
-        Invitar miembro
-      </Button>
-    ]
+    description: "Gestiona los miembros de tu organización"
   };
 
   const breadcrumb = [
@@ -199,31 +194,66 @@ export default function OrganizationMembers() {
   return (
     <Layout headerProps={headerProps} breadcrumb={breadcrumb}>
       <div className="space-y-6">
-        {/* Feature Introduction - Above everything */}
-        <FeatureIntroduction
+        {/* Feature Introduction - Mobile only */}
+        <div className="md:hidden">
+          <FeatureIntroduction
+            title="Gestión de Miembros"
+            subtitle="(click para más información)"
+            icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
+            features={[
+              {
+                icon: <Users className="h-4 w-4" />,
+                title: "Invitación de miembros",
+                description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
+              },
+              {
+                icon: <UserCheck className="h-4 w-4" />,
+                title: "Gestión de roles",
+                description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
+              },
+              {
+                icon: <Clock className="h-4 w-4" />,
+                title: "Control de acceso",
+                description: "Controla el acceso a configuraciones de la organización y datos sensibles"
+              },
+              {
+                icon: <MoreHorizontal className="h-4 w-4" />,
+                title: "Supervisión de actividad",
+                description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+              }
+            ]}
+          />
+        </div>
+
+        {/* ActionBar Desktop */}
+        <ActionBarDesktop
           title="Gestión de Miembros"
-          subtitle="(click para más información)"
-          icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
+          icon={<Users className="h-5 w-5" />}
+          primaryAction={{
+            label: "Invitar miembro",
+            onClick: () => openModal('member'),
+            icon: <UserPlus className="h-4 w-4" />
+          }}
           features={[
             {
               icon: <Users className="h-4 w-4" />,
-              title: "Invitación de miembros",
-              description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
+              title: "Invitación y gestión de equipo",
+              description: "Invita a miembros de tu equipo con acceso completo a proyectos y herramientas de colaboración. Administra perfiles y datos de contacto."
+            },
+            {
+              icon: <Shield className="h-4 w-4" />,
+              title: "Control de roles y permisos",
+              description: "Asigna roles específicos (Admin, Editor, Viewer) con permisos diferenciados. Controla acceso a configuraciones sensibles de la organización."
+            },
+            {
+              icon: <Activity className="h-4 w-4" />,
+              title: "Supervisión de actividad y estado",
+              description: "Monitorea el estado de conexión, última actividad y participación de cada miembro del equipo en tiempo real."
             },
             {
               icon: <UserCheck className="h-4 w-4" />,
-              title: "Gestión de roles",
-              description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
-            },
-            {
-              icon: <Clock className="h-4 w-4" />,
-              title: "Control de acceso",
-              description: "Controla el acceso a configuraciones de la organización y datos sensibles"
-            },
-            {
-              icon: <MoreHorizontal className="h-4 w-4" />,
-              title: "Supervisión de actividad",
-              description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
+              title: "Gestión de invitaciones y huéspedes",
+              description: "Administra invitaciones pendientes, cuentas de huéspedes temporales y colaboradores externos con acceso limitado a proyectos específicos."
             }
           ]}
         />
