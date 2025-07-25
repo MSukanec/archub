@@ -7,7 +7,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskLibrary } from '@/hooks/use-task-library'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { Library, Search, Layers, FileText, Tag, Grid, Filter, X } from 'lucide-react'
+import { BarChart3, Search, Layers, FileText, Tag, Grid, Filter, X } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -22,7 +22,7 @@ export default function ConstructionLibrary() {
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: tasks = [], isLoading: tasksLoading } = useTaskLibrary(
-    userData?.organization_id || ''
+    userData?.organization?.id || ''
   )
   const { setSidebarContext } = useNavigationStore()
 
@@ -32,8 +32,8 @@ export default function ConstructionLibrary() {
   }, [setSidebarContext])
 
   // Get unique categories and subcategories for filters
-  const uniqueCategories = [...new Set(tasks.map(t => t.category_name))].sort()
-  const uniqueSubcategories = [...new Set(tasks.map(t => t.subcategory_name))].sort()
+  const uniqueCategories = Array.from(new Set(tasks.map(t => t.category_name))).sort()
+  const uniqueSubcategories = Array.from(new Set(tasks.map(t => t.subcategory_name))).sort()
 
   // Filter and sort tasks
   const filteredTasks = tasks
@@ -68,8 +68,80 @@ export default function ConstructionLibrary() {
 
   const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== "" || selectedSubcategory !== ""
 
+  // Custom filters for ActionBar
+  const customFilters = (
+    <div className="w-[288px] space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Filtrar por categoría</Label>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger>
+            <SelectValue placeholder="Todas las categorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todas las categorías</SelectItem>
+            {uniqueCategories.map(category => (
+              <SelectItem key={category} value={category}>{category}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Filtrar por subcategoría</Label>
+        <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+          <SelectTrigger>
+            <SelectValue placeholder="Todas las subcategorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todas las subcategorías</SelectItem>
+            {uniqueSubcategories.map(subcategory => (
+              <SelectItem key={subcategory} value={subcategory}>{subcategory}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Ordenar por</Label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="category">Categoría</SelectItem>
+            <SelectItem value="subcategory">Subcategoría</SelectItem>
+            <SelectItem value="rubro">Rubro</SelectItem>
+            <SelectItem value="name">Nombre de tarea</SelectItem>
+            <SelectItem value="code">Código</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+
+  const features = [
+    {
+      icon: <BarChart3 className="w-4 h-4" />,
+      title: "Análisis de Costos por Categoría",
+      description: "Visualiza y compara los costos de tareas organizadas por categorías y subcategorías específicas."
+    },
+    {
+      icon: <Search className="w-4 h-4" />,
+      title: "Búsqueda Avanzada de Tareas",
+      description: "Encuentra rápidamente tareas específicas usando códigos, nombres, rubros o categorías."
+    },
+    {
+      icon: <Layers className="w-4 h-4" />,
+      title: "Filtrado por Rubros",
+      description: "Organiza y filtra las tareas por diferentes rubros de construcción para mejor análisis."
+    },
+    {
+      icon: <Grid className="w-4 h-4" />,
+      title: "Vista Comparativa de Costos",
+      description: "Compara costos unitarios y cantidades entre diferentes tareas del mismo tipo."
+    }
+  ]
+
   const headerProps = {
-    title: "Librería de Tareas"
+    title: "Análisis de Costos"
   }
 
   // Table columns configuration
@@ -144,7 +216,7 @@ export default function ConstructionLibrary() {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Cargando librería de tareas...</div>
+          <div className="text-sm text-muted-foreground">Cargando análisis de costos...</div>
         </div>
       </Layout>
     )
@@ -153,39 +225,27 @@ export default function ConstructionLibrary() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Feature Introduction */}
+        <ActionBarDesktop
+          title="Análisis de Costos"
+          icon={BarChart3}
+          features={features}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          customFilters={customFilters}
+          onClearFilters={handleClearFilters}
+        />
+        
         <FeatureIntroduction
-          title="Librería de Tareas de Construcción"
-          icon={<Library className="w-6 h-6" />}
-          features={[
-            {
-              icon: <Grid className="w-4 h-4" />,
-              title: "Catálogo Completo",
-              description: "Visualiza todas las tareas disponibles organizadas por categoría, subcategoría y rubro."
-            },
-            {
-              icon: <Tag className="w-4 h-4" />,
-              title: "Sistema de Códigos",
-              description: "Cada tarea tiene un código único para fácil identificación y referencia en presupuestos."
-            },
-            {
-              icon: <Layers className="w-4 h-4" />,
-              title: "Organización Jerárquica",
-              description: "Estructura organizada en niveles: Categoría → Subcategoría → Rubro → Tarea."
-            },
-            {
-              icon: <FileText className="w-4 h-4" />,
-              title: "Búsqueda Avanzada",
-              description: "Busca tareas por nombre, código, categoría o cualquier término relacionado."
-            }
-          ]}
+          title="Análisis de Costos"
+          description="Analiza y compara los costos de todas las tareas de construcción disponibles en tu organización."
+          features={features}
         />
 
         {filteredTasks.length === 0 && !tasksLoading ? (
           <EmptyState
-            icon={<Library className="w-8 h-8 text-muted-foreground" />}
-            title="No hay tareas en la librería"
-            description="La librería de tareas aparecerá aquí cuando se agreguen tareas al sistema"
+            icon={<BarChart3 className="w-8 h-8 text-muted-foreground" />}
+            title="No hay datos para análisis"
+            description="Los datos de análisis de costos aparecerán aquí cuando se agreguen tareas al sistema"
           />
         ) : (
           <>
@@ -272,14 +332,14 @@ export default function ConstructionLibrary() {
             />
             
             <BudgetTable
-              data={filteredTasks}
+              tasks={filteredTasks}
               columns={columns}
               isLoading={tasksLoading}
               showGrouping={true}
               groupBy="category_name"
               emptyState={
                 <EmptyState
-                  icon={<Library className="w-8 h-8 text-muted-foreground" />}
+                  icon={<BarChart3 className="w-8 h-8 text-muted-foreground" />}
                   title="No se encontraron tareas"
                   description="No hay tareas que coincidan con los filtros aplicados"
                 />

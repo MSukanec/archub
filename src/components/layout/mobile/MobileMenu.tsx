@@ -37,7 +37,7 @@ import {
   FileCode,
   Crown,
   User,
-  Library,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -285,7 +285,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Asistencia', href: '/construction/personnel' },
-      { icon: Library, label: 'Librería', href: '/construction/library' },
+      { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/library' },
     ],
     finanzas: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
