@@ -14,6 +14,8 @@ export function usePlanFeatures(): PlanFeatures {
   const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
   const currentPlan = currentOrganization?.plan;
   
+
+  
   // Obtener features del plan actual
   const planFeatures = currentPlan?.features || {};
 

@@ -60,13 +60,15 @@ export function CustomRestricted({
     if (current !== undefined) {
       const featureLimit = limit(feature);
 
-      // console.log(`Feature: ${feature}, Current: ${current}, Limit: ${featureLimit}`);
+      // Obtener plan igual que en usePlanFeatures
+      const organizationId = userData?.preferences?.last_organization_id;
+      const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
+      const currentPlan = currentOrganization?.plan;
 
       // Restringir si se alcanzó o superó el límite
       if (featureLimit !== Infinity && current >= featureLimit) {
         isRestricted = true;
         restrictionKey = feature;
-        // console.log(`Restricted: ${feature} - ${current} >= ${featureLimit}`);
       }
     } else {
       // Si no hay current, verificar si la feature está permitida (para features booleanas)
@@ -83,9 +85,15 @@ export function CustomRestricted({
     return <>{children}</>;
   }
 
-  // Si es administrador, permitir acceso a TODO excepto "general_mode"
-  // "general_mode" sigue siendo aplicable incluso para admins porque es una restricción de contexto, no de permisos
-  if (isAdmin && reason !== "general_mode") {
+
+
+  // Plan restrictions (max_members, max_projects, etc.) apply to admins too
+  const isPlanRestriction = feature && (feature.startsWith('max_') || ['max_members', 'max_projects', 'max_organizations'].includes(feature));
+
+  // Si es administrador, permitir acceso EXCEPTO para restricciones de plan y "general_mode"
+  // Las restricciones de plan se aplican incluso a administradores
+  if (isAdmin && reason !== "general_mode" && !isPlanRestriction) {
+
     return <>{children}</>;
   }
 
