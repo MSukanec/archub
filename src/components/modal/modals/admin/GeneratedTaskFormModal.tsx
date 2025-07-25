@@ -66,10 +66,42 @@ function ParameterField({ parameter, value, onChange }: {
     allOptionValues: options.map(opt => ({ id: opt.id, value: opt.value, label: opt.label }))
   });
   
+  // Convert stored value (label) to option value (ID) for Select component
+  const findMatchingOption = () => {
+    if (!value || options.length === 0) return null;
+    
+    // First try to find by ID/value (exact match)
+    let match = options.find(opt => opt.value === value || opt.id === value);
+    
+    // If not found, try to find by label (stored as label in param_values)
+    if (!match) {
+      match = options.find(opt => opt.label === value);
+    }
+    
+    return match;
+  };
+
+  const matchingOption = findMatchingOption();
+  const selectValue = matchingOption ? matchingOption.value : '';
+  
+  console.log('🔧 Value conversion:', {
+    storedValue: value,
+    matchingOption: matchingOption,
+    selectValue: selectValue,
+    optionLabels: options.map(opt => opt.label)
+  });
+
+  const handleSelectChange = (selectedValue: string) => {
+    // Find the selected option and store its label (to maintain consistency with existing data)
+    const selectedOption = options.find(opt => opt.value === selectedValue || opt.id === selectedValue);
+    const valueToStore = selectedOption ? selectedOption.label : selectedValue;
+    onChange(valueToStore);
+  };
+
   return (
     <div className="space-y-2">
       <FormLabel>{parameter.label}</FormLabel>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={selectValue} onValueChange={handleSelectChange}>
         <SelectTrigger>
           <SelectValue placeholder={`Seleccionar ${parameter.label.toLowerCase()}`} />
         </SelectTrigger>
@@ -377,13 +409,15 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                       {parameters.map((param) => {
                         // Use parameter.name as key since param_values in task_generated stores by name, not ID
                         const paramKey = param.name;
-                        const currentValue = paramValues[paramKey] || '';
+                        const storedValue = paramValues[paramKey] || '';
                         
+                        // Need to convert the stored value to match option format
+                        // For now, pass the stored value directly and let ParameterField handle the conversion
                         console.log('🔧 Rendering parameter field:', {
                           paramId: param.id,
                           paramName: param.name,
                           paramKey,
-                          currentValue,
+                          storedValue,
                           allParamValues: paramValues
                         });
                         
@@ -391,7 +425,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                           <ParameterField
                             key={param.id}
                             parameter={param}
-                            value={currentValue}
+                            value={storedValue}
                             onChange={(value) => handleParameterChange(paramKey, value)}
                           />
                         );
