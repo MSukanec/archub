@@ -195,7 +195,12 @@ export function CustomRestricted({
           >
             <div 
               className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
-              style={badgeStyle}
+              style={{ 
+                ...badgeStyle,
+                // Forzar que el badge siempre tenga fondo circular visible
+                border: `1px solid ${badgeStyle.borderColor}`,
+                backgroundColor: badgeStyle.backgroundColor
+              }}
             >
               <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
             </div>
