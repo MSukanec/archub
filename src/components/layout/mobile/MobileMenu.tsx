@@ -48,6 +48,7 @@ import { useLocation } from "wouter";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/hooks/use-projects";
 import CustomRestricted from "@/components/ui-custom/CustomRestricted";
 import { useProjectContext } from "@/stores/projectContext";
@@ -360,8 +361,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     setCurrentView('main');
   };
 
+  const { closeMenu } = useMobileMenuStore();
+  
+  const handleCloseMenu = () => {
+    closeMenu();
+    onClose();
+  };
+
   const menuContent = (
-    <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={onClose}>
+    <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={handleCloseMenu}>
       <div 
         className="fixed inset-0 flex flex-col overflow-hidden"
         style={{ 
@@ -386,11 +394,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
+            onClick={handleCloseMenu}
             className="text-[var(--menues-fg)]"
           >
             <X className="h-4 w-4" />
@@ -407,7 +411,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   {('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
                         disabled
                       >
                         <item.icon className="h-5 w-5" />
@@ -419,7 +423,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     <button
                       onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
                       className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl transition-colors",
+                        "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-colors",
                         item.isActive 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
@@ -441,7 +445,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   {('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
                         disabled
                       >
                         <item.icon className="h-5 w-5" />
@@ -455,7 +459,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         onClose();
                       }}
                       className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl transition-colors",
+                        "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-colors",
                         location === item.href 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
