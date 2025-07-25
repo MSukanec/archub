@@ -94,29 +94,73 @@ export function ConstructionTaskFormModal({
     setPanel("edit");
   }, [setPanel]);
 
-  // Hook para cargar TODAS las tareas SIEMPRE desde la librería
+  // Hook para cargar TODAS las tareas SIEMPRE - probando múltiples fuentes
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['task-library', modalData.organizationId],
+    queryKey: ['all-tasks', modalData.organizationId],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 Cargando tareas para organización:', modalData.organizationId);
+      console.log('🔍 Buscando tareas para organización:', modalData.organizationId);
       
-      const { data, error } = await supabase
+      // Intentar primero task_generated_view
+      const { data: generatedTasks, error: generatedError } = await supabase
         .from('task_generated_view')
         .select('*')
-        .eq('organization_id', modalData.organizationId)
-        .order('display_name', { ascending: true });
+        .eq('organization_id', modalData.organizationId);
       
-      if (error) {
-        console.error('❌ Error cargando tareas:', error);
-        throw error;
+      console.log('📊 task_generated_view:', generatedTasks?.length || 0, 'tareas');
+      
+      // Intentar task_templates también
+      const { data: templates, error: templatesError } = await supabase
+        .from('task_templates')
+        .select(`
+          *,
+          units:unit_id(name, symbol),
+          categories:category_id(name),
+          rubros:rubro_id(name)
+        `)
+        .eq('organization_id', modalData.organizationId);
+      
+      console.log('📊 task_templates:', templates?.length || 0, 'templates');
+      
+      // Intentar tasks de sistema también
+      const { data: systemTasks, error: systemError } = await supabase
+        .from('task_generated_view')
+        .select('*')
+        .eq('is_system', true);
+      
+      console.log('📊 system tasks:', systemTasks?.length || 0, 'tareas del sistema');
+      
+      // Combinar todas las fuentes disponibles
+      let allTasks = [];
+      
+      if (generatedTasks?.length) {
+        allTasks = [...allTasks, ...generatedTasks];
       }
       
-      console.log('✅ Tareas cargadas:', data?.length || 0, 'tareas encontradas');
-      console.log('📋 Primeras 3 tareas:', data?.slice(0, 3));
+      if (templates?.length) {
+        // Convertir templates a formato compatible
+        const convertedTemplates = templates.map(template => ({
+          id: template.id,
+          display_name: template.name,
+          rubro_name: template.rubros?.name || 'Sin rubro',
+          category_name: template.categories?.name || 'Sin categoría',
+          unit_name: template.units?.name || 'ud',
+          unit_symbol: template.units?.symbol || 'ud',
+          organization_id: template.organization_id
+        }));
+        allTasks = [...allTasks, ...convertedTemplates];
+      }
       
-      return data || [];
+      if (systemTasks?.length && allTasks.length === 0) {
+        // Solo usar tareas del sistema si no hay otras
+        allTasks = [...allTasks, ...systemTasks.slice(0, 20)]; // Limitar a 20
+      }
+      
+      console.log('✅ Total tareas cargadas:', allTasks.length);
+      console.log('📋 Primeras 3 tareas:', allTasks.slice(0, 3));
+      
+      return allTasks;
     },
     enabled: !!modalData.organizationId && !!supabase
   });
