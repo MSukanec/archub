@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, CheckSquare, Calendar, MapPin, User } from 'lucide-react'
-import { BudgetTable } from '@/components/ui-custom/BudgetTable'
+import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2 } from 'lucide-react'
+import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
@@ -35,131 +35,132 @@ export default function ConstructionTasks() {
     organizationId || ''
   )
 
-  // Procesar los nombres de las tareas adaptadas al formato de BudgetTable
-  const processedTasks = useMemo(() => {
-    if (!tasks.length) return []
+  // Filtrar tareas según búsqueda
+  const filteredTasks = useMemo(() => {
+    if (!searchValue.trim()) return tasks
     
-    return tasks.map((task) => ({
-      id: task.id,
-      budget_id: '', // No aplica para construction tasks
-      task_id: task.task?.task_id || '',
-      organization_id: task.organization_id || '',
-      project_id: task.project_id || '',
-      created_at: task.created_at || '',
-      updated_at: task.updated_at || '',
-      task: task.task ? {
-        task_instance_id: task.id,
-        project_id: task.project_id || '',
-        task_id: task.task.task_id || '',
-        task_code: task.task.code || '',
-        start_date: task.start_date,
-        end_date: task.end_date,
-        duration_in_days: task.duration_in_days,
-        quantity: task.quantity || 0,
-        phase_instance_id: task.phase_instance_id || '',
-        phase_name: task.phase_name || '',
-        phase_position: 0,
-        progress_percent: task.progress_percent || 0,
-        unit_id: task.task.unit_id || '',
-        unit_name: task.task.unit_name || '',
-        unit_symbol: task.task.unit_symbol || '',
-        display_name: task.task.display_name || task.task.code || 'Tarea sin nombre',
-        subcategory_id: task.task?.id || '',
-        subcategory_name: task.task?.category_name || '',
-        category_id: task.task?.id || '',
-        category_name: task.task.category_name || '',
-        rubro_id: task.task.rubro_id || '',
-        rubro_name: task.task.rubro_name || '',
-        task_group_id: '',
-        task_group_name: ''
-      } : null
-    }))
-  }, [tasks])
+    return tasks.filter(task => {
+      const displayName = task.task?.display_name || task.task?.code || ''
+      const rubroName = task.task?.rubro_name || ''
+      const categoryName = task.task?.category_name || ''
+      
+      return displayName.toLowerCase().includes(searchValue.toLowerCase()) ||
+        rubroName.toLowerCase().includes(searchValue.toLowerCase()) ||
+        categoryName.toLowerCase().includes(searchValue.toLowerCase())
+    })
+  }, [tasks, searchValue])
 
   const handleAddTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing project, organization ID, or user data', {
-        projectId,
-        organizationId,
-        userId: userData?.user?.id
-      });
+      console.error('Missing required data for task creation')
       return
     }
 
     openModal('construction-task', {
       projectId,
       organizationId,
-      userId: userData.user.id
-    });
+      userId: userData.user.id,
+      isEditing: false
+    })
   }
 
   const handleEditTask = (task: any) => {
-    if (!projectId || !organizationId || !userData?.user?.id) return
-    
     openModal('construction-task', {
       projectId,
       organizationId,
-      userId: userData.user.id,
-      editingTask: task,
+      userId: userData?.user?.id,
+      taskData: task,
       isEditing: true
     })
   }
 
   const handleDeleteTask = (taskId: string) => {
-    if (!projectId || !organizationId) return
-
-    // Encontrar la tarea para obtener su nombre
-    const task = processedTasks.find(t => t.id === taskId)
-    const taskName = task?.task?.display_name || 'Tarea sin nombre'
-
-    openModal('delete-confirmation', {
-      mode: 'simple',
-      title: 'Eliminar Tarea',
-      description: `¿Estás seguro que deseas eliminar la tarea "${taskName}"? Esta acción no se puede deshacer.`,
+    const task = tasks.find(t => t.id === taskId)
+    const taskName = task?.task?.display_name || task?.task?.code || 'Tarea'
+    
+    showDeleteConfirmation({
+      title: "Eliminar tarea",
+      description: "¿Estás seguro de que deseas eliminar esta tarea de construcción?",
       itemName: taskName,
-      destructiveActionText: 'Eliminar Tarea',
-      onDelete: () => deleteTask.mutate({
-        id: taskId,
-        project_id: projectId,
-        organization_id: organizationId
-      }),
-      isLoading: deleteTask.isPending
+      onConfirm: async () => {
+        await deleteTask.mutateAsync(taskId)
+      }
     })
   }
 
-  // Filtrar tareas según búsqueda
-  const filteredTasks = useMemo(() => {
-    if (!searchValue.trim()) return processedTasks
-    
-    return processedTasks.filter(task =>
-      task.task?.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.task?.rubro_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.task?.task_code?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.task?.phase_name?.toLowerCase().includes(searchValue.toLowerCase())
-    )
-  }, [processedTasks, searchValue])
-
-  // Función para generar el nombre completo de la tarea
-  const generateTaskDisplayName = (task: any, parameterValues: any[] = []): string => {
-    if (!task) return 'Sin nombre';
-    
-    // Usar display_name que ya fue procesado
-    return task.display_name || task.task_code || task.name || 'Sin nombre';
-  }
-
-
-
-
-
-
-
-  const headerProps = {
-    title: "Listado de Tareas"
-  }
+  // Definir columnas para la tabla
+  const columns = [
+    {
+      key: 'rubro_name',
+      label: 'Rubro',
+      render: (task: any) => task.task?.rubro_name || 'Sin rubro',
+      width: '15%'
+    },
+    {
+      key: 'display_name',
+      label: 'Tarea',
+      render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
+      width: '25%'
+    },
+    {
+      key: 'unit',
+      label: 'Unidad',
+      render: (task: any) => task.task?.unit_symbol || 'Sin unidad',
+      width: '10%'
+    },
+    {
+      key: 'quantity',
+      label: 'Cantidad',
+      render: (task: any) => task.quantity || 0,
+      width: '10%'
+    },
+    {
+      key: 'progress',
+      label: 'Progreso',
+      render: (task: any) => `${task.progress_percent || 0}%`,
+      width: '10%'
+    },
+    {
+      key: 'phase',
+      label: 'Fase',
+      render: (task: any) => task.phase_name || 'Sin fase',
+      width: '15%'
+    },
+    {
+      key: 'dates',
+      label: 'Fechas',
+      render: (task: any) => task.start_date ? new Date(task.start_date).toLocaleDateString() : 'Sin fecha',
+      width: '10%'
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (task: any) => (
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditTask(task)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteTask(task.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      width: '15%',
+      sortable: false
+    }
+  ]
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout headerProps={{ title: "Listado de Tareas" }}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando tareas...</div>
         </div>
@@ -168,90 +169,93 @@ export default function ConstructionTasks() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
-      {/* Feature Introduction */}
-      <FeatureIntroduction
-        icon={<CheckSquare className="h-6 w-6" />}
-        title="Gestión de Tareas de Construcción"
-        features={[
-          {
-            icon: <CheckSquare className="h-5 w-5" />,
-            title: "Control de tareas",
-            description: "Listado completo y organización de todas las tareas del proyecto"
-          },
-          {
-            icon: <Calendar className="h-5 w-5" />,
-            title: "Programación temporal",
-            description: "Fechas de inicio, fin y duración para cada tarea"
-          },
-          {
-            icon: <MapPin className="h-5 w-5" />,
-            title: "Organización por fases",
-            description: "Tareas agrupadas por fases del proyecto para mejor control"
-          },
-          {
-            icon: <User className="h-5 w-5" />,
-            title: "Asignación de recursos",
-            description: "Control de cantidades y unidades para cada tarea"
-          }
-        ]}
-      />
-
-      {/* Action Bar Desktop - siempre visible */}
-      <ActionBarDesktop
-        title="Listado de Tareas"
-        icon={<CheckSquare className="w-6 h-6" />}
-        features={[
-          {
-            icon: <CheckSquare className="w-4 h-4" />,
-            title: "Vista de Tabla Completa",
-            description: "Listado detallado con todas las tareas organizadas por rubro, unidad, cantidad y fase asignada."
-          },
-          {
-            icon: <Calendar className="w-4 h-4" />,
-            title: "Gestión de Fechas",
-            description: "Control de fechas de inicio, fin y progreso de cada tarea con vista temporal."
-          },
-          {
-            icon: <MapPin className="w-4 h-4" />,
-            title: "Organización por Fases",
-            description: "Agrupación automática por fases del proyecto con opciones de agrupamiento flexible."
-          },
-          {
-            icon: <User className="w-4 h-4" />,
-            title: "Control de Recursos",
-            description: "Gestión de cantidades, unidades y asignación de recursos para cada tarea."
-          }
-        ]}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        showGrouping
-        groupingType={groupingType}
-        onGroupingChange={setGroupingType}
-        primaryActionLabel="Nueva Tarea"
-        onPrimaryActionClick={handleAddTask}
-      />
-
-      {/* Table or Empty State */}
-      {filteredTasks.length === 0 ? (
-        <EmptyState
-          icon={<CheckSquare className="h-8 w-8" />}
-          title="No hay tareas en el proyecto"
-          description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
+    <Layout headerProps={{ title: "Listado de Tareas" }}>
+      <div className="space-y-6">
+        {/* FeatureIntroduction - Mobile Only */}
+        <FeatureIntroduction
+          title="Listado de Tareas"
+          icon={<CheckSquare className="w-5 h-5" />}
+          features={[
+            {
+              icon: <CheckSquare className="w-5 h-5" />,
+              title: "Vista de Tabla Completa",
+              description: "Listado detallado con todas las tareas organizadas por rubro, unidad, cantidad y fase asignada."
+            },
+            {
+              icon: <Calendar className="w-5 h-5" />,
+              title: "Gestión de Fechas",
+              description: "Control de fechas de inicio, fin y progreso de cada tarea con vista temporal."
+            },
+            {
+              icon: <MapPin className="w-5 h-5" />,
+              title: "Organización por Fases",
+              description: "Agrupación automática por fases del proyecto con opciones de agrupamiento flexible."
+            },
+            {
+              icon: <User className="w-5 h-5" />,
+              title: "Control de Recursos",
+              description: "Gestión de cantidades, unidades y asignación de recursos para cada tarea."
+            }
+          ]}
         />
-      ) : (
-        <BudgetTable
-          tasks={processedTasks}
-          onEditTask={handleEditTask}
-          onDeleteTask={handleDeleteTask}
-          selectedTasks={[]}
-          onSelectedTasksChange={() => {}}
+
+        {/* Action Bar Desktop - siempre visible */}
+        <ActionBarDesktop
+          title="Listado de Tareas"
+          icon={<CheckSquare className="w-6 h-6" />}
+          features={[
+            {
+              icon: <CheckSquare className="w-4 h-4" />,
+              title: "Vista de Tabla Completa",
+              description: "Listado detallado con todas las tareas organizadas por rubro, unidad, cantidad y fase asignada."
+            },
+            {
+              icon: <Calendar className="w-4 h-4" />,
+              title: "Gestión de Fechas",
+              description: "Control de fechas de inicio, fin y progreso de cada tarea con vista temporal."
+            },
+            {
+              icon: <MapPin className="w-4 h-4" />,
+              title: "Organización por Fases",
+              description: "Agrupación automática por fases del proyecto con opciones de agrupamiento flexible."
+            },
+            {
+              icon: <User className="w-4 h-4" />,
+              title: "Control de Recursos",
+              description: "Gestión de cantidades, unidades y asignación de recursos para cada tarea."
+            }
+          ]}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          showGrouping
           groupingType={groupingType}
           onGroupingChange={setGroupingType}
-          searchValue={searchValue}
-          isLoading={isLoading}
+          primaryActionLabel="Nueva Tarea"
+          onPrimaryActionClick={handleAddTask}
         />
-      )}
+
+        {/* Table or Empty State */}
+        {filteredTasks.length === 0 ? (
+          <EmptyState
+            icon={<CheckSquare className="h-8 w-8" />}
+            title="No hay tareas en el proyecto"
+            description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
+          />
+        ) : (
+          <Table
+            columns={columns}
+            data={filteredTasks}
+            isLoading={isLoading}
+            emptyState={
+              <EmptyState
+                icon={<CheckSquare className="h-8 w-8" />}
+                title="No hay tareas que coincidan"
+                description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
+              />
+            }
+          />
+        )}
+      </div>
     </Layout>
   )
 }
