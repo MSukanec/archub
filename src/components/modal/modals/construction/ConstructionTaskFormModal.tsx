@@ -552,7 +552,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      className="max-w-[1200px] w-[1200px] p-0"
+      className="max-w-[1440px] w-[1440px] p-0"
       isEditing={true}
     />
   );
