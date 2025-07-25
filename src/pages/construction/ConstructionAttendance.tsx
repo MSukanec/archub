@@ -44,11 +44,6 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
               id,
               name
             )
-          ),
-          created_by_member:organization_members!created_by(
-            id,
-            first_name,
-            last_name
           )
         `)
         .eq('project_id', projectId)

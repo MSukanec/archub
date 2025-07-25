@@ -56,10 +56,10 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
 
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
-    id: member.id, // Usar member.id en lugar de member.user_id
-    full_name: member.full_name || member.email || 'Usuario',
-    email: member.email || '',
-    avatar_url: member.avatar_url || ''
+    id: member.id, // Usar member.id (organization_members.id)
+    full_name: `Usuario ${member.user_id.slice(0, 8)}`, // Temporal hasta obtener info del user
+    email: '',
+    avatar_url: ''
   }))
 
   // Encontrar el member_id del usuario actual
