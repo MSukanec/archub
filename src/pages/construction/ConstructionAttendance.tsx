@@ -11,13 +11,13 @@ import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { Users, Download, Calendar, CalendarDays, FileText, Clock, BarChart3, Filter, X } from 'lucide-react'
+import { Users, Download, Calendar, CalendarDays, Clock, BarChart3, Filter, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { format } from 'date-fns'
 import { useLocation } from 'wouter'
-import { Link } from 'wouter'
+
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 // Hook to fetch attendance data from new attendees table
@@ -337,12 +337,10 @@ export default function ConstructionAttendance() {
             title="Sin personal registrado"
             description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
             action={
-              <Link href="/construction/logs">
-                <Button>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Ir a Bitácora
-                </Button>
-              </Link>
+              <Button onClick={() => openModal('attendance', {})}>
+                <Users className="w-4 h-4 mr-2" />
+                Registrar Asistencia
+              </Button>
             }
           />
         )}
