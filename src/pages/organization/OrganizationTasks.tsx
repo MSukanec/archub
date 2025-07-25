@@ -289,7 +289,7 @@ function TasksContent() {
         }}
       />
       
-      {selectedBoard && (
+      {selectedBoard ? (
         <KanbanBox 
           lists={lists}
           cards={cards}
@@ -300,6 +300,12 @@ function TasksContent() {
           onDeleteCard={handleDeleteCard}
           onCardEdit={(card) => openModal('card', { card: card, isEditing: true })}
           loading={listsLoading || cardsLoading}
+        />
+      ) : (
+        <EmptyState
+          icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
+          title="Selecciona un tablero"
+          description="Elige un tablero del selector para comenzar a gestionar tus tareas"
         />
       )}
     </Layout>
