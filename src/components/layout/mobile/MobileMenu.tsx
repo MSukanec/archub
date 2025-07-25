@@ -398,7 +398,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header con botón de cierre */}
-        <div className="flex justify-between items-center h-14 px-4 border-b border-[var(--menues-border)]">
+        <div className="flex justify-between items-center h-14 px-4 pr-6 border-b border-[var(--menues-border)]">
           {currentView !== 'main' && (
             <Button
               variant="ghost"
