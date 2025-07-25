@@ -284,7 +284,11 @@ export default function OrganizationMembers() {
                 {members.map((member) => (
                   <MemberCard 
                     key={member.id} 
-                    member={member}
+                    member={{
+                      ...member,
+                      users: Array.isArray(member.users) ? member.users[0] : member.users,
+                      roles: Array.isArray(member.roles) ? member.roles[0] : member.roles
+                    }}
                   />
                 ))}
                 {members.length === 0 && (
@@ -303,20 +307,24 @@ export default function OrganizationMembers() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={member.users?.[0]?.avatar_url} />
+                            <AvatarImage src={Array.isArray(member.users) ? member.users[0]?.avatar_url : member.users?.avatar_url} />
                             <AvatarFallback>
-                              {getInitials(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U')}
+                              {getInitials(
+                                (Array.isArray(member.users) ? member.users[0]?.full_name : member.users?.full_name) || 
+                                (Array.isArray(member.users) ? member.users[0]?.email : member.users?.email) || 
+                                'U'
+                              )}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">
-                                {member.users?.[0]?.full_name || 'Sin nombre'}
+                                {(Array.isArray(member.users) ? member.users[0]?.full_name : member.users?.full_name) || 'Sin nombre'}
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {member.users?.[0]?.email}
+                              {Array.isArray(member.users) ? member.users[0]?.email : member.users?.email}
                             </p>
                           </div>
                         </div>
@@ -332,10 +340,10 @@ export default function OrganizationMembers() {
                           </div>
 
                           <Badge 
-                            variant={getRoleBadgeVariant(member.roles?.[0]?.name || '')}
-                            className={getRoleBadgeClassName(member.roles?.[0]?.name || '')}
+                            variant={getRoleBadgeVariant((Array.isArray(member.roles) ? member.roles[0]?.name : member.roles?.name) || '')}
+                            className={getRoleBadgeClassName((Array.isArray(member.roles) ? member.roles[0]?.name : member.roles?.name) || '')}
                           >
-                            {member.roles?.[0]?.name || 'Sin rol'}
+                            {(Array.isArray(member.roles) ? member.roles[0]?.name : member.roles?.name) || 'Sin rol'}
                           </Badge>
 
                           <DropdownMenu>

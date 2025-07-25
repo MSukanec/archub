@@ -146,18 +146,11 @@ export function CustomRestricted({
         {children}
       </div>
 
-      {/* Área invisible para conexión con popover */}
-      <div
-        className="absolute inset-0 -inset-y-4 pointer-events-none z-40"
-        onMouseEnter={() => setIsPopoverOpen(true)}
-        onMouseLeave={() => setIsPopoverOpen(false)}
-      />
-
       {/* Overlay con badge que activa hover */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <div
-            className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group pointer-events-auto z-50"
+            className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group"
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
@@ -178,6 +171,7 @@ export function CustomRestricted({
             borderRadius: '16px'
           }}
           side="top"
+          sideOffset={-2}
           onMouseEnter={() => setIsPopoverOpen(true)}
           onMouseLeave={() => setIsPopoverOpen(false)}
         >
