@@ -11,7 +11,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter, X, LayoutGrid } from "lucide-react";
+import { Settings, Search, CheckSquare, Square, Filter, X, LayoutGrid, Plus, ArrowLeft } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useProjectPhases } from "@/hooks/use-construction-phases";
@@ -63,6 +63,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   
   const { userData, currentMember } = useCurrentUser();
   const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
+  const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
 
   // Hook para el formulario
   const form = useForm<AddTaskFormData>({
@@ -495,8 +496,25 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
             <ScrollArea className="h-[400px]">
               <div className="divide-y">
                 {filteredTasks.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
+                  <div className="text-center py-12 px-6">
+                    <div className="text-muted-foreground mb-4">
+                      {searchQuery ? "No se encontraron tareas que coincidan con tu búsqueda" : "No hay tareas disponibles"}
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-4">
+                      ¿No encuentras la tarea que necesitas?
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCurrentSubform('create-task');
+                        setPanel('subform');
+                      }}
+                      className="text-sm"
+                    >
+                      Crear Nueva Tarea
+                    </Button>
                   </div>
                 ) : (
                   groupedTasks.map((group) => (
@@ -640,12 +658,58 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     </form>
   );
 
-  const headerContent = (
+  const headerContent = currentPanel === 'subform' ? (
+    <FormModalHeader
+      title="Crear Nueva Tarea"
+      description="Diseña una tarea personalizada para tu proyecto"
+      icon={Plus}
+      leftActions={
+        <Button
+          variant="ghost"
+          onClick={() => setPanel('edit')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver
+        </Button>
+      }
+    />
+  ) : (
     <FormModalHeader 
       title={modalData.isEditing ? "Editar Tarea de Construcción" : "Seleccionar Tareas del Proyecto"}
       icon={CheckSquare}
     />
   );
+
+  // Subform para crear nuevas tareas
+  const createTaskSubform = (
+    <div className="space-y-6 p-6">
+      <div className="text-center">
+        <div className="text-lg font-semibold mb-2">Crear Nueva Tarea</div>
+        <div className="text-sm text-muted-foreground mb-6">
+          Aquí podrás crear una nueva tarea personalizada para tu proyecto
+        </div>
+      </div>
+      
+      <div className="text-center py-12 text-muted-foreground">
+        <div className="text-sm">
+          Funcionalidad de creación de tareas en desarrollo
+        </div>
+        <div className="text-xs mt-2">
+          Esta característica estará disponible próximamente
+        </div>
+      </div>
+    </div>
+  );
+
+  const getSubform = () => {
+    switch (currentSubform) {
+      case 'create-task':
+        return createTaskSubform;
+      default:
+        return null;
+    }
+  };
 
   const footerContent = (
     <FormModalFooter
@@ -662,6 +726,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={getSubform()}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
