@@ -261,9 +261,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Submenus para cada sección principal (igual que SidebarSubmenu.tsx)
   const submenuContent = {
     perfil: [
-      { icon: UserCircle, label: 'Datos Básicos', href: '/profile' },
+      { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
       { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
     ],
     organizacion: [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },

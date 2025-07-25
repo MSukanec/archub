@@ -94,9 +94,9 @@ export function SidebarSubmenu() {
   // Contenido de submenús para cada sección principal
   const submenuContent = {
     'perfil': [
-      { icon: UserCircle, label: 'Datos Básicos', href: '/profile' },
+      { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
       { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
     ],
     
     'organizacion': [

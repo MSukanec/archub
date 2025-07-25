@@ -85,7 +85,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
               {members.slice(0, 3).map((member, index) => (
                 <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   <AvatarFallback className="text-xs">
-                    {(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U').substring(0, 2).toUpperCase()}
+                    {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -258,6 +258,10 @@ export default function OrganizationManagement() {
 
   const deleteOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
+      if (!supabase) {
+        throw new Error('Supabase client not available')
+      }
+      
       const { error } = await supabase
         .from('organizations')
         .delete()

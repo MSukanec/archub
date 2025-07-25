@@ -44,7 +44,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 
 import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
 import OrganizationTasks from "@/pages/organization/OrganizationTasks";
-import OrganizationManagement from "@/pages/organization/OrganizationList";
+import ProfileOrganizations from "@/pages/profile/ProfileOrganizations";
 
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
@@ -131,12 +131,12 @@ function Router() {
         </Route>
         <Route path="/organizaciones">
           <ProtectedRoute>
-            <OrganizationManagement />
+            <ProfileOrganizations />
           </ProtectedRoute>
         </Route>
         <Route path="/organizations">
           <ProtectedRoute>
-            <OrganizationManagement />
+            <ProfileOrganizations />
           </ProtectedRoute>
         </Route>
 
@@ -258,9 +258,19 @@ function Router() {
             <ProfileBasicData />
           </ProtectedRoute>
         </Route>
+        <Route path="/profile/data">
+          <ProtectedRoute>
+            <ProfileBasicData />
+          </ProtectedRoute>
+        </Route>
         <Route path="/profile/settings">
           <ProtectedRoute>
             <ProfileSettings />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/profile/organizations">
+          <ProtectedRoute>
+            <ProfileOrganizations />
           </ProtectedRoute>
         </Route>
 
