@@ -323,10 +323,12 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Plantilla de Tarea *</FormLabel>
-                <Select onValueChange={handleTemplateChange} value={field.value || selectedTemplateId}>
+                <Select onValueChange={handleTemplateChange} value={selectedTemplateId}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar plantilla" />
+                      <SelectValue placeholder="Seleccionar plantilla">
+                        {selectedTemplateId && templates?.find(t => t.id === selectedTemplateId)?.name}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="z-[9999]">
