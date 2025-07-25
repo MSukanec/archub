@@ -331,54 +331,60 @@ export function ConstructionTaskFormModal({
     >
       {/* Sección fija superior */}
       <div className="flex-shrink-0 space-y-6">
-        {/* Phase Selection */}
-        <div className="space-y-2">
-          <Label htmlFor="project_phase_id">Fase de Proyecto *</Label>
-          <Select 
-            value={watch('project_phase_id') || ""}
-            onValueChange={(value) => setValue('project_phase_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar fase del proyecto" />
-            </SelectTrigger>
-            <SelectContent>
-              {projectPhases.map((projectPhase) => (
-                <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                  {projectPhase.phase.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.project_phase_id && (
-            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-          )}
+        {/* Título para toda la sección */}
+        <div>
+          <Label>Configuración de Tareas *</Label>
         </div>
 
-        {/* Search Bar */}
-        <div className="space-y-3">
-          <div>
-            <Label>Seleccionar Tareas *</Label>
+        {/* Tres columnas inline: Fase, Filtro Rubro, Búsqueda */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Columna 1: Phase Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="project_phase_id" className="text-xs font-medium text-muted-foreground">
+              Fase de Proyecto
+            </Label>
+            <Select 
+              value={watch('project_phase_id') || ""}
+              onValueChange={(value) => setValue('project_phase_id', value)}
+            >
+              <SelectTrigger className="text-xs">
+                <SelectValue placeholder="Seleccionar fase" />
+              </SelectTrigger>
+              <SelectContent>
+                {projectPhases.map((projectPhase) => (
+                  <SelectItem key={projectPhase.id} value={projectPhase.id}>
+                    {projectPhase.phase.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex gap-3">
-            {/* Filtro por Rubro */}
-            <div className="w-48">
-              <ComboBox
-                value={rubroFilter}
-                onValueChange={setRubroFilter}
-                options={rubroOptions}
-                placeholder="Filtrar por rubro"
-                searchPlaceholder="Buscar rubro..."
-                emptyMessage="No se encontraron rubros"
-                className="text-xs"
-              />
-            </div>
-            
-            {/* Campo de búsqueda */}
-            <div className="relative flex-1">
+          {/* Columna 2: Filtro por Rubro */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Filtrar por Rubro
+            </Label>
+            <ComboBox
+              value={rubroFilter}
+              onValueChange={setRubroFilter}
+              options={rubroOptions}
+              placeholder="Todos los rubros"
+              searchPlaceholder="Buscar rubro..."
+              emptyMessage="No se encontraron rubros"
+              className="text-xs"
+            />
+          </div>
+          
+          {/* Columna 3: Campo de búsqueda */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Búsqueda de Texto
+            </Label>
+            <div className="relative">
               <input
                 type="text"
-                placeholder="Buscar por nombre, rubro o categoría..."
+                placeholder="Buscar por nombre o categoría..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
@@ -394,7 +400,14 @@ export function ConstructionTaskFormModal({
               )}
             </div>
           </div>
+        </div>
 
+        {/* Errores y estado */}
+        <div className="space-y-2">
+          {errors.project_phase_id && (
+            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
+          )}
+          
           {selectedTasks.length > 0 && (
             <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
               {selectedTasks.length} tarea{selectedTasks.length > 1 ? 's' : ''} seleccionada{selectedTasks.length > 1 ? 's' : ''}
