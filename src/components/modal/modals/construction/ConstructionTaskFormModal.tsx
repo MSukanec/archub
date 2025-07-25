@@ -829,20 +829,24 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
   // Subform para crear nuevas tareas
   const createTaskSubform = (
-    <div className="space-y-6 p-6">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <Plus className="w-5 h-5 text-accent" />
-          Crear Nueva Tarea
-        </div>
-        <div className="text-sm text-muted-foreground">
-          La tarea se agregará a la biblioteca de tu organización y a este proyecto
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+      {/* Separador y título de sección de plantilla */}
+      <div className="col-span-2">
+        <Separator className="mb-4" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+            <Plus className="w-4 h-4 text-accent" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-foreground">Seleccionar Plantilla de Tarea</h3>
+            <p className="text-xs text-muted-foreground">Elige el tipo de tarea que vas a crear</p>
+          </div>
         </div>
       </div>
-      
+
       {/* Selector de Grupo de Tareas */}
-      <div className="space-y-4">
-        <Label>Seleccionar Grupo de Tareas</Label>
+      <div className="col-span-2">
+        <Label>Grupo de Tareas *</Label>
         <Select value={selectedTaskGroupId} onValueChange={setSelectedTaskGroupId}>
           <SelectTrigger>
             <SelectValue placeholder="Elige un grupo de tareas..." />
@@ -857,12 +861,23 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         </Select>
       </div>
 
-      {/* Parámetros del Template */}
+      {/* Separador y título de sección de parámetros */}
       {selectedTaskGroupId && parameters.length > 0 && (
-        <div className="space-y-4">
-          <Separator />
-          <Label>Configurar Parámetros</Label>
-          
+        <>
+          <div className="col-span-2">
+            <Separator className="mb-4" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                <Settings className="w-4 h-4 text-accent" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Configurar Parámetros</h3>
+                <p className="text-xs text-muted-foreground">Personaliza las características de tu tarea</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Parámetros dinámicos */}
           {parameters.map((param) => (
             <div key={param.id} className="space-y-2">
               <Label htmlFor={param.id}>{param.label}</Label>
@@ -923,55 +938,29 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
               )}
             </div>
           ))}
-        </div>
-      )}
 
-      {/* Vista Previa */}
-      {taskPreview && (
-        <div className="space-y-4">
-          <Separator />
-          <Label>Vista Previa de la Tarea</Label>
-          <div className="p-4 bg-muted rounded-lg border-2 border-dashed border-accent">
-            <div className="text-sm font-medium text-accent-foreground">
-              {taskPreview}
+          {/* Vista Previa */}
+          {taskPreview && (
+            <div className="col-span-2 space-y-2">
+              <Label>Vista Previa de la Tarea</Label>
+              <div className="p-4 bg-muted rounded-lg border-2 border-dashed border-accent">
+                <div className="text-sm font-medium text-foreground">
+                  {taskPreview}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
-      {/* Información de desarrollo temporal */}
+      {/* Información cuando no hay parámetros */}
       {selectedTaskGroupId && parameters.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
+        <div className="col-span-2 text-center py-8 text-muted-foreground">
           <div className="text-sm">
             Este grupo de tareas no tiene parámetros configurados
           </div>
         </div>
       )}
-
-      {/* Botones de acción */}
-      <div className="flex gap-3 pt-4 border-t">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => setCurrentSubform(null)}
-          className="flex-1"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </Button>
-        
-        {selectedTaskGroupId && taskPreview && parameters.length > 0 && (
-          <Button
-            type="button"
-            onClick={handleCreateAndAddTask}
-            disabled={createGeneratedTaskMutation.isPending}
-            className="flex-1"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {createGeneratedTaskMutation.isPending ? 'Creando...' : 'Crear y Agregar'}
-          </Button>
-        )}
-      </div>
     </div>
   );
 
@@ -984,15 +973,31 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     }
   };
 
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={onClose}
-      rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
-      onRightClick={handleSubmit(onSubmit)}
-      rightLoading={isSubmitting}
-    />
-  );
+  const getFooterContent = () => {
+    const { currentPanel } = useModalPanelStore();
+    
+    if (currentPanel === 'subform') {
+      return (
+        <FormModalFooter
+          leftLabel="Volver"
+          onLeftClick={() => setCurrentSubform(null)}
+          rightLabel={selectedTaskGroupId && taskPreview && parameters.length > 0 ? (createGeneratedTaskMutation.isPending ? 'Creando...' : 'Crear y Agregar') : null}
+          onRightClick={selectedTaskGroupId && taskPreview && parameters.length > 0 ? handleCreateAndAddTask : undefined}
+          rightLoading={createGeneratedTaskMutation.isPending}
+        />
+      );
+    }
+    
+    return (
+      <FormModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
+        onRightClick={handleSubmit(onSubmit)}
+        rightLoading={isSubmitting}
+      />
+    );
+  };
 
   return (
     <FormModalLayout
@@ -1001,7 +1006,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       editPanel={editPanel}
       subformPanel={getSubform()}
       headerContent={headerContent}
-      footerContent={footerContent}
+      footerContent={getFooterContent()}
       onClose={onClose}
       className="max-w-[1440px] w-[1440px] p-0"
       isEditing={true}
