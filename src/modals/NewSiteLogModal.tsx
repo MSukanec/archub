@@ -260,7 +260,7 @@ export function NewSiteLogModal({ open, onClose, editingSiteLog }: NewSiteLogMod
 
       // Load attendees
       const { data: attendeesData } = await supabase
-        .from('site_log_attendees')
+        .from('attendees')
         .select('*')
         .eq('site_log_id', siteLogId)
 

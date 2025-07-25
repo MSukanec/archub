@@ -115,9 +115,9 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
       
 
 
-      // Fetch attendees separately
-      const { data: attendeesData } = await supabase
-        .from('site_log_attendees')
+      // Fetch attendees separately from ATTENDEES table
+      const { data: attendeesData, error: attendeesError } = await supabase
+        .from('attendees')
         .select(`
           *,
           contact:contacts(
@@ -127,6 +127,10 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
           )
         `)
         .in('site_log_id', logIds);
+
+      if (attendeesError) {
+        console.error('Error fetching attendees:', attendeesError);
+      }
 
       // Fetch equipment separately
       const { data: equipmentData } = await supabase
