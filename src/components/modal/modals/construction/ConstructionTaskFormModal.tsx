@@ -422,6 +422,7 @@ export function ConstructionTaskFormModal({
           <div className="grid gap-3 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 1fr"}}>
             <div className="flex items-center justify-start">
               <Checkbox
+                className="h-3.5 w-3.5"
                 checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
                 onCheckedChange={(checked) => {
                   if (checked) {
@@ -452,6 +453,7 @@ export function ConstructionTaskFormModal({
                       {/* Checkbox Column */}
                       <div className="flex items-start justify-start pt-1">
                         <Checkbox
+                          className="h-3.5 w-3.5"
                           checked={isSelected}
                           onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
                         />
