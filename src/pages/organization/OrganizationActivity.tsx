@@ -15,6 +15,7 @@ import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
