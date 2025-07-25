@@ -321,7 +321,7 @@ export function ConstructionTaskFormModal({
   const editPanel = (
     <form 
       onSubmit={handleSubmit(onSubmit)} 
-      className="space-y-6 h-full flex flex-col"
+      className="flex flex-col h-full"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
@@ -329,78 +329,85 @@ export function ConstructionTaskFormModal({
         }
       }}
     >
-      {/* Phase Selection */}
-      <div className="space-y-2">
-        <Label htmlFor="project_phase_id">Fase de Proyecto *</Label>
-        <Select 
-          value={watch('project_phase_id') || ""}
-          onValueChange={(value) => setValue('project_phase_id', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar fase del proyecto" />
-          </SelectTrigger>
-          <SelectContent>
-            {projectPhases.map((projectPhase) => (
-              <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                {projectPhase.phase.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.project_phase_id && (
-          <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-        )}
-      </div>
-
-      {/* Search Bar */}
-      <div className="space-y-3">
-        <div>
-          <Label>Seleccionar Tareas *</Label>
+      {/* Sección fija superior */}
+      <div className="flex-shrink-0 space-y-6">
+        {/* Phase Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="project_phase_id">Fase de Proyecto *</Label>
+          <Select 
+            value={watch('project_phase_id') || ""}
+            onValueChange={(value) => setValue('project_phase_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar fase del proyecto" />
+            </SelectTrigger>
+            <SelectContent>
+              {projectPhases.map((projectPhase) => (
+                <SelectItem key={projectPhase.id} value={projectPhase.id}>
+                  {projectPhase.phase.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.project_phase_id && (
+            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
+          )}
         </div>
 
-        <div className="flex gap-3">
-          {/* Filtro por Rubro */}
-          <div className="w-48">
-            <ComboBox
-              value={rubroFilter}
-              onValueChange={setRubroFilter}
-              options={rubroOptions}
-              placeholder="Filtrar por rubro"
-              searchPlaceholder="Buscar rubro..."
-              emptyMessage="No se encontraron rubros"
-              className="text-xs"
-            />
+        {/* Search Bar */}
+        <div className="space-y-3">
+          <div>
+            <Label>Seleccionar Tareas *</Label>
           </div>
-          
-          {/* Campo de búsqueda */}
-          <div className="relative flex-1">
-            <input
-              type="text"
-              placeholder="Buscar por nombre, rubro o categoría..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
 
-        {selectedTasks.length > 0 && (
-          <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
-            {selectedTasks.length} tarea{selectedTasks.length > 1 ? 's' : ''} seleccionada{selectedTasks.length > 1 ? 's' : ''}
+          <div className="flex gap-3">
+            {/* Filtro por Rubro */}
+            <div className="w-48">
+              <ComboBox
+                value={rubroFilter}
+                onValueChange={setRubroFilter}
+                options={rubroOptions}
+                placeholder="Filtrar por rubro"
+                searchPlaceholder="Buscar rubro..."
+                emptyMessage="No se encontraron rubros"
+                className="text-xs"
+              />
+            </div>
+            
+            {/* Campo de búsqueda */}
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Buscar por nombre, rubro o categoría..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
-        )}
+
+          {selectedTasks.length > 0 && (
+            <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
+              {selectedTasks.length} tarea{selectedTasks.length > 1 ? 's' : ''} seleccionada{selectedTasks.length > 1 ? 's' : ''}
+            </div>
+          )}
+
+          {errors.selectedTasks && (
+            <p className="text-sm text-destructive">{errors.selectedTasks.message}</p>
+          )}
+        </div>
       </div>
 
-      {/* Optimized Tasks Table */}
+      {/* Área de tareas con scroll */}
       <div className="flex-1 min-h-0 -mx-6">
         <div className="border-0 border-t border-b">
           {/* Table Header */}
@@ -467,10 +474,6 @@ export function ConstructionTaskFormModal({
           </ScrollArea>
         </div>
       </div>
-
-      {errors.selectedTasks && (
-        <p className="text-sm text-destructive">{errors.selectedTasks.message}</p>
-      )}
     </form>
   );
 
