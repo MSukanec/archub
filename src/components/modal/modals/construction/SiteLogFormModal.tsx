@@ -661,13 +661,13 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       </div>
 
       {/* Lista completa de contactos */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
+      <div className="space-y-1 max-h-96 overflow-y-auto">
         {contacts?.map((contact: any) => {
           const isPresent = attendees.some(a => a.contact_id === contact.id);
           const attendeeData = attendees.find(a => a.contact_id === contact.id);
           
           return (
-            <div key={contact.id} className="grid grid-cols-12 gap-2 items-center py-2 border-b border-muted/30">
+            <div key={contact.id} className="grid grid-cols-12 gap-1 items-center py-1 border-b border-muted/20">
               {/* Checkbox */}
               <div className="col-span-1">
                 <input
@@ -693,7 +693,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                       setAttendees(attendees.filter(a => a.contact_id !== contact.id));
                     }
                   }}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded checkbox-accent"
                 />
               </div>
 

@@ -124,6 +124,12 @@
   --chart-negative: hsl(0, 50%, 50%);
   --chart-neutral: hsl(200, 30%, 40%);
 
+  /* Checkbox */
+  --checkbox-bg: hsl(0, 0%, 100%);
+  --checkbox-border: hsl(0, 0%, 70%);
+  --checkbox-checked-bg: hsl(76, 100%, 40%);
+  --checkbox-checked-border: hsl(76, 100%, 40%);
+
   /* Movement border colors */
   --movement-income-border: hsl(142, 76%, 36%);
   --movement-expense-border: hsl(0, 72%, 51%);
@@ -172,6 +178,25 @@
 /* Animated border class */
 .animated-border {
   animation: border-glow 2s ease-in-out infinite;
+}
+
+/* Global checkbox styling with accent color */
+.checkbox-accent {
+  background-color: var(--checkbox-bg);
+  border-color: var(--checkbox-border);
+  accent-color: var(--checkbox-checked-bg);
+}
+
+.checkbox-accent:checked {
+  background-color: var(--checkbox-checked-bg);
+  border-color: var(--checkbox-checked-border);
+}
+
+.checkbox-accent:focus {
+  ring-color: var(--checkbox-checked-bg);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--checkbox-checked-bg);
 }
 
 .dark {
@@ -295,6 +320,12 @@
   --chart-positive: #22c55e;
   --chart-negative: #ef4444;
   --chart-neutral: #84cc16;
+
+  /* Checkbox dark mode */
+  --checkbox-bg: hsl(0, 0%, 12%);
+  --checkbox-border: hsl(0, 0%, 30%);
+  --checkbox-checked-bg: hsl(76, 100%, 40%);
+  --checkbox-checked-border: hsl(76, 100%, 40%);
 
   /* Movement border colors */
   --movement-income-border: hsl(142, 76%, 36%);
