@@ -241,9 +241,8 @@ export default function ConstructionAttendance() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
-        {/* Feature Introduction */}
-        <FeatureIntroduction
+      {/* Feature Introduction */}
+      <FeatureIntroduction
           title="Control de Asistencia de Personal"
           icon={<Users className="w-6 h-6" />}
           features={[
@@ -326,7 +325,6 @@ export default function ConstructionAttendance() {
             }
           />
         )}
-      </div>
     </Layout>
   )
 }

@@ -1034,9 +1034,8 @@ export default function FinancesInstallments() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
-        {/* Feature Introduction */}
-        <FeatureIntroduction
+      {/* Feature Introduction */}
+      <FeatureIntroduction
           icon={<Receipt className="h-6 w-6" />}
           title="Gestión de Aportes de Terceros"
           features={[
@@ -1175,8 +1174,6 @@ export default function FinancesInstallments() {
             </div>
           </>
         )}
-
-      </div>
 
       {/* Modals handled by ModalFactory */}
     </Layout>
