@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -386,6 +386,33 @@ export default function OrganizationManagement() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
+        {/* Plan Card */}
+        <Card className="bg-[var(--card-bg)] border border-[var(--card-border)]">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-1 flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground">
+                  Tu aplicación está actualmente en el plan gratuito
+                </p>
+                <p className="text-xs text-muted-foreground break-words">
+                  Los planes pagos ofrecen límites de uso más altos, ramas adicionales y mucho más. 
+                  <span className="text-primary underline cursor-pointer ml-1">Aprende más aquí.</span>
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Chatear con nosotros</span>
+                  <span className="sm:hidden">Chat</span>
+                </Button>
+                <Button size="sm" className="w-full sm:w-auto">
+                  Actualizar
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Card con información de la organización seleccionada */}
         {userData?.organization && (
           <Card className="mb-6">

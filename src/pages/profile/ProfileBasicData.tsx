@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, UserCircle, Shield } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -192,6 +193,12 @@ export default function ProfileBasicData() {
 
   return (
     <Layout headerProps={headerProps}>
+      {/* ActionBar */}
+      <ActionBarDesktop
+        title="Mi Perfil"
+        icon={<UserCircle className="h-5 w-5" />}
+      />
+      
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Feature Introduction */}
         <FeatureIntroduction
@@ -223,35 +230,6 @@ export default function ProfileBasicData() {
             Guardando...
           </div>
         )}
-
-        {/* Plan Card */}
-        <Card className="bg-[var(--card-bg)] border border-[var(--card-border)]">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-1 flex-1 min-w-0">
-                <p className="text-sm text-muted-foreground">
-                  Tu aplicación está actualmente en el plan gratuito
-                </p>
-                <p className="text-xs text-muted-foreground break-words">
-                  Los planes pagos ofrecen límites de uso más altos, ramas adicionales y mucho más. 
-                  <span className="text-primary underline cursor-pointer ml-1">Aprende más aquí.</span>
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
-                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Chatear con nosotros</span>
-                  <span className="sm:hidden">Chat</span>
-                </Button>
-                <Button size="sm" className="w-full sm:w-auto">
-                  Actualizar
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Perfil Section */}
         <div>
@@ -406,7 +384,7 @@ export default function ProfileBasicData() {
 
             {/* Right Column - Current Mode and Change Button */}
             <div className="space-y-6">
-              <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg bg-[var(--card)] text-[var(--card-foreground)]">
+              <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg">
                 {(() => {
                   const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
                   const ModeIcon = modeInfo.icon;

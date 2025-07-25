@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. PROFILE PAGE UI RESTRUCTURING COMPLETED: Successfully implemented ActionBar, moved plan card to organizations, and removed white background from mode card - COMPLETED
+  • ACTIONBAR INTEGRATION: Added ActionBarDesktop component to ProfileBasicData.tsx with title "Mi Perfil" and UserCircle icon (no project selector or ghost buttons)
+  • PLAN CARD RELOCATION: Moved plan information card from ProfileBasicData to ProfileOrganizations page as the first element after space-y-6 container
+  • CARD STYLING MODERNIZATION: Removed white background (bg-[var(--card)]) from "Modo de uso actual" card to match "Cerrar Sesión" card styling
+  • PROFILE SECTION PRIORITIZATION: Eliminated plan card divider from profile page so profile section appears immediately after ActionBar and FeatureIntroduction
+  • ORGANIZATION PAGE ENHANCEMENT: Plan card now appears at top of organization management page with proper spacing and existing functionality
+  • CONSISTENT VISUAL STYLING: Both profile action cards now have same transparent styling matching overall design system
 - July 25, 2025. PROFILE ROUTES REORGANIZATION AND HEADER HIDDEN: Successfully restructured profile navigation with proper nested routes and UI simplification - COMPLETED
   • HEADER TEMPORARILY HIDDEN: Concealed header component in Layout.tsx while preserving it for potential restoration if needed
   • REDUCED TOP PADDING: Adjusted main content padding from md:pt-12 to md:pt-6 to accommodate header removal and provide cleaner layout
