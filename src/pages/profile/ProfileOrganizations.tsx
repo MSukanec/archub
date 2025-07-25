@@ -162,7 +162,8 @@ export default function OrganizationManagement() {
 
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { data: activeOrgMembers = [] } = useOrganizationMembers(userData?.organization?.id || '')
+  const activeOrgId = userData?.preferences?.last_organization_id || userData?.organization?.id || ''
+  const { data: activeOrgMembers = [] } = useOrganizationMembers(activeOrgId)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
@@ -203,11 +204,11 @@ export default function OrganizationManagement() {
   })
 
   // Poner la organización activa primero
-  const activeOrgId = userData?.preferences?.last_organization_id
-  if (activeOrgId) {
+  const currentActiveOrgId = userData?.preferences?.last_organization_id
+  if (currentActiveOrgId) {
     filteredOrganizations = [
-      ...filteredOrganizations.filter(org => org.id === activeOrgId),
-      ...filteredOrganizations.filter(org => org.id !== activeOrgId)
+      ...filteredOrganizations.filter(org => org.id === currentActiveOrgId),
+      ...filteredOrganizations.filter(org => org.id !== currentActiveOrgId)
     ]
   }
 
@@ -454,50 +455,53 @@ export default function OrganizationManagement() {
         </Card>
 
         {/* Card con información de la organización seleccionada */}
-        {userData?.organization && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16 avatar-border">
-                    <AvatarFallback className="text-lg font-semibold">
-                      {userData.organization?.name?.substring(0, 2).toUpperCase() || 'ORG'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-xl font-semibold">{userData.organization.name}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Creada el {format(new Date(userData.organization.created_at), 'dd/MM/yyyy', { locale: es })}
-                    </p>
-                    {/* Badge del plan */}
-                    <div className="mt-2">
-                      <Badge 
-                        variant="secondary" 
-                        className="text-xs text-white" 
-                        style={{
-                          backgroundColor: userData.organization.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                                         userData.organization.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                                         userData.organization.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                                         'var(--plan-free-bg)'
-                        }}
-                      >
-                        <Crown className="w-3 h-3 mr-1" />
-                        {userData.organization.plan?.name || 'Free'}
-                      </Badge>
+        {(() => {
+          const activeOrg = userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id) || userData?.organization;
+          return activeOrg ? (
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="w-16 h-16 avatar-border">
+                      <AvatarFallback className="text-lg font-semibold">
+                        {activeOrg?.name?.substring(0, 2).toUpperCase() || 'ORG'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-xl font-semibold">{activeOrg.name}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Creada el {format(new Date(activeOrg.created_at), 'dd/MM/yyyy', { locale: es })}
+                      </p>
+                      {/* Badge del plan */}
+                      <div className="mt-2">
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs text-white" 
+                          style={{
+                            backgroundColor: activeOrg.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                           activeOrg.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                           activeOrg.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                           'var(--plan-free-bg)'
+                          }}
+                        >
+                          <Crown className="w-3 h-3 mr-1" />
+                          {activeOrg.plan?.name || 'Free'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex flex-col items-end gap-2">
+                    {/* Avatares de miembros más grandes */}
+                    <ActiveOrganizationMembersCard members={activeOrgMembers} />
+                    <Badge variant="default" className="bg-[var(--accent)] text-white">
+                      ACTIVA
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  {/* Avatares de miembros más grandes */}
-                  <ActiveOrganizationMembersCard members={activeOrgMembers} />
-                  <Badge variant="default" className="bg-[var(--accent)] text-white">
-                    ACTIVA
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          ) : null;
+        })()}
 
         {/* Headers de columnas */}
         <div className="grid grid-cols-6 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
