@@ -118,43 +118,43 @@ export default function ConstructionTasks() {
       key: 'rubro_name',
       label: 'Rubro',
       render: (task: any) => task.task?.rubro_name || 'Sin rubro',
-      width: '15%'
+      width: '10%'
     },
     {
       key: 'display_name',
       label: 'Tarea',
       render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
-      width: '30%'
+      width: 'auto' // El resto del espacio disponible
     },
     {
       key: 'unit',
       label: 'Unidad',
       render: (task: any) => task.task?.unit_symbol || 'Sin unidad',
-      width: '8%'
+      width: '10%'
     },
     {
       key: 'quantity',
       label: 'Cantidad',
       render: (task: any) => task.quantity || 0,
-      width: '8%'
+      width: '10%'
     },
     {
       key: 'progress',
       label: 'Progreso',
       render: (task: any) => `${task.progress_percent || 0}%`,
-      width: '8%'
+      width: '10%'
     },
     {
       key: 'phase',
       label: 'Fase',
       render: (task: any) => task.phase_name || 'Sin fase',
-      width: '13%'
+      width: '10%'
     },
     {
       key: 'dates',
       label: 'Fechas',
       render: (task: any) => task.start_date ? new Date(task.start_date).toLocaleDateString() : 'Sin fecha',
-      width: '8%'
+      width: '10%'
     },
     {
       key: 'actions',
