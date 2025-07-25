@@ -419,7 +419,7 @@ export function ConstructionTaskFormModal({
       <div className="flex-1 min-h-0">
         <div className="border-0 border-t border-b">
           {/* Table Header */}
-          <div className="grid gap-1 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 140px 1fr"}}>
+          <div className="grid gap-1.5 py-2 bg-muted font-medium text-xs border-b" style={{gridTemplateColumns: "auto 140px 1fr"}}>
             <div className="flex items-center justify-start">
               <Checkbox
                 checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
@@ -449,7 +449,7 @@ export function ConstructionTaskFormModal({
                   const selectedTask = selectedTasks.find(t => t.task_id === task.id);
                   
                   return (
-                    <div key={task.id} className="grid gap-1 py-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 140px 1fr"}}>
+                    <div key={task.id} className="grid gap-1.5 py-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 140px 1fr"}}>
                       {/* Checkbox Column */}
                       <div className="flex items-start justify-start pt-1">
                         <Checkbox
