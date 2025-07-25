@@ -55,10 +55,15 @@ function ParameterField({ parameter, value, onChange }: {
     queryEnabled: !!parameterId
   });
   
-  // Extra debug for Supabase connection
-  console.log('🔍 Supabase and parameterId check:', {
-    parameterId: parameterId,
-    isEnabled: !!parameterId
+  // Select-specific debug logging
+  console.log('🔧 Select Value Debug:', {
+    parameterName: parameter.name,
+    receivedValue: value,
+    optionsAvailable: options.length,
+    firstOptionValue: options[0]?.value,
+    firstOptionLabel: options[0]?.label,
+    valueMatchesAnyOption: options.some(opt => opt.value === value || opt.id === value),
+    allOptionValues: options.map(opt => ({ id: opt.id, value: opt.value, label: opt.label }))
   });
   
   return (
