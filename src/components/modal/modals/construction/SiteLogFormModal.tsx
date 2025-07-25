@@ -147,23 +147,24 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         // Primero eliminar attendees existentes si estamos actualizando
         if (siteLogId) {
           await supabase
-            .from('site_log_attendees')
+            .from('attendees')
             .delete()
             .eq('site_log_id', savedSiteLog.id);
         }
 
-        // Insertar nuevos attendees
-        const attendeesToInsert = formData.attendees.map(attendee => ({
+        // Insertar nuevos attendees en tabla ATTENDEES
+        const attendeesToInsert = formData.attendees.map((attendee: any) => ({
           site_log_id: savedSiteLog.id,
           contact_id: attendee.contact_id,
-          contact_type: attendee.contact_type,
-          arrival_time: attendee.arrival_time,
-          departure_time: attendee.departure_time,
-          notes: attendee.notes
+          attendance_type: attendee.attendance_type || 'full',
+          hours_worked: attendee.hours_worked || 8,
+          description: attendee.description || attendee.notes || '',
+          created_by: formData.created_by,
+          project_id: currentUser?.preferences?.last_project_id || ''
         }));
 
         const { error: attendeesError } = await supabase
-          .from('site_log_attendees')
+          .from('attendees')
           .insert(attendeesToInsert);
 
         if (attendeesError) {
@@ -680,7 +681,12 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                         contact_id: contact.id,
                         contact_type: '',
                         attendance_type: 'full',
-                        description: ''
+                        hours_worked: 8,
+                        description: '',
+                        // Campos legacy para compatibilidad
+                        arrival_time: '',
+                        departure_time: '',
+                        notes: ''
                       }]);
                     } else {
                       // Quitar personal
@@ -704,7 +710,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                   value={attendeeData?.attendance_type || 'full'}
                   onValueChange={(value) => {
                     if (isPresent) {
-                      const newAttendees = attendees.map(a => 
+                      const newAttendees = attendees.map((a: any) => 
                         a.contact_id === contact.id 
                           ? { ...a, attendance_type: value as 'full' | 'half' }
                           : a
@@ -731,7 +737,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                   value={attendeeData?.description || ''}
                   onChange={(e) => {
                     if (isPresent) {
-                      const newAttendees = attendees.map(a => 
+                      const newAttendees = attendees.map((a: any) => 
                         a.contact_id === contact.id 
                           ? { ...a, description: e.target.value }
                           : a
