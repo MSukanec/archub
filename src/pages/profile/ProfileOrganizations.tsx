@@ -457,7 +457,7 @@ export default function OrganizationManagement() {
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
-                    <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white border-white/20 hover:border-white hover:text-white">
                       Actualizar
                     </Button>
                   </div>
