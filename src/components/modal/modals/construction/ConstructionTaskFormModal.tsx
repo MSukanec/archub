@@ -146,12 +146,23 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const handleTaskSelection = (taskId: string) => {
     const task = tasks?.find(t => t.id === taskId);
     if (task) {
+      console.log('➕ Agregando tarea:', taskId);
       setSelectedTasks(prev => [...prev, {
         task_id: taskId,
         quantity: 1,
         phase_instance_id: ''
       }]);
     }
+  };
+
+  // Función para eliminar tarea por índice
+  const handleRemoveTask = (indexToRemove: number) => {
+    console.log('🗑️ Eliminando tarea en índice:', indexToRemove);
+    setSelectedTasks(prev => {
+      const newTasks = prev.filter((_, i) => i !== indexToRemove);
+      console.log('📋 Tareas después de eliminar:', newTasks.length);
+      return newTasks;
+    });
   };
 
   const handleSelectAll = () => {
@@ -196,8 +207,21 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
   // Sincronizar selectedTasks con el formulario
   useEffect(() => {
+    console.log('🔄 Sincronizando selectedTasks con formulario:', selectedTasks.length);
     setValue('selectedTasks', selectedTasks);
   }, [selectedTasks, setValue]);
+
+  // Función para actualizar tarea seleccionada por índice
+  const updateSelectedTask = (index: number, updates: Partial<SelectedTask>) => {
+    console.log('✏️ Actualizando tarea en índice:', index, updates);
+    setSelectedTasks(prev => {
+      const newTasks = prev.map((task, i) => 
+        i === index ? { ...task, ...updates } : task
+      );
+      console.log('📝 Tareas después de actualizar:', newTasks.length);
+      return newTasks;
+    });
+  };
 
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
@@ -414,35 +438,33 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                       <div key={`${selectedTask.task_id}-${index}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "auto 1fr auto auto"}}>
                         {/* Fase Select */}
                         <div className="w-20">
-                          <select
-                            value={selectedTask.phase_instance_id || ''}
-                            onChange={(e) => {
-                              setSelectedTasks(prev => 
-                                prev.map((t, i) => 
-                                  i === index 
-                                    ? { ...t, phase_instance_id: e.target.value }
-                                    : t
-                                )
-                              );
+                          <Select 
+                            value={selectedTask.phase_instance_id || ''} 
+                            onValueChange={(value) => {
+                              updateSelectedTask(index, { phase_instance_id: value });
                             }}
-                            className="h-8 text-xs border rounded px-1 w-full"
                           >
-                            <option value="">Fase</option>
-                            {projectPhases.map(phase => (
-                              <option key={phase.id} value={phase.id}>
-                                {phase.phase?.name}
-                              </option>
-                            ))}
-                          </select>
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Fase" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Sin fase</SelectItem>
+                              {projectPhases.map(phase => (
+                                <SelectItem key={phase.id} value={phase.id}>
+                                  {phase.phase?.name || 'Sin nombre'}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         {/* Task Name */}
                         <div>
-                          <div className="text-sm leading-tight line-clamp-1">
+                          <div className="text-sm leading-tight line-clamp-2">
                             {task.display_name || 'Sin nombre'}
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span>
+                            <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
                           </div>
                         </div>
 
@@ -453,13 +475,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                             value={selectedTask.quantity}
                             onChange={(e) => {
                               const newQuantity = parseFloat(e.target.value) || 0;
-                              setSelectedTasks(prev => 
-                                prev.map((t, i) => 
-                                  i === index 
-                                    ? { ...t, quantity: newQuantity }
-                                    : t
-                                )
-                              );
+                              updateSelectedTask(index, { quantity: newQuantity });
                             }}
                             className="h-8 text-xs"
                             min="0"
@@ -473,9 +489,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            onClick={() => {
-                              setSelectedTasks(prev => prev.filter((_, i) => i !== index));
-                            }}
+                            onClick={() => handleRemoveTask(index)}
                           >
                             <X className="h-3 w-3" />
                           </Button>
