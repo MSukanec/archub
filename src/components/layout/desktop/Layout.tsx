@@ -13,6 +13,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { MobileActionBar } from "@/components/layout/mobile/MobileActionBar";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
+import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -73,18 +74,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         <SidebarSubmenu />
       </div>
 
-      {/* Header TEMPORARILY HIDDEN - can be restored if needed */}
-      {/* 
-      <div
-        className={`transition-all duration-300 ease-in-out md:fixed md:top-0 md:left-0 md:right-0 md:z-30 md:bg-[var(--layout-bg)] ${
-          isSecondaryExpanded
-            ? "md:pl-[304px]" // 40px main + 264px secondary
-            : "md:pl-[80px]" // 40px main + 40px secondary
-        } ml-0`}
-      >
-        <Header {...headerProps} />
-      </div>
-      */}
+      {/* Header Mobile - Only visible on mobile */}
+      <HeaderMobile {...headerProps} />
 
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 mt-1 pb-12 md:pt-6 ${
