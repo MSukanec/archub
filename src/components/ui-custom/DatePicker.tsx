@@ -48,26 +48,23 @@ export default function DatePicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <div
           role="combobox"
           aria-expanded={open}
-          disabled={disabled}
           className={cn(
             // Exact SelectTrigger styles
-            "flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60",
-            // Remove ALL button-specific styles and hover effects
-            "shadow-none hover:bg-[var(--input-bg)] hover:text-foreground hover:border-[var(--input-border)] hover:translate-y-0 hover:shadow-none",
+            "flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer",
             // Placeholder text styling
             !value && "text-[var(--input-placeholder)]",
+            disabled && "cursor-not-allowed opacity-60",
             className
           )}
         >
           <span className="truncate">
             {value ? format(value, "dd/MM/yyyy", { locale: es }) : placeholder}
           </span>
-          <CalendarDays className="h-4 w-4 opacity-50" />
-        </Button>
+          <CalendarDays className="h-4 w-4 text-foreground opacity-50" />
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar

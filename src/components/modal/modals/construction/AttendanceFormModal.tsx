@@ -164,10 +164,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const isLoading = createAttendanceMutation.isPending || updateAttendanceMutation.isPending
 
   const attendanceTypes = [
-    { value: 'full_day', label: 'Jornada completa (8 horas)' },
-    { value: 'half_day', label: 'Media jornada (4 horas)' },
-    { value: 'overtime', label: 'Horas extras' },
-    { value: 'custom', label: 'Horario personalizado' }
+    { value: 'full', label: 'Jornada Completa' },
+    { value: 'half', label: 'Media Jornada' }
   ]
 
   const viewPanel = (
@@ -260,9 +258,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
                 <Select onValueChange={(value) => {
                   field.onChange(value)
                   // Auto-set hours based on attendance type
-                  if (value === 'full_day') form.setValue('hours_worked', 8)
-                  else if (value === 'half_day') form.setValue('hours_worked', 4)
-                  else if (value === 'overtime') form.setValue('hours_worked', 10)
+                  if (value === 'full') form.setValue('hours_worked', 8)
+                  else if (value === 'half') form.setValue('hours_worked', 4)
                 }} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
