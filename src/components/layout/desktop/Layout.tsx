@@ -83,7 +83,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           isSecondaryExpanded
             ? "md:ml-[304px]" // 40px main + 264px secondary
             : "md:ml-[80px]" // 40px main + 40px secondary
-        } ml-0 pt-16 md:pt-6 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+        } ml-0 pt-1 md:pt-6 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
       >
         <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>{children}</div>
       </main>
