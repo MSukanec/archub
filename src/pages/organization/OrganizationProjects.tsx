@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -42,6 +43,7 @@ export default function OrganizationProjects() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
+  const { setSelectedProject } = useProjectContext()
   const [, navigate] = useLocation()
   const { setActions } = useMobileActionBar()
 
@@ -166,6 +168,9 @@ export default function OrganizationProjects() {
       return projectId;
     },
     onSuccess: (projectId) => {
+      // Update project context immediately
+      setSelectedProject(projectId);
+      
       // Force immediate refresh of user data
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.refetchQueries({ queryKey: ['current-user'] });
@@ -204,6 +209,9 @@ export default function OrganizationProjects() {
       if (error) throw error
     },
     onSuccess: () => {
+      // Clear project context immediately
+      setSelectedProject(null);
+      
       // Force immediate refresh of user data  
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.refetchQueries({ queryKey: ['current-user'] });
