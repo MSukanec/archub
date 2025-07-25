@@ -15,6 +15,8 @@ interface ActiveOrganizationMembersCardProps {
 }
 
 export function ActiveOrganizationMembersCard({ members }: ActiveOrganizationMembersCardProps) {
+  if (!members || members.length === 0) return null;
+  
   const displayMembers = members.slice(0, 4);
   const remainingCount = members.length > 4 ? members.length - 4 : 0;
 

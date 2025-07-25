@@ -74,13 +74,27 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
           {/* Plan */}
           <div className="col-span-1">
             {organization.plan ? (
-              <Badge variant="secondary" className="text-xs">
-                <Crown className="w-3 h-3 mr-1 text-yellow-500" />
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{
+                  backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                 'var(--plan-free-bg)'
+                }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
                 {organization.plan.name}
               </Badge>
             ) : (
-              <Badge variant="outline" className="text-xs">
-                Sin plan
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{ backgroundColor: 'var(--plan-free-bg)' }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                Free
               </Badge>
             )}
           </div>
@@ -148,6 +162,7 @@ export default function OrganizationManagement() {
 
   
   const { data: userData, isLoading } = useCurrentUser()
+  const { data: activeOrgMembers = [] } = useOrganizationMembers(userData?.organization?.id || '')
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
@@ -456,36 +471,25 @@ export default function OrganizationManagement() {
                     </p>
                     {/* Badge del plan */}
                     <div className="mt-2">
-                      {userData.organization.plan ? (
-                        <Badge 
-                          variant="secondary" 
-                          className="text-xs text-white" 
-                          style={{
-                            backgroundColor: userData.organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                                           userData.organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                                           userData.organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                                           'var(--plan-free-bg)'
-                          }}
-                        >
-                          <Crown className="w-3 h-3 mr-1" />
-                          {userData.organization.plan.name}
-                        </Badge>
-                      ) : (
-                        <Badge 
-                          variant="secondary" 
-                          className="text-xs text-white" 
-                          style={{ backgroundColor: 'var(--plan-free-bg)' }}
-                        >
-                          <Crown className="w-3 h-3 mr-1" />
-                          Free
-                        </Badge>
-                      )}
+                      <Badge 
+                        variant="secondary" 
+                        className="text-xs text-white" 
+                        style={{
+                          backgroundColor: userData.organization.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                         userData.organization.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                         userData.organization.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                         'var(--plan-free-bg)'
+                        }}
+                      >
+                        <Crown className="w-3 h-3 mr-1" />
+                        {userData.organization.plan?.name || 'Free'}
+                      </Badge>
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   {/* Badge ACTIVA con avatares de miembros arriba */}
-                  <ActiveOrganizationMembersCard members={userData.organization.members || []} />
+                  <ActiveOrganizationMembersCard members={activeOrgMembers} />
                   <Badge variant="default" className="bg-[var(--accent)] text-white">
                     ACTIVA
                   </Badge>
