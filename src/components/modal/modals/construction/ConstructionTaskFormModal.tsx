@@ -56,6 +56,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState('');
   const [phaseFilter, setPhaseFilter] = useState('');
+  const [currentPhaseId, setCurrentPhaseId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { userData, currentMember } = useCurrentUser();
@@ -150,7 +151,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
       setSelectedTasks(prev => [...prev, {
         task_id: taskId,
         quantity: 1,
-        phase_instance_id: ''
+        phase_instance_id: currentPhaseId || ''
       }]);
     }
   };
@@ -406,18 +407,37 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         {/* Columna Derecha - Tareas Seleccionadas */}
         <div className="flex flex-col">
           <div className="border rounded-lg flex-1">
-            <div className="p-3 border-b bg-muted">
+            <div className="p-3 border-b bg-muted space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">Tareas Seleccionadas</h3>
                 <Badge variant="secondary">
                   {selectedTasks.length} tarea{selectedTasks.length !== 1 ? 's' : ''}
                 </Badge>
               </div>
+              
+              {/* Selector de Fase para nuevas tareas */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Fase para nuevas tareas:
+                </label>
+                <Select value={currentPhaseId} onValueChange={setCurrentPhaseId}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Seleccionar fase" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Sin fase</SelectItem>
+                    {projectPhases.map(phase => (
+                      <SelectItem key={phase.id} value={phase.id}>
+                        {phase.phase?.name || 'Sin nombre'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             {/* Selected Tasks Header */}
-            <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "auto 1fr auto auto"}}>
-              <div className="text-xs font-medium w-20">FASE</div>
+            <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "1fr auto auto"}}>
               <div className="text-xs font-medium">TAREA</div>
               <div className="text-xs font-medium w-20">CANTIDAD</div>
               <div className="text-xs font-medium w-8"></div>
@@ -425,80 +445,87 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
             {/* Selected Tasks Body */}
             <ScrollArea className="h-[400px]">
-              <div className="divide-y">
+              <div>
                 {selectedTasks.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <div className="text-lg mb-2">No hay tareas seleccionadas</div>
                     <div className="text-sm">Selecciona tareas de la columna izquierda</div>
                   </div>
                 ) : (
-                  selectedTasks.map((selectedTask, index) => {
-                    const task = tasks?.find(t => t.id === selectedTask.task_id);
-                    if (!task) return null;
-                    
-                    return (
-                      <div key={`${selectedTask.task_id}-${index}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "auto 1fr auto auto"}}>
-                        {/* Fase Select */}
-                        <div className="w-20">
-                          <Select 
-                            value={selectedTask.phase_instance_id || ''} 
-                            onValueChange={(value) => {
-                              updateSelectedTask(index, { phase_instance_id: value });
-                            }}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Fase" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="">Sin fase</SelectItem>
-                              {projectPhases.map(phase => (
-                                <SelectItem key={phase.id} value={phase.id}>
-                                  {phase.phase?.name || 'Sin nombre'}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                  (() => {
+                    // Agrupar tareas por fase
+                    const tasksByPhase = selectedTasks.reduce((acc, task, index) => {
+                      const phaseId = task.phase_instance_id || '';
+                      const phaseName = phaseId ? projectPhases.find(p => p.id === phaseId)?.phase?.name || 'Fase desconocida' : 'Sin fase asignada';
+                      
+                      if (!acc[phaseId]) {
+                        acc[phaseId] = {
+                          phaseName,
+                          tasks: []
+                        };
+                      }
+                      acc[phaseId].tasks.push({ ...task, originalIndex: index });
+                      return acc;
+                    }, {} as Record<string, { phaseName: string; tasks: Array<SelectedTask & { originalIndex: number }> }>);
 
-                        {/* Task Name */}
-                        <div>
-                          <div className="text-sm leading-tight">
-                            {task.display_name || 'Sin nombre'}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
-                          </div>
+                    return Object.entries(tasksByPhase).map(([phaseId, phaseGroup]) => (
+                      <div key={phaseId}>
+                        {/* Phase Header */}
+                        <div className="bg-accent text-accent-foreground py-2 px-3 font-medium text-sm border-b">
+                          {phaseGroup.phaseName}
                         </div>
+                        
+                        {/* Tasks in this phase */}
+                        <div className="divide-y">
+                          {phaseGroup.tasks.map((selectedTask) => {
+                            const task = tasks?.find(t => t.id === selectedTask.task_id);
+                            if (!task) return null;
+                            
+                            return (
+                              <div key={`${selectedTask.task_id}-${selectedTask.originalIndex}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto auto"}}>
+                                {/* Task Name */}
+                                <div>
+                                  <div className="text-sm leading-tight">
+                                    {task.display_name || 'Sin nombre'}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
+                                  </div>
+                                </div>
 
-                        {/* Cantidad Input */}
-                        <div className="w-20">
-                          <Input
-                            type="number"
-                            value={selectedTask.quantity}
-                            onChange={(e) => {
-                              const newQuantity = parseFloat(e.target.value) || 0;
-                              updateSelectedTask(index, { quantity: newQuantity });
-                            }}
-                            className="h-8 text-xs"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
+                                {/* Cantidad Input */}
+                                <div className="w-20">
+                                  <Input
+                                    type="number"
+                                    value={selectedTask.quantity}
+                                    onChange={(e) => {
+                                      const newQuantity = parseFloat(e.target.value) || 0;
+                                      updateSelectedTask(selectedTask.originalIndex, { quantity: newQuantity });
+                                    }}
+                                    className="h-8 text-xs"
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
 
-                        {/* Delete Button */}
-                        <div className="w-8">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => handleRemoveTask(index)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
+                                {/* Delete Button */}
+                                <div className="w-8">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handleRemoveTask(selectedTask.originalIndex)}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    );
-                  })
+                    ));
+                  })()
                 )}
               </div>
             </ScrollArea>
