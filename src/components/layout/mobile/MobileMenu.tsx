@@ -97,6 +97,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Usar project context en lugar de last_project_id directamente
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   const effectiveCurrentProject = selectedProjectId;
+  
+  // Obtener el proyecto actual para mostrar su nombre
+  const currentProject = projectsData?.find((p: any) => p.id === selectedProjectId);
+  const currentProjectName = currentProject?.name || "General";
   const isAdmin = useIsAdmin();
 
   // Organization selection mutation
@@ -515,9 +519,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               onClick={() => {
                 setExpandedProjectSelector(!expandedProjectSelector);
               }}
-              className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+              className="w-full h-12 flex items-center justify-between px-3 rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
             >
-              <FolderOpen className="h-6 w-6" />
+              <span className="text-sm font-medium truncate">{currentProjectName}</span>
+              <FolderOpen className="h-5 w-5 ml-2 flex-shrink-0" />
             </button>
 
             {expandedProjectSelector && (
