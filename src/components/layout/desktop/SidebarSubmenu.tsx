@@ -39,8 +39,7 @@ import {
   Images,
   Database,
   Layout,
-  CreditCard,
-  Handshake,
+
   NotebookPen,
   FileImage,
   BarChart3,
@@ -71,8 +70,7 @@ export function SidebarSubmenu() {
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
-    if (location.startsWith('/commercialization')) return 'comercializacion';
-    if (location.startsWith('/postsale')) return 'post-venta';
+
     if (location.startsWith('/admin')) return 'administracion';
     return 'organizacion'; // default fallback
   };
@@ -143,20 +141,7 @@ export function SidebarSubmenu() {
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments', generalModeRestricted: true },
     ],
 
-    'comercializacion': [
-      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard', restricted: true, requiresProject: true },
-      { icon: Handshake, label: 'Unidades', href: '/commercialization/units', restricted: true, requiresProject: true },
-      { icon: Users, label: 'Clientes', href: '/commercialization/clients', restricted: true, requiresProject: true },
-      { icon: DollarSign, label: 'Ventas', href: '/commercialization/sales', restricted: true, requiresProject: true },
-      { icon: FolderOpen, label: 'Preferencias de Comercialización', href: '/commercialization/preferences', restricted: true, requiresProject: true },
-    ],
 
-    'post-venta': [
-      { icon: Home, label: 'Resumen de Post-Venta', href: '/postsale/dashboard', restricted: true },
-      { icon: Contact, label: 'Servicios', href: '/postsale/services', restricted: true },
-      { icon: Activity, label: 'Soporte', href: '/postsale/support', restricted: true },
-      { icon: FolderOpen, label: 'Preferencias de Post-Venta', href: '/postsale/preferences', restricted: true },
-    ],
 
     'administracion': [
       { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
@@ -198,8 +183,7 @@ export function SidebarSubmenu() {
       'diseno': { title: 'Diseño', icon: Brush },
       'obra': { title: 'Obra', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },
-      'comercializacion': { title: 'Comercialización', icon: Handshake },
-      'post-venta': { title: 'Post-Venta', icon: CreditCard },
+
       'administracion': { title: 'Administración', icon: Crown }
     };
     return sectionInfo[currentSection as keyof typeof sectionInfo] || { title: 'Organización', icon: Building };

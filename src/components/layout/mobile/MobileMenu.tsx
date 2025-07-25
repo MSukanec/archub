@@ -27,8 +27,7 @@ import {
   Database,
   Layout,
   Images,
-  Handshake,
-  CreditCard,
+
   HandCoins,
   HardHat,
   Brush,
@@ -241,22 +240,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       isActive: currentSidebarContext === 'design' || location.startsWith('/design'),
       restricted: true
     },
-    { 
-      id: 'comercializacion', 
-      icon: Handshake, 
-      label: 'Comercialización', 
-      defaultRoute: '/commercialization/dashboard',
-      isActive: currentSidebarContext === 'commercialization' || location.startsWith('/commercialization'),
-      restricted: true
-    },
-    { 
-      id: 'post-venta', 
-      icon: CreditCard, 
-      label: 'Post-Venta', 
-      defaultRoute: '/postsale/dashboard',
-      isActive: currentSidebarContext === 'postsale' || location.startsWith('/postsale'),
-      restricted: true
-    },
+
     { 
       id: 'perfil', 
       icon: User, 
@@ -311,15 +295,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
       { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
     ],
-    comercializacion: [
-      { icon: Home, label: 'Resumen de Comercialización', href: '/commercialization/dashboard' },
-      { icon: Building, label: 'Listado de unidades', href: '/commercialization/unidades' },
-      { icon: Users, label: 'Clientes interesados', href: '/commercialization/clientes' },
-      { icon: FileText, label: 'Estadísticas de venta', href: '/commercialization/estadisticas' },
-    ],
-    'post-venta': [
-      { icon: Home, label: 'Resumen de Post-Venta', href: '/postsale/dashboard' },
-    ],
+
     admin: [
       { icon: Home, label: 'Panel de Administración', href: '/admin/dashboard' },
       { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
