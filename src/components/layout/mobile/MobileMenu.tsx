@@ -398,13 +398,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header con botón de cierre */}
-        <div className="flex justify-between items-center p-4 border-b border-[var(--menues-border)]">
+        <div className="flex justify-between items-center h-14 px-4 border-b border-[var(--menues-border)]">
           {currentView !== 'main' && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleBackToMain}
-              className="text-[var(--menues-fg)]"
+              className="text-[var(--menues-fg)] p-2"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
@@ -415,9 +415,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             variant="ghost"
             size="sm"
             onClick={handleCloseMenu}
-            className="text-[var(--menues-fg)]"
+            className="text-[var(--menues-fg)] p-2"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
