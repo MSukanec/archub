@@ -830,15 +830,14 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   // Subform para crear nuevas tareas
   const createTaskSubform = (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
-      {/* Separador y título de sección de plantilla */}
+      {/* Título de sección de plantilla sin separador */}
       <div className="col-span-2">
-        <Separator className="mb-4" />
         <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
             <Plus className="w-4 h-4 text-accent" />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-foreground">Seleccionar Plantilla de Tarea</h3>
+            <h3 className="text-sm font-medium text-foreground">Paso 1: Seleccionar Plantilla de Tarea</h3>
             <p className="text-xs text-muted-foreground">Elige el tipo de tarea que vas a crear</p>
           </div>
         </div>
@@ -861,6 +860,19 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         </Select>
       </div>
 
+      {/* Mostrar Unidad del Grupo Seleccionado */}
+      {selectedTaskGroupId && (
+        <div className="col-span-2">
+          <Label>Unidad de Medida</Label>
+          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
+            <div className="text-sm font-medium">
+              {taskGroups.find(group => group.id === selectedTaskGroupId)?.unit?.name || 'Sin unidad'} 
+              ({taskGroups.find(group => group.id === selectedTaskGroupId)?.unit?.symbol || '-'})
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Separador y título de sección de parámetros */}
       {selectedTaskGroupId && parameters.length > 0 && (
         <>
@@ -871,7 +883,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                 <Settings className="w-4 h-4 text-accent" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-foreground">Configurar Parámetros</h3>
+                <h3 className="text-sm font-medium text-foreground">Paso 2: Configurar Parámetros</h3>
                 <p className="text-xs text-muted-foreground">Personaliza las características de tu tarea</p>
               </div>
             </div>
