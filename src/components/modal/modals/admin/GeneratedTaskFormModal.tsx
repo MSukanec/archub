@@ -127,14 +127,14 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   });
 
-  // Ensure form is initialized with correct values when generatedTask loads
+  // Simple form initialization without loops
   useEffect(() => {
-    if (generatedTask) {
+    if (generatedTask && !hasInitialized) {
       form.setValue('template_id', generatedTask.template_id);
       form.setValue('is_public', generatedTask.is_public || false);
       form.setValue('param_values', generatedTask.param_values || {});
     }
-  }, [generatedTask, form]);
+  }, [generatedTask, form, hasInitialized]);
 
   // Load parameter options - using individual hooks to avoid conditional hook calls
   const { data: templateParams } = useTaskTemplateParameters(selectedTemplateId || null);
@@ -178,58 +178,23 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
     }
   }, [parameters]);
 
-  // Convert param values when options are loaded (only needed for edit mode)
+  // Initialize edit mode values once when we have data
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
   useEffect(() => {
-    if (generatedTask && parameterOptions && Object.keys(parameterOptions).length > 0 && parameters) {
-      console.log('🔧 Converting param values for edit mode:', {
-        paramValues: generatedTask.param_values,
-        availableOptions: Object.keys(parameterOptions),
-        parametersCount: parameters.length
-      });
-      
-      const convertedValues: Record<string, string> = {};
-      
-      Object.entries(generatedTask.param_values || {}).forEach(([paramName, storedValue]) => {
-        const param = parameters?.find(p => p.name === paramName);
-        if (param && parameterOptions[param.id]) {
-          // Find matching option - this converts compressed values to IDs
-          const options = parameterOptions[param.id];
-          const matchingOption = options.find(opt => 
-            opt.id === storedValue || 
-            opt.label === storedValue ||
-            opt.label.toLowerCase().includes(storedValue.toString().toLowerCase())
-          );
-          
-          convertedValues[paramName] = matchingOption ? matchingOption.id : storedValue.toString();
-          
-          console.log('🔧 Converted parameter:', {
-            paramName,
-            storedValue,
-            foundOption: matchingOption?.label,
-            convertedValue: convertedValues[paramName]
-          });
-        } else {
-          convertedValues[paramName] = storedValue.toString();
-        }
-      });
-      
-      // Only update if we actually converted something
-      if (Object.keys(convertedValues).length > 0) {
-        setParamValues(convertedValues);
-        form.setValue('param_values', convertedValues);
-      }
+    if (isEditing && generatedTask && !hasInitialized) {
+      setSelectedTemplateId(generatedTask.template_id);
+      setParamValues(generatedTask.param_values || {});
+      setHasInitialized(true);
     }
-  }, [generatedTask, parameterOptions, parameters, form]);
+  }, [isEditing, generatedTask, hasInitialized]);
 
   // Handle template selection
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId);
-    // Only clear param values if this is a new selection (not during initialization)
-    if (!isEditing || templateId !== generatedTask?.template_id) {
-      setParamValues({});
-      form.setValue('param_values', {});
-    }
+    setParamValues({});
     form.setValue('template_id', templateId);
+    form.setValue('param_values', {});
   };
 
   // Handle parameter value changes
