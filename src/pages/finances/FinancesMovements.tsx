@@ -1370,6 +1370,30 @@ export default function Movements() {
       {/* ActionBar Desktop */}
       {processedMovements.length > 0 && (
         <ActionBarDesktop
+          title="Gestión de Movimientos Financieros"
+          icon={<DollarSign className="w-6 h-6" />}
+          features={[
+            {
+              icon: <TrendingUp className="w-5 h-5" />,
+              title: "Seguimiento en Tiempo Real",
+              description: "Monitorea todos tus ingresos y egresos con actualizaciones instantáneas y balances por moneda para control total de tus finanzas."
+            },
+            {
+              icon: <FileText className="w-5 h-5" />,
+              title: "Importación de Excel",
+              description: "Importa movimientos masivos desde archivos Excel con mapeo automático de columnas para ahorrarte tiempo en cargas manuales."
+            },
+            {
+              icon: <Users className="w-5 h-5" />,
+              title: "Conversiones Multi-moneda",
+              description: "Gestiona conversiones entre diferentes monedas con tipos de cambio y seguimiento completo de operaciones cambiarias."
+            },
+            {
+              icon: <BarChart3 className="w-5 h-5" />,
+              title: "Filtros y Búsqueda Avanzada",
+              description: "Filtra por tipo, categoría, favoritos y busca por descripción para encontrar movimientos específicos rapidamente."
+            }
+          ]}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           customFilters={customFilters}

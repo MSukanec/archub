@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Receipt, Edit, Trash2, Users, Coins, FileText, Filter, X, Search, Plus, Upload } from 'lucide-react'
+import { Receipt, Edit, Trash2, Users, Coins, FileText, Filter, X, Search, Plus, Upload, BarChart3 } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
@@ -1064,6 +1064,30 @@ export default function FinancesInstallments() {
           <>
             {/* Action Bar Desktop with Tabs */}
             <ActionBarDesktop
+              title="Gestión de Aportes de Terceros"
+              icon={<Receipt className="w-6 h-6" />}
+              features={[
+                {
+                  icon: <Users className="w-5 h-5" />,
+                  title: "Aportes Detallados por Cliente",
+                  description: "Registro detallado de aportes financieros de clientes e inversores con seguimiento individualizado de compromisos."
+                },
+                {
+                  icon: <Coins className="w-5 h-5" />,
+                  title: "Análisis Multi-moneda",
+                  description: "Seguimiento de aportes con múltiples monedas y cotizaciones automáticas para control completo de flujos financieros."
+                },
+                {
+                  icon: <BarChart3 className="w-5 h-5" />,
+                  title: "Análisis USD Dolarizado",
+                  description: "Cálculo automático de equivalencias en USD para análisis financiero unificado y reportes consolidados."
+                },
+                {
+                  icon: <FileText className="w-5 h-5" />,
+                  title: "Resúmenes y Porcentajes",
+                  description: "Resúmenes por cliente con porcentajes de cumplimiento, montos restantes y métricas de desempeño financiero."
+                }
+              ]}
               searchValue={searchValue}
               onSearchChange={setSearchValue}
               primaryActionLabel="Nuevo Compromiso"

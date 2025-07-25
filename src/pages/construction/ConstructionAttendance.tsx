@@ -272,6 +272,30 @@ export default function ConstructionAttendance() {
 
         {/* ActionBar - Always visible */}
         <ActionBarDesktop
+          title="Control de Asistencia de Personal"
+          icon={<Users className="w-6 h-6" />}
+          features={[
+            {
+              icon: <Calendar className="w-5 h-5" />,
+              title: "Registro Visual de Asistencia",
+              description: "Visualiza la asistencia del personal en formato de calendario con datos extraídos automáticamente de las entradas de bitácora del proyecto."
+            },
+            {
+              icon: <Filter className="w-5 h-5" />,
+              title: "Filtros por Tipo de Trabajador",
+              description: "Filtra la vista por tipos de personal (obreros, supervisores, técnicos) para análisis específicos por categoría profesional."
+            },
+            {
+              icon: <BarChart3 className="w-5 h-5" />,
+              title: "Estadísticas de Productividad",
+              description: "Revisa métricas de jornadas completas vs medias jornadas, días activos y tasas de asistencia para optimizar la gestión del equipo."
+            },
+            {
+              icon: <Clock className="w-5 h-5" />,
+              title: "Control de Períodos Flexibles",
+              description: "Configura rangos de fechas personalizados y oculta fines de semana para adaptar la vista a tu calendario de trabajo específico."
+            }
+          ]}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           showGrouping={false}
