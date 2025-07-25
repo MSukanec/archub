@@ -39,8 +39,8 @@ function ParameterField({ parameter, value, onChange }: {
   value: string, 
   onChange: (value: string) => void 
 }) {
-  // Use parameter_id since that's the actual parameter ID, not the template parameter relation ID
-  const parameterId = parameter.parameter_id || parameter.id;
+  // Use id since that's the actual parameter ID from the transformed data
+  const parameterId = parameter.id;
   const { data: options = [], isLoading, error } = useTaskTemplateParameterOptions(parameterId);
   
   // Debug logging
@@ -353,7 +353,8 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
                 {parameters && parameters.length > 0 && (
                   <div className="space-y-4">
                       {parameters.map((param) => {
-                        const paramId = param.parameter_id || param.id;
+                        // Use id since that's the actual parameter ID from the transformed data
+                        const paramId = param.id;
                         return (
                           <ParameterField
                             key={paramId}
@@ -475,7 +476,7 @@ export function GeneratedTaskFormModal({ modalData, onClose }: GeneratedTaskForm
       onLeftClick={onClose}
       rightLabel={isEditing ? "Actualizar" : "Crear"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      isLoading={isSubmitting}
+      rightIsLoading={isSubmitting}
     />
   );
 
