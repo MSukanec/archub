@@ -47,7 +47,6 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
           ),
           created_by_member:organization_members!created_by(
             id,
-            email,
             first_name,
             last_name
           )

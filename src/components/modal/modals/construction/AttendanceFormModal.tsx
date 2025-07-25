@@ -50,9 +50,9 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const projectId = currentUser?.preferences?.last_project_id
   const queryClient = useQueryClient()
 
-  // Get organization members and contacts
-  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId!)
-  const { data: contacts = [] } = useContacts(organizationId!)
+  // Get organization members and contacts - skip if no organizationId
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId || '')
+  const { data: contacts = [] } = useContacts(organizationId || '')
 
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
