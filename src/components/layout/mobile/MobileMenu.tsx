@@ -255,6 +255,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       defaultRoute: '/postsale/dashboard',
       isActive: currentSidebarContext === 'postsale' || location.startsWith('/postsale'),
       restricted: true
+    },
+    { 
+      id: 'perfil', 
+      icon: User, 
+      label: 'Perfil', 
+      defaultRoute: '/profile/data',
+      isActive: currentSidebarContext === 'perfil' || location.startsWith('/profile')
     }
   ];
 
@@ -379,7 +386,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
             className="text-[var(--menues-fg)]"
           >
             <X className="h-4 w-4" />
@@ -393,7 +404,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             <nav className="space-y-2">
               {mainMenuItems.map((item) => (
                 <div key={item.id}>
-                  {item.restricted ? (
+                  {('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
                         className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
@@ -427,7 +438,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             <nav className="space-y-2">
               {submenuContent[currentView as keyof typeof submenuContent]?.map((item, index) => (
                 <div key={index}>
-                  {item.restricted ? (
+                  {('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
                         className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
@@ -464,9 +475,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           )}
         </div>
 
-        {/* Footer with 3 icon buttons - Fixed at bottom */}
+        {/* Footer with 2 icon buttons - Fixed at bottom */}
         <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {/* Project Selector Button */}
             <div className="relative">
               <button
@@ -558,13 +569,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               )}
             </div>
 
-            {/* Profile Button */}
-            <button
-              onClick={() => handleMenuItemClick('perfil', '/profile')}
-              className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-            >
-              <User className="h-6 w-6" />
-            </button>
+
           </div>
         </div>
       </div>
