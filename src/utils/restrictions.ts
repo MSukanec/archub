@@ -2,6 +2,10 @@ export interface RestrictionMessage {
   message: string;
   actionLabel: string;
   actionUrl: string;
+  planType?: 'teams' | 'pro' | 'enterprise';
+  iconColor?: string;
+  backgroundColor?: string;
+  borderColor?: string;
 }
 
 export const restrictionMessages: Record<string, RestrictionMessage> = {
@@ -31,9 +35,13 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     actionUrl: "/billing",
   },
   max_members: {
-    message: "Has alcanzado el límite máximo de miembros para tu plan actual.",
-    actionLabel: "Actualizar plan",
+    message: "Has alcanzado el límite máximo de miembros para tu plan actual. Actualiza a Teams para más miembros.",
+    actionLabel: "Actualizar a Teams",
     actionUrl: "/billing",
+    planType: 'teams',
+    iconColor: '#10b981',
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
   },
   custom_templates: {
     message: "Las plantillas personalizadas están disponibles en el plan PRO.",

@@ -8,10 +8,10 @@ interface MemberCardProps {
       full_name?: string;
       email?: string;
       avatar_url?: string;
-    };
+    }[];
     roles?: {
       name?: string;
-    };
+    }[];
   };
   onClick?: () => void;
 }
@@ -47,28 +47,28 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <Avatar className="h-10 w-10 shrink-0">
-          <AvatarImage src={member.users?.avatar_url} />
+          <AvatarImage src={member.users?.[0]?.avatar_url} />
           <AvatarFallback>
-            {getInitials(member.users?.full_name || member.users?.email || 'U')}
+            {getInitials(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U')}
           </AvatarFallback>
         </Avatar>
         
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-sm truncate">
-            {member.users?.full_name || 'Sin nombre'}
+            {member.users?.[0]?.full_name || 'Sin nombre'}
           </h4>
           <p className="text-xs text-muted-foreground truncate">
-            {member.users?.email}
+            {member.users?.[0]?.email}
           </p>
         </div>
       </div>
 
       <div className="shrink-0 ml-3">
         <Badge 
-          variant={getRoleBadgeVariant(member.roles?.name || '')}
-          className={getRoleBadgeClassName(member.roles?.name || '')}
+          variant={getRoleBadgeVariant(member.roles?.[0]?.name || '')}
+          className={getRoleBadgeClassName(member.roles?.[0]?.name || '')}
         >
-          {member.roles?.name || 'Sin rol'}
+          {member.roles?.[0]?.name || 'Sin rol'}
         </Badge>
       </div>
     </div>

@@ -110,13 +110,34 @@ export function CustomRestricted({
   // Determinar icono y estilo según el tipo de restricción
   const isGeneralMode = restrictionKey === "general_mode";
   const BadgeIcon = isGeneralMode ? Building : Lock;
-  const badgeStyle = isGeneralMode ? {
-    backgroundColor: 'var(--accent)',
-    borderColor: 'var(--accent)'
-  } : {
-    backgroundColor: 'black',
-    borderColor: 'black'
-  };
+  
+  // Determinar estilo según el plan específico
+  let badgeStyle, popoverBgColor, popoverBorderColor, iconColor, textColor, subtextColor;
+  
+  if (isGeneralMode) {
+    badgeStyle = { backgroundColor: 'var(--accent)', borderColor: 'var(--accent)' };
+    popoverBgColor = 'var(--accent)';
+    popoverBorderColor = 'var(--accent)';
+    iconColor = 'white';
+    textColor = 'white';
+    subtextColor = 'rgba(255, 255, 255, 0.8)';
+  } else if (restriction.planType === 'teams') {
+    // Estilo específico para plan Teams (verde)
+    badgeStyle = { backgroundColor: restriction.backgroundColor, borderColor: restriction.borderColor };
+    popoverBgColor = restriction.backgroundColor;
+    popoverBorderColor = restriction.borderColor;
+    iconColor = 'white';
+    textColor = 'white';
+    subtextColor = 'rgba(255, 255, 255, 0.9)';
+  } else {
+    // Estilo por defecto (negro)
+    badgeStyle = { backgroundColor: 'black', borderColor: 'black' };
+    popoverBgColor = 'hsl(0, 0%, 10%)';
+    popoverBorderColor = 'hsl(0, 0%, 25%)';
+    iconColor = 'white';
+    textColor = 'hsl(0, 0%, 95%)';
+    subtextColor = 'hsl(0, 0%, 70%)';
+  }
 
   return (
     <div className="relative w-full">
@@ -137,7 +158,7 @@ export function CustomRestricted({
               className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
               style={badgeStyle}
             >
-              <BadgeIcon className={`h-3 w-3 ${isGeneralMode ? 'text-white' : 'text-white'}`} />
+              <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
             </div>
           </div>
         </PopoverTrigger>
@@ -145,8 +166,8 @@ export function CustomRestricted({
         <PopoverContent
           className="w-64 p-3 shadow-xl rounded-2xl"
           style={{
-            backgroundColor: isGeneralMode ? 'var(--accent)' : 'hsl(0, 0%, 10%)',
-            border: isGeneralMode ? '1px solid var(--accent)' : '1px solid hsl(0, 0%, 25%)',
+            backgroundColor: popoverBgColor,
+            border: `1px solid ${popoverBorderColor}`,
             borderRadius: '16px'
           }}
           side="top"
@@ -155,18 +176,28 @@ export function CustomRestricted({
             <div 
               className="rounded-full p-1 flex-shrink-0"
               style={{
-                backgroundColor: isGeneralMode ? 'rgba(255, 255, 255, 0.2)' : 'hsl(var(--accent), 0.2)',
+                backgroundColor: isGeneralMode 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : restriction.planType === 'teams' 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : 'hsl(var(--accent), 0.2)',
               }}
             >
               <BadgeIcon 
                 className="h-3 w-3" 
-                style={{ color: isGeneralMode ? 'white' : 'hsl(var(--accent))' }}
+                style={{ 
+                  color: isGeneralMode 
+                    ? 'white' 
+                    : restriction.planType === 'teams' 
+                    ? 'white' 
+                    : 'hsl(var(--accent))' 
+                }}
               />
             </div>
             <div className="flex-1">
               <h4 
                 className="font-medium text-sm" 
-                style={{ color: isGeneralMode ? 'white' : 'hsl(0, 0%, 95%)' }}
+                style={{ color: textColor }}
               >
                 {isGeneralMode 
                   ? (functionName ? `${functionName} - Requiere Proyecto` : 'Requiere Proyecto')
@@ -175,7 +206,7 @@ export function CustomRestricted({
               </h4>
               <p 
                 className="text-xs mt-1"
-                style={{ color: isGeneralMode ? 'rgba(255, 255, 255, 0.8)' : 'hsl(0, 0%, 70%)' }}
+                style={{ color: subtextColor }}
               >
                 {isGeneralMode 
                   ? 'Esta sección está únicamente disponible con un proyecto seleccionado.'
@@ -185,8 +216,10 @@ export function CustomRestricted({
               {!isGeneralMode && restriction.actionLabel && restriction.actionUrl && (
                 <button
                   onClick={handleActionClick}
-                  className="text-xs hover:underline mt-1"
-                  style={{ color: 'hsl(var(--accent))' }}
+                  className="text-xs hover:underline mt-1 font-medium"
+                  style={{ 
+                    color: restriction.planType === 'teams' ? 'white' : 'hsl(var(--accent))' 
+                  }}
                 >
                   {restriction.actionLabel}
                 </button>
