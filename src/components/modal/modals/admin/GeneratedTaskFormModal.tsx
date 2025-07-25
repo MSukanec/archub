@@ -51,7 +51,14 @@ function ParameterField({ parameter, value, onChange }: {
     optionsCount: options?.length || 0,
     isLoading,
     error: error?.message,
-    options: options
+    options: options,
+    queryEnabled: !!parameterId
+  });
+  
+  // Extra debug for Supabase connection
+  console.log('🔍 Supabase and parameterId check:', {
+    parameterId: parameterId,
+    isEnabled: !!parameterId
   });
   
   return (

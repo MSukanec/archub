@@ -131,7 +131,7 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
       
       const { data, error } = await supabase
         .from('task_parameter_values')
-        .select('id, name, label, expression_template')
+        .select('id, name, label')
         .eq('parameter_id', parameterId);
       
       if (error) {
@@ -144,7 +144,7 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
         id: item.id,
         value: item.id, // Use ID as value
         label: item.label || item.name,
-        expression_template: item.expression_template || '{value}'
+        expression_template: '{value}' // Default template
       })) as TaskTemplateParameterOption[];
     },
     enabled: !!parameterId && !!supabase
