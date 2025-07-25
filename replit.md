@@ -118,15 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 25, 2025. DELETE BUTTON CONSISTENCY APPLIED: Fixed delete button styling to always use variant="destructive" for consistent red appearance across all table actions - COMPLETED
-  • DESTRUCTIVE VARIANT APPLIED: Changed delete button from variant="ghost" to variant="destructive" in ConstructionTasks actions column
-  • VISUAL CONSISTENCY ENFORCED: Delete buttons now always appear red regardless of context for clear destructive action indication
-  • USER EXPERIENCE IMPROVED: Eliminated inconsistent button styling where delete buttons sometimes appeared gray instead of red
-- July 25, 2025. CONSTRUCTION TASKS LAYOUT AND COLUMN OPTIMIZATION COMPLETED: Successfully implemented wide layout and optimized column distribution - COMPLETED
-  • WIDE LAYOUT ENABLED: Added wide={true} to Layout component for full-width table display without max-width constraints
-  • COLUMN DISTRIBUTION OPTIMIZED: Set 7 columns to 10% width each (Rubro, Unidad, Cantidad, Progreso, Fase, Fechas, Acciones) with Tarea column using remaining space
-  • ACTION BAR SPACING REDUCED: Changed space-y-6 to space-y-4 to match other pages' ActionBar positioning
-  • TABLE VISIBILITY ENHANCED: Full-width layout allows proper display of all 8 columns including previously hidden Actions column
 - July 25, 2025. CONSTRUCTION TASKS LISTADO COMPLETELY FIXED: Successfully migrated from BudgetTable to Table.tsx and resolved all data visibility issues - COMPLETED
   • BUDGETTABLE ELIMINATED: Completely removed deprecated BudgetTable component from ConstructionTasks.tsx and replaced with modern Table.tsx component
   • TABLE STRUCTURE IMPLEMENTED: Defined 8 columns (Rubro, Tarea, Unidad, Cantidad, Progreso, Fase, Fechas, Acciones) with proper render functions and widths

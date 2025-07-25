@@ -169,7 +169,7 @@ export default function ConstructionTasks() {
             <Edit className="h-4 w-4" />
           </Button>
           <Button
-            variant="destructive"
+            variant="ghost"
             size="sm"
             onClick={() => handleDeleteTask(task.id)}
           >
