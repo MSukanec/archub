@@ -70,6 +70,20 @@ export default function ConstructionTasks() {
     })
   }
 
+  const handleAddPhase = () => {
+    if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for phase creation')
+      return
+    }
+
+    openModal('construction-phase', {
+      projectId,
+      organizationId,
+      userId: userData.user.id,
+      isEditing: false
+    })
+  }
+
   const handleEditTask = (task: any) => {
     openModal('construction-task', {
       projectId,
@@ -242,6 +256,17 @@ export default function ConstructionTasks() {
           onGroupingChange={setGroupingType}
           primaryActionLabel="Nueva Tarea"
           onPrimaryActionClick={handleAddTask}
+          customActions={[
+            <Button 
+              key="create-phase"
+              onClick={handleAddPhase} 
+              variant="secondary" 
+              className="h-9 px-4"
+            >
+              <Plus />
+              Crear Fase
+            </Button>
+          ]}
         />
 
         {/* Table or Empty State */}
