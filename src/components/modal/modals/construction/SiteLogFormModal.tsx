@@ -180,7 +180,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   useEffect(() => {
     if (data) {
-      console.log('📝 Cargando datos para edición:', data);
+      console.log('📝 Cargando datos para edición:', { data });
       // Si estamos editando, cargar los datos existentes
       form.reset({
         created_by: data.created_by || "", // Este ya es el organization_member.id correcto
@@ -367,7 +367,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de bitácora</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar tipo" />
@@ -395,7 +395,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Condición climática</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar clima" />
