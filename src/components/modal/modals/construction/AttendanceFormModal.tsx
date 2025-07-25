@@ -61,16 +61,16 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId || '')
   const { data: contacts = [] } = useContacts(organizationId || '')
 
-  // Convert members to users format for UserSelector
+  // Convert members to users format for UserSelector (siguiendo patrón de MovementFormModal)
   const users = organizationMembers.map(member => ({
-    id: member.id, // Usar member.id (organization_members.id)
-    full_name: member.user?.full_name || `Usuario ${member.user_id.slice(0, 8)}`,
-    email: member.user?.email || '',
-    avatar_url: member.user?.avatar_url || ''
+    id: member.user_id, // Usar member.user_id como en MovementFormModal
+    full_name: member.full_name || member.email || 'Usuario',
+    email: member.email || '',
+    avatar_url: member.avatar_url || ''
   }))
 
-  // Encontrar el member_id del usuario actual
-  const currentUserMember = organizationMembers.find(member => member.user_id === currentUser?.user?.id)
+  // Preseleccionar usuario actual (siguiendo patrón de MovementFormModal)
+  const currentUserId = currentUser?.user?.id
 
   const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && modalData?.attendance)
   const attendance = modalData?.attendance || modalData?.editingData?.existingRecord
@@ -78,7 +78,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
-      created_by: currentUserMember?.id || '', // Usar member.id en lugar de user.id
+      created_by: currentUserId || '', // Usar user_id directamente como en MovementFormModal
       attendance_date: modalData?.editingData?.attendanceDate || (isEditing ? new Date(attendance?.created_at) : new Date()),
       contact_id: modalData?.editingData?.contactId || attendance?.contact_id || '',
       attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
@@ -99,7 +99,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          created_by: data.created_by,
+          created_by: organizationMembers.find(m => m.user_id === data.created_by)?.id || data.created_by,
           project_id: projectId,
           created_at: data.attendance_date.toISOString(),
           updated_at: new Date().toISOString()
@@ -136,7 +136,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          created_by: data.created_by,
+          created_by: organizationMembers.find(m => m.user_id === data.created_by)?.id || data.created_by,
           updated_at: new Date().toISOString()
         })
         .eq('id', attendance.id)
