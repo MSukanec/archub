@@ -20,7 +20,7 @@ import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -350,28 +350,35 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
             <div className="p-3 border-b bg-muted">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">Tareas Disponibles</h3>
-                <div className="text-xs text-muted-foreground">
-                  {filteredTasks.length} tareas
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSelectAll}
+                    className="h-6 px-2 text-xs"
+                  >
+                    Seleccionar todas
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearAll}
+                    className="h-6 px-2 text-xs"
+                  >
+                    Limpiar
+                  </Button>
+                  <div className="text-xs text-muted-foreground">
+                    {filteredTasks.length} tareas
+                  </div>
                 </div>
               </div>
             </div>
             
             {/* Table Header */}
-            <div className="grid gap-3 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "auto 1fr"}}>
-              <div className="flex items-center justify-start">
-                <Checkbox
-                  className="h-3.5 w-3.5"
-                  checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      handleSelectAll();
-                    } else {
-                      handleClearAll();
-                    }
-                  }}
-                />
-              </div>
-              <div className="text-xs font-medium">TAREA</div>
+            <div className="py-2 px-3 bg-muted/50 font-medium text-xs border-b">
+              <div className="text-xs font-medium">TAREA (Click para seleccionar)</div>
             </div>
 
             {/* Table Body */}
@@ -386,24 +393,16 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     const isSelected = selectedTasks.some(t => t.task_id === task.id);
                     
                     return (
-                      <div key={task.id} className="grid gap-3 py-3 px-3 hover:bg-muted/30" style={{gridTemplateColumns: "auto 1fr"}}>
-                        {/* Checkbox Column */}
-                        <div className="flex items-start justify-start pt-1">
-                          <Checkbox
-                            className="h-3.5 w-3.5"
-                            checked={isSelected}
-                            onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
-                          />
+                      <div 
+                        key={task.id} 
+                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
+                        onClick={() => handleTaskSelection(task.id, !isSelected)}
+                      >
+                        <div className="text-sm leading-tight line-clamp-2">
+                          {task.display_name || 'Sin nombre'}
                         </div>
-
-                        {/* Task Name Column */}
-                        <div>
-                          <div className="text-sm leading-tight line-clamp-2">
-                            {task.display_name || 'Sin nombre'}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
-                          </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
                         </div>
                       </div>
                     );
