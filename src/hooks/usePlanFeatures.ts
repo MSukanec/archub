@@ -81,6 +81,20 @@ export function usePlanFeatures(): PlanFeatures {
       return 3;
     }
     
+    if (feature === 'max_kanban_boards') {
+      if (planName === 'Teams') {
+        return Infinity;
+      }
+      if (planName === 'Pro') {
+        return 25;
+      }
+      if (planName === 'Free') {
+        return 5;
+      }
+      // Si no hay plan definido, asumir Free por defecto
+      return 5;
+    }
+    
     // Si es false o no existe, límite por defecto
     return 0;
   };

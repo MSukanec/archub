@@ -97,12 +97,43 @@ export function CustomRestricted({
     return <>{children}</>;
   }
 
-  // Obtener el mensaje de restricción
-  const restriction = getRestrictionMessage(restrictionKey);
+  // Lógica dinámica para determinar el plan objetivo
+  let dynamicRestriction = getRestrictionMessage(restrictionKey);
+  
+  // Para max_kanban_boards, determinar dinámicamente el plan objetivo
+  if (restrictionKey === 'max_kanban_boards') {
+    const organizationId = userData?.preferences?.last_organization_id;
+    const currentOrganization = userData?.organizations?.find(org => org.id === organizationId);
+    const currentPlan = currentOrganization?.plan?.name;
+    
+    if (currentPlan === 'Free') {
+      // Free → Pro
+      dynamicRestriction = {
+        ...dynamicRestriction,
+        message: "Has alcanzado el límite de 5 tableros Kanban de tu plan Free. Actualiza a Pro para 25 tableros.",
+        actionLabel: "Actualizar a Pro",
+        planType: 'pro' as const,
+        iconColor: 'white',
+        backgroundColor: 'hsl(213, 100%, 30%)',
+        borderColor: 'hsl(213, 100%, 30%)',
+      };
+    } else if (currentPlan === 'Pro') {
+      // Pro → Teams  
+      dynamicRestriction = {
+        ...dynamicRestriction,
+        message: "Has alcanzado el límite de 25 tableros Kanban de tu plan Pro. Actualiza a Teams para tableros ilimitados.",
+        actionLabel: "Actualizar a Teams",
+        planType: 'teams' as const,
+        iconColor: 'white',
+        backgroundColor: 'hsl(271, 76%, 53%)',
+        borderColor: 'hsl(271, 76%, 53%)',
+      };
+    }
+  }
 
   const handleActionClick = () => {
-    if (restriction.actionUrl) {
-      navigate(restriction.actionUrl);
+    if (dynamicRestriction.actionUrl) {
+      navigate(dynamicRestriction.actionUrl);
     }
     setIsPopoverOpen(false);
   };
@@ -121,11 +152,19 @@ export function CustomRestricted({
     iconColor = 'white';
     textColor = 'white';
     subtextColor = 'rgba(255, 255, 255, 0.8)';
-  } else if (restriction.planType === 'teams') {
-    // Estilo específico para plan Teams (verde)
-    badgeStyle = { backgroundColor: restriction.backgroundColor, borderColor: restriction.borderColor };
-    popoverBgColor = restriction.backgroundColor;
-    popoverBorderColor = restriction.borderColor;
+  } else if (dynamicRestriction.planType === 'teams') {
+    // Estilo específico para plan Teams (morado)
+    badgeStyle = { backgroundColor: dynamicRestriction.backgroundColor, borderColor: dynamicRestriction.borderColor };
+    popoverBgColor = dynamicRestriction.backgroundColor;
+    popoverBorderColor = dynamicRestriction.borderColor;
+    iconColor = 'white';
+    textColor = 'white';
+    subtextColor = 'rgba(255, 255, 255, 0.9)';
+  } else if (dynamicRestriction.planType === 'pro') {
+    // Estilo específico para plan Pro (azul)
+    badgeStyle = { backgroundColor: dynamicRestriction.backgroundColor, borderColor: dynamicRestriction.borderColor };
+    popoverBgColor = dynamicRestriction.backgroundColor;
+    popoverBorderColor = dynamicRestriction.borderColor;
     iconColor = 'white';
     textColor = 'white';
     subtextColor = 'rgba(255, 255, 255, 0.9)';
@@ -181,7 +220,7 @@ export function CustomRestricted({
               style={{
                 backgroundColor: isGeneralMode 
                   ? 'rgba(255, 255, 255, 0.2)' 
-                  : restriction.planType === 'teams' 
+                  : dynamicRestriction.planType === 'teams' 
                   ? 'rgba(255, 255, 255, 0.2)' 
                   : 'hsl(var(--accent), 0.2)',
               }}
@@ -191,7 +230,7 @@ export function CustomRestricted({
                 style={{ 
                   color: isGeneralMode 
                     ? 'white' 
-                    : restriction.planType === 'teams' 
+                    : dynamicRestriction.planType === 'teams' 
                     ? 'white' 
                     : 'hsl(var(--accent))' 
                 }}
@@ -213,10 +252,10 @@ export function CustomRestricted({
               >
                 {isGeneralMode 
                   ? 'Esta sección está únicamente disponible con un proyecto seleccionado.'
-                  : restriction.message
+                  : dynamicRestriction.message
                 }
               </p>
-              {!isGeneralMode && restriction.actionLabel && restriction.actionUrl && (
+              {!isGeneralMode && dynamicRestriction.actionLabel && dynamicRestriction.actionUrl && (
                 <button
                   onClick={handleActionClick}
                   className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-white/10"
@@ -226,7 +265,7 @@ export function CustomRestricted({
                     backgroundColor: 'transparent'
                   }}
                 >
-                  {restriction.actionLabel}
+                  {dynamicRestriction.actionLabel}
                 </button>
               )}
             </div>
