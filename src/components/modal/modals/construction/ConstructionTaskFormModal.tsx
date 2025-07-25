@@ -471,7 +471,8 @@ export function ConstructionTaskFormModal({
                           {task.display_name || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {task.category_name || 'Sin categoría'} | {task.unit_symbol || 'UD'}
+                          {task.category_name || 'Sin categoría'}
+                          {console.log('Task data for unit:', task)}
                         </div>
                       </div>
                     </div>
