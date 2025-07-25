@@ -316,22 +316,6 @@ export function Sidebar() {
       defaultRoute: '/finances/dashboard',
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
     },
-    { 
-      id: 'comercializacion', 
-      icon: Handshake, 
-      label: 'Comercialización', 
-      defaultRoute: '/commercialization/dashboard',
-      isActive: activeSidebarSection === 'comercializacion' || location.startsWith('/commercialization'),
-      restricted: true
-    },
-    { 
-      id: 'post-venta', 
-      icon: CreditCard, 
-      label: 'Post-Venta', 
-      defaultRoute: '/postsale/dashboard',
-      isActive: activeSidebarSection === 'post-venta' || location.startsWith('/postsale'),
-      restricted: true
-    },
     // Administración movida al footer
   ];
 

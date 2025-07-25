@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. COMERCIALIZACIÓN AND POST VENTA BUTTONS ELIMINATED: Successfully removed COMERCIALIZACIÓN and POST VENTA buttons from desktop sidebar per user request - COMPLETED
+  • DESKTOP SIDEBAR SIMPLIFIED: Removed comercializacion and post-venta entries from mainSidebarItems array in Sidebar.tsx
+  • NAVIGATION STREAMLINED: Sidebar now shows only essential sections: Organización, Proyecto, Diseño, Construcción, Finanzas
+  • UI CONSISTENCY MAINTAINED: All functionality preserved while eliminating unused commercial sections
+  • CLEAN INTERFACE: Desktop sidebar navigation now focuses on core construction management features
 - July 25, 2025. EMPTYSTATE BUTTONS COMPLETELY ELIMINATED: Successfully removed all action buttons from EmptyState components across entire application per user request - COMPLETED
   • CONSTRUCTION PAGES CLEANED: Removed buttons from ConstructionLogs, ConstructionAttendance, and ConstructionGallery EmptyState components
   • PROJECT PAGES SIMPLIFIED: Eliminated buttons from ProjectDocumentation EmptyState
