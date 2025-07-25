@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Coins, Package2, Plus, Settings, CheckCircle, XCircle, Filter, Search } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
@@ -366,6 +367,38 @@ export default function OrganizationPreferences() {
       }}
     >
       <div className="space-y-8">
+        {/* ActionBar - Desktop Only */}
+        <ActionBarDesktop 
+          title="Preferencias de la Organización"
+          icon={<Settings className="h-5 w-5" />}
+          showProjectSelector={false}
+          showSearch={false}
+          showGrouping={false}
+          features={[
+            {
+              icon: <Coins className="h-4 w-4" />,
+              title: "Monedas Predeterminadas", 
+              description: "Configurar monedas predeterminadas y secundarias para movimientos financieros"
+            },
+            {
+              icon: <Coins className="h-4 w-4" />,
+              title: "Billeteras por Defecto",
+              description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
+            },
+            {
+              icon: <Package2 className="h-4 w-4" />,
+              title: "Conceptos de Finanzas", 
+              description: "Administrar los conceptos disponibles para categorizar movimientos financieros"
+            },
+            {
+              icon: <Settings className="h-4 w-4" />,
+              title: "Preferencias Globales",
+              description: "Administrar las preferencias globales que afectan a todos los proyectos"
+            }
+          ]}
+        />
+
+        {/* FeatureIntroduction - Mobile Only */}
         <FeatureIntroduction
           icon={<Coins className="h-5 w-5" />}
           title="Preferencias de la Organización"

@@ -95,6 +95,19 @@ export function ActionBarDesktop({
 }: ActionBarDesktopProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  // Check if there's any content in the bottom row
+  const hasBottomContent = Boolean(
+    (tabs && activeTab && onTabChange) || // Tabs
+    budgetSelector || // Budget selector
+    showSearch || // Search
+    (showGrouping && onGroupingChange) || // Grouping
+    customFilters || // Custom filters
+    onClearFilters || // Clear filters
+    customActions.length > 0 || // Custom actions
+    onTodayClick || // Today button
+    (primaryActionLabel && onPrimaryActionClick) // Primary action
+  )
+
   return (
     <div 
       className={cn(
@@ -165,12 +178,13 @@ export function ActionBarDesktop({
             </div>
           )}
 
-          {/* Divider line */}
-          <div className="border-t border-[var(--card-border)]" />
+          {/* Divider line - only show if there's bottom content */}
+          {hasBottomContent && <div className="border-t border-[var(--card-border)]" />}
         </>
       )}
 
-      {/* Bottom Row - ActionBar Content */}
+      {/* Bottom Row - ActionBar Content - only render if there's content */}
+      {hasBottomContent && (
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left side - Tabs OR Budget Selector (casos puntuales) */}
         <div className="flex items-center gap-3">
@@ -382,6 +396,7 @@ export function ActionBarDesktop({
         )}
         </div>
       </div>
+      )}
     </div>
   )
 }
