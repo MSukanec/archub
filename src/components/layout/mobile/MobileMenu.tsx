@@ -260,6 +260,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   // Submenus para cada sección principal (igual que SidebarSubmenu.tsx)
   const submenuContent = {
+    perfil: [
+      { icon: UserCircle, label: 'Datos Básicos', href: '/profile' },
+      { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
+    ],
     organizacion: [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
@@ -557,10 +562,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
             {/* Profile Button */}
             <button
-              onClick={() => {
-                navigate('/profile');
-                onClose();
-              }}
+              onClick={() => handleMenuItemClick('perfil', '/profile')}
               className="w-full h-12 flex items-center justify-center rounded-xl transition-colors bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
             >
               <User className="h-6 w-6" />

@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 25, 2025. HEADER HIDDEN AND PROFILE SIDEBAR ENHANCED: Successfully implemented UI simplification with header removal and organization management access - COMPLETED
+  • HEADER TEMPORARILY HIDDEN: Concealed header component in Layout.tsx while preserving it for potential restoration if needed
+  • REDUCED TOP PADDING: Adjusted main content padding from md:pt-12 to md:pt-6 to accommodate header removal and provide cleaner layout
+  • PROFILE SIDEBAR ENHANCED: Added "Gestión de Organizaciones" button below preferences in desktop SidebarSubmenu.tsx for direct access to organization management
+  • MOBILE PROFILE SUBMENU: Created complete profile submenu in MobileMenu.tsx with "Datos Básicos", "Preferencias", and "Gestión de Organizaciones" options
+  • MOBILE NAVIGATION IMPROVED: Changed profile button from direct navigation to submenu expansion using handleMenuItemClick('perfil', '/profile')
+  • ORGANIZATION ROUTE ADDED: Added /organizations route in App.tsx alongside existing /organizaciones for organization management access
+  • UI SIMPLIFICATION: Interface now relies on ActionBar as primary navigation control with simplified layout structure
+  • CONSISTENT ACCESS: Organization management available from both desktop and mobile profile submenus for unified user experience
 - July 24, 2025. TERMINOLOGY UPDATE OBRA TO CONSTRUCCIÓN COMPLETED: Successfully updated all references from "Obra" to "Construcción" throughout the application for consistent terminology - COMPLETED
   • SIDEBAR NAVIGATION: Updated desktop SidebarSubmenu.tsx and mobile MobileMenu.tsx to show "Construcción" instead of "Obra" in main menu
   • SUBMENU LABELS: Changed "Resumen de Obra" to "Resumen de Construcción" in both desktop and mobile submenus

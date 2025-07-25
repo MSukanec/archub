@@ -96,6 +96,7 @@ export function SidebarSubmenu() {
     'perfil': [
       { icon: UserCircle, label: 'Datos Básicos', href: '/profile' },
       { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/organizations' },
     ],
     
     'organizacion': [
