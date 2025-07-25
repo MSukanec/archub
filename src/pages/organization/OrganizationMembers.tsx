@@ -101,6 +101,7 @@ export default function OrganizationMembers() {
         .order('joined_at', { ascending: false });
       
       if (error) throw error;
+      console.log('🔍 Members data:', data);
       return data || [];
     },
     enabled: !!organizationId,
@@ -131,7 +132,6 @@ export default function OrganizationMembers() {
         description: "El miembro ha sido eliminado de la organización.",
       });
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      setMemberToDelete(null);
     },
     onError: (error: any) => {
       toast({

@@ -39,9 +39,9 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     actionLabel: "Actualizar a Teams",
     actionUrl: "/billing",
     planType: 'teams',
-    iconColor: '#10b981',
-    backgroundColor: '#10b981',
-    borderColor: '#10b981',
+    iconColor: 'hsl(271, 76%, 53%)',
+    backgroundColor: 'hsl(271, 76%, 53%)',
+    borderColor: 'hsl(271, 76%, 53%)',
   },
   custom_templates: {
     message: "Las plantillas personalizadas están disponibles en el plan PRO.",

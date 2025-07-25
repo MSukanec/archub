@@ -146,11 +146,18 @@ export function CustomRestricted({
         {children}
       </div>
 
+      {/* Área invisible para conexión con popover */}
+      <div
+        className="absolute inset-0 -inset-y-4 pointer-events-none z-40"
+        onMouseEnter={() => setIsPopoverOpen(true)}
+        onMouseLeave={() => setIsPopoverOpen(false)}
+      />
+
       {/* Overlay con badge que activa hover */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <div
-            className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group"
+            className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group pointer-events-auto z-50"
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
@@ -171,6 +178,8 @@ export function CustomRestricted({
             borderRadius: '16px'
           }}
           side="top"
+          onMouseEnter={() => setIsPopoverOpen(true)}
+          onMouseLeave={() => setIsPopoverOpen(false)}
         >
           <div className="flex items-start gap-2">
             <div 
@@ -216,9 +225,11 @@ export function CustomRestricted({
               {!isGeneralMode && restriction.actionLabel && restriction.actionUrl && (
                 <button
                   onClick={handleActionClick}
-                  className="text-xs hover:underline mt-1 font-medium"
+                  className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-white/10"
                   style={{ 
-                    color: restriction.planType === 'teams' ? 'white' : 'hsl(var(--accent))' 
+                    color: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    backgroundColor: 'transparent'
                   }}
                 >
                   {restriction.actionLabel}
