@@ -121,6 +121,12 @@ export default function ConstructionTasks() {
       width: '10%'
     },
     {
+      key: 'phase',
+      label: 'Fase',
+      render: (task: any) => task.phase_name || 'Sin fase',
+      width: '10%'
+    },
+    {
       key: 'display_name',
       label: 'Tarea',
       render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
@@ -136,24 +142,6 @@ export default function ConstructionTasks() {
       key: 'quantity',
       label: 'Cantidad',
       render: (task: any) => task.quantity || 0,
-      width: '10%'
-    },
-    {
-      key: 'progress',
-      label: 'Progreso',
-      render: (task: any) => `${task.progress_percent || 0}%`,
-      width: '10%'
-    },
-    {
-      key: 'phase',
-      label: 'Fase',
-      render: (task: any) => task.phase_name || 'Sin fase',
-      width: '10%'
-    },
-    {
-      key: 'dates',
-      label: 'Fechas',
-      render: (task: any) => task.start_date ? new Date(task.start_date).toLocaleDateString() : 'Sin fecha',
       width: '10%'
     },
     {
