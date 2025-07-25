@@ -153,12 +153,12 @@ export function ConstructionTaskFormModal({
 
   // Obtener opciones únicas para filtros
   const rubroOptions = useMemo(() => {
-    const rubros = [...new Set(tasks.map(task => task.rubro_name).filter(Boolean))];
+    const rubros = Array.from(new Set(tasks.map(task => task.rubro_name).filter(Boolean)));
     return rubros.sort();
   }, [tasks]);
 
   const categoryOptions = useMemo(() => {
-    const categories = [...new Set(tasks.map(task => task.category_name).filter(Boolean))];
+    const categories = Array.from(new Set(tasks.map(task => task.category_name).filter(Boolean)));
     return categories.sort();
   }, [tasks]);
 
@@ -254,7 +254,9 @@ export function ConstructionTaskFormModal({
         await updateTask.mutateAsync({
           id: modalData.editingTask.id,
           quantity: firstSelected.quantity,
-          project_phase_id: data.project_phase_id
+          project_phase_id: data.project_phase_id,
+          project_id: modalData.projectId,
+          organization_id: modalData.organizationId
         });
 
         toast({
@@ -336,8 +338,8 @@ export function ConstructionTaskFormModal({
         )}
       </div>
 
-      {/* Search and Filters Section */}
-      <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label>Seleccionar Tareas *</Label>
           <div className="flex gap-2">
@@ -346,7 +348,7 @@ export function ConstructionTaskFormModal({
               variant="outline"
               size="sm"
               onClick={handleSelectAll}
-              disabled={filteredTasks.length === 0}
+              disabled={tasks.length === 0}
             >
               Seleccionar Todo
             </Button>
@@ -362,138 +364,108 @@ export function ConstructionTaskFormModal({
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Buscar por nombre, código, rubro o categoría..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Buscar tareas..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+        />
 
-        {/* Filters */}
-        <div className="flex gap-2">
-          <Select value={rubroFilter} onValueChange={setRubroFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por Rubro" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todos los Rubros</SelectItem>
-              {rubroOptions.map((rubro) => (
-                <SelectItem key={rubro} value={rubro}>
-                  {rubro}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por Categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas las Categorías</SelectItem>
-              {categoryOptions.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Selected Tasks Summary */}
         {selectedTasks.length > 0 && (
-          <div className="p-3 bg-muted rounded-md">
-            <p className="text-sm text-muted-foreground">
-              {selectedTasks.length} tarea{selectedTasks.length > 1 ? 's' : ''} seleccionada{selectedTasks.length > 1 ? 's' : ''}
-            </p>
+          <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
+            {selectedTasks.length} tarea{selectedTasks.length > 1 ? 's' : ''} seleccionada{selectedTasks.length > 1 ? 's' : ''}
           </div>
         )}
       </div>
 
-      {/* Tasks List */}
+      {/* Optimized Tasks Table */}
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full max-h-[400px] border rounded-md">
-          <div className="p-4 space-y-2">
-            {filteredTasks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery || rubroFilter || categoryFilter 
-                  ? "No se encontraron tareas con los filtros aplicados" 
-                  : "No hay tareas disponibles"
-                }
-              </div>
-            ) : (
-              filteredTasks.map((task) => {
-                const isSelected = selectedTasks.some(t => t.task_id === task.id);
-                const selectedTask = selectedTasks.find(t => t.task_id === task.id);
-                
-                return (
-                  <div key={task.id} className="flex items-start space-x-3 p-3 border rounded-md hover:bg-muted/50">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
-                      className="mt-1"
-                    />
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium leading-tight mb-1">
-                            {task.display_name || task.code || 'Sin nombre'}
-                          </p>
-                          
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {task.code && (
-                              <Badge variant="outline" className="text-xs">
-                                {task.code}
-                              </Badge>
-                            )}
-                            {task.rubro_name && (
-                              <Badge variant="secondary" className="text-xs">
-                                {task.rubro_name}
-                              </Badge>
-                            )}
-                            {task.category_name && (
-                              <Badge variant="outline" className="text-xs">
-                                {task.category_name}
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <p className="text-xs text-muted-foreground">
-                            Unidad: {task.units?.symbol || task.units?.name || 'ud'}
-                          </p>
+        <div className="border rounded-md">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-2 p-3 bg-muted font-medium text-sm border-b">
+            <div className="col-span-1 flex items-center justify-center">
+              <Checkbox
+                checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    handleSelectAll();
+                  } else {
+                    handleClearAll();
+                  }
+                }}
+              />
+            </div>
+            <div className="col-span-2">RUBRO</div>
+            <div className="col-span-7">TAREA</div>
+            <div className="col-span-2">CANTIDAD</div>
+          </div>
+
+          {/* Table Body */}
+          <ScrollArea className="h-[400px]">
+            <div className="divide-y">
+              {filteredTasks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
+                </div>
+              ) : (
+                filteredTasks.map((task) => {
+                  const isSelected = selectedTasks.some(t => t.task_id === task.id);
+                  const selectedTask = selectedTasks.find(t => t.task_id === task.id);
+                  
+                  return (
+                    <div key={task.id} className="grid grid-cols-12 gap-2 p-3 hover:bg-muted/30">
+                      {/* Checkbox Column */}
+                      <div className="col-span-1 flex items-start justify-center pt-1">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => handleTaskSelection(task.id, checked as boolean)}
+                        />
+                      </div>
+
+                      {/* Rubro Column */}
+                      <div className="col-span-2">
+                        <div className="text-sm font-medium leading-tight">
+                          {task.rubro_name || 'Sin rubro'}
                         </div>
-                        
-                        {isSelected && (
-                          <div className="ml-3 flex-shrink-0">
-                            <div className="flex items-center space-x-2">
-                              <Label htmlFor={`quantity-${task.id}`} className="text-xs">
-                                Cant:
-                              </Label>
-                              <input
-                                id={`quantity-${task.id}`}
-                                type="number"
-                                min="0.01"
-                                step="0.01"
-                                value={selectedTask?.quantity || 1}
-                                onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
-                                className="w-20 px-2 py-1 text-xs border border-input rounded bg-background"
-                              />
-                            </div>
-                          </div>
+                        <div className="text-xs text-muted-foreground">
+                          {task.category_name || ''}
+                        </div>
+                      </div>
+
+                      {/* Task Name Column */}
+                      <div className="col-span-7">
+                        <div className="text-sm leading-tight line-clamp-2">
+                          {task.display_name || task.code || 'Sin nombre'}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {task.code && `Código: ${task.code}`} • Unidad: {task.units?.name || 'ud'}
+                        </div>
+                      </div>
+
+                      {/* Quantity Column */}
+                      <div className="col-span-2">
+                        {isSelected ? (
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            value={selectedTask?.quantity || 1}
+                            onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
+                            className="w-full px-2 py-1 text-sm border border-input rounded bg-background"
+                            placeholder="1.00"
+                          />
+                        ) : (
+                          <div className="text-sm text-muted-foreground">-</div>
                         )}
                       </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </ScrollArea>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+        </div>
       </div>
 
       {errors.selectedTasks && (
@@ -515,7 +487,7 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
       onRightClick={handleSubmit(onSubmit)}
-      rightDisabled={isSubmitting || selectedTasks.length === 0}
+      isLoading={isSubmitting}
     />
   );
 
