@@ -300,11 +300,14 @@ export default function ConstructionTasks() {
             columns={columns}
             data={filteredTasks}
             isLoading={isLoading}
+            mode="construction"
             groupBy={groupingType !== 'none' ? 'groupKey' : undefined}
             renderGroupHeader={groupingType !== 'none' ? (groupKey: string, groupRows: any[]) => (
-              <div className="px-4 py-3 bg-accent text-accent-foreground text-sm font-medium border-b">
-                {groupKey} ({groupRows.length} tareas)
-              </div>
+              <>
+                <div className="col-span-full text-sm font-medium">
+                  {groupKey} ({groupRows.length} tareas)
+                </div>
+              </>
             ) : undefined}
             emptyState={
               <EmptyState
