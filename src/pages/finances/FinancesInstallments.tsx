@@ -1046,120 +1046,117 @@ export default function FinancesInstallments() {
           ]}
         />
 
-        {/* Conditional Content - EmptyState or ActionBar + Tabs */}
-        {installments.length === 0 ? (
-          <EmptyState
-            icon={<Receipt className="h-8 w-8" />}
-            title="Aún no hay compromisos registrados"
-            description="Esta sección muestra los compromisos de pago registrados en el proyecto."
-          />
-        ) : (
-          <>
-            {/* Action Bar Desktop with Tabs */}
-            <ActionBarDesktop
-              title="Gestión de Aportes de Terceros"
-              icon={<Receipt className="w-6 h-6" />}
-              features={[
-                {
-                  icon: <Users className="w-5 h-5" />,
-                  title: "Aportes Detallados por Cliente",
-                  description: "Registro detallado de aportes financieros de clientes e inversores con seguimiento individualizado de compromisos."
-                },
-                {
-                  icon: <Coins className="w-5 h-5" />,
-                  title: "Análisis Multi-moneda",
-                  description: "Seguimiento de aportes con múltiples monedas y cotizaciones automáticas para control completo de flujos financieros."
-                },
-                {
-                  icon: <BarChart3 className="w-5 h-5" />,
-                  title: "Análisis USD Dolarizado",
-                  description: "Cálculo automático de equivalencias en USD para análisis financiero unificado y reportes consolidados."
-                },
-                {
-                  icon: <FileText className="w-5 h-5" />,
-                  title: "Resúmenes y Porcentajes",
-                  description: "Resúmenes por cliente con porcentajes de cumplimiento, montos restantes y métricas de desempeño financiero."
-                }
-              ]}
-              searchValue={searchValue}
-              onSearchChange={setSearchValue}
-              primaryActionLabel="Nuevo Compromiso"
-              onPrimaryActionClick={handleAddInstallment}
-              customFilters={customFilters}
-              onClearFilters={handleClearFilters}
-              hasActiveFilters={hasActiveFilters}
-              tabs={[
-                {
-                  value: "clients",
-                  label: "Resumen por Cliente",
-                  icon: <Users className="h-4 w-4" />
-                },
-                {
-                  value: "currencies",
-                  label: "Detalle por Moneda",
-                  icon: <Coins className="h-4 w-4" />
-                },
-                {
-                  value: "details",
-                  label: "Detalle de Compromisos",
-                  icon: <FileText className="h-4 w-4" />
-                }
-              ]}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
+      {/* Action Bar Desktop - SIEMPRE VISIBLE */}
+      <ActionBarDesktop
+        title="Gestión de Aportes de Terceros"
+        icon={<Receipt className="w-6 h-6" />}
+        features={[
+          {
+            icon: <Users className="w-5 h-5" />,
+            title: "Aportes Detallados por Cliente",
+            description: "Registro detallado de aportes financieros de clientes e inversores con seguimiento individualizado de compromisos."
+          },
+          {
+            icon: <Coins className="w-5 h-5" />,
+            title: "Análisis Multi-moneda",
+            description: "Seguimiento de aportes con múltiples monedas y cotizaciones automáticas para control completo de flujos financieros."
+          },
+          {
+            icon: <BarChart3 className="w-5 h-5" />,
+            title: "Análisis USD Dolarizado",
+            description: "Cálculo automático de equivalencias en USD para análisis financiero unificado y reportes consolidados."
+          },
+          {
+            icon: <FileText className="w-5 h-5" />,
+            title: "Resúmenes y Porcentajes",
+            description: "Resúmenes por cliente con porcentajes de cumplimiento, montos restantes y métricas de desempeño financiero."
+          }
+        ]}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        primaryActionLabel="Nuevo Compromiso"
+        onPrimaryActionClick={handleAddInstallment}
+        customFilters={customFilters}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={hasActiveFilters}
+        tabs={[
+          {
+            value: "clients",
+            label: "Resumen por Cliente",
+            icon: <Users className="h-4 w-4" />
+          },
+          {
+            value: "currencies",
+            label: "Detalle por Moneda",
+            icon: <Coins className="h-4 w-4" />
+          },
+          {
+            value: "details",
+            label: "Detalle de Compromisos",
+            icon: <FileText className="h-4 w-4" />
+          }
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      {/* Conditional Content - EmptyState o Tabs */}
+      {installments.length === 0 ? (
+        <EmptyState
+          icon={<Receipt className="h-8 w-8" />}
+          title="Aún no hay compromisos registrados"
+          description="Esta sección muestra los compromisos de pago registrados en el proyecto."
+        />
+      ) : (
+        <div className="space-y-4">
+          {activeTab === "clients" && clientSummary.length > 0 && (
+            <Table
+              data={clientSummary}
+              columns={contactSummaryColumns}
+              defaultSort={{ key: 'contacto', direction: 'asc' }}
+              renderCard={(item) => (
+                <ClientSummaryCard 
+                  item={item} 
+                  allCurrencies={allCurrencies}
+                />
+              )}
             />
+          )}
 
-            {/* Tab Content Based on activeTab */}
-            <div className="space-y-4">
-              {activeTab === "clients" && clientSummary.length > 0 && (
-                <Table
-                  data={clientSummary}
-                  columns={contactSummaryColumns}
-                  defaultSort={{ key: 'contacto', direction: 'asc' }}
-                  renderCard={(item) => (
-                    <ClientSummaryCard 
-                      item={item} 
-                      allCurrencies={allCurrencies}
-                    />
-                  )}
-                />
+          {activeTab === "currencies" && clientSummary.length > 0 && (
+            <Table
+              data={clientSummary}
+              columns={summaryColumns}
+              defaultSort={{ key: 'contacto', direction: 'asc' }}
+              renderCard={(item) => (
+                <CurrencyDetailCard item={item} />
               )}
+            />
+          )}
 
-              {activeTab === "currencies" && clientSummary.length > 0 && (
-                <Table
-                  data={clientSummary}
-                  columns={summaryColumns}
-                  defaultSort={{ key: 'contacto', direction: 'asc' }}
-                  renderCard={(item) => (
-                    <CurrencyDetailCard item={item} />
-                  )}
-                />
-              )}
-
-              {activeTab === "details" && (
-                filteredInstallments.length > 0 ? (
-                  <Table
-                    data={filteredInstallments}
-                    columns={detailColumns}
-                    defaultSort={{ key: 'movement_date', direction: 'desc' }}
-                    renderCard={(item) => (
-                      <InstallmentDetailCard 
-                        item={item}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                      />
-                    )}
+          {activeTab === "details" && (
+            filteredInstallments.length > 0 ? (
+              <Table
+                data={filteredInstallments}
+                columns={detailColumns}
+                defaultSort={{ key: 'movement_date', direction: 'desc' }}
+                renderCard={(item) => (
+                  <InstallmentDetailCard 
+                    item={item}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
                   />
-                ) : (
-                  <EmptyState
-                    title="No se encontraron compromisos"
-                    description="No hay compromisos que coincidan con los filtros aplicados"
-                  />
-                )
-              )}
-            </div>
-          </>
-        )}
+                )}
+              />
+            ) : (
+              <EmptyState
+                title="No se encontraron compromisos"
+                description="No hay compromisos que coincidan con los filtros aplicados"
+              />
+            )
+          )}
+        </div>
+      )}
 
       {/* Modals handled by ModalFactory */}
     </Layout>
