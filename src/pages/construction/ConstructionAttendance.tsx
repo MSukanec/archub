@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns'
 import { useLocation } from 'wouter'
 import { Link } from 'wouter'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 // Hook to fetch attendance data
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -150,6 +151,7 @@ export default function ConstructionAttendance() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedContactType, setSelectedContactType] = useState<string>("")
   const [triggerTodayCenter, setTriggerTodayCenter] = useState(false)
+  const { openModal } = useGlobalModalStore()
 
   const [location, navigate] = useLocation()
   const { data: userData } = useCurrentUser()
@@ -301,6 +303,8 @@ export default function ConstructionAttendance() {
           customFilters={customFilters}
           onClearFilters={handleClearFilters}
           onTodayClick={handleTodayClick}
+          primaryActionLabel="Registrar Asistencia"
+          onPrimaryActionClick={() => openModal('attendance', {})}
         />
 
         {/* Gradebook Component - Show always if there's original data, even if filtered workers is empty */}

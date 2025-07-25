@@ -38,6 +38,7 @@ import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogFormModal } from '../modals/construction/SiteLogFormModal';
+import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -137,6 +138,8 @@ export function ModalFactory() {
       return <ChangelogFormModal modalData={data} onClose={closeModal} />;
     case 'site-log':
       return <SiteLogFormModal data={data} />;
+    case 'attendance':
+      return <AttendanceFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
