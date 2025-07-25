@@ -385,7 +385,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                     return (
                       <div 
                         key={task.id} 
-                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isInUse ? 'bg-[hsl(var(--accent))]/10 border-l-4 border-l-[hsl(var(--accent))]' : ''}`}
+                        className={`py-3 px-3 hover:bg-muted/30 cursor-pointer transition-colors ${isInUse ? 'bg-accent/10 border-l-4 border-l-accent' : ''}`}
                         onClick={() => handleTaskSelection(task.id)}
                       >
                         <div className="text-sm leading-tight">
