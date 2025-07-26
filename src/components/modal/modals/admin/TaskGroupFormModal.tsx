@@ -22,8 +22,8 @@ type TaskGroupFormData = z.infer<typeof taskGroupSchema>
 
 interface TaskGroupFormModalProps {
   modalData?: {
-    categoryId: string
-    categoryName: string
+    categoryId?: string
+    categoryName?: string
     taskGroup?: {
       id: string
       name: string
@@ -93,11 +93,13 @@ export function TaskGroupFormModal({ modalData, onClose }: TaskGroupFormModalPro
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Category context */}
-        <div className="p-3 bg-muted rounded-md">
-          <p className="text-sm text-muted-foreground">
-            Categoría: <span className="font-medium text-foreground">{modalData?.categoryName}</span>
-          </p>
-        </div>
+        {modalData?.categoryName && (
+          <div className="p-3 bg-muted rounded-md">
+            <p className="text-sm text-muted-foreground">
+              Categoría: <span className="font-medium text-foreground">{modalData.categoryName}</span>
+            </p>
+          </div>
+        )}
 
         {/* Task Group Name */}
         <FormField
@@ -133,7 +135,6 @@ export function TaskGroupFormModal({ modalData, onClose }: TaskGroupFormModalPro
       onLeftClick={handleClose}
       rightLabel={isEditing ? "Actualizar Grupo" : "Crear Grupo"}
       onRightClick={form.handleSubmit(onSubmit)}
-      isLoading={isLoading}
     />
   )
 

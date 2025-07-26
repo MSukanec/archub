@@ -207,7 +207,7 @@ export default function AdminTaskGroups() {
         customFilters={renderCustomFilters()}
         showProjectSelector={false}
         primaryActionLabel="Nuevo Grupo"
-        onPrimaryActionClick={() => openModal('task-group', {})}
+        onPrimaryActionClick={() => openModal('task-group-creator', {})}
       />
       
       <div className="space-y-6">
