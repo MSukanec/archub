@@ -495,19 +495,13 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   // Step 2: Template configuration
   const step2Panel = (
     <div className="space-y-6">
-      {/* Vista Previa de la Plantilla */}
+      {/* Vista Previa */}
       {taskGroup && (
-        <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-accent">
-          <div className="flex items-center space-x-2 mb-2">
-            <FileText className="w-4 h-4 text-muted-foreground" />
-            <h4 className="font-medium">Plantilla: {taskGroup.name}</h4>
-          </div>
-          <div className="mt-3 p-3 bg-background rounded border">
+        <div className="space-y-3">
+          <h4 className="font-medium text-sm text-muted-foreground">Vista Previa</h4>
+          <div className="p-3 bg-background rounded border">
             <p className="text-sm font-medium text-foreground">{generatePreview()}</p>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Configura los parámetros que utilizará esta plantilla para generar tareas dinámicas.
-          </p>
         </div>
       )}
 
