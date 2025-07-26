@@ -317,6 +317,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Home, label: 'Panel de Administración', href: '/admin/dashboard' },
       { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
       { icon: Package2, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
+      { icon: Package2, label: 'Grupos de Tareas', href: '/admin/task-groups' },
       { icon: Package, label: 'Categorías de Tareas', href: '/admin/task-categories' },
       { icon: Users, label: 'Usuarios', href: '/admin/users' },
       { icon: Crown, label: 'Organizaciones', href: '/admin/organizations' },

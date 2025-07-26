@@ -153,6 +153,7 @@ export function SidebarSubmenu() {
       { type: 'accordion', label: 'TAREAS', items: [
         { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
         { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
+        { icon: Package2, label: 'Grupos de Tareas', href: '/admin/task-groups' },
         { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories' },
       ]},
       { type: 'accordion', label: 'FINANZAS', items: [
