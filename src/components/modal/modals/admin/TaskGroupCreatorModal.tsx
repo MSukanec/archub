@@ -596,7 +596,6 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       headerContent={headerContent}
       footerContent={footerContent}
       stepContent={currentStep === 1 ? step1Panel : step2Panel}
-      className="md:max-w-[1440px]"
       onClose={onClose}
     >
     </FormModalLayout>
