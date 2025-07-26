@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 
 import { Layout } from '@/components/layout/desktop/Layout';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 
@@ -113,53 +114,48 @@ export default function AdminTaskParameters() {
     }
   };
 
-  // Custom filters for the header
-  const customFilters = (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-            <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-            <SelectItem value="type_asc">Tipo A-Z</SelectItem>
-            <SelectItem value="type_desc">Tipo Z-A</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-
-  // Header actions
-  const actions = [
-    <Button 
-      key="new-parameter"
-      className="h-8 px-3 text-sm"
-      onClick={() => openModal('task-parameter', {})}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Nuevo Parámetro
-    </Button>
+  // Features for ActionBar expandable info
+  const features = [
+    {
+      icon: Settings,
+      title: "Gestión Avanzada de Parámetros",
+      description: "Sistema completo de administración de parámetros reutilizables para tareas de construcción con soporte para diferentes tipos de datos."
+    },
+    {
+      icon: Building2,
+      title: "Configuración de Opciones",
+      description: "Permite crear y gestionar opciones personalizadas para parámetros de selección, organizadas en grupos para facilitar su uso."
+    },
+    {
+      icon: Eye,
+      title: "Vista Unificada de Parámetros",
+      description: "Visualización centralizada de todos los parámetros con estadísticas en tiempo real y herramientas de búsqueda avanzada."
+    },
+    {
+      icon: Plus,
+      title: "Sistema de Templates Dinámicos",
+      description: "Integración completa con plantillas de tareas para generar descripciones automáticas basadas en los parámetros configurados."
+    }
   ];
 
-  const headerProps = {
-    icon: Settings,
-    title: "Parámetros de Tareas",
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    showFilters: true,
-    customFilters,
-    onClearFilters: clearFilters,
-    actions
-  };
+  // Custom filters dropdown for ActionBar
+  const renderCustomFilters = () => (
+    <Select value={sortBy} onValueChange={setSortBy}>
+      <SelectTrigger className="w-[140px]">
+        <SelectValue placeholder="Ordenar por" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="name_asc">Nombre A-Z</SelectItem>
+        <SelectItem value="name_desc">Nombre Z-A</SelectItem>
+        <SelectItem value="type_asc">Tipo A-Z</SelectItem>
+        <SelectItem value="type_desc">Tipo Z-A</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 
   if (isLoading) {
     return (
-      <Layout wide={true} headerProps={headerProps}>
+      <Layout wide={true}>
         <div className="p-8 text-center text-muted-foreground">
           Cargando parámetros...
         </div>
@@ -267,7 +263,18 @@ export default function AdminTaskParameters() {
   }
 
   return (
-    <Layout wide={true} headerProps={headerProps}>
+    <Layout wide={true}>
+      <ActionBarDesktop
+        title="Parámetros de Tareas"
+        icon={Settings}
+        features={features}
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        customFilters={renderCustomFilters()}
+        primaryActionLabel="Nuevo Parámetro"
+        onPrimaryActionClick={() => openModal('task-parameter', {})}
+      />
+      
       <div className="space-y-6">
         {filteredAndSortedParameters.length === 0 ? (
           <EmptyState
@@ -277,7 +284,6 @@ export default function AdminTaskParameters() {
               ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
             }
-
           />
         ) : (
           <>
