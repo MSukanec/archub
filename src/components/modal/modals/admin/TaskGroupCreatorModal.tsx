@@ -148,6 +148,24 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     })
   )
 
+  // Generate preview function (como en TaskTemplateFormModal)
+  const generatePreview = () => {
+    const baseName = taskGroup?.name || 'Nueva tarea';
+    
+    if (templateParameters.length === 0) {
+      return `${baseName}.`;
+    }
+    
+    const parameterPlaceholders = templateParameters
+      .map(tp => {
+        const parameter = availableParameters.find(p => p.id === tp.parameter_id);
+        return `{{${parameter?.name || 'parámetro'}}}`;
+      })
+      .join(' ');
+    
+    return `${baseName} ${parameterPlaceholders}.`;
+  }
+
   const form = useForm<TaskGroupCreatorFormData>({
     resolver: zodResolver(taskGroupCreatorSchema),
     defaultValues: {
@@ -477,14 +495,17 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   // Step 2: Template configuration
   const step2Panel = (
     <div className="space-y-6">
-      {/* Template Info */}
+      {/* Vista Previa de la Plantilla */}
       {taskGroup && (
-        <div className="p-4 bg-muted/30 rounded-lg border">
+        <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-accent">
           <div className="flex items-center space-x-2 mb-2">
             <FileText className="w-4 h-4 text-muted-foreground" />
             <h4 className="font-medium">Plantilla: {taskGroup.name}</h4>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <div className="mt-3 p-3 bg-background rounded border">
+            <p className="text-sm font-medium text-foreground">{generatePreview()}</p>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
             Configura los parámetros que utilizará esta plantilla para generar tareas dinámicas.
           </p>
         </div>
