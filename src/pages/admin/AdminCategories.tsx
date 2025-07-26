@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, X, Tag, TreePine, Eye, Zap } from 'lucide-react';
+import { Plus, Package2, PackagePlus, Settings, CheckCircle, XCircle, Filter, X, Tag, TreePine, Eye, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -342,6 +342,18 @@ export default function AdminCategories() {
               isEditing: false
             });
           }}
+          customActions={[
+            <Button 
+              key="quick-group"
+              variant="secondary"
+              onClick={() => {
+                openModal('task-group-creator', {});
+              }}
+            >
+              <PackagePlus className="h-4 w-4 mr-2" />
+              Crear Grupo Rápido
+            </Button>
+          ]}
         />
 
         {/* Statistics Cards */}
