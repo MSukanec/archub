@@ -415,7 +415,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       onLeftClick={onClose}
       rightLabel={parameter ? "Actualizar" : "Guardar"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      rightLoading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 

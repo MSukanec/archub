@@ -311,7 +311,12 @@ export default function AdminTaskParameters() {
           <Button 
             key="nuevo-parametro"
             variant="secondary" 
-            onClick={() => openModal('task-parameter', {})}
+            onClick={() => openModal('task-parameter', {
+              onParameterCreated: (parameterId: string) => {
+                // Auto-select the newly created parameter
+                setSelectedParameterId(parameterId);
+              }
+            })}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Parámetro
