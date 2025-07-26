@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
@@ -12,9 +12,8 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useTaskGroups, useDeleteTaskGroup } from '@/hooks/use-task-groups'
-import { useAllTaskCategories } from '@/hooks/use-task-categories-admin'
 
-import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock, Layers3 } from 'lucide-react'
+import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock } from 'lucide-react'
 
 interface TaskGroup {
   id: string
@@ -28,12 +27,10 @@ interface TaskGroup {
 export default function AdminTaskGroups() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
-  const [groupingType, setGroupingType] = useState('subcategory')
   const { openModal } = useGlobalModalStore()
   
-  // Real data from hooks
+  // Real data from useTaskGroups hook
   const { data: taskGroups = [], isLoading } = useTaskGroups()
-  const { data: allCategories = [], isLoading: categoriesLoading } = useAllTaskCategories()
   const deleteTaskGroupMutation = useDeleteTaskGroup()
 
   // Statistics calculations
@@ -45,26 +42,13 @@ export default function AdminTaskGroups() {
     return groupDate >= sevenDaysAgo
   }).length
 
-  // Filter and process task groups with category data
-  const processedTaskGroups = useMemo(() => {
-    // Enrich task groups with category data
-    const enriched = taskGroups.map((group: TaskGroup) => {
-      const category = allCategories.find(cat => cat.id === group.category_id)
-      return {
-        ...group,
-        category_name: category?.name || 'Sin categoría',
-        groupKey: groupingType === 'subcategory' ? (category?.name || 'Sin categoría') : 'Sin grupo'
-      }
+  // Filter and sort task groups
+  const filteredTaskGroups = taskGroups
+    .filter((group: TaskGroup) => {
+      // Search filter
+      return group.name?.toLowerCase().includes(searchValue.toLowerCase())
     })
-
-    // Filter by search
-    let filtered = enriched.filter((group) => {
-      return group.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-             group.category_name?.toLowerCase().includes(searchValue.toLowerCase())
-    })
-
-    // Sort
-    filtered = filtered.sort((a, b) => {
+    .sort((a: TaskGroup, b: TaskGroup) => {
       if (sortBy === 'name') {
         return a.name.localeCompare(b.name)
       } else if (sortBy === 'created_at') {
@@ -72,9 +56,6 @@ export default function AdminTaskGroups() {
       }
       return 0
     })
-
-    return filtered
-  }, [taskGroups, allCategories, searchValue, sortBy, groupingType])
 
   // Handle delete task group
   const handleDeleteTaskGroup = (taskGroup: TaskGroup) => {
@@ -96,16 +77,6 @@ export default function AdminTaskGroups() {
   // Custom filters for ActionBar
   const renderCustomFilters = () => (
     <div className="flex items-center gap-2">
-      {/* Grouping dropdown */}
-      <select
-        value={groupingType}
-        onChange={(e) => setGroupingType(e.target.value)}
-        className="h-8 px-2 rounded border text-sm bg-background"
-      >
-        <option value="subcategory">Agrupar por Subcategorías</option>
-        <option value="none">Sin agrupar</option>
-      </select>
-      
       {/* Sort dropdown */}
       <select
         value={sortBy}
@@ -145,21 +116,9 @@ export default function AdminTaskGroups() {
   // Table columns configuration
   const columns = [
     {
-      key: 'category_name',
-      label: 'Subcategoría',
-      width: '20%',
-      render: (taskGroup: any) => (
-        <div className="text-sm">
-          <Badge variant="outline" className="text-xs">
-            {taskGroup.category_name}
-          </Badge>
-        </div>
-      )
-    },
-    {
       key: 'name',
       label: 'Nombre del Grupo',
-      width: '35%',
+      width: '40%',
       render: (taskGroup: TaskGroup) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -167,14 +126,15 @@ export default function AdminTaskGroups() {
           </div>
           <div>
             <div className="font-medium text-sm">{taskGroup.name}</div>
+            <div className="text-xs text-muted-foreground">ID: {taskGroup.id.slice(0, 8)}...</div>
           </div>
         </div>
       )
     },
     {
       key: 'template_id',
-      label: 'Plantilla',
-      width: '20%',
+      label: 'Plantilla Asociada',
+      width: '25%',
       render: (taskGroup: TaskGroup) => (
         <div className="text-sm">
           {taskGroup.template_id ? (
@@ -191,8 +151,8 @@ export default function AdminTaskGroups() {
     },
     {
       key: 'created_at',
-      label: 'Fecha',
-      width: '15%',
+      label: 'Fecha de Creación',
+      width: '20%',
       render: (taskGroup: TaskGroup) => (
         <div className="text-sm text-muted-foreground">
           {format(new Date(taskGroup.created_at), 'dd/MM/yyyy', { locale: es })}
@@ -202,7 +162,7 @@ export default function AdminTaskGroups() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '10%',
+      width: '15%',
       render: (taskGroup: TaskGroup) => (
         <div className="flex items-center gap-1">
           <Button
@@ -248,11 +208,10 @@ export default function AdminTaskGroups() {
         showProjectSelector={false}
         primaryActionLabel="Nuevo Grupo"
         onPrimaryActionClick={() => openModal('task-group-creator', {})}
-
       />
       
       <div className="space-y-6">
-        {processedTaskGroups.length === 0 ? (
+        {filteredTaskGroups.length === 0 ? (
           <EmptyState
             icon={<Package2 className="w-12 h-12 text-muted-foreground" />}
             title={searchValue ? "No se encontraron grupos" : "No hay grupos de tareas creados"}
@@ -263,10 +222,8 @@ export default function AdminTaskGroups() {
           />
         ) : (
           <Table
-            data={processedTaskGroups}
+            data={filteredTaskGroups}
             columns={columns}
-            isLoading={isLoading || categoriesLoading}
-            groupingType={groupingType}
           />
         )}
       </div>
