@@ -579,7 +579,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
             onClick: handleClose 
           },
           nextAction: { 
-            label: modalData?.taskGroup ? 'Actualizar' : 'Crear y Continuar', 
+            label: 'Siguiente', 
             onClick: handleNext,
             disabled: !form.formState.isValid,
             loading: isSubmitting
@@ -596,7 +596,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
             onClick: handlePrevious 
           },
           submitAction: { 
-            label: 'Finalizar', 
+            label: modalData?.taskGroup ? 'Actualizar' : 'Finalizar', 
             onClick: handleNext,
             loading: isSubmitting
           }
