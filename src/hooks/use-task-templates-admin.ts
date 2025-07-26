@@ -4,22 +4,19 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface TaskTemplate {
   id: string;
-  code: string;
   name_template: string;
-  category_id: string;
-  action_id: string | null;
+  task_group_id: string;
+  unit_id: string;
+  task_code: string;
   created_at: string;
-  task_categories?: {
-    id: string;
-    name: string;
-  };
+  updated_at: string;
 }
 
 export interface CreateTaskTemplateData {
-  code: string;
   name_template: string;
-  category_id: string;
-  action_id?: string | null;
+  task_group_id: string;
+  unit_id: string;
+  task_code: string;
 }
 
 export interface UpdateTaskTemplateData extends CreateTaskTemplateData {
@@ -34,13 +31,7 @@ export function useTaskTemplatesAdmin() {
       
       const { data, error } = await supabase
         .from('task_templates')
-        .select(`
-          *,
-          task_categories (
-            id,
-            name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;

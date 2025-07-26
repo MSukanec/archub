@@ -255,13 +255,13 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         })
 
         // Create the associated template
-        const selectedCategory = subcategories.find(cat => cat.id === data.subcategory_id)
-        const categoryCode = selectedCategory?.code || 'AUTO'
+        const selectedUnit = units.find(unit => unit.id === data.unit_id)
         
         const newTemplate = await createTemplateMutation.mutateAsync({
           name_template: `${data.name}.`,
-          category_id: data.subcategory_id,
-          code: categoryCode,
+          task_group_id: newGroup.id,
+          unit_id: data.unit_id,
+          task_code: 'AUTO',
         })
 
         // Update the task group with the template_id
