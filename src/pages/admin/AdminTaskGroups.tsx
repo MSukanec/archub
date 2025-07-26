@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useTaskGroups, useDeleteTaskGroup } from '@/hooks/use-task-groups'
 
-import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock, FileText } from 'lucide-react'
+import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock } from 'lucide-react'
 
 interface TaskGroup {
   id: string
@@ -74,14 +74,7 @@ export default function AdminTaskGroups() {
     openModal('task-group-creator', { taskGroup });
   }
 
-  // Handle template action for task group
-  const handleTaskGroupTemplate = (taskGroup: TaskGroup) => {
-    openModal('task-group-template', {
-      taskGroupId: taskGroup.id,
-      taskGroupName: taskGroup.name,
-      categoryId: taskGroup.category_id
-    });
-  }
+
 
   // Custom filters for ActionBar
   const renderCustomFilters = () => (
@@ -166,15 +159,6 @@ export default function AdminTaskGroups() {
       width: '10%',
       render: (taskGroup: TaskGroup) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => handleTaskGroupTemplate(taskGroup)}
-            title="Plantilla"
-          >
-            <FileText className="w-3 h-3" />
-          </Button>
           <Button
             variant="ghost"
             size="sm"

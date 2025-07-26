@@ -582,14 +582,12 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     />
   )
 
-  const editPanel = currentStep === 1 ? step1Panel : step2Panel
-
   return (
     <FormModalLayout
-      editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      isEditing={true}
-    />
+    >
+      {currentStep === 1 ? step1Panel : step2Panel}
+    </FormModalLayout>
   )
 }

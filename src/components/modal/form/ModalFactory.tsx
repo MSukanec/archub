@@ -14,7 +14,7 @@ import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormMod
 import MovementFormModal from '../modals/finances/MovementFormModal';
 import MovementConceptFormModal from '../modals/admin/MovementConceptFormModal';
 import { OrganizationMovementConceptFormModal } from '../modals/organizations/OrganizationMovementConceptFormModal';
-import MovementImportModal from '../modals/MovementImportModal';
+
 import MovementImportStepModal from '../modals/finances/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/construction/BudgetFormModal';
@@ -32,7 +32,7 @@ import { TaskGroupFormModal } from '../modals/admin/TaskGroupFormModal';
 import { TaskGroupCreatorModal } from '../modals/admin/TaskGroupCreatorModal';
 import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
-import TaskGroupTemplateModal from '../modals/admin/TaskGroupTemplateModal';
+
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
 import { TaskParameterGroupAssignmentModal } from '../modals/admin/TaskParameterGroupAssignmentModal';
 import { GeneratedTaskFormModal } from '../modals/admin/GeneratedTaskFormModal';
@@ -135,12 +135,7 @@ export function ModalFactory() {
         taskGroupId={data?.taskGroupId}
         taskGroupName={data?.taskGroupName}
       />;
-    case 'task-group-template':
-      return <TaskGroupTemplateModal 
-        taskGroupId={data?.taskGroupId}
-        taskGroupName={data?.taskGroupName}
-        categoryId={data?.categoryId}
-      />;
+
     case 'admin-user':
       return <UserFormModal modalData={data} onClose={closeModal} />;
     case 'admin-organization':
