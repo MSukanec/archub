@@ -17,6 +17,14 @@ interface BudgetSelectorProps {
   onDeleteBudget: () => void
 }
 
+interface ParameterSelectorProps {
+  parameters: any[]
+  selectedParameterId: string
+  onParameterChange: (parameterId: string) => void
+  onEditParameter: () => void
+  onDeleteParameter: () => void
+}
+
 interface Tab {
   value: string
   label: string
@@ -55,6 +63,7 @@ interface ActionBarDesktopProps {
   }
   customActions?: React.ReactNode[]
   budgetSelector?: BudgetSelectorProps
+  parameterSelector?: ParameterSelectorProps
   tabs?: Tab[]
   activeTab?: string
   onTabChange?: (value: string) => void
@@ -84,6 +93,7 @@ export function ActionBarDesktop({
   primaryActionRestriction,
   customActions = [],
   budgetSelector,
+  parameterSelector,
   tabs,
   activeTab,
   onTabChange,
@@ -226,6 +236,42 @@ export function ActionBarDesktop({
                 variant="ghost-icon"
                 className="text-destructive hover:text-destructive"
                 onClick={budgetSelector.onDeleteBudget}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {/* Parameter Selector - ONLY for specific cases like admin task parameters page */}
+        {parameterSelector && (
+          <div className="flex items-center gap-2">
+            <div className="w-64">
+              <Selector
+                options={parameterSelector.parameters.map((parameter: any) => ({
+                  value: parameter.id,
+                  label: parameter.label
+                }))}
+                value={parameterSelector.selectedParameterId}
+                onValueChange={parameterSelector.onParameterChange}
+                placeholder="Selecciona un parámetro"
+                className="h-8"
+              />
+            </div>
+            
+            {/* Parameter Action Buttons */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost-icon"
+                onClick={parameterSelector.onEditParameter}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              
+              <Button
+                variant="ghost-icon"
+                className="text-destructive hover:text-destructive"
+                onClick={parameterSelector.onDeleteParameter}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>

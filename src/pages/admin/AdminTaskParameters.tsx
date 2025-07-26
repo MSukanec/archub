@@ -91,6 +91,33 @@ export default function AdminTaskParameters() {
     setSortBy('name_asc');
   };
 
+  // Parameter selector handlers
+  const handleParameterChange = (parameterId: string) => {
+    setSelectedParameterId(parameterId);
+  };
+
+  const handleEditParameter = () => {
+    if (selectedParameter) {
+      openModal('task-parameter', {
+        parameter: selectedParameter,
+        isEditing: true
+      });
+    }
+  };
+
+  const handleDeleteParameter = () => {
+    if (selectedParameter) {
+      openModal('delete-confirmation', {
+        title: 'Eliminar Parámetro',
+        description: '¿Estás seguro de que deseas eliminar este parámetro?',
+        itemName: selectedParameter.label,
+        onConfirm: () => {
+          deleteParameterMutation.mutate(selectedParameter.id);
+        }
+      });
+    }
+  };
+
   // Legacy delete handlers removed - now using ModalFactory with direct mutations
 
   // Helper functions for parameter type styling
@@ -273,6 +300,13 @@ export default function AdminTaskParameters() {
         customFilters={renderCustomFilters()}
         primaryActionLabel="Nuevo Parámetro"
         onPrimaryActionClick={() => openModal('task-parameter', {})}
+        parameterSelector={filteredAndSortedParameters.length > 0 ? {
+          parameters: filteredAndSortedParameters,
+          selectedParameterId,
+          onParameterChange: handleParameterChange,
+          onEditParameter: handleEditParameter,
+          onDeleteParameter: handleDeleteParameter
+        } : undefined}
       />
       
       <div className="space-y-6">
@@ -338,33 +372,20 @@ export default function AdminTaskParameters() {
               </Card>
             </div>
 
-            {/* Single Parameter Card with Selector */}
+            {/* Parameter Options Section */}
             <Card className="border rounded-lg overflow-hidden">
               <div className="flex items-center justify-between w-full p-4 border-b">
                 <div className="flex items-center gap-3 flex-1">
                   <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Building2 className="h-4 w-4 text-primary" />
                   </div>
-                  
-                  {/* Parameter Selector */}
-                  <div className="flex-1">
-                    <Select value={selectedParameterId} onValueChange={setSelectedParameterId}>
-                      <SelectTrigger className="w-full max-w-sm">
-                        <SelectValue placeholder="Selecciona un parámetro" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredAndSortedParameters.map((parameter: TaskParameter) => (
-                          <SelectItem key={parameter.id} value={parameter.id}>
-                            <div>
-                              <div className="font-medium text-sm">{parameter.label}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {parameter.name} • {getParameterTypeLabel(parameter.type)} • {parameter.options?.length || 0} opciones
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div>
+                    <h3 className="font-medium text-sm">
+                      {selectedParameter ? selectedParameter.label : 'Opciones del Parámetro'}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedParameter ? `${getParameterTypeLabel(selectedParameter.type)} • ${selectedParameter.options?.length || 0} opciones` : 'Selecciona un parámetro en el selector de arriba'}
+                    </p>
                   </div>
                 </div>
                 
