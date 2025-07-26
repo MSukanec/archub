@@ -298,8 +298,25 @@ export default function AdminTaskParameters() {
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
         customFilters={renderCustomFilters()}
-        primaryActionLabel="Nuevo Parámetro"
-        onPrimaryActionClick={() => openModal('task-parameter', {})}
+        showProjectSelector={false}
+        primaryActionLabel="Agregar Opción"
+        onPrimaryActionClick={() => {
+          if (selectedParameter) {
+            openModal('task-parameter-option', {
+              parameterId: selectedParameter.id
+            });
+          }
+        }}
+        customActions={[
+          <Button 
+            key="nuevo-parametro"
+            variant="secondary" 
+            onClick={() => openModal('task-parameter', {})}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Parámetro
+          </Button>
+        ]}
         parameterSelector={filteredAndSortedParameters.length > 0 ? {
           parameters: filteredAndSortedParameters,
           selectedParameterId,
@@ -321,136 +338,16 @@ export default function AdminTaskParameters() {
           />
         ) : (
           <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Parámetros</p>
-                      <p className="text-2xl font-semibold">{stats.totalParameters}</p>
-                    </div>
-                    <Settings className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Parámetros de Selección</p>
-                      <p className="text-2xl font-semibold">{stats.selectParameters}</p>
-                    </div>
-                    <Building2 className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Opciones</p>
-                      <p className="text-2xl font-semibold">{stats.totalOptions}</p>
-                    </div>
-                    <Eye className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Obligatorios</p>
-                      <p className="text-2xl font-semibold">0</p>
-                    </div>
-                    <Plus className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Parameter Options Section */}
-            <Card className="border rounded-lg overflow-hidden">
-              <div className="flex items-center justify-between w-full p-4 border-b">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Building2 className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-sm">
-                      {selectedParameter ? selectedParameter.label : 'Opciones del Parámetro'}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedParameter ? `${getParameterTypeLabel(selectedParameter.type)} • ${selectedParameter.options?.length || 0} opciones` : 'Selecciona un parámetro en el selector de arriba'}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0"
-                    onClick={() => {
-                      openModal('task-parameter', { parameter: selectedParameter });
-                    }}
-                  >
-                    <Edit className="w-3 h-3" />
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                    onClick={() => {
-                      if (selectedParameter) {
-                        openModal('delete-confirmation', {
-                          title: 'Eliminar Parámetro',
-                          description: 'Esta acción no se puede deshacer. Se eliminará el parámetro y todas sus opciones asociadas.',
-                          itemName: selectedParameter.label,
-                          onConfirm: () => {
-                            deleteParameterMutation.mutate(selectedParameter.id);
-                          }
-                        });
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-
-                  {selectedParameter?.type === 'select' && (
-                    <Button
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => {
-                        openModal('task-parameter-option', {
-                          parameterId: selectedParameter.parameter_id,
-                          parameterLabel: selectedParameter.label,
-                          option: null
-                        });
-                      }}
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      AGREGAR OPCIÓN
-                    </Button>
-                  )}
-                </div>
+            {/* Parameter Values Table */}
+            {selectedParameter ? (
+              <ParameterValuesTable parameterId={selectedParameter.id} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Selecciona un parámetro para ver sus opciones
               </div>
-
-              {/* Parameter Values Table */}
-              <div className="p-4">
-                {selectedParameter ? (
-                  <ParameterValuesTable parameterId={selectedParameter.id} />
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Selecciona un parámetro para ver sus opciones
-                  </div>
-                )}
-              </div>
-            </Card>
+            )}
           </>
         )}
       </div>
