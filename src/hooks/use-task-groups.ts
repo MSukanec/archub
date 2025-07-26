@@ -9,15 +9,6 @@ export interface TaskGroup {
   template_id?: string | null;
   created_at: string;
   updated_at: string;
-  task_categories?: {
-    id: string;
-    name: string;
-    subcategory_id: string;
-    task_subcategories: {
-      id: string;
-      name: string;
-    };
-  };
 }
 
 export interface CreateTaskGroupData {
@@ -38,18 +29,7 @@ export function useTaskGroups() {
 
       const { data, error } = await supabase
         .from('task_groups')
-        .select(`
-          *,
-          task_categories!inner(
-            id,
-            name,
-            subcategory_id,
-            task_subcategories!inner(
-              id,
-              name
-            )
-          )
-        `)
+        .select('*')
         .order('name');
 
       if (error) {
