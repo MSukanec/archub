@@ -117,22 +117,22 @@ export default function AdminTaskParameters() {
   // Features for ActionBar expandable info
   const features = [
     {
-      icon: Settings,
+      icon: <Settings className="w-4 h-4" />,
       title: "Gestión Avanzada de Parámetros",
       description: "Sistema completo de administración de parámetros reutilizables para tareas de construcción con soporte para diferentes tipos de datos."
     },
     {
-      icon: Building2,
+      icon: <Building2 className="w-4 h-4" />,
       title: "Configuración de Opciones",
       description: "Permite crear y gestionar opciones personalizadas para parámetros de selección, organizadas en grupos para facilitar su uso."
     },
     {
-      icon: Eye,
+      icon: <Eye className="w-4 h-4" />,
       title: "Vista Unificada de Parámetros",
       description: "Visualización centralizada de todos los parámetros con estadísticas en tiempo real y herramientas de búsqueda avanzada."
     },
     {
-      icon: Plus,
+      icon: <Plus className="w-4 h-4" />,
       title: "Sistema de Templates Dinámicos",
       description: "Integración completa con plantillas de tareas para generar descripciones automáticas basadas en los parámetros configurados."
     }
@@ -266,7 +266,7 @@ export default function AdminTaskParameters() {
     <Layout wide={true}>
       <ActionBarDesktop
         title="Parámetros de Tareas"
-        icon={Settings}
+        icon={<Settings className="w-5 h-5" />}
         features={features}
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
