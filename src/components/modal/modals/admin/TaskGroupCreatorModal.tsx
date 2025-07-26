@@ -198,10 +198,11 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={<div />}
+      viewPanel={null}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
+      isEditing={true}
       onClose={handleClose}
     />
   )
