@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, X } from 'lucide-react';
+import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, X, Tag, TreePine, Eye, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -284,6 +284,30 @@ export default function AdminCategories() {
     setTemplateFilter('all');
   };
 
+  // Features for ActionBar expansion
+  const features = [
+    {
+      icon: <TreePine className="w-5 h-5" />,
+      title: "Estructura Jerárquica",
+      description: "Organiza categorías en una estructura de árbol con niveles padre-hijo para mejor clasificación."
+    },
+    {
+      icon: <Package2 className="w-5 h-5" />,
+      title: "Gestión de Grupos",
+      description: "Administra grupos de tareas dentro de cada categoría para organizar plantillas y elementos relacionados."
+    },
+    {
+      icon: <Eye className="w-5 h-5" />,
+      title: "Vista Expandible",
+      description: "Navega fácilmente por categorías y subcategorías con controles de expansión intuitivos."
+    },
+    {
+      icon: <Zap className="w-5 h-5" />,
+      title: "Operaciones Rápidas",
+      description: "Crea, edita y elimina categorías y grupos con acciones rápidas desde la interfaz principal."
+    }
+  ];
+
   // Header props
   const headerProps = {
     title: "Gestión de Categorías",
@@ -305,80 +329,19 @@ export default function AdminCategories() {
       <Layout headerProps={headerProps}>
         {/* Action Bar Desktop */}
         <ActionBarDesktop
+          title="Categorías de Tareas"
+          icon={<Tag className="w-5 h-5" />}
+          features={features}
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          showGrouping={false}
-          primaryActionLabel="CREAR CATEGORÍA"
+          showProjectSelector={false}
+          primaryActionLabel="Nueva Categoría"
           onPrimaryActionClick={() => {
             openModal('task-category', {
               editingCategory: null,
               isEditing: false
             });
           }}
-          customActions={[
-            <TooltipProvider key="tooltip-provider">
-              <Tooltip key="filter-all">
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setTemplateFilter('all')}
-                    className={templateFilter === 'all' ? 'bg-accent text-accent-foreground' : ''}
-                  >
-                    <Package2 className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Todas</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip key="filter-with">
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setTemplateFilter('with-template')}
-                    className={templateFilter === 'with-template' ? 'bg-accent text-accent-foreground' : ''}
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Con Plantilla</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip key="filter-without">
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setTemplateFilter('without-template')}
-                    className={templateFilter === 'without-template' ? 'bg-accent text-accent-foreground' : ''}
-                  >
-                    <XCircle className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Sin Plantilla</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip key="clear-filters">
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={clearFilters}
-                    className={searchTerm || templateFilter !== 'all' ? 'opacity-100' : 'opacity-50'}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Limpiar Filtros</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ]}
         />
 
         {/* Statistics Cards */}
