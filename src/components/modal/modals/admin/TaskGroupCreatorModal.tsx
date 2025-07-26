@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge'
 
 import { useCreateTaskGroup, useUpdateTaskGroup } from '@/hooks/use-task-groups'
 import { useCreateTaskTemplate } from '@/hooks/use-task-templates-admin'
-import { useAllTaskCategories } from '@/hooks/use-task-categories-admin'
+import { useSubcategoriesOnly } from '@/hooks/use-task-categories-admin'
 import { useUnits } from '@/hooks/use-units'
 import { TaskTemplate, TaskTemplateParameter, TaskParameter } from '@shared/schema'
 
@@ -128,7 +128,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const updateGroupMutation = useUpdateTaskGroup()
   
   // Data hooks for step 1
-  const { data: allCategories = [], isLoading: categoriesLoading } = useAllTaskCategories()
+  const { data: allCategories = [], isLoading: categoriesLoading } = useSubcategoriesOnly()
   const { data: units = [], isLoading: unitsLoading } = useUnits()
   
   // State for step 2 (template configuration)

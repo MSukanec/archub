@@ -59,6 +59,39 @@ export function useAllTaskCategories() {
   });
 }
 
+export function useSubcategoriesOnly() {
+  return useQuery({
+    queryKey: ['subcategories-only'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+
+      const { data: categories, error } = await supabase
+        .from('task_categories')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+
+      // Filter to get only subcategories (items that have a parent_id and their parent also has a parent_id)
+      const subcategories = categories?.filter(category => {
+        if (!category.parent_id) return false; // Must have a parent
+        
+        // Find the parent
+        const parent = categories.find(c => c.id === category.parent_id);
+        if (!parent) return false;
+        
+        // Parent must also have a parent (making current item a subcategory)
+        return parent.parent_id !== null;
+      }) || [];
+
+      return subcategories;
+    },
+  });
+}
+
 export function useTaskCategoriesAdmin() {
   return useQuery({
     queryKey: ['task-categories-admin'],
