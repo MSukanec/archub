@@ -261,7 +261,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
           name_template: `${data.name}.`,
           task_group_id: newGroup.id,
           unit_id: data.unit_id,
-          task_code: null,
+          task_code: 'AUTO',
         })
 
         // Update the task group with the template_id
