@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
+import { FormModalStepHeader } from '@/components/modal/form/FormModalStepHeader'
 import { FormModalStepFooter } from '@/components/modal/form/FormModalStepFooter'
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -555,39 +555,65 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     </div>
   )
 
+  const stepConfig = {
+    currentStep,
+    totalSteps: 2,
+    stepTitle: stepTitles[currentStep as keyof typeof stepTitles],
+    stepDescription: stepDescriptions[currentStep as keyof typeof stepDescriptions]
+  }
+
   const headerContent = (
-    <FormModalHeader 
-      title={stepTitles[currentStep as keyof typeof stepTitles]}
-      description={stepDescriptions[currentStep as keyof typeof stepDescriptions]}
+    <FormModalStepHeader 
+      title={modalData?.taskGroup ? "Editar Grupo de Tareas" : "Crear Grupo de Tareas"}
       icon={currentStep === 1 ? PackagePlus : Settings}
+      stepConfig={stepConfig}
     />
   )
 
-  const footerConfig = {
-    cancelAction: {
-      label: "Cancelar",
-      onClick: handleClose,
-      disabled: false,
-      loading: false,
-    },
-    previousAction: currentStep > 1 ? {
-      label: "Anterior",
-      onClick: handlePrevious,
-      disabled: false,
-      loading: false,
-    } : undefined,
-    nextAction: {
-      label: currentStep === 2 ? "Finalizar" : (isSubmitting ? (isEditing ? "Actualizando..." : "Creando...") : (isEditing ? "Actualizar" : "Crear y Continuar")),
-      onClick: handleNext,
-      disabled: currentStep === 1 ? !form.formState.isValid : false,
-      loading: isSubmitting,
-      variant: "default" as const,
-    },
+  const getFooterConfig = () => {
+    switch (currentStep) {
+      case 1:
+        return {
+          cancelAction: { 
+            label: 'Cancelar', 
+            onClick: handleClose 
+          },
+          nextAction: { 
+            label: modalData?.taskGroup ? 'Actualizar' : 'Crear y Continuar', 
+            onClick: handleNext,
+            disabled: !form.formState.isValid,
+            loading: isSubmitting
+          }
+        }
+      case 2:
+        return {
+          cancelAction: { 
+            label: 'Cancelar', 
+            onClick: handleClose 
+          },
+          previousAction: { 
+            label: 'Anterior', 
+            onClick: handlePrevious 
+          },
+          submitAction: { 
+            label: 'Finalizar', 
+            onClick: handleNext,
+            loading: isSubmitting
+          }
+        }
+      default:
+        return {
+          cancelAction: { 
+            label: 'Cancelar', 
+            onClick: handleClose 
+          }
+        }
+    }
   }
 
   const footerContent = (
     <FormModalStepFooter
-      config={footerConfig}
+      config={getFooterConfig()}
     />
   )
 
