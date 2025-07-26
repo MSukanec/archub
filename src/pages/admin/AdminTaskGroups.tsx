@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useTaskGroups, useDeleteTaskGroup } from '@/hooks/use-task-groups'
 
-import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock } from 'lucide-react'
+import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock, Grid3x3 } from 'lucide-react'
 
 interface TaskGroup {
   id: string
@@ -27,6 +27,7 @@ interface TaskGroup {
 export default function AdminTaskGroups() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
+  const [groupingType, setGroupingType] = useState<'none' | 'subcategory'>('none')
   const { openModal } = useGlobalModalStore()
   
   // Real data from useTaskGroups hook
@@ -57,6 +58,22 @@ export default function AdminTaskGroups() {
       return 0
     })
 
+  // Group by subcategory if needed
+  const groupedData = useMemo(() => {
+    if (groupingType === 'subcategory') {
+      const grouped = filteredTaskGroups.reduce((acc: Record<string, TaskGroup[]>, group: TaskGroup) => {
+        const subcategoryName = group.task_categories?.task_subcategories?.name || 'Sin subcategoría'
+        if (!acc[subcategoryName]) {
+          acc[subcategoryName] = []
+        }
+        acc[subcategoryName].push(group)
+        return acc
+      }, {})
+      return grouped
+    }
+    return null
+  }, [filteredTaskGroups, groupingType])
+
   // Handle delete task group
   const handleDeleteTaskGroup = (taskGroup: TaskGroup) => {
     openModal('delete-confirmation', {
@@ -77,6 +94,16 @@ export default function AdminTaskGroups() {
   // Custom filters for ActionBar
   const renderCustomFilters = () => (
     <div className="flex items-center gap-2">
+      {/* Grouping dropdown */}
+      <select
+        value={groupingType}
+        onChange={(e) => setGroupingType(e.target.value as 'none' | 'subcategory')}
+        className="h-8 px-2 rounded border text-sm bg-background"
+      >
+        <option value="none">Sin agrupar</option>
+        <option value="subcategory">Agrupar por Subcategoría</option>
+      </select>
+      
       {/* Sort dropdown */}
       <select
         value={sortBy}
@@ -120,15 +147,7 @@ export default function AdminTaskGroups() {
       label: 'Nombre del Grupo',
       width: '40%',
       render: (taskGroup: TaskGroup) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Package2 className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <div className="font-medium text-sm">{taskGroup.name}</div>
-            <div className="text-xs text-muted-foreground">ID: {taskGroup.id.slice(0, 8)}...</div>
-          </div>
-        </div>
+        <div className="font-medium text-sm">{taskGroup.name}</div>
       )
     },
     {
@@ -206,6 +225,17 @@ export default function AdminTaskGroups() {
         onSearchChange={setSearchValue}
         customFilters={renderCustomFilters()}
         showProjectSelector={false}
+        customActions={[
+          <Button
+            key="grouping"
+            variant="ghost"
+            size="sm"
+            onClick={() => setGroupingType(groupingType === 'none' ? 'subcategory' : 'none')}
+            title="Agrupar por Subcategoría"
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </Button>
+        ]}
         primaryActionLabel="Nuevo Grupo"
         onPrimaryActionClick={() => openModal('task-group-creator', {})}
       />
@@ -220,6 +250,26 @@ export default function AdminTaskGroups() {
               : 'Comienza creando tu primer grupo de tareas para organizar plantillas y elementos relacionados'
             }
           />
+        ) : groupingType === 'subcategory' && groupedData ? (
+          <div className="space-y-6">
+            {Object.entries(groupedData).map(([subcategoryName, groups]) => (
+              <div key={subcategoryName} className="space-y-3">
+                <div className="flex items-center gap-3 py-2 px-4 bg-accent/30 rounded-lg border">
+                  <Package2 className="w-4 h-4 text-accent-foreground" />
+                  <span className="font-medium text-sm text-accent-foreground">
+                    {subcategoryName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({groups.length} {groups.length === 1 ? 'grupo' : 'grupos'})
+                  </span>
+                </div>
+                <Table
+                  data={groups}
+                  columns={columns}
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           <Table
             data={filteredTaskGroups}
