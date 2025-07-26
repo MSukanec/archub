@@ -179,12 +179,16 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     try {
       if (!supabase) return
       
-      // Fetch existing template
+      console.log('🔍 Buscando plantilla para task_group_id:', taskGroupId)
+      
+      // Fetch existing template using task_group_id
       const { data: template } = await supabase
         .from('task_templates')
         .select('*')
-        .eq('category_id', taskGroup.category_id)
+        .eq('task_group_id', taskGroupId)
         .single()
+
+      console.log('🔍 Resultado búsqueda plantilla:', { data: template })
 
       if (template) {
         setExistingTemplate(template)
@@ -192,10 +196,14 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         // Fetch template parameters
         const { data: templateParams } = await supabase
           .from('task_template_parameters')
-          .select('*')
+          .select(`
+            *,
+            task_parameter:task_parameters(*)
+          `)
           .eq('template_id', template.id)
           .order('position')
 
+        console.log('📋 Parámetros de plantilla cargados:', templateParams)
         setTemplateParameters(templateParams || [])
       }
 
@@ -205,9 +213,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         .select('*')
         .order('name')
 
+      console.log('⚙️ Parámetros disponibles:', params)
       setAvailableParameters(params || [])
     } catch (error) {
-      console.error('Error fetching template data:', error)
+      console.error('❌ Error fetching template data:', error)
     }
   }
 
