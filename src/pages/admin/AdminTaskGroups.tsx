@@ -71,7 +71,7 @@ export default function AdminTaskGroups() {
 
   // Handle edit task group
   const handleEditTaskGroup = (taskGroup: TaskGroup) => {
-    openModal('task-group', { taskGroup });
+    openModal('task-group-creator', { taskGroup });
   }
 
   // Handle template action for task group
