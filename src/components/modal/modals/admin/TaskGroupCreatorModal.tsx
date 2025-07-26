@@ -69,12 +69,16 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         category_id: data.subcategory_id,
       })
 
-      // Step 2: Create the associated template
+      // Step 2: Get the category code through the task group
+      const selectedCategory = subcategories.find(cat => cat.id === data.subcategory_id)
+      const categoryCode = selectedCategory?.code || 'AUTO'
+
+      // Step 3: Create the associated template
       await createTemplateMutation.mutateAsync({
-        name_template: `${data.name} {{}}`, // Basic template with placeholder
-        category_id: data.subcategory_id, // Use category_id instead of task_group_id
+        name_template: `${data.name}.`, // Template name with period
+        task_group_id: newGroup.id, // Use task_group_id (not category_id)
         unit_id: data.unit_id,
-        task_code: 'AUTO', // Auto-generated code
+        task_code: categoryCode, // Use actual category code
       })
 
       handleClose()
@@ -163,17 +167,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
           )}
         />
 
-        {/* Information section */}
-        <div className="p-3 bg-muted rounded-md">
-          <p className="text-sm text-muted-foreground">
-            💡 <strong>Este proceso creará:</strong>
-          </p>
-          <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-            <li>• Un nuevo grupo de tareas en la subcategoría seleccionada</li>
-            <li>• Una plantilla de tarea asociada con la unidad seleccionada</li>
-            <li>• Base para futuras tareas parametrizadas</li>
-          </ul>
-        </div>
+
       </form>
     </Form>
   )
