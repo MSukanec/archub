@@ -96,11 +96,10 @@ function SortableParameterItem({ param, parameter, onRemove }: SortableParameter
         </div>
         <div className="flex-1">
           <p className="font-medium text-sm">{parameter?.label || 'Parámetro sin nombre'}</p>
-          <p className="text-xs text-muted-foreground">{parameter?.name || 'N/A'}</p>
+          <Badge variant="outline" className="text-xs mt-1">
+            {parameter?.type || 'N/A'}
+          </Badge>
         </div>
-        <Badge variant="outline" className="text-xs">
-          {parameter?.type || 'N/A'}
-        </Badge>
       </div>
       <Button
         variant="ghost"
