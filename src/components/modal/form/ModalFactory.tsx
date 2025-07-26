@@ -32,6 +32,7 @@ import { TaskGroupFormModal } from '../modals/admin/TaskGroupFormModal';
 import { TaskGroupCreatorModal } from '../modals/admin/TaskGroupCreatorModal';
 import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
+import TaskGroupTemplateModal from '../modals/admin/TaskGroupTemplateModal';
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
 import { TaskParameterGroupAssignmentModal } from '../modals/admin/TaskParameterGroupAssignmentModal';
 import { GeneratedTaskFormModal } from '../modals/admin/GeneratedTaskFormModal';
@@ -133,6 +134,12 @@ export function ModalFactory() {
         categoryName={data?.categoryName}
         taskGroupId={data?.taskGroupId}
         taskGroupName={data?.taskGroupName}
+      />;
+    case 'task-group-template':
+      return <TaskGroupTemplateModal 
+        taskGroupId={data?.taskGroupId}
+        taskGroupName={data?.taskGroupName}
+        categoryId={data?.categoryId}
       />;
     case 'admin-user':
       return <UserFormModal modalData={data} onClose={closeModal} />;

@@ -76,7 +76,7 @@ export default function AdminTaskGroups() {
 
   // Handle template action for task group
   const handleTaskGroupTemplate = (taskGroup: TaskGroup) => {
-    openModal('task-template', {
+    openModal('task-group-template', {
       taskGroupId: taskGroup.id,
       taskGroupName: taskGroup.name,
       categoryId: taskGroup.category_id
