@@ -51,6 +51,17 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     },
   })
 
+  // Load data when editing existing task group
+  useEffect(() => {
+    if (modalData?.taskGroup) {
+      form.reset({
+        name: modalData.taskGroup.name,
+        subcategory_id: modalData.taskGroup.category_id,
+        unit_id: '',
+      })
+    }
+  }, [modalData, form])
+
   // Get subcategories (categories that have parent_id - are not root level)
   const subcategories = allCategories.filter(category => category.parent_id !== null)
 
@@ -64,35 +75,43 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     setIsSubmitting(true)
     
     try {
-      // Step 1: Create the task group
-      const newGroup = await createGroupMutation.mutateAsync({
-        name: data.name,
-        category_id: data.subcategory_id,
-      })
+      if (modalData?.taskGroup) {
+        // Editing existing task group
+        await updateGroupMutation.mutateAsync({
+          id: modalData.taskGroup.id,
+          name: data.name,
+          category_id: data.subcategory_id,
+        })
+      } else {
+        // Creating new task group
+        // Step 1: Create the task group
+        const newGroup = await createGroupMutation.mutateAsync({
+          name: data.name,
+          category_id: data.subcategory_id,
+        })
 
-      // Step 2: Get the category code through the task group
-      const selectedCategory = subcategories.find(cat => cat.id === data.subcategory_id)
-      const categoryCode = selectedCategory?.code || 'AUTO'
+        // Step 2: Get the category code through the task group
+        const selectedCategory = subcategories.find(cat => cat.id === data.subcategory_id)
+        const categoryCode = selectedCategory?.code || 'AUTO'
 
-      // Step 3: Create the associated template
-      const newTemplate = await createTemplateMutation.mutateAsync({
-        name_template: `${data.name}.`, // Template name with period
-        task_group_id: newGroup.id, // Use task_group_id (not category_id)
-        unit_id: data.unit_id,
-        task_code: categoryCode, // Use actual category code
-      })
+        // Step 3: Create the associated template
+        const newTemplate = await createTemplateMutation.mutateAsync({
+          name_template: `${data.name}.`, // Template name with period
+          category_id: data.subcategory_id,
+        })
 
-      // Step 4: Update the task group with the template_id
-      await updateGroupMutation.mutateAsync({
-        id: newGroup.id,
-        name: newGroup.name,
-        category_id: newGroup.category_id,
-        template_id: newTemplate.id,
-      })
+        // Step 4: Update the task group with the template_id
+        await updateGroupMutation.mutateAsync({
+          id: newGroup.id,
+          name: newGroup.name,
+          category_id: newGroup.category_id,
+          template_id: newTemplate.id,
+        })
+      }
 
       handleClose()
     } catch (error) {
-      console.error('Error creating group and template:', error)
+      console.error('Error creating/updating group and template:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -104,6 +123,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   }
 
   const isLoading = categoriesLoading || unitsLoading || isSubmitting
+  const isEditing = !!modalData?.taskGroup
 
   // Edit panel with form
   const editPanel = (
@@ -123,7 +143,6 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder="Buscar subcategoría..."
-                  emptyText="No se encontraron subcategorías"
                   disabled={categoriesLoading}
                 />
               </FormControl>
@@ -183,7 +202,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
 
   const headerContent = (
     <FormModalHeader 
-      title="Crear Grupo y Plantilla"
+      title={isEditing ? "Editar Grupo de Tareas" : "Crear Grupo y Plantilla"}
       icon={PackagePlus}
     />
   )
@@ -192,9 +211,8 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isSubmitting ? "Creando..." : "Crear Grupo"}
+      rightLabel={isSubmitting ? (isEditing ? "Actualizando..." : "Creando...") : (isEditing ? "Actualizar Grupo" : "Crear Grupo")}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightDisabled={isLoading}
     />
   )
 
