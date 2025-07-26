@@ -18,6 +18,7 @@ export interface CreateTaskGroupData {
 
 export interface UpdateTaskGroupData extends CreateTaskGroupData {
   id: string;
+  template_id?: string | null;
 }
 
 export function useTaskGroups() {

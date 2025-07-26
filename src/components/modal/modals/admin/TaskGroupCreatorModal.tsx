@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 
-import { useCreateTaskGroup } from '@/hooks/use-task-groups'
+import { useCreateTaskGroup, useUpdateTaskGroup } from '@/hooks/use-task-groups'
 import { useCreateTaskTemplate } from '@/hooks/use-task-templates-admin'
 import { useAllTaskCategories } from '@/hooks/use-task-categories-admin'
 import { useUnits } from '@/hooks/use-units'
@@ -36,6 +36,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   
   const createGroupMutation = useCreateTaskGroup()
   const createTemplateMutation = useCreateTaskTemplate()
+  const updateGroupMutation = useUpdateTaskGroup()
   
   // Data hooks
   const { data: allCategories = [], isLoading: categoriesLoading } = useAllTaskCategories()
@@ -74,11 +75,19 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       const categoryCode = selectedCategory?.code || 'AUTO'
 
       // Step 3: Create the associated template
-      await createTemplateMutation.mutateAsync({
+      const newTemplate = await createTemplateMutation.mutateAsync({
         name_template: `${data.name}.`, // Template name with period
         task_group_id: newGroup.id, // Use task_group_id (not category_id)
         unit_id: data.unit_id,
         task_code: categoryCode, // Use actual category code
+      })
+
+      // Step 4: Update the task group with the template_id
+      await updateGroupMutation.mutateAsync({
+        id: newGroup.id,
+        name: newGroup.name,
+        category_id: newGroup.category_id,
+        template_id: newTemplate.id,
       })
 
       handleClose()
