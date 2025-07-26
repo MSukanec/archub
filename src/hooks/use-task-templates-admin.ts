@@ -7,7 +7,7 @@ export interface TaskTemplate {
   name_template: string;
   task_group_id: string;
   unit_id: string;
-  task_code: string;
+  task_code: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -16,7 +16,7 @@ export interface CreateTaskTemplateData {
   name_template: string;
   task_group_id: string;
   unit_id: string;
-  task_code: string;
+  task_code: string | null;
 }
 
 export interface UpdateTaskTemplateData extends CreateTaskTemplateData {
