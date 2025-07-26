@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useTaskGroups, useDeleteTaskGroup } from '@/hooks/use-task-groups'
 
-import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock } from 'lucide-react'
+import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock, FileText } from 'lucide-react'
 
 interface TaskGroup {
   id: string
@@ -74,6 +74,15 @@ export default function AdminTaskGroups() {
     openModal('task-group', { taskGroup });
   }
 
+  // Handle template action for task group
+  const handleTaskGroupTemplate = (taskGroup: TaskGroup) => {
+    openModal('task-template', {
+      taskGroupId: taskGroup.id,
+      taskGroupName: taskGroup.name,
+      categoryId: taskGroup.category_id
+    });
+  }
+
   // Custom filters for ActionBar
   const renderCustomFilters = () => (
     <div className="flex items-center gap-2">
@@ -118,23 +127,15 @@ export default function AdminTaskGroups() {
     {
       key: 'name',
       label: 'Nombre del Grupo',
-      width: '40%',
+      width: '50%',
       render: (taskGroup: TaskGroup) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Package2 className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <div className="font-medium text-sm">{taskGroup.name}</div>
-            <div className="text-xs text-muted-foreground">ID: {taskGroup.id.slice(0, 8)}...</div>
-          </div>
-        </div>
+        <div className="font-medium text-sm">{taskGroup.name}</div>
       )
     },
     {
       key: 'template_id',
       label: 'Plantilla Asociada',
-      width: '25%',
+      width: '20%',
       render: (taskGroup: TaskGroup) => (
         <div className="text-sm">
           {taskGroup.template_id ? (
@@ -162,9 +163,18 @@ export default function AdminTaskGroups() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '15%',
+      width: '10%',
       render: (taskGroup: TaskGroup) => (
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={() => handleTaskGroupTemplate(taskGroup)}
+            title="Plantilla"
+          >
+            <FileText className="w-3 h-3" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
