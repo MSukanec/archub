@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { BudgetTable } from '@/components/ui-custom/BudgetTable'
+import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
@@ -331,7 +331,7 @@ export default function ConstructionLibrary() {
               ]}
             />
             
-            <BudgetTable
+            <Table
               tasks={filteredTasks}
               columns={columns}
               isLoading={tasksLoading}

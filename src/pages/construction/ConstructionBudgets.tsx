@@ -11,7 +11,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
-// Removed CustomTable import as we now use BudgetTable
+// Using Table component for budget tasks display
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Table } from '@/components/ui-custom/Table'
@@ -530,7 +530,7 @@ export default function ConstructionBudgets() {
     </Layout>
   )
 
-  // Budget Task Table Component using reusable BudgetTable
+  // Budget Task Table Component using reusable Table
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
     const { budgetTasks, isLoading, updateBudgetTask, createBudgetTask, deleteBudgetTask } = useBudgetTasks(budgetId);
     const { data: parameterValues = [] } = useTaskParameterValues();

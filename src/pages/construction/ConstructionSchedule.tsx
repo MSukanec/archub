@@ -2,11 +2,11 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, Table, Edit, Trash2 } from 'lucide-react'
+import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2 } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { BudgetTable } from '@/components/ui-custom/BudgetTable'
+import { Table } from '@/components/ui-custom/Table'
 import ProgressCurve from '@/components/charts/gantt/ProgressCurve'
 import BurndownChart from '@/components/charts/gantt/BurndownChart'
 import WorkloadOverTime from '@/components/charts/gantt/WorkloadOverTime'
@@ -208,7 +208,7 @@ export default function ConstructionSchedule() {
     })
   }, [processedTasks, searchValue])
 
-  // Transformar construction tasks al formato que espera BudgetTable
+  // Transformar construction tasks al formato que espera Table
   const budgetTasks = useMemo(() => {
     if (!filteredTasks) return []
     
@@ -249,7 +249,7 @@ export default function ConstructionSchedule() {
     }))
   }, [filteredTasks])
 
-  // Funciones helper requeridas por BudgetTable
+  // Funciones helper requeridas por Table
   const generateTaskDisplayName = (task: any, parameterValues: any[]) => {
     if (!task) return 'Tarea sin nombre'
     return cleanTaskDisplayName(task.processed_display_name || task.display_name || task.code || 'Tarea sin nombre')
@@ -545,7 +545,7 @@ export default function ConstructionSchedule() {
           {
             value: "table",
             label: "Listado de Tareas",
-            icon: <Table className="h-4 w-4" />
+            icon: <TableIcon className="h-4 w-4" />
           },
           {
             value: "analytics",
@@ -592,7 +592,7 @@ export default function ConstructionSchedule() {
             )}
 
             {activeTab === "table" && (
-              <BudgetTable
+              <Table
               budgetId="construction-tasks"
               budgetTasks={budgetTasks}
               isLoading={isLoading}
