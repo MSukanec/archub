@@ -32,6 +32,27 @@ export interface CreateTaskParameterData {
   expression_template?: string;
 }
 
+export interface UpdateTaskParameterData {
+  id: string;
+  slug: string;
+  label: string;
+  type: string;
+  expression_template?: string;
+}
+
+export interface CreateTaskParameterOptionData {
+  parameter_id: string;
+  name: string;
+  label: string;
+}
+
+export interface UpdateTaskParameterOptionData {
+  id: string;
+  parameter_id: string;
+  name: string;
+  label: string;
+}
+
 export interface UpdateTaskParameterData extends CreateTaskParameterData {
   id: string;
 }
@@ -51,6 +72,8 @@ export function useTaskParametersAdmin() {
   return useQuery({
     queryKey: ['task-parameters-admin-clean'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
         .select('*')
@@ -92,10 +115,12 @@ export function useCreateTaskParameter() {
   
   return useMutation({
     mutationFn: async (parameterData: CreateTaskParameterData) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { data: parameter, error: paramError } = await supabase
         .from('task_parameters')
         .insert([{
-          name: parameterData.name,
+          slug: parameterData.slug,
           label: parameterData.label,
           type: parameterData.type,
           expression_template: parameterData.expression_template
@@ -134,10 +159,12 @@ export function useUpdateTaskParameter() {
   
   return useMutation({
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterData) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { data: parameter, error: paramError } = await supabase
         .from('task_parameters')
         .update({
-          name: updateData.name,
+          slug: updateData.slug,
           label: updateData.label,
           type: updateData.type,
           expression_template: updateData.expression_template
@@ -177,9 +204,11 @@ export function useDeleteTaskParameter() {
   
   return useMutation({
     mutationFn: async (parameterId: string) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       // First delete all parameter options
       await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .delete()
         .eq('parameter_id', parameterId);
 
@@ -219,8 +248,10 @@ export function useCreateTaskParameterOption() {
   
   return useMutation({
     mutationFn: async (optionData: CreateTaskParameterOptionData) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { data: option, error: optionError } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .insert([{
           parameter_id: optionData.parameter_id,
           name: optionData.name,
@@ -260,8 +291,10 @@ export function useUpdateTaskParameterOption() {
   
   return useMutation({
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterOptionData) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { data: option, error: optionError } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .update({
           parameter_id: updateData.parameter_id,
           name: updateData.name,
@@ -302,8 +335,10 @@ export function useDeleteTaskParameterOption() {
   
   return useMutation({
     mutationFn: async (optionId: string) => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { error } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .delete()
         .eq('id', optionId);
 
