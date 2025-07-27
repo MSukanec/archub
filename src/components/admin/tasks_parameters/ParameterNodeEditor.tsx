@@ -147,7 +147,7 @@ function ParameterNodeEditorContent() {
   const { data: parametersData = [], isLoading: parametersLoading } = useParametersWithOptions();
   const { data: dependencies = [], isLoading: dependenciesLoading } = useParameterDependencies();
 
-  // Tipos de nodos personalizados
+  // Tipos de nodos personalizados - memoizados para evitar recreación
   const nodeTypes = useMemo(() => ({
     parameterNode: ParameterNode,
   }), []);
@@ -173,7 +173,6 @@ function ParameterNodeEditorContent() {
       return data;
     },
     onSuccess: (newDependency) => {
-      console.log('✅ Dependency created successfully:', newDependency);
       queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
       toast({
         title: "Dependencia creada",
@@ -243,46 +242,32 @@ function ParameterNodeEditorContent() {
 
   // Configurar edges desde dependencias existentes
   useEffect(() => {
-    console.log('🔄 Loading existing dependencies:', dependencies);
-    
-    if (dependencies.length > 0) {
-      const initialEdges: Edge[] = dependencies.map((dep) => {
-        const edgeId = `${dep.parent_parameter_id}-${dep.parent_option_id}-${dep.child_parameter_id}`;
-        console.log('📍 Creating edge:', {
-          id: edgeId,
-          source: dep.parent_parameter_id,
-          sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
-          target: dep.child_parameter_id,
-          targetHandle: `target-${dep.child_parameter_id}`
-        });
-
-        return {
-          id: edgeId,
-          source: dep.parent_parameter_id,
-          sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
-          target: dep.child_parameter_id,
-          targetHandle: `target-${dep.child_parameter_id}`,
-          type: 'default',
-          animated: true,
-          style: {
-            stroke: 'hsl(var(--accent))',
-            strokeWidth: 2,
-          },
-          data: {
-            parentParameterId: dep.parent_parameter_id,
-            parentOptionId: dep.parent_option_id,
-            childParameterId: dep.child_parameter_id
-          }
-        };
-      });
-
-      console.log('🎯 Setting initial edges:', initialEdges);
-      setEdges(initialEdges);
-    } else {
-      console.log('📭 No dependencies found, clearing edges');
+    if (!dependencies || dependencies.length === 0) {
       setEdges([]);
+      return;
     }
-  }, [dependencies, setEdges]);
+
+    const initialEdges: Edge[] = dependencies.map((dep) => ({
+      id: `${dep.parent_parameter_id}-${dep.parent_option_id}-${dep.child_parameter_id}`,
+      source: dep.parent_parameter_id,
+      sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
+      target: dep.child_parameter_id,
+      targetHandle: `target-${dep.child_parameter_id}`,
+      type: 'default',
+      animated: true,
+      style: {
+        stroke: 'hsl(var(--accent))',
+        strokeWidth: 2,
+      },
+      data: {
+        parentParameterId: dep.parent_parameter_id,
+        parentOptionId: dep.parent_option_id,
+        childParameterId: dep.child_parameter_id
+      }
+    }));
+
+    setEdges(initialEdges);
+  }, [dependencies.length]);
 
   // Manejar nuevas conexiones
   const onConnect = useCallback(
@@ -295,12 +280,7 @@ function ParameterNodeEditorContent() {
       const sourceOptionId = params.sourceHandle.replace(`${sourceParamId}-`, ''); // Remover el prefijo para obtener solo el option ID
       const targetParamId = params.target;
 
-      console.log('🔗 Connection attempt:', {
-        sourceHandle: params.sourceHandle,
-        sourceParamId,
-        sourceOptionId,
-        targetParamId
-      });
+      // Debug logging removed to prevent console spam
 
       // Verificar que no sea una auto-conexión
       if (sourceParamId === targetParamId) {
@@ -416,6 +396,9 @@ function ParameterNodeEditorContent() {
           attributionPosition="bottom-left"
           className="bg-background"
           deleteKeyCode={['Backspace', 'Delete']}
+          minZoom={0.1}
+          maxZoom={4}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         >
           <Background 
             variant={BackgroundVariant.Dots} 
