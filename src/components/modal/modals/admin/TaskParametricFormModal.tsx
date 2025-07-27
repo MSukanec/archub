@@ -132,7 +132,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       <ParametricTaskBuilder 
         onSelectionChange={setSelections}
         onPreviewChange={setTaskPreview}
-        initialParameters={actualTask ? actualTask.param_values : null}
+        initialParameters={actualTask ? JSON.stringify(actualTask.param_values) : null}
       />
     </div>
   )

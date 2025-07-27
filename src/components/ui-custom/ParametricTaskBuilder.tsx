@@ -62,19 +62,6 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
 
-  // Load initial parameters if provided
-  useEffect(() => {
-    if (initialParameters && typeof initialParameters === 'string') {
-      try {
-        const parsedParams = JSON.parse(initialParameters);
-        console.log('🔄 Loading initial parameters:', parsedParams);
-        // This will be implemented when we have the parameter data loaded
-      } catch (e) {
-        console.error('❌ Error parsing initial parameters:', e);
-      }
-    }
-  }, [initialParameters]);
-
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({
     queryKey: ['parametric-builder-parameters'],
@@ -212,6 +199,67 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
     console.log('🎯 Parámetros disponibles actualizados:', newAvailableParams)
     setAvailableParameters(newAvailableParams)
   }, [selections, parameters, dependencies, dependencyOptions])
+
+  // Load initial parameters if provided (after parameters and options are loaded)
+  useEffect(() => {
+    if (initialParameters && typeof initialParameters === 'string' && parameters.length > 0 && allOptions.length > 0 && selections.length === 0) {
+      try {
+        const parsedParams = JSON.parse(initialParameters);
+        console.log('🔄 PROCESANDO PARÁMETROS INICIALES:', parsedParams);
+        console.log('📋 Available parameters:', parameters.map(p => ({ id: p.id, slug: p.slug })));
+        console.log('🎯 Available options:', allOptions.slice(0, 5).map(o => ({ id: o.id, parameter_id: o.parameter_id, label: o.label })));
+        
+        // Convert parsedParams to ParameterSelection format
+        const initialSelections: ParameterSelection[] = [];
+        const initialAvailableParams: string[] = [];
+        
+        for (const [paramSlug, paramValue] of Object.entries(parsedParams)) {
+          const parameter = parameters.find(p => p.slug === paramSlug);
+          if (parameter) {
+            // Find the option that matches the value (try multiple approaches)
+            let option = allOptions.find(opt => 
+              opt.parameter_id === parameter.id && 
+              (opt.label === paramValue || opt.name === paramValue)
+            );
+            
+            // If not found, try case-insensitive search
+            if (!option) {
+              option = allOptions.find(opt => 
+                opt.parameter_id === parameter.id && 
+                (opt.label?.toLowerCase() === (paramValue as string)?.toLowerCase() || 
+                 opt.name?.toLowerCase() === (paramValue as string)?.toLowerCase())
+              );
+            }
+            
+            if (option) {
+              initialSelections.push({
+                parameterId: parameter.id,
+                optionId: option.id,
+                parameterSlug: parameter.slug,
+                parameterLabel: parameter.label,
+                optionName: option.name,
+                optionLabel: option.label
+              });
+              initialAvailableParams.push(parameter.id);
+              console.log('✅ Loaded parameter:', paramSlug, '→', paramValue);
+            } else {
+              console.log('❌ Option not found for:', paramSlug, '→', paramValue, 'in parameter:', parameter.id);
+            }
+          } else {
+            console.log('❌ Parameter not found:', paramSlug);
+          }
+        }
+        
+        if (initialSelections.length > 0) {
+          setSelections(initialSelections);
+          setAvailableParameters(initialAvailableParams);
+          console.log('🎯 Initial selections set:', initialSelections.length, 'parameters');
+        }
+      } catch (e) {
+        console.error('❌ Error parsing initial parameters:', e);
+      }
+    }
+  }, [initialParameters, parameters, allOptions, selections.length]);
 
   // Generar vista previa
   useEffect(() => {
