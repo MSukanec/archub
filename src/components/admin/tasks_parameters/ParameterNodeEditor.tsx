@@ -837,7 +837,10 @@ function ParameterNodeEditorContent() {
         console.log('🔗 Nodo target es duplicado, usando original_parameter_id:', targetParamId);
       }
 
-      const sourceOptionId = params.sourceHandle.replace(`${params.source}-`, '');
+      // Extraer correctamente el option ID del sourceHandle
+      // Format del sourceHandle: parameterId-optionId (donde ambos son UUIDs de 36 caracteres)
+      // Los UUIDs tienen formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (8-4-4-4-12 caracteres)
+      const sourceOptionId = params.sourceHandle.slice(-36); // Últimos 36 caracteres son el optionId
 
       // Verificar que no sea una auto-conexión
       if (sourceParamId === targetParamId) {
