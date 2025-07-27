@@ -79,13 +79,18 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
   const { data: parameters = [] } = useQuery({
     queryKey: ['parametric-builder-parameters'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
       const { data, error } = await supabase
         .from('task_parameters')
         .select('*')
         .eq('type', 'select')
         .order('label')
       
-      if (error) throw error
+      if (error) {
+        console.error('Error loading parameters:', error)
+        throw error
+      }
+      console.log('📋 Parameters loaded:', data?.length || 0)
       return data as TaskParameter[]
     }
   })
@@ -94,12 +99,17 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
   const { data: allOptions = [] } = useQuery({
     queryKey: ['parametric-builder-options'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
       const { data, error } = await supabase
         .from('task_parameter_options')
         .select('*')
         .order('label')
       
-      if (error) throw error
+      if (error) {
+        console.error('Error loading options:', error)
+        throw error
+      }
+      console.log('🎯 Options loaded:', data?.length || 0)
       return data as TaskParameterOption[]
     }
   })
@@ -108,11 +118,16 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
   const { data: dependencies = [] } = useQuery({
     queryKey: ['parametric-builder-dependencies'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
       const { data, error } = await supabase
         .from('task_parameter_dependencies')
         .select('*')
       
-      if (error) throw error
+      if (error) {
+        console.error('Error loading dependencies:', error)
+        throw error
+      }
+      console.log('🔗 Dependencies loaded:', data?.length || 0)
       return data as TaskParameterDependency[]
     }
   })
@@ -121,11 +136,16 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
   const { data: dependencyOptions = [] } = useQuery({
     queryKey: ['parametric-builder-dependency-options'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
       const { data, error } = await supabase
         .from('task_parameter_dependency_options')
         .select('*')
       
-      if (error) throw error
+      if (error) {
+        console.error('Error loading dependency options:', error)
+        throw error
+      }
+      console.log('🎲 Dependency options loaded:', data?.length || 0)
       return data as TaskParameterDependencyOption[]
     }
   })
