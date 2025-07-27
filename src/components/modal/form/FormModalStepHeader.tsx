@@ -31,11 +31,6 @@ export function FormModalStepHeader({
               {stepConfig.stepTitle && ` • ${stepConfig.stepTitle}`}
             </p>
           )}
-          {stepConfig?.stepDescription && (
-            <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-              {stepConfig.stepDescription}
-            </p>
-          )}
         </div>
       </div>
     </div>

@@ -467,15 +467,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const isLoading = categoriesLoading || unitsLoading || isSubmitting
   const isEditing = !!modalData?.taskGroup
 
-  // Step titles and descriptions
+  // Step titles
   const stepTitles = {
     1: isEditing ? "Editar Grupo de Tareas" : "Crear Grupo de Tareas",
     2: "Configurar Plantilla"
-  }
-
-  const stepDescriptions = {
-    1: isEditing ? "Modifica la información del grupo de tareas." : "Define el nombre y categoría del grupo de tareas.",
-    2: "Configura los parámetros que utilizará la plantilla de este grupo."
   }
 
   // Step 1: Group creation/editing
@@ -634,8 +629,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const stepConfig = {
     currentStep,
     totalSteps: 2,
-    stepTitle: stepTitles[currentStep as keyof typeof stepTitles],
-    stepDescription: stepDescriptions[currentStep as keyof typeof stepDescriptions]
+    stepTitle: stepTitles[currentStep as keyof typeof stepTitles]
   }
 
   const headerContent = (
