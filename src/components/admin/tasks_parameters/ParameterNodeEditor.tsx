@@ -76,37 +76,34 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
           />
         </CardHeader>
         <CardContent className="pt-0 space-y-1">
-          {visibleOptionsList.map((option) => (
+          {visibleOptionsList.map((option, index) => (
             <div
               key={option.id}
-              className="flex items-center py-1 px-2 rounded bg-muted/50 text-xs"
+              className="relative flex items-center py-1 px-2 rounded bg-muted/50 text-xs"
             >
-              <span className="truncate">{option.label}</span>
+              <span className="truncate pr-4">{option.label}</span>
+              {/* Handle de salida alineado con el texto */}
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={`${parameter.id}-${option.id}`}
+                style={{
+                  right: -8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: 16,
+                  height: 16,
+                  backgroundColor: '#10b981',
+                  border: '2px solid #ffffff',
+                  borderRadius: '50%',
+                  zIndex: 10,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                }}
+              />
             </div>
           ))}
         </CardContent>
       </Card>
-      
-      {/* Handles de salida para cada opción - posicionados en el borde derecho */}
-      {visibleOptionsList.map((option, index) => (
-        <Handle
-          key={`source-${option.id}`}
-          type="source"
-          position={Position.Right}
-          id={`${parameter.id}-${option.id}`}
-          style={{
-            right: -8,
-            top: `${90 + (index * 28)}px`, // 90px para compensar header + ComboBox + espacio, 28px por fila
-            width: 12,
-            height: 12,
-            backgroundColor: '#10b981',
-            border: '2px solid #ffffff',
-            borderRadius: '50%',
-            zIndex: 10,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          }}
-        />
-      ))}
       
       {/* Handle de entrada principal */}
       <Handle
