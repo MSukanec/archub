@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { TaskParameterDependencyManager } from '@/components/ui-custom/TaskParameterDependencyManager';
 // Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 
 
@@ -374,11 +375,7 @@ export default function AdminTaskParameters() {
         )}
 
         {activeTab === "arbol" && (
-          <div className="text-center py-12 text-muted-foreground">
-            <TreePine className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-medium mb-2">Vista de Árbol</h3>
-            <p className="text-sm">Esta vista estará disponible próximamente</p>
-          </div>
+          <TaskParameterDependencyManager />
         )}
       </div>
 

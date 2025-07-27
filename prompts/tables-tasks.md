@@ -366,3 +366,57 @@ TABLA TASK_GROUP_PARAMETER_OPTIONS:
     "data_type": "integer"
   }
 ]
+
+TABLA TASK_PARAMETER_DEPENDENCIES
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parent_parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parent_option_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "child_parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
+
+TASK_PARAMETER_DEPENDENCY_OPTIONS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "dependency_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "child_option_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]

@@ -171,6 +171,24 @@ export const task_template_parameters = pgTable("task_template_parameters", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
+// Task Parameter Dependencies System
+export const task_parameter_dependencies = pgTable("task_parameter_dependencies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  parent_parameter_id: uuid("parent_parameter_id").notNull(),
+  parent_option_id: uuid("parent_option_id").notNull(),
+  child_parameter_id: uuid("child_parameter_id").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const task_parameter_dependency_options = pgTable("task_parameter_dependency_options", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dependency_id: uuid("dependency_id").notNull(),
+  child_option_id: uuid("child_option_id").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertTaskParameterSchema = createInsertSchema(task_parameters).omit({
   id: true,
   created_at: true,
@@ -201,6 +219,18 @@ export const insertTaskTemplateParameterSchema = createInsertSchema(task_templat
   created_at: true,
 });
 
+export const insertTaskParameterDependencySchema = createInsertSchema(task_parameter_dependencies).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertTaskParameterDependencyOptionSchema = createInsertSchema(task_parameter_dependency_options).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type DesignDocument = typeof design_documents.$inferSelect;
@@ -217,3 +247,7 @@ export type TaskTemplate = typeof task_templates.$inferSelect;
 export type TaskTemplateParameter = typeof task_template_parameters.$inferSelect;
 export type InsertTaskTemplate = z.infer<typeof insertTaskTemplateSchema>;
 export type InsertTaskTemplateParameter = z.infer<typeof insertTaskTemplateParameterSchema>;
+export type TaskParameterDependency = typeof task_parameter_dependencies.$inferSelect;
+export type TaskParameterDependencyOption = typeof task_parameter_dependency_options.$inferSelect;
+export type InsertTaskParameterDependency = z.infer<typeof insertTaskParameterDependencySchema>;
+export type InsertTaskParameterDependencyOption = z.infer<typeof insertTaskParameterDependencyOptionSchema>;
