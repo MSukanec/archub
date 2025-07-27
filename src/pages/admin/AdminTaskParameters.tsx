@@ -55,7 +55,7 @@ export default function AdminTaskParameters() {
   const filteredAndSortedParameters = parameters
     .filter(parameter =>
       (parameter.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (parameter.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      (parameter.slug || '').toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       switch (sortBy) {

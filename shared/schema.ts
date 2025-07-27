@@ -119,7 +119,7 @@ export type UserPreferences = typeof user_preferences.$inferSelect;
 // Task Parameters System
 export const task_parameters = pgTable("task_parameters", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(), // e.g., "brick-type"
+  slug: text("slug").notNull(), // e.g., "brick-type"
   label: text("label").notNull(), // e.g., "Tipo de Ladrillo / Bloque"
   type: text("type", { enum: ["text", "number", "select", "boolean"] }).notNull(),
   required: boolean("required").default(false),

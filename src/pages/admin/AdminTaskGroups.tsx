@@ -167,7 +167,7 @@ export default function AdminTaskGroups() {
       const parameter = tp.task_parameter
       if (!parameter) return
 
-      const placeholder = `{{${parameter.name}}}`
+      const placeholder = `{{${parameter.slug}}}`
       const selectedOptions = optionsMap[tp.parameter_id] || []
       
       if (selectedOptions.length > 0) {

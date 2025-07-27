@@ -268,7 +268,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     let template = existingTemplate?.name_template || '';
     const hasPlaceholders = templateParameters.some(tp => {
       const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
-      return parameter && template.includes(`{{${parameter.name}}}`);
+      return parameter && template.includes(`{{${parameter.slug}}}`);
     });
     
     if (!hasPlaceholders) {
@@ -277,7 +277,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         .sort((a, b) => a.position - b.position)
         .map(tp => {
           const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
-          return parameter ? `{{${parameter.name}}}` : '[parámetro]';
+          return parameter ? `{{${parameter.slug}}}` : '[parámetro]';
         })
         .join(' ');
       
@@ -292,12 +292,12 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
       if (!parameter) return;
       
-      const placeholder = `{{${parameter.name}}}`;
+      const placeholder = `{{${parameter.slug}}}`;
       console.log(`🔍 Procesando placeholder: ${placeholder}`);
       
       // Get selected options for this parameter
       const selectedOptions = selectedOptionsMap?.[tp.parameter_id] || [];
-      console.log(`📋 Opciones seleccionadas para ${parameter.name}:`, selectedOptions);
+      console.log(`📋 Opciones seleccionadas para ${parameter.slug}:`, selectedOptions);
       
       if (selectedOptions.length > 0) {
         // Get the first selected option ID
@@ -626,7 +626,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
           .sort((a, b) => a.position - b.position)
           .map(tp => {
             const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
-            return parameter ? `{{${parameter.name}}}` : '';
+            return parameter ? `{{${parameter.slug}}}` : '';
           })
           .filter(Boolean)
           .join(' ');
