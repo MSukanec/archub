@@ -135,6 +135,7 @@ export function useCreateTaskParameter() {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       
       toast({
         title: 'Parámetro creado',
@@ -180,6 +181,7 @@ export function useUpdateTaskParameter() {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       
       toast({
         title: 'Parámetro actualizado',
@@ -224,6 +226,7 @@ export function useDeleteTaskParameter() {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       
       toast({
         title: 'Parámetro eliminado',
@@ -267,6 +270,7 @@ export function useCreateTaskParameterOption() {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       
       toast({
         title: 'Opción creada',
@@ -311,6 +315,7 @@ export function useUpdateTaskParameterOption() {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       
       toast({
         title: 'Opción actualizada',
@@ -348,6 +353,7 @@ export function useDeleteTaskParameterOption() {
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       
       toast({
         title: 'Opción eliminada',
