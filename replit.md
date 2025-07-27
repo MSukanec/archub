@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. PARAMETER POSITIONS PERSISTENCE SYSTEM IMPLEMENTED: Successfully added database storage for node positions and visible options with automatic save/restore functionality - COMPLETED
+  • DATABASE TABLE CREATED: task_parameter_positions table with parameter_id, x, y coordinates, and visible_options array storage
+  • PERSISTENT POSITIONS: Node positions automatically saved to database when moved and restored on page reload
+  • VISIBLE OPTIONS STORAGE: Selected parameter options saved per node and restored between sessions
+  • UPSERT FUNCTIONALITY: Position updates use conflict resolution to update existing records or create new ones
+  • AUTOMATIC RESTORATION: Saved positions and visible options loaded automatically when editor opens
+  • REAL-TIME SYNC: Changes to visible options trigger immediate database updates with current position data
 - July 27, 2025. REACT FLOW VISUAL PARAMETER DEPENDENCY EDITOR IMPLEMENTED: Complete replacement of Árbol tab with visual node-based dependency management system - COMPLETED
   • VISUAL NODE EDITOR: Full React Flow implementation with ParameterNode components displaying parameters and options with connection handles
   • AUTODESK-STYLE INTERFACE: Infinite canvas with zoom, scroll, dotted background, and professional node editor controls
