@@ -24,13 +24,23 @@ import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-reac
 interface GeneratedTask {
   id: string
   code: string
-  task_group_id: string
-  parameter_values: any
-  is_public: boolean
-  is_system: boolean
-  created_at: string
+  template_id: string
+  param_values: any
   organization_id: string
-  updated_at: string
+  created_at: string
+  unit_id: string
+  task_group_id: string
+  task_group_name: string
+  category_id: string
+  category_name: string
+  category_code: string
+  subcategory_id: string
+  subcategory_name: string
+  subcategory_code: string
+  rubro_id: string
+  rubro_name: string
+  rubro_code: string
+  display_name: string
 }
 
 export default function AdminGeneratedTasks() {
@@ -151,23 +161,19 @@ export default function AdminGeneratedTasks() {
       )
     },
     {
-      key: 'is_system',
-      label: 'Tipo',
-      width: '5%',
+      key: 'category_name',
+      label: 'Categoría',
+      width: '15%',
       render: (task: GeneratedTask) => (
-        <Badge variant={task.is_system ? "default" : "outline"} className="text-xs">
-          {task.is_system ? 'Sistema' : 'Usuario'}
-        </Badge>
+        <span className="text-sm">{task.category_name}</span>
       )
     },
     {
-      key: 'is_public',
-      label: 'Visibilidad',
-      width: '5%',
+      key: 'task_group_name',
+      label: 'Grupo',
+      width: '15%',
       render: (task: GeneratedTask) => (
-        <Badge variant={task.is_public ? "default" : "secondary"} className="text-xs">
-          {task.is_public ? 'Pública' : 'Privada'}
-        </Badge>
+        <span className="text-sm">{task.task_group_name}</span>
       )
     },
 

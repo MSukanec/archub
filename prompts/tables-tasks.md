@@ -1,38 +1,5 @@
 # Tablas de Supabase relacionadas a TAREAS (Tasks) y OBRA (Construction):
 
-TABLA TASK_TEMPLATES:
-
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "name_template",
-    "data_type": "text"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "task_group_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "unit_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "task_code",
-    "data_type": "text"
-  }
-]
-
 TABLA TASK_PARAMETERS:
 
 [
@@ -128,80 +95,6 @@ TABLA TASK_CATEGORIES:
   }
 ]
 
-TABLA TASK_GENERATED:
-
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "code",
-    "data_type": "text"
-  },
-  {
-    "column_name": "template_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "param_values",
-    "data_type": "jsonb"
-  },
-  {
-    "column_name": "is_public",
-    "data_type": "boolean"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "is_system",
-    "data_type": "boolean"
-  },
-  {
-    "column_name": "task_group_id",
-    "data_type": "uuid"
-  }
-]
-
-TABLA TASK_GROUPS:
-
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "category_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "template_id",
-    "data_type": "uuid"
-  }
-]
-
 TABLA (VISTA) TASK_GENERATED_VIEW:
 
 [
@@ -283,90 +176,6 @@ TABLA (VISTA) TASK_GENERATED_VIEW:
   }
 ]
 
-TABLA CONSTRUCTION_TASKS
-
-[
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "project_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "task_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "quantity",
-    "data_type": "real"
-  },
-  {
-    "column_name": "created_by",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "start_date",
-    "data_type": "date"
-  },
-  {
-    "column_name": "end_date",
-    "data_type": "date"
-  },
-  {
-    "column_name": "duration_in_days",
-    "data_type": "integer"
-  },
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  }
-]
-
-]
-
-TABLA TASK_GROUP_PARAMETER_OPTIONS:
-
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "group_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "parameter_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "parameter_option_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "position",
-    "data_type": "integer"
-  }
-]
-
 TABLA TASK_PARAMETER_DEPENDENCIES
 
 [
@@ -418,5 +227,96 @@ TASK_PARAMETER_DEPENDENCY_OPTIONS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  }
+]
+
+TABLA TASK_PARAMETRIC:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "param_values",
+    "data_type": "jsonb"
+  }
+]
+
+TABLA TASK_PARAMETER_POSITIONS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "x",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "y",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "visible_options",
+    "data_type": "ARRAY"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
+
+TABLA TASK_MATERIALS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "task_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "material_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "real"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
   }
 ]
