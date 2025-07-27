@@ -129,8 +129,9 @@ Archub is a modern construction management platform built with a React frontend 
   • INTERFACE UPDATES: Updated GeneratedTask interface to match task_parametric table structure (removed obsolete fields)
   • MODAL EDIT MODE FIX: Fixed TaskParametricFormModal to always open in EDIT mode (isEditing={true}) for both new task creation and editing
   • PARAMETRIC TASK BUILDER RESTORED: Fixed ParametricTaskBuilder component to correctly load parameters, options, and dependencies with proper slug matching
-  • SNAKE_CASE SLUGS: Parameter and option modals now generate slugs using snake_case format instead of hyphens
+  • SNAKE_CASE SLUGS: Parameter and option modals now generate slugs using snake_case format instead of hyphens  
   • UI COMPONENTS WORKING: Badge system, parameter selection, preview generation, and dependency chains all functioning correctly
+  • TABLE PREVIEW GENERATION FIXED: Corrected AdminGeneratedTasks processTaskNames function to use expression_template logic with proper parameter ordering
 - July 27, 2025. TASK_GENERATED TABLE ELIMINATION COMPLETED: Successfully removed task_generated table from database and updated all hooks to use task_parametric table exclusively - COMPLETED
   • HOOK MIGRATION: Updated useGeneratedTasks to query task_parametric instead of task_generated table
   • DELETION FUNCTION: Modified useDeleteGeneratedTask to work with task_parametric table

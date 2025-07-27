@@ -15,6 +15,8 @@ import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
+import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
 import { useAllTaskParameterValues } from '@/hooks/use-task-parameters-admin'
@@ -46,15 +48,20 @@ export default function AdminGeneratedTasks() {
   // Process task names when data changes
   useEffect(() => {
     const processTaskNames = async () => {
+      if (!supabase) return;
+      
       const newProcessedNames: Record<string, string> = {};
       
+      // Get parameters and their expression templates
+      const { data: parameters } = await supabase
+        .from('task_parameters')
+        .select('*');
+        
       for (const task of generatedTasks) {
         console.log('🔍 Processing task:', task.id, 'param_values:', task.param_values);
         
-        // Generate full phrase from param_values
+        // Parse param_values from JSON string
         let paramValues = task.param_values;
-        
-        // Parse JSON string if needed
         if (typeof paramValues === 'string') {
           try {
             paramValues = JSON.parse(paramValues);
@@ -64,15 +71,33 @@ export default function AdminGeneratedTasks() {
           }
         }
         
-        if (paramValues && typeof paramValues === 'object') {
-          const values = Object.values(paramValues).filter(val => val && val !== '');
-          console.log('📝 Parameter values for task:', task.id, values);
+        if (paramValues && typeof paramValues === 'object' && parameters) {
+          // Generate preview using same logic as ParametricTaskBuilder
+          let preview = '';
           
-          if (values.length > 0) {
-            newProcessedNames[task.id] = values.join(' ');
-          } else {
-            newProcessedNames[task.id] = `Tarea ${task.id.slice(0, 8)}`;
+          // Define the correct order of parameters based on dependency chain
+          const parameterOrder = ['tipo_tarea', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero'];
+          
+          // Process parameters in the correct order
+          for (const paramSlug of parameterOrder) {
+            const paramValue = paramValues[paramSlug];
+            if (paramValue) {
+              const parameter = parameters.find(p => p.slug === paramSlug);
+              if (parameter && parameter.expression_template) {
+                const processedText = parameter.expression_template.replace('{value}', paramValue);
+                preview += processedText + ' ';
+              }
+            }
           }
+          
+          // Clean up and finalize
+          preview = preview.trim();
+          if (preview && !preview.endsWith('.')) {
+            preview += '.';
+          }
+          
+          newProcessedNames[task.id] = preview || `Tarea ${task.id.slice(0, 8)}`;
+          console.log('📝 Generated preview for task:', task.id, '→', preview);
         } else {
           newProcessedNames[task.id] = `Tarea ${task.id.slice(0, 8)}`;
         }
