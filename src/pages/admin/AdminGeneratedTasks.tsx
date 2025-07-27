@@ -299,6 +299,16 @@ export default function AdminGeneratedTasks() {
           onClearFilters={clearFilters}
           primaryActionLabel="Nueva Tarea Generada"
           onPrimaryActionClick={() => openModal('generated-task', {})}
+          customActions={[
+            <Button 
+              key="parametric-task"
+              variant="default"
+              onClick={() => openModal('parametric-task', {})}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Tarea Paramétrica
+            </Button>
+          ]}
         />
 
         {/* Statistics Cards */}
