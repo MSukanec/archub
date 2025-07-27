@@ -420,3 +420,32 @@ TABLA CONSTRUCTION_TASKS
 ]
 
 ]
+
+TABLA TASK_GROUP_PARAMETER_OPTIONS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "group_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "parameter_option_id",
+    "data_type": "uuid"
+  }
+]

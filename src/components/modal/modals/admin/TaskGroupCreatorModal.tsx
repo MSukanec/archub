@@ -24,6 +24,7 @@ import { useCreateTaskGroup, useUpdateTaskGroup } from '@/hooks/use-task-groups'
 import { useCreateTaskTemplate } from '@/hooks/use-task-templates-admin'
 import { useSubcategoriesOnly } from '@/hooks/use-task-categories-admin'
 import { useUnits } from '@/hooks/use-units'
+import { useSaveTaskGroupParameterOptions, useLoadTaskGroupParameterOptions } from '@/hooks/use-task-group-parameter-options'
 
 // Hook para obtener opciones de parámetro
 const useParameterOptions = (parameterId: string) => {
@@ -171,6 +172,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const createGroupMutation = useCreateTaskGroup()
   const createTemplateMutation = useCreateTaskTemplate()
   const updateGroupMutation = useUpdateTaskGroup()
+  const saveParameterOptionsMutation = useSaveTaskGroupParameterOptions()
+  
+  // Load saved parameter options for the group
+  const { data: savedOptionsMap = {} } = useLoadTaskGroupParameterOptions(taskGroup?.id)
   
   // Data hooks for step 1
   const { data: allCategories = [], isLoading: categoriesLoading } = useSubcategoriesOnly()
@@ -248,6 +253,14 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       fetchTemplateData(taskGroup.id)
     }
   }, [currentStep, taskGroup])
+  
+  // Load saved parameter options when they become available
+  useEffect(() => {
+    if (Object.keys(savedOptionsMap).length > 0) {
+      console.log('📥 Cargando opciones guardadas:', savedOptionsMap)
+      setSelectedOptionsMap(savedOptionsMap)
+    }
+  }, [savedOptionsMap])
 
   const fetchTemplateData = async (taskGroupId: string) => {
     try {
@@ -454,11 +467,41 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 1) {
       form.handleSubmit(onSubmitStep1)()
     } else {
+      // Step 2: Save parameter options using new system
+      await saveParameterOptions()
       handleClose()
+    }
+  }
+
+  const saveParameterOptions = async () => {
+    if (!taskGroup?.id) return
+
+    console.log('💾 Guardando opciones con nuevo sistema para grupo:', taskGroup.id)
+    console.log('📋 Opciones actuales:', selectedOptionsMap)
+
+    try {
+      // Prepare data for new table structure
+      const parameterOptions = Object.entries(selectedOptionsMap)
+        .filter(([_, options]) => options.length > 0)
+        .map(([parameter_id, parameter_option_ids]) => ({
+          parameter_id,
+          parameter_option_ids
+        }))
+
+      console.log('📤 Enviando opciones al nuevo sistema:', parameterOptions)
+
+      await saveParameterOptionsMutation.mutateAsync({
+        groupId: taskGroup.id,
+        parameterOptions
+      })
+
+      console.log('✅ Opciones guardadas exitosamente con nuevo sistema')
+    } catch (error) {
+      console.error('❌ Error guardando opciones:', error)
     }
   }
 
