@@ -32,7 +32,7 @@ import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
 
-import { ParametricTaskFormModal } from '../modals/admin/ParametricTaskFormModal';
+import { ParametricTaskFormModal } from '../modals/admin/TaskParametricFormModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
 import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizationFormModal';
