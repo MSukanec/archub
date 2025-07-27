@@ -126,6 +126,7 @@ Archub is a modern construction management platform built with a React frontend 
   • MODAL PARSING FIXED: Enhanced TaskParametricFormModal to properly parse param_values from JSON string for editing mode
   • ERROR HANDLING IMPROVED: Updated error messages to reference correct function names (create_parametric_task instead of archub_generate_task_parametric)
   • TEMPORARY SOLUTION: System uses direct Supabase table operations until SQL function is properly synchronized in database
+  • RPC PARAMETER ORDER CORRECTION: Fixed render_task_name_from_param_values function calls to use correct parameter order (input_param_values first, input_param_order second) to match database function signature
 - July 27, 2025. PREVIEW GENERATION ORDER FIXED: Successfully corrected preview text generation to use proper parameter ordering instead of random selection order - COMPLETED
   • ORDERED PREVIEW GENERATION: Modified ParametricTaskBuilder preview logic to use getOrderedParameters() for correct sequence processing
   • LOGICAL TEXT FLOW: Preview now generates "Ejecución de muro de ladrillo cerámico hueco de 12x18x33 con mortero de asiento de cemento de albañilería" in proper order
