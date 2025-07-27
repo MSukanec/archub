@@ -174,6 +174,30 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const updateGroupMutation = useUpdateTaskGroup()
   const saveParameterOptionsMutation = useSaveTaskGroupParameterOptions()
   
+  // Hook para actualizar templates
+  const updateTemplateMutation = useMutation({
+    mutationFn: async ({ templateId, name_template }: { templateId: string, name_template: string }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      console.log('🔄 Actualizando template en BD:', { templateId, name_template });
+      
+      const { data, error } = await supabase
+        .from('task_templates')
+        .update({ name_template })
+        .eq('id', templateId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error actualizando template:', error);
+        throw error;
+      }
+
+      console.log('✅ Template actualizado exitosamente:', data);
+      return data;
+    }
+  })
+  
   // Get task group for step 2
   const taskGroup = modalData?.taskGroup || createdTaskGroup
   
@@ -746,13 +770,19 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       console.log('🏗️ Template final para guardar (solo placeholders):', realTemplate);
 
       // Update the template's name_template with the real constructed template
-      if (supabase) {
-        await supabase
-          .from('task_templates')
-          .update({ name_template: realTemplate })
-          .eq('id', existingTemplate.id)
-        
-        console.log('✅ Template actualizado en base de datos con valores reales')
+      if (existingTemplate?.id) {
+        console.log('🔄 Iniciando actualización de template:', {
+          template_id: existingTemplate.id,
+          old_template: existingTemplate.name_template,
+          new_template: realTemplate
+        });
+
+        await updateTemplateMutation.mutateAsync({
+          templateId: existingTemplate.id,
+          name_template: realTemplate
+        });
+      } else {
+        console.warn('⚠️ No se pudo actualizar template: existingTemplate.id no disponible', existingTemplate);
       }
 
       await saveParameterOptionsMutation.mutateAsync({
