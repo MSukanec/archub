@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +24,30 @@ import { useCreateTaskGroup, useUpdateTaskGroup } from '@/hooks/use-task-groups'
 import { useCreateTaskTemplate } from '@/hooks/use-task-templates-admin'
 import { useSubcategoriesOnly } from '@/hooks/use-task-categories-admin'
 import { useUnits } from '@/hooks/use-units'
+
+// Hook para obtener opciones de parámetro
+const useParameterOptions = (parameterId: string) => {
+  return useQuery({
+    queryKey: ['parameter-options', parameterId],
+    queryFn: async () => {
+      console.log('🔍 Obteniendo opciones para parámetro:', parameterId)
+      const { data, error } = await supabase
+        .from('task_parameter_values')
+        .select('id, name, label')
+        .eq('parameter_id', parameterId)
+        .order('label', { ascending: true })
+
+      if (error) {
+        console.error('❌ Error obteniendo opciones:', error)
+        throw error
+      }
+      
+      console.log('📝 Opciones obtenidas:', data)
+      return data || []
+    },
+    enabled: !!parameterId,
+  })
+}
 import { TaskTemplate, TaskTemplateParameter, TaskParameter } from '@shared/schema'
 
 import {
@@ -62,9 +87,11 @@ interface SortableParameterItemProps {
   param: { id: string; parameter_id: string; template_id: string; position: number; option_group_id: string | null }
   parameter: { id: string; name: string; label: string; type: string } | undefined
   onRemove: (id: string) => void
+  selectedOptions: string[]
+  onOptionsChange: (parameterId: string, options: string[]) => void
 }
 
-function SortableParameterItem({ param, parameter, onRemove }: SortableParameterItemProps) {
+function SortableParameterItem({ param, parameter, onRemove, selectedOptions, onOptionsChange }: SortableParameterItemProps) {
   const {
     attributes,
     listeners,
@@ -74,41 +101,62 @@ function SortableParameterItem({ param, parameter, onRemove }: SortableParameter
     isDragging,
   } = useSortable({ id: param.id })
 
+  const { data: parameterOptions = [] } = useParameterOptions(param.parameter_id)
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   }
 
+  const options = parameterOptions.map(option => ({
+    value: option.id,
+    label: option.label
+  }))
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-3 bg-muted/30 rounded border"
+      className="flex flex-col space-y-3 p-3 bg-muted/30 rounded border"
     >
-      <div className="flex items-center space-x-3 flex-1">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing"
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3 flex-1">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing"
+          >
+            <GripVertical className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-sm">{parameter?.label || 'Parámetro sin nombre'}</p>
+            <Badge variant="outline" className="text-xs mt-1">
+              {parameter?.type || 'N/A'}
+            </Badge>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onRemove(param.id)}
+          className="text-red-500 hover:text-red-700 hover:bg-red-50"
         >
-          <GripVertical className="w-4 h-4 text-muted-foreground" />
-        </div>
-        <div className="flex-1">
-          <p className="font-medium text-sm">{parameter?.label || 'Parámetro sin nombre'}</p>
-          <Badge variant="outline" className="text-xs mt-1">
-            {parameter?.type || 'N/A'}
-          </Badge>
-        </div>
+          <Trash2 className="w-4 h-4" />
+        </Button>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onRemove(param.id)}
-        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-      >
-        <Trash2 className="w-4 h-4" />
-      </Button>
+      
+      {parameter?.type === 'select' && options.length > 0 && (
+        <div className="ml-7">
+          <ComboBoxMultiSelect
+            options={options}
+            values={selectedOptions}
+            onValuesChange={(values) => onOptionsChange(param.parameter_id, values)}
+            placeholder="Seleccionar opciones..."
+            className="w-full"
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -135,6 +183,9 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const [selectedParameterId, setSelectedParameterId] = useState('')
   const [existingTemplate, setExistingTemplate] = useState<any>(null)
   const [availableParameters, setAvailableParameters] = useState<any[]>([])
+  
+  // State for selected options per parameter
+  const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<string, string[]>>({})
   
   // Get task group for step 2
   const taskGroup = modalData?.taskGroup || createdTaskGroup
@@ -163,6 +214,14 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       .join(' ');
     
     return `${baseName} ${parameterPlaceholders}.`;
+  }
+
+  // Handle options selection changes
+  const handleOptionsChange = (parameterId: string, selectedOptions: string[]) => {
+    setSelectedOptionsMap(prev => ({
+      ...prev,
+      [parameterId]: selectedOptions
+    }));
   }
 
   const form = useForm<TaskGroupCreatorFormData>({
@@ -559,6 +618,8 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
                       param={param}
                       parameter={parameter}
                       onRemove={removeParameter}
+                      selectedOptions={selectedOptionsMap[param.parameter_id] || []}
+                      onOptionsChange={handleOptionsChange}
                     />
                   )
                 })}
