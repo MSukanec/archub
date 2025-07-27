@@ -830,18 +830,41 @@ function ParameterNodeEditorContent() {
           onNodesChange={onNodesChange}
           onNodeDragStop={(event, node) => {
             console.log('🎯 Nodo arrastrado y soltado:', node.id, 'nueva posición:', node.position);
-            console.log('📍 Guardando posición de nodo (original o duplicado):', {
-              parameter_id: node.id, // Usar el ID completo (con -duplicate- si es duplicado)
-              x: Math.round(node.position.x),
-              y: Math.round(node.position.y),
-              visible_options: nodeVisibleOptions[node.id] || []
-            });
-            savePositionMutation.mutate({
-              parameter_id: node.id, // Usar el ID completo para distinguir duplicados
-              x: Math.round(node.position.x),
-              y: Math.round(node.position.y),
-              visible_options: nodeVisibleOptions[node.id] || []
-            });
+            
+            // Detectar si es un nodo duplicado verificando si el ID existe en savedPositions con original_parameter_id
+            const isDuplicateNode = savedPositions.some(pos => pos.id === node.id && pos.original_parameter_id !== null);
+            
+            if (isDuplicateNode) {
+              console.log('📍 Guardando posición de nodo DUPLICADO:', {
+                id: node.id,
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+                visible_options: nodeVisibleOptions[node.id] || []
+              });
+              
+              // Para nodos duplicados, actualizar directamente por ID sin usar parameter_id
+              savePositionMutation.mutate({
+                id: node.id,
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+                visible_options: nodeVisibleOptions[node.id] || []
+              });
+            } else {
+              console.log('📍 Guardando posición de nodo ORIGINAL:', {
+                parameter_id: node.id,
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+                visible_options: nodeVisibleOptions[node.id] || []
+              });
+              
+              // Para nodos originales, usar parameter_id
+              savePositionMutation.mutate({
+                parameter_id: node.id,
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+                visible_options: nodeVisibleOptions[node.id] || []
+              });
+            }
           }}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
