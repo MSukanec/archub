@@ -20,6 +20,7 @@ import 'reactflow/dist/style.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Copy, Edit, Trash2 } from 'lucide-react';
 import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -48,11 +49,14 @@ interface ParameterNodeData {
   }>;
   visibleOptions: string[];
   onVisibleOptionsChange: (optionIds: string[]) => void;
+  onDuplicate: (parameterId: string) => void;
+  onEdit: (parameterId: string) => void;
+  onDelete: (nodeId: string) => void;
 }
 
 // Componente de nodo personalizado
 function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
-  const { parameter, options, visibleOptions, onVisibleOptionsChange } = data;
+  const { parameter, options, visibleOptions, onVisibleOptionsChange, onDuplicate, onEdit, onDelete } = data;
   
   const visibleOptionsList = options.filter(option => visibleOptions.includes(option.id));
   const comboBoxOptions = options.map(option => ({
@@ -64,9 +68,49 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
     <div className="relative">
       <Card className="min-w-[250px] max-w-[300px] border-2 shadow-lg bg-white">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-center">
-            {parameter.label}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold flex-1">
+              {parameter.label}
+            </CardTitle>
+            <div className="flex items-center gap-1 ml-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDuplicate(parameter.id);
+                }}
+                title="Duplicar parámetro"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(parameter.id);
+                }}
+                title="Editar parámetro"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(id);
+                }}
+                title="Borrar parámetro"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
           <ComboBoxMultiSelect
             options={comboBoxOptions}
             value={visibleOptions}
@@ -349,6 +393,66 @@ function ParameterNodeEditorContent() {
     parameterNode: ParameterNode,
   }), []);
 
+  // Función para duplicar un nodo (crear visualización adicional)
+  const handleDuplicateNode = useCallback((parameterId: string) => {
+    console.log('🔄 Duplicando nodo:', parameterId);
+    const originalParameter = parametersData.find(item => item.parameter.id === parameterId);
+    if (!originalParameter) return;
+
+    // Generar ID único para el nodo duplicado
+    const duplicateId = `${parameterId}-duplicate-${Date.now()}`;
+    
+    // Encontrar posición para el nuevo nodo (al lado del original)
+    const originalNode = nodes.find(n => n.id === parameterId);
+    const newPosition = originalNode ? 
+      { x: originalNode.position.x + 350, y: originalNode.position.y } :
+      { x: 350, y: 0 };
+
+    const duplicateNode: Node = {
+      id: duplicateId,
+      type: 'parameterNode',
+      position: newPosition,
+      data: {
+        parameter: originalParameter.parameter,
+        options: originalParameter.options,
+        visibleOptions: nodeVisibleOptions[parameterId] || [],
+        onVisibleOptionsChange: (optionIds: string[]) => {
+          setNodeVisibleOptions(prev => ({
+            ...prev,
+            [duplicateId]: optionIds
+          }));
+        },
+        onDuplicate: handleDuplicateNode,
+        onEdit: handleEditNode,
+        onDelete: handleDeleteNode
+      }
+    };
+
+    setNodes(prev => [...prev, duplicateNode]);
+    toast({ title: "Parámetro duplicado", description: "Nueva visualización creada exitosamente" });
+  }, [parametersData, nodes, nodeVisibleOptions, toast]);
+
+  // Función para editar un parámetro (abrir modal)
+  const handleEditNode = useCallback((parameterId: string) => {
+    console.log('✏️ Editando parámetro:', parameterId);
+    // TODO: Abrir modal de edición de parámetro
+    toast({ title: "Función próximamente", description: "La edición de parámetros estará disponible pronto" });
+  }, [toast]);
+
+  // Función para borrar un nodo del canvas
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    console.log('🗑️ Borrando nodo:', nodeId);
+    setNodes(prev => prev.filter(n => n.id !== nodeId));
+    
+    // Si es un nodo duplicado, solo removemos del canvas
+    if (nodeId.includes('-duplicate-')) {
+      toast({ title: "Visualización eliminada", description: "Nodo removido del canvas" });
+    } else {
+      // Si es el nodo original, confirmar acción
+      toast({ title: "Nodo eliminado", description: "Parámetro removido del canvas" });
+    }
+  }, [toast]);
+
   // Manejo del pan con botón central del ratón
   useEffect(() => {
     let isPanning = false;
@@ -475,7 +579,10 @@ function ParameterNodeEditorContent() {
                   visible_options: optionIds
                 });
               }
-            }
+            },
+            onDuplicate: handleDuplicateNode,
+            onEdit: handleEditNode,
+            onDelete: handleDeleteNode
           },
         };
       });
