@@ -180,14 +180,18 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
   // Generar vista previa
   useEffect(() => {
     if (selections.length === 0) {
+      setTaskPreview('')
       onPreviewChange?.('')
       return
     }
+
+    console.log('🎯 Generando vista previa con selecciones:', selections)
 
     // Crear un mapa de parámetros para reemplazo
     const paramMap: Record<string, string> = {}
     selections.forEach(selection => {
       paramMap[selection.parameterSlug] = selection.optionName
+      console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionName}`)
     })
 
     // Obtener template base del primer parámetro (tipo-de-tarea)
@@ -197,6 +201,8 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
     if (tipoTareaSelection) {
       const tipoTareaParam = parameters.find(p => p.id === tipoTareaSelection.parameterId)
+      console.log('📋 Template encontrado:', tipoTareaParam?.expression_template)
+      
       if (tipoTareaParam?.expression_template) {
         let preview = tipoTareaParam.expression_template
 
@@ -204,19 +210,27 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
         Object.entries(paramMap).forEach(([slug, value]) => {
           const regex = new RegExp(`{{${slug}}}`, 'g')
           preview = preview.replace(regex, value.toLowerCase())
+          console.log(`🔄 Reemplazando {{${slug}}} con ${value.toLowerCase()}`)
         })
 
         // Reemplazar parámetros no seleccionados con placeholders
         const placeholderRegex = /{{([^}]+)}}/g
         preview = preview.replace(placeholderRegex, (match, slug) => {
           const param = parameters.find(p => p.slug === slug)
-          return param ? `[${param.label}]` : match
+          const placeholder = param ? `[${param.label}]` : match
+          console.log(`🔍 Placeholder: ${match} → ${placeholder}`)
+          return placeholder
         })
 
+        console.log('✅ Vista previa final:', preview)
         setTaskPreview(preview)
         onPreviewChange?.(preview)
         lastPreview = preview
+      } else {
+        console.log('❌ No se encontró expression_template')
       }
+    } else {
+      console.log('❌ No se encontró selección de tipo-de-tarea')
     }
   }, [selections, parameters, onPreviewChange])
 
