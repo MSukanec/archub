@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
@@ -12,6 +12,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useTaskGroups, useDeleteTaskGroup } from '@/hooks/use-task-groups'
+import { supabase } from '@/lib/supabase'
 
 import { Plus, Edit, Trash2, Package2, Target, Zap, Eye, Clock } from 'lucide-react'
 
@@ -27,6 +28,7 @@ interface TaskGroup {
 export default function AdminTaskGroups() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
+  const [templateInfo, setTemplateInfo] = useState<Record<string, any>>({})
   const { openModal } = useGlobalModalStore()
   
   // Real data from useTaskGroups hook
@@ -74,6 +76,59 @@ export default function AdminTaskGroups() {
     openModal('task-group-creator', { taskGroup });
   }
 
+  // Load template information for each task group
+  useEffect(() => {
+    const loadTemplateInfo = async () => {
+      if (!supabase || taskGroups.length === 0) return
+
+      const templateInfoMap: Record<string, any> = {}
+
+      for (const group of taskGroups) {
+        if (group.template_id) {
+          try {
+            // Get template parameters
+            const { data: templateParams } = await supabase
+              .from('task_template_parameters')
+              .select(`
+                *,
+                task_parameter:task_parameters(name)
+              `)
+              .eq('template_id', group.template_id)
+              .order('position')
+
+            templateInfoMap[group.id] = {
+              hasTemplate: true,
+              parameters: templateParams || [],
+              preview: generateTemplatePreview(group.name, templateParams || [])
+            }
+          } catch (error) {
+            console.error('Error loading template info:', error)
+            templateInfoMap[group.id] = { hasTemplate: false }
+          }
+        } else {
+          templateInfoMap[group.id] = { hasTemplate: false }
+        }
+      }
+
+      setTemplateInfo(templateInfoMap)
+    }
+
+    loadTemplateInfo()
+  }, [taskGroups])
+
+  // Generate template preview
+  const generateTemplatePreview = (groupName: string, parameters: any[]) => {
+    if (parameters.length === 0) {
+      return `${groupName}.`
+    }
+
+    const parameterPlaceholders = parameters
+      .map(tp => `{{${tp.task_parameter?.name || 'parámetro'}}}`)
+      .join(' ')
+
+    return `${groupName} ${parameterPlaceholders}.`
+  }
+
 
 
   // Custom filters for ActionBar
@@ -119,29 +174,36 @@ export default function AdminTaskGroups() {
   const columns = [
     {
       key: 'name',
-      label: 'Nombre del Grupo',
-      width: '50%',
+      label: 'Grupo de Tareas',
+      width: '35%',
       render: (taskGroup: TaskGroup) => (
         <div className="font-medium text-sm">{taskGroup.name}</div>
       )
     },
     {
-      key: 'template_id',
-      label: 'Plantilla Asociada',
-      width: '20%',
-      render: (taskGroup: TaskGroup) => (
-        <div className="text-sm">
-          {taskGroup.template_id ? (
-            <Badge variant="secondary" className="text-xs">
-              Con Plantilla
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="text-xs">
-              Sin Plantilla
-            </Badge>
-          )}
-        </div>
-      )
+      key: 'template_info',
+      label: 'Plantilla de Tareas',
+      width: '35%',
+      render: (taskGroup: TaskGroup) => {
+        const info = templateInfo[taskGroup.id]
+        
+        if (!info || !info.hasTemplate) {
+          return (
+            <div className="text-sm text-muted-foreground">
+              Sin plantilla configurada
+            </div>
+          )
+        }
+
+        return (
+          <div className="text-sm space-y-1">
+            <div className="font-medium">{info.preview}</div>
+            <div className="text-xs text-muted-foreground">
+              {info.parameters.length} parámetro{info.parameters.length !== 1 ? 's' : ''} configurado{info.parameters.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+        )
+      }
     },
     {
       key: 'created_at',

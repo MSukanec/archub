@@ -174,6 +174,9 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const updateGroupMutation = useUpdateTaskGroup()
   const saveParameterOptionsMutation = useSaveTaskGroupParameterOptions()
   
+  // Get task group for step 2
+  const taskGroup = modalData?.taskGroup || createdTaskGroup
+  
   // Load saved parameter options for the group
   const { data: savedOptionsMap = {} } = useLoadTaskGroupParameterOptions(taskGroup?.id)
   
@@ -189,9 +192,6 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   
   // State for selected options per parameter
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<string, string[]>>({})
-  
-  // Get task group for step 2
-  const taskGroup = modalData?.taskGroup || createdTaskGroup
   
   // Sensors for drag and drop
   const sensors = useSensors(
