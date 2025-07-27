@@ -205,66 +205,36 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       console.log('📋 Template encontrado:', tipoTareaParam?.expression_template)
       
       if (tipoTareaParam?.expression_template) {
-        let preview = tipoTareaParam.expression_template
+        // Usar la misma lógica que AdminTaskGroups - implementación exacta
+        let processedTemplate = tipoTareaParam.expression_template
+        
+        console.log(`🎯 Template base encontrado: ${processedTemplate}`)
 
-        // Si el template es muy básico como "{value} de", construir frase completa
-        if (tipoTareaParam.expression_template === "{value} de") {
-          // Construir frase completa con todos los parámetros seleccionados
-          const parts: string[] = []
-          
-          // Agregar tipo de tarea
-          if (paramMap['tipo-de-tarea']) {
-            parts.push(paramMap['tipo-de-tarea'].toLowerCase())
-          }
-          
-          // Agregar "de" si hay más parámetros
-          if (Object.keys(paramMap).length > 1) {
-            parts.push('de')
-          }
-          
-          // Agregar tipo de elemento
-          if (paramMap['tipo-de-elemento']) {
-            parts.push(paramMap['tipo-de-elemento'].toLowerCase())
-          }
-          
-          // Agregar otros parámetros con "con" o "de"
-          Object.entries(paramMap).forEach(([slug, value]) => {
-            if (slug !== 'tipo-de-tarea' && slug !== 'tipo-de-elemento') {
-              if (slug.includes('tipo-') || slug.includes('brick-') || slug.includes('mortar')) {
-                parts.push('de')
-                parts.push(value.toLowerCase())
-              } else if (slug === 'aditivos') {
-                parts.push('con')
-                parts.push(value.toLowerCase())
-              } else {
-                parts.push('con')
-                parts.push(value.toLowerCase())
-              }
-            }
-          })
-          
-          preview = parts.join(' ')
-          console.log(`🏗️ Construyendo frase completa: ${preview}`)
-        } else {
-          // Template personalizado - usar lógica original
-          const mainValue = paramMap['tipo-de-tarea'] || 'valor'
-          preview = preview.replace(/{value}/g, mainValue.toLowerCase())
-          console.log(`🔄 Reemplazando {value} con ${mainValue.toLowerCase()}`)
+        // Procesar cada parámetro seleccionado
+        selections.forEach(selection => {
+          const parameter = parameters.find(p => p.id === selection.parameterId)
+          if (!parameter) return
 
-          Object.entries(paramMap).forEach(([slug, value]) => {
-            const regex = new RegExp(`{{${slug}}}`, 'g')
-            preview = preview.replace(regex, value.toLowerCase())
-            console.log(`🔄 Reemplazando {{${slug}}} con ${value.toLowerCase()}`)
-          })
+          const placeholder = `{{${parameter.slug}}}`
+          console.log(`🔍 Procesando parámetro: ${parameter.slug}`)
+          
+          // Aplicar expression_template del parámetro o usar {value} como fallback
+          const expressionTemplate = parameter.expression_template || '{value}'
+          console.log(`📋 Expression template del parámetro: ${expressionTemplate}`)
+          
+          // Reemplazar {value} con el label de la opción seleccionada
+          const generatedText = expressionTemplate.replace('{value}', selection.optionLabel)
+          console.log(`🔄 Texto generado: ${generatedText}`)
+          
+          // Reemplazar el placeholder en el template principal
+          processedTemplate = processedTemplate.replace(placeholder, generatedText)
+          console.log(`✨ Template después de reemplazar ${placeholder}: ${processedTemplate}`)
+        })
 
-          const placeholderRegex = /{{([^}]+)}}/g
-          preview = preview.replace(placeholderRegex, (match, slug) => {
-            const param = parameters.find(p => p.slug === slug)
-            const placeholder = param ? `[${param.label}]` : match
-            console.log(`🔍 Placeholder: ${match} → ${placeholder}`)
-            return placeholder
-          })
-        }
+        // Limpiar espacios extra
+        processedTemplate = processedTemplate.replace(/\s+/g, ' ').trim()
+        
+        preview = processedTemplate
 
         console.log('✅ Vista previa final:', preview)
         setTaskPreview(preview)
