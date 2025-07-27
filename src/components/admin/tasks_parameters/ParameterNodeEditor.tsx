@@ -466,11 +466,11 @@ function ParameterNodeEditorContent() {
 
     try {
       // Crear una nueva entrada en la base de datos para el nodo duplicado
-      // Usamos el ID generado automáticamente como parameter_id del nodo duplicado
       const { data: dbPosition, error } = await supabase
         .from('task_parameter_positions')
         .insert({
-          parameter_id: parameterId, // Temporalmente usar el original, se actualizará después
+          parameter_id: null, // NULL para nodos duplicados
+          original_parameter_id: parameterId, // Referencia al parámetro original
           x: Math.round(newPosition.x),
           y: Math.round(newPosition.y),
           visible_options: nodeVisibleOptions[parameterId] || []
@@ -486,12 +486,6 @@ function ParameterNodeEditorContent() {
 
       // Usar el UUID generado por la base de datos como ID del nodo duplicado
       const duplicateId = dbPosition.id;
-      
-      // Actualizar el parameter_id con el ID generado para diferenciarlo del original
-      await supabase
-        .from('task_parameter_positions')
-        .update({ parameter_id: duplicateId })
-        .eq('id', duplicateId);
 
       const duplicateNode: Node = {
         id: duplicateId,
@@ -514,7 +508,8 @@ function ParameterNodeEditorContent() {
             // Actualizar las opciones visibles en la base de datos
             savePositionMutation.mutate({
               id: duplicateId,
-              parameter_id: duplicateId,
+              parameter_id: null,
+              original_parameter_id: parameterId,
               x: Math.round(newPosition.x),
               y: Math.round(newPosition.y),
               visible_options: optionIds
@@ -695,18 +690,17 @@ function ParameterNodeEditorContent() {
 
       // Crear nodos duplicados desde posiciones guardadas
       const duplicatedNodes: Node[] = savedPositions
-        .filter(pos => pos.parameter_id.includes('-duplicate-'))
+        .filter(pos => pos.original_parameter_id !== null) // Nodos con original_parameter_id son duplicados
         .map(pos => {
-          // Extraer el parameter_id original del ID duplicado
-          const originalParameterId = pos.parameter_id.split('-duplicate-')[0];
-          const originalParameter = parametersData.find(item => item.parameter.id === originalParameterId);
+          // Buscar el parámetro original usando original_parameter_id
+          const originalParameter = parametersData.find(item => item.parameter.id === pos.original_parameter_id);
           
           if (!originalParameter) return null;
           
           console.log(`📌 Nodo duplicado ${originalParameter.parameter.slug}:`, 'posición guardada', { x: pos.x, y: pos.y });
           
           return {
-            id: pos.parameter_id, // Usar el ID completo con -duplicate-
+            id: pos.id, // Usar el ID de la entrada en task_parameter_positions
             type: 'parameterNode',
             position: { x: pos.x, y: pos.y },
             data: {
