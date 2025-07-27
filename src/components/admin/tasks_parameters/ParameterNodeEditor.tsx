@@ -772,14 +772,36 @@ function ParameterNodeEditorContent() {
     (params: Connection) => {
       if (!params.source || !params.target || !params.sourceHandle) return;
 
-      const sourceParamId = params.source;
-      const sourceOptionId = params.sourceHandle.replace(`${sourceParamId}-`, '');
-      const targetParamId = params.target;
+      let sourceParamId = params.source;
+      let targetParamId = params.target;
+      
+      // Verificar si el source es un nodo duplicado
+      const sourcePosition = savedPositions.find(pos => pos.id === params.source && pos.original_parameter_id !== null);
+      if (sourcePosition && sourcePosition.original_parameter_id) {
+        sourceParamId = sourcePosition.original_parameter_id;
+        console.log('🔗 Nodo source es duplicado, usando original_parameter_id:', sourceParamId);
+      }
+      
+      // Verificar si el target es un nodo duplicado
+      const targetPosition = savedPositions.find(pos => pos.id === params.target && pos.original_parameter_id !== null);
+      if (targetPosition && targetPosition.original_parameter_id) {
+        targetParamId = targetPosition.original_parameter_id;
+        console.log('🔗 Nodo target es duplicado, usando original_parameter_id:', targetParamId);
+      }
+
+      const sourceOptionId = params.sourceHandle.replace(`${params.source}-`, '');
 
       // Verificar que no sea una auto-conexión
       if (sourceParamId === targetParamId) {
+        console.log('❌ Auto-conexión detectada, cancelando');
         return;
       }
+
+      console.log('🔗 Creando conexión:', {
+        parentParameterId: sourceParamId,
+        parentOptionId: sourceOptionId,
+        childParameterId: targetParamId
+      });
 
       // Crear la dependencia en la base de datos
       createDependencyMutation.mutate({
@@ -788,7 +810,7 @@ function ParameterNodeEditorContent() {
         childParameterId: targetParamId
       });
     },
-    [createDependencyMutation]
+    [createDependencyMutation, savedPositions]
   );
 
   // Manejar eliminación de conexiones
