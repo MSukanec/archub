@@ -39,10 +39,13 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   console.log('🔍 Modal data received:', modalData);
   console.log('📝 Task data:', actualTask);
   console.log('✏️ Is editing:', isEditing);
+  console.log('📊 param_order from task:', actualTask?.param_order);
+  console.log('📊 param_values from task:', actualTask?.param_values);
   
   // Parse existing param_values if editing
   if (actualTask && actualTask.param_values) {
     console.log('🔄 Loading existing parameters:', actualTask.param_values);
+    console.log('📊 Loading existing param_order:', actualTask.param_order);
   }
 
   // Use the new hooks for creating and updating tasks
@@ -139,6 +142,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         onPreviewChange={setTaskPreview}
         onOrderChange={setParameterOrder}
         initialParameters={actualTask ? JSON.stringify(actualTask.param_values) : null}
+        initialParameterOrder={actualTask?.param_order || null}
       />
     </div>
   )

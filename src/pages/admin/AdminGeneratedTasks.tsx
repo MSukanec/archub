@@ -134,7 +134,11 @@ export default function AdminGeneratedTasks() {
 
   const handleEdit = (generatedTask: GeneratedTask) => {
     console.log('📝 Editando tarea:', generatedTask);
-    openModal('parametric-task', { task: generatedTask, isEditing: true })
+    console.log('📊 Editando tarea - param_values:', generatedTask.param_values);
+    console.log('📊 Editando tarea - param_order:', generatedTask.param_order);
+    const modalData = { task: generatedTask, isEditing: true };
+    console.log('🚀 Opening modal with data:', modalData);
+    openModal('parametric-task', modalData)
   }
 
   const handleConfirmDelete = async () => {

@@ -52,12 +52,13 @@ interface ParametricTaskBuilderProps {
   onPreviewChange?: (preview: string) => void
   onOrderChange?: (order: string[]) => void
   initialParameters?: string | null
+  initialParameterOrder?: string[] | null
 }
 
 // Variable para mantener la última vista previa
 let lastPreview = ''
 
-export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOrderChange, initialParameters }: ParametricTaskBuilderProps) {
+export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOrderChange, initialParameters, initialParameterOrder }: ParametricTaskBuilderProps) {
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [availableParameters, setAvailableParameters] = useState<string[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
@@ -256,11 +257,29 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
           setSelections(initialSelections);
           setAvailableParameters(initialAvailableParams);
           
-          // También establecer el orden inicial basado en los parámetros cargados
-          const initialOrder = initialSelections.map(sel => sel.parameterSlug);
+          // Establecer el orden inicial - priorizar el orden guardado si existe
+          let initialOrder: string[];
+          if (initialParameterOrder && initialParameterOrder.length > 0) {
+            // Usar el orden guardado si está disponible
+            initialOrder = initialParameterOrder;
+            console.log('📊 Using saved parameter order:', initialOrder);
+          } else {
+            // Fallback: usar un orden lógico estándar para parámetros conocidos
+            const standardOrder = ['tipo_tarea', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos'];
+            const availableSlugs = initialSelections.map(sel => sel.parameterSlug);
+            
+            // Filtrar el orden estándar para incluir solo los parámetros disponibles
+            const filteredStandardOrder = standardOrder.filter(slug => availableSlugs.includes(slug));
+            
+            // Agregar parámetros que no están en el orden estándar al final
+            const remainingSlugs = availableSlugs.filter(slug => !standardOrder.includes(slug));
+            
+            initialOrder = [...filteredStandardOrder, ...remainingSlugs];
+            console.log('📊 Using standard parameter order for existing task:', initialOrder);
+          }
+          
           setParameterOrder(initialOrder);
           console.log('🎯 Initial selections set:', initialSelections.length, 'parameters');
-          console.log('📊 Initial parameter order:', initialOrder);
         }
       } catch (e) {
         console.error('❌ Error parsing initial parameters:', e);
@@ -423,13 +442,54 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
     )
   }
 
+  // Función para ordenar parámetros según parameterOrder
+  const getOrderedParameters = () => {
+    if (parameterOrder.length === 0) {
+      // Si no hay orden definido, usar el orden de availableParameters
+      return availableParameters
+    }
+    
+    // Crear un mapa de slug a ID para facilitar el ordenamiento
+    const slugToIdMap: Record<string, string> = {}
+    parameters.forEach(param => {
+      slugToIdMap[param.slug] = param.id
+    })
+    
+    // Ordenar según parameterOrder, agregando al final los parámetros no especificados
+    const orderedIds: string[] = []
+    
+    // Primero, agregar parámetros en el orden especificado
+    parameterOrder.forEach(slug => {
+      const paramId = slugToIdMap[slug]
+      if (paramId && availableParameters.includes(paramId)) {
+        orderedIds.push(paramId)
+      }
+    })
+    
+    // Luego, agregar parámetros no especificados en parameterOrder
+    availableParameters.forEach(paramId => {
+      if (!orderedIds.includes(paramId)) {
+        orderedIds.push(paramId)
+      }
+    })
+    
+    console.log('🔀 Parameter ordering:', {
+      parameterOrder,
+      availableParameters,
+      orderedIds,
+      slugToIdMap
+    })
+    
+    return orderedIds
+  }
+
   return (
     <div className="space-y-6">
       {/* Badges de parámetros seleccionados */}
       <div className="space-y-4">
         <Label className="text-sm font-medium">Configuración de parámetros</Label>
         <div className="flex flex-wrap gap-2">
-          {availableParameters.map(paramId => {
+          {getOrderedParameters().map(paramId => {
             const parameter = parameters.find(p => p.id === paramId)
             const selection = selections.find(s => s.parameterId === paramId)
             const options = getOptionsForParameter(paramId)
