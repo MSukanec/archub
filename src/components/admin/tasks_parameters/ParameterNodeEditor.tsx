@@ -82,13 +82,13 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
               className="relative flex items-center py-1 px-2 rounded bg-muted/50 text-xs"
             >
               <span className="truncate pr-4">{option.label}</span>
-              {/* Handle de salida alineado con el texto */}
+              {/* Handle de salida completamente fuera del borde */}
               <Handle
                 type="source"
                 position={Position.Right}
                 id={`${parameter.id}-${option.id}`}
                 style={{
-                  right: -8,
+                  right: -16, // Movido más afuera para que se vea completamente
                   top: '50%',
                   transform: 'translateY(-50%)',
                   width: 16,
@@ -96,7 +96,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                   backgroundColor: '#10b981',
                   border: '2px solid #ffffff',
                   borderRadius: '50%',
-                  zIndex: 10,
+                  zIndex: 20, // Z-index más alto que la tarjeta
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 }}
               />
@@ -111,14 +111,14 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
         position={Position.Left}
         id={`target-${parameter.id}`}
         style={{
-          left: -8,
+          left: -16, // Misma distancia que los handles de salida
           top: '50%',
           width: 16,
           height: 16,
           backgroundColor: '#3b82f6',
           border: '2px solid #ffffff',
           borderRadius: '50%',
-          zIndex: 10,
+          zIndex: 20, // Mismo z-index alto
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         }}
       />
