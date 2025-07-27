@@ -24,21 +24,13 @@ import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-reac
 interface GeneratedTask {
   id: string
   code: string
-  template_id: string
-  param_values: any
+  task_group_id: string
+  parameter_values: any
   is_public: boolean
   is_system: boolean
   created_at: string
   organization_id: string
   updated_at: string
-  scope: string
-  // Related data for dynamic name generation
-  task_templates?: {
-    id: string
-    name_template: string
-    code: string
-    category_id: string
-  }
 }
 
 export default function AdminGeneratedTasks() {
@@ -85,8 +77,7 @@ export default function AdminGeneratedTasks() {
   const filteredGeneratedTasks = generatedTasks
     .filter((task: any) => {
       // Search filter
-      const matchesSearch = task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.description?.toLowerCase().includes(searchValue.toLowerCase())
+      const matchesSearch = task.code?.toLowerCase().includes(searchValue.toLowerCase())
       
       // Type filter
       let matchesType = true
@@ -106,7 +97,7 @@ export default function AdminGeneratedTasks() {
     })
 
   const handleEdit = (generatedTask: GeneratedTask) => {
-    openModal('generated-task', { generatedTask })
+    openModal('parametric-task', { taskData: generatedTask })
   }
 
   const handleConfirmDelete = async () => {

@@ -41,20 +41,14 @@ export interface TaskMaterial {
 
 export function useGeneratedTasks() {
   return useQuery({
-    queryKey: ['task-generated'],
+    queryKey: ['task-parametric'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('task_generated')
+        .from('task_parametric')
         .select(`
-          *,
-          task_templates (
-            id,
-            name_template,
-            task_group_id,
-            unit_id
-          )
+          *
         `)
         .order('created_at', { ascending: false });
       
@@ -174,14 +168,14 @@ export function useDeleteGeneratedTask() {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { error } = await supabase
-        .from('task_generated')
+        .from('task_parametric')
         .delete()
         .eq('id', taskId);
       
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-generated'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
       toast({
         title: "Tarea Eliminada",
         description: "La tarea generada se ha eliminado exitosamente",
