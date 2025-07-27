@@ -259,11 +259,16 @@ const useParameterPositions = () => {
   return useQuery({
     queryKey: ['parameter-positions'],
     queryFn: async () => {
+      console.log('📥 Cargando posiciones desde DB...');
       const { data, error } = await supabase!
         .from('task_parameter_positions')
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error cargando posiciones:', error);
+        throw error;
+      }
+      console.log('📊 Posiciones cargadas desde DB:', data?.length || 0, 'registros');
       return data as TaskParameterPosition[];
     },
   });
@@ -324,15 +329,19 @@ function ParameterNodeEditorContent() {
   // Inicializar opciones visibles por primera vez desde posiciones guardadas
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length === 0) {
+      console.log('🔍 Inicializando opciones visibles. Posiciones guardadas:', savedPositions);
       const newVisibleOptions: Record<string, string[]> = {};
       parametersData.forEach((item) => {
         const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
         if (savedPosition && savedPosition.visible_options.length > 0) {
           // Usar opciones guardadas
+          console.log('✅ Usando opciones guardadas para:', item.parameter.slug, savedPosition.visible_options);
           newVisibleOptions[item.parameter.id] = savedPosition.visible_options;
         } else {
           // Por defecto mostrar las primeras 5 opciones
-          newVisibleOptions[item.parameter.id] = item.options.slice(0, 5).map(opt => opt.id);
+          const defaultOptions = item.options.slice(0, 5).map(opt => opt.id);
+          console.log('🔧 Usando opciones por defecto para:', item.parameter.slug, defaultOptions);
+          newVisibleOptions[item.parameter.id] = defaultOptions;
         }
       });
       setNodeVisibleOptions(newVisibleOptions);
@@ -342,19 +351,24 @@ function ParameterNodeEditorContent() {
   // Configurar nodos desde datos de parámetros con posiciones guardadas
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
+      console.log('🎯 Configurando nodos. Parámetros:', parametersData.length, 'Posiciones guardadas:', savedPositions.length);
       const initialNodes: Node[] = parametersData.map((item, index) => {
         const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
+        
+        const position = savedPosition ? { 
+          x: savedPosition.x, 
+          y: savedPosition.y 
+        } : { 
+          x: (index % 3) * 320, // 3 columnas
+          y: Math.floor(index / 3) * 200 // Separación vertical
+        };
+        
+        console.log(`📌 Nodo ${item.parameter.slug}:`, savedPosition ? 'posición guardada' : 'posición por defecto', position);
         
         return {
           id: item.parameter.id,
           type: 'parameterNode',
-          position: savedPosition ? { 
-            x: savedPosition.x, 
-            y: savedPosition.y 
-          } : { 
-            x: (index % 3) * 320, // 3 columnas
-            y: Math.floor(index / 3) * 200 // Separación vertical
-          },
+          position,
           data: {
             parameter: item.parameter,
             options: item.options,
