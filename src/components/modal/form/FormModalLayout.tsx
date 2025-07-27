@@ -18,6 +18,8 @@ interface FormModalLayoutProps {
   stepContent?: ReactNode;
   // Prop para inicializar en modo edición
   isEditing?: boolean;
+  // Función para manejar el submit con ENTER
+  onSubmit?: () => void;
 }
 
 export function FormModalLayout({
@@ -31,6 +33,7 @@ export function FormModalLayout({
   columns = 2,
   stepContent,
   isEditing = false,
+  onSubmit,
 }: FormModalLayoutProps) {
   const { currentPanel, setPanel } = useModalPanelStore();
 
@@ -52,6 +55,23 @@ export function FormModalLayout({
       setPanel('view');
     }
   }, [isEditing, setPanel]);
+
+  // Manejar ENTER para submit global
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Solo procesar ENTER si hay función de submit y no estamos en un textarea
+      if (event.key === 'Enter' && onSubmit && 
+          (event.target as HTMLElement)?.tagName !== 'TEXTAREA') {
+        event.preventDefault();
+        onSubmit();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onSubmit]);
 
   // Reset panel al cerrar modal
   const handleClose = () => {
