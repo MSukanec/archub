@@ -44,7 +44,9 @@ export function ComboBoxMultiSelect({
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
       : [...value, optionValue];
+    
     onChange(newValue);
+    // Mantener el popover abierto para selecciones múltiples
   };
 
   const getDisplayText = () => {
@@ -84,8 +86,14 @@ export function ComboBoxMultiSelect({
               <CommandItem
                 key={option.value}
                 value={option.label}
-                onSelect={() => handleSelect(option.value)}
                 className="cursor-pointer"
+                onSelect={(currentValue) => {
+                  // Usar currentValue para encontrar la opción correspondiente
+                  const selectedOption = options.find(opt => opt.label.toLowerCase() === currentValue.toLowerCase());
+                  if (selectedOption) {
+                    handleSelect(selectedOption.value);
+                  }
+                }}
               >
                 <Check
                   className={cn(
