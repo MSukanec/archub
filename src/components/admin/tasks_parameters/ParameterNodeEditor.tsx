@@ -553,6 +553,12 @@ function ParameterNodeEditorContent() {
             setSelectedEdge(edge);
             setShowDeleteDialog(true);
           }}
+          // Configuración de controles de interacción - estilo Autodesk
+          panOnDrag={false} // Desactivar pan con click izquierdo
+          selectionOnDrag={true} // Activar selección múltiple con arrastre del fondo
+          panOnScroll={false} // Desactivar pan con scroll
+          zoomOnScroll={true} // Mantener zoom con scroll
+          zoomOnPinch={true} // Zoom con pinch en móvil
         >
           <Controls />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
