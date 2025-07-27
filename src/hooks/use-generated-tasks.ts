@@ -59,66 +59,96 @@ export function useCreateGeneratedTask() {
       console.log('🚀 Creating task with parameters:', payload.param_values);
       console.log('🎯 Parameter order:', payload.param_order);
       
-      // Verificar si ya existe una tarea con esos parámetros exactos
-      const paramValuesString = JSON.stringify(payload.param_values);
-      const { data: existingTask, error: searchError } = await supabase
-        .from('task_parametric')
-        .select('*')
-        .eq('param_values', paramValuesString)
-        .single();
-      
-      if (searchError && searchError.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('❌ Error searching for existing task:', searchError);
-        throw searchError;
-      }
-      
-      let taskResult;
-      
-      if (existingTask) {
-        // Task already exists, return it
-        console.log('✅ Found existing task:', existingTask);
-        taskResult = existingTask;
-      } else {
-        // Get the last code number
-        const { data: lastTask, error: lastCodeError } = await supabase
-          .from('task_parametric')
-          .select('code')
-          .order('code', { ascending: false })
-          .limit(1)
-          .single();
+      try {
+        // Use the RPC function with CORRECT parameter order
+        const { data, error } = await supabase.rpc('create_parametric_task', {
+          input_param_values: payload.param_values,  // FIRST parameter (jsonb)
+          input_param_order: payload.param_order || [] // SECOND parameter (text[])
+        });
         
-        let newCodeNumber = 1;
-        if (lastTask && lastTask.code && /^\d+$/.test(lastTask.code)) {
-          newCodeNumber = parseInt(lastTask.code) + 1;
+        if (error) {
+          console.error('❌ Error calling create_parametric_task RPC:', error);
+          throw error;
         }
         
-        const newCode = newCodeNumber.toString().padStart(6, '0');
+        console.log('✅ RPC function returned:', data);
         
-        // Create new task
-        const { data: newTask, error: createError } = await supabase
-          .from('task_parametric')
-          .insert({
-            code: newCode,
-            param_values: paramValuesString,
-            param_order: payload.param_order || []
-          })
-          .select()
-          .single();
-        
-        if (createError) {
-          console.error('❌ Error creating new task:', createError);
-          throw createError;
+        if (!data || data.length === 0) {
+          throw new Error('No data returned from create_parametric_task function');
         }
         
-        console.log('✅ Created new task:', newTask);
-        taskResult = newTask;
+        const taskResult = data[0]; // Function returns array of rows
+        
+        return { 
+          new_task: taskResult, 
+          generated_code: taskResult.code,
+          is_existing: false
+        };
+      } catch (rpcError) {
+        console.error('❌ RPC function failed, falling back to direct insertion:', rpcError);
+        
+        // Fallback: use direct table insertion if RPC fails
+        // Verificar si ya existe una tarea con esos parámetros exactos
+        const paramValuesString = JSON.stringify(payload.param_values);
+        const { data: existingTask, error: searchError } = await supabase
+          .from('task_parametric')
+          .select('*')
+          .eq('param_values', paramValuesString)
+          .single();
+        
+        if (searchError && searchError.code !== 'PGRST116') { // PGRST116 = no rows found
+          console.error('❌ Error searching for existing task:', searchError);
+          throw searchError;
+        }
+        
+        let taskResult;
+        
+        if (existingTask) {
+          // Task already exists, return it
+          console.log('✅ Found existing task:', existingTask);
+          taskResult = existingTask;
+        } else {
+          // Get the last code number
+          const { data: lastTask, error: lastCodeError } = await supabase
+            .from('task_parametric')
+            .select('code')
+            .order('code', { ascending: false })
+            .limit(1)
+            .single();
+          
+          let newCodeNumber = 1;
+          if (lastTask && lastTask.code && /^\d+$/.test(lastTask.code)) {
+            newCodeNumber = parseInt(lastTask.code) + 1;
+          }
+          
+          const newCode = newCodeNumber.toString().padStart(6, '0');
+          
+          // Create new task
+          const { data: newTask, error: createError } = await supabase
+            .from('task_parametric')
+            .insert({
+              code: newCode,
+              param_values: paramValuesString,
+              param_order: payload.param_order || []
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('❌ Error creating new task:', createError);
+            throw createError;
+          }
+          
+          console.log('✅ Created new task via fallback:', newTask);
+          taskResult = newTask;
+        }
+        
+        return { 
+          new_task: taskResult, 
+          generated_code: taskResult.code,
+          is_existing: false
+        };
       }
-      
-      return { 
-        new_task: taskResult, 
-        generated_code: taskResult.code,
-        is_existing: false // The function handles deduplication internally
-      };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
