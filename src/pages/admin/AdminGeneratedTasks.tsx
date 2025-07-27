@@ -75,17 +75,47 @@ export default function AdminGeneratedTasks() {
           // Generate preview using same logic as ParametricTaskBuilder
           let preview = '';
           
-          // Define the correct order of parameters based on dependency chain
-          const parameterOrder = ['tipo_tarea', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero'];
+          // Check if we're dealing with new format (UUID keys) or legacy format (slug keys)
+          const firstKey = Object.keys(paramValues)[0];
+          const isNewFormat = firstKey && firstKey.length === 36 && firstKey.includes('-');
           
-          // Process parameters in the correct order
-          for (const paramSlug of parameterOrder) {
-            const paramValue = paramValues[paramSlug];
-            if (paramValue) {
+          if (isNewFormat) {
+            // New format: parameterId → optionId
+            // Need to get parameter options to convert IDs to labels
+            const { data: parameterOptions } = await supabase
+              .from('task_parameter_options')
+              .select('*');
+            
+            // Define the correct order of parameters based on dependency chain
+            const parameterOrder = ['tipo_tarea', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero'];
+            
+            // Process parameters in the correct order
+            for (const paramSlug of parameterOrder) {
               const parameter = parameters.find(p => p.slug === paramSlug);
-              if (parameter && parameter.expression_template) {
-                const processedText = parameter.expression_template.replace('{value}', paramValue);
-                preview += processedText + ' ';
+              if (parameter) {
+                const optionId = paramValues[parameter.id];
+                if (optionId && parameterOptions) {
+                  const option = parameterOptions.find(opt => opt.id === optionId);
+                  if (option && parameter.expression_template) {
+                    const processedText = parameter.expression_template.replace('{value}', option.label);
+                    preview += processedText + ' ';
+                  }
+                }
+              }
+            }
+          } else {
+            // Legacy format: paramSlug → optionLabel
+            const parameterOrder = ['tipo_tarea', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero'];
+            
+            // Process parameters in the correct order
+            for (const paramSlug of parameterOrder) {
+              const paramValue = paramValues[paramSlug];
+              if (paramValue) {
+                const parameter = parameters.find(p => p.slug === paramSlug);
+                if (parameter && parameter.expression_template) {
+                  const processedText = parameter.expression_template.replace('{value}', paramValue);
+                  preview += processedText + ' ';
+                }
               }
             }
           }
