@@ -84,7 +84,7 @@ const useParametersWithOptions = () => {
     queryFn: async () => {
       const { data: parameters, error: paramsError } = await supabase!
         .from('task_parameters')
-        .select('*')
+        .select('id, slug, label, type')
         .eq('type', 'select')
         .order('label');
 
@@ -94,7 +94,7 @@ const useParametersWithOptions = () => {
         parameters.map(async (parameter) => {
           const { data: options, error: optionsError } = await supabase!
             .from('task_parameter_options')
-            .select('*')
+            .select('id, label, parameter_id')
             .eq('parameter_id', parameter.id)
             .order('label');
 
@@ -119,7 +119,7 @@ const useParameterDependencies = () => {
     queryFn: async () => {
       const { data, error } = await supabase!
         .from('task_parameter_dependencies')
-        .select('*');
+        .select('id, parent_parameter_id, parent_option_id, child_parameter_id');
 
       if (error) throw error;
       return data || [];
@@ -241,7 +241,7 @@ function ParameterNodeEditorContent() {
 
       setNodes(initialNodes);
     }
-  }, [parametersData, setNodes]);
+  }, [parametersData.length]);
 
   // Configurar edges desde dependencias
   useEffect(() => {
@@ -258,13 +258,18 @@ function ParameterNodeEditorContent() {
           stroke: 'hsl(var(--accent))',
           strokeWidth: 2,
         },
+        data: {
+          parentParameterId: dep.parent_parameter_id,
+          parentOptionId: dep.parent_option_id,
+          childParameterId: dep.child_parameter_id
+        }
       }));
 
       setEdges(initialEdges);
     } else {
       setEdges([]);
     }
-  }, [dependencies, setEdges]);
+  }, [dependencies.length]);
 
   // Manejar nuevas conexiones
   const onConnect = useCallback(
