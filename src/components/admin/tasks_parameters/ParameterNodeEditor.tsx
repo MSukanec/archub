@@ -362,6 +362,7 @@ function ParameterNodeEditorContent() {
   const deleteDependencyMutation = useDeleteDependency();
   const savePositionMutation = useSaveParameterPosition();
   const { setViewport, getViewport } = useReactFlow();
+  const { toast } = useToast();
 
   // Debug: mostrar estado de carga de posiciones
   useEffect(() => {
