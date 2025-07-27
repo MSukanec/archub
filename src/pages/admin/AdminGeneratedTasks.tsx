@@ -92,6 +92,10 @@ export default function AdminGeneratedTasks() {
           
           // Clean up and finalize
           preview = preview.trim();
+          // Remove trailing comma if it exists before adding period
+          if (preview.endsWith(',')) {
+            preview = preview.slice(0, -1);
+          }
           if (preview && !preview.endsWith('.')) {
             preview += '.';
           }

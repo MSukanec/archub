@@ -130,6 +130,8 @@ Archub is a modern construction management platform built with a React frontend 
   • CREATE_PARAMETRIC_TASK RPC INTEGRATION: Updated useCreateGeneratedTask to use create_parametric_task RPC function with fallback to direct insertion
   • DATABASE FUNCTION ISSUES IDENTIFIED: create_parametric_task function has ambiguous ID reference error, requires function signature correction in database
   • RENDER FUNCTION ERROR PERSISTS: render_task_name_from_param_values still called with wrong parameter order (text[], jsonb) - likely from database trigger or automatic process
+  • TRIGGERS FIXED BY USER: Database trigger issues resolved by user, RPC function now working correctly with proper parameter order
+  • COMMA CLEANUP: Fixed AdminGeneratedTasks preview generation to remove trailing commas before adding period, eliminating "cemento,." formatting issue
 - July 27, 2025. PREVIEW GENERATION ORDER FIXED: Successfully corrected preview text generation to use proper parameter ordering instead of random selection order - COMPLETED
   • ORDERED PREVIEW GENERATION: Modified ParametricTaskBuilder preview logic to use getOrderedParameters() for correct sequence processing
   • LOGICAL TEXT FLOW: Preview now generates "Ejecución de muro de ladrillo cerámico hueco de 12x18x33 con mortero de asiento de cemento de albañilería" in proper order
