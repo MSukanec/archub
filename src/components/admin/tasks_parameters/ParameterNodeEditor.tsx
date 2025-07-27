@@ -513,37 +513,20 @@ function ParameterNodeEditorContent() {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={(changes) => {
-            onNodesChange(changes);
-            
-            // Guardar posiciones cuando los nodos se mueven
-            changes.forEach((change) => {
-              console.log('🔄 Cambio de nodo:', change.type, 'dragging:', change.dragging, 'position:', !!change.position);
-              if (change.type === 'position') {
-                console.log('🔍 Evaluando condiciones: type=position ✅, position=' + !!change.position + ', dragging=' + change.dragging);
-                if (change.position && change.dragging === false) {
-                  console.log('✅ Condiciones cumplidas, buscando nodo...');
-                  const node = nodes.find(n => n.id === change.id);
-                  if (node) {
-                    console.log('📍 Guardando posición de nodo:', {
-                      parameter_id: change.id,
-                      x: Math.round(change.position.x),
-                      y: Math.round(change.position.y),
-                      visible_options: nodeVisibleOptions[change.id] || []
-                    });
-                    savePositionMutation.mutate({
-                      parameter_id: change.id,
-                      x: Math.round(change.position.x),
-                      y: Math.round(change.position.y),
-                      visible_options: nodeVisibleOptions[change.id] || []
-                    });
-                  } else {
-                    console.log('❌ No se encontró el nodo:', change.id);
-                  }
-                } else {
-                  console.log('❌ Condiciones no cumplidas: position=' + !!change.position + ', dragging=' + change.dragging);
-                }
-              }
+          onNodesChange={onNodesChange}
+          onNodeDragStop={(event, node) => {
+            console.log('🎯 Nodo arrastrado y soltado:', node.id, 'nueva posición:', node.position);
+            console.log('📍 Guardando posición de nodo:', {
+              parameter_id: node.id,
+              x: Math.round(node.position.x),
+              y: Math.round(node.position.y),
+              visible_options: nodeVisibleOptions[node.id] || []
+            });
+            savePositionMutation.mutate({
+              parameter_id: node.id,
+              x: Math.round(node.position.x),
+              y: Math.round(node.position.y),
+              visible_options: nodeVisibleOptions[node.id] || []
             });
           }}
           onEdgesChange={onEdgesChange}
