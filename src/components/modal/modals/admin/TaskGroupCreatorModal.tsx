@@ -770,7 +770,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       console.log('🏗️ Template final para guardar (solo placeholders):', realTemplate);
 
       // Update the template's name_template with the real constructed template
-      if (existingTemplate?.id) {
+      if (existingTemplate?.id && existingTemplate.id !== 'temp-template') {
         console.log('🔄 Iniciando actualización de template:', {
           template_id: existingTemplate.id,
           old_template: existingTemplate.name_template,
@@ -782,7 +782,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
           name_template: realTemplate
         });
       } else {
-        console.warn('⚠️ No se pudo actualizar template: existingTemplate.id no disponible', existingTemplate);
+        console.warn('⚠️ Saltando actualización de template: ID no válido o temporal', {
+          templateId: existingTemplate?.id,
+          isTemp: existingTemplate?.id === 'temp-template'
+        });
       }
 
       await saveParameterOptionsMutation.mutateAsync({
