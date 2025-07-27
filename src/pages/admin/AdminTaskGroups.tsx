@@ -100,8 +100,8 @@ export default function AdminTaskGroups() {
                 .select(`
                   parameter_id,
                   parameter_option_id,
-                  task_parameter_values!inner(id, name, label),
-                  task_parameters!inner(id, name, label, type, expression_template)
+                  task_parameter_options!inner(id, name, label),
+                  task_parameters!inner(id, slug, label, type, expression_template)
                 `)
                 .eq('group_id', group.id)
 
@@ -115,7 +115,7 @@ export default function AdminTaskGroups() {
                   if (!optionsMap[opt.parameter_id]) {
                     optionsMap[opt.parameter_id] = []
                   }
-                  optionsMap[opt.parameter_id].push(opt.task_parameter_values)
+                  optionsMap[opt.parameter_id].push(opt.task_parameter_options)
                   
                   // Build parameters map
                   parametersMap[opt.parameter_id] = opt.task_parameters
@@ -134,7 +134,7 @@ export default function AdminTaskGroups() {
                 hasTemplate: true,
                 parameters: parameters.map((tp: any) => ({
                   id: tp.parameter_id,
-                  name: tp.task_parameter?.name || 'unknown',
+                  name: tp.task_parameter?.slug || 'unknown',
                   label: tp.task_parameter?.label || 'Unknown Parameter',
                   type: tp.task_parameter?.type || 'unknown',
                   position: 1
