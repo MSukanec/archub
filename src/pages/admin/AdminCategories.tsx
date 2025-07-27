@@ -118,27 +118,7 @@ export default function AdminCategories() {
     return filterCategories(categories);
   }, [categories, searchTerm]);
 
-  // Calculate statistics - simplified without templates and groups
-  const calculateStats = () => {
-    const flattenCategories = (cats: TaskCategoryAdmin[]): TaskCategoryAdmin[] => {
-      return cats.reduce((acc, cat) => {
-        acc.push(cat);
-        if (cat.children) {
-          acc.push(...flattenCategories(cat.children));
-        }
-        return acc;
-      }, [] as TaskCategoryAdmin[]);
-    };
-
-    const allFlatCategories = flattenCategories(categories);
-    
-    return {
-      totalCategorias: allFlatCategories.length,
-      categoriasPadre: categories.length,
-    };
-  };
-
-  const stats = calculateStats();
+  // Statistics removed per user request
 
   const features = [
     {
@@ -185,48 +165,11 @@ export default function AdminCategories() {
           features={features}
           primaryActionLabel="Nueva Categoría"
           onPrimaryActionClick={handleCreateCategory}
+          showProjectSelector={false}
         />
-
-        {/* KPI Cards - Simplified */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Categorías</CardTitle>
-              <Tag className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-accent">{stats.totalCategorias}</div>
-              <p className="text-xs text-muted-foreground">
-                Incluyendo subcategorías
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Categorías Principales</CardTitle>
-              <TreePine className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-accent">{stats.categoriasPadre}</div>
-              <p className="text-xs text-muted-foreground">
-                Categorías de primer nivel
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Categories Tree */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TreePine className="w-5 h-5" />
-              Categorías de Tareas
-            </CardTitle>
-            <CardDescription>
-              Administra la estructura jerárquica de categorías para organizar tipos de trabajo
-            </CardDescription>
-          </CardHeader>
           <CardContent>
             {filteredCategories.length === 0 ? (
               <div className="text-center py-12">
