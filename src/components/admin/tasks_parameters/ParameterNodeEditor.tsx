@@ -18,9 +18,20 @@ import 'reactflow/dist/style.css';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ParameterNodeData {
   parameter: {
@@ -238,6 +249,8 @@ function ParameterNodeEditorContent() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Tipos de nodos - definidos fuera para evitar recreación
   const nodeTypes = useMemo(() => ({
@@ -278,7 +291,9 @@ function ParameterNodeEditorContent() {
         style: {
           stroke: '#10b981',
           strokeWidth: 3,
+          cursor: 'pointer',
         },
+        className: 'hoverable-edge',
         data: {
           parentParameterId: dep.parent_parameter_id,
           parentOptionId: dep.parent_option_id,
@@ -367,9 +382,13 @@ function ParameterNodeEditorContent() {
           snapGrid={[15, 15]}
           connectionLineStyle={{ stroke: '#10b981', strokeWidth: 3 }}
           defaultEdgeOptions={{
-            style: { stroke: '#10b981', strokeWidth: 3 },
+            style: { stroke: '#10b981', strokeWidth: 3, cursor: 'pointer' },
             type: 'smoothstep',
             animated: true,
+          }}
+          onEdgeClick={(event, edge) => {
+            setSelectedEdge(edge);
+            setShowDeleteDialog(true);
           }}
         >
           <Controls />
@@ -381,6 +400,49 @@ function ParameterNodeEditorContent() {
       <div className="text-xs text-muted-foreground">
         Nodos: {nodes.length} | Conexiones: {edges.length} | Dependencias en BD: {dependencies.length}
       </div>
+      
+      {/* Dialog de confirmación para eliminar conexión */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar conexión?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente la dependencia entre parámetros.
+              ¿Estás seguro de que deseas continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedEdge?.data) {
+                  deleteDependencyMutation.mutate({
+                    parentParameterId: selectedEdge.data.parentParameterId,
+                    parentOptionId: selectedEdge.data.parentOptionId,
+                    childParameterId: selectedEdge.data.childParameterId
+                  });
+                }
+                setShowDeleteDialog(false);
+                setSelectedEdge(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* CSS personalizado para efectos hover */}
+      <style jsx>{`
+        .react-flow__edge.hoverable-edge:hover path {
+          stroke-width: 6 !important;
+          stroke: #059669 !important;
+        }
+        .react-flow__edge {
+          transition: all 0.2s ease;
+        }
+      `}</style>
     </div>
   );
 }
