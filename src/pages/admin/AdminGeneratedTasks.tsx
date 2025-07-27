@@ -138,6 +138,18 @@ export default function AdminGeneratedTasks() {
   // Table columns configuration
   const columns = [
     {
+      key: 'code',
+      label: 'Código',
+      width: '15%',
+      render: (task: GeneratedTask) => (
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-mono text-foreground bg-accent/10 px-2 py-1 rounded border">
+            {task.code || 'Sin código'}
+          </span>
+        </div>
+      )
+    },
+    {
       key: 'task_name',
       label: 'Tarea',
       render: (task: GeneratedTask) => (

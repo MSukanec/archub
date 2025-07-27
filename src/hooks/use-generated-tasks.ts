@@ -5,21 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 export interface GeneratedTask {
   id: string;
   code: string;
-  template_id: string;
-  param_values: Record<string, any>;
-  is_public: boolean;
-  is_system: boolean;
+  param_values: string; // JSON string from database
   created_at: string;
-  organization_id: string;
   updated_at: string;
-  scope: string;
-  // Related data for dynamic name generation
-  task_templates?: {
-    id: string;
-    name_template: string;
-    task_group_id: string;
-    unit_id?: string | null;
-  };
 }
 
 // Interface for task materials
@@ -62,97 +50,55 @@ export function useCreateGeneratedTask() {
 
   return useMutation({
     mutationFn: async (payload: {
-      template_id: string;
       param_values: Record<string, any>;
-      organization_id: string;
-      is_system?: boolean;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // First, get the task_group_id from the template
-      const { data: templateData, error: templateError } = await supabase
-        .from('task_templates')
-        .select('task_group_id')
-        .eq('id', payload.template_id)
-        .single();
+      console.log('🚀 Creating task with parameters:', payload.param_values);
       
-      if (templateError || !templateData?.task_group_id) {
-        throw new Error('Template not found or missing task_group_id');
-      }
-      
-      // Call RPC function that handles both code generation and task creation/verification
+      // Call the new centralized SQL function
       const { data: taskData, error: taskError } = await supabase
-        .rpc('task_generate_code', {
-          input_task_group_id: templateData.task_group_id,
-          input_param_values: payload.param_values,
-          input_organization_id: payload.organization_id,
-          input_is_system: payload.is_system || false
+        .rpc('archub_generate_task_parametric', {
+          input_param_values: payload.param_values
         });
       
-      if (taskError) throw taskError;
-      if (!taskData || taskData.length === 0) throw new Error('No se pudo crear la tarea');
-      
-      // The function returns the task data directly
-      const taskResult = taskData[0];
-      
-      // Now fetch the complete task data with template information
-      const { data: completeTask, error: fetchError } = await supabase
-        .from('task_generated')
-        .select(`
-          *,
-          task_templates (
-            id,
-            name_template,
-            task_group_id,
-            unit_id
-          )
-        `)
-        .eq('id', taskResult.id)
-        .single();
-      
-      if (fetchError) {
-        console.error('Error fetching complete task data:', fetchError);
-        // Fallback to basic task data
-        return { 
-          new_task: taskResult, 
-          generated_code: taskResult.code,
-          is_existing: false
-        };
+      if (taskError) {
+        console.error('❌ Error calling archub_generate_task_parametric:', taskError);
+        throw taskError;
       }
       
+      if (!taskData || taskData.length === 0) {
+        throw new Error('No se pudo crear la tarea');
+      }
+      
+      const taskResult = taskData[0];
+      console.log('✅ Task created/found:', taskResult);
+      
       return { 
-        new_task: completeTask, 
+        new_task: taskResult, 
         generated_code: taskResult.code,
-        is_existing: false // Function handles duplicates internally
+        is_existing: false // The function handles deduplication internally
       };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['task-generated'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
       
       toast({
         title: "Tarea Generada",
         description: `Tarea creada exitosamente con código ${data.generated_code}`,
         variant: "default"
       });
+      console.log('🎉 Task creation successful:', data.new_task);
       return data.new_task;
     },
     onError: (error: any) => {
-      console.error('Error handling task:', error);
+      console.error('❌ Error creating task:', error);
       
-      // Handle duplicate task error specifically
-      if (error.code === '23505' && error.message?.includes('unique_generated_task_per_template_and_params')) {
-        toast({
-          title: "Tarea Duplicada",
-          description: "Ya existe una tarea con estos parámetros exactos. Revisa la lista de tareas existentes.",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message || "Ocurrió un error al crear la tarea",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Error",
+        description: error.message || "Ocurrió un error al crear la tarea",
+        variant: "destructive"
+      });
     }
   });
 }
@@ -347,9 +293,9 @@ export function useUpdateGeneratedTask() {
       console.log('Updating generated task with data:', payload);
       
       const { data, error } = await supabase
-        .from('task_generated')
+        .from('task_parametric')
         .update({
-          param_values: payload.input_param_values
+          param_values: JSON.stringify(payload.input_param_values)
         })
         .eq('id', payload.task_id)
         .select()
@@ -364,10 +310,7 @@ export function useUpdateGeneratedTask() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-generated'] });
-      queryClient.invalidateQueries({ queryKey: ['task-search'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task-generated-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
       toast({
         title: "Tarea Actualizada",
         description: "La tarea se ha actualizado exitosamente"

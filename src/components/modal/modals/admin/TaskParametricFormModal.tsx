@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useCreateGeneratedTask, useUpdateGeneratedTask } from '@/hooks/use-generated-tasks'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -35,7 +34,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [taskPreview, setTaskPreview] = useState<string>('')
   const { task, isEditing, taskData } = modalData
   const actualTask = task || taskData
-  const queryClient = useQueryClient()
   
   console.log('🔍 Modal data received:', modalData);
   console.log('📝 Task data:', actualTask);
@@ -46,24 +44,9 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     console.log('🔄 Loading existing parameters:', actualTask.param_values);
   }
 
-  // Mutación para crear tarea paramétrica
-  const createParametricTaskMutation = useMutation({
-    mutationFn: async (paramValues: Record<string, string>) => {
-      const { data, error } = await supabase
-        .from('task_parametric')
-        .insert({
-          param_values: JSON.stringify(paramValues)
-        })
-        .select()
-        .single()
-      
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['task-parametric'] })
-    }
-  })
+  // Use the new hooks for creating and updating tasks
+  const createTaskMutation = useCreateGeneratedTask()
+  const updateTaskMutation = useUpdateGeneratedTask()
 
   const handleSubmit = async () => {
     if (selections.length === 0) {
@@ -84,27 +67,43 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       })
       
       console.log('💾 Saving param values:', paramValues);
-
-      console.log('🔧 Creando tarea paramétrica:', {
+      console.log('🔧 Creating parametric task:', {
         selections,
         preview: taskPreview,
         paramValues
       })
       
-      // Guardar en la tabla task_parametric
-      await createParametricTaskMutation.mutateAsync(paramValues)
-      
-      toast({
-        title: "Tarea paramétrica creada",
-        description: `Tarea creada: "${taskPreview}"`,
-      })
+      if (isEditing && actualTask) {
+        // Update existing task
+        await updateTaskMutation.mutateAsync({
+          task_id: actualTask.id,
+          input_param_values: paramValues
+        })
+        
+        toast({
+          title: "Tarea actualizada",
+          description: `Tarea actualizada: "${taskPreview}"`,
+        })
+      } else {
+        // Create new task using the centralized SQL function
+        const result = await createTaskMutation.mutateAsync({
+          param_values: paramValues
+        })
+        
+        console.log('✅ Task created with code:', result.generated_code);
+        
+        toast({
+          title: "Tarea generada",
+          description: `Tarea creada con código ${result.generated_code}: "${taskPreview}"`,
+        })
+      }
       
       onClose()
     } catch (error) {
-      console.error('Error creando tarea paramétrica:', error)
+      console.error('Error processing task:', error)
       toast({
         title: "Error",
-        description: "Hubo un error al crear la tarea paramétrica.",
+        description: "Hubo un error al procesar la tarea.",
         variant: "destructive",
       })
     } finally {

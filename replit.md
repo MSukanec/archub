@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. ARCHUB_GENERATE_TASK_PARAMETRIC SQL FUNCTION INTEGRATION COMPLETED: Successfully implemented centralized task creation using SQL function with automatic 6-digit code generation - COMPLETED
+  • CENTRALIZED FUNCTION: All task creation now uses archub_generate_task_parametric(input_param_values) SQL function instead of manual table inserts
+  • AUTOMATIC CODE GENERATION: Function generates unique 6-digit numeric codes (000001, 000002, etc.) automatically
+  • DEDUPLICATION LOGIC: Function handles duplicate parameter combinations internally - returns existing task if parameters match
+  • SIMPLIFIED ARCHITECTURE: Eliminated all references to task_templates, task_groups, organizations - system is now completely global and centralized
+  • UI CODE DISPLAY: Added "Código" column to AdminGeneratedTasks table with visual styling to display generated 6-digit codes
+  • HOOK MODERNIZATION: Updated useCreateGeneratedTask to call SQL function directly with simplified payload structure
+  • MODAL INTEGRATION: TaskParametricFormModal now uses new hook system and displays generated codes in success messages
+  • INTERFACE UPDATES: Updated GeneratedTask interface to match task_parametric table structure (removed obsolete fields)
+  • SNAKE_CASE SLUGS: Parameter and option modals now generate slugs using snake_case format instead of hyphens
 - July 27, 2025. TASK_GENERATED TABLE ELIMINATION COMPLETED: Successfully removed task_generated table from database and updated all hooks to use task_parametric table exclusively - COMPLETED
   • HOOK MIGRATION: Updated useGeneratedTasks to query task_parametric instead of task_generated table
   • DELETION FUNCTION: Modified useDeleteGeneratedTask to work with task_parametric table
