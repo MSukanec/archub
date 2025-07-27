@@ -36,7 +36,8 @@ type ParametricTaskForm = z.infer<typeof parametricTaskSchema>
 
 export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const { isEditing = true, task } = modalData
+  const { task } = modalData
+  const isEditing = !task // Si no hay task, es creación (modo edición)
 
   const form = useForm<ParametricTaskForm>({
     resolver: zodResolver(parametricTaskSchema),
@@ -220,6 +221,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={isEditing}
     />
   )
 }
