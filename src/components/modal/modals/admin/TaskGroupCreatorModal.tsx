@@ -833,8 +833,22 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         queryClient.invalidateQueries({ queryKey: ['adminTaskGroups'] }),
         // Force refetch of all queries to ensure UI updates
         queryClient.refetchQueries({ queryKey: ['task-groups'] }),
+        queryClient.refetchQueries({ queryKey: ['task-templates'] }),
+        queryClient.refetchQueries({ queryKey: ['task-group-parameter-options'] }),
       ])
       console.log('🔄 Cache completamente invalidado y refetch forzado para actualización inmediata')
+      
+      // Additional manual trigger to force table refresh
+      setTimeout(() => {
+        console.log('🔄 Disparando refresh manual adicional después de 1.5 segundos')
+        queryClient.invalidateQueries({ queryKey: ['task-groups'] })
+        queryClient.refetchQueries({ queryKey: ['task-groups'] })
+        
+        // Try to trigger table refresh directly using custom event
+        const refreshEvent = new CustomEvent('refresh-task-groups-table');
+        window.dispatchEvent(refreshEvent);
+        console.log('🔄 Evento de refresh enviado a la tabla');
+      }, 1500)
       return true; // Éxito
     } catch (error) {
       console.error('❌ Error guardando opciones:', error)

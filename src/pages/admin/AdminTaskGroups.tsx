@@ -25,6 +25,8 @@ interface TaskGroup {
   updated_at: string
 }
 
+// No need for global function anymore
+
 export default function AdminTaskGroups() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
@@ -242,14 +244,39 @@ export default function AdminTaskGroups() {
     console.log('✅ Templates refrescados exitosamente')
   }
 
-  // Auto refresh when data changes (add this effect)
+  // Listen for custom refresh events
+  useEffect(() => {
+    const handleRefreshEvent = () => {
+      console.log('🔄 Recibido evento de refresh personalizado')
+      setTimeout(() => refreshTemplateInfo(), 200);
+    };
+
+    window.addEventListener('refresh-task-groups-table', handleRefreshEvent);
+    return () => window.removeEventListener('refresh-task-groups-table', handleRefreshEvent);
+  }, [refreshTemplateInfo]);
+
+  // Auto refresh when data changes - trigger on template/parameter changes
   useEffect(() => {
     const timer = setTimeout(() => {
+      console.log('🔄 Auto-refresh triggered after data change')
       refreshTemplateInfo()
-    }, 1000) // Wait 1 second after data changes to refresh
+    }, 2000) // Wait 2 seconds after data changes to refresh
 
     return () => clearTimeout(timer)
-  }, [taskGroups])
+  }, [taskGroups, supabase])
+
+  // Additional effect to refresh when coming back to this page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🔄 Page became visible, refreshing template info')
+        setTimeout(() => refreshTemplateInfo(), 500)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [refreshTemplateInfo])
 
   // Generate processed template preview with real values
   const generateProcessedTemplatePreview = (nameTemplate: string, parameters: any[], optionsMap: Record<string, any[]>) => {
