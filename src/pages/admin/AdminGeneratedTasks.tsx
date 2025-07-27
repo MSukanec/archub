@@ -49,8 +49,17 @@ export default function AdminGeneratedTasks() {
       const newProcessedNames: Record<string, string> = {};
       
       for (const task of generatedTasks) {
-        // With the new template-free system, use the task ID 
-        newProcessedNames[task.id] = `Tarea ${task.id.slice(0, 8)}`;
+        // Generate full phrase from param_values
+        if (task.param_values && typeof task.param_values === 'object') {
+          const values = Object.values(task.param_values);
+          if (values.length > 0) {
+            newProcessedNames[task.id] = values.join(' ');
+          } else {
+            newProcessedNames[task.id] = `Tarea ${task.id.slice(0, 8)}`;
+          }
+        } else {
+          newProcessedNames[task.id] = `Tarea ${task.id.slice(0, 8)}`;
+        }
       }
       
       setProcessedTaskNames(newProcessedNames);
@@ -71,10 +80,9 @@ export default function AdminGeneratedTasks() {
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
     .filter((task: any) => {
-      // Search filter
-      const matchesSearch = task.id?.toLowerCase().includes(searchValue.toLowerCase())
-      
-      // Type filter is removed since task_parametric doesn't have is_system
+      // Search filter - search in processed task name
+      const taskName = getProcessedTaskName(task);
+      const matchesSearch = !searchValue || taskName?.toLowerCase().includes(searchValue.toLowerCase())
       
       return matchesSearch
     })
@@ -112,11 +120,10 @@ export default function AdminGeneratedTasks() {
   // Table columns configuration
   const columns = [
     {
-      key: 'id',
-      label: 'ID',
-      width: '20%',
+      key: 'task_name',
+      label: 'Tarea',
       render: (task: GeneratedTask) => (
-        <span className="text-sm font-mono">{task.id.slice(0, 8)}...</span>
+        <span className="text-sm font-medium">{getProcessedTaskName(task)}</span>
       )
     },
     {
@@ -127,13 +134,6 @@ export default function AdminGeneratedTasks() {
         <span className="text-xs">
           {format(new Date(task.created_at), 'dd/MM/yyyy', { locale: es })}
         </span>
-      )
-    },
-    {
-      key: 'param_values',
-      label: 'Parámetros',
-      render: (task: GeneratedTask) => (
-        <span className="text-sm">{Object.keys(task.param_values || {}).length} parámetros</span>
       )
     },
     {
