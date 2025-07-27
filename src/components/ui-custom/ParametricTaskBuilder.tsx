@@ -188,11 +188,11 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
     console.log('🎯 Generando vista previa con selecciones:', selections)
 
-    // Crear un mapa de parámetros para reemplazo
+    // Crear un mapa de parámetros para reemplazo usando labels legibles
     const paramMap: Record<string, string> = {}
     selections.forEach(selection => {
-      paramMap[selection.parameterSlug] = selection.optionName
-      console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionName}`)
+      paramMap[selection.parameterSlug] = selection.optionLabel
+      console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionLabel}`)
     })
 
     // Obtener template base del primer parámetro (tipo-de-tarea)
