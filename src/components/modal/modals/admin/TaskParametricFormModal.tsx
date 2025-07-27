@@ -33,9 +33,18 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
-  const { task } = modalData
-  const isEditing = !task // Si no hay task, es creación (modo edición)
+  const { task, isEditing, taskData } = modalData
+  const actualTask = task || taskData
   const queryClient = useQueryClient()
+  
+  console.log('🔍 Modal data received:', modalData);
+  console.log('📝 Task data:', actualTask);
+  console.log('✏️ Is editing:', isEditing);
+  
+  // Parse existing param_values if editing
+  if (actualTask && actualTask.param_values) {
+    console.log('🔄 Loading existing parameters:', actualTask.param_values);
+  }
 
   // Mutación para crear tarea paramétrica
   const createParametricTaskMutation = useMutation({
@@ -52,7 +61,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['parametric-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['task-parametric'] })
     }
   })
 
@@ -73,6 +82,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       selections.forEach(selection => {
         paramValues[selection.parameterSlug] = selection.optionLabel
       })
+      
+      console.log('💾 Saving param values:', paramValues);
 
       console.log('🔧 Creando tarea paramétrica:', {
         selections,
@@ -122,6 +133,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       <ParametricTaskBuilder 
         onSelectionChange={setSelections}
         onPreviewChange={setTaskPreview}
+        initialParameters={actualTask ? actualTask.param_values : null}
       />
     </div>
   )

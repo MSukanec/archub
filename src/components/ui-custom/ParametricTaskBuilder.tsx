@@ -50,16 +50,30 @@ interface ParameterSelection {
 interface ParametricTaskBuilderProps {
   onSelectionChange?: (selections: ParameterSelection[]) => void
   onPreviewChange?: (preview: string) => void
+  initialParameters?: string | null
 }
 
 // Variable para mantener la última vista previa
 let lastPreview = ''
 
-export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: ParametricTaskBuilderProps) {
+export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, initialParameters }: ParametricTaskBuilderProps) {
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [availableParameters, setAvailableParameters] = useState<string[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
+
+  // Load initial parameters if provided
+  useEffect(() => {
+    if (initialParameters && typeof initialParameters === 'string') {
+      try {
+        const parsedParams = JSON.parse(initialParameters);
+        console.log('🔄 Loading initial parameters:', parsedParams);
+        // This will be implemented when we have the parameter data loaded
+      } catch (e) {
+        console.error('❌ Error parsing initial parameters:', e);
+      }
+    }
+  }, [initialParameters]);
 
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({

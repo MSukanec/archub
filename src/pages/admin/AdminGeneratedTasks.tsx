@@ -49,9 +49,25 @@ export default function AdminGeneratedTasks() {
       const newProcessedNames: Record<string, string> = {};
       
       for (const task of generatedTasks) {
+        console.log('🔍 Processing task:', task.id, 'param_values:', task.param_values);
+        
         // Generate full phrase from param_values
-        if (task.param_values && typeof task.param_values === 'object') {
-          const values = Object.values(task.param_values);
+        let paramValues = task.param_values;
+        
+        // Parse JSON string if needed
+        if (typeof paramValues === 'string') {
+          try {
+            paramValues = JSON.parse(paramValues);
+          } catch (e) {
+            console.error('❌ Error parsing param_values:', e);
+            paramValues = null;
+          }
+        }
+        
+        if (paramValues && typeof paramValues === 'object') {
+          const values = Object.values(paramValues).filter(val => val && val !== '');
+          console.log('📝 Parameter values for task:', task.id, values);
+          
           if (values.length > 0) {
             newProcessedNames[task.id] = values.join(' ');
           } else {
@@ -62,6 +78,7 @@ export default function AdminGeneratedTasks() {
         }
       }
       
+      console.log('✅ Processed task names:', newProcessedNames);
       setProcessedTaskNames(newProcessedNames);
     };
 
@@ -91,7 +108,8 @@ export default function AdminGeneratedTasks() {
     })
 
   const handleEdit = (generatedTask: GeneratedTask) => {
-    openModal('parametric-task', { taskData: generatedTask })
+    console.log('📝 Editando tarea:', generatedTask);
+    openModal('parametric-task', { task: generatedTask, isEditing: true })
   }
 
   const handleConfirmDelete = async () => {
