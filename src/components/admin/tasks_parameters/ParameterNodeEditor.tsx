@@ -23,6 +23,7 @@ import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { TaskParameterPosition, InsertTaskParameterPosition } from '@shared/schema';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -253,13 +254,53 @@ const useDeleteDependency = () => {
   });
 };
 
+// Hook para obtener posiciones guardadas
+const useParameterPositions = () => {
+  return useQuery({
+    queryKey: ['parameter-positions'],
+    queryFn: async () => {
+      const { data, error } = await supabase!
+        .from('task_parameter_positions')
+        .select('*');
+
+      if (error) throw error;
+      return data as TaskParameterPosition[];
+    },
+  });
+};
+
+// Hook para guardar/actualizar posición
+const useSaveParameterPosition = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (position: InsertTaskParameterPosition) => {
+      const { data, error } = await supabase!
+        .from('task_parameter_positions')
+        .upsert(position, { 
+          onConflict: 'parameter_id',
+          ignoreDuplicates: false 
+        })
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+    },
+  });
+};
+
 // Componente principal del editor
 function ParameterNodeEditorContent() {
   const { data: parametersData = [], isLoading: parametersLoading } = useParametersWithOptions();
   const { data: dependencies = [], isLoading: dependenciesLoading } = useParameterDependencies();
+  const { data: savedPositions = [] } = useParameterPositions();
   
   const createDependencyMutation = useCreateDependency();
   const deleteDependencyMutation = useDeleteDependency();
+  const savePositionMutation = useSaveParameterPosition();
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -272,28 +313,40 @@ function ParameterNodeEditorContent() {
     parameterNode: ParameterNode,
   }), []);
 
-  // Inicializar opciones visibles por primera vez
+  // Inicializar opciones visibles por primera vez desde posiciones guardadas
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length === 0) {
       const newVisibleOptions: Record<string, string[]> = {};
       parametersData.forEach((item) => {
-        // Por defecto mostrar las primeras 5 opciones
-        newVisibleOptions[item.parameter.id] = item.options.slice(0, 5).map(opt => opt.id);
+        const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
+        if (savedPosition && savedPosition.visible_options.length > 0) {
+          // Usar opciones guardadas
+          newVisibleOptions[item.parameter.id] = savedPosition.visible_options;
+        } else {
+          // Por defecto mostrar las primeras 5 opciones
+          newVisibleOptions[item.parameter.id] = item.options.slice(0, 5).map(opt => opt.id);
+        }
       });
       setNodeVisibleOptions(newVisibleOptions);
     }
-  }, [parametersData.length]);
+  }, [parametersData.length, savedPositions.length]);
 
-  // Configurar nodos desde datos de parámetros
+  // Configurar nodos desde datos de parámetros con posiciones guardadas
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
-      const initialNodes: Node[] = parametersData.map((item, index) => ({
-        id: item.parameter.id,
-        type: 'parameterNode',
-        position: { 
-          x: (index % 3) * 320, // 3 columnas
-          y: Math.floor(index / 3) * 200 // Separación vertical
-        },
+      const initialNodes: Node[] = parametersData.map((item, index) => {
+        const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
+        
+        return {
+          id: item.parameter.id,
+          type: 'parameterNode',
+          position: savedPosition ? { 
+            x: savedPosition.x, 
+            y: savedPosition.y 
+          } : { 
+            x: (index % 3) * 320, // 3 columnas
+            y: Math.floor(index / 3) * 200 // Separación vertical
+          },
         data: {
           parameter: item.parameter,
           options: item.options,
@@ -303,13 +356,25 @@ function ParameterNodeEditorContent() {
               ...prev,
               [item.parameter.id]: optionIds
             }));
+            
+            // Guardar opciones visibles en la base de datos
+            const currentNode = nodes.find(n => n.id === item.parameter.id);
+            if (currentNode) {
+              savePositionMutation.mutate({
+                parameter_id: item.parameter.id,
+                x: currentNode.position.x,
+                y: currentNode.position.y,
+                visible_options: optionIds
+              });
+            }
           }
         },
-      }));
+        };
+      });
 
       setNodes(initialNodes);
     }
-  }, [parametersData.length, nodeVisibleOptions]);
+  }, [parametersData.length, nodeVisibleOptions, savedPositions.length]);
 
   // Configurar edges desde dependencias
   useEffect(() => {
@@ -401,7 +466,24 @@ function ParameterNodeEditorContent() {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
+          onNodesChange={(changes) => {
+            onNodesChange(changes);
+            
+            // Guardar posiciones cuando los nodos se mueven
+            changes.forEach((change) => {
+              if (change.type === 'position' && change.position && !change.dragging) {
+                const node = nodes.find(n => n.id === change.id);
+                if (node) {
+                  savePositionMutation.mutate({
+                    parameter_id: change.id,
+                    x: change.position.x,
+                    y: change.position.y,
+                    visible_options: nodeVisibleOptions[change.id] || []
+                  });
+                }
+              }
+            });
+          }}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onEdgesDelete={onEdgesDelete}

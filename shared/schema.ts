@@ -229,7 +229,24 @@ export const insertTaskParameterDependencyOptionSchema = createInsertSchema(task
   id: true,
   created_at: true,
   updated_at: true,
+})
+
+// Task Parameter Positions Table
+export const task_parameter_positions = pgTable("task_parameter_positions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  parameter_id: uuid("parameter_id").notNull().unique(),
+  x: integer("x").notNull().default(0),
+  y: integer("y").notNull().default(0),
+  visible_options: text("visible_options").array().notNull().default([]),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
 });
+
+export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});;
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
@@ -251,3 +268,5 @@ export type TaskParameterDependency = typeof task_parameter_dependencies.$inferS
 export type TaskParameterDependencyOption = typeof task_parameter_dependency_options.$inferSelect;
 export type InsertTaskParameterDependency = z.infer<typeof insertTaskParameterDependencySchema>;
 export type InsertTaskParameterDependencyOption = z.infer<typeof insertTaskParameterDependencyOptionSchema>;
+export type TaskParameterPosition = typeof task_parameter_positions.$inferSelect;
+export type InsertTaskParameterPosition = z.infer<typeof insertTaskParameterPositionSchema>;
