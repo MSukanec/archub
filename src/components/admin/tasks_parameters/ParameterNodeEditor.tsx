@@ -275,6 +275,7 @@ const useSaveParameterPosition = () => {
 
   return useMutation({
     mutationFn: async (position: InsertTaskParameterPosition) => {
+      console.log('🔄 Intentando guardar en DB:', position);
       const { data, error } = await supabase!
         .from('task_parameter_positions')
         .upsert(position, { 
@@ -283,11 +284,18 @@ const useSaveParameterPosition = () => {
         })
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error guardando posición:', error);
+        throw error;
+      }
+      console.log('✅ Posición guardada exitosamente:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+    },
+    onError: (error) => {
+      console.error('❌ Error en mutación:', error);
     },
   });
 };
@@ -347,28 +355,34 @@ function ParameterNodeEditorContent() {
             x: (index % 3) * 320, // 3 columnas
             y: Math.floor(index / 3) * 200 // Separación vertical
           },
-        data: {
-          parameter: item.parameter,
-          options: item.options,
-          visibleOptions: nodeVisibleOptions[item.parameter.id] || [],
-          onVisibleOptionsChange: (optionIds: string[]) => {
-            setNodeVisibleOptions(prev => ({
-              ...prev,
-              [item.parameter.id]: optionIds
-            }));
-            
-            // Guardar opciones visibles en la base de datos
-            const currentNode = nodes.find(n => n.id === item.parameter.id);
-            if (currentNode) {
-              savePositionMutation.mutate({
-                parameter_id: item.parameter.id,
-                x: currentNode.position.x,
-                y: currentNode.position.y,
-                visible_options: optionIds
-              });
+          data: {
+            parameter: item.parameter,
+            options: item.options,
+            visibleOptions: nodeVisibleOptions[item.parameter.id] || [],
+            onVisibleOptionsChange: (optionIds: string[]) => {
+              setNodeVisibleOptions(prev => ({
+                ...prev,
+                [item.parameter.id]: optionIds
+              }));
+              
+              // Guardar opciones visibles en la base de datos
+              const currentNode = nodes.find(n => n.id === item.parameter.id);
+              if (currentNode) {
+                console.log('💾 Guardando opciones visibles:', {
+                  parameter_id: item.parameter.id,
+                  x: currentNode.position.x,
+                  y: currentNode.position.y,
+                  visible_options: optionIds
+                });
+                savePositionMutation.mutate({
+                  parameter_id: item.parameter.id,
+                  x: currentNode.position.x,
+                  y: currentNode.position.y,
+                  visible_options: optionIds
+                });
+              }
             }
-          }
-        },
+          },
         };
       });
 
@@ -474,6 +488,12 @@ function ParameterNodeEditorContent() {
               if (change.type === 'position' && change.position && !change.dragging) {
                 const node = nodes.find(n => n.id === change.id);
                 if (node) {
+                  console.log('📍 Guardando posición de nodo:', {
+                    parameter_id: change.id,
+                    x: change.position.x,
+                    y: change.position.y,
+                    visible_options: nodeVisibleOptions[change.id] || []
+                  });
                   savePositionMutation.mutate({
                     parameter_id: change.id,
                     x: change.position.x,
