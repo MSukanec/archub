@@ -685,18 +685,24 @@ function ParameterNodeEditorContent() {
           onNodesChange={onNodesChange}
           onNodeDragStop={(event, node) => {
             console.log('🎯 Nodo arrastrado y soltado:', node.id, 'nueva posición:', node.position);
-            console.log('📍 Guardando posición de nodo:', {
-              parameter_id: node.id,
-              x: Math.round(node.position.x),
-              y: Math.round(node.position.y),
-              visible_options: nodeVisibleOptions[node.id] || []
-            });
-            savePositionMutation.mutate({
-              parameter_id: node.id,
-              x: Math.round(node.position.x),
-              y: Math.round(node.position.y),
-              visible_options: nodeVisibleOptions[node.id] || []
-            });
+            
+            // Solo guardar posiciones para nodos originales, no duplicados
+            if (!node.id.includes('-duplicate-')) {
+              console.log('📍 Guardando posición de nodo:', {
+                parameter_id: node.id,
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+                visible_options: nodeVisibleOptions[node.id] || []
+              });
+              savePositionMutation.mutate({
+                parameter_id: node.id,
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+                visible_options: nodeVisibleOptions[node.id] || []
+              });
+            } else {
+              console.log('📍 Nodo duplicado movido (no se guarda en DB):', node.id);
+            }
           }}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
