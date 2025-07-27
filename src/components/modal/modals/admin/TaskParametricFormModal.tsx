@@ -139,7 +139,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? "Nueva Tarea Paramétrica" : "Ver Tarea Paramétrica"}
+      title={actualTask ? "Editar Tarea Paramétrica" : "Nueva Tarea Paramétrica"}
       icon={Zap}
     />
   )
@@ -148,8 +148,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? "Crear Tarea" : "Cerrar"}
-      onRightClick={isEditing ? handleSubmit : onClose}
+      rightLabel={actualTask ? "Actualizar Tarea" : "Crear Tarea"}
+      onRightClick={handleSubmit}
       isLoading={isLoading}
     />
   )
@@ -162,7 +162,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      isEditing={isEditing}
+      isEditing={true}
     />
   )
 }
