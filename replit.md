@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. DEFAULT PARAMETERS AUTOMATION IMPLEMENTED: TaskGroupCreatorModal now automatically includes "TIPO DE TAREA" and "TIPO DE ELEMENTO" parameters by default to save user time - COMPLETED
+  • AUTOMATIC INITIALIZATION: New function initializeDefaultParameters() adds default parameters when creating new task groups
+  • CORRECT ORDERING: "TIPO DE TAREA" always appears in position 1, "TIPO DE ELEMENTO" in position 2
+  • NEW GROUP WORKFLOW: When user creates new task group, step 2 automatically shows these two parameters pre-configured
+  • EXISTING GROUP SUPPORT: Editing existing groups without parameters also gets default parameters initialized
+  • REAL-TIME PREVIEW: Preview system correctly shows "{{tipo-de-tarea}} {{tipo-de-elemento}}." template with proper placeholder processing
+  • DRAG AND DROP COMPATIBLE: Default parameters can still be reordered using drag and drop functionality with persistent position storage
+  • USER TIME SAVINGS: Users no longer need to manually add these common parameters every time they create a task group
 - July 27, 2025. TEMPLATE SYSTEM UI CLEANUP COMPLETED: Successfully eliminated all obsolete template UI elements and fixed color issues in category management - COMPLETED
   • PLANTILLAS BUTTON ELIMINATED: Removed "PLANTILLAS" button from task groups in AdminCategories page
   • TEMPLATE BADGES REMOVED: Eliminated "CON PLANTILLA" and "SIN PLANTILLA" badges from task group display

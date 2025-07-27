@@ -369,8 +369,13 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   useEffect(() => {
     if (currentStep === 2 && taskGroup?.id) {
       fetchTemplateData(taskGroup.id)
+    } else if (currentStep === 2 && createdTaskGroup?.id) {
+      fetchTemplateData(createdTaskGroup.id)
+    } else if (currentStep === 2 && !taskGroup?.id && !createdTaskGroup?.id) {
+      // For new task groups, initialize with default parameters
+      initializeDefaultParameters()
     }
-  }, [currentStep, taskGroup])
+  }, [currentStep, taskGroup, createdTaskGroup])
   
   // Load saved parameter options when they become available AND template parameters are loaded
   useEffect(() => {
@@ -379,6 +384,71 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       setSelectedOptionsMap(savedOptionsMap)
     }
   }, [savedOptionsMap, templateParameters])
+
+  // Initialize default parameters for new task groups
+  const initializeDefaultParameters = async () => {
+    try {
+      if (!supabase) return
+
+      // Fetch available parameters to find the default ones
+      const { data: params } = await supabase
+        .from('task_parameters')
+        .select('*')
+        .in('slug', ['tipo-de-tarea', 'tipo-de-elemento'])
+        .order('slug')
+
+      console.log('🎯 Parámetros por defecto encontrados:', params)
+      setAvailableParameters(params || [])
+
+      if (params && params.length >= 2) {
+        // Find specific parameters by slug
+        const tipoTareaParam = params.find(p => p.slug === 'tipo-de-tarea')
+        const tipoElementoParam = params.find(p => p.slug === 'tipo-de-elemento')
+
+        if (tipoTareaParam && tipoElementoParam) {
+          // Create default template parameters in the correct order
+          const defaultParameters = [
+            {
+              id: `temp-tipo-tarea-${Date.now()}`,
+              parameter_id: tipoTareaParam.id,
+              position: 1,
+              parameter: tipoTareaParam
+            },
+            {
+              id: `temp-tipo-elemento-${Date.now() + 1}`,
+              parameter_id: tipoElementoParam.id,
+              position: 2,
+              parameter: tipoElementoParam
+            }
+          ]
+
+          console.log('🏗️ Inicializando parámetros por defecto:', defaultParameters)
+          setTemplateParameters(defaultParameters)
+
+          // Create a simple template for preview
+          setExistingTemplate({
+            id: 'temp-template',
+            name_template: '{{tipo-de-tarea}} {{tipo-de-elemento}}.',
+            task_group_id: '',
+            unit_id: '',
+            task_code: 'TMP',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+        }
+      }
+
+      // Also fetch all available parameters for the dropdown
+      const { data: allParams } = await supabase
+        .from('task_parameters')
+        .select('*')
+        .order('slug')
+
+      setAvailableParameters(allParams || [])
+    } catch (error) {
+      console.error('❌ Error inicializando parámetros por defecto:', error)
+    }
+  }
 
   const fetchTemplateData = async (taskGroupId: string) => {
     try {
@@ -432,7 +502,13 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         
         const templateParams = Object.values(uniqueParameters)
           .sort((a, b) => a.position - b.position) // Sort by position
-        setTemplateParameters(templateParams)
+        
+        // If no existing parameters, add default ones
+        if (templateParams.length === 0) {
+          await initializeDefaultParameters()
+        } else {
+          setTemplateParameters(templateParams)
+        }
       }
 
       // Fetch available parameters
@@ -503,6 +579,9 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
 
         setCreatedTaskGroup(newGroup)
         setCurrentStep(2)
+        
+        // Initialize with default parameters for new groups
+        await initializeDefaultParameters()
         
         toast({
           title: "Grupo creado",
@@ -625,9 +704,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   }
 
   const saveParameterOptions = async () => {
-    if (!taskGroup?.id || !existingTemplate?.id) return
+    const currentGroupId = taskGroup?.id || createdTaskGroup?.id
+    if (!currentGroupId || !existingTemplate?.id) return
 
-    console.log('💾 Guardando opciones con nuevo sistema para grupo:', taskGroup.id)
+    console.log('💾 Guardando opciones con nuevo sistema para grupo:', currentGroupId)
     console.log('📋 Opciones actuales:', selectedOptionsMap)
 
     try {
@@ -676,7 +756,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       }
 
       await saveParameterOptionsMutation.mutateAsync({
-        groupId: taskGroup.id,
+        groupId: currentGroupId,
         parameterOptions
       })
 
