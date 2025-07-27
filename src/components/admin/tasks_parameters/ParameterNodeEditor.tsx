@@ -39,41 +39,56 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
   const { parameter, options } = data;
 
   return (
-    <Card className="min-w-[250px] max-w-[300px] border-2 shadow-lg">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-center">
-          {parameter.label}
-        </CardTitle>
-        <Badge variant="outline" className="text-xs self-center">
-          {parameter.slug}
-        </Badge>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-1">
-        {/* Handle de entrada */}
-        <Handle
-          type="target"
-          position={Position.Left}
-          id={`target-${parameter.id}`}
-          className="!w-4 !h-4 !bg-primary !border-2 !border-primary-foreground !left-[-8px]"
-        />
-        
-        {options.map((option) => (
-          <div
-            key={option.id}
-            className="relative flex items-center justify-between py-1 px-2 rounded bg-muted/50 text-xs"
-          >
-            <span className="truncate pr-2">{option.label}</span>
-            {/* Handle de salida para cada opción */}
-            <Handle
-              type="source"
-              position={Position.Right}
-              id={`${parameter.id}-${option.id}`}
-              className="!w-3 !h-3 !bg-accent !border-2 !border-accent-foreground !right-[-6px]"
-            />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+    <div className="relative">
+      <Card className="min-w-[250px] max-w-[300px] border-2 shadow-lg bg-white">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold text-center">
+            {parameter.label}
+          </CardTitle>
+          <Badge variant="outline" className="text-xs self-center">
+            {parameter.slug}
+          </Badge>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-1">
+          {options.map((option) => (
+            <div
+              key={option.id}
+              className="relative flex items-center justify-between py-1 px-2 rounded bg-muted/50 text-xs"
+            >
+              <span className="truncate pr-2">{option.label}</span>
+              {/* Handle de salida para cada opción */}
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={`${parameter.id}-${option.id}`}
+                style={{
+                  right: -8,
+                  width: 12,
+                  height: 12,
+                  backgroundColor: 'hsl(var(--accent))',
+                  border: '2px solid hsl(var(--background))',
+                }}
+              />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+      
+      {/* Handle de entrada principal */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        id={`target-${parameter.id}`}
+        style={{
+          left: -8,
+          top: '50%',
+          width: 16,
+          height: 16,
+          backgroundColor: 'hsl(var(--primary))',
+          border: '2px solid hsl(var(--background))',
+        }}
+      />
+    </div>
   );
 }
 
@@ -255,8 +270,8 @@ function ParameterNodeEditorContent() {
         type: 'default',
         animated: true,
         style: {
-          stroke: 'hsl(var(--accent))',
-          strokeWidth: 2,
+          stroke: 'rgb(99, 102, 241)',
+          strokeWidth: 3,
         },
         data: {
           parentParameterId: dep.parent_parameter_id,
@@ -352,6 +367,12 @@ function ParameterNodeEditorContent() {
           maxZoom={2}
           snapToGrid={true}
           snapGrid={[15, 15]}
+          connectionLineStyle={{ stroke: 'rgb(99, 102, 241)', strokeWidth: 3 }}
+          defaultEdgeOptions={{
+            style: { stroke: 'rgb(99, 102, 241)', strokeWidth: 3 },
+            type: 'smoothstep',
+            animated: true,
+          }}
         >
           <Controls />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
