@@ -205,7 +205,8 @@ export const insertTaskParameterDependencyOptionSchema = createInsertSchema(task
 // Task Parameter Positions Table
 export const task_parameter_positions = pgTable("task_parameter_positions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  parameter_id: uuid("parameter_id").notNull(), // Siempre requerido - para duplicados usa el UUID generado
+  parameter_id: uuid("parameter_id"), // Puede ser null para nodos duplicados
+  original_parameter_id: uuid("original_parameter_id"), // Referencia al parámetro original para duplicados
   x: integer("x").notNull().default(0),
   y: integer("y").notNull().default(0),
   visible_options: text("visible_options").array().notNull().default([]),

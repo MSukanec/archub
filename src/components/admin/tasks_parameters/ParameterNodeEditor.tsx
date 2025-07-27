@@ -458,15 +458,15 @@ function ParameterNodeEditorContent() {
     const originalParameter = parametersData.find(item => item.parameter.id === parameterId);
     if (!originalParameter) return;
 
-    // Encontrar posición para el nuevo nodo (al lado del original)
+    // Encontrar posición para el nuevo nodo (ligeramente desplazado del original)
     const originalNode = nodes.find(n => n.id === parameterId);
     const newPosition = originalNode ? 
-      { x: originalNode.position.x + 350, y: originalNode.position.y } :
-      { x: 350, y: 0 };
+      { x: originalNode.position.x + 20, y: originalNode.position.y + 20 } :
+      { x: 20, y: 20 };
 
     try {
       // Crear una nueva entrada en la base de datos para el nodo duplicado
-      const { data: dbPosition, error } = await supabase
+      const { data: dbPosition, error } = await supabase!
         .from('task_parameter_positions')
         .insert({
           parameter_id: null, // NULL para nodos duplicados
@@ -710,7 +710,7 @@ function ParameterNodeEditorContent() {
               onVisibleOptionsChange: (optionIds: string[]) => {
                 setNodeVisibleOptions(prev => ({
                   ...prev,
-                  [pos.parameter_id]: optionIds
+                  [pos.id]: optionIds
                 }));
                 
                 // Guardar opciones visibles para el nodo duplicado
