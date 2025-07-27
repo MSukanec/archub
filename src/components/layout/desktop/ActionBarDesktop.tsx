@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
+import { Selector } from '@/components/ui-custom/Selector'
 import { ProjectSelector } from '@/components/navigation/ProjectSelector'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { cn } from '@/lib/utils'
@@ -211,7 +211,7 @@ export function ActionBarDesktop({
         {budgetSelector && (
           <div className="flex items-center gap-2">
             <div className="w-64">
-              <ComboBoxWrite
+              <Selector
                 options={budgetSelector.budgets.map((budget: any) => ({
                   value: budget.id,
                   label: budget.name
@@ -219,7 +219,6 @@ export function ActionBarDesktop({
                 value={budgetSelector.selectedBudgetId}
                 onValueChange={budgetSelector.onBudgetChange}
                 placeholder="Selecciona un presupuesto"
-                searchPlaceholder="Buscar presupuesto..."
                 className="h-8"
               />
             </div>
@@ -248,7 +247,7 @@ export function ActionBarDesktop({
         {parameterSelector && (
           <div className="flex items-center gap-2">
             <div className="w-64">
-              <ComboBoxWrite
+              <Selector
                 options={parameterSelector.parameters.map((parameter: any) => ({
                   value: parameter.id,
                   label: parameter.label
@@ -256,7 +255,6 @@ export function ActionBarDesktop({
                 value={parameterSelector.selectedParameterId}
                 onValueChange={parameterSelector.onParameterChange}
                 placeholder="Selecciona un parámetro"
-                searchPlaceholder="Buscar parámetro..."
                 className="h-8"
               />
             </div>
