@@ -231,17 +231,7 @@ export default function AdminCategories() {
     }
   };
 
-  // Handle task group template action - NEW: plantillas ahora van a nivel de grupo
-  const handleTaskGroupTemplate = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
-    // Usar el nuevo sistema global de modales
-    openModal('task-template', {
-      categoryId: category.id,
-      categoryCode: category.code || '',
-      categoryName: category.name,
-      taskGroupId: taskGroup.id,
-      taskGroupName: taskGroup.name
-    });
-  };
+
 
   // Handle add task group
   const handleAddTaskGroup = (category: TaskCategoryAdmin) => {
@@ -443,7 +433,7 @@ export default function AdminCategories() {
                 });
                 handleDeleteTaskGroup(taskGroupId, taskGroupName);
               }}
-              onTaskGroupTemplate={handleTaskGroupTemplate}
+
             />
           )}
         </div>

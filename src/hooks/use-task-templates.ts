@@ -65,48 +65,47 @@ export function useTaskTemplateParameters(templateId: string | null) {
     queryFn: async () => {
       if (!supabase || !templateId) return [];
       
-      console.log('Fetching real parameters for template:', templateId);
+      console.log('🔍 Buscando plantilla para task_group_id:', templateId);
       
+      // New approach: get parameters through task_group_parameter_options
       const { data, error } = await supabase
-        .from('task_template_parameters')
+        .from('task_group_parameter_options')
         .select(`
-          id,
-          template_id,
           parameter_id,
-          option_group_id,
-          position,
-          created_at,
-          updated_at,
-          task_parameters (
-            id,
-            name,
-            label,
-            type,
-            expression_template
-          )
+          parameter_option_id,
+          task_parameter_options!inner(id, name, label),
+          task_parameters!inner(id, slug, label, type, expression_template)
         `)
-        .eq('template_id', templateId)
-        .order('position');
+        .eq('group_id', templateId);
+      
+      console.log('🔍 Resultado búsqueda plantilla:', { data, error });
       
       if (error) {
         console.error('Error fetching parameters:', error);
         throw error;
       }
       
-      console.log('Raw parameter data from DB:', data);
-      console.log('Individual item raw with expression_template:', data?.[0]);
+      if (!data || data.length === 0) return [];
       
-      // Transform the data to match our interface - only real data
-      const parameters = data?.map(item => ({
-        id: item.parameter_id,
-        template_id: item.template_id,
-        name: item.task_parameters?.name || '',
-        label: item.task_parameters?.label || '',
-        type: item.task_parameters?.type || 'text',
-        is_required: false,
-        position: item.position,
-        expression_template: item.task_parameters?.expression_template || '{value}'
-      })) || [];
+      // Transform the data to match our interface
+      const parametersMap: Record<string, any> = {};
+      
+      data.forEach(opt => {
+        if (!parametersMap[opt.parameter_id]) {
+          parametersMap[opt.parameter_id] = {
+            id: opt.parameter_id,
+            template_id: templateId,
+            name: opt.task_parameters?.slug || '',
+            label: opt.task_parameters?.label || '',
+            type: opt.task_parameters?.type || 'text',
+            is_required: false,
+            position: 1,
+            expression_template: opt.task_parameters?.expression_template || '{value}'
+          };
+        }
+      });
+      
+      const parameters = Object.values(parametersMap);
       
       console.log('Parameters with expression_template:', parameters.map(p => ({
         name: p.name,
@@ -130,7 +129,7 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
       console.log('Fetching real options for parameter:', parameterId);
       
       const { data, error } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .select('id, name, label')
         .eq('parameter_id', parameterId);
       
