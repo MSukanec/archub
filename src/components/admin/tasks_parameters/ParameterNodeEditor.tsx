@@ -271,9 +271,18 @@ function ParameterNodeEditorContent() {
     (params: Connection) => {
       if (!params.source || !params.target || !params.sourceHandle) return;
 
-      // Extraer IDs de los handles
-      const [sourceParamId, sourceOptionId] = params.sourceHandle.split('-');
+      // Extraer IDs de los handles - el formato es "paramId-optionId"
+      // Pero los UUIDs contienen guiones, así que necesitamos dividir correctamente
+      const sourceParamId = params.source; // El source node ID es el parameter ID
+      const sourceOptionId = params.sourceHandle.replace(`${sourceParamId}-`, ''); // Remover el prefijo para obtener solo el option ID
       const targetParamId = params.target;
+
+      console.log('🔗 Connection attempt:', {
+        sourceHandle: params.sourceHandle,
+        sourceParamId,
+        sourceOptionId,
+        targetParamId
+      });
 
       // Verificar que no sea una auto-conexión
       if (sourceParamId === targetParamId) {
