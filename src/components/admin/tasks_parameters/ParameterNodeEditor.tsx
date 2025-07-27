@@ -326,14 +326,36 @@ const useSaveParameterPosition = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (position: InsertTaskParameterPosition) => {
+    mutationFn: async (position: any) => {
       console.log('🔄 Intentando guardar en DB:', position);
       
-      // Primero verificar si ya existe un registro con este parameter_id exacto
+      // Si tiene un ID específico (nodo duplicado), buscar por ID
+      if (position.id) {
+        const { data, error } = await supabase!
+          .from('task_parameter_positions')
+          .update({
+            x: position.x,
+            y: position.y,
+            visible_options: position.visible_options,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', position.id)
+          .select();
+
+        if (error) {
+          console.error('❌ Error actualizando posición por ID:', error);
+          throw error;
+        }
+        console.log('✅ Posición de nodo duplicado actualizada:', data);
+        return data;
+      }
+      
+      // Para nodos originales, buscar por parameter_id
       const { data: existing } = await supabase!
         .from('task_parameter_positions')
         .select('id')
         .eq('parameter_id', position.parameter_id)
+        .is('original_parameter_id', null) // Solo nodos originales
         .single();
 
       if (existing) {
@@ -347,6 +369,7 @@ const useSaveParameterPosition = () => {
             updated_at: new Date().toISOString()
           })
           .eq('parameter_id', position.parameter_id)
+          .is('original_parameter_id', null)
           .select();
 
         if (error) {
@@ -357,9 +380,17 @@ const useSaveParameterPosition = () => {
         return data;
       } else {
         // Si no existe, crear nuevo registro
+        const insertData = {
+          parameter_id: position.parameter_id,
+          original_parameter_id: position.original_parameter_id || null,
+          x: position.x,
+          y: position.y,
+          visible_options: position.visible_options
+        };
+        
         const { data, error } = await supabase!
           .from('task_parameter_positions')
-          .insert(position)
+          .insert(insertData)
           .select();
 
         if (error) {
@@ -422,73 +453,88 @@ function ParameterNodeEditorContent() {
   }), []);
 
   // Función para duplicar un nodo (crear visualización adicional)
-  const handleDuplicateNode = useCallback((parameterId: string) => {
+  const handleDuplicateNode = useCallback(async (parameterId: string) => {
     console.log('🔄 Duplicando nodo:', parameterId);
     const originalParameter = parametersData.find(item => item.parameter.id === parameterId);
     if (!originalParameter) return;
 
-    // Generar UUID real para el nodo duplicado
-    const generateUUID = () => {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    };
-    
-    const duplicateId = generateUUID();
-    
     // Encontrar posición para el nuevo nodo (al lado del original)
     const originalNode = nodes.find(n => n.id === parameterId);
     const newPosition = originalNode ? 
       { x: originalNode.position.x + 350, y: originalNode.position.y } :
       { x: 350, y: 0 };
 
-    const duplicateNode: Node = {
-      id: duplicateId,
-      type: 'parameterNode',
-      position: newPosition,
-      data: {
-        parameter: { 
-          ...originalParameter.parameter,
-          // Mantener referencia al parámetro original para identificar duplicados
-          original_id: originalParameter.parameter.id 
-        },
-        options: originalParameter.options,
-        visibleOptions: nodeVisibleOptions[parameterId] || [],
-        onVisibleOptionsChange: (optionIds: string[]) => {
-          setNodeVisibleOptions(prev => ({
-            ...prev,
-            [duplicateId]: optionIds
-          }));
-          // Guardar inmediatamente las opciones visibles
-          savePositionMutation.mutate({
-            parameter_id: duplicateId,
-            x: Math.round(newPosition.x),
-            y: Math.round(newPosition.y),
-            visible_options: optionIds,
-            original_parameter_id: originalParameter.parameter.id
-          });
-        },
-        onDuplicate: handleDuplicateNode,
-        onEdit: handleEditNode,
-        onDelete: handleDeleteNode
-      }
-    };
+    try {
+      // Crear una nueva entrada en la base de datos para el nodo duplicado
+      // Usamos el ID generado automáticamente como parameter_id del nodo duplicado
+      const { data: dbPosition, error } = await supabase
+        .from('task_parameter_positions')
+        .insert({
+          parameter_id: parameterId, // Temporalmente usar el original, se actualizará después
+          x: Math.round(newPosition.x),
+          y: Math.round(newPosition.y),
+          visible_options: nodeVisibleOptions[parameterId] || []
+        })
+        .select()
+        .single();
 
-    setNodes(prev => [...prev, duplicateNode]);
-    
-    // Guardar inmediatamente la posición del nodo duplicado
-    savePositionMutation.mutate({
-      parameter_id: duplicateId,
-      x: Math.round(newPosition.x),
-      y: Math.round(newPosition.y),
-      visible_options: nodeVisibleOptions[parameterId] || [],
-      original_parameter_id: originalParameter.parameter.id
-    });
-    
-    toast({ title: "Parámetro duplicado", description: "Nueva visualización creada y guardada exitosamente" });
-  }, [parametersData, nodes, nodeVisibleOptions, toast, savePositionMutation]);
+      if (error) {
+        console.error('❌ Error creando nodo duplicado:', error);
+        toast({ title: "Error", description: "No se pudo duplicar el parámetro" });
+        return;
+      }
+
+      // Usar el UUID generado por la base de datos como ID del nodo duplicado
+      const duplicateId = dbPosition.id;
+      
+      // Actualizar el parameter_id con el ID generado para diferenciarlo del original
+      await supabase
+        .from('task_parameter_positions')
+        .update({ parameter_id: duplicateId })
+        .eq('id', duplicateId);
+
+      const duplicateNode: Node = {
+        id: duplicateId,
+        type: 'parameterNode',
+        position: newPosition,
+        data: {
+          parameter: { 
+            ...originalParameter.parameter,
+            // Marcar como duplicado para identificación
+            isDuplicate: true,
+            original_id: originalParameter.parameter.id 
+          },
+          options: originalParameter.options,
+          visibleOptions: nodeVisibleOptions[parameterId] || [],
+          onVisibleOptionsChange: (optionIds: string[]) => {
+            setNodeVisibleOptions(prev => ({
+              ...prev,
+              [duplicateId]: optionIds
+            }));
+            // Actualizar las opciones visibles en la base de datos
+            savePositionMutation.mutate({
+              id: duplicateId,
+              parameter_id: duplicateId,
+              x: Math.round(newPosition.x),
+              y: Math.round(newPosition.y),
+              visible_options: optionIds
+            });
+          },
+          onDuplicate: handleDuplicateNode,
+          onEdit: handleEditNode,
+          onDelete: handleDeleteNode
+        }
+      };
+
+      setNodes(prev => [...prev, duplicateNode]);
+      console.log('✅ Nodo duplicado creado con ID:', duplicateId);
+      toast({ title: "Parámetro duplicado", description: "Nueva visualización creada exitosamente" });
+      
+    } catch (error) {
+      console.error('❌ Error duplicando nodo:', error);
+      toast({ title: "Error", description: "No se pudo duplicar el parámetro" });
+    }
+  }, [parametersData, nodes, nodeVisibleOptions, toast, savePositionMutation, supabase]);
 
   // Función para editar un parámetro (abrir modal)
   const handleEditNode = useCallback((parameterId: string) => {
