@@ -235,7 +235,6 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
         processedTemplate = processedTemplate.replace(/\s+/g, ' ').trim()
         
         preview = processedTemplate
-
         console.log('✅ Vista previa final:', preview)
         setTaskPreview(preview)
         onPreviewChange?.(preview)
