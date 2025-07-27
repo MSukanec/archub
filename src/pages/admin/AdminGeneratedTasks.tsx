@@ -79,16 +79,7 @@ export default function AdminGeneratedTasks() {
     return processedTaskNames[task.id] || task.code || 'Tarea sin código';
   }
 
-  // Statistics calculations
-  const totalGeneratedTasks = generatedTasks.length
-  const systemTasks = generatedTasks.filter(task => task.is_system).length
-  const userTasks = generatedTasks.filter(task => !task.is_system).length
-  const recentGeneratedTasks = generatedTasks.filter((task: any) => {
-    const taskDate = new Date(task.created_at)
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    return taskDate >= sevenDaysAgo
-  }).length
+
 
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
@@ -287,48 +278,7 @@ export default function AdminGeneratedTasks() {
           customActions={[]}
         />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Tareas Generadas</p>
-                <p className="text-lg font-semibold">{totalGeneratedTasks}</p>
-              </div>
-              <Zap className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-          
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Tareas de Sistema</p>
-                <p className="text-lg font-semibold">{systemTasks}</p>
-              </div>
-              <CheckSquare className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-          
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Tareas de Usuario</p>
-                <p className="text-lg font-semibold">{userTasks}</p>
-              </div>
-              <Target className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-          
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Nuevas (7 días)</p>
-                <p className="text-lg font-semibold">{recentGeneratedTasks}</p>
-              </div>
-              <Plus className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-        </div>
+
 
         {/* Generated Tasks Table */}
         <Table
