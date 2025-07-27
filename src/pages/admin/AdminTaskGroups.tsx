@@ -239,7 +239,12 @@ export default function AdminTaskGroups() {
       label: 'Grupo de Tareas',
       width: '35%',
       render: (taskGroup: TaskGroup) => (
-        <div className="font-medium text-sm">{taskGroup.name}</div>
+        <div className="space-y-1">
+          <div className="font-medium text-sm">{taskGroup.name}</div>
+          <div className="text-xs text-muted-foreground font-mono">
+            {taskGroup.code || 'Sin código'}
+          </div>
+        </div>
       )
     },
     {
