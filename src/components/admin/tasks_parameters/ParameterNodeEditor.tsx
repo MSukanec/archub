@@ -272,19 +272,21 @@ function ParameterNodeEditorContent() {
     parameterNode: ParameterNode,
   }), []);
 
-  // Configurar nodos desde datos de parámetros
+  // Inicializar opciones visibles por primera vez
   useEffect(() => {
-    if (parametersData.length > 0) {
-      // Inicializar opciones visibles si no existen
-      const newVisibleOptions = { ...nodeVisibleOptions };
+    if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length === 0) {
+      const newVisibleOptions: Record<string, string[]> = {};
       parametersData.forEach((item) => {
-        if (!newVisibleOptions[item.parameter.id]) {
-          // Por defecto mostrar las primeras 5 opciones
-          newVisibleOptions[item.parameter.id] = item.options.slice(0, 5).map(opt => opt.id);
-        }
+        // Por defecto mostrar las primeras 5 opciones
+        newVisibleOptions[item.parameter.id] = item.options.slice(0, 5).map(opt => opt.id);
       });
       setNodeVisibleOptions(newVisibleOptions);
+    }
+  }, [parametersData.length]);
 
+  // Configurar nodos desde datos de parámetros
+  useEffect(() => {
+    if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
       const initialNodes: Node[] = parametersData.map((item, index) => ({
         id: item.parameter.id,
         type: 'parameterNode',
@@ -295,7 +297,7 @@ function ParameterNodeEditorContent() {
         data: {
           parameter: item.parameter,
           options: item.options,
-          visibleOptions: newVisibleOptions[item.parameter.id] || [],
+          visibleOptions: nodeVisibleOptions[item.parameter.id] || [],
           onVisibleOptionsChange: (optionIds: string[]) => {
             setNodeVisibleOptions(prev => ({
               ...prev,
@@ -466,15 +468,17 @@ function ParameterNodeEditorContent() {
       </AlertDialog>
       
       {/* CSS personalizado para efectos hover */}
-      <style jsx>{`
-        .react-flow__edge.hoverable-edge:hover path {
-          stroke-width: 6 !important;
-          stroke: #059669 !important;
-        }
-        .react-flow__edge {
-          transition: all 0.2s ease;
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .react-flow__edge.hoverable-edge:hover path {
+            stroke-width: 6 !important;
+            stroke: #059669 !important;
+          }
+          .react-flow__edge {
+            transition: all 0.2s ease;
+          }
+        `
+      }} />
     </div>
   );
 }
