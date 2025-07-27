@@ -66,7 +66,9 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                   width: 12,
                   height: 12,
                   backgroundColor: 'hsl(var(--accent))',
-                  border: '2px solid hsl(var(--background))',
+                  border: '2px solid white',
+                  borderRadius: '50%',
+                  zIndex: 10,
                 }}
               />
             </div>
@@ -85,7 +87,9 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
           width: 16,
           height: 16,
           backgroundColor: 'hsl(var(--primary))',
-          border: '2px solid hsl(var(--background))',
+          border: '2px solid white',
+          borderRadius: '50%',
+          zIndex: 10,
         }}
       />
     </div>
@@ -270,7 +274,7 @@ function ParameterNodeEditorContent() {
         type: 'default',
         animated: true,
         style: {
-          stroke: 'rgb(99, 102, 241)',
+          stroke: 'hsl(var(--accent))',
           strokeWidth: 3,
         },
         data: {
@@ -367,9 +371,9 @@ function ParameterNodeEditorContent() {
           maxZoom={2}
           snapToGrid={true}
           snapGrid={[15, 15]}
-          connectionLineStyle={{ stroke: 'rgb(99, 102, 241)', strokeWidth: 3 }}
+          connectionLineStyle={{ stroke: 'hsl(var(--accent))', strokeWidth: 3 }}
           defaultEdgeOptions={{
-            style: { stroke: 'rgb(99, 102, 241)', strokeWidth: 3 },
+            style: { stroke: 'hsl(var(--accent))', strokeWidth: 3 },
             type: 'smoothstep',
             animated: true,
           }}
