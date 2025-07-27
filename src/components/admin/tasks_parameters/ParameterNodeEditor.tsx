@@ -172,7 +172,8 @@ function ParameterNodeEditorContent() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (newDependency) => {
+      console.log('✅ Dependency created successfully:', newDependency);
       queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
       toast({
         title: "Dependencia creada",
@@ -242,27 +243,44 @@ function ParameterNodeEditorContent() {
 
   // Configurar edges desde dependencias existentes
   useEffect(() => {
+    console.log('🔄 Loading existing dependencies:', dependencies);
+    
     if (dependencies.length > 0) {
-      const initialEdges: Edge[] = dependencies.map((dep) => ({
-        id: `${dep.parent_parameter_id}-${dep.parent_option_id}-${dep.child_parameter_id}`,
-        source: dep.parent_parameter_id,
-        sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
-        target: dep.child_parameter_id,
-        targetHandle: `target-${dep.child_parameter_id}`,
-        type: 'default',
-        animated: true,
-        style: {
-          stroke: 'hsl(var(--accent))',
-          strokeWidth: 2,
-        },
-        data: {
-          parentParameterId: dep.parent_parameter_id,
-          parentOptionId: dep.parent_option_id,
-          childParameterId: dep.child_parameter_id
-        }
-      }));
+      const initialEdges: Edge[] = dependencies.map((dep) => {
+        const edgeId = `${dep.parent_parameter_id}-${dep.parent_option_id}-${dep.child_parameter_id}`;
+        console.log('📍 Creating edge:', {
+          id: edgeId,
+          source: dep.parent_parameter_id,
+          sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
+          target: dep.child_parameter_id,
+          targetHandle: `target-${dep.child_parameter_id}`
+        });
 
+        return {
+          id: edgeId,
+          source: dep.parent_parameter_id,
+          sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
+          target: dep.child_parameter_id,
+          targetHandle: `target-${dep.child_parameter_id}`,
+          type: 'default',
+          animated: true,
+          style: {
+            stroke: 'hsl(var(--accent))',
+            strokeWidth: 2,
+          },
+          data: {
+            parentParameterId: dep.parent_parameter_id,
+            parentOptionId: dep.parent_option_id,
+            childParameterId: dep.child_parameter_id
+          }
+        };
+      });
+
+      console.log('🎯 Setting initial edges:', initialEdges);
       setEdges(initialEdges);
+    } else {
+      console.log('📭 No dependencies found, clearing edges');
+      setEdges([]);
     }
   }, [dependencies, setEdges]);
 
@@ -294,29 +312,7 @@ function ParameterNodeEditorContent() {
         return;
       }
 
-      // Crear la conexión visual primero
-      const newEdge: Edge = {
-        id: `${sourceParamId}-${sourceOptionId}-${targetParamId}`,
-        source: params.source,
-        sourceHandle: params.sourceHandle,
-        target: params.target,
-        targetHandle: params.targetHandle,
-        type: 'default',
-        animated: true,
-        style: {
-          stroke: 'hsl(var(--accent))',
-          strokeWidth: 2,
-        },
-        data: {
-          parentParameterId: sourceParamId,
-          parentOptionId: sourceOptionId,
-          childParameterId: targetParamId
-        }
-      };
-
-      setEdges((eds) => addEdge(newEdge, eds));
-
-      // Guardar en la base de datos
+      // Guardar en la base de datos - no agregar edge manualmente ya que se recargará automáticamente
       createDependencyMutation.mutate({
         parentParameterId: sourceParamId,
         parentOptionId: sourceOptionId,
