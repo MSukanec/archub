@@ -201,44 +201,125 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     })
   )
 
-  // Pre-load parameter options data using useMemo to avoid hook issues
-  const parameterOptionsData = useMemo(() => {
-    const optionsMap: Record<string, any[]> = {};
+  // Estado para almacenar las opciones cargadas
+  const [parameterOptionsCache, setParameterOptionsCache] = useState<Record<string, any[]>>({});
+
+  // Efecto para cargar opciones cuando se necesiten
+  useEffect(() => {
+    const loadOptionsForParameters = async () => {
+      if (!templateParameters || templateParameters.length === 0) return;
+      
+      const optionsToLoad: string[] = [];
+      templateParameters.forEach(tp => {
+        if (!parameterOptionsCache[tp.parameter_id]) {
+          optionsToLoad.push(tp.parameter_id);
+        }
+      });
+      
+      if (optionsToLoad.length === 0) return;
+      
+      console.log('🔄 Cargando opciones para parámetros:', optionsToLoad);
+      
+      for (const parameterId of optionsToLoad) {
+        try {
+          const { data, error } = await supabase!
+            .from('task_parameter_options')
+            .select('id, name, label')
+            .eq('parameter_id', parameterId);
+          
+          if (!error && data) {
+            setParameterOptionsCache(prev => ({
+              ...prev,
+              [parameterId]: data
+            }));
+            console.log(`✅ Opciones cargadas para ${parameterId}:`, data.length);
+          }
+        } catch (error) {
+          console.error(`❌ Error cargando opciones para ${parameterId}:`, error);
+        }
+      }
+    };
     
-    // This is a simplified approach - we'll track which parameters need options loaded
-    templateParameters?.forEach(tp => {
-      // For now, we'll just set empty arrays to prevent errors
-      optionsMap[tp.parameter_id] = [];
-    });
-    
-    return optionsMap;
-  }, [templateParameters]);
+    loadOptionsForParameters();
+  }, [templateParameters, supabase]);
+
+  // Función para obtener el label de una opción
+  const getParameterOptionLabel = (parameterId: string, optionId: string) => {
+    const options = parameterOptionsCache[parameterId] || [];
+    const option = options.find(opt => opt.id === optionId);
+    return option?.label || `[${optionId.slice(0, 8)}]`;
+  };
 
   // Generate preview function with real sentence construction
   const generatePreview = useMemo(() => {
-    // Use name_template from existing template or fallback
-    let template = existingTemplate?.name_template || `${taskGroup?.name || 'Nueva tarea'}.`;
+    console.log('🎯 ExistingTemplate completo:', existingTemplate);
+    console.log('🔧 TemplateParameters:', templateParameters);
+    console.log('🎛️ SelectedOptionsMap:', selectedOptionsMap);
     
+    // Si no tenemos parámetros, usar el template existente o fallback
     if (!templateParameters || templateParameters.length === 0) {
+      const template = existingTemplate?.name_template || 'Nueva tarea.';
+      console.log('🎯 Sin parámetros, usando template base:', template);
       return template;
     }
+    
+    // Si tenemos parámetros, construir template dinámicamente
+    // Verificar si el template existente ya contiene placeholders
+    let template = existingTemplate?.name_template || '';
+    const hasPlaceholders = templateParameters.some(tp => {
+      const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
+      return parameter && template.includes(`{{${parameter.name}}}`);
+    });
+    
+    if (!hasPlaceholders) {
+      // El template no tiene placeholders, construir uno automáticamente
+      const placeholders = templateParameters
+        .sort((a, b) => a.position - b.position)
+        .map(tp => {
+          const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
+          return parameter ? `{{${parameter.name}}}` : '[parámetro]';
+        })
+        .join(' ');
+      
+      template = `${placeholders}.`;
+      console.log('🔧 Template construido automáticamente:', template);
+    }
+    
+    console.log('🎯 Template a procesar:', template);
 
-    // Replace each {{param}} with generated text
+    // Replace each {{param}} with generated text using real option labels
     templateParameters.forEach((tp) => {
       const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
       if (!parameter) return;
       
       const placeholder = `{{${parameter.name}}}`;
+      console.log(`🔍 Procesando placeholder: ${placeholder}`);
       
       // Get selected options for this parameter
       const selectedOptions = selectedOptionsMap?.[tp.parameter_id] || [];
+      console.log(`📋 Opciones seleccionadas para ${parameter.name}:`, selectedOptions);
       
       if (selectedOptions.length > 0) {
-        // Show that something is selected with a simple indicator
-        template = template.replace(placeholder, '[seleccionado]');
+        // Get the first selected option ID
+        const selectedOptionId = selectedOptions[0];
+        
+        // Por ahora usar una representación simplificada
+        const optionLabel = getParameterOptionLabel(tp.parameter_id, selectedOptionId);
+        
+        if (parameter.expression_template) {
+          // Replace {value} in expression_template with option label
+          const generatedText = parameter.expression_template.replace('{value}', optionLabel);
+          template = template.replace(placeholder, generatedText);
+          console.log(`✅ Reemplazado ${placeholder} con "${generatedText}"`);
+        } else {
+          // Fallback if no expression_template
+          template = template.replace(placeholder, optionLabel);
+          console.log(`✅ Reemplazado ${placeholder} con "${optionLabel}"`);
+        }
       } else {
         // No option selected, show placeholder
         template = template.replace(placeholder, '[...]');
+        console.log(`⏸️ Reemplazado ${placeholder} con [...]`);
       }
     });
     
@@ -250,8 +331,9 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     // Clean up extra spaces
     template = template.replace(/\s+/g, ' ').trim();
     
+    console.log('🎉 Template final:', template);
     return template;
-  }, [existingTemplate?.name_template, taskGroup?.name, templateParameters, availableParameters, selectedOptionsMap]);
+  }, [existingTemplate?.name_template, templateParameters, availableParameters, selectedOptionsMap, parameterOptionsCache]);
 
   // Handle options selection changes
   const handleOptionsChange = (parameterId: string, selectedOptions: string[]) => {
