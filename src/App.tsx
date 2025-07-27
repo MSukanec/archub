@@ -57,13 +57,13 @@ import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
-import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
+
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import AdminCategories from "@/pages/admin/AdminCategories";
-import AdminTaskGroups from "@/pages/admin/AdminTaskGroups";
+
 
 import NotFound from "@/pages/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
@@ -320,13 +320,7 @@ function Router() {
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
-        <Route path="/admin/task-templates">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminTaskTemplates />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/task-parameters">
           <ProtectedRoute>
             <AdminProtectedRoute>
@@ -334,13 +328,7 @@ function Router() {
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
-        <Route path="/admin/task-groups">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminTaskGroups />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/material-categories">
           <ProtectedRoute>
             <AdminProtectedRoute>

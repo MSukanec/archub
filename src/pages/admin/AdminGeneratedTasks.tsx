@@ -15,7 +15,7 @@ import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
-import { useTaskTemplates, useTaskTemplateParameters, useTaskTemplateParameterOptions } from '@/hooks/use-task-templates'
+
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
 import { useAllTaskParameterValues } from '@/hooks/use-task-parameters-admin'
 
@@ -53,8 +53,7 @@ export default function AdminGeneratedTasks() {
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
   const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
 
-  // Data for dynamic name generation
-  const { data: templates = [] } = useTaskTemplates()
+  // Data for dynamic name generation  
   const { data: parameterValues = [] } = useAllTaskParameterValues()
 
   // Process task names when data changes
@@ -63,35 +62,21 @@ export default function AdminGeneratedTasks() {
       const newProcessedNames: Record<string, string> = {};
       
       for (const task of generatedTasks) {
-        const template = templates.find(t => t.id === task.template_id);
-        if (!template) {
-          newProcessedNames[task.id] = 'Sin plantilla';
-          continue;
-        }
-
-        try {
-          const processedName = await generateTaskDescription(
-            template.name_template || '',
-            task.param_values || {}
-          );
-          newProcessedNames[task.id] = processedName;
-        } catch (error) {
-          console.error('Error generating task name:', error);
-          newProcessedNames[task.id] = template.name_template || 'Sin plantilla';
-        }
+        // With the new template-free system, use the task code directly
+        newProcessedNames[task.id] = task.code || 'Tarea sin código';
       }
       
       setProcessedTaskNames(newProcessedNames);
     };
 
-    if (generatedTasks.length > 0 && templates.length > 0) {
+    if (generatedTasks.length > 0) {
       processTaskNames();
     }
-  }, [generatedTasks, templates]);
+  }, [generatedTasks]);
 
   // Helper function to get processed task name
   const getProcessedTaskName = (task: GeneratedTask): string => {
-    return processedTaskNames[task.id] || 'Procesando...';
+    return processedTaskNames[task.id] || task.code || 'Tarea sin código';
   }
 
   // Statistics calculations
@@ -298,17 +283,8 @@ export default function AdminGeneratedTasks() {
           customFilters={customFilters}
           onClearFilters={clearFilters}
           primaryActionLabel="Nueva Tarea Generada"
-          onPrimaryActionClick={() => openModal('generated-task', {})}
-          customActions={[
-            <Button 
-              key="parametric-task"
-              variant="default"
-              onClick={() => openModal('parametric-task', {})}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nueva Tarea Paramétrica
-            </Button>
-          ]}
+          onPrimaryActionClick={() => openModal('parametric-task', {})}
+          customActions={[]}
         />
 
         {/* Statistics Cards */}

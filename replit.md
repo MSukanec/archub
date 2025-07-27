@@ -118,6 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. COMPLETE LEGACY TEMPLATE SYSTEM ELIMINATION FINALIZED: Successfully completed the total removal of all template and task group components, completing the transition to pure parametric task system - COMPLETED
+  • LEGACY FILES DELETED: Permanently removed use-task-templates.ts, use-task-templates-admin.ts, AdminTaskTemplates.tsx, TaskGroupFormModal.tsx, GeneratedTaskFormModal.tsx
+  • ROUTING CLEANUP: Eliminated all /admin/task-groups and /admin/task-templates routes from App.tsx
+  • NAVIGATION CLEANUP: Removed "Grupos de Tareas" from both desktop SidebarSubmenu and mobile MobileMenu admin sections  
+  • MODAL FACTORY CLEANUP: Removed GeneratedTaskFormModal import and 'generated-task' case from ModalFactory.tsx
+  • TYPES CLEANUP: Eliminated 'generated-task', 'task-group', 'task-template' from modal types
+  • ADMIN GENERATED TASKS SIMPLIFIED: Updated to use parametric-task modal and removed template dependencies
+  • ARCHITECTURE FINALIZED: System now purely focused on hierarchical categories and parametric task creation with JSON persistence
+  • TEMPLATE-FREE WORKFLOW: AdminGeneratedTasks page now displays task codes directly without template processing
+  • COMPLETE ELIMINATION: Zero legacy template/group system components remain in codebase
 - July 27, 2025. REACT FLOW INTERACTION CONTROLS PERFECTED: Successfully implemented complete interaction system with selection box, middle mouse panning, and optimized pan speed - COMPLETED
   • SELECTION BOX: Left-click + drag on background creates selection box for multiple node selection
   • MIDDLE MOUSE PAN: Middle mouse button + drag provides smooth canvas panning with 2x speed multiplier for responsive movement

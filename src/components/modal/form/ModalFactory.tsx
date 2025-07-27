@@ -28,14 +28,11 @@ import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormM
 import { DependencyConnectionModal } from '../modals/construction/DependencyConnectionModal';
 import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
 import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
-import { TaskGroupFormModal } from '../modals/admin/TaskGroupFormModal';
-import { TaskGroupCreatorModal } from '../modals/admin/TaskGroupCreatorModal';
 import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
-import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
 import { TaskParameterGroupAssignmentModal } from '../modals/admin/TaskParameterGroupAssignmentModal';
-import { GeneratedTaskFormModal } from '../modals/admin/GeneratedTaskFormModal';
+
 import { ParametricTaskFormModal } from '../modals/admin/ParametricTaskFormModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
@@ -116,28 +113,17 @@ export function ModalFactory() {
       return <BudgetTaskFormModal modalData={data} onClose={closeModal} />;
     case 'task-category':
       return <TaskCategoryFormModal modalData={data} onClose={closeModal} />;
-    case 'task-group':
-      return <TaskGroupFormModal modalData={data} onClose={closeModal} />;
-    case 'task-group-creator':
-      return <TaskGroupCreatorModal modalData={data} onClose={closeModal} />;
+
     case 'task-parameter':
       return <TaskParameterFormModal modalData={data} onClose={closeModal} />;
     case 'task-parameter-option':
       return <TaskParameterOptionFormModal modalType="task-parameter-option" />;
     case 'task-parameter-group-assignment':
       return <TaskParameterGroupAssignmentModal modalData={data} onClose={closeModal} />;
-    case 'generated-task':
-      return <GeneratedTaskFormModal modalData={data} onClose={closeModal} />;
+
     case 'parametric-task':
       return <ParametricTaskFormModal modalData={data} onClose={closeModal} />;
-    case 'task-template':
-      return <TaskTemplateFormModal 
-        categoryId={data?.categoryId}
-        categoryCode={data?.categoryCode}
-        categoryName={data?.categoryName}
-        taskGroupId={data?.taskGroupId}
-        taskGroupName={data?.taskGroupName}
-      />;
+
 
     case 'admin-user':
       return <UserFormModal modalData={data} onClose={closeModal} />;
