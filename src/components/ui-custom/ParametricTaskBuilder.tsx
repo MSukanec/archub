@@ -50,17 +50,19 @@ interface ParameterSelection {
 interface ParametricTaskBuilderProps {
   onSelectionChange?: (selections: ParameterSelection[]) => void
   onPreviewChange?: (preview: string) => void
+  onOrderChange?: (order: string[]) => void
   initialParameters?: string | null
 }
 
 // Variable para mantener la última vista previa
 let lastPreview = ''
 
-export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, initialParameters }: ParametricTaskBuilderProps) {
+export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOrderChange, initialParameters }: ParametricTaskBuilderProps) {
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [availableParameters, setAvailableParameters] = useState<string[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
+  const [parameterOrder, setParameterOrder] = useState<string[]>([])
 
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({
@@ -253,7 +255,12 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
         if (initialSelections.length > 0) {
           setSelections(initialSelections);
           setAvailableParameters(initialAvailableParams);
+          
+          // También establecer el orden inicial basado en los parámetros cargados
+          const initialOrder = initialSelections.map(sel => sel.parameterSlug);
+          setParameterOrder(initialOrder);
           console.log('🎯 Initial selections set:', initialSelections.length, 'parameters');
+          console.log('📊 Initial parameter order:', initialOrder);
         }
       } catch (e) {
         console.error('❌ Error parsing initial parameters:', e);
@@ -326,6 +333,11 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
     onSelectionChange?.(selections)
   }, [selections, onSelectionChange])
 
+  // Notificar cambios de orden al componente padre
+  useEffect(() => {
+    onOrderChange?.(parameterOrder)
+  }, [parameterOrder, onOrderChange])
+
   const handleParameterSelect = (parameterId: string, optionId: string) => {
     const parameter = parameters.find(p => p.id === parameterId)
     const option = allOptions.find(o => o.id === optionId)
@@ -345,11 +357,20 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
     const updatedSelections = selections.filter(s => s.parameterId !== parameterId)
     setSelections([...updatedSelections, newSelection])
 
+    // Actualizar el orden de parámetros
+    const updatedOrder = [...parameterOrder]
+    if (!updatedOrder.includes(parameter.slug)) {
+      updatedOrder.push(parameter.slug)
+      setParameterOrder(updatedOrder)
+      console.log('🎯 Parameter order updated:', updatedOrder)
+    }
+
     // Cerrar el popover
     setOpenPopovers(prev => ({ ...prev, [parameterId]: false }))
   }
 
   const removeSelection = (parameterId: string) => {
+    const parameter = parameters.find(p => p.id === parameterId)
     const updatedSelections = selections.filter(s => s.parameterId !== parameterId)
     setSelections(updatedSelections)
     
@@ -362,6 +383,13 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
       !dependentParams.includes(s.parameterId)
     )
     setSelections(finalSelections)
+
+    // Actualizar el orden removiendo el parámetro eliminado
+    if (parameter) {
+      const updatedOrder = parameterOrder.filter(slug => slug !== parameter.slug)
+      setParameterOrder(updatedOrder)
+      console.log('🗑️ Parameter removed from order:', parameter.slug, '→ New order:', updatedOrder)
+    }
   }
 
   const getOptionsForParameter = (parameterId: string): TaskParameterOption[] => {

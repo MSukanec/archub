@@ -32,6 +32,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
+  const [parameterOrder, setParameterOrder] = useState<string[]>([])
   const { task, isEditing, taskData } = modalData
   const actualTask = task || taskData
   
@@ -67,17 +68,20 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       })
       
       console.log('💾 Saving param values:', paramValues);
+      console.log('📊 Parameter order:', parameterOrder);
       console.log('🔧 Creating parametric task:', {
         selections,
         preview: taskPreview,
-        paramValues
+        paramValues,
+        paramOrder: parameterOrder
       })
       
       if (isEditing && actualTask) {
         // Update existing task
         await updateTaskMutation.mutateAsync({
           task_id: actualTask.id,
-          input_param_values: paramValues
+          input_param_values: paramValues,
+          param_order: parameterOrder
         })
         
         toast({
@@ -87,7 +91,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       } else {
         // Create new task using the centralized SQL function
         const result = await createTaskMutation.mutateAsync({
-          param_values: paramValues
+          param_values: paramValues,
+          param_order: parameterOrder
         })
         
         console.log('✅ Task created with code:', result.generated_code);
@@ -132,6 +137,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       <ParametricTaskBuilder 
         onSelectionChange={setSelections}
         onPreviewChange={setTaskPreview}
+        onOrderChange={setParameterOrder}
         initialParameters={actualTask ? JSON.stringify(actualTask.param_values) : null}
       />
     </div>
