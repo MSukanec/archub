@@ -94,42 +94,11 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
   const editPanel = (
     <div className="space-y-6">
-      {/* Explicación inicial */}
-      <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Zap className="w-4 h-4 text-blue-600" />
-          <Label className="text-sm font-medium text-blue-900 dark:text-blue-100">
-            Constructor de Tareas Paramétricas
-          </Label>
-        </div>
-        <p className="text-xs text-blue-700 dark:text-blue-300">
-          Selecciona parámetros secuencialmente para construir tu tarea. Comienza con "Tipo de Tarea" 
-          y los siguientes parámetros aparecerán según las dependencias configuradas.
-        </p>
-      </div>
-
       {/* Componente constructor de parámetros */}
       <ParametricTaskBuilder 
         onSelectionChange={setSelections}
         onPreviewChange={setTaskPreview}
       />
-
-      {/* Vista previa final */}
-      {taskPreview && (
-        <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-green-600" />
-              <Label className="text-sm font-medium text-green-900 dark:text-green-100">
-                Tarea generada
-              </Label>
-            </div>
-            <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-              {taskPreview}
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 
@@ -146,7 +115,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       onLeftClick={onClose}
       rightLabel={isEditing ? "Crear Tarea" : "Cerrar"}
       onRightClick={isEditing ? handleSubmit : onClose}
-      rightLoading={isLoading}
+      isLoading={isLoading}
     />
   )
 

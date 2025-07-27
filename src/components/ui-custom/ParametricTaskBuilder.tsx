@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
-import { X, Sparkles } from 'lucide-react'
+import { X, Sparkles, ChevronDown } from 'lucide-react'
 
 interface TaskParameter {
   id: string
@@ -50,9 +52,13 @@ interface ParametricTaskBuilderProps {
   onPreviewChange?: (preview: string) => void
 }
 
+// Variable para mantener la última vista previa
+let lastPreview = ''
+
 export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: ParametricTaskBuilderProps) {
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [availableParameters, setAvailableParameters] = useState<string[]>([])
+  const [taskPreview, setTaskPreview] = useState<string>('')
 
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({
@@ -194,7 +200,9 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
           return param ? `[${param.label}]` : match
         })
 
+        setTaskPreview(preview)
         onPreviewChange?.(preview)
+        lastPreview = preview
       }
     }
   }, [selections, parameters, onPreviewChange])
@@ -285,43 +293,52 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
             return (
               <div key={paramId} className="flex items-center gap-2">
-                <Badge 
-                  variant={selection ? "default" : "outline"}
-                  className="px-3 py-1.5 text-xs flex items-center gap-2"
-                >
-                  <span>{parameter.label}</span>
-                  {selection && (
-                    <button
-                      onClick={() => removeSelection(paramId)}
-                      className="hover:bg-white/20 rounded-sm p-0.5"
+                {!selection ? (
+                  // Badge con dropdown integrado cuando no hay selección
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline"
+                        className="px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full"
+                      >
+                        <span>{parameter.label}</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <div className="p-1">
+                        {options.map(option => (
+                          <Button
+                            key={option.id}
+                            variant="ghost"
+                            className="w-full justify-start text-xs h-8"
+                            onClick={() => handleParameterSelect(paramId, option.id)}
+                          >
+                            {option.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  // Badge con selección y opción de eliminar
+                  <div className="flex items-center gap-1">
+                    <Badge 
+                      variant="default"
+                      className="px-3 py-1.5 text-xs flex items-center gap-2"
                     >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </Badge>
-                
-                {!selection && (
-                  <Select
-                    value=""
-                    onValueChange={(optionId) => handleParameterSelect(paramId, optionId)}
-                  >
-                    <SelectTrigger className="w-[200px] h-8">
-                      <SelectValue placeholder="Seleccionar..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {options.map(option => (
-                        <SelectItem key={option.id} value={option.id}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                
-                {selection && (
-                  <Badge variant="secondary" className="text-xs">
-                    {selection.optionLabel}
-                  </Badge>
+                      <span>{parameter.label}</span>
+                      <button
+                        onClick={() => removeSelection(paramId)}
+                        className="hover:bg-white/20 rounded-sm p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {selection.optionLabel}
+                    </Badge>
+                  </div>
                 )}
               </div>
             )
@@ -340,10 +357,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground italic min-h-[3rem] flex items-center">
-              {selections.length === 0 
-                ? "Selecciona parámetros para generar la vista previa de la tarea..."
-                : "Cargando vista previa..."
-              }
+              {taskPreview || "Selecciona parámetros para generar la vista previa de la tarea..."}
             </p>
           </CardContent>
         </Card>
