@@ -421,6 +421,7 @@ function ParameterNodeEditorContent() {
   const savePositionMutation = useSaveParameterPosition();
   const { setViewport, getViewport } = useReactFlow();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Debug: mostrar estado de carga de posiciones
   useEffect(() => {
@@ -539,18 +540,59 @@ function ParameterNodeEditorContent() {
   }, [toast]);
 
   // Función para borrar un nodo del canvas
-  const handleDeleteNode = useCallback((nodeId: string) => {
+  const handleDeleteNode = useCallback(async (nodeId: string) => {
     console.log('🗑️ Borrando nodo:', nodeId);
-    setNodes(prev => prev.filter(n => n.id !== nodeId));
     
-    // Si es un nodo duplicado, solo removemos del canvas
-    if (nodeId.includes('-duplicate-')) {
-      toast({ title: "Visualización eliminada", description: "Nodo removido del canvas" });
-    } else {
-      // Si es el nodo original, confirmar acción
-      toast({ title: "Nodo eliminado", description: "Parámetro removido del canvas" });
+    try {
+      // Determinar si es un nodo duplicado o original
+      const isDuplicatedNode = savedPositions.find(pos => pos.id === nodeId && pos.original_parameter_id !== null);
+      
+      if (isDuplicatedNode) {
+        // Es un nodo duplicado - eliminar por ID
+        console.log('🗑️ Eliminando nodo duplicado de BD:', nodeId);
+        const { error } = await supabase!
+          .from('task_parameter_positions')
+          .delete()
+          .eq('id', nodeId);
+          
+        if (error) {
+          console.error('❌ Error eliminando nodo duplicado:', error);
+          toast({ title: "Error", description: "No se pudo eliminar el nodo duplicado" });
+          return;
+        }
+        
+        console.log('✅ Nodo duplicado eliminado de BD');
+        toast({ title: "Visualización eliminada", description: "Nodo duplicado removido permanentemente" });
+      } else {
+        // Es un nodo original - eliminar por parameter_id
+        console.log('🗑️ Eliminando nodo original de BD:', nodeId);
+        const { error } = await supabase!
+          .from('task_parameter_positions')
+          .delete()
+          .eq('parameter_id', nodeId)
+          .is('original_parameter_id', null);
+          
+        if (error) {
+          console.error('❌ Error eliminando nodo original:', error);
+          toast({ title: "Error", description: "No se pudo eliminar el nodo original" });
+          return;
+        }
+        
+        console.log('✅ Nodo original eliminado de BD');
+        toast({ title: "Nodo eliminado", description: "Parámetro removido del canvas permanentemente" });
+      }
+      
+      // Actualizar la interfaz - remover del canvas
+      setNodes(prev => prev.filter(n => n.id !== nodeId));
+      
+      // Invalidar cache para recargar posiciones
+      queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+      
+    } catch (error) {
+      console.error('❌ Error eliminando nodo:', error);
+      toast({ title: "Error", description: "No se pudo eliminar el nodo" });
     }
-  }, [toast]);
+  }, [toast, savedPositions, supabase, queryClient]);
 
   // Manejo del pan con botón central del ratón
   useEffect(() => {
