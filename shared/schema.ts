@@ -242,11 +242,25 @@ export const task_parameter_positions = pgTable("task_parameter_positions", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// Task Parametric Table - Para guardar tareas generadas con configuración paramétrica
+export const task_parametric = pgTable("task_parametric", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  param_values: text("param_values").notNull(), // JSON con los valores de parámetros
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
   created_at: true,
   updated_at: true,
-});;
+});
+
+export const insertTaskParametricSchema = createInsertSchema(task_parametric).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
@@ -270,3 +284,5 @@ export type InsertTaskParameterDependency = z.infer<typeof insertTaskParameterDe
 export type InsertTaskParameterDependencyOption = z.infer<typeof insertTaskParameterDependencyOptionSchema>;
 export type TaskParameterPosition = typeof task_parameter_positions.$inferSelect;
 export type InsertTaskParameterPosition = z.infer<typeof insertTaskParameterPositionSchema>;
+export type TaskParametric = typeof task_parametric.$inferSelect;
+export type InsertTaskParametric = z.infer<typeof insertTaskParametricSchema>;

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { toast } from '@/hooks/use-toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -33,6 +35,26 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [taskPreview, setTaskPreview] = useState<string>('')
   const { task } = modalData
   const isEditing = !task // Si no hay task, es creación (modo edición)
+  const queryClient = useQueryClient()
+
+  // Mutación para crear tarea paramétrica
+  const createParametricTaskMutation = useMutation({
+    mutationFn: async (paramValues: Record<string, string>) => {
+      const { data, error } = await supabase
+        .from('task_parametric')
+        .insert({
+          param_values: JSON.stringify(paramValues)
+        })
+        .select()
+        .single()
+      
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['parametric-tasks'] })
+    }
+  })
 
   const handleSubmit = async () => {
     if (selections.length === 0) {
@@ -46,18 +68,20 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
     setIsLoading(true)
     try {
+      // Construir objeto JSON con los valores de parámetros usando optionLabel
+      const paramValues: Record<string, string> = {}
+      selections.forEach(selection => {
+        paramValues[selection.parameterSlug] = selection.optionLabel
+      })
+
       console.log('🔧 Creando tarea paramétrica:', {
         selections,
         preview: taskPreview,
-        parameterConfig: selections.reduce((acc, sel) => {
-          acc[sel.parameterSlug] = sel.optionId
-          return acc
-        }, {} as Record<string, string>)
+        paramValues
       })
       
-      // Aquí iría la lógica para crear la tarea paramétrica en task_parametric
-      // Guardar selections y taskPreview en la base de datos
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Guardar en la tabla task_parametric
+      await createParametricTaskMutation.mutateAsync(paramValues)
       
       toast({
         title: "Tarea paramétrica creada",

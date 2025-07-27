@@ -380,19 +380,15 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       <Separator />
 
       {/* Vista previa de la tarea */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-blue-600" />
-          <Label className="text-sm font-medium">Vista previa de la tarea</Label>
-        </div>
+      {taskPreview && (
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground italic min-h-[3rem] flex items-center">
-              {taskPreview || "Selecciona parámetros para generar la vista previa de la tarea..."}
+            <p className="text-sm text-muted-foreground italic">
+              {taskPreview}
             </p>
           </CardContent>
         </Card>
-      </div>
+      )}
     </div>
   )
 }
