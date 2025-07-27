@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Plus, Edit, Trash2, Eye, Building2, List, TreePine, Network } from 'lucide-react';
+import { Settings, Plus, Edit, Trash2, Eye, Building2, List, TreePine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,6 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ParameterNodeEditor } from '@/components/admin/tasks_parameters/ParameterNodeEditor';
-import { DependencyListEditor } from '@/components/admin/tasks_parameters/DependencyListEditor';
 // Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 
 
@@ -301,11 +300,6 @@ export default function AdminTaskParameters() {
             value: "arbol",
             label: "Árbol",
             icon: <TreePine className="h-4 w-4" />
-          },
-          {
-            value: "dependencias",
-            label: "Dependencias",
-            icon: <Network className="h-4 w-4" />
           }
         ]}
         activeTab={activeTab}
@@ -372,10 +366,6 @@ export default function AdminTaskParameters() {
 
         {activeTab === "arbol" && (
           <ParameterNodeEditor />
-        )}
-
-        {activeTab === "dependencias" && (
-          <DependencyListEditor />
         )}
       </div>
 
