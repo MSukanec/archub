@@ -280,11 +280,16 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       if (template) {
         setExistingTemplate(template)
         
-        // Fetch template parameters
+        // Fetch template parameters (without option_group_id)
         const { data: templateParams } = await supabase
           .from('task_template_parameters')
           .select(`
-            *,
+            id,
+            template_id,
+            parameter_id,
+            position,
+            created_at,
+            updated_at,
             task_parameter:task_parameters(*)
           `)
           .eq('template_id', template.id)

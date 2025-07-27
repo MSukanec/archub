@@ -13,7 +13,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 
-import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, useTaskParameterOptionGroups, useTaskParameterOptionGroupItems, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
+import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption } from '@/hooks/use-task-parameters-admin-clean';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 // Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 
@@ -37,8 +37,7 @@ export default function AdminTaskParameters() {
   // Get selected parameter
   const selectedParameter = parameters.find(param => param.id === selectedParameterId);
   
-  // Load groups for selected parameter
-  const { data: optionGroupsData = [] } = useTaskParameterOptionGroups(selectedParameter?.parameter_id || '');
+  // Groups functionality removed - using simplified system
 
   // Calculate statistics
   const calculateStats = (parameters: TaskParameter[]) => {

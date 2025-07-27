@@ -2,24 +2,19 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit, Trash2, Eye, Settings, Package, Pencil, CheckSquare, Check } from 'lucide-react';
+import { Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { useToast } from '@/hooks/use-toast';
 
-import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter, useTaskParameterOptionGroups, useCreateTaskParameterOptionGroup, useDeleteTaskParameterOptionGroup, useUpdateTaskParameterOptionGroup, useTaskGroups } from '@/hooks/use-task-parameters-admin';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin-clean';
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
@@ -44,28 +39,13 @@ interface TaskParameterFormModalProps {
 export function TaskParameterFormModal({ modalData, onClose }: TaskParameterFormModalProps) {
   const { parameter, onParameterCreated } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { openModal } = useGlobalModalStore();
-  const [selectedTaskGroupId, setSelectedTaskGroupId] = useState('');
-  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  
   const { toast } = useToast();
   
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
-  const createGroupMutation = useCreateTaskParameterOptionGroup();
-  const deleteGroupMutation = useDeleteTaskParameterOptionGroup();
-  // Removed updateGroupMutation as group editing is no longer allowed
   
   // Load units for the selector
   const { data: units, isLoading: unitsLoading } = useUnits();
-  
-  // Load option groups for this parameter
-  const parameterId = parameter?.parameter_id || '';
-  console.log('Loading groups for parameter:', { parameter, parameterId });
-  const { data: optionGroups, isLoading: isLoadingGroups } = useTaskParameterOptionGroups(parameterId);
-  
-  // Load task groups for group creation
-  const { data: taskGroups = [], isLoading: taskGroupsLoading } = useTaskGroups();
   
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -73,7 +53,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       name: '',
       label: '',
       type: 'text',
-      expression_template: '',
+      expression_template: '{value}',
     },
   });
 
@@ -84,62 +64,12 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
         name: parameter.name || '',
         label: parameter.label || '',
         type: parameter.type as any || 'text',
-        expression_template: parameter.expression_template || '',
+        expression_template: parameter.expression_template || '{value}',
       });
     }
   }, [parameter, form]);
 
-  // Functions for inline group creation
-  const handleCreateGroup = async () => {
-    if (!selectedTaskGroupId || !parameter?.parameter_id) return;
-    
-    const selectedTaskGroup = taskGroups.find(group => group.id === selectedTaskGroupId);
-    if (!selectedTaskGroup) return;
-    
-    // Check if group already exists for this task group
-    const existingGroup = optionGroups?.find(group => group.task_group_id === selectedTaskGroupId);
-    if (existingGroup) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Ya existe un grupo para este tipo de tarea'
-      });
-      return;
-    }
-    
-    setIsCreatingGroup(true);
-    try {
-      await createGroupMutation.mutateAsync({
-        parameter_id: parameter.parameter_id,
-        name: selectedTaskGroup.name,
-        task_group_id: selectedTaskGroup.id,
-      });
-      setSelectedTaskGroupId('');
-      toast({
-        title: 'Éxito',
-        description: 'Grupo creado correctamente'
-      });
-    } catch (error: any) {
-      console.error('Error creating group:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Error al crear el grupo'
-      });
-    } finally {
-      setIsCreatingGroup(false);
-    }
-  };
-
-  const handleDeleteGroup = async (groupId: string) => {
-    try {
-      await deleteGroupMutation.mutateAsync(groupId);
-    } catch (error) {
-      console.error('Error deleting group:', error);
-    }
-  };
-
-  // Removed group editing functions as requested - groups only have check and delete buttons
+  // Group functionality removed - using simplified system
 
   // Submit function
   const handleSubmit = async (data: TaskParameterFormData) => {
@@ -151,7 +81,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       if (parameter) {
         // Update existing parameter
         result = await updateMutation.mutateAsync({
-          id: parameter.parameter_id,
+          id: parameter.id,
           ...data
         });
       } else {
@@ -310,92 +240,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
         </form>
       </Form>
 
-      {/* Option Groups Section - Only show for existing parameters */}
-      {parameter && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Grupos de Opciones</h3>
-          </div>
-
-          {/* Create new group section */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <h4 className="font-medium">Crear nuevo grupo</h4>
-                <div className="flex gap-2">
-                  <Select value={selectedTaskGroupId} onValueChange={setSelectedTaskGroupId}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Seleccionar tipo de tarea" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskGroups.map((group) => (
-                        <SelectItem key={group.id} value={group.id}>
-                          {group.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    onClick={handleCreateGroup}
-                    disabled={!selectedTaskGroupId || isCreatingGroup}
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Crear
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Existing groups */}
-          {isLoadingGroups ? (
-            <div className="text-center py-4 text-muted-foreground">
-              Cargando grupos...
-            </div>
-          ) : optionGroups && optionGroups.length > 0 ? (
-            <div className="space-y-2">
-              {optionGroups.map((group) => (
-                <Card key={group.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">{group.name}</div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            openModal('task-parameter-group-assignment', {
-                              group,
-                              parameterLabel: parameter?.label || ''
-                            });
-                          }}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteGroup(group.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No hay grupos creados para este parámetro
-            </div>
-          )}
-        </div>
-      )}
+      {/* Groups functionality removed - simplified system */}
 
       {/* Assignment Modal is now handled by ModalFactory */}
     </div>
