@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface TaskParameter {
   id: string;
-  name: string;
+  slug: string;
   label: string;
   type: string;
   expression_template: string;
@@ -26,7 +26,7 @@ export interface TaskParameterWithOptions extends TaskParameter {
 }
 
 export interface CreateTaskParameterData {
-  name: string;
+  slug: string;
   label: string;
   type: string;
   expression_template?: string;
@@ -54,14 +54,14 @@ export function useTaskParametersAdmin() {
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
         .select('*')
-        .order('name');
+        .order('slug');
 
       if (parametersError) throw parametersError;
 
       const { data: options, error: optionsError } = await supabase
         .from('task_parameter_options')
         .select('*')
-        .order('name');
+        .order('label');
 
       if (optionsError) throw optionsError;
 
