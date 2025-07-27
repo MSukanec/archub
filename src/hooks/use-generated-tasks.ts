@@ -6,6 +6,7 @@ export interface GeneratedTask {
   id: string;
   code: string;
   param_values: string; // JSON string from database
+  param_order?: string[]; // Array of parameter slugs in order
   created_at: string;
   updated_at: string;
 }
@@ -51,15 +52,18 @@ export function useCreateGeneratedTask() {
   return useMutation({
     mutationFn: async (payload: {
       param_values: Record<string, any>;
+      param_order?: string[];
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       console.log('🚀 Creating task with parameters:', payload.param_values);
+      console.log('🎯 Parameter order:', payload.param_order);
       
-      // Call the new centralized SQL function
+      // Call the new centralized SQL function with param_order
       const { data: taskData, error: taskError } = await supabase
         .rpc('archub_generate_task_parametric', {
-          input_param_values: payload.param_values
+          input_param_values: payload.param_values,
+          input_param_order: payload.param_order || []
         });
       
       if (taskError) {
