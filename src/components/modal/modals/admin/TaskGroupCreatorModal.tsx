@@ -254,13 +254,13 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     }
   }, [currentStep, taskGroup])
   
-  // Load saved parameter options when they become available
+  // Load saved parameter options when they become available AND template parameters are loaded
   useEffect(() => {
-    if (Object.keys(savedOptionsMap).length > 0) {
-      console.log('📥 Cargando opciones guardadas:', savedOptionsMap)
+    if (Object.keys(savedOptionsMap).length > 0 && templateParameters.length > 0) {
+      console.log('📥 Cargando opciones guardadas después de cargar parámetros:', savedOptionsMap)
       setSelectedOptionsMap(savedOptionsMap)
     }
-  }, [savedOptionsMap])
+  }, [savedOptionsMap, templateParameters])
 
   const fetchTemplateData = async (taskGroupId: string) => {
     try {
