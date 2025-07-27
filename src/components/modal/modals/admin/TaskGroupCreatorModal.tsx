@@ -174,37 +174,16 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   const updateGroupMutation = useUpdateTaskGroup()
   const saveParameterOptionsMutation = useSaveTaskGroupParameterOptions()
   
-  // Hook para actualizar templates con manejo de duplicados
+  // Hook para actualizar templates 
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ templateId, name_template }: { templateId: string, name_template: string }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       console.log('🔄 Actualizando template en BD:', { templateId, name_template });
       
-      // Primero verificar si ya existe un template con este nombre (excluyendo el actual)
-      const { data: existingTemplates, error: checkError } = await supabase
-        .from('task_templates')
-        .select('id, name_template')
-        .eq('name_template', name_template)
-        .neq('id', templateId);
-
-      if (checkError) {
-        console.error('❌ Error verificando templates existentes:', checkError);
-        throw checkError;
-      }
-
-      let finalTemplate = name_template;
-      
-      // Si existe otro template con el mismo nombre, agregar sufijo único
-      if (existingTemplates && existingTemplates.length > 0) {
-        const timestamp = Date.now();
-        finalTemplate = `${name_template.replace('.', '')} (${timestamp}).`;
-        console.log('⚠️ Template duplicado detectado, usando nombre único:', finalTemplate);
-      }
-      
       const { data, error } = await supabase
         .from('task_templates')
-        .update({ name_template: finalTemplate })
+        .update({ name_template })
         .eq('id', templateId)
         .select()
         .single();
