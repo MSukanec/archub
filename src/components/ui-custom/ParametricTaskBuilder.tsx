@@ -135,6 +135,13 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
     const newAvailableParams: string[] = []
     
+    // Siempre incluir parámetros que ya están seleccionados (para poder cambiarlos)
+    selections.forEach(selection => {
+      if (!newAvailableParams.includes(selection.parameterId)) {
+        newAvailableParams.push(selection.parameterId)
+      }
+    })
+
     // Siempre incluir el primer parámetro si no está seleccionado
     const tipoTareaParam = parameters.find(p => p.slug === 'tipo-de-tarea')
     if (tipoTareaParam && !selections.some(s => s.parameterId === tipoTareaParam.id)) {
