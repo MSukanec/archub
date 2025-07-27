@@ -170,7 +170,7 @@ export default function AdminCategories() {
 
         {/* Categories Tree */}
         <Card>
-          <CardContent>
+          <CardContent className="p-6">
             {filteredCategories.length === 0 ? (
               <div className="text-center py-12">
                 <TreePine className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
