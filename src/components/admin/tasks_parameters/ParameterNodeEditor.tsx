@@ -13,6 +13,7 @@ import ReactFlow, {
   NodeProps,
   BackgroundVariant,
   ReactFlowProvider,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -316,6 +317,7 @@ function ParameterNodeEditorContent() {
   const createDependencyMutation = useCreateDependency();
   const deleteDependencyMutation = useDeleteDependency();
   const savePositionMutation = useSaveParameterPosition();
+  const { setViewport, getViewport } = useReactFlow();
 
   // Debug: mostrar estado de carga de posiciones
   useEffect(() => {
@@ -346,6 +348,63 @@ function ParameterNodeEditorContent() {
   const nodeTypes = useMemo(() => ({
     parameterNode: ParameterNode,
   }), []);
+
+  // Manejo del pan con botón central del ratón
+  useEffect(() => {
+    let isPanning = false;
+    let startPosition = { x: 0, y: 0 };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button === 1) { // Botón central del ratón
+        e.preventDefault();
+        isPanning = true;
+        startPosition = { x: e.clientX, y: e.clientY };
+        document.body.style.cursor = 'move';
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanning) return;
+      
+      const currentViewport = getViewport();
+      const deltaX = (e.clientX - startPosition.x) * 0.5;
+      const deltaY = (e.clientY - startPosition.y) * 0.5;
+      
+      setViewport({
+        x: currentViewport.x + deltaX,
+        y: currentViewport.y + deltaY,
+        zoom: currentViewport.zoom
+      });
+      
+      startPosition = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (e.button === 1) {
+        isPanning = false;
+        document.body.style.cursor = 'default';
+      }
+    };
+
+    // Prevenir scroll con botón central
+    const handleWheel = (e: WheelEvent) => {
+      if (e.button === 1) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('wheel', handleWheel);
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('wheel', handleWheel);
+    };
+  }, [getViewport, setViewport]);
 
   // Inicializar opciones visibles por primera vez desde posiciones guardadas
   useEffect(() => {
@@ -559,6 +618,7 @@ function ParameterNodeEditorContent() {
           panOnScroll={false} // Desactivar pan con scroll
           zoomOnScroll={true} // Mantener zoom con scroll
           zoomOnPinch={true} // Zoom con pinch en móvil
+
         >
           <Controls />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
