@@ -625,18 +625,77 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
 
       console.log('📤 Enviando opciones al nuevo sistema:', parameterOptions)
 
-      // Get the current generated preview to save as name_template
-      const dynamicTemplate = generatePreview
-      console.log('🏗️ Actualizando name_template a:', dynamicTemplate)
+      // Construct the real template using actual data from database
+      let realTemplate = ''
+      
+      if (templateParameters.length > 0) {
+        // Build template with placeholders
+        const placeholders = templateParameters
+          .sort((a, b) => a.position - b.position)
+          .map(tp => {
+            const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
+            return parameter ? `{{${parameter.name}}}` : '';
+          })
+          .filter(Boolean)
+          .join(' ');
+        
+        realTemplate = placeholders + '.';
+        console.log('🏗️ Template construido para guardar:', realTemplate);
+        
+        // Now replace placeholders with actual selected option labels
+        for (const tp of templateParameters) {
+          const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
+          if (!parameter) continue;
+          
+          const placeholder = `{{${parameter.name}}}`;
+          const selectedOptions = selectedOptionsMap?.[tp.parameter_id] || [];
+          
+          if (selectedOptions.length > 0) {
+            const selectedOptionId = selectedOptions[0];
+            
+            // Get the actual option from database
+            console.log(`🔍 Buscando opción con ID: ${selectedOptionId}`);
+            const { data: optionData, error } = await supabase!
+              .from('task_parameter_options')
+              .select('label')
+              .eq('id', selectedOptionId)
+              .single();
+            
+            console.log(`📋 Datos de opción obtenidos:`, optionData, error);
+            
+            if (optionData) {
+              const expressionTemplate = parameter.expression_template || '{value}';
+              const generatedText = expressionTemplate.replace('{value}', optionData.label);
+              realTemplate = realTemplate.replace(placeholder, generatedText);
+              console.log(`✅ Reemplazado ${placeholder} con "${generatedText}"`);
+            } else {
+              console.log(`❌ No se encontró opción para ID: ${selectedOptionId}`);
+              realTemplate = realTemplate.replace(placeholder, '[...]');
+            }
+          } else {
+            realTemplate = realTemplate.replace(placeholder, '[...]');
+          }
+        }
+        
+        // Clean up
+        realTemplate = realTemplate.replace(/\s+/g, ' ').trim();
+        if (!realTemplate.endsWith('.')) {
+          realTemplate += '.';
+        }
+      } else {
+        realTemplate = existingTemplate?.name_template || 'Nueva tarea.';
+      }
+      
+      console.log('🏗️ Template final para guardar:', realTemplate);
 
-      // Update the template's name_template with the generated preview
+      // Update the template's name_template with the real constructed template
       if (supabase) {
         await supabase
           .from('task_templates')
-          .update({ name_template: dynamicTemplate })
+          .update({ name_template: realTemplate })
           .eq('id', existingTemplate.id)
         
-        console.log('✅ Template actualizado en base de datos')
+        console.log('✅ Template actualizado en base de datos con valores reales')
       }
 
       await saveParameterOptionsMutation.mutateAsync({
