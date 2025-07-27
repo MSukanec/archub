@@ -207,6 +207,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       if (tipoTareaParam?.expression_template) {
         // Usar la misma lógica que AdminTaskGroups - implementación exacta
         let processedTemplate = tipoTareaParam.expression_template
+        let preview = ''
         
         console.log(`🎯 Template base encontrado: ${processedTemplate}`)
 
