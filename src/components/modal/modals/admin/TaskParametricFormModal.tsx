@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { toast } from '@/hooks/use-toast'
 import { useCreateGeneratedTask, useUpdateGeneratedTask } from '@/hooks/use-generated-tasks'
 
@@ -43,10 +43,42 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   console.log('📊 param_values from task:', actualTask?.param_values);
   
   // Parse existing param_values if editing
-  if (actualTask && actualTask.param_values) {
-    console.log('🔄 Loading existing parameters:', actualTask.param_values);
-    console.log('📊 Loading existing param_order:', actualTask.param_order);
-  }
+  const existingParamValues = React.useMemo(() => {
+    if (!actualTask?.param_values) return null;
+    
+    try {
+      // Si param_values es string, parsearlo como JSON
+      if (typeof actualTask.param_values === 'string') {
+        const parsed = JSON.parse(actualTask.param_values);
+        console.log('🔄 Parsed param_values from string:', parsed);
+        return parsed;
+      } else {
+        console.log('🔄 Using param_values as object:', actualTask.param_values);
+        return actualTask.param_values;
+      }
+    } catch (e) {
+      console.error('❌ Error parsing param_values:', e);
+      return null;
+    }
+  }, [actualTask?.param_values]);
+
+  const existingParamOrder = React.useMemo(() => {
+    if (!actualTask?.param_order) return null;
+    
+    // Si param_order es string, parsearlo como JSON, si no, usarlo como array
+    if (typeof actualTask.param_order === 'string') {
+      try {
+        return JSON.parse(actualTask.param_order);
+      } catch (e) {
+        console.error('❌ Error parsing param_order:', e);
+        return null;
+      }
+    }
+    return actualTask.param_order;
+  }, [actualTask?.param_order]);
+
+  console.log('📊 Processed param_values:', existingParamValues);
+  console.log('📊 Processed param_order:', existingParamOrder);
 
   // Use the new hooks for creating and updating tasks
   const createTaskMutation = useCreateGeneratedTask()
@@ -141,8 +173,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         onSelectionChange={setSelections}
         onPreviewChange={setTaskPreview}
         onOrderChange={setParameterOrder}
-        initialParameters={actualTask ? JSON.stringify(actualTask.param_values) : null}
-        initialParameterOrder={actualTask?.param_order || null}
+        initialParameters={existingParamValues ? JSON.stringify(existingParamValues) : null}
+        initialParameterOrder={existingParamOrder || null}
       />
     </div>
   )
