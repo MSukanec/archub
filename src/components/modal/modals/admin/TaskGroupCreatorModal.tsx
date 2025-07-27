@@ -314,17 +314,9 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
           template = template.replace(placeholder, generatedText);
           console.log(`✅ Reemplazado ${placeholder} con "${generatedText}" (label: "${selectedOption.label}", template: "${expressionTemplate}")`);
         } else {
-          // Si las opciones aún no están cargadas, mostrar indicador de carga
-          const hasOptionsLoaded = parameterOptions.length > 0;
-          if (hasOptionsLoaded) {
-            // Opciones cargadas pero selección no encontrada
-            template = template.replace(placeholder, '[...]');
-            console.log(`⚠️ Reemplazado ${placeholder} con [...] (opción no encontrada)`);
-          } else {
-            // Opciones aún cargando
-            template = template.replace(placeholder, '[cargando...]');
-            console.log(`⏳ Reemplazado ${placeholder} con [cargando...] (opciones aún cargando)`);
-          }
+          // Si las opciones aún no están cargadas, esperar a que se carguen
+          template = template.replace(placeholder, '[...]');
+          console.log(`⚠️ Reemplazado ${placeholder} con [...] (opción no encontrada en cache)`);
         }
       } else {
         // No option selected, show placeholder
@@ -663,6 +655,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       })
 
       console.log('✅ Opciones guardadas exitosamente con nuevo sistema')
+      
+      // Invalidate task groups cache to refresh table
+      await queryClient.invalidateQueries({ queryKey: ['task-groups'] })
+      console.log('🔄 Cache de task groups invalidado')
     } catch (error) {
       console.error('❌ Error guardando opciones:', error)
     }

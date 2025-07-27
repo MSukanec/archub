@@ -86,20 +86,66 @@ export default function AdminTaskGroups() {
       for (const group of taskGroups) {
         if (group.template_id) {
           try {
-            // Get template parameters
-            const { data: templateParams } = await supabase
-              .from('task_template_parameters')
+            // Get template with parameters and expression_template
+            const { data: template } = await supabase
+              .from('task_templates')
               .select(`
                 *,
-                task_parameter:task_parameters(name)
+                task_template_parameters (
+                  id,
+                  parameter_id,
+                  position,
+                  task_parameter:task_parameters (
+                    id,
+                    name,
+                    label,
+                    type,
+                    expression_template
+                  )
+                )
               `)
-              .eq('template_id', group.template_id)
-              .order('position')
+              .eq('id', group.template_id)
+              .single()
 
-            templateInfoMap[group.id] = {
-              hasTemplate: true,
-              parameters: templateParams || [],
-              preview: generateTemplatePreview(group.name, templateParams || [])
+            if (template) {
+              const parameters = template.task_template_parameters || []
+              
+              // Load parameter options for this group  
+              const { data: groupOptions } = await supabase
+                .from('task_group_parameter_options')
+                .select(`
+                  parameter_id,
+                  parameter_option_id,
+                  task_parameter_values!inner(id, name, label)
+                `)
+                .eq('group_id', group.id)
+
+              // Create options map by parameter_id
+              const optionsMap: Record<string, any[]> = {}
+              if (groupOptions) {
+                groupOptions.forEach(opt => {
+                  if (!optionsMap[opt.parameter_id]) {
+                    optionsMap[opt.parameter_id] = []
+                  }
+                  optionsMap[opt.parameter_id].push(opt.task_parameter_values)
+                })
+              }
+
+              const preview = generateProcessedTemplatePreview(template.name_template, parameters, optionsMap)
+              
+              templateInfoMap[group.id] = {
+                hasTemplate: true,
+                parameters: parameters.map(tp => ({
+                  id: tp.id,
+                  name: tp.task_parameter?.name || 'unknown',
+                  label: tp.task_parameter?.label || 'Unknown Parameter',
+                  type: tp.task_parameter?.type || 'unknown',
+                  position: tp.position
+                })),
+                preview
+              }
+            } else {
+              templateInfoMap[group.id] = { hasTemplate: false }
             }
           } catch (error) {
             console.error('Error loading template info:', error)
@@ -116,17 +162,36 @@ export default function AdminTaskGroups() {
     loadTemplateInfo()
   }, [taskGroups])
 
-  // Generate template preview
-  const generateTemplatePreview = (groupName: string, parameters: any[]) => {
-    if (parameters.length === 0) {
-      return `${groupName}.`
-    }
+  // Generate processed template preview with real values
+  const generateProcessedTemplatePreview = (nameTemplate: string, parameters: any[], optionsMap: Record<string, any[]>) => {
+    let processedTemplate = nameTemplate
 
-    const parameterPlaceholders = parameters
-      .map(tp => `{{${tp.task_parameter?.name || 'parámetro'}}}`)
-      .join(' ')
+    parameters.forEach((tp) => {
+      const parameter = tp.task_parameter
+      if (!parameter) return
 
-    return `${groupName} ${parameterPlaceholders}.`
+      const placeholder = `{{${parameter.name}}}`
+      const selectedOptions = optionsMap[tp.parameter_id] || []
+      
+      if (selectedOptions.length > 0) {
+        // Get the first selected option
+        const selectedOption = selectedOptions[0]
+        
+        // Apply expression_template or use {value} as fallback
+        const expressionTemplate = parameter.expression_template || '{value}'
+        const generatedText = expressionTemplate.replace('{value}', selectedOption.label)
+        
+        processedTemplate = processedTemplate.replace(placeholder, generatedText)
+      } else {
+        // No options selected, show parameter label in brackets
+        processedTemplate = processedTemplate.replace(placeholder, `[${parameter.label}]`)
+      }
+    })
+
+    // Clean up extra spaces
+    processedTemplate = processedTemplate.replace(/\s+/g, ' ').trim()
+    
+    return processedTemplate
   }
 
 
