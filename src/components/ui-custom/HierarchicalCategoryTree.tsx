@@ -190,17 +190,17 @@ export function HierarchicalCategoryTree({
             {category.taskGroups.map(taskGroup => (
               <div 
                 key={taskGroup.id}
-                className="flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/30 transition-colors border-l-2 border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10"
+                className="flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/30 transition-colors border-l-2 border-accent bg-accent/10"
                 style={{ marginLeft: `${(currentLevel + 1) * 24}px` }}
               >
                 {/* Left side: Task group info */}
                 <div className="flex items-center space-x-2 flex-1">
                   <div className="w-5 flex justify-center">
-                    <Layers className="w-3 h-3 text-[hsl(var(--accent))]" />
+                    <Layers className="w-3 h-3 text-accent" />
                   </div>
                   
                   <div className="flex items-center space-x-2 flex-1">
-                    <span className="text-sm font-medium text-[hsl(var(--accent))]">{taskGroup.name}</span>
+                    <span className="text-sm font-medium text-accent">{taskGroup.name}</span>
 
                   </div>
                 </div>

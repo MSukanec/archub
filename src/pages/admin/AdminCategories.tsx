@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Package2, PackagePlus, Settings, CheckCircle, XCircle, Filter, X, Tag, TreePine, Eye, Zap } from 'lucide-react';
+import { Plus, Package2, PackagePlus, Settings, Filter, X, Tag, TreePine, Eye, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -108,28 +108,18 @@ export default function AdminCategories() {
   const deleteCategoryMutation = useDeleteTaskCategory();
   const deleteTaskGroupMutation = useDeleteTaskGroup();
 
-  // Calculate statistics - NOW BASED ON TASK GROUPS INSTEAD OF CATEGORIES
+  // Calculate statistics
   const calculateStats = (categories: TaskCategoryAdmin[]) => {
     let totalCategories = 0;
     let totalTaskGroups = 0;
-    let taskGroupsWithTemplates = 0;
-    let taskGroupsWithoutTemplates = 0;
 
     const countRecursive = (cats: TaskCategoryAdmin[]) => {
       cats.forEach(cat => {
         totalCategories++;
         
-        // Contar task groups y sus plantillas with debugging
+        // Contar task groups
         if (cat.taskGroups && cat.taskGroups.length > 0) {
           totalTaskGroups += cat.taskGroups.length;
-          cat.taskGroups.forEach(tg => {
-            const hasTemplate = tg.template_id !== null && tg.template_id !== undefined && tg.template_id !== '';
-            if (hasTemplate) {
-              taskGroupsWithTemplates++;
-            } else {
-              taskGroupsWithoutTemplates++;
-            }
-          });
         }
         
         if (cat.children && cat.children.length > 0) {
@@ -141,9 +131,7 @@ export default function AdminCategories() {
     countRecursive(categories);
     return { 
       totalCategories, 
-      totalTaskGroups,
-      taskGroupsWithTemplates, 
-      taskGroupsWithoutTemplates 
+      totalTaskGroups
     };
   };
 
@@ -347,7 +335,7 @@ export default function AdminCategories() {
         />
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Categorías</CardTitle>
@@ -370,32 +358,6 @@ export default function AdminCategories() {
               <div className="text-2xl font-bold">{stats.totalTaskGroups}</div>
               <p className="text-xs text-muted-foreground">
                 Total de grupos de tareas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Con Plantillas</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.taskGroupsWithTemplates}</div>
-              <p className="text-xs text-muted-foreground">
-                Grupos con plantillas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Sin Plantillas</CardTitle>
-              <XCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.taskGroupsWithoutTemplates}</div>
-              <p className="text-xs text-muted-foreground">
-                Grupos sin plantillas
               </p>
             </CardContent>
           </Card>

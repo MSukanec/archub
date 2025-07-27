@@ -138,7 +138,7 @@ export function useTaskTemplateParameterOptions(parameterId: string | null) {
         throw error;
       }
       
-      console.log('Real parameter options from task_parameter_values:', data);
+      console.log('Real parameter options from task_parameter_options:', data);
       return data?.map(item => ({
         id: item.id,
         value: item.id, // Use ID as value

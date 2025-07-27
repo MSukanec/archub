@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. TEMPLATE SYSTEM UI CLEANUP COMPLETED: Successfully eliminated all obsolete template UI elements and fixed color issues in category management - COMPLETED
+  • PLANTILLAS BUTTON ELIMINATED: Removed "PLANTILLAS" button from task groups in AdminCategories page
+  • TEMPLATE BADGES REMOVED: Eliminated "CON PLANTILLA" and "SIN PLANTILLA" badges from task group display
+  • COLOR SYSTEM FIXED: Changed hardcoded blue colors to proper --accent CSS variable (text-accent, border-accent, bg-accent/10)
+  • KPI CARDS REDUCED: Removed template-related statistics cards, keeping only "Total Categorías" and "Grupos de Tareas" (grid changed from 4 columns to 2)
+  • HOOK UPDATED: Fixed use-task-templates.ts to use task_group_parameter_options instead of obsolete task_template_parameters table
+  • STATISTICS SIMPLIFIED: Removed template counting logic from calculateStats function to focus on essential metrics
 - July 27, 2025. TASK PARAMETERS COLUMN RENAME COMPLETED: Successfully updated task_parameters table column from 'name' to 'slug' throughout codebase - COMPLETED
   • SCHEMA UPDATED: Changed task_parameters.name to task_parameters.slug in shared/schema.ts
   • REFERENCES UPDATED: Modified all parameter.name to parameter.slug in AdminTaskGroups, AdminTaskParameters, and TaskGroupCreatorModal
