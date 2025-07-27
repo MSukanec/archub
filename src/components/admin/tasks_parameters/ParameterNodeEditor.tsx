@@ -367,8 +367,8 @@ function ParameterNodeEditorContent() {
       if (!isPanning) return;
       
       const currentViewport = getViewport();
-      const deltaX = (e.clientX - startPosition.x) * 0.5;
-      const deltaY = (e.clientY - startPosition.y) * 0.5;
+      const deltaX = (e.clientX - startPosition.x);
+      const deltaY = (e.clientY - startPosition.y);
       
       setViewport({
         x: currentViewport.x + deltaX,
