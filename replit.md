@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. TASK_GENERATED TABLE ELIMINATION COMPLETED: Successfully removed task_generated table from database and updated all hooks to use task_parametric table exclusively - COMPLETED
+  • HOOK MIGRATION: Updated useGeneratedTasks to query task_parametric instead of task_generated table
+  • DELETION FUNCTION: Modified useDeleteGeneratedTask to work with task_parametric table
+  • INTERFACE UPDATES: Changed GeneratedTask interface to match task_parametric schema (task_group_id, parameter_values)
+  • MODAL INTEGRATION: Updated handleEdit to use parametric-task modal for editing tasks
+  • ARCHITECTURE SIMPLIFIED: System now uses single task_parametric table for all generated tasks without legacy task_generated dependencies
 - July 27, 2025. COMPLETE LEGACY TEMPLATE SYSTEM ELIMINATION FINALIZED: Successfully completed the total removal of all template and task group components, completing the transition to pure parametric task system - COMPLETED
   • LEGACY FILES DELETED: Permanently removed use-task-templates.ts, use-task-templates-admin.ts, AdminTaskTemplates.tsx, TaskGroupFormModal.tsx, GeneratedTaskFormModal.tsx
   • ROUTING CLEANUP: Eliminated all /admin/task-groups and /admin/task-templates routes from App.tsx
