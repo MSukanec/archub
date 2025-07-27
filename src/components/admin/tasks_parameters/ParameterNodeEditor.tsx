@@ -591,8 +591,15 @@ function ParameterNodeEditorContent() {
       // Actualizar la interfaz - remover del canvas
       setNodes(prev => prev.filter(n => n.id !== nodeId));
       
-      // Invalidar cache para recargar posiciones
-      queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+      // Actualizar también las opciones visibles del nodo eliminado
+      setNodeVisibleOptions(prev => {
+        const updated = { ...prev };
+        delete updated[nodeId];
+        return updated;
+      });
+      
+      // NO invalidar cache - esto causaba que reaparecieran los nodos
+      // La eliminación ya se hizo en la DB, simplemente actualizamos el estado local
       
     } catch (error) {
       console.error('❌ Error eliminando nodo:', error);
