@@ -33,7 +33,7 @@ const useParameterOptions = (parameterId: string) => {
     queryFn: async () => {
       console.log('🔍 Obteniendo opciones para parámetro:', parameterId)
       const { data, error } = await supabase!
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .select('id, name, label')
         .eq('parameter_id', parameterId)
         .order('label', { ascending: true })
@@ -86,7 +86,7 @@ interface TaskGroupCreatorModalProps {
 
 interface SortableParameterItemProps {
   param: { id: string; parameter_id: string; template_id: string; position: number; option_group_id: string | null }
-  parameter: { id: string; name: string; label: string; type: string } | undefined
+  parameter: { id: string; slug: string; label: string; type: string } | undefined
   onRemove: (id: string) => void
   selectedOptions: string[]
   onOptionsChange: (parameterId: string, options: string[]) => void
@@ -436,7 +436,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       const { data: params } = await supabase
         .from('task_parameters')
         .select('*')
-        .order('name')
+        .order('slug')
 
       console.log('⚙️ Parámetros disponibles:', params)
       setAvailableParameters(params || [])

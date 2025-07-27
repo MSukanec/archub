@@ -59,7 +59,7 @@ export function useTaskParametersAdmin() {
       if (parametersError) throw parametersError;
 
       const { data: options, error: optionsError } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .select('*')
         .order('name');
 

@@ -454,7 +454,7 @@ export function useAllTaskParameterValues() {
     queryKey: ['all-task-parameter-values'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .select(`
           *,
           task_parameters(

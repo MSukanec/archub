@@ -95,7 +95,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
           parametersMap[opt.parameter_id] = {
             id: opt.parameter_id,
             template_id: templateId,
-            name: opt.task_parameters?.slug || '',
+            slug: opt.task_parameters?.slug || '',
             label: opt.task_parameters?.label || '',
             type: opt.task_parameters?.type || 'text',
             is_required: false,
@@ -108,7 +108,7 @@ export function useTaskTemplateParameters(templateId: string | null) {
       const parameters = Object.values(parametersMap);
       
       console.log('Parameters with expression_template:', parameters.map(p => ({
-        name: p.name,
+        slug: p.slug,
         expression_template: p.expression_template,
         position: p.position
       })));

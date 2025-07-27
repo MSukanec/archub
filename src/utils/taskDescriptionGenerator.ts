@@ -53,7 +53,7 @@ export async function generateTaskDescription(
   let parameterValuesData: any[] = [];
   if (selectParamValues.length > 0) {
     const { data: valuesData, error: valuesError } = await supabase
-      .from('task_parameter_values')
+      .from('task_parameter_options')
       .select('name, label, parameter_id, task_parameters!inner(expression_template)')
       .in('name', selectParamValues);
 
