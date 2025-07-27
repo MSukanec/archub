@@ -133,16 +133,17 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
-                        // Auto-generate slug from label if creating new parameter
+                        // Auto-generate slug from label if creating new parameter (snake_case)
                         if (!parameter) {
                           const slug = e.target.value
                             .toLowerCase()
                             .normalize('NFD')
                             .replace(/[\u0300-\u036f]/g, '') // Remove accents
-                            .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-                            .replace(/\s+/g, '-') // Replace spaces with hyphens
-                            .replace(/-+/g, '-') // Replace multiple hyphens with single
-                            .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+                            .replace(/ñ/g, 'n') // Replace ñ with n
+                            .replace(/[^a-z0-9\s_]/g, '') // Remove special characters, keep underscores
+                            .replace(/\s+/g, '_') // Replace spaces with underscores
+                            .replace(/_+/g, '_') // Replace multiple underscores with single
+                            .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
                           form.setValue('slug', slug);
                         }
                       }}
@@ -161,7 +162,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                   <FormLabel>Slug *</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="ej: ladrillos-y-bloques" 
+                      placeholder="ej: ladrillos_y_bloques" 
                       {...field} 
                     />
                   </FormControl>
@@ -172,7 +173,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
           </div>
           
           <div className="text-sm text-muted-foreground">
-            El Slug se genera automáticamente basado en el nombre. Puedes modificarlo si es necesario.
+            El Slug se genera automáticamente en formato snake_case basado en el nombre. Puedes modificarlo si es necesario.
           </div>
 
           {/* Tipo y Plantilla inline */}

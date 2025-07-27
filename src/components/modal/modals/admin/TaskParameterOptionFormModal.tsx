@@ -37,16 +37,16 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
   const createMutation = useCreateTaskParameterOption();
   const updateMutation = useUpdateTaskParameterOption();
   
-  // Function to normalize label to value
+  // Function to normalize label to value (snake_case)
   const normalizeLabel = (label: string): string => {
     return label
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remove accents
       .replace(/ñ/g, 'n')
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/[^a-z0-9\s_]/g, '') // Remove special characters, keep underscores
       .trim()
-      .replace(/\s+/g, '-'); // Replace spaces with hyphens
+      .replace(/\s+/g, '_'); // Replace spaces with underscores
   };
 
   const form = useForm<TaskParameterOptionFormData>({
