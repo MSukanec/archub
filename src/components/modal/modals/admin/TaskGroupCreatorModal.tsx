@@ -531,63 +531,48 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     }
   }
 
-  const addParameter = async () => {
-    if (!selectedParameterId || !existingTemplate || !supabase) return
+  const addParameter = () => {
+    if (!selectedParameterId) return
 
     const newPosition = templateParameters.length + 1
     
-    try {
-      const { data, error } = await supabase
-        .from('task_template_parameters')
-        .insert({
-          template_id: existingTemplate.id,
-          parameter_id: selectedParameterId,
-          position: newPosition,
-          option_group_id: null,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      setTemplateParameters([...templateParameters, data])
-      setSelectedParameterId('')
-      
-      toast({
-        title: "Parámetro agregado",
-        description: "El parámetro se agregó correctamente a la plantilla.",
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo agregar el parámetro.",
-        variant: "destructive",
-      })
+    // Find the parameter details from available parameters
+    const selectedParameter = availableParameters.find(p => p.id === selectedParameterId)
+    if (!selectedParameter) return
+    
+    // Create a temporary parameter object for local state
+    const newParameter = {
+      id: `temp-${Date.now()}`, // Temporary ID for local state
+      parameter_id: selectedParameterId,
+      position: newPosition,
+      parameter: selectedParameter // Include parameter details for display
     }
+    
+    setTemplateParameters([...templateParameters, newParameter])
+    setSelectedParameterId('')
+    
+    toast({
+      title: "Parámetro agregado",
+      description: "El parámetro se agregó correctamente a la plantilla.",
+    })
   }
 
-  const removeParameter = async (paramId: string) => {
-    try {
-      if (!supabase) return
-      
-      await supabase
-        .from('task_template_parameters')
-        .delete()
-        .eq('id', paramId)
-
-      setTemplateParameters(templateParameters.filter(p => p.id !== paramId))
-      
-      toast({
-        title: "Parámetro eliminado",
-        description: "El parámetro se eliminó correctamente.",
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar el parámetro.",
-        variant: "destructive",
-      })
+  const removeParameter = (paramId: string) => {
+    // Simply remove from local state - no database operation needed
+    setTemplateParameters(templateParameters.filter(p => p.id !== paramId))
+    
+    // Also remove from selected options if exists
+    const paramToRemove = templateParameters.find(p => p.id === paramId)
+    if (paramToRemove?.parameter_id) {
+      const newSelectedOptionsMap = { ...selectedOptionsMap }
+      delete newSelectedOptionsMap[paramToRemove.parameter_id]
+      setSelectedOptionsMap(newSelectedOptionsMap)
     }
+    
+    toast({
+      title: "Parámetro eliminado",
+      description: "El parámetro se eliminó correctamente.",
+    })
   }
 
   const handleClose = () => {
