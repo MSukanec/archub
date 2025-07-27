@@ -309,12 +309,17 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
     
     console.log('🎯 Construyendo frase sin template base, solo con expression_templates')
 
-    // Procesar cada parámetro seleccionado y generar su parte
-    selections.forEach(selection => {
+    // Procesar cada parámetro en el orden correcto 
+    const orderedParameterIds = getOrderedParameters()
+    const orderedSelections = orderedParameterIds
+      .map(paramId => selections.find(s => s.parameterId === paramId))
+      .filter(selection => selection !== undefined) as ParameterSelection[]
+    
+    orderedSelections.forEach(selection => {
       const parameter = parameters.find(p => p.id === selection.parameterId)
       if (!parameter) return
 
-      console.log(`🔍 Procesando parámetro: ${parameter.slug}`)
+      console.log(`🔍 Procesando parámetro en orden: ${parameter.slug}`)
       
       // Aplicar expression_template del parámetro o usar {value} como fallback
       const expressionTemplate = parameter.expression_template || '{value}'

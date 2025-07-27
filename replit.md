@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. PREVIEW GENERATION ORDER FIXED: Successfully corrected preview text generation to use proper parameter ordering instead of random selection order - COMPLETED
+  • ORDERED PREVIEW GENERATION: Modified ParametricTaskBuilder preview logic to use getOrderedParameters() for correct sequence processing
+  • LOGICAL TEXT FLOW: Preview now generates "Ejecución de muro de ladrillo cerámico hueco de 12x18x33 con mortero de asiento de cemento de albañilería" in proper order
+  • CONSISTENT ORDERING: Both parameter badges and preview text now follow same logical sequence (tipo_tarea → tipo_elemento → tipo_ladrillo → tipo_mortero)
+  • BUG ELIMINATION: Fixed issue where preview showed incorrect order like "Ejecución de con mortero de asiento de..." 
 - July 27, 2025. GRUPOS COLUMN ELIMINATION FROM TASK PARAMETERS TABLE COMPLETED: Successfully removed GRUPOS column from AdminTaskParameters table to simplify interface - COMPLETED
   • COLUMN REMOVED: Eliminated 'Grupos' column from parameter options table in AdminTaskParameters.tsx
   • INTERFACE SIMPLIFIED: Table now shows only essential columns: Nombre (visible), Slug, and Acciones
