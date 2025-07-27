@@ -81,6 +81,7 @@ export default function AdminTaskGroups() {
     const loadTemplateInfo = async () => {
       if (!supabase || taskGroups.length === 0) return
 
+      console.log('🔄 Cargando información de templates para tabla...')
       const templateInfoMap: Record<string, any> = {}
 
       for (const group of taskGroups) {
@@ -154,9 +155,100 @@ export default function AdminTaskGroups() {
       }
 
       setTemplateInfo(templateInfoMap)
+      console.log('✅ Información de templates cargada para tabla:', templateInfoMap)
     }
 
     loadTemplateInfo()
+  }, [taskGroups])
+
+  // Force refresh template info when needed
+  const refreshTemplateInfo = async () => {
+    if (!supabase || taskGroups.length === 0) return
+
+    console.log('🔄 Refrescando información de templates manualmente...')
+    const templateInfoMap: Record<string, any> = {}
+
+    for (const group of taskGroups) {
+      if (group.template_id) {
+        try {
+          // Get template basic info
+          const { data: template } = await supabase
+            .from('task_templates')
+            .select('*')
+            .eq('id', group.template_id)
+            .single()
+
+          if (template) {
+            // Load parameter options for this group with parameter details
+            const { data: groupOptions } = await supabase
+              .from('task_group_parameter_options')
+              .select(`
+                parameter_id,
+                parameter_option_id,
+                task_parameter_options!inner(id, name, label),
+                task_parameters!inner(id, slug, label, type, expression_template)
+              `)
+              .eq('group_id', group.id)
+
+            // Create options map and parameters list
+            const optionsMap: Record<string, any[]> = {}
+            const parametersMap: Record<string, any> = {}
+            
+            if (groupOptions) {
+              groupOptions.forEach(opt => {
+                // Build options map
+                if (!optionsMap[opt.parameter_id]) {
+                  optionsMap[opt.parameter_id] = []
+                }
+                optionsMap[opt.parameter_id].push(opt.task_parameter_options)
+                
+                // Build parameters map
+                parametersMap[opt.parameter_id] = opt.task_parameters
+              })
+            }
+
+            // Convert parameters map to array for compatibility
+            const parameters = Object.entries(parametersMap).map(([paramId, param]) => ({
+              parameter_id: paramId,
+              task_parameter: param
+            }))
+
+            const preview = generateProcessedTemplatePreview(template.name_template, parameters, optionsMap)
+            
+            templateInfoMap[group.id] = {
+              hasTemplate: true,
+              parameters: parameters.map((tp: any) => ({
+                id: tp.parameter_id,
+                name: tp.task_parameter?.slug || 'unknown',
+                label: tp.task_parameter?.label || 'Unknown Parameter',
+                type: tp.task_parameter?.type || 'unknown',
+                position: 1
+              })),
+              preview
+            }
+          } else {
+            templateInfoMap[group.id] = { hasTemplate: false }
+          }
+        } catch (error) {
+          console.error('Error loading template info:', error)
+          templateInfoMap[group.id] = { hasTemplate: false }
+        }
+      } else {
+        templateInfoMap[group.id] = { hasTemplate: false }
+      }
+    }
+
+    setTemplateInfo(templateInfoMap)
+    console.log('✅ Templates refrescados exitosamente')
+  }
+
+  // Auto refresh when data changes (add this effect)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refreshTemplateInfo()
+    }, 1000) // Wait 1 second after data changes to refresh
+
+    return () => clearTimeout(timer)
   }, [taskGroups])
 
   // Generate processed template preview with real values

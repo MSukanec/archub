@@ -801,8 +801,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options'] }),
         queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options-loaded'] }),
         queryClient.invalidateQueries({ queryKey: ['adminTaskGroups'] }),
+        // Force refetch of all queries to ensure UI updates
+        queryClient.refetchQueries({ queryKey: ['task-groups'] }),
       ])
-      console.log('🔄 Cache completamente invalidado para actualización inmediata')
+      console.log('🔄 Cache completamente invalidado y refetch forzado para actualización inmediata')
     } catch (error) {
       console.error('❌ Error guardando opciones:', error)
     }
