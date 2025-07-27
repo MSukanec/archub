@@ -231,16 +231,6 @@ export default function AdminTaskParameters() {
         )
       },
       {
-        key: 'groups',
-        label: 'Grupos',
-        render: (value: TaskParameterOption) => (
-          <div className="flex flex-wrap gap-1">
-            <span className="text-xs text-muted-foreground">Por implementar</span>
-          </div>
-        ),
-        sortable: false
-      },
-      {
         key: 'actions',
         label: 'Acciones',
         render: (value: TaskParameterOption) => (

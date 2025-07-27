@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. GRUPOS COLUMN ELIMINATION FROM TASK PARAMETERS TABLE COMPLETED: Successfully removed GRUPOS column from AdminTaskParameters table to simplify interface - COMPLETED
+  • COLUMN REMOVED: Eliminated 'Grupos' column from parameter options table in AdminTaskParameters.tsx
+  • INTERFACE SIMPLIFIED: Table now shows only essential columns: Nombre (visible), Slug, and Acciones
+  • UI CLEANUP: Removed "Por implementar" placeholder text and unused group functionality
+  • TABLE OPTIMIZATION: Reduced column count improves readability and focuses on active functionality
 - July 27, 2025. PARAMETER BADGE DISPLAY ORDER SYSTEM IMPLEMENTED: Successfully implemented parameter ordering system in ParametricTaskBuilder component with automatic fallback order for legacy tasks - COMPLETED
   • ORDERED BADGE DISPLAY: Created getOrderedParameters() function to display parameter badges in correct order based on param_order field
   • STANDARD ORDER FALLBACK: Implemented automatic fallback order (tipo_tarea → tipo_elemento → tipo_ladrillo → tipo_mortero → aditivos) for legacy tasks with empty param_order
