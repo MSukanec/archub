@@ -342,7 +342,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
                       <ChevronDown className="w-3 h-3" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[200px] p-2 rounded-lg border border-[var(--popover-border)] bg-[var(--popover-bg)] shadow-lg">
+                  <PopoverContent className="w-[200px] p-2 rounded-lg bg-[var(--popover-bg)] shadow-lg border-0">
                     <div className="space-y-1">
                       {selection && (
                         <>
