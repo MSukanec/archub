@@ -907,24 +907,30 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         </div>
       )}
 
-      {/* Available Parameters to Add */}
+      {/* Add Parameter */}
       <div className="space-y-3">
         <Label>Agregar Parámetro</Label>
-        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-          {availableParameters
-            .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
-            .map((param) => (
-            <Button
-              key={param.id}
-              variant="outline"
-              size="sm"
-              onClick={() => addParameterById(param.id)}
-              className="justify-start h-8 text-xs"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              {param.label} ()
-            </Button>
-          ))}
+        <div className="flex space-x-2">
+          <div className="flex-1">
+            <Select value={selectedParameterId} onValueChange={setSelectedParameterId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar parámetro..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableParameters
+                  .filter(p => !templateParameters.some(tp => tp.parameter_id === p.id))
+                  .map((param) => (
+                  <SelectItem key={param.id} value={param.id}>
+                    {param.label} ({param.name})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={addParameter} disabled={!selectedParameterId} size="sm">
+            <Plus className="w-4 h-4 mr-1" />
+            Agregar
+          </Button>
         </div>
       </div>
 
