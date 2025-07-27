@@ -293,53 +293,42 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
             return (
               <div key={paramId} className="flex items-center gap-2">
-                {!selection ? (
-                  // Badge con dropdown integrado cuando no hay selección
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="outline"
-                        className="px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full"
-                      >
-                        <span>{parameter.label}</span>
-                        <ChevronDown className="w-3 h-3" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      <div className="p-1">
-                        {options.map(option => (
-                          <Button
-                            key={option.id}
-                            variant="ghost"
-                            className="w-full justify-start text-xs h-8"
-                            onClick={() => handleParameterSelect(paramId, option.id)}
-                          >
-                            {option.label}
-                          </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  // Badge con selección y opción de eliminar
-                  <div className="flex items-center gap-1">
-                    <Badge 
-                      variant="default"
-                      className="px-3 py-1.5 text-xs flex items-center gap-2"
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant={selection ? "default" : "outline"}
+                      className="px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full"
                     >
-                      <span>{parameter.label}</span>
-                      <button
-                        onClick={() => removeSelection(paramId)}
-                        className="hover:bg-white/20 rounded-sm p-0.5"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {selection.optionLabel}
-                    </Badge>
-                  </div>
-                )}
+                      <span>{selection ? selection.optionLabel : parameter.label}</span>
+                      <ChevronDown className="w-3 h-3" />
+                      {selection && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeSelection(paramId)
+                          }}
+                          className="hover:bg-white/20 rounded-sm p-0.5 ml-1"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[200px] p-0">
+                    <div className="p-1">
+                      {options.map(option => (
+                        <Button
+                          key={option.id}
+                          variant={selection?.optionId === option.id ? "secondary" : "ghost"}
+                          className="w-full justify-start text-xs h-8"
+                          onClick={() => handleParameterSelect(paramId, option.id)}
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             )
           })}
