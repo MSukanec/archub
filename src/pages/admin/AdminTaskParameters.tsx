@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Plus, Edit, Trash2, Eye, Building2 } from 'lucide-react';
+import { Settings, Plus, Edit, Trash2, Eye, Building2, List, TreePine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ export default function AdminTaskParameters() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name_asc');
   const [selectedParameterId, setSelectedParameterId] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('lista');
   
   // Global modal store
   const { openModal } = useGlobalModalStore();
@@ -298,6 +299,20 @@ export default function AdminTaskParameters() {
         onSearchChange={setSearchTerm}
         customFilters={renderCustomFilters()}
         showProjectSelector={false}
+        tabs={[
+          {
+            value: "lista",
+            label: "Lista",
+            icon: <List className="h-4 w-4" />
+          },
+          {
+            value: "arbol",
+            label: "Árbol",
+            icon: <TreePine className="h-4 w-4" />
+          }
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         primaryActionLabel="Agregar Opción"
         onPrimaryActionClick={() => {
           if (selectedParameter) {
@@ -330,29 +345,40 @@ export default function AdminTaskParameters() {
         } : undefined}
       />
       
+      {/* Tab Content */}
       <div className="space-y-6">
-        {filteredAndSortedParameters.length === 0 ? (
-          <EmptyState
-            icon={<Settings className="w-12 h-12 text-muted-foreground" />}
-            title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
-            description={searchTerm 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
-            }
-          />
-        ) : (
+        {activeTab === "lista" && (
           <>
-
-
-            {/* Parameter Values Table */}
-            {selectedParameter ? (
-              <ParameterValuesTable parameterId={selectedParameter.id} />
+            {filteredAndSortedParameters.length === 0 ? (
+              <EmptyState
+                icon={<Settings className="w-12 h-12 text-muted-foreground" />}
+                title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
+                description={searchTerm 
+                  ? 'Prueba ajustando los filtros de búsqueda' 
+                  : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
+                }
+              />
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                Selecciona un parámetro para ver sus opciones
-              </div>
+              <>
+                {/* Parameter Values Table */}
+                {selectedParameter ? (
+                  <ParameterValuesTable parameterId={selectedParameter.id} />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Selecciona un parámetro para ver sus opciones
+                  </div>
+                )}
+              </>
             )}
           </>
+        )}
+
+        {activeTab === "arbol" && (
+          <div className="text-center py-12 text-muted-foreground">
+            <TreePine className="w-16 h-16 mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-medium mb-2">Vista de Árbol</h3>
+            <p className="text-sm">Esta vista estará disponible próximamente</p>
+          </div>
         )}
       </div>
 
