@@ -26,6 +26,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { TaskParameterPosition, InsertTaskParameterPosition } from '@shared/schema';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -535,9 +536,14 @@ function ParameterNodeEditorContent() {
   // Función para editar un parámetro (abrir modal)
   const handleEditNode = useCallback((parameterId: string) => {
     console.log('✏️ Editando parámetro:', parameterId);
-    // TODO: Abrir modal de edición de parámetro
-    toast({ title: "Función próximamente", description: "La edición de parámetros estará disponible pronto" });
-  }, [toast]);
+    // Buscar el parámetro en los datos cargados
+    const parameterData = parametersData.find(item => item.parameter.id === parameterId);
+    if (parameterData) {
+      // Abrir el modal centralizado de edición de parámetros
+      const { openModal } = useGlobalModalStore.getState();
+      openModal('task-parameter', { parameter: parameterData.parameter, isEditing: true });
+    }
+  }, [parametersData]);
 
   // Función para borrar un nodo del canvas
   const handleDeleteNode = useCallback(async (nodeId: string) => {
