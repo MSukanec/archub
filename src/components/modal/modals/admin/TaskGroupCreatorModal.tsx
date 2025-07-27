@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -32,7 +32,7 @@ const useParameterOptions = (parameterId: string) => {
     queryKey: ['parameter-options', parameterId],
     queryFn: async () => {
       console.log('🔍 Obteniendo opciones para parámetro:', parameterId)
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('task_parameter_values')
         .select('id, name, label')
         .eq('parameter_id', parameterId)
@@ -136,7 +136,7 @@ function SortableParameterItem({ param, parameter, onRemove, selectedOptions, on
         </Badge>
       </div>
       
-      {parameter?.type === 'select' && options.length > 0 && (
+      {parameter?.type === 'select' && options && options.length > 0 && (
         <div className="flex-1 max-w-xs">
           <ComboBoxMultiSelect
             options={options}
@@ -201,23 +201,57 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     })
   )
 
-  // Generate preview function (como en TaskTemplateFormModal)
-  const generatePreview = () => {
-    const baseName = taskGroup?.name || 'Nueva tarea';
+  // Pre-load parameter options data using useMemo to avoid hook issues
+  const parameterOptionsData = useMemo(() => {
+    const optionsMap: Record<string, any[]> = {};
     
-    if (templateParameters.length === 0) {
-      return `${baseName}.`;
+    // This is a simplified approach - we'll track which parameters need options loaded
+    templateParameters?.forEach(tp => {
+      // For now, we'll just set empty arrays to prevent errors
+      optionsMap[tp.parameter_id] = [];
+    });
+    
+    return optionsMap;
+  }, [templateParameters]);
+
+  // Generate preview function with real sentence construction
+  const generatePreview = useMemo(() => {
+    // Use name_template from existing template or fallback
+    let template = existingTemplate?.name_template || `${taskGroup?.name || 'Nueva tarea'}.`;
+    
+    if (!templateParameters || templateParameters.length === 0) {
+      return template;
+    }
+
+    // Replace each {{param}} with generated text
+    templateParameters.forEach((tp) => {
+      const parameter = availableParameters?.find(p => p.id === tp.parameter_id);
+      if (!parameter) return;
+      
+      const placeholder = `{{${parameter.name}}}`;
+      
+      // Get selected options for this parameter
+      const selectedOptions = selectedOptionsMap?.[tp.parameter_id] || [];
+      
+      if (selectedOptions.length > 0) {
+        // Show that something is selected with a simple indicator
+        template = template.replace(placeholder, '[seleccionado]');
+      } else {
+        // No option selected, show placeholder
+        template = template.replace(placeholder, '[...]');
+      }
+    });
+    
+    // Add final period if missing
+    if (!template.endsWith('.')) {
+      template += '.';
     }
     
-    const parameterPlaceholders = templateParameters
-      .map(tp => {
-        const parameter = availableParameters.find(p => p.id === tp.parameter_id);
-        return `{{${parameter?.name || 'parámetro'}}}`;
-      })
-      .join(' ');
+    // Clean up extra spaces
+    template = template.replace(/\s+/g, ' ').trim();
     
-    return `${baseName} ${parameterPlaceholders}.`;
-  }
+    return template;
+  }, [existingTemplate?.name_template, taskGroup?.name, templateParameters, availableParameters, selectedOptionsMap]);
 
   // Handle options selection changes
   const handleOptionsChange = (parameterId: string, selectedOptions: string[]) => {
@@ -599,7 +633,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         <div className="space-y-3">
           <h4 className="font-medium text-sm text-muted-foreground">Vista Previa</h4>
           <div className="p-3 bg-background rounded border">
-            <p className="text-sm font-medium text-foreground">{generatePreview()}</p>
+            <p className="text-sm font-medium text-foreground">{generatePreview}</p>
           </div>
         </div>
       )}
