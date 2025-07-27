@@ -15,7 +15,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { TaskParameterDependencyManager } from '@/components/ui-custom/TaskParameterDependencyManager';
+import { ParameterNodeEditor } from '@/components/admin/tasks_parameters/ParameterNodeEditor';
 // Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 
 
@@ -375,7 +375,7 @@ export default function AdminTaskParameters() {
         )}
 
         {activeTab === "arbol" && (
-          <TaskParameterDependencyManager />
+          <ParameterNodeEditor />
         )}
       </div>
 
