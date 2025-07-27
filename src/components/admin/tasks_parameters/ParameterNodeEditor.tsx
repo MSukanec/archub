@@ -427,8 +427,16 @@ function ParameterNodeEditorContent() {
     const originalParameter = parametersData.find(item => item.parameter.id === parameterId);
     if (!originalParameter) return;
 
-    // Generar ID único para el nodo duplicado
-    const duplicateId = `${parameterId}-duplicate-${Date.now()}`;
+    // Generar UUID real para el nodo duplicado
+    const generateUUID = () => {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    };
+    
+    const duplicateId = generateUUID();
     
     // Encontrar posición para el nuevo nodo (al lado del original)
     const originalNode = nodes.find(n => n.id === parameterId);
@@ -441,7 +449,11 @@ function ParameterNodeEditorContent() {
       type: 'parameterNode',
       position: newPosition,
       data: {
-        parameter: originalParameter.parameter,
+        parameter: { 
+          ...originalParameter.parameter,
+          // Mantener referencia al parámetro original para identificar duplicados
+          original_id: originalParameter.parameter.id 
+        },
         options: originalParameter.options,
         visibleOptions: nodeVisibleOptions[parameterId] || [],
         onVisibleOptionsChange: (optionIds: string[]) => {
@@ -449,6 +461,14 @@ function ParameterNodeEditorContent() {
             ...prev,
             [duplicateId]: optionIds
           }));
+          // Guardar inmediatamente las opciones visibles
+          savePositionMutation.mutate({
+            parameter_id: duplicateId,
+            x: Math.round(newPosition.x),
+            y: Math.round(newPosition.y),
+            visible_options: optionIds,
+            original_parameter_id: originalParameter.parameter.id
+          });
         },
         onDuplicate: handleDuplicateNode,
         onEdit: handleEditNode,
@@ -457,8 +477,18 @@ function ParameterNodeEditorContent() {
     };
 
     setNodes(prev => [...prev, duplicateNode]);
-    toast({ title: "Parámetro duplicado", description: "Nueva visualización creada exitosamente" });
-  }, [parametersData, nodes, nodeVisibleOptions, toast]);
+    
+    // Guardar inmediatamente la posición del nodo duplicado
+    savePositionMutation.mutate({
+      parameter_id: duplicateId,
+      x: Math.round(newPosition.x),
+      y: Math.round(newPosition.y),
+      visible_options: nodeVisibleOptions[parameterId] || [],
+      original_parameter_id: originalParameter.parameter.id
+    });
+    
+    toast({ title: "Parámetro duplicado", description: "Nueva visualización creada y guardada exitosamente" });
+  }, [parametersData, nodes, nodeVisibleOptions, toast, savePositionMutation]);
 
   // Función para editar un parámetro (abrir modal)
   const handleEditNode = useCallback((parameterId: string) => {
