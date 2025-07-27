@@ -722,8 +722,11 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       form.handleSubmit(onSubmitStep1)()
     } else {
       // Step 2: Save parameter options using new system
-      await saveParameterOptions()
-      handleClose()
+      const success = await saveParameterOptions()
+      // Solo cerrar el modal si el guardado fue exitoso
+      if (success) {
+        handleClose()
+      }
     }
   }
 
@@ -755,7 +758,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       });
       
       console.log('⚠️ Guardado cancelado: parámetros sin opciones:', parameterNames);
-      return;
+      return false;
     }
 
     try {
@@ -832,8 +835,10 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         queryClient.refetchQueries({ queryKey: ['task-groups'] }),
       ])
       console.log('🔄 Cache completamente invalidado y refetch forzado para actualización inmediata')
+      return true; // Éxito
     } catch (error) {
       console.error('❌ Error guardando opciones:', error)
+      return false; // Error
     }
   }
 
