@@ -94,13 +94,19 @@ export function Selector({
           <div className="absolute top-full left-0 right-0 h-1 z-40" />
           
           <div 
-            className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg shadow-button-normal border overflow-hidden"
+            className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg shadow-button-normal border"
             style={{ 
               backgroundColor: 'var(--card-bg)',
-              borderColor: 'var(--card-border)'
+              borderColor: 'var(--card-border)',
+              maxHeight: '200px' // Límite de altura fijo
             }}
           >
-            <div className="py-1">
+            <div 
+              className="py-1 overflow-y-auto overflow-x-hidden"
+              style={{
+                maxHeight: '200px' // Scroll interno dentro del popover
+              }}
+            >
               {options.map((option) => (
                 <button
                   key={option.value}
@@ -109,7 +115,8 @@ export function Selector({
                   className={cn(
                     "w-full text-left px-4 py-2 text-sm font-medium transition-colors",
                     "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    value === option.value && "bg-[var(--button-ghost-hover-bg)]"
+                    value === option.value && "bg-[var(--button-ghost-hover-bg)]",
+                    "whitespace-nowrap" // Prevenir wrap de texto
                   )}
                 >
                   {option.label}
