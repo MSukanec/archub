@@ -309,11 +309,30 @@ const useSaveParameterPosition = () => {
 function ParameterNodeEditorContent() {
   const { data: parametersData = [], isLoading: parametersLoading } = useParametersWithOptions();
   const { data: dependencies = [], isLoading: dependenciesLoading } = useParameterDependencies();
-  const { data: savedPositions = [] } = useParameterPositions();
+  const { data: savedPositions = [], isLoading: positionsLoading } = useParameterPositions();
   
   const createDependencyMutation = useCreateDependency();
   const deleteDependencyMutation = useDeleteDependency();
   const savePositionMutation = useSaveParameterPosition();
+
+  // Debug: mostrar estado de carga de posiciones
+  useEffect(() => {
+    console.log('🔄 Estado de posiciones:', { positionsLoading, savedPositions: savedPositions.length });
+  }, [positionsLoading, savedPositions.length]);
+
+  // Botón de test para verificar que el guardado funciona
+  const testSavePosition = async () => {
+    if (parametersData.length > 0) {
+      const firstParam = parametersData[0];
+      console.log('🧪 Test: Guardando posición manual para:', firstParam.parameter.slug);
+      savePositionMutation.mutate({
+        parameter_id: firstParam.parameter.id,
+        x: 100,
+        y: 50,
+        visible_options: firstParam.options.slice(0, 3).map(opt => opt.id)
+      });
+    }
+  };
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -499,21 +518,30 @@ function ParameterNodeEditorContent() {
             
             // Guardar posiciones cuando los nodos se mueven
             changes.forEach((change) => {
-              if (change.type === 'position' && change.position && !change.dragging) {
-                const node = nodes.find(n => n.id === change.id);
-                if (node) {
-                  console.log('📍 Guardando posición de nodo:', {
-                    parameter_id: change.id,
-                    x: change.position.x,
-                    y: change.position.y,
-                    visible_options: nodeVisibleOptions[change.id] || []
-                  });
-                  savePositionMutation.mutate({
-                    parameter_id: change.id,
-                    x: change.position.x,
-                    y: change.position.y,
-                    visible_options: nodeVisibleOptions[change.id] || []
-                  });
+              console.log('🔄 Cambio de nodo:', change.type, 'dragging:', change.dragging, 'position:', !!change.position);
+              if (change.type === 'position') {
+                console.log('🔍 Evaluando condiciones: type=position ✅, position=' + !!change.position + ', dragging=' + change.dragging);
+                if (change.position && change.dragging === false) {
+                  console.log('✅ Condiciones cumplidas, buscando nodo...');
+                  const node = nodes.find(n => n.id === change.id);
+                  if (node) {
+                    console.log('📍 Guardando posición de nodo:', {
+                      parameter_id: change.id,
+                      x: Math.round(change.position.x),
+                      y: Math.round(change.position.y),
+                      visible_options: nodeVisibleOptions[change.id] || []
+                    });
+                    savePositionMutation.mutate({
+                      parameter_id: change.id,
+                      x: Math.round(change.position.x),
+                      y: Math.round(change.position.y),
+                      visible_options: nodeVisibleOptions[change.id] || []
+                    });
+                  } else {
+                    console.log('❌ No se encontró el nodo:', change.id);
+                  }
+                } else {
+                  console.log('❌ Condiciones no cumplidas: position=' + !!change.position + ', dragging=' + change.dragging);
                 }
               }
             });
