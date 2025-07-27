@@ -609,7 +609,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   }
 
   const saveParameterOptions = async () => {
-    if (!taskGroup?.id) return
+    if (!taskGroup?.id || !existingTemplate?.id) return
 
     console.log('💾 Guardando opciones con nuevo sistema para grupo:', taskGroup.id)
     console.log('📋 Opciones actuales:', selectedOptionsMap)
@@ -624,6 +624,20 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         }))
 
       console.log('📤 Enviando opciones al nuevo sistema:', parameterOptions)
+
+      // Get the current generated preview to save as name_template
+      const dynamicTemplate = generatePreview
+      console.log('🏗️ Actualizando name_template a:', dynamicTemplate)
+
+      // Update the template's name_template with the generated preview
+      if (supabase) {
+        await supabase
+          .from('task_templates')
+          .update({ name_template: dynamicTemplate })
+          .eq('id', existingTemplate.id)
+        
+        console.log('✅ Template actualizado en base de datos')
+      }
 
       await saveParameterOptionsMutation.mutateAsync({
         groupId: taskGroup.id,
