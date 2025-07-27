@@ -13,7 +13,7 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParameterOption } from '@/hooks/use-task-parameters-admin-clean';
+import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 
 // Form schema
 const taskParameterOptionSchema = z.object({

@@ -13,7 +13,7 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 
-import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin-clean';
+import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 // Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 

@@ -14,11 +14,11 @@ import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { useToast } from '@/hooks/use-toast';
 
-import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin-clean';
+import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
 import { useUnits } from '@/hooks/use-units';
 
 const taskParameterSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
+  slug: z.string().min(1, 'El slug es requerido'),
   label: z.string().min(1, 'La etiqueta es requerida'),
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
     required_error: 'El tipo es requerido' 
@@ -50,7 +50,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
     defaultValues: {
-      name: '',
+      slug: '',
       label: '',
       type: 'text',
       expression_template: '{value}',
@@ -61,7 +61,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
   useEffect(() => {
     if (parameter) {
       form.reset({
-        name: parameter.name || '',
+        slug: parameter.slug || '',
         label: parameter.label || '',
         type: parameter.type as any || 'text',
         expression_template: parameter.expression_template || '{value}',
@@ -143,7 +143,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                             .replace(/\s+/g, '-') // Replace spaces with hyphens
                             .replace(/-+/g, '-') // Replace multiple hyphens with single
                             .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-                          form.setValue('name', slug);
+                          form.setValue('slug', slug);
                         }
                       }}
                     />
@@ -155,7 +155,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
 
             <FormField
               control={form.control}
-              name="name"
+              name="slug"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Slug *</FormLabel>
