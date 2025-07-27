@@ -142,22 +142,22 @@ export default function AdminCategories() {
 
   const features = [
     {
-      icon: TreePine,
+      icon: <TreePine className="w-4 h-4" />,
       title: "Organización Jerárquica",
       description: "Estructura las categorías en múltiples niveles para una clasificación detallada de tareas."
     },
     {
-      icon: Tag,
+      icon: <Tag className="w-4 h-4" />,
       title: "Clasificación Avanzada", 
       description: "Sistema de categorización que permite organizar tipos de trabajo por especialidad y complejidad."
     },
     {
-      icon: Filter,
+      icon: <Filter className="w-4 h-4" />,
       title: "Búsqueda Inteligente",
       description: "Encuentra categorías específicas mediante filtros de texto que buscan en toda la jerarquía."
     },
     {
-      icon: Plus,
+      icon: <Plus className="w-4 h-4" />,
       title: "Gestión Completa",
       description: "Crea, edita y elimina categorías con validación automática de dependencias y estructura."
     }
@@ -181,8 +181,7 @@ export default function AdminCategories() {
       <div className="space-y-6">
         <ActionBarDesktop
           title="Gestión de Categorías de Tareas"
-          icon={TreePine}
-          onSearch={handleSearch}
+          icon={<TreePine className="w-5 h-5" />}
           features={features}
           primaryActionLabel="Nueva Categoría"
           onPrimaryActionClick={handleCreateCategory}

@@ -10,21 +10,6 @@ export interface TaskCategoryAdmin {
   position?: string;
   created_at: string;
   children?: TaskCategoryAdmin[];
-  taskGroups?: TaskGroupAdmin[];
-  template?: {
-    id: string;
-    name_template: string;
-    task_group_name?: string;
-  } | null;
-}
-
-export interface TaskGroupAdmin {
-  id: string;
-  name: string;
-  category_id: string;
-  template_id?: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface CreateTaskCategoryData {
@@ -102,7 +87,7 @@ export function useTaskCategoriesAdmin() {
         throw new Error('Supabase client not initialized');
       }
 
-      // Fetch categories with their templates
+      // Fetch categories only - simplified without groups and templates
       const { data: categories, error: categoriesError } = await supabase
         .from('task_categories')
         .select('*')
@@ -112,87 +97,29 @@ export function useTaskCategoriesAdmin() {
         throw categoriesError;
       }
 
-      // Fetch task groups with template_id field
-      const { data: taskGroups, error: taskGroupsError } = await supabase
-        .from('task_groups')
-        .select(`
-          id,
-          name,
-          category_id,
-          template_id,
-          created_at,
-          updated_at
-        `);
-
-      if (taskGroupsError) {
-        throw taskGroupsError;
-      }
-
-      // Fetch templates separately if needed
-      const { data: templates, error: templatesError } = await supabase
-        .from('task_templates')
-        .select('id, name_template, task_group_id');
-
-      if (templatesError) {
-        // Don't throw here, templates are optional
-      }
-
       // Build hierarchical structure
       const categoryMap = new Map();
       const rootCategories: TaskCategoryAdmin[] = [];
 
-      // First pass: create all categories with task groups and template info
+      // First pass: create all categories
       categories.forEach(category => {
-        // Find task groups for this category
-        const categoryTaskGroups = taskGroups?.filter(tg => tg.category_id === category.id) || [];
-        
-        // Convert task groups to TaskGroupAdmin format with template_id preservation
-        const taskGroupsForCategory: TaskGroupAdmin[] = categoryTaskGroups.map(tg => {
-          return {
-            id: tg.id,
-            name: tg.name,
-            category_id: tg.category_id,
-            template_id: tg.template_id, // This should be populated from database
-            created_at: tg.created_at,
-            updated_at: tg.updated_at,
-          };
-        });
-
-        // Check if category has templates (match templates with task groups)
-        const categoryTemplates = templates?.filter(t => 
-          categoryTaskGroups.some(tg => tg.id === t.task_group_id)
-        ) || [];
-        
-        let template = null;
-        if (categoryTemplates.length > 0) {
-          const firstTemplate = categoryTemplates[0];
-          const associatedTaskGroup = categoryTaskGroups.find(tg => tg.id === firstTemplate.task_group_id);
-          template = {
-            id: firstTemplate.id,
-            name_template: firstTemplate.name_template,
-            task_group_name: associatedTaskGroup?.name || ''
-          };
-        }
-        
-        const categoryWithTemplate: TaskCategoryAdmin = {
+        const categoryWithChildren: TaskCategoryAdmin = {
           ...category,
-          children: [],
-          taskGroups: taskGroupsForCategory,
-          template
+          children: []
         };
-        categoryMap.set(category.id, categoryWithTemplate);
+        categoryMap.set(category.id, categoryWithChildren);
       });
 
       // Second pass: build hierarchy
       categories.forEach(category => {
-        const categoryWithTemplate = categoryMap.get(category.id);
+        const categoryWithChildren = categoryMap.get(category.id);
         if (category.parent_id) {
           const parent = categoryMap.get(category.parent_id);
           if (parent) {
-            parent.children!.push(categoryWithTemplate);
+            parent.children!.push(categoryWithChildren);
           }
         } else {
-          rootCategories.push(categoryWithTemplate);
+          rootCategories.push(categoryWithChildren);
         }
       });
 
