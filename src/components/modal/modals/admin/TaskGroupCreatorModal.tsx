@@ -118,36 +118,25 @@ function SortableParameterItem({ param, parameter, onRemove, selectedOptions, on
     <div
       ref={setNodeRef}
       style={style}
-      className="flex flex-col space-y-3 p-3 bg-muted/30 rounded border"
+      className="flex items-center space-x-3 p-3 bg-muted/30 rounded border"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 flex-1">
-          <div
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing"
-          >
-            <GripVertical className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <div className="flex-1">
-            <p className="font-medium text-sm">{parameter?.label || 'Parámetro sin nombre'}</p>
-            <Badge variant="outline" className="text-xs mt-1">
-              {parameter?.type || 'N/A'}
-            </Badge>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onRemove(param.id)}
-          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </div>
+      
+      <div className="flex flex-col min-w-0">
+        <p className="font-medium text-sm">{parameter?.label || 'Parámetro sin nombre'}</p>
+        <Badge variant="outline" className="text-xs mt-1 w-fit">
+          {parameter?.type || 'N/A'}
+        </Badge>
       </div>
       
       {parameter?.type === 'select' && options.length > 0 && (
-        <div className="ml-7">
+        <div className="flex-1 max-w-xs">
           <ComboBoxMultiSelect
             options={options}
             values={selectedOptions}
@@ -157,6 +146,15 @@ function SortableParameterItem({ param, parameter, onRemove, selectedOptions, on
           />
         </div>
       )}
+      
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onRemove(param.id)}
+        className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
     </div>
   )
 }
