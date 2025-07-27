@@ -216,40 +216,55 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
         const initialSelections: ParameterSelection[] = [];
         const initialAvailableParams: string[] = [];
         
-        for (const [paramSlug, paramValue] of Object.entries(parsedParams)) {
-          const parameter = parameters.find(p => p.slug === paramSlug);
-          if (parameter) {
-            // Find the option that matches the value (try multiple approaches)
-            let option = allOptions.find(opt => 
-              opt.parameter_id === parameter.id && 
-              (opt.label === paramValue || opt.name === paramValue)
-            );
-            
-            // If not found, try case-insensitive search
-            if (!option) {
-              option = allOptions.find(opt => 
-                opt.parameter_id === parameter.id && 
-                (opt.label?.toLowerCase() === (paramValue as string)?.toLowerCase() || 
-                 opt.name?.toLowerCase() === (paramValue as string)?.toLowerCase())
-              );
-            }
-            
-            if (option) {
-              initialSelections.push({
-                parameterId: parameter.id,
-                optionId: option.id,
-                parameterSlug: parameter.slug,
-                parameterLabel: parameter.label,
-                optionName: option.name,
-                optionLabel: option.label
-              });
-              initialAvailableParams.push(parameter.id);
-              console.log('✅ Loaded parameter:', paramSlug, '→', paramValue);
-            } else {
-              console.log('❌ Option not found for:', paramSlug, '→', paramValue, 'in parameter:', parameter.id);
+        for (const [key, value] of Object.entries(parsedParams)) {
+          let parameter: TaskParameter | undefined;
+          let option: TaskParameterOption | undefined;
+          
+          // Check if the key is a parameter ID (UUID format)
+          if (key.length === 36 && key.includes('-')) {
+            // New format: key is parameter ID, value is option ID
+            parameter = parameters.find(p => p.id === key);
+            if (parameter && typeof value === 'string' && value.length === 36 && value.includes('-')) {
+              option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter.id);
             }
           } else {
-            console.log('❌ Parameter not found:', paramSlug);
+            // Legacy format: key is parameter slug, value is option label/name
+            parameter = parameters.find(p => p.slug === key);
+            if (parameter) {
+              // Find the option that matches the value (try multiple approaches)
+              option = allOptions.find(opt => 
+                opt.parameter_id === parameter.id && 
+                (opt.label === value || opt.name === value)
+              );
+              
+              // If not found, try case-insensitive search
+              if (!option) {
+                option = allOptions.find(opt => 
+                  opt.parameter_id === parameter.id && 
+                  (opt.label?.toLowerCase() === (value as string)?.toLowerCase() || 
+                   opt.name?.toLowerCase() === (value as string)?.toLowerCase())
+                );
+              }
+            }
+          }
+          
+          if (parameter && option) {
+            initialSelections.push({
+              parameterId: parameter.id,
+              optionId: option.id,
+              parameterSlug: parameter.slug,
+              parameterLabel: parameter.label,
+              optionName: option.name,
+              optionLabel: option.label
+            });
+            initialAvailableParams.push(parameter.id);
+            console.log('✅ Loaded parameter:', key, '→', value, `(${parameter.slug} → ${option.label})`);
+          } else {
+            if (!parameter) {
+              console.log('❌ Parameter not found:', key);
+            } else {
+              console.log('❌ Option not found for:', key, '→', value, 'in parameter:', parameter.id);
+            }
           }
         }
         

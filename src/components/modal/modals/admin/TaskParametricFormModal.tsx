@@ -96,10 +96,10 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
     setIsLoading(true)
     try {
-      // Construir objeto JSON con los valores de parámetros usando optionLabel
+      // Construir objeto JSON con los valores de parámetros usando IDs para resistir cambios de nombre
       const paramValues: Record<string, string> = {}
       selections.forEach(selection => {
-        paramValues[selection.parameterSlug] = selection.optionLabel
+        paramValues[selection.parameterId] = selection.optionId
       })
       
       console.log('💾 Saving param values:', paramValues);
