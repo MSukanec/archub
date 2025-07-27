@@ -1,41 +1,23 @@
 import React, { useState } from 'react';
-import { Plus, Package2, PackagePlus, Settings, Filter, X, Tag, TreePine, Eye, Zap } from 'lucide-react';
+import { Plus, Tag, Filter, X, TreePine } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-// AlertDialog components replaced with unified DeleteConfirmationModal
 import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { HierarchicalCategoryTree } from '@/components/ui-custom/HierarchicalCategoryTree';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
-import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin, TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
-import { useDeleteTaskGroup } from '@/hooks/use-task-groups';
+import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-// Task modals replaced with FormModalLayout components in global modal system
-
-// Import TaskGroup type since it's still used in handleEditTaskGroup
-export interface TaskGroup {
-  id: string;
-  name: string;
-  category_id: string;
-  created_at: string;
-  updated_at: string;
-}
 
 export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [templateFilter, setTemplateFilter] = useState<'all' | 'with-template' | 'without-template'>('all');
   
   // New modal system
   const { openModal } = useGlobalModalStore();
-  
-  // Template modal states migrated to global modal system
-  
-  // No need for delete confirmation states anymore - handled by global modal
 
   const { data: categories = [], isLoading, error, isError, refetch } = useTaskCategoriesAdmin();
   const { data: allCategories = [] } = useAllTaskCategories();
@@ -45,369 +27,234 @@ export default function AdminCategories() {
     console.error('❌ AdminCategories error:', error);
   }
 
-  // Auto-expand categories that have task groups (only on initial load)
+  // Auto-expand categories that have children (only on initial load)
   React.useEffect(() => {
     if (categories.length > 0 && expandedCategories.size === 0) {
       const categoriesToExpand = new Set<string>();
       
-      const checkForTaskGroups = (cats: TaskCategoryAdmin[]) => {
-        cats.forEach(cat => {
-          // If category has task groups, expand it
-          if (cat.taskGroups && cat.taskGroups.length > 0) {
-            categoriesToExpand.add(cat.id);
-          }
-          
-          // Also expand parent categories if they have children with task groups
+      const checkForChildren = (cats: TaskCategoryAdmin[]) => {
+        cats.forEach(cat => {          
+          // Expand parent categories if they have children
           if (cat.children && cat.children.length > 0) {
-            const hasChildrenWithTaskGroups = cat.children.some(child => 
-              child.taskGroups && child.taskGroups.length > 0
-            );
-            if (hasChildrenWithTaskGroups) {
-              categoriesToExpand.add(cat.id);
-            }
-            checkForTaskGroups(cat.children);
+            categoriesToExpand.add(cat.id);
+            checkForChildren(cat.children);
           }
         });
       };
       
-      checkForTaskGroups(categories);
+      checkForChildren(categories);
       
       if (categoriesToExpand.size > 0) {
         setExpandedCategories(categoriesToExpand);
       }
     }
-  }, [categories.length]); // Only depend on categories.length, not the full categories array
+  }, [categories, expandedCategories.size]);
 
-  // Preserve expanded state after data updates
-  React.useEffect(() => {
-    if (categories.length > 0 && expandedCategories.size > 0) {
-      // When categories update but we already have expanded state, 
-      // ensure newly created task groups still keep their parent expanded
-      const currentExpanded = new Set(expandedCategories);
-      let hasChanges = false;
-      
-      const checkForNewTaskGroups = (cats: TaskCategoryAdmin[]) => {
-        cats.forEach(cat => {
-          if (cat.taskGroups && cat.taskGroups.length > 0 && !currentExpanded.has(cat.id)) {
-            currentExpanded.add(cat.id);
-            hasChanges = true;
-          }
-          if (cat.children && cat.children.length > 0) {
-            checkForNewTaskGroups(cat.children);
-          }
-        });
-      };
-      
-      checkForNewTaskGroups(categories);
-      
-      if (hasChanges) {
-        setExpandedCategories(currentExpanded);
-      }
-    }
-  }, [categories]); // Monitor full categories for new task groups
-  const deleteCategoryMutation = useDeleteTaskCategory();
-  const deleteTaskGroupMutation = useDeleteTaskGroup();
+  const deleteTaskCategoryMutation = useDeleteTaskCategory();
 
-  // Calculate statistics
-  const calculateStats = (categories: TaskCategoryAdmin[]) => {
-    let totalCategories = 0;
-    let totalTaskGroups = 0;
-
-    const countRecursive = (cats: TaskCategoryAdmin[]) => {
-      cats.forEach(cat => {
-        totalCategories++;
-        
-        // Contar task groups
-        if (cat.taskGroups && cat.taskGroups.length > 0) {
-          totalTaskGroups += cat.taskGroups.length;
-        }
-        
-        if (cat.children && cat.children.length > 0) {
-          countRecursive(cat.children);
-        }
-      });
-    };
-
-    countRecursive(categories);
-    return { 
-      totalCategories, 
-      totalTaskGroups
-    };
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
   };
 
-  const stats = calculateStats(categories);
-
-  // Filter categories based on search and template filter
-  const filterCategories = (categories: TaskCategoryAdmin[], term: string, templateFilter: string): TaskCategoryAdmin[] => {
-    return categories.filter(category => {
-      // Search filter
-      const matchesSearch = !term || 
-        category.name.toLowerCase().includes(term.toLowerCase()) ||
-        category.code?.toLowerCase().includes(term.toLowerCase());
-      
-      // Template filter - NOW BASED ON TASK GROUPS
-      let matchesTemplate = true;
-      if (templateFilter !== 'all') {
-        // Calculate if category has task groups with/without templates
-        const hasTaskGroups = category.taskGroups && category.taskGroups.length > 0;
-        const hasTaskGroupsWithTemplates = hasTaskGroups && category.taskGroups.some(tg => tg.template_id);
-        const hasTaskGroupsWithoutTemplates = hasTaskGroups && category.taskGroups.some(tg => !tg.template_id);
-        
-        if (templateFilter === 'with-template') {
-          matchesTemplate = hasTaskGroupsWithTemplates;
-        } else if (templateFilter === 'without-template') {
-          matchesTemplate = hasTaskGroupsWithoutTemplates;
-        }
-      }
-      
-      // Check if children match filters
-      const hasMatchingChildren = category.children && 
-                                 filterCategories(category.children, term, templateFilter).length > 0;
-      
-      return (matchesSearch && matchesTemplate) || hasMatchingChildren;
-    }).map(category => ({
-      ...category,
-      children: category.children ? filterCategories(category.children, term, templateFilter) : undefined
-    }));
-  };
-
-  const filteredCategories = filterCategories(categories, searchTerm, templateFilter);
-
-  // Toggle category expansion
   const toggleCategoryExpansion = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  // Handle edit category
-  const handleEditCategory = (category: TaskCategoryAdmin) => {
-    openModal('task-category', {
-      editingCategory: category,
-      isEditing: true
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
     });
   };
 
-  // Handle delete category
   const handleDeleteCategory = (categoryId: string, categoryName: string) => {
     openModal('delete-confirmation', {
-      mode: 'simple',
-      title: '¿Eliminar categoría?',
-      description: 'Esta acción no se puede deshacer. La categoría y todas sus subcategorías serán eliminadas permanentemente.',
+      title: "Eliminar categoría",
+      itemName: categoryName,
+      warningMessage: "Esta acción eliminará permanentemente la categoría y todas sus subcategorías.",
       onConfirm: async () => {
         try {
-          await deleteCategoryMutation.mutateAsync(categoryId);
+          await deleteTaskCategoryMutation.mutateAsync(categoryId);
         } catch (error) {
           console.error('Error deleting category:', error);
+          throw error;
         }
       }
     });
   };
 
-  // Handle template action - DEPRECATED: solo para categorías finales (3 letras)
-  const handleTemplateAction = (category: TaskCategoryAdmin) => {
-    if (category.code && category.code.length === 3) {
-      openModal('task-template', {
-        categoryId: category.id,
-        categoryCode: category.code || '',
-        categoryName: category.name
-      });
-    }
+  const handleEditCategory = (categoryId: string) => {
+    openModal('task-category', { isEditing: true, categoryId });
   };
 
-
-
-  // Handle add task group
-  const handleAddTaskGroup = (category: TaskCategoryAdmin) => {
-    openModal('task-group', {
-      categoryId: category.id,
-      categoryName: category.name,
-      isEditing: false
-    });
+  const handleCreateCategory = () => {
+    openModal('task-category', { isEditing: true });
   };
 
-  // Handle edit task group
-  const handleEditTaskGroup = (taskGroup: TaskGroupAdmin, category: TaskCategoryAdmin) => {
-    openModal('task-group', {
-      categoryId: category.id,
-      categoryName: category.name,
-      taskGroup: taskGroup,
-      isEditing: true
-    });
-  };
+  // Filter categories based on search term
+  const filteredCategories = React.useMemo(() => {
+    if (!searchTerm) return categories;
 
-  // Handle delete task group
-  const handleDeleteTaskGroup = (taskGroupId: string, taskGroupName: string) => {
-    openModal('delete-confirmation', {
-      mode: 'simple',
-      title: '¿Eliminar grupo de tareas?',
-      description: 'Esta acción no se puede deshacer. El grupo de tareas será eliminado permanentemente.',
-      onConfirm: async () => {
-        try {
-          await deleteTaskGroupMutation.mutateAsync(taskGroupId);
-        } catch (error) {
-          console.error('Error deleting task group:', error);
+    const filterCategories = (cats: TaskCategoryAdmin[]): TaskCategoryAdmin[] => {
+      return cats.filter(cat => {
+        const matchesSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const hasMatchingChildren = cat.children && filterCategories(cat.children).length > 0;
+        
+        if (matchesSearch || hasMatchingChildren) {
+          return {
+            ...cat,
+            children: cat.children ? filterCategories(cat.children) : []
+          };
         }
-      }
-    });
+        
+        return false;
+      }).map(cat => ({
+        ...cat,
+        children: cat.children ? filterCategories(cat.children) : []
+      }));
+    };
+
+    return filterCategories(categories);
+  }, [categories, searchTerm]);
+
+  // Calculate statistics - simplified without templates and groups
+  const calculateStats = () => {
+    const flattenCategories = (cats: TaskCategoryAdmin[]): TaskCategoryAdmin[] => {
+      return cats.reduce((acc, cat) => {
+        acc.push(cat);
+        if (cat.children) {
+          acc.push(...flattenCategories(cat.children));
+        }
+        return acc;
+      }, [] as TaskCategoryAdmin[]);
+    };
+
+    const allFlatCategories = flattenCategories(categories);
+    
+    return {
+      totalCategorias: allFlatCategories.length,
+      categoriasPadre: categories.length,
+    };
   };
 
-  // Clear filters
-  const clearFilters = () => {
-    setSearchTerm('');
-    setTemplateFilter('all');
-  };
+  const stats = calculateStats();
 
-  // Features for ActionBar expansion
   const features = [
     {
-      icon: <TreePine className="w-5 h-5" />,
-      title: "Estructura Jerárquica",
-      description: "Organiza categorías en una estructura de árbol con niveles padre-hijo para mejor clasificación."
+      icon: TreePine,
+      title: "Organización Jerárquica",
+      description: "Estructura las categorías en múltiples niveles para una clasificación detallada de tareas."
     },
     {
-      icon: <Package2 className="w-5 h-5" />,
-      title: "Gestión de Grupos",
-      description: "Administra grupos de tareas dentro de cada categoría para organizar plantillas y elementos relacionados."
+      icon: Tag,
+      title: "Clasificación Avanzada", 
+      description: "Sistema de categorización que permite organizar tipos de trabajo por especialidad y complejidad."
     },
     {
-      icon: <Eye className="w-5 h-5" />,
-      title: "Vista Expandible",
-      description: "Navega fácilmente por categorías y subcategorías con controles de expansión intuitivos."
+      icon: Filter,
+      title: "Búsqueda Inteligente",
+      description: "Encuentra categorías específicas mediante filtros de texto que buscan en toda la jerarquía."
     },
     {
-      icon: <Zap className="w-5 h-5" />,
-      title: "Operaciones Rápidas",
-      description: "Crea, edita y elimina categorías y grupos con acciones rápidas desde la interfaz principal."
+      icon: Plus,
+      title: "Gestión Completa",
+      description: "Crea, edita y elimina categorías con validación automática de dependencias y estructura."
     }
   ];
 
-  // Header props
-  const headerProps = {
-    title: "Gestión de Categorías",
-    actions: []
-  };
-
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando categorías...</div>
+      <Layout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Cargando categorías...</p>
+          </div>
         </div>
       </Layout>
     );
   }
 
   return (
-    <>
-      <Layout headerProps={headerProps}>
-        {/* Action Bar Desktop */}
+    <Layout>
+      <div className="space-y-6">
         <ActionBarDesktop
-          title="Categorías de Tareas"
-          icon={<Tag className="w-5 h-5" />}
+          title="Gestión de Categorías de Tareas"
+          icon={TreePine}
+          onSearch={handleSearch}
           features={features}
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          showProjectSelector={false}
           primaryActionLabel="Nueva Categoría"
-          onPrimaryActionClick={() => {
-            openModal('task-category', {
-              editingCategory: null,
-              isEditing: false
-            });
-          }}
-          customActions={[
-            <Button 
-              key="quick-group"
-              variant="secondary"
-              onClick={() => {
-                openModal('task-group-creator', {});
-              }}
-            >
-              <PackagePlus className="h-4 w-4 mr-2" />
-              Crear Grupo Rápido
-            </Button>
-          ]}
+          onPrimaryActionClick={handleCreateCategory}
         />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* KPI Cards - Simplified */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Categorías</CardTitle>
-              <Package2 className="h-4 w-4 text-muted-foreground" />
+              <Tag className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCategories}</div>
+              <div className="text-2xl font-bold text-accent">{stats.totalCategorias}</div>
               <p className="text-xs text-muted-foreground">
-                Categorías creadas en total
+                Incluyendo subcategorías
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Grupos de Tareas</CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Categorías Principales</CardTitle>
+              <TreePine className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalTaskGroups}</div>
+              <div className="text-2xl font-bold text-accent">{stats.categoriasPadre}</div>
               <p className="text-xs text-muted-foreground">
-                Total de grupos de tareas
+                Categorías de primer nivel
               </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Categories Tree */}
-        <div className="space-y-2">
-          {filteredCategories.length === 0 ? (
-            <Card className="p-8">
-              <div className="text-center text-muted-foreground">
-                {searchTerm ? 'No se encontraron categorías que coincidan con la búsqueda' : 'No hay categorías creadas'}
-              </div>
-            </Card>
-          ) : (
-            <HierarchicalCategoryTree
-              categories={filteredCategories}
-              expandedCategories={expandedCategories}
-              onToggleExpanded={toggleCategoryExpansion}
-              onEdit={handleEditCategory}
-              onDelete={(categoryId) => {
-                const category = filteredCategories.find(c => c.id === categoryId);
-                handleDeleteCategory(categoryId, category?.name || '');
-              }}
-              onTemplate={handleTemplateAction}
-              onAddTaskGroup={handleAddTaskGroup}
-              onEditTaskGroup={handleEditTaskGroup}
-              onDeleteTaskGroup={(taskGroupId) => {
-                // Find task group name from categories
-                let taskGroupName = '';
-                filteredCategories.forEach(cat => {
-                  if (cat.taskGroups) {
-                    const tg = cat.taskGroups.find(tg => tg.id === taskGroupId);
-                    if (tg) taskGroupName = tg.name;
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TreePine className="w-5 h-5" />
+              Categorías de Tareas
+            </CardTitle>
+            <CardDescription>
+              Administra la estructura jerárquica de categorías para organizar tipos de trabajo
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {filteredCategories.length === 0 ? (
+              <div className="text-center py-12">
+                <TreePine className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                  {searchTerm ? 'No se encontraron categorías' : 'No hay categorías creadas'}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {searchTerm 
+                    ? 'Intenta con otros términos de búsqueda'
+                    : 'Comienza creando tu primera categoría de tareas'
                   }
-                });
-                handleDeleteTaskGroup(taskGroupId, taskGroupName);
-              }}
-
-            />
-          )}
-        </div>
-      </Layout>
-
-
-
-      {/* Template Modal now handled by global ModalFactory */}
-
-      {/* Task Group Modal now handled by global ModalFactory */}
-
-      {/* Delete confirmations are now handled by the global DeleteConfirmationModal through ModalFactory */}
-    </>
+                </p>
+              </div>
+            ) : (
+              <HierarchicalCategoryTree
+                categories={filteredCategories}
+                expandedCategories={expandedCategories}
+                onToggleExpansion={toggleCategoryExpansion}
+                onEdit={handleEditCategory}
+                onDelete={handleDeleteCategory}
+                searchTerm={searchTerm}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
   );
 }

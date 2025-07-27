@@ -148,28 +148,7 @@ export const task_parameter_option_group_items = pgTable("task_parameter_option_
   created_at: timestamp("created_at").defaultNow(),
 });
 
-// Task Templates System
-export const task_templates = pgTable("task_templates", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  code_prefix: text("code_prefix").notNull(),
-  name_template: text("name_template").notNull(),
-  category_id: uuid("category_id").notNull(),
-  action_id: uuid("action_id"),
-  created_at: timestamp("created_at").defaultNow(),
-});
-
-export const task_template_parameters = pgTable("task_template_parameters", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  template_id: uuid("template_id").notNull(),
-  parameter_id: uuid("parameter_id").notNull(),
-  option_group_id: uuid("option_group_id"),
-  is_required: boolean("is_required").default(false),
-  position: integer("position").notNull(),
-  role: text("role"),
-  expression_template: text("expression_template"),
-  created_at: timestamp("created_at").defaultNow(),
-});
+// Task Templates System - ELIMINADO (ya no se usa)
 
 // Task Parameter Dependencies System
 export const task_parameter_dependencies = pgTable("task_parameter_dependencies", {
@@ -209,15 +188,7 @@ export const insertTaskParameterOptionGroupItemSchema = createInsertSchema(task_
   created_at: true,
 });
 
-export const insertTaskTemplateSchema = createInsertSchema(task_templates).omit({
-  id: true,
-  created_at: true,
-});
-
-export const insertTaskTemplateParameterSchema = createInsertSchema(task_template_parameters).omit({
-  id: true,
-  created_at: true,
-});
+// Task Templates schemas eliminados
 
 export const insertTaskParameterDependencySchema = createInsertSchema(task_parameter_dependencies).omit({
   id: true,
@@ -274,10 +245,7 @@ export type InsertTaskParameter = z.infer<typeof insertTaskParameterSchema>;
 export type InsertTaskParameterOption = z.infer<typeof insertTaskParameterOptionSchema>;
 export type InsertTaskParameterOptionGroup = z.infer<typeof insertTaskParameterOptionGroupSchema>;
 export type InsertTaskParameterOptionGroupItem = z.infer<typeof insertTaskParameterOptionGroupItemSchema>;
-export type TaskTemplate = typeof task_templates.$inferSelect;
-export type TaskTemplateParameter = typeof task_template_parameters.$inferSelect;
-export type InsertTaskTemplate = z.infer<typeof insertTaskTemplateSchema>;
-export type InsertTaskTemplateParameter = z.infer<typeof insertTaskTemplateParameterSchema>;
+// Task Templates types eliminados
 export type TaskParameterDependency = typeof task_parameter_dependencies.$inferSelect;
 export type TaskParameterDependencyOption = typeof task_parameter_dependency_options.$inferSelect;
 export type InsertTaskParameterDependency = z.infer<typeof insertTaskParameterDependencySchema>;
