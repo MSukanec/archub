@@ -276,6 +276,7 @@ export default function AdminGeneratedTasks() {
           primaryActionLabel="Nueva Tarea Generada"
           onPrimaryActionClick={() => openModal('parametric-task', {})}
           customActions={[]}
+          showProjectSelector={false}
         />
 
 
