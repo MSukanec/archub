@@ -232,7 +232,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
               ...prev,
               [parameterId]: data
             }));
-            console.log(`✅ Opciones cargadas para ${parameterId}:`, data.length);
+            console.log(`✅ Opciones cargadas para ${parameterId}:`, data.length, data);
           }
         } catch (error) {
           console.error(`❌ Error cargando opciones para ${parameterId}:`, error);
@@ -303,18 +303,28 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         // Get the first selected option ID
         const selectedOptionId = selectedOptions[0];
         
-        // Por ahora usar una representación simplificada
-        const optionLabel = getParameterOptionLabel(tp.parameter_id, selectedOptionId);
+        // Obtener el label real de la opción seleccionada
+        const parameterOptions = parameterOptionsCache[tp.parameter_id] || [];
+        const selectedOption = parameterOptions.find(opt => opt.id === selectedOptionId);
         
-        if (parameter.expression_template) {
-          // Replace {value} in expression_template with option label
-          const generatedText = parameter.expression_template.replace('{value}', optionLabel);
+        if (selectedOption) {
+          // Aplicar expression_template o usar {value} como fallback
+          const expressionTemplate = parameter.expression_template || '{value}';
+          const generatedText = expressionTemplate.replace('{value}', selectedOption.label);
           template = template.replace(placeholder, generatedText);
-          console.log(`✅ Reemplazado ${placeholder} con "${generatedText}"`);
+          console.log(`✅ Reemplazado ${placeholder} con "${generatedText}" (label: "${selectedOption.label}", template: "${expressionTemplate}")`);
         } else {
-          // Fallback if no expression_template
-          template = template.replace(placeholder, optionLabel);
-          console.log(`✅ Reemplazado ${placeholder} con "${optionLabel}"`);
+          // Si las opciones aún no están cargadas, mostrar indicador de carga
+          const hasOptionsLoaded = parameterOptions.length > 0;
+          if (hasOptionsLoaded) {
+            // Opciones cargadas pero selección no encontrada
+            template = template.replace(placeholder, '[...]');
+            console.log(`⚠️ Reemplazado ${placeholder} con [...] (opción no encontrada)`);
+          } else {
+            // Opciones aún cargando
+            template = template.replace(placeholder, '[cargando...]');
+            console.log(`⏳ Reemplazado ${placeholder} con [cargando...] (opciones aún cargando)`);
+          }
         }
       } else {
         // No option selected, show placeholder
