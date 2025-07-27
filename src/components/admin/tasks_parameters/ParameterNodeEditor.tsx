@@ -19,6 +19,7 @@ import 'reactflow/dist/style.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -43,11 +44,19 @@ interface ParameterNodeData {
     id: string;
     label: string;
   }>;
+  visibleOptions: string[];
+  onVisibleOptionsChange: (optionIds: string[]) => void;
 }
 
 // Componente de nodo personalizado
 function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
-  const { parameter, options } = data;
+  const { parameter, options, visibleOptions, onVisibleOptionsChange } = data;
+  
+  const visibleOptionsList = options.filter(option => visibleOptions.includes(option.id));
+  const comboBoxOptions = options.map(option => ({
+    value: option.id,
+    label: option.label
+  }));
 
   return (
     <div className="relative">
@@ -56,12 +65,17 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
           <CardTitle className="text-sm font-semibold text-center">
             {parameter.label}
           </CardTitle>
-          <Badge variant="outline" className="text-xs self-center">
-            {parameter.slug}
-          </Badge>
+          <ComboBoxMultiSelect
+            options={comboBoxOptions}
+            value={visibleOptions}
+            onChange={onVisibleOptionsChange}
+            placeholder="Seleccionar opciones..."
+            className="text-xs w-full"
+            maxDisplay={2}
+          />
         </CardHeader>
         <CardContent className="pt-0 space-y-1">
-          {options.map((option) => (
+          {visibleOptionsList.map((option) => (
             <div
               key={option.id}
               className="relative flex items-center justify-between py-1 px-2 rounded bg-muted/50 text-xs"
@@ -251,6 +265,7 @@ function ParameterNodeEditorContent() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [nodeVisibleOptions, setNodeVisibleOptions] = useState<Record<string, string[]>>({});
 
   // Tipos de nodos - definidos fuera para evitar recreación
   const nodeTypes = useMemo(() => ({
@@ -260,6 +275,16 @@ function ParameterNodeEditorContent() {
   // Configurar nodos desde datos de parámetros
   useEffect(() => {
     if (parametersData.length > 0) {
+      // Inicializar opciones visibles si no existen
+      const newVisibleOptions = { ...nodeVisibleOptions };
+      parametersData.forEach((item) => {
+        if (!newVisibleOptions[item.parameter.id]) {
+          // Por defecto mostrar las primeras 5 opciones
+          newVisibleOptions[item.parameter.id] = item.options.slice(0, 5).map(opt => opt.id);
+        }
+      });
+      setNodeVisibleOptions(newVisibleOptions);
+
       const initialNodes: Node[] = parametersData.map((item, index) => ({
         id: item.parameter.id,
         type: 'parameterNode',
@@ -269,13 +294,20 @@ function ParameterNodeEditorContent() {
         },
         data: {
           parameter: item.parameter,
-          options: item.options
+          options: item.options,
+          visibleOptions: newVisibleOptions[item.parameter.id] || [],
+          onVisibleOptionsChange: (optionIds: string[]) => {
+            setNodeVisibleOptions(prev => ({
+              ...prev,
+              [item.parameter.id]: optionIds
+            }));
+          }
         },
       }));
 
       setNodes(initialNodes);
     }
-  }, [parametersData.length]);
+  }, [parametersData.length, nodeVisibleOptions]);
 
   // Configurar edges desde dependencias
   useEffect(() => {
