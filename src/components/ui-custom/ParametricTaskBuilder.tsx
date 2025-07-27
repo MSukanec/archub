@@ -143,24 +143,30 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
     // Para cada selección actual, buscar qué parámetros puede desbloquear
     selections.forEach(selection => {
+      console.log('🔍 Buscando dependencias para:', selection.parameterSlug, '→', selection.optionLabel)
+      
       const relevantDependencies = dependencies.filter(
         dep => dep.parent_parameter_id === selection.parameterId && 
                dep.parent_option_id === selection.optionId
       )
 
+      console.log('📋 Dependencias encontradas:', relevantDependencies.length)
+
       relevantDependencies.forEach(dep => {
+        console.log('🔗 Evaluando dependencia:', dep.child_parameter_id)
+        
         // Verificar si este parámetro hijo ya está seleccionado
         const alreadySelected = selections.some(s => s.parameterId === dep.child_parameter_id)
         if (!alreadySelected && !newAvailableParams.includes(dep.child_parameter_id)) {
-          // Verificar si hay opciones específicas permitidas para esta dependencia
-          const allowedOptions = dependencyOptions.filter(opt => opt.dependency_id === dep.id)
-          if (allowedOptions.length > 0) {
-            newAvailableParams.push(dep.child_parameter_id)
-          }
+          // Agregar directamente el parámetro hijo sin verificar opciones específicas
+          // Esto permite que aparezca el badge hijo
+          newAvailableParams.push(dep.child_parameter_id)
+          console.log('✅ Parámetro hijo agregado:', dep.child_parameter_id)
         }
       })
     })
 
+    console.log('🎯 Parámetros disponibles actualizados:', newAvailableParams)
     setAvailableParameters(newAvailableParams)
   }, [selections, parameters, dependencies, dependencyOptions])
 
@@ -301,21 +307,21 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
                     >
                       <span>{selection ? selection.optionLabel : parameter.label}</span>
                       <ChevronDown className="w-3 h-3" />
-                      {selection && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            removeSelection(paramId)
-                          }}
-                          className="hover:bg-white/20 rounded-sm p-0.5 ml-1"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[200px] p-0">
                     <div className="p-1">
+                      {selection && (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-xs h-8 text-red-600 hover:text-red-700"
+                          onClick={() => removeSelection(paramId)}
+                        >
+                          <X className="w-3 h-3 mr-2" />
+                          Limpiar selección
+                        </Button>
+                      )}
+                      {selection && <div className="border-t my-1" />}
                       {options.map(option => (
                         <Button
                           key={option.id}
