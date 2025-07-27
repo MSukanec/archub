@@ -61,7 +61,7 @@ export function useCreateGeneratedTask() {
       
       // Call the new centralized SQL function with param_order
       const { data: taskData, error: taskError } = await supabase
-        .rpc('archub_generate_task_parametric', {
+        .rpc('create_parametric_task', {
           input_param_values: payload.param_values,
           input_param_order: payload.param_order || []
         });
@@ -290,17 +290,26 @@ export function useUpdateGeneratedTask() {
     mutationFn: async (payload: {
       task_id: string;
       input_param_values: Record<string, any>;
+      param_order?: string[];
       input_is_system?: boolean;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       console.log('Updating generated task with data:', payload);
+      console.log('🎯 Updating param_order:', payload.param_order);
+      
+      const updateData: any = {
+        param_values: JSON.stringify(payload.input_param_values)
+      };
+      
+      // Solo incluir param_order si se proporciona
+      if (payload.param_order !== undefined) {
+        updateData.param_order = payload.param_order;
+      }
       
       const { data, error } = await supabase
         .from('task_parametric')
-        .update({
-          param_values: JSON.stringify(payload.input_param_values)
-        })
+        .update(updateData)
         .eq('id', payload.task_id)
         .select()
         .single();
