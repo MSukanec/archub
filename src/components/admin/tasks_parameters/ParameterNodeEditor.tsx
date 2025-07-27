@@ -347,16 +347,8 @@ function ParameterNodeEditorContent() {
 
   return (
     <div className="space-y-4">
-      {/* Información del editor */}
-      <div className="bg-muted/50 p-4 rounded-lg">
-        <h3 className="font-semibold mb-2">Editor Visual de Dependencias</h3>
-        <p className="text-sm text-muted-foreground">
-          Conecta opciones de parámetros para crear dependencias tipo "árbol genealógico".
-        </p>
-      </div>
-
       {/* Canvas de React Flow */}
-      <div className="h-[600px] border rounded-lg overflow-hidden bg-background">
+      <div className="h-[600px] border rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--card-bg)' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -367,7 +359,7 @@ function ParameterNodeEditorContent() {
           nodeTypes={nodeTypes}
           fitView
           attributionPosition="bottom-left"
-          className="bg-background"
+          style={{ backgroundColor: 'var(--card-bg)' }}
           deleteKeyCode={['Backspace', 'Delete']}
           minZoom={0.2}
           maxZoom={2}
