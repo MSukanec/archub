@@ -328,20 +328,47 @@ const useSaveParameterPosition = () => {
   return useMutation({
     mutationFn: async (position: InsertTaskParameterPosition) => {
       console.log('🔄 Intentando guardar en DB:', position);
-      const { data, error } = await supabase!
+      
+      // Primero verificar si ya existe un registro con este parameter_id
+      const { data: existing } = await supabase!
         .from('task_parameter_positions')
-        .upsert(position, { 
-          onConflict: 'parameter_id',
-          ignoreDuplicates: false 
-        })
-        .select();
+        .select('id')
+        .eq('parameter_id', position.parameter_id)
+        .single();
 
-      if (error) {
-        console.error('❌ Error guardando posición:', error);
-        throw error;
+      if (existing) {
+        // Si existe, actualizar
+        const { data, error } = await supabase!
+          .from('task_parameter_positions')
+          .update({
+            x: position.x,
+            y: position.y,
+            visible_options: position.visible_options,
+            updated_at: new Date().toISOString()
+          })
+          .eq('parameter_id', position.parameter_id)
+          .select();
+
+        if (error) {
+          console.error('❌ Error actualizando posición:', error);
+          throw error;
+        }
+        console.log('✅ Posición actualizada exitosamente:', data);
+        return data;
+      } else {
+        // Si no existe, crear nuevo
+        const { data, error } = await supabase!
+          .from('task_parameter_positions')
+          .insert(position)
+          .select();
+
+        if (error) {
+          console.error('❌ Error insertando posición:', error);
+          throw error;
+        }
+        console.log('✅ Posición insertada exitosamente:', data);
+        return data;
       }
-      console.log('✅ Posición guardada exitosamente:', data);
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
@@ -537,7 +564,9 @@ function ParameterNodeEditorContent() {
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
       console.log('🎯 Configurando nodos. Parámetros:', parametersData.length, 'Posiciones guardadas:', savedPositions.length);
-      const initialNodes: Node[] = parametersData.map((item, index) => {
+      
+      // Crear nodos originales
+      const originalNodes: Node[] = parametersData.map((item, index) => {
         const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
         
         const position = savedPosition ? { 
@@ -588,7 +617,53 @@ function ParameterNodeEditorContent() {
         };
       });
 
-      setNodes(initialNodes);
+      // Crear nodos duplicados desde posiciones guardadas
+      const duplicatedNodes: Node[] = savedPositions
+        .filter(pos => pos.parameter_id.includes('-duplicate-'))
+        .map(pos => {
+          // Extraer el parameter_id original del ID duplicado
+          const originalParameterId = pos.parameter_id.split('-duplicate-')[0];
+          const originalParameter = parametersData.find(item => item.parameter.id === originalParameterId);
+          
+          if (!originalParameter) return null;
+          
+          console.log(`📌 Nodo duplicado ${originalParameter.parameter.slug}:`, 'posición guardada', { x: pos.x, y: pos.y });
+          
+          return {
+            id: pos.parameter_id, // Usar el ID completo con -duplicate-
+            type: 'parameterNode',
+            position: { x: pos.x, y: pos.y },
+            data: {
+              parameter: originalParameter.parameter,
+              options: originalParameter.options,
+              visibleOptions: pos.visible_options || [],
+              onVisibleOptionsChange: (optionIds: string[]) => {
+                setNodeVisibleOptions(prev => ({
+                  ...prev,
+                  [pos.parameter_id]: optionIds
+                }));
+                
+                // Guardar opciones visibles para el nodo duplicado
+                savePositionMutation.mutate({
+                  parameter_id: pos.parameter_id,
+                  x: pos.x,
+                  y: pos.y,
+                  visible_options: optionIds
+                });
+              },
+              onDuplicate: handleDuplicateNode,
+              onEdit: handleEditNode,
+              onDelete: handleDeleteNode
+            },
+          };
+        })
+        .filter(node => node !== null) as Node[];
+
+      // Combinar nodos originales y duplicados
+      const allNodes = [...originalNodes, ...duplicatedNodes];
+      setNodes(allNodes);
+      
+      console.log(`✅ Nodos configurados: ${originalNodes.length} originales + ${duplicatedNodes.length} duplicados = ${allNodes.length} total`);
     }
   }, [parametersData.length, nodeVisibleOptions, savedPositions.length]);
 
@@ -685,24 +760,18 @@ function ParameterNodeEditorContent() {
           onNodesChange={onNodesChange}
           onNodeDragStop={(event, node) => {
             console.log('🎯 Nodo arrastrado y soltado:', node.id, 'nueva posición:', node.position);
-            
-            // Solo guardar posiciones para nodos originales, no duplicados
-            if (!node.id.includes('-duplicate-')) {
-              console.log('📍 Guardando posición de nodo:', {
-                parameter_id: node.id,
-                x: Math.round(node.position.x),
-                y: Math.round(node.position.y),
-                visible_options: nodeVisibleOptions[node.id] || []
-              });
-              savePositionMutation.mutate({
-                parameter_id: node.id,
-                x: Math.round(node.position.x),
-                y: Math.round(node.position.y),
-                visible_options: nodeVisibleOptions[node.id] || []
-              });
-            } else {
-              console.log('📍 Nodo duplicado movido (no se guarda en DB):', node.id);
-            }
+            console.log('📍 Guardando posición de nodo (original o duplicado):', {
+              parameter_id: node.id, // Usar el ID completo (con -duplicate- si es duplicado)
+              x: Math.round(node.position.x),
+              y: Math.round(node.position.y),
+              visible_options: nodeVisibleOptions[node.id] || []
+            });
+            savePositionMutation.mutate({
+              parameter_id: node.id, // Usar el ID completo para distinguir duplicados
+              x: Math.round(node.position.x),
+              y: Math.round(node.position.y),
+              visible_options: nodeVisibleOptions[node.id] || []
+            });
           }}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
