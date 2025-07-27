@@ -152,8 +152,9 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
 
   // Inicializar con "TIPO DE TAREA" al cargar
   useEffect(() => {
-    const tipoTareaParam = parameters.find(p => p.slug === 'tipo-de-tarea')
+    const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
     if (tipoTareaParam && availableParameters.length === 0) {
+      console.log('🎯 Parámetro inicial encontrado:', tipoTareaParam)
       setAvailableParameters([tipoTareaParam.id])
     }
   }, [parameters, availableParameters.length])
@@ -161,7 +162,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
   // Calcular parámetros disponibles basado en selecciones actuales
   useEffect(() => {
     if (selections.length === 0) {
-      const tipoTareaParam = parameters.find(p => p.slug === 'tipo-de-tarea')
+      const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
       if (tipoTareaParam) {
         setAvailableParameters([tipoTareaParam.id])
       }
@@ -178,7 +179,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
     })
 
     // Siempre incluir el primer parámetro si no está seleccionado
-    const tipoTareaParam = parameters.find(p => p.slug === 'tipo-de-tarea')
+    const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
     if (tipoTareaParam && !selections.some(s => s.parameterId === tipoTareaParam.id)) {
       newAvailableParams.push(tipoTareaParam.id)
     }
@@ -317,7 +318,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, init
 
   const getOptionsForParameter = (parameterId: string): TaskParameterOption[] => {
     // Si es el primer parámetro, mostrar todas sus opciones
-    const isFirstParam = parameters.find(p => p.id === parameterId)?.slug === 'tipo-de-tarea'
+    const isFirstParam = parameters.find(p => p.id === parameterId)?.slug === 'tipo_tarea'
     if (isFirstParam) {
       return allOptions.filter(opt => opt.parameter_id === parameterId)
     }
