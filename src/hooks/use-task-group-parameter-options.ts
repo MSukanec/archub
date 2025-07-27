@@ -9,6 +9,7 @@ export interface TaskGroupParameterOption {
   group_id: string
   parameter_id: string
   parameter_option_id: string
+  position: number
 }
 
 export function useTaskGroupParameterOptions(groupId?: string) {
@@ -21,6 +22,7 @@ export function useTaskGroupParameterOptions(groupId?: string) {
         .from('task_group_parameter_options')
         .select('*')
         .eq('group_id', groupId)
+        .order('position', { ascending: true })
 
       if (error) throw error
       return data as TaskGroupParameterOption[]
@@ -42,6 +44,7 @@ export function useSaveTaskGroupParameterOptions() {
       parameterOptions: Array<{
         parameter_id: string
         parameter_option_ids: string[]
+        position: number
       }>
     }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -61,11 +64,12 @@ export function useSaveTaskGroupParameterOptions() {
       }
 
       // Prepare new records to insert
-      const recordsToInsert = parameterOptions.flatMap(({ parameter_id, parameter_option_ids }) =>
+      const recordsToInsert = parameterOptions.flatMap(({ parameter_id, parameter_option_ids, position }) =>
         parameter_option_ids.map(parameter_option_id => ({
           group_id: groupId,
           parameter_id,
-          parameter_option_id
+          parameter_option_id,
+          position
         }))
       )
 

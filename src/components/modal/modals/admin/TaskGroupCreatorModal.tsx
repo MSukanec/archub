@@ -398,19 +398,21 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       if (template) {
         setExistingTemplate(template)
         
-        // Fetch group parameter options with parameter details
+        // Fetch group parameter options with parameter details, ordered by position
         const { data: groupOptions } = await supabase
           .from('task_group_parameter_options')
           .select(`
             parameter_id,
             parameter_option_id,
+            position,
             task_parameters!inner(*)
           `)
           .eq('group_id', taskGroupId)
+          .order('position', { ascending: true })
 
         console.log('📋 Opciones de parámetros de grupo cargadas:', groupOptions)
         
-        // Convert to templateParameters format for compatibility
+        // Convert to templateParameters format for compatibility, preserving original positions
         const uniqueParameters: Record<string, any> = {}
         if (groupOptions) {
           groupOptions.forEach((opt: any, index: number) => {
@@ -419,7 +421,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
                 id: `param_${index}`,
                 template_id: template.id,
                 parameter_id: opt.parameter_id,
-                position: index + 1,
+                position: opt.position || index + 1, // Use database position if available
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 task_parameter: opt.task_parameters
@@ -429,6 +431,7 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
         }
         
         const templateParams = Object.values(uniqueParameters)
+          .sort((a, b) => a.position - b.position) // Sort by position
         setTemplateParameters(templateParams)
       }
 
@@ -527,7 +530,20 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
 
     if (activeIndex !== overIndex) {
       const newParams = arrayMove(templateParameters, activeIndex, overIndex)
-      setTemplateParameters(newParams)
+      
+      // Update positions after drag
+      const updatedParams = newParams.map((param, index) => ({
+        ...param,
+        position: index + 1
+      }))
+
+      console.log('🔄 Parámetros reordenados con nuevas posiciones:', updatedParams.map(p => ({
+        id: p.id,
+        parameter_id: p.parameter_id,
+        position: p.position
+      })))
+
+      setTemplateParameters(updatedParams)
     }
   }
 
@@ -558,8 +574,16 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
   }
 
   const removeParameter = (paramId: string) => {
-    // Simply remove from local state - no database operation needed
-    setTemplateParameters(templateParameters.filter(p => p.id !== paramId))
+    // Remove from local state and update positions
+    const filteredParams = templateParameters.filter(p => p.id !== paramId)
+    
+    // Update positions after removal
+    const updatedParams = filteredParams.map((param, index) => ({
+      ...param,
+      position: index + 1
+    }))
+    
+    setTemplateParameters(updatedParams)
     
     // Also remove from selected options if exists
     const paramToRemove = templateParameters.find(p => p.id === paramId)
@@ -607,12 +631,14 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     console.log('📋 Opciones actuales:', selectedOptionsMap)
 
     try {
-      // Prepare data for new table structure
-      const parameterOptions = Object.entries(selectedOptionsMap)
-        .filter(([_, options]) => options.length > 0)
-        .map(([parameter_id, parameter_option_ids]) => ({
-          parameter_id,
-          parameter_option_ids
+      // Prepare data for new table structure with positions
+      const parameterOptions = templateParameters
+        .sort((a, b) => a.position - b.position)
+        .filter(tp => selectedOptionsMap[tp.parameter_id]?.length > 0)
+        .map((tp, index) => ({
+          parameter_id: tp.parameter_id,
+          parameter_option_ids: selectedOptionsMap[tp.parameter_id] || [],
+          position: index + 1
         }))
 
       console.log('📤 Enviando opciones al nuevo sistema:', parameterOptions)

@@ -360,5 +360,9 @@ TABLA TASK_GROUP_PARAMETER_OPTIONS:
   {
     "column_name": "parameter_option_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "position",
+    "data_type": "integer"
   }
 ]
