@@ -195,19 +195,11 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionLabel}`)
     })
 
-    // Obtener template base del primer parámetro (tipo-de-tarea)
-    const tipoTareaSelection = selections.find(s => 
-      parameters.find(p => p.id === s.parameterId)?.slug === 'tipo-de-tarea'
-    )
-
-    if (tipoTareaSelection) {
-      const tipoTareaParam = parameters.find(p => p.id === tipoTareaSelection.parameterId)
-      console.log('📋 Template encontrado:', tipoTareaParam?.expression_template)
-      
-      if (tipoTareaParam?.expression_template) {
-        // Usar la misma lógica que AdminTaskGroups - implementación exacta
-        let processedTemplate = tipoTareaParam.expression_template
-        let preview = ''
+    // Necesitamos obtener el template completo del task_template, no solo del parámetro
+    // Por ahora usar un template base que incluya todos los parámetros
+    const baseTemplate = "{{tipo-de-tarea}} {{tipo-de-elemento}} {{brick-type}} {{mortar_type}} {{aditivos}}."
+    let processedTemplate = baseTemplate
+    let preview = ''
         
         console.log(`🎯 Template base encontrado: ${processedTemplate}`)
 
@@ -230,6 +222,13 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
           // Reemplazar el placeholder en el template principal
           processedTemplate = processedTemplate.replace(placeholder, generatedText)
           console.log(`✨ Template después de reemplazar ${placeholder}: ${processedTemplate}`)
+        })
+
+        // Procesar parámetros no seleccionados - reemplazar con placeholders
+        const placeholderRegex = /{{([^}]+)}}/g
+        processedTemplate = processedTemplate.replace(placeholderRegex, (match, slug) => {
+          const param = parameters.find(p => p.slug === slug)
+          return param ? `[${param.label}]` : match
         })
 
         // Limpiar espacios extra
