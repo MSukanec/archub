@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. DATABASE SCHEMA STANDARDIZATION COMPLETED: Successfully renamed task_parameter_values to task_parameter_options and updated all schema references for consistency - COMPLETED
+  • TABLE RENAMED: Changed task_parameter_values to task_parameter_options in shared/schema.ts for better naming consistency
+  • SCHEMA TYPES UPDATED: Updated insertTaskParameterValueSchema to insertTaskParameterOptionSchema and related types
+  • COLUMN CONSISTENCY: Changed parameter_value_id to parameter_option_id in task_parameter_option_group_items table
+  • TASK GROUP CODES DISPLAYED: Added 3-letter group codes below task group names in AdminTaskGroups table with proper styling
+  • PARAMETER ADDITION FIXED: Corrected addParameter and removeParameter functions to work with new simplified architecture without database calls
 - July 27, 2025. TASK TEMPLATE PARAMETERS TABLE ELIMINATION AND ARCHITECTURE SIMPLIFICATION COMPLETED: Successfully removed task_template_parameters table and updated all references to use direct task_group_parameter_options queries - COMPLETED
   • ARCHITECTURE SIMPLIFIED: Eliminated intermediate task_template_parameters table - parameters now linked directly through task_group_parameter_options
   • ADMINtaskgroups UPDATED: Modified loadTemplateInfo to query task_group_parameter_options with task_parameters join instead of task_template_parameters
