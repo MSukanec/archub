@@ -195,66 +195,47 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionLabel}`)
     })
 
-    // Obtener template base del primer parámetro (tipo-de-tarea)
-    const tipoTareaSelection = selections.find(s => 
-      parameters.find(p => p.id === s.parameterId)?.slug === 'tipo-de-tarea'
-    )
+    // NUEVA LÓGICA: Construir frase concatenando expression_templates de parámetros seleccionados
+    const processedParts: string[] = []
+    
+    console.log('🎯 Construyendo frase sin template base, solo con expression_templates')
 
-    if (tipoTareaSelection) {
-      const tipoTareaParam = parameters.find(p => p.id === tipoTareaSelection.parameterId)
-      console.log('📋 Template encontrado:', tipoTareaParam?.expression_template)
+    // Procesar cada parámetro seleccionado y generar su parte
+    selections.forEach(selection => {
+      const parameter = parameters.find(p => p.id === selection.parameterId)
+      if (!parameter) return
+
+      console.log(`🔍 Procesando parámetro: ${parameter.slug}`)
       
-      if (tipoTareaParam?.expression_template) {
-        // Usar la misma lógica que AdminTaskGroups - implementación exacta
-        let processedTemplate = tipoTareaParam.expression_template
-        
-        console.log(`🎯 Template base encontrado: ${processedTemplate}`)
+      // Aplicar expression_template del parámetro o usar {value} como fallback
+      const expressionTemplate = parameter.expression_template || '{value}'
+      console.log(`📋 Expression template del parámetro: ${expressionTemplate}`)
+      
+      // Reemplazar {value} con el label de la opción seleccionada
+      const generatedText = expressionTemplate.replace('{value}', selection.optionLabel)
+      console.log(`🔄 Texto generado: ${generatedText}`)
+      
+      // Agregar a las partes procesadas
+      processedParts.push(generatedText)
+    })
 
-        // Procesar cada parámetro seleccionado
-        selections.forEach(selection => {
-          const parameter = parameters.find(p => p.id === selection.parameterId)
-          if (!parameter) return
-
-          const placeholder = `{{${parameter.slug}}}`
-          console.log(`🔍 Procesando parámetro: ${parameter.slug}`)
-          
-          // Aplicar expression_template del parámetro o usar {value} como fallback
-          const expressionTemplate = parameter.expression_template || '{value}'
-          console.log(`📋 Expression template del parámetro: ${expressionTemplate}`)
-          
-          // Reemplazar {value} con el label de la opción seleccionada
-          const generatedText = expressionTemplate.replace('{value}', selection.optionLabel)
-          console.log(`🔄 Texto generado: ${generatedText}`)
-          
-          // Reemplazar el placeholder en el template principal
-          processedTemplate = processedTemplate.replace(placeholder, generatedText)
-          console.log(`✨ Template después de reemplazar ${placeholder}: ${processedTemplate}`)
-        })
-
-        // CRÍTICO: También reemplazar {value} del template principal con el primer parámetro (tipo-de-tarea)
-        const tipoTareaValue = selections.find(s => 
-          parameters.find(p => p.id === s.parameterId)?.slug === 'tipo-de-tarea'
-        )?.optionLabel
-        
-        if (tipoTareaValue && processedTemplate.includes('{value}')) {
-          processedTemplate = processedTemplate.replace(/{value}/g, tipoTareaValue)
-          console.log(`🔧 Reemplazando {value} del template principal con: ${tipoTareaValue}`)
-          console.log(`📜 Template después del reemplazo principal: ${processedTemplate}`)
-        }
-
-        // Limpiar espacios extra
-        processedTemplate = processedTemplate.replace(/\s+/g, ' ').trim()
-        
-        console.log('✅ Vista previa final:', processedTemplate)
-        setTaskPreview(processedTemplate)
-        onPreviewChange?.(processedTemplate)
-        lastPreview = processedTemplate
-      } else {
-        console.log('❌ No se encontró expression_template')
-      }
-    } else {
-      console.log('❌ No se encontró selección de tipo-de-tarea')
+    // Unir todas las partes en una frase completa
+    let finalText = processedParts.join(' ')
+    
+    // Limpiar espacios extra y comas/puntos duplicados
+    finalText = finalText.replace(/\s+/g, ' ').trim()
+    finalText = finalText.replace(/,\s*,/g, ',') // Eliminar comas duplicadas
+    finalText = finalText.replace(/\.\s*\./g, '.') // Eliminar puntos duplicados
+    
+    // Asegurar que termine con punto si no tiene
+    if (finalText && !finalText.endsWith('.') && !finalText.endsWith(',')) {
+      finalText += '.'
     }
+    
+    console.log('✅ Vista previa final concatenada:', finalText)
+    setTaskPreview(finalText)
+    onPreviewChange?.(finalText)
+    lastPreview = finalText
   }, [selections, parameters, onPreviewChange])
 
   // Notificar cambios de selección al componente padre
