@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. REACT FLOW VISUAL PARAMETER DEPENDENCY EDITOR IMPLEMENTED: Complete replacement of Árbol tab with visual node-based dependency management system - COMPLETED
+  • VISUAL NODE EDITOR: Full React Flow implementation with ParameterNode components displaying parameters and options with connection handles
+  • AUTODESK-STYLE INTERFACE: Infinite canvas with zoom, scroll, dotted background, and professional node editor controls
+  • DATABASE INTEGRATION: Connections save successfully to task_parameter_dependencies table with proper parent/child relationships
+  • HANDLE SYSTEM: Source handles on each parameter option (right side) and target handle on parameter (left side) for tree-like connections
+  • REAL-TIME UPDATES: Visual connections update automatically when dependencies are created or deleted
+  • GRID LAYOUT: Parameters organized in 3-column grid layout for optimal visual organization
+  • DRAG AND DROP: Full node repositioning with persistent positions and ReactFlow controls integration
+  • DELETION SUPPORT: Users can delete connections using Delete/Backspace keys with database synchronization
 - July 27, 2025. DEFAULT PARAMETERS AUTOMATION IMPLEMENTED: TaskGroupCreatorModal now automatically includes "TIPO DE TAREA" and "TIPO DE ELEMENTO" parameters by default to save user time - COMPLETED
   • AUTOMATIC INITIALIZATION: New function initializeDefaultParameters() adds default parameters when creating new task groups
   • CORRECT ORDERING: "TIPO DE TAREA" always appears in position 1, "TIPO DE ELEMENTO" in position 2

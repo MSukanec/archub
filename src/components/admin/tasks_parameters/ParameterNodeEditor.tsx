@@ -322,6 +322,8 @@ function ParameterNodeEditorContent() {
     );
   }
 
+  console.log('DEBUG - Parameters:', parametersData.length, 'Dependencies:', dependencies.length, 'Nodes:', nodes.length, 'Edges:', edges.length);
+
   return (
     <div className="space-y-4">
       {/* Información del editor */}
@@ -348,10 +350,17 @@ function ParameterNodeEditorContent() {
           deleteKeyCode={['Backspace', 'Delete']}
           minZoom={0.2}
           maxZoom={2}
+          snapToGrid={true}
+          snapGrid={[15, 15]}
         >
           <Controls />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         </ReactFlow>
+      </div>
+      
+      {/* Debug info */}
+      <div className="text-xs text-muted-foreground">
+        Nodos: {nodes.length} | Conexiones: {edges.length} | Dependencias en BD: {dependencies.length}
       </div>
     </div>
   );
