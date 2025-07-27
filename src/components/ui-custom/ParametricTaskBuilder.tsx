@@ -59,6 +59,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [availableParameters, setAvailableParameters] = useState<string[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
+  const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
 
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({
@@ -206,7 +207,12 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       if (tipoTareaParam?.expression_template) {
         let preview = tipoTareaParam.expression_template
 
-        // Reemplazar todos los parámetros en el template
+        // Primero reemplazar {value} con el valor principal (normalmente tipo-de-tarea)
+        const mainValue = paramMap['tipo-de-tarea'] || 'valor'
+        preview = preview.replace(/{value}/g, mainValue.toLowerCase())
+        console.log(`🔄 Reemplazando {value} con ${mainValue.toLowerCase()}`)
+
+        // Luego reemplazar todos los parámetros específicos en el template
         Object.entries(paramMap).forEach(([slug, value]) => {
           const regex = new RegExp(`{{${slug}}}`, 'g')
           preview = preview.replace(regex, value.toLowerCase())
@@ -257,6 +263,9 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
     // Remover selección anterior del mismo parámetro si existe
     const updatedSelections = selections.filter(s => s.parameterId !== parameterId)
     setSelections([...updatedSelections, newSelection])
+
+    // Cerrar el popover
+    setOpenPopovers(prev => ({ ...prev, [parameterId]: false }))
   }
 
   const removeSelection = (parameterId: string) => {
@@ -320,7 +329,10 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
 
             return (
               <div key={paramId} className="flex items-center gap-2">
-                <Popover>
+                <Popover 
+                  open={openPopovers[paramId] || false}
+                  onOpenChange={(open) => setOpenPopovers(prev => ({ ...prev, [paramId]: open }))}
+                >
                   <PopoverTrigger asChild>
                     <Button 
                       variant={selection ? "default" : "outline"}
@@ -330,24 +342,29 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
                       <ChevronDown className="w-3 h-3" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[200px] p-0">
-                    <div className="p-1">
+                  <PopoverContent className="w-[200px] p-2 rounded-lg border border-[var(--popover-border)] bg-[var(--popover-bg)] shadow-lg">
+                    <div className="space-y-1">
                       {selection && (
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-xs h-8 text-red-600 hover:text-red-700"
-                          onClick={() => removeSelection(paramId)}
-                        >
-                          <X className="w-3 h-3 mr-2" />
-                          Limpiar selección
-                        </Button>
+                        <>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-xs h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={() => {
+                              removeSelection(paramId)
+                              setOpenPopovers(prev => ({ ...prev, [paramId]: false }))
+                            }}
+                          >
+                            <X className="w-3 h-3 mr-2" />
+                            Limpiar selección
+                          </Button>
+                          <div className="border-t border-[var(--popover-border)] my-1" />
+                        </>
                       )}
-                      {selection && <div className="border-t my-1" />}
                       {options.map(option => (
                         <Button
                           key={option.id}
                           variant={selection?.optionId === option.id ? "secondary" : "ghost"}
-                          className="w-full justify-start text-xs h-8"
+                          className="w-full justify-start text-xs h-8 hover:bg-[var(--accent-hover)]"
                           onClick={() => handleParameterSelect(paramId, option.id)}
                         >
                           {option.label}
