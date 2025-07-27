@@ -329,7 +329,7 @@ const useSaveParameterPosition = () => {
     mutationFn: async (position: InsertTaskParameterPosition) => {
       console.log('🔄 Intentando guardar en DB:', position);
       
-      // Primero verificar si ya existe un registro con este parameter_id
+      // Primero verificar si ya existe un registro con este parameter_id exacto
       const { data: existing } = await supabase!
         .from('task_parameter_positions')
         .select('id')
@@ -356,7 +356,7 @@ const useSaveParameterPosition = () => {
         console.log('✅ Posición actualizada exitosamente:', data);
         return data;
       } else {
-        // Si no existe, crear nuevo
+        // Si no existe, crear nuevo registro
         const { data, error } = await supabase!
           .from('task_parameter_positions')
           .insert(position)
