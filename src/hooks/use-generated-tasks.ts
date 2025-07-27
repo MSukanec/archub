@@ -41,12 +41,12 @@ export interface TaskMaterial {
 
 export function useGeneratedTasks() {
   return useQuery({
-    queryKey: ['task-generated-view'],
+    queryKey: ['task-parametric'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('task_generated_view')
+        .from('task_parametric')
         .select(`*`)
         .order('created_at', { ascending: false });
       

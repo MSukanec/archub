@@ -23,24 +23,9 @@ import { Plus, Edit, Trash2, CheckSquare, Clock, Target, Zap } from 'lucide-reac
 
 interface GeneratedTask {
   id: string
-  code: string
-  template_id: string
-  param_values: any
-  organization_id: string
   created_at: string
-  unit_id: string
-  task_group_id: string
-  task_group_name: string
-  category_id: string
-  category_name: string
-  category_code: string
-  subcategory_id: string
-  subcategory_name: string
-  subcategory_code: string
-  rubro_id: string
-  rubro_name: string
-  rubro_code: string
-  display_name: string
+  updated_at: string
+  param_values: any
 }
 
 export default function AdminGeneratedTasks() {
@@ -64,8 +49,8 @@ export default function AdminGeneratedTasks() {
       const newProcessedNames: Record<string, string> = {};
       
       for (const task of generatedTasks) {
-        // With the new template-free system, use the task code directly
-        newProcessedNames[task.id] = task.code || 'Tarea sin código';
+        // With the new template-free system, use the task ID 
+        newProcessedNames[task.id] = `Tarea ${task.id.slice(0, 8)}`;
       }
       
       setProcessedTaskNames(newProcessedNames);
@@ -78,7 +63,7 @@ export default function AdminGeneratedTasks() {
 
   // Helper function to get processed task name
   const getProcessedTaskName = (task: GeneratedTask): string => {
-    return processedTaskNames[task.id] || task.code || 'Tarea sin código';
+    return processedTaskNames[task.id] || `Tarea ${task.id.slice(0, 8)}`;
   }
 
 
@@ -87,22 +72,13 @@ export default function AdminGeneratedTasks() {
   const filteredGeneratedTasks = generatedTasks
     .filter((task: any) => {
       // Search filter
-      const matchesSearch = task.code?.toLowerCase().includes(searchValue.toLowerCase())
+      const matchesSearch = task.id?.toLowerCase().includes(searchValue.toLowerCase())
       
-      // Type filter
-      let matchesType = true
-      if (typeFilter === 'system') {
-        matchesType = task.is_system === true
-      } else if (typeFilter === 'user') {
-        matchesType = task.is_system === false
-      }
+      // Type filter is removed since task_parametric doesn't have is_system
       
-      return matchesSearch && matchesType
+      return matchesSearch
     })
     .sort((a: any, b: any) => {
-      if (sortBy === 'code') {
-        return a.code?.localeCompare(b.code) || 0
-      }
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
@@ -136,9 +112,17 @@ export default function AdminGeneratedTasks() {
   // Table columns configuration
   const columns = [
     {
+      key: 'id',
+      label: 'ID',
+      width: '20%',
+      render: (task: GeneratedTask) => (
+        <span className="text-sm font-mono">{task.id.slice(0, 8)}...</span>
+      )
+    },
+    {
       key: 'created_at',
       label: 'Fecha de Creación',
-      width: '5%',
+      width: '15%',
       render: (task: GeneratedTask) => (
         <span className="text-xs">
           {format(new Date(task.created_at), 'dd/MM/yyyy', { locale: es })}
@@ -146,41 +130,16 @@ export default function AdminGeneratedTasks() {
       )
     },
     {
-      key: 'code',
-      label: 'Código',
-      width: '10%',
+      key: 'param_values',
+      label: 'Parámetros',
       render: (task: GeneratedTask) => (
-        <span className="text-sm font-medium">{task.code}</span>
+        <span className="text-sm">{Object.keys(task.param_values || {}).length} parámetros</span>
       )
     },
-    {
-      key: 'name',
-      label: 'Tarea',
-      render: (task: GeneratedTask) => (
-        <span className="text-sm">{getProcessedTaskName(task)}</span>
-      )
-    },
-    {
-      key: 'category_name',
-      label: 'Categoría',
-      width: '15%',
-      render: (task: GeneratedTask) => (
-        <span className="text-sm">{task.category_name}</span>
-      )
-    },
-    {
-      key: 'task_group_name',
-      label: 'Grupo',
-      width: '15%',
-      render: (task: GeneratedTask) => (
-        <span className="text-sm">{task.task_group_name}</span>
-      )
-    },
-
     {
       key: 'actions',
       label: 'Acciones',
-      width: '5%',
+      width: '10%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center gap-1">
           <Button
@@ -215,8 +174,6 @@ export default function AdminGeneratedTasks() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las tareas</SelectItem>
-            <SelectItem value="system">Tareas de sistema</SelectItem>
-            <SelectItem value="user">Tareas de usuario</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -228,7 +185,6 @@ export default function AdminGeneratedTasks() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="created_at">Fecha de creación</SelectItem>
-            <SelectItem value="code">Código</SelectItem>
           </SelectContent>
         </Select>
       </div>
