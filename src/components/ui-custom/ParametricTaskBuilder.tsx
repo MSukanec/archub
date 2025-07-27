@@ -207,7 +207,6 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       if (tipoTareaParam?.expression_template) {
         // Usar la misma lógica que AdminTaskGroups - implementación exacta
         let processedTemplate = tipoTareaParam.expression_template
-        let preview = ''
         
         console.log(`🎯 Template base encontrado: ${processedTemplate}`)
 
@@ -232,14 +231,24 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
           console.log(`✨ Template después de reemplazar ${placeholder}: ${processedTemplate}`)
         })
 
+        // CRÍTICO: También reemplazar {value} del template principal con el primer parámetro (tipo-de-tarea)
+        const tipoTareaValue = selections.find(s => 
+          parameters.find(p => p.id === s.parameterId)?.slug === 'tipo-de-tarea'
+        )?.optionLabel
+        
+        if (tipoTareaValue && processedTemplate.includes('{value}')) {
+          processedTemplate = processedTemplate.replace(/{value}/g, tipoTareaValue)
+          console.log(`🔧 Reemplazando {value} del template principal con: ${tipoTareaValue}`)
+          console.log(`📜 Template después del reemplazo principal: ${processedTemplate}`)
+        }
+
         // Limpiar espacios extra
         processedTemplate = processedTemplate.replace(/\s+/g, ' ').trim()
         
-        preview = processedTemplate
-        console.log('✅ Vista previa final:', preview)
-        setTaskPreview(preview)
-        onPreviewChange?.(preview)
-        lastPreview = preview
+        console.log('✅ Vista previa final:', processedTemplate)
+        setTaskPreview(processedTemplate)
+        onPreviewChange?.(processedTemplate)
+        lastPreview = processedTemplate
       } else {
         console.log('❌ No se encontró expression_template')
       }
