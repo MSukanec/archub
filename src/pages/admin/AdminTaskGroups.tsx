@@ -86,61 +86,58 @@ export default function AdminTaskGroups() {
       for (const group of taskGroups) {
         if (group.template_id) {
           try {
-            // Get template with parameters and expression_template
+            // Get template basic info
             const { data: template } = await supabase
               .from('task_templates')
-              .select(`
-                *,
-                task_template_parameters (
-                  id,
-                  parameter_id,
-                  position,
-                  task_parameter:task_parameters (
-                    id,
-                    name,
-                    label,
-                    type,
-                    expression_template
-                  )
-                )
-              `)
+              .select('*')
               .eq('id', group.template_id)
               .single()
 
             if (template) {
-              const parameters = template.task_template_parameters || []
-              
-              // Load parameter options for this group  
+              // Load parameter options for this group with parameter details
               const { data: groupOptions } = await supabase
                 .from('task_group_parameter_options')
                 .select(`
                   parameter_id,
                   parameter_option_id,
-                  task_parameter_values!inner(id, name, label)
+                  task_parameter_values!inner(id, name, label),
+                  task_parameters!inner(id, name, label, type, expression_template)
                 `)
                 .eq('group_id', group.id)
 
-              // Create options map by parameter_id
+              // Create options map and parameters list
               const optionsMap: Record<string, any[]> = {}
+              const parametersMap: Record<string, any> = {}
+              
               if (groupOptions) {
                 groupOptions.forEach(opt => {
+                  // Build options map
                   if (!optionsMap[opt.parameter_id]) {
                     optionsMap[opt.parameter_id] = []
                   }
                   optionsMap[opt.parameter_id].push(opt.task_parameter_values)
+                  
+                  // Build parameters map
+                  parametersMap[opt.parameter_id] = opt.task_parameters
                 })
               }
+
+              // Convert parameters map to array for compatibility
+              const parameters = Object.entries(parametersMap).map(([paramId, param]) => ({
+                parameter_id: paramId,
+                task_parameter: param
+              }))
 
               const preview = generateProcessedTemplatePreview(template.name_template, parameters, optionsMap)
               
               templateInfoMap[group.id] = {
                 hasTemplate: true,
-                parameters: parameters.map(tp => ({
-                  id: tp.id,
+                parameters: parameters.map((tp: any) => ({
+                  id: tp.parameter_id,
                   name: tp.task_parameter?.name || 'unknown',
                   label: tp.task_parameter?.label || 'Unknown Parameter',
                   type: tp.task_parameter?.type || 'unknown',
-                  position: tp.position
+                  position: 1
                 })),
                 preview
               }

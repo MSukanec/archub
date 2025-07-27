@@ -398,23 +398,38 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
       if (template) {
         setExistingTemplate(template)
         
-        // Fetch template parameters (without option_group_id)
-        const { data: templateParams } = await supabase
-          .from('task_template_parameters')
+        // Fetch group parameter options with parameter details
+        const { data: groupOptions } = await supabase
+          .from('task_group_parameter_options')
           .select(`
-            id,
-            template_id,
             parameter_id,
-            position,
-            created_at,
-            updated_at,
-            task_parameter:task_parameters(*)
+            parameter_option_id,
+            task_parameters!inner(*)
           `)
-          .eq('template_id', template.id)
-          .order('position')
+          .eq('group_id', taskGroupId)
 
-        console.log('📋 Parámetros de plantilla cargados:', templateParams)
-        setTemplateParameters(templateParams || [])
+        console.log('📋 Opciones de parámetros de grupo cargadas:', groupOptions)
+        
+        // Convert to templateParameters format for compatibility
+        const uniqueParameters: Record<string, any> = {}
+        if (groupOptions) {
+          groupOptions.forEach((opt: any, index: number) => {
+            if (!uniqueParameters[opt.parameter_id]) {
+              uniqueParameters[opt.parameter_id] = {
+                id: `param_${index}`,
+                template_id: template.id,
+                parameter_id: opt.parameter_id,
+                position: index + 1,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                task_parameter: opt.task_parameters
+              }
+            }
+          })
+        }
+        
+        const templateParams = Object.values(uniqueParameters)
+        setTemplateParameters(templateParams)
       }
 
       // Fetch available parameters

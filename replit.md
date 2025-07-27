@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 27, 2025. TASK TEMPLATE PARAMETERS TABLE ELIMINATION AND ARCHITECTURE SIMPLIFICATION COMPLETED: Successfully removed task_template_parameters table and updated all references to use direct task_group_parameter_options queries - COMPLETED
+  • ARCHITECTURE SIMPLIFIED: Eliminated intermediate task_template_parameters table - parameters now linked directly through task_group_parameter_options
+  • ADMINtaskgroups UPDATED: Modified loadTemplateInfo to query task_group_parameter_options with task_parameters join instead of task_template_parameters
+  • MODAL UPDATED: TaskGroupCreatorModal now fetches parameters directly from task_group_parameter_options table
+  • QUERY OPTIMIZATION: Reduced database complexity by removing unnecessary template-parameter relationship layer
+  • DATA INTEGRITY MAINTAINED: All existing functionality preserved while simplifying database schema
+  • PROCESSED PREVIEW WORKING: Both modal and table continue showing processed text with real values instead of placeholders
 - July 25, 2025. ADMIN GENERATED TASKS ACTIONBAR INTEGRATION COMPLETED: Successfully implemented ActionBarDesktop system in admin generated tasks page following established patterns - COMPLETED
   • ACTIONBAR IMPLEMENTATION: Added complete ActionBarDesktop to AdminGeneratedTasks.tsx with title "Gestión de Tareas Generadas" and Target icon
   • FEATURE DESCRIPTIONS: Implemented 4 detailed features covering advanced task management, template system, visibility control, and temporal tracking
