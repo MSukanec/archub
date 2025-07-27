@@ -65,10 +65,11 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                   right: -8,
                   width: 12,
                   height: 12,
-                  backgroundColor: 'hsl(var(--accent))',
-                  border: '2px solid white',
+                  backgroundColor: '#10b981',
+                  border: '2px solid #ffffff',
                   borderRadius: '50%',
                   zIndex: 10,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 }}
               />
             </div>
@@ -86,10 +87,11 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
           top: '50%',
           width: 16,
           height: 16,
-          backgroundColor: 'hsl(var(--primary))',
-          border: '2px solid white',
+          backgroundColor: '#3b82f6',
+          border: '2px solid #ffffff',
           borderRadius: '50%',
           zIndex: 10,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         }}
       />
     </div>
@@ -274,7 +276,7 @@ function ParameterNodeEditorContent() {
         type: 'default',
         animated: true,
         style: {
-          stroke: 'hsl(var(--accent))',
+          stroke: '#10b981',
           strokeWidth: 3,
         },
         data: {
@@ -371,9 +373,9 @@ function ParameterNodeEditorContent() {
           maxZoom={2}
           snapToGrid={true}
           snapGrid={[15, 15]}
-          connectionLineStyle={{ stroke: 'hsl(var(--accent))', strokeWidth: 3 }}
+          connectionLineStyle={{ stroke: '#10b981', strokeWidth: 3 }}
           defaultEdgeOptions={{
-            style: { stroke: 'hsl(var(--accent))', strokeWidth: 3 },
+            style: { stroke: '#10b981', strokeWidth: 3 },
             type: 'smoothstep',
             animated: true,
           }}
