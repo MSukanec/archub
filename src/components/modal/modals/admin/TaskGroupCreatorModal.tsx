@@ -734,6 +734,30 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
     console.log('💾 Guardando opciones con nuevo sistema para grupo:', currentGroupId)
     console.log('📋 Opciones actuales:', selectedOptionsMap)
 
+    // Validar que todos los parámetros tengan al menos una opción seleccionada
+    const parametersWithoutOptions = templateParameters.filter(tp => {
+      const selectedOptions = selectedOptionsMap[tp.parameter_id] || [];
+      return selectedOptions.length === 0;
+    });
+
+    if (parametersWithoutOptions.length > 0) {
+      const parameterNames = parametersWithoutOptions
+        .map(tp => {
+          const param = availableParameters?.find(p => p.id === tp.parameter_id);
+          return param?.label || 'Parámetro desconocido';
+        })
+        .join(', ');
+      
+      toast({
+        variant: "destructive",
+        title: "Faltan opciones por seleccionar",
+        description: `Los siguientes parámetros no tienen opciones seleccionadas: ${parameterNames}`,
+      });
+      
+      console.log('⚠️ Guardado cancelado: parámetros sin opciones:', parameterNames);
+      return;
+    }
+
     try {
       // Prepare data for new table structure with positions
       const parameterOptions = templateParameters
