@@ -59,24 +59,60 @@ export function useCreateGeneratedTask() {
       console.log('🚀 Creating task with parameters:', payload.param_values);
       console.log('🎯 Parameter order:', payload.param_order);
       
-      // Call the new centralized SQL function with param_order
-      const { data: taskData, error: taskError } = await supabase
-        .rpc('create_parametric_task', {
-          input_param_values: payload.param_values,
-          input_param_order: payload.param_order || []
-        });
+      // Verificar si ya existe una tarea con esos parámetros exactos
+      const paramValuesString = JSON.stringify(payload.param_values);
+      const { data: existingTask, error: searchError } = await supabase
+        .from('task_parametric')
+        .select('*')
+        .eq('param_values', paramValuesString)
+        .single();
       
-      if (taskError) {
-        console.error('❌ Error calling archub_generate_task_parametric:', taskError);
-        throw taskError;
+      if (searchError && searchError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('❌ Error searching for existing task:', searchError);
+        throw searchError;
       }
       
-      if (!taskData || taskData.length === 0) {
-        throw new Error('No se pudo crear la tarea');
-      }
+      let taskResult;
       
-      const taskResult = taskData[0];
-      console.log('✅ Task created/found:', taskResult);
+      if (existingTask) {
+        // Task already exists, return it
+        console.log('✅ Found existing task:', existingTask);
+        taskResult = existingTask;
+      } else {
+        // Get the last code number
+        const { data: lastTask, error: lastCodeError } = await supabase
+          .from('task_parametric')
+          .select('code')
+          .order('code', { ascending: false })
+          .limit(1)
+          .single();
+        
+        let newCodeNumber = 1;
+        if (lastTask && lastTask.code && /^\d+$/.test(lastTask.code)) {
+          newCodeNumber = parseInt(lastTask.code) + 1;
+        }
+        
+        const newCode = newCodeNumber.toString().padStart(6, '0');
+        
+        // Create new task
+        const { data: newTask, error: createError } = await supabase
+          .from('task_parametric')
+          .insert({
+            code: newCode,
+            param_values: paramValuesString,
+            param_order: payload.param_order || []
+          })
+          .select()
+          .single();
+        
+        if (createError) {
+          console.error('❌ Error creating new task:', createError);
+          throw createError;
+        }
+        
+        console.log('✅ Created new task:', newTask);
+        taskResult = newTask;
+      }
       
       return { 
         new_task: taskResult, 
