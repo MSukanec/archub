@@ -207,26 +207,64 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange }: Pa
       if (tipoTareaParam?.expression_template) {
         let preview = tipoTareaParam.expression_template
 
-        // Primero reemplazar {value} con el valor principal (normalmente tipo-de-tarea)
-        const mainValue = paramMap['tipo-de-tarea'] || 'valor'
-        preview = preview.replace(/{value}/g, mainValue.toLowerCase())
-        console.log(`🔄 Reemplazando {value} con ${mainValue.toLowerCase()}`)
+        // Si el template es muy básico como "{value} de", construir frase completa
+        if (tipoTareaParam.expression_template === "{value} de") {
+          // Construir frase completa con todos los parámetros seleccionados
+          const parts: string[] = []
+          
+          // Agregar tipo de tarea
+          if (paramMap['tipo-de-tarea']) {
+            parts.push(paramMap['tipo-de-tarea'].toLowerCase())
+          }
+          
+          // Agregar "de" si hay más parámetros
+          if (Object.keys(paramMap).length > 1) {
+            parts.push('de')
+          }
+          
+          // Agregar tipo de elemento
+          if (paramMap['tipo-de-elemento']) {
+            parts.push(paramMap['tipo-de-elemento'].toLowerCase())
+          }
+          
+          // Agregar otros parámetros con "con" o "de"
+          Object.entries(paramMap).forEach(([slug, value]) => {
+            if (slug !== 'tipo-de-tarea' && slug !== 'tipo-de-elemento') {
+              if (slug.includes('tipo-') || slug.includes('brick-') || slug.includes('mortar')) {
+                parts.push('de')
+                parts.push(value.toLowerCase())
+              } else if (slug === 'aditivos') {
+                parts.push('con')
+                parts.push(value.toLowerCase())
+              } else {
+                parts.push('con')
+                parts.push(value.toLowerCase())
+              }
+            }
+          })
+          
+          preview = parts.join(' ')
+          console.log(`🏗️ Construyendo frase completa: ${preview}`)
+        } else {
+          // Template personalizado - usar lógica original
+          const mainValue = paramMap['tipo-de-tarea'] || 'valor'
+          preview = preview.replace(/{value}/g, mainValue.toLowerCase())
+          console.log(`🔄 Reemplazando {value} con ${mainValue.toLowerCase()}`)
 
-        // Luego reemplazar todos los parámetros específicos en el template
-        Object.entries(paramMap).forEach(([slug, value]) => {
-          const regex = new RegExp(`{{${slug}}}`, 'g')
-          preview = preview.replace(regex, value.toLowerCase())
-          console.log(`🔄 Reemplazando {{${slug}}} con ${value.toLowerCase()}`)
-        })
+          Object.entries(paramMap).forEach(([slug, value]) => {
+            const regex = new RegExp(`{{${slug}}}`, 'g')
+            preview = preview.replace(regex, value.toLowerCase())
+            console.log(`🔄 Reemplazando {{${slug}}} con ${value.toLowerCase()}`)
+          })
 
-        // Reemplazar parámetros no seleccionados con placeholders
-        const placeholderRegex = /{{([^}]+)}}/g
-        preview = preview.replace(placeholderRegex, (match, slug) => {
-          const param = parameters.find(p => p.slug === slug)
-          const placeholder = param ? `[${param.label}]` : match
-          console.log(`🔍 Placeholder: ${match} → ${placeholder}`)
-          return placeholder
-        })
+          const placeholderRegex = /{{([^}]+)}}/g
+          preview = preview.replace(placeholderRegex, (match, slug) => {
+            const param = parameters.find(p => p.slug === slug)
+            const placeholder = param ? `[${param.label}]` : match
+            console.log(`🔍 Placeholder: ${match} → ${placeholder}`)
+            return placeholder
+          })
+        }
 
         console.log('✅ Vista previa final:', preview)
         setTaskPreview(preview)
