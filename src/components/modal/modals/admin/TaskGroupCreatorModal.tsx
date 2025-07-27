@@ -762,9 +762,17 @@ export function TaskGroupCreatorModal({ modalData, onClose }: TaskGroupCreatorMo
 
       console.log('✅ Opciones guardadas exitosamente con nuevo sistema')
       
-      // Invalidate task groups cache to refresh table
-      await queryClient.invalidateQueries({ queryKey: ['task-groups'] })
-      console.log('🔄 Cache de task groups invalidado')
+      // Invalidate all relevant caches to refresh UI
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['task-groups'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-groups', currentGroupId] }),
+        queryClient.invalidateQueries({ queryKey: ['task-templates'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options-loaded'] }),
+        queryClient.invalidateQueries({ queryKey: ['adminTaskGroups'] }),
+      ])
+      console.log('🔄 Cache completamente invalidado para actualización inmediata')
     } catch (error) {
       console.error('❌ Error guardando opciones:', error)
     }

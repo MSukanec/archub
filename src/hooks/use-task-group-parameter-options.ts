@@ -95,10 +95,16 @@ export function useSaveTaskGroupParameterOptions() {
     onSuccess: (data, variables) => {
       console.log('✅ Opciones de parámetros guardadas exitosamente')
       
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ 
-        queryKey: ['task-group-parameter-options', variables.groupId] 
-      })
+      // Invalidate all relevant queries for complete UI refresh
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options', variables.groupId] }),
+        queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options-loaded'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-group-parameter-options-loaded', variables.groupId] }),
+        queryClient.invalidateQueries({ queryKey: ['task-groups'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-templates'] }),
+        queryClient.invalidateQueries({ queryKey: ['adminTaskGroups'] }),
+      ])
 
       toast({
         title: "Éxito",

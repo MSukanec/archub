@@ -129,11 +129,16 @@ export function useUpdateTaskGroup() {
       return data;
     },
     onSuccess: (data) => {
-      // Invalidate all related queries
-      queryClient.invalidateQueries({ queryKey: ['task-groups'] });
-      queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['task-groups', data.category_id] });
+      // Invalidate all related queries for complete UI refresh
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['task-groups'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-categories-admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-task-categories'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-groups', data.category_id] }),
+        queryClient.invalidateQueries({ queryKey: ['adminTaskGroups'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-templates'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-template-parameters'] }),
+      ]);
       toast({
         title: "Grupo de tareas actualizado",
         description: "El grupo de tareas se ha actualizado exitosamente.",
