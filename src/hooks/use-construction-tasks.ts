@@ -362,18 +362,7 @@ export function useUpdateConstructionTask() {
         .from('construction_tasks')
         .update(updateData)
         .eq('id', data.id)
-        .select(`
-          *,
-          task:task_parametric_view!inner (
-            id,
-            code,
-            display_name,
-            rubro_name,
-            category_name,
-            unit_id,
-            rubro_id
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) {
