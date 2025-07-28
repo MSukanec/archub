@@ -118,15 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 28, 2025. AUTOMATIC NAME RENDERED RECALCULATION AND PERIOD CONSISTENCY IMPLEMENTED: Successfully implemented automatic task name recalculation when parameters are updated and fixed period inconsistency between preview and database - COMPLETED
-  • AUTOMATIC RECALCULATION: When updating a parameter's expression_template, all existing task names are automatically recalculated in the database
-  • RECALCULATION TRIGGER: Added loop in useUpdateTaskParameter to update each task's param_values, triggering database name regeneration
-  • PERIOD CONSISTENCY FIXED: Modified renderTaskNameFromParams and renderTaskNameWithFallback to automatically add period at end of generated names
-  • PREVIEW ALIGNMENT: Database-generated names now match modal preview format with consistent period endings
-  • COMPREHENSIVE INVALIDATION: Added invalidation for generated-tasks and task-parametric-view queries to refresh all related data
-  • ENHANCED TOAST MESSAGES: Updated success messages to indicate both parameter and task updates
-  • FALLBACK IMPROVEMENTS: Enhanced fallback functions to maintain period consistency across all name generation paths
-  • DATABASE SYNCHRONIZATION: System now ensures all task names end with periods consistently between frontend preview and backend storage
 - July 28, 2025. UNIT AND CATEGORY PERSISTENCE BUG COMPLETELY FIXED: Successfully resolved issue where modal wasn't saving unit_id and category_id values to Supabase - COMPLETED
   • MUTACION CREACION CORREGIDA: Fixed useCreateTaskParameterOption to include unit_id and category_id in insert payload
   • MUTACION ACTUALIZACION CORREGIDA: Fixed useUpdateTaskParameterOption to include unit_id and category_id in update payload

@@ -28,14 +28,7 @@ export async function renderTaskNameFromParams(
       throw error;
     }
 
-    let renderedName = data as string;
-    
-    // Agregar punto al final si no lo tiene (consistente con vista previa)
-    if (renderedName && !renderedName.endsWith('.')) {
-      renderedName += '.';
-    }
-
-    return renderedName;
+    return data as string;
   } catch (error) {
     console.error('Failed to render task name from params:', error);
     throw error;
@@ -60,28 +53,14 @@ export async function renderTaskNameWithFallback(
     console.warn('RPC function failed, using fallback:', error);
     
     if (fallbackGenerator) {
-      let fallbackName = fallbackGenerator();
-      // Agregar punto al final si no lo tiene
-      if (fallbackName && !fallbackName.endsWith('.')) {
-        fallbackName += '.';
-      }
-      return fallbackName;
+      return fallbackGenerator();
     }
     
     // Default fallback: create a basic name from parameters
-    let paramNames = Object.entries(paramValues)
+    const paramNames = Object.entries(paramValues)
       .map(([key, value]) => value)
       .join(' ');
     
-    if (!paramNames) {
-      paramNames = 'Tarea sin nombre';
-    }
-    
-    // Agregar punto al final si no lo tiene
-    if (paramNames && !paramNames.endsWith('.')) {
-      paramNames += '.';
-    }
-    
-    return paramNames;
+    return paramNames || 'Tarea sin nombre';
   }
 }
