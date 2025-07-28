@@ -587,9 +587,7 @@ export default function FinancesAnalysis() {
                   </p>
                 </CardHeader>
                 <CardContent className="pb-2">
-                  <div className="h-72 flex items-center justify-center">
-                    <div className="text-sm text-muted-foreground">Gráfico de tendencias en desarrollo</div>
-                  </div>
+                  <ExpensesTreemapChart data={treemapData || []} isLoading={isLoading} />
                 </CardContent>
               </Card>
               
