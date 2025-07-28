@@ -60,28 +60,32 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         enabled: !!projectId && !!organizationId
       });
       
-      // Consultar construction_tasks para el proyecto específico con JOIN a task_parametric_view
-      const { data: constructionTasks, error } = await supabase
+      // Primero obtener las tareas de construcción del proyecto
+      const { data: constructionTasks, error: constructionError } = await supabase
         .from('construction_tasks')
-        .select(`
-          *,
-          task_parametric_view!inner (
-            id,
-            code,
-            name_rendered,
-            unit_id,
-            unit_name,
-            category_id,
-            category_name,
-            param_values,
-            param_order,
-            created_at,
-            updated_at
-          )
-        `)
+        .select('*')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
+
+      if (constructionError) {
+        console.error('Error fetching construction tasks:', constructionError);
+        throw constructionError;
+      }
+
+      if (!constructionTasks || constructionTasks.length === 0) {
+        console.log('No construction tasks found for project:', projectId);
+        return [];
+      }
+
+      // Obtener los IDs de las tareas para buscar en task_parametric_view
+      const taskIds = constructionTasks.map(ct => ct.task_id);
+      
+      // Consultar los detalles de las tareas en task_parametric_view
+      const { data: taskDetails, error } = await supabase
+        .from('task_parametric_view')
+        .select('*')
+        .in('id', taskIds);
         
       console.log('📊 CONSTRUCTION TASKS QUERY RESULT:', {
         projectId,
@@ -104,9 +108,17 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       // Debug: ver qué campos están llegando exactamente
       console.log('RAW CONSTRUCTION TASKS DATA SAMPLE:', JSON.stringify(constructionTasks?.[0], null, 2));
 
-      // Mapear datos de construction_tasks con task_parametric al formato esperado
+      // Crear un mapa de los detalles de tareas por ID para fácil acceso
+      const taskDetailsMap = new Map();
+      if (taskDetails) {
+        taskDetails.forEach(task => {
+          taskDetailsMap.set(task.id, task);
+        });
+      }
+
+      // Mapear datos de construction_tasks con task_parametric_view al formato esperado
       const mappedTasks: ConstructionTask[] = constructionTasks.map((item: any) => {
-        const taskData = item.task_parametric;
+        const taskData = taskDetailsMap.get(item.task_id);
         
         return {
           // Campos principales de construction_tasks
