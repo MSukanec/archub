@@ -104,9 +104,9 @@ export function ConstructionTaskFormModal({
       console.log('🔍 Cargando TODAS las tareas SIN FILTRAR');
       
       const { data: allTasks, error } = await supabase
-        .from('task_generated_view')
+        .from('task_parametric_view')
         .select('*')
-        .order('display_name', { ascending: true });
+        .order('name_rendered', { ascending: true });
       
       if (error) {
         console.error('❌ Error cargando tareas:', error);
@@ -144,7 +144,7 @@ export function ConstructionTaskFormModal({
 
   // Obtener rubros únicos para el filtro
   const rubroOptions = useMemo(() => {
-    const uniqueRubros = Array.from(new Set(tasks.map(task => task.rubro_name).filter(Boolean)));
+    const uniqueRubros = Array.from(new Set(tasks.map(task => task.category_name).filter(Boolean)));
     return uniqueRubros.map(rubro => ({ value: rubro, label: rubro }));
   }, [tasks]);
 
@@ -156,14 +156,13 @@ export function ConstructionTaskFormModal({
     
     // Filtro por rubro
     if (rubroFilter) {
-      filtered = filtered.filter(task => task.rubro_name === rubroFilter);
+      filtered = filtered.filter(task => task.category_name === rubroFilter);
     }
     
     // Filtro por búsqueda de texto
     if (searchQuery.trim()) {
       filtered = filtered.filter(task => 
-        task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.name_rendered?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.category_name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
@@ -467,10 +466,10 @@ export function ConstructionTaskFormModal({
                       {/* Task Name Column */}
                       <div>
                         <div className="text-sm leading-tight line-clamp-2">
-                          {task.display_name || 'Sin nombre'}
+                          {task.name_rendered || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span> - {task.category_name || 'Sin categoría'}
+                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.unit_name || 'Sin unidad'}
                         </div>
                       </div>
                     </div>
