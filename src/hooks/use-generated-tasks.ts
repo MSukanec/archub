@@ -128,7 +128,7 @@ export function useCreateGeneratedTask() {
             .from('task_parametric')
             .insert({
               code: newCode,
-              param_values: paramValuesString,
+              param_values: payload.param_values,
               param_order: payload.param_order || []
             })
             .select()
@@ -380,7 +380,7 @@ export function useUpdateGeneratedTask() {
       console.log('🎯 Updating param_order:', payload.param_order);
       
       const updateData: any = {
-        param_values: JSON.stringify(payload.input_param_values)
+        param_values: payload.input_param_values
       };
       
       // Solo incluir param_order si se proporciona

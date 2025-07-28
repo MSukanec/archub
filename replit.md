@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. DATA PERSISTENCE AND JSONB FORMAT COMPLETELY FIXED: Successfully resolved critical task editing and database format issues - COMPLETED
+  • JSONB FORMAT CORRECTED: Fixed param_values to be sent as native JSONB object instead of JSON.stringify() string to Supabase database
+  • MERGE VALUES LOGIC: Task editing now properly combines existing parameter values with new selections instead of replacing all values
+  • CACHE INVALIDATION ENHANCED: Added comprehensive query invalidation (7 queries) to useUpdateGeneratedTask matching creation function
+  • PARAMETER ORDER PRESERVED: Array param_order sent as native array instead of serialized string for proper database storage
+  • EXISTING DATA PROTECTED: When editing tasks, all unmodified parameters retain their original values while only changed selections are updated
 - July 28, 2025. PARAMETER ORDERING BUG FIXED: Successfully implemented intelligent parameter insertion system for handling new parameters in existing tasks - COMPLETED
   • SMART ORDER INSERTION: New parameters like "TIPO DE MURO" now automatically insert in correct position based on standardOrder instead of appearing at end
   • ENHANCED ORDER LOGIC: When editing existing tasks, system detects missing parameters and inserts them intelligently using position-aware algorithm
