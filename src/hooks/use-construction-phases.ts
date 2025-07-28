@@ -106,8 +106,7 @@ export function useCreateConstructionPhase() {
           .insert({
             name: phaseData.name,
             description: phaseData.description,
-            organization_id: phaseData.organizationId,
-            created_by: phaseData.createdBy
+            organization_id: phaseData.organizationId
           })
           .select()
           .single()
