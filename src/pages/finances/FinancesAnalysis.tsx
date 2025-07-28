@@ -286,9 +286,24 @@ export default function FinancesAnalysis() {
               groupBy="category"
               mode="construction"
               renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+                // Check if all items in group have same currency
+                const currencies = [...new Set(groupRows.map(item => item.currency_symbol))];
+                const hasMixedCurrencies = currencies.length > 1;
+                
+                if (currencyView === 'discriminado' && hasMixedCurrencies) {
+                  // Don't show totals for mixed currencies in discriminado mode
+                  return (
+                    <>
+                      <div className="col-span-1 truncate">{groupKey}</div>
+                      <div className="col-span-1 text-muted-foreground">-</div>
+                      <div className="col-span-1 text-muted-foreground">-</div>
+                    </>
+                  );
+                }
+                
+                // Calculate totals (safe for same currency or converted currencies)
                 const totalAmount = groupRows.reduce((sum, item) => sum + item.amount, 0);
                 const totalPercentage = groupRows.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2);
-                // Use the currency from the first item in the group for the total
                 const currencySymbol = groupRows[0]?.currency_symbol || 'ARS';
                 
                 return (
