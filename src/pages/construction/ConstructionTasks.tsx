@@ -374,6 +374,7 @@ export default function ConstructionTasks() {
         <FeatureIntroduction
           title="Listado de Tareas"
           icon={<CheckSquare className="w-5 h-5" />}
+          className="md:hidden"
           features={[
             {
               icon: <CheckSquare className="w-5 h-5" />,

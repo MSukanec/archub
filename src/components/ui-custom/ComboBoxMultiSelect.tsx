@@ -48,13 +48,13 @@ export function ComboBoxMultiSelect({
   };
 
   const getDisplayText = () => {
-    if (value.length === 0) {
+    if (!value || value.length === 0) {
       return placeholder;
     }
     
     if (value.length <= maxDisplay) {
       return value
-        .map((v) => options.find((opt) => opt.value === v)?.label)
+        .map((v) => options?.find((opt) => opt.value === v)?.label)
         .filter(Boolean)
         .join(", ");
     }
@@ -80,7 +80,7 @@ export function ComboBoxMultiSelect({
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>No se encontraron opciones.</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
-            {options.map((option) => (
+            {options?.map((option) => (
               <CommandItem
                 key={option.value}
                 value={option.label}
@@ -90,18 +90,18 @@ export function ComboBoxMultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value.includes(option.value) ? "opacity-100" : "opacity-0"
+                    value?.includes(option.value) ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {option.label}
               </CommandItem>
-            ))}
+            )) || []}
           </CommandGroup>
-          {value.length > 0 && (
+          {value && value.length > 0 && (
             <div className="border-t p-2">
               <div className="flex flex-wrap gap-1">
                 {value.slice(0, maxDisplay).map((v) => {
-                  const option = options.find((opt) => opt.value === v);
+                  const option = options?.find((opt) => opt.value === v);
                   return option ? (
                     <Badge
                       key={v}

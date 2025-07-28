@@ -89,7 +89,7 @@ export default function OrganizationPreferences() {
   // Save default currency mutation
   const saveDefaultCurrencyMutation = useMutation({
     mutationFn: async (currencyId: string) => {
-      if (!userData?.organization?.id) throw new Error('No organization found');
+      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
 
       // First, remove default from all currencies
       await supabase
@@ -115,7 +115,7 @@ export default function OrganizationPreferences() {
   // Save default wallet mutation
   const saveDefaultWalletMutation = useMutation({
     mutationFn: async (walletId: string) => {
-      if (!userData?.organization?.id) throw new Error('No organization found');
+      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
 
       // First, remove default from all wallets
       await supabase
@@ -141,7 +141,7 @@ export default function OrganizationPreferences() {
   // Add/remove secondary currencies
   const updateSecondaryCurrenciesMutation = useMutation({
     mutationFn: async (currencyIds: string[]) => {
-      if (!userData?.organization?.id) throw new Error('No organization found');
+      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
 
       // Get current organization currencies
       const { data: currentCurrencies } = await supabase
@@ -158,7 +158,7 @@ export default function OrganizationPreferences() {
         await supabase
           .from('organization_currencies')
           .delete()
-          .eq('organization_id', userData.organization.id)
+          .eq('organization_id', userData.organization.id!)
           .in('currency_id', toRemove);
       }
 
@@ -166,7 +166,7 @@ export default function OrganizationPreferences() {
       const toAdd = allSelectedIds.filter(id => !currentIds.includes(id));
       if (toAdd.length > 0) {
         const newRecords = toAdd.map(currencyId => ({
-          organization_id: userData.organization.id,
+          organization_id: userData.organization?.id!,
           currency_id: currencyId,
           is_active: true,
           is_default: currencyId === defaultCurrency,
@@ -186,7 +186,7 @@ export default function OrganizationPreferences() {
   // Add/remove secondary wallets
   const updateSecondaryWalletsMutation = useMutation({
     mutationFn: async (walletIds: string[]) => {
-      if (!userData?.organization?.id) throw new Error('No organization found');
+      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
 
       // Get current organization wallets
       const { data: currentWallets } = await supabase
@@ -203,7 +203,7 @@ export default function OrganizationPreferences() {
         await supabase
           .from('organization_wallets')
           .delete()
-          .eq('organization_id', userData.organization.id)
+          .eq('organization_id', userData.organization.id!)
           .in('wallet_id', toRemove);
       }
 
@@ -211,7 +211,7 @@ export default function OrganizationPreferences() {
       const toAdd = allSelectedIds.filter(id => !currentIds.includes(id));
       if (toAdd.length > 0) {
         const newRecords = toAdd.map(walletId => ({
-          organization_id: userData.organization.id,
+          organization_id: userData.organization?.id!,
           wallet_id: walletId,
           is_active: true,
           is_default: walletId === defaultWallet,
@@ -362,7 +362,6 @@ export default function OrganizationPreferences() {
       wide={false}
       headerProps={{
         title: "Preferencias",
-        showBackButton: false,
         description: "Configuración de preferencias de la organización"
       }}
     >
@@ -472,8 +471,8 @@ export default function OrganizationPreferences() {
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
                   }))}
-                  values={secondaryCurrencies}
-                  onValuesChange={handleSecondaryCurrenciesChange}
+                  value={secondaryCurrencies}
+                  onChange={handleSecondaryCurrenciesChange}
                   placeholder="Selecciona monedas secundarias"
                   searchPlaceholder="Buscar monedas..."
                 />
@@ -502,8 +501,8 @@ export default function OrganizationPreferences() {
                     value: wallet.id,
                     label: wallet.name
                   }))}
-                  values={secondaryWallets}
-                  onValuesChange={handleSecondaryWalletsChange}
+                  value={secondaryWallets}
+                  onChange={handleSecondaryWalletsChange}
                   placeholder="Selecciona billeteras secundarias"
                   searchPlaceholder="Buscar billeteras..."
                 />
