@@ -252,14 +252,20 @@ export function useCreateTaskParameterOption() {
     mutationFn: async (optionData: CreateTaskParameterOptionData) => {
       if (!supabase) throw new Error('Supabase client not available');
       
+      const insertData: any = {
+        parameter_id: optionData.parameter_id,
+        name: optionData.name,
+        label: optionData.label,
+        description: optionData.description
+      };
+      
+      // Add conditional fields if provided
+      if (optionData.unit_id) insertData.unit_id = optionData.unit_id;
+      if (optionData.category_id) insertData.category_id = optionData.category_id;
+
       const { data: option, error: optionError } = await supabase
         .from('task_parameter_options')
-        .insert([{
-          parameter_id: optionData.parameter_id,
-          name: optionData.name,
-          label: optionData.label,
-          description: optionData.description
-        }])
+        .insert([insertData])
         .select()
         .single();
 
@@ -297,14 +303,20 @@ export function useUpdateTaskParameterOption() {
     mutationFn: async ({ id, ...updateData }: UpdateTaskParameterOptionData) => {
       if (!supabase) throw new Error('Supabase client not available');
       
+      const updatePayload: any = {
+        parameter_id: updateData.parameter_id,
+        name: updateData.name,
+        label: updateData.label,
+        description: updateData.description
+      };
+      
+      // Add conditional fields if provided
+      if (updateData.unit_id) updatePayload.unit_id = updateData.unit_id;
+      if (updateData.category_id) updatePayload.category_id = updateData.category_id;
+
       const { data: option, error: optionError } = await supabase
         .from('task_parameter_options')
-        .update({
-          parameter_id: updateData.parameter_id,
-          name: updateData.name,
-          label: updateData.label,
-          description: updateData.description
-        })
+        .update(updatePayload)
         .eq('id', id)
         .select()
         .single();
@@ -378,6 +390,7 @@ export function useTaskParameterValues(parameterId: string) {
     queryKey: ['task-parameter-values', parameterId],
     queryFn: async () => {
       if (!parameterId) return [];
+      if (!supabase) throw new Error('Supabase client not available');
       
       const { data, error } = await supabase
         .from('task_parameter_values')
@@ -397,6 +410,8 @@ export function useAllTaskParameterValues() {
   return useQuery({
     queryKey: ['all-task-parameter-values'],
     queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not available');
+      
       const { data, error } = await supabase
         .from('task_parameter_values')
         .select(`

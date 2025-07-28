@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. UNIT AND CATEGORY PERSISTENCE BUG COMPLETELY FIXED: Successfully resolved issue where modal wasn't saving unit_id and category_id values to Supabase - COMPLETED
+  • MUTACION CREACION CORREGIDA: Fixed useCreateTaskParameterOption to include unit_id and category_id in insert payload
+  • MUTACION ACTUALIZACION CORREGIDA: Fixed useUpdateTaskParameterOption to include unit_id and category_id in update payload
+  • CONDICIONAL FIELDS: Both mutations only send unit_id/category_id when values are provided, avoiding null field issues
+  • INTERFACE TYPESCRIPT: Added unit_id and category_id as optional fields to TaskParameterOption, CreateTaskParameterOptionData, and UpdateTaskParameterOptionData
+  • TABLE DISPLAY ENHANCED: AdminTaskParameters table now shows UNIDAD and CATEGORIA columns with proper badge styling for "TIPO DE TAREA" parameter only
+  • SUPABASE PERSISTENCE: Modal form values for CATEGORIA and UNIDAD now properly save to database when editing/creating parameter options
 - July 28, 2025. DATA PERSISTENCE AND JSONB FORMAT COMPLETELY FIXED: Successfully resolved critical task editing and database format issues - COMPLETED
   • JSONB FORMAT CORRECTED: Fixed param_values to be sent as native JSONB object instead of JSON.stringify() string to Supabase database
   • MERGE VALUES LOGIC: Task editing now properly combines existing parameter values with new selections instead of replacing all values
