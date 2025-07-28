@@ -13,6 +13,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
+import ConstructionTaskCard from '@/components/cards/ConstructionTaskCard'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -485,6 +486,14 @@ export default function ConstructionTasks() {
               isLoading={isLoading}
               mode="construction"
               groupBy={'groupKey'}
+              renderCard={(task: any) => (
+                <ConstructionTaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={handleEditTask}
+                  onDelete={(taskToDelete) => handleDeleteTask(taskToDelete.id)}
+                />
+              )}
               renderGroupHeader={(groupKey: string, groupRows: any[]) => {
                 if (groupingType === 'tasks') {
                   // Para agrupación por rubros y tareas, calcular suma de cantidades
