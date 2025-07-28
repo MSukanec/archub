@@ -458,6 +458,7 @@ function ParameterNodeEditorContent() {
   const { setViewport, getViewport } = useReactFlow();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { openModal } = useGlobalModalStore();
 
   // Debug: mostrar estado de carga de posiciones
   useEffect(() => {
@@ -957,8 +958,6 @@ function ParameterNodeEditorContent() {
   }
 
   console.log('DEBUG - Parameters:', parametersData.length, 'Dependencies:', dependencies.length, 'Nodes:', nodes.length, 'Edges:', edges.length);
-
-  const { openModal } = useGlobalModalStore();
 
   return (
     <div className="space-y-4">
