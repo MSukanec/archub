@@ -61,6 +61,8 @@ interface ActionBarDesktopProps {
     current?: number
     functionName?: string
   }
+  secondaryActionLabel?: string
+  onSecondaryActionClick?: () => void
   customActions?: React.ReactNode[]
   budgetSelector?: BudgetSelectorProps
   parameterSelector?: ParameterSelectorProps
@@ -91,6 +93,8 @@ export function ActionBarDesktop({
   primaryActionLabel,
   onPrimaryActionClick,
   primaryActionRestriction,
+  secondaryActionLabel,
+  onSecondaryActionClick,
   customActions = [],
   budgetSelector,
   parameterSelector,
@@ -115,7 +119,8 @@ export function ActionBarDesktop({
     onClearFilters || // Clear filters
     customActions.length > 0 || // Custom actions
     onTodayClick || // Today button
-    (primaryActionLabel && onPrimaryActionClick) // Primary action
+    (primaryActionLabel && onPrimaryActionClick) || // Primary action
+    (secondaryActionLabel && onSecondaryActionClick) // Secondary action
   )
 
   return (
@@ -391,6 +396,16 @@ export function ActionBarDesktop({
           >
             <CalendarDays className="w-4 h-4 mr-1" />
             Hoy
+          </Button>
+        )}
+
+        {/* Secondary Action Button */}
+        {secondaryActionLabel && onSecondaryActionClick && (
+          <Button
+            variant="secondary"
+            onClick={onSecondaryActionClick}
+          >
+            {secondaryActionLabel}
           </Button>
         )}
 

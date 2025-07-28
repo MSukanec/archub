@@ -388,10 +388,10 @@ export default function ConstructionTasks() {
           showGrouping
           groupingType={groupingType}
           onGroupingChange={setGroupingType}
-          primaryActionLabel={activeTab === "tasks" ? "Agregar Tareas en Masa" : "Crear Fase"}
-          onPrimaryActionClick={activeTab === "tasks" ? handleAddTask : handleAddPhase}
-          secondaryActionLabel={activeTab === "tasks" ? "Agregar Tarea" : undefined}
-          onSecondaryActionClick={activeTab === "tasks" ? handleAddSingleTask : undefined}
+          primaryActionLabel={activeTab === "tasks" ? "Agregar Tarea" : "Crear Fase"}
+          onPrimaryActionClick={activeTab === "tasks" ? handleAddSingleTask : handleAddPhase}
+          secondaryActionLabel={activeTab === "tasks" ? "Agregar Tareas en Masa" : undefined}
+          onSecondaryActionClick={activeTab === "tasks" ? handleAddTask : undefined}
           tabs={[
             {
               value: "tasks",
