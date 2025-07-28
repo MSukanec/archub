@@ -494,96 +494,57 @@ export default function FinancesAnalysis() {
             />
           )
         ) : (
-          // Tab Gráficos - Múltiples visualizaciones que respetan el estado de agrupación
+          // Tab Gráficos - Múltiples visualizaciones
           <div className="space-y-6">
-            {groupByCategory ? (
-              // Modo agrupado - Solo categorías principales
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <PieChart className="h-5 w-5" />
-                      Egresos por Categorías
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Distribución de gastos por categorías principales
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
-                  </CardContent>
-                </Card>
-                
-                {/* Sunburst Chart - Solo categorías */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <LayoutGrid className="h-5 w-5" />
-                      Vista Alternativa por Categorías
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Visualización alternativa de categorías principales
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              // Modo detallado - Subcategorías
-              <div className="space-y-6">
-                {/* Primera fila - Gráficos de categorías para contexto */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <PieChart className="h-5 w-5" />
-                        Contexto: Categorías Principales
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Vista general de las 3 categorías principales
-                      </p>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Sunburst Chart - Solo categorías para contexto */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <LayoutGrid className="h-5 w-5" />
-                        Vista Alternativa por Categorías
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Distribución de categorías principales
-                      </p>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
-                    </CardContent>
-                  </Card>
-                </div>
+            {/* Primera fila - Gráficos de categorías */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <PieChart className="h-5 w-5" />
+                    Egresos por Categorías
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Distribución de gastos por tipo de categoría
+                  </p>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
+                </CardContent>
+              </Card>
+              
+              {/* Sunburst Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <LayoutGrid className="h-5 w-5" />
+                    Vista Alternativa por Categorías
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Distribución de gastos por categorías principales
+                  </p>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
+                </CardContent>
+              </Card>
+            </div>
 
-                {/* Segunda fila - Treemap de subcategorías */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Calculator className="h-5 w-5" />
-                      Detalle: Mapa de Subcategorías
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Visualización jerárquica de subcategorías con áreas proporcionales a los montos
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <ExpensesTreemapChart data={treemapData || []} isLoading={isLoading} />
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+            {/* Segunda fila - Treemap de subcategorías */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calculator className="h-5 w-5" />
+                  Mapa de Subcategorías
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Visualización jerárquica de subcategorías con áreas proporcionales a los montos
+                </p>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <ExpensesTreemapChart data={treemapData || []} isLoading={isLoading} />
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
