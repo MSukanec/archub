@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. PARAMETER VISIBILITY CONFIG MODAL ARCHITECTURE FIXED: Successfully restructured ParameterVisibilityConfigModal to follow proper README.md architecture standards - COMPLETED
+  • MODAL STRUCTURE CORRECTED: Changed from incorrect FormModalLayout JSX direct usage to proper object-based structure (viewPanel, editPanel, headerContent, footerContent)
+  • GLOBALMODALSTORE INTEGRATION: Updated modal to use useGlobalModalStore instead of direct prop passing for consistent state management
+  • FORM MODAL LAYOUT COMPLIANCE: Modal now follows BoardFormModal.tsx pattern exactly as required by src/components/modal/README.md
+  • MODALFACTORY UPDATED: Corrected case 'parameter-visibility-config' to return <ParameterVisibilityConfigModal /> without props
+  • MODAL TYPES ADDED: Added "parameter-visibility-config" to ModalType union in types.ts for proper TypeScript support
+  • ISEDITING ADDED: Set isEditing={true} to ensure modal opens in edit mode instead of showing empty view panel
+  • ARCHITECTURE COMPLIANCE: Modal now uses proper object structure instead of prohibited JSX direct rendering pattern
 - July 28, 2025. CACHE SYNCHRONIZATION BUG COMPLETELY FIXED: Successfully resolved critical issue where modal "Nueva Tarea Paramétrica" required F5 refresh to see dependency changes from visual editor - COMPLETED
   • COMPREHENSIVE CACHE INVALIDATION: Added complete query invalidation system to all parameter-related mutations (create, delete dependencies, save positions)
   • MODAL SYNC ACHIEVED: Modal now updates automatically when dependencies or parameter positions change in visual editor

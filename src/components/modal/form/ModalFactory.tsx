@@ -137,7 +137,7 @@ export function ModalFactory() {
     case 'attendance':
       return <AttendanceFormModal modalData={data} onClose={closeModal} />;
     case 'parameter-visibility-config':
-      return <ParameterVisibilityConfigModal parameterId={data?.parameterId} onClose={closeModal} />;
+      return <ParameterVisibilityConfigModal />;
     default:
       return null;
   }

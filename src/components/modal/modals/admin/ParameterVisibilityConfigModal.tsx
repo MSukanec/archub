@@ -11,16 +11,11 @@ import { Settings, ArrowRight } from 'lucide-react';
 import { useParameterAsChild, useDependencyOptions, useSaveDependencyOptions } from '@/hooks/use-dependency-options';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 
-interface ParameterVisibilityConfigModalProps {
-  parameterId: string;
-  onClose: () => void;
-}
-
-export function ParameterVisibilityConfigModal({
-  parameterId,
-  onClose,
-}: ParameterVisibilityConfigModalProps) {
+export function ParameterVisibilityConfigModal() {
+  const { modalData, modalType, open, closeModal } = useGlobalModalStore();
+  const parameterId = modalData?.parameterId;
   const [configuredOptions, setConfiguredOptions] = useState<Record<string, string[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -108,7 +103,7 @@ export function ParameterVisibilityConfigModal({
         });
       }
       
-      onClose();
+      closeModal();
     } catch (error) {
       console.error('Error saving configurations:', error);
     } finally {
@@ -116,76 +111,27 @@ export function ParameterVisibilityConfigModal({
     }
   };
 
-  const headerContent = {
-    icon: Settings,
-    title: 'Configurar Visibilidad por Opción',
-    description: `Configure qué opciones de "${childParameter?.label}" se muestran según la opción seleccionada en los parámetros padre.`
-  };
-
-  const footerContent = {
-    cancelText: 'Cancelar',
-    submitText: isSubmitting ? 'Guardando...' : 'Guardar Configuración',
-  };
-
-  if (dependenciesLoading) {
-    return (
-      <FormModalLayout 
-        maxWidth="800px"
-        headerContent={<FormModalHeader {...headerContent} />}
-        footerContent={
-          <FormModalFooter 
-            onCancel={onClose}
-            onSubmit={() => {}}
-            cancelText="Cerrar"
-            submitText="Cargando..."
-            isSubmitting={true}
-          />
-        }
-      >
+  // Contenido del modal (editPanel)
+  const getModalContent = () => {
+    if (dependenciesLoading) {
+      return (
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
         </div>
-      </FormModalLayout>
-    );
-  }
+      );
+    }
 
-  if (dependencies.length === 0) {
-    return (
-      <FormModalLayout 
-        maxWidth="800px"
-        headerContent={<FormModalHeader {...headerContent} />}
-        footerContent={
-          <FormModalFooter 
-            onCancel={onClose}
-            onSubmit={() => {}}
-            cancelText="Cerrar"
-            submitText=""
-            hideSubmit={true}
-          />
-        }
-      >
+    if (dependencies.length === 0) {
+      return (
         <div className="text-center py-8 text-muted-foreground">
           <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p className="text-lg mb-2">Sin dependencias padre</p>
           <p>Este parámetro no tiene parámetros padre conectados, por lo que no se puede configurar visibilidad condicional.</p>
         </div>
-      </FormModalLayout>
-    );
-  }
+      );
+    }
 
-  return (
-    <FormModalLayout 
-      maxWidth="800px"
-      headerContent={<FormModalHeader {...headerContent} />}
-      footerContent={
-        <FormModalFooter 
-          onCancel={onClose}
-          onSubmit={handleSave}
-          {...footerContent}
-          isSubmitting={isSubmitting}
-        />
-      }
-    >
+    return (
       <ScrollArea className="max-h-[500px]">
         <div className="space-y-8">
           {dependencies.map((dependency, index) => (
@@ -248,6 +194,46 @@ export function ParameterVisibilityConfigModal({
           ))}
         </div>
       </ScrollArea>
-    </FormModalLayout>
+    );
+  };
+
+  const viewPanel = null;
+
+  const editPanel = (
+    <div className="space-y-4">
+      {getModalContent()}
+    </div>
+  );
+
+  const headerContent = (
+    <FormModalHeader 
+      title="Configurar Visibilidad por Opción"
+      icon={Settings}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={closeModal}
+      rightLabel={isSubmitting ? 'Guardando...' : 'Guardar Configuración'}
+      onRightClick={handleSave}
+      rightLoading={isSubmitting}
+    />
+  );
+
+  if (!open || modalType !== 'parameter-visibility-config' || !parameterId) return null;
+
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={closeModal}
+      onSubmit={handleSave}
+      isEditing={true}
+    />
   );
 }
