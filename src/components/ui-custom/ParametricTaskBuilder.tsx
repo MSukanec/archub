@@ -272,17 +272,52 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
           setSelections(initialSelections);
           setAvailableParameters(initialAvailableParams);
           
-          // Establecer el orden inicial - priorizar el orden guardado si existe
+          // Establecer el orden inicial - siempre usar orden inteligente que incluya parámetros nuevos
+          const standardOrder = ['tipo_tarea', 'tipo_de_muro', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos'];
+          const availableSlugs = initialSelections.map(sel => sel.parameterSlug);
+          
+          // Si tenemos un orden guardado, usarlo como base pero insertar parámetros nuevos inteligentemente
           let initialOrder: string[];
           if (initialParameterOrder && initialParameterOrder.length > 0) {
-            // Usar el orden guardado si está disponible
-            initialOrder = initialParameterOrder;
-            console.log('📊 Using saved parameter order:', initialOrder);
-          } else {
-            // Fallback: usar un orden lógico estándar para parámetros conocidos
-            const standardOrder = ['tipo_tarea', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos'];
-            const availableSlugs = initialSelections.map(sel => sel.parameterSlug);
+            // Comenzar con el orden guardado
+            const savedOrder = [...initialParameterOrder];
             
+            // Encontrar parámetros que están disponibles pero no en el orden guardado
+            const missingParams = availableSlugs.filter(slug => !savedOrder.includes(slug));
+            
+            if (missingParams.length > 0) {
+              console.log('🔄 Inserting missing parameters:', missingParams);
+              
+              // Para cada parámetro faltante, insertarlo en la posición correcta según standardOrder
+              missingParams.forEach(missingParam => {
+                const standardIndex = standardOrder.indexOf(missingParam);
+                if (standardIndex !== -1) {
+                  // Encontrar la posición correcta para insertar
+                  let insertIndex = savedOrder.length; // Por defecto al final
+                  
+                  // Buscar hacia atrás en standardOrder para encontrar un parámetro que ya esté en savedOrder
+                  for (let i = standardIndex - 1; i >= 0; i--) {
+                    const beforeParam = standardOrder[i];
+                    const beforeIndex = savedOrder.indexOf(beforeParam);
+                    if (beforeIndex !== -1) {
+                      insertIndex = beforeIndex + 1;
+                      break;
+                    }
+                  }
+                  
+                  // Insertar el parámetro en la posición correcta
+                  savedOrder.splice(insertIndex, 0, missingParam);
+                  console.log(`🎯 Inserted ${missingParam} at position ${insertIndex}`);
+                } else {
+                  // Si no está en standardOrder, agregarlo al final
+                  savedOrder.push(missingParam);
+                }
+              });
+            }
+            
+            initialOrder = savedOrder;
+            console.log('📊 Using enhanced saved parameter order:', initialOrder);
+          } else {
             // Filtrar el orden estándar para incluir solo los parámetros disponibles
             const filteredStandardOrder = standardOrder.filter(slug => availableSlugs.includes(slug));
             
@@ -290,7 +325,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
             const remainingSlugs = availableSlugs.filter(slug => !standardOrder.includes(slug));
             
             initialOrder = [...filteredStandardOrder, ...remainingSlugs];
-            console.log('📊 Using standard parameter order for existing task:', initialOrder);
+            console.log('📊 Using standard parameter order for new task:', initialOrder);
           }
           
           setParameterOrder(initialOrder);

@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. PARAMETER ORDERING BUG FIXED: Successfully implemented intelligent parameter insertion system for handling new parameters in existing tasks - COMPLETED
+  • SMART ORDER INSERTION: New parameters like "TIPO DE MURO" now automatically insert in correct position based on standardOrder instead of appearing at end
+  • ENHANCED ORDER LOGIC: When editing existing tasks, system detects missing parameters and inserts them intelligently using position-aware algorithm
+  • FALLBACK POSITION SYSTEM: New parameters find correct insertion point by searching backwards in standardOrder for existing parameters
+  • STANDARD ORDER UPDATED: Added 'tipo_de_muro' to standardOrder array positioned between 'tipo_tarea' and 'tipo_elemento'
+  • PRESERVED SAVED ORDER: System enhances saved parameter order instead of replacing it, maintaining user customizations while fixing gaps
 - July 28, 2025. PARAMETER VISIBILITY CONFIG MODAL ARCHITECTURE FIXED: Successfully restructured ParameterVisibilityConfigModal to follow proper README.md architecture standards - COMPLETED
   • MODAL STRUCTURE CORRECTED: Changed from incorrect FormModalLayout JSX direct usage to proper object-based structure (viewPanel, editPanel, headerContent, footerContent)
   • GLOBALMODALSTORE INTEGRATION: Updated modal to use useGlobalModalStore instead of direct prop passing for consistent state management
