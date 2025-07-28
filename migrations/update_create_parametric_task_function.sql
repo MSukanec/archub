@@ -38,12 +38,20 @@ BEGIN
   tipo_tarea_value := input_param_values->>'tipo_tarea';
   
   -- Logic to assign unit_id and category_id based on tipo_tarea
-  IF tipo_tarea_value = 'ejecucion-de-muros' THEN
-    -- Set unit_id to m2 and category_id to muros (replace with actual UUIDs)
-    calculated_unit_id := 'uuid_de_m2'::UUID; -- Replace with actual UUID for m2
-    calculated_category_id := 'uuid_de_muros'::UUID; -- Replace with actual UUID for muros category
+  -- First, get the option ID for 'ejecucion-de-muros' from task_parameter_options
+  IF EXISTS (
+    SELECT 1 FROM task_parameter_options tpo
+    JOIN task_parameters tp ON tpo.parameter_id = tp.id
+    WHERE tp.slug = 'tipo_tarea' AND tpo.name = tipo_tarea_value
+  ) THEN
+    -- Get unit_id and category_id from the matching option
+    SELECT tpo.unit_id, tpo.category_id 
+    INTO calculated_unit_id, calculated_category_id
+    FROM task_parameter_options tpo
+    JOIN task_parameters tp ON tpo.parameter_id = tp.id
+    WHERE tp.slug = 'tipo_tarea' AND tpo.name = tipo_tarea_value;
   ELSE
-    -- For other values, set to null
+    -- For unknown values, set to null
     calculated_unit_id := NULL;
     calculated_category_id := NULL;
   END IF;
