@@ -32,11 +32,18 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
     )
   }
 
+  // Map CSS variables to actual HSL values for display
+  const colorMap = {
+    'var(--chart-1)': 'hsl(76, 100%, 40%)',   // Verde - Mano de Obra
+    'var(--chart-2)': 'hsl(173, 58%, 39%)',   // Azul-Verde - Materiales
+    'var(--chart-3)': 'hsl(197, 37%, 24%)'    // Azul - Indirectos
+  }
+
   // Prepare data for the single ring - categories only
   const categoryData = data.map(item => ({
     name: item.category,
     value: item.amount,
-    color: item.color,
+    color: colorMap[item.color as keyof typeof colorMap] || item.color,
     percentage: item.percentage
   }))
 
