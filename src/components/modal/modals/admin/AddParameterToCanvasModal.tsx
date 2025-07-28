@@ -57,11 +57,13 @@ export function AddParameterToCanvasModal() {
       if (!supabase) throw new Error('Supabase client not available');
       
       // Obtener las coordenadas del centro del viewport actual desde modalData
-      const centerX = modalData?.viewportCenter?.x || 0;
-      const centerY = modalData?.viewportCenter?.y || 0;
+      const centerX = Math.round(modalData?.viewportCenter?.x || 0);
+      const centerY = Math.round(modalData?.viewportCenter?.y || 0);
+      
+      console.log('🎯 Agregando parámetro en posición:', { centerX, centerY });
       
       // Crear una nueva posición para el parámetro en el canvas
-      // Posición: centro del viewport actual
+      // Posición: centro del viewport actual (redondeado a enteros)
       const { error } = await supabase
         .from('task_parameter_positions')
         .insert({

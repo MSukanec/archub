@@ -471,8 +471,9 @@ function AddParameterButton() {
       const viewport = reactFlowInstance.getViewport();
       
       // Calcular las coordenadas del centro del viewport
-      const viewportCenterX = -viewport.x / viewport.zoom + (300); // 300px es aproximadamente la mitad del ancho visible
-      const viewportCenterY = -viewport.y / viewport.zoom + (150); // 150px es aproximadamente la mitad del alto visible
+      // El canvas tiene 600px de alto, asumimos ~800px de ancho
+      const viewportCenterX = Math.round(-viewport.x / viewport.zoom + (400)); // 400px es aproximadamente la mitad del ancho visible
+      const viewportCenterY = Math.round(-viewport.y / viewport.zoom + (300)); // 300px es la mitad del alto (600px)
       
       openModal('add-parameter-to-canvas', {
         viewportCenter: {
