@@ -118,6 +118,19 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. PROJECT CLIENTS PAGE ACTIONBAR IMPLEMENTATION COMPLETED: Successfully modernized project clients page with ActionBarDesktop system replacing legacy header - COMPLETED
+  • ACTIONBAR INTEGRATION: Added complete ActionBarDesktop with "Gestión de Clientes del Proyecto" title, Handshake icon, and 4 detailed features
+  • LEGACY HEADER REMOVED: Eliminated headerProps system and migrated to modern ActionBar architecture following established patterns
+  • PRIMARY ACTION BUTTON: "Agregar Cliente" button integrated into ActionBar with proper modal opening functionality
+  • FEATURE DESCRIPTIONS: Added 4 comprehensive features covering contact linking, financial commitments, roles/permissions, and contribution tracking
+  • MOBILE COMPATIBILITY: FeatureIntroduction maintained for mobile view (md:hidden) while ActionBar handles desktop experience
+  • LAYOUT MODERNIZATION: Removed Layout headerProps dependency and updated to clean space-y-6 container structure
+  • CONSISTENT PATTERN: Page now follows same ActionBar implementation as other project and organization pages
+- July 28, 2025. MOVEMENT FORM MODAL AUTO-CLOSE ON NAVIGATION COMPLETED: Successfully implemented automatic modal closing when navigating to client management page - COMPLETED
+  • MODAL CLOSE INTEGRATION: Added useGlobalModalStore closeModal function to "Agregar" button in AportesFields component
+  • AUTOMATIC NAVIGATION: Modal now closes immediately when user clicks "Agregar" and navigates to /project/clients page
+  • USER EXPERIENCE IMPROVED: Eliminates need for manual modal closing after navigation, providing seamless workflow
+  • BUTTON STYLING CORRECTED: "Agregar" button uses variant="default" (blue solid) instead of outline for proper visual hierarchy
 - July 28, 2025. MOVEMENT FORM OPTIONAL CLIENT/PARTNER FIELDS WITH EMPTY STATE NAVIGATION COMPLETED: Successfully implemented optional client/partner fields in movement forms with empty state guidance - COMPLETED
   • OPTIONAL FIELD VALIDATION: Made contact_id and member_id fields optional in all movement form schemas (aportes, aportes_propios, retiros_propios)
   • EMPTY STATE UI: Added visual empty state when no clients/partners exist showing "Aún no tienes Clientes/Socios, ¿quieres agregar uno?"

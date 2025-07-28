@@ -12,8 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
-
-
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
@@ -210,59 +209,67 @@ export default function ProjectClients() {
 
 
 
-  const headerProps = {
-    title: "Clientes del Proyecto",
-    actions: [(
-      <Button 
-        key="add-client" 
-        className="h-8 px-3 text-sm"
-        onClick={() => openModal('project-client')}
-      >
-        <UserPlus className="w-4 h-4 mr-2" />
-        Agregar Cliente
-      </Button>
-    )]
-  }
+  // ActionBar features
+  const features = [
+    {
+      icon: <UserCheck className="h-4 w-4" />,
+      title: "Vincular Contactos al Proyecto",
+      description: "Agrega contactos de tu organización como clientes del proyecto actual para un control detallado."
+    },
+    {
+      icon: <CreditCard className="h-4 w-4" />,
+      title: "Gestión de Compromisos Financieros",
+      description: "Administra los montos comprometidos por cada cliente y configura las monedas correspondientes."
+    },
+    {
+      icon: <Users className="h-4 w-4" />,
+      title: "Roles y Permisos",
+      description: "Asigna roles específicos a cada cliente y controla su nivel de acceso a la información del proyecto."
+    },
+    {
+      icon: <TrendingUp className="h-4 w-4" />,
+      title: "Seguimiento de Aportes",
+      description: "Conecta automáticamente los aportes financieros con los clientes correspondientes para un seguimiento completo."
+    }
+  ]
 
   if (isLoading || loadingClients) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-sm text-muted-foreground">Cargando clientes...</div>
+      <Layout>
+        <div className="space-y-6">
+          <ActionBarDesktop
+            title="Gestión de Clientes del Proyecto"
+            icon={<Handshake className="h-5 w-5" />}
+            features={features}
+            primaryActionLabel="Agregar Cliente"
+            onPrimaryActionClick={() => openModal('project-client')}
+          />
+          <div className="flex items-center justify-center h-64">
+            <div className="text-sm text-muted-foreground">Cargando clientes...</div>
+          </div>
         </div>
       </Layout>
     )
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout>
       <div className="space-y-6">
-        {/* Feature Introduction */}
+        {/* ActionBar */}
+        <ActionBarDesktop
+          title="Gestión de Clientes del Proyecto"
+          icon={<Handshake className="h-5 w-5" />}
+          features={features}
+          primaryActionLabel="Agregar Cliente"
+          onPrimaryActionClick={() => openModal('project-client')}
+        />
+
+        {/* Feature Introduction - Mobile only */}
         <FeatureIntroduction
           title="Gestión de Clientes del Proyecto"
           icon={<Handshake className="h-6 w-6" />}
-          features={[
-            {
-              icon: <UserCheck className="h-4 w-4" />,
-              title: "Vincular Contactos al Proyecto",
-              description: "Agrega contactos de tu organización como clientes del proyecto actual para un control detallado."
-            },
-            {
-              icon: <CreditCard className="h-4 w-4" />,
-              title: "Gestión de Compromisos Financieros",
-              description: "Administra los montos comprometidos por cada cliente y configura las monedas correspondientes."
-            },
-            {
-              icon: <Users className="h-4 w-4" />,
-              title: "Roles y Permisos",
-              description: "Asigna roles específicos a cada cliente y controla su nivel de acceso a la información del proyecto."
-            },
-            {
-              icon: <TrendingUp className="h-4 w-4" />,
-              title: "Seguimiento de Aportes",
-              description: "Conecta automáticamente los aportes financieros con los clientes correspondientes para un seguimiento completo."
-            }
-          ]}
+          features={features}
+          className="md:hidden"
         />
 
         {/* Conditional rendering: Two-column layout OR full-width empty state */}
