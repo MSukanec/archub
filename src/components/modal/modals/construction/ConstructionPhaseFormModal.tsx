@@ -9,11 +9,10 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Layers } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useConstructionProjectPhases, useCreateConstructionPhase, useConstructionPhases } from "@/hooks/use-construction-phases";
+import { useCreateConstructionPhase } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -22,21 +21,6 @@ import { useQueryClient } from "@tanstack/react-query";
 const phaseSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().optional(),
-  use_existing_phase: z.boolean().optional(),
-  existing_phase_id: z.string().optional(),
-}).refine((data) => {
-  // Si usa fase existente, debe seleccionar una
-  if (data.use_existing_phase && !data.existing_phase_id) {
-    return false;
-  }
-  // Si no usa fase existente, debe tener nombre
-  if (!data.use_existing_phase && !data.name) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Debe seleccionar una fase existente o crear una nueva",
-  path: ["existing_phase_id"],
 });
 
 type PhaseFormData = z.infer<typeof phaseSchema>;
@@ -57,7 +41,6 @@ export function ConstructionPhaseFormModal({
   onClose 
 }: ConstructionPhaseFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [useExisting, setUseExisting] = useState(false);
   
   const { data: userData } = useCurrentUser();
   const { setPanel } = useModalPanelStore();
@@ -88,8 +71,7 @@ export function ConstructionPhaseFormModal({
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
 
-  // Get existing phases for selection  
-  const { data: existingPhases = [] } = useConstructionPhases(modalData.organizationId);
+
 
   // Force edit mode on modal open
   useEffect(() => {
@@ -101,8 +83,6 @@ export function ConstructionPhaseFormModal({
     defaultValues: {
       name: modalData.isEditing ? modalData.editingPhase?.phase?.name || "" : "",
       description: modalData.isEditing ? modalData.editingPhase?.phase?.description || "" : "",
-      use_existing_phase: false,
-      existing_phase_id: "",
     }
   });
 
@@ -110,11 +90,7 @@ export function ConstructionPhaseFormModal({
 
   const createPhase = useCreateConstructionPhase();
 
-  const watchUseExisting = watch('use_existing_phase');
-  
-  useEffect(() => {
-    setUseExisting(watchUseExisting || false);
-  }, [watchUseExisting]);
+
 
   const onSubmit = async (data: PhaseFormData) => {
     if (!userData?.user?.id || !currentMember?.id) {
@@ -166,8 +142,7 @@ export function ConstructionPhaseFormModal({
           name: data.name,
           description: data.description,
           createdBy: currentMember.id,
-          useExisting: data.use_existing_phase,
-          existingPhaseId: data.existing_phase_id
+          useExisting: false
         });
       }
 
@@ -206,71 +181,28 @@ export function ConstructionPhaseFormModal({
   const viewPanel = null; // No view mode for this modal
 
   const editPanel = (
-    <div className="space-y-6">
-      {/* Option to use existing or create new */}
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="use_existing" 
-          checked={useExisting}
-          onCheckedChange={(checked) => {
-            setValue('use_existing_phase', checked === true);
-            setUseExisting(checked === true);
-          }}
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Nombre de la Fase *</Label>
+        <Input
+          id="name"
+          placeholder="Ej: Cimentación, Estructura, Acabados..."
+          {...register('name')}
         />
-        <Label htmlFor="use_existing" className="text-sm font-medium">
-          Usar fase existente
-        </Label>
+        {errors.name && (
+          <p className="text-sm text-red-500">{errors.name.message}</p>
+        )}
       </div>
 
-      {useExisting ? (
-        // Existing phase selection
-        <div className="space-y-2">
-          <Label htmlFor="existing_phase_id">Fase Existente *</Label>
-          <Select 
-            value={watch('existing_phase_id') || ''} 
-            onValueChange={(value) => setValue('existing_phase_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar fase..." />
-            </SelectTrigger>
-            <SelectContent>
-              {existingPhases.map((phase) => (
-                <SelectItem key={phase.id} value={phase.id}>
-                  {phase.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.existing_phase_id && (
-            <p className="text-sm text-red-500">{errors.existing_phase_id.message}</p>
-          )}
-        </div>
-      ) : (
-        // New phase creation fields
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre de la Fase *</Label>
-            <Input
-              id="name"
-              placeholder="Ej: Cimentación, Estructura, Acabados..."
-              {...register('name')}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
-            <Textarea
-              id="description"
-              placeholder="Descripción de las actividades de esta fase..."
-              {...register('description')}
-              rows={3}
-            />
-          </div>
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label htmlFor="description">Descripción</Label>
+        <Textarea
+          id="description"
+          placeholder="Descripción de las actividades de esta fase..."
+          {...register('description')}
+          rows={3}
+        />
+      </div>
     </div>
   );
 

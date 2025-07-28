@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. CONSTRUCTION PHASE MODAL SIMPLIFIED: Eliminated "use existing phase" functionality and streamlined modal to only create new phases with name and description fields - COMPLETED
+  • SIMPLIFIED INTERFACE: Removed checkbox and dropdown for selecting existing phases, modal now only creates new phases
+  • CLEAN VALIDATION: Updated schema to simple name (required) and description (optional) validation
+  • REDUCED COMPLEXITY: Eliminated conditional logic, Select components, and complex validation rules
+  • TAB-SPECIFIC BUTTONS: Successfully separated buttons - "Agregar Tareas en Masa" in Tasks tab, "Crear Fase" in Phases tab
+  • WORKING PHASE CREATION: Modal now successfully creates new construction phases with proper database integration
 - July 28, 2025. CONSTRUCTION TASK MODAL DATABASE INTEGRATION COMPLETELY FIXED: Successfully resolved foreign key constraint issues and completed fully functional task creation system - COMPLETED
   • FOREIGN KEY BUG RESOLVED: Fixed critical issue where created_by field was using users.id instead of organization_members.id for foreign key constraint
   • MEMBRESÍA QUERY IMPLEMENTED: Added proper organization_members lookup to get correct member ID for database insertion
