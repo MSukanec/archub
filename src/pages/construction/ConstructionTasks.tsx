@@ -498,14 +498,13 @@ export default function ConstructionTasks() {
                   const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
                   
                   return (
-                    <div className="grid grid-cols-12 gap-2 text-sm font-medium">
+                    <div className="grid grid-cols-10 gap-2 text-sm font-medium">
                       <div className="col-span-7 truncate">
-                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'instancia' : 'instancias'})
+                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
                       </div>
-                      <div className="col-span-1"></div> {/* Rubro */}
-                      <div className="col-span-1"></div> {/* Unidad */}
-                      <div className="col-span-1">{totalQuantity} {unitSymbol}</div> {/* Cantidad total */}
-                      <div className="col-span-2"></div> {/* Espacio restante */}
+                      <div className="col-span-1"></div> {/* Rubro (vacío en header) */}
+                      <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
+                      <div className="col-span-1">{totalQuantity}</div> {/* Cantidad total */}
                     </div>
                   );
                 } else {
