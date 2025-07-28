@@ -41,7 +41,7 @@ export function FeatureIntroduction({
   return (
     <div 
       className={cn(
-        "md:hidden w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] shadow-sm mb-6 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
+        "md:hidden w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] shadow-sm cursor-pointer transition-all duration-300 ease-in-out hover:shadow-md",
         className
       )}
       onClick={handleToggle}
