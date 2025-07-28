@@ -76,11 +76,11 @@ export function Selector({
           "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
           "rounded-lg px-2 py-2 shadow-button-normal hover:shadow-button-hover",
           "text-sm font-medium",
-          "w-full min-w-0", // Full width and allow text truncation
+          "min-w-fit", // Minimum width to fit content
           className
         )}
       >
-        <span className="truncate text-left flex-1">{displayText}</span>
+        <span className="text-left flex-1 whitespace-nowrap">{displayText}</span>
         <ChevronDown className={cn(
           "w-4 h-4 ml-2 shrink-0 transition-transform duration-200",
           open && "rotate-180"
@@ -94,7 +94,7 @@ export function Selector({
           <div className="absolute top-full left-0 right-0 h-1 z-40" />
           
           <div 
-            className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg shadow-button-normal border"
+            className="absolute top-full left-0 z-50 mt-1 rounded-lg shadow-button-normal border min-w-full"
             style={{ 
               backgroundColor: 'var(--card-bg)',
               borderColor: 'var(--card-border)',
