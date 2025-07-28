@@ -8,8 +8,6 @@ export interface TaskParameter {
   label: string;
   type: string;
   expression_template: string;
-  category_id?: string;
-  unit_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -33,8 +31,6 @@ export interface CreateTaskParameterData {
   label: string;
   type: string;
   expression_template?: string;
-  category_id?: string;
-  unit_id?: string;
 }
 
 export interface UpdateTaskParameterData {
@@ -43,8 +39,6 @@ export interface UpdateTaskParameterData {
   label: string;
   type: string;
   expression_template?: string;
-  category_id?: string;
-  unit_id?: string;
 }
 
 export interface CreateTaskParameterOptionData {
