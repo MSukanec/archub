@@ -86,47 +86,68 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       // Debug: ver qué campos están llegando exactamente
       console.log('RAW PARAMETRIC TASKS SAMPLE:', JSON.stringify(parametricTasks?.[0], null, 2));
 
+      // Generar nombres de tareas usando la función RPC
+      const tasksWithNames = await Promise.all(
+        parametricTasks.map(async (task: any) => {
+          try {
+            // Llamar a la función RPC para generar el nombre
+            const { data: renderedName, error: rpcError } = await supabase
+              .rpc('render_task_name_from_param_values', {
+                input_param_values: task.param_values,
+                input_param_order: task.param_order || []
+              });
+
+            if (rpcError) {
+              console.error('Error rendering task name:', rpcError);
+              return { ...task, display_name: `Tarea ${task.code || 'sin código'}` };
+            }
+
+            return { ...task, display_name: renderedName || `Tarea ${task.code || 'sin código'}` };
+          } catch (error) {
+            console.error('Error processing task name:', error);
+            return { ...task, display_name: `Tarea ${task.code || 'sin código'}` };
+          }
+        })
+      );
+
       // Mapear datos de task_parametric al formato esperado para construcción
-      const mappedTasks: ConstructionTask[] = parametricTasks.map((item: any) => {
-        const taskParametric = item.task_parametric;
-        const phase = item.construction_project_phases;
-        
+      const mappedTasks: ConstructionTask[] = tasksWithNames.map((item: any, index: number) => {
         return {
-          // Campos principales de construction_tasks
+          // Campos principales usando task_parametric
           task_instance_id: item.id,
-          project_id: item.project_id,
-          task_id: item.task_id,
-          task_code: `CT-${String(item.id).slice(-6)}`, // Generar código basado en ID
-          param_values: taskParametric?.param_values || {},
-          start_date: item.start_date,
-          end_date: item.end_date,
-          duration_in_days: item.duration_in_days,
-          quantity: item.quantity || 0,
+          project_id: projectId, // Asignar projectId actual
+          task_id: item.id, // Usar mismo ID de task_parametric
+          task_code: item.code || `000${index + 1}`.slice(-3), // Usar código generado o crear uno
+          param_values: typeof item.param_values === 'string' ? JSON.parse(item.param_values) : (item.param_values || {}),
+          start_date: null, // Por defecto null
+          end_date: null,
+          duration_in_days: null,
+          quantity: 1, // Cantidad por defecto
           
-          // Campos de fase
-          phase_instance_id: item.project_phase_id || '',
-          phase_name: phase?.name || 'Sin fase',
-          phase_position: phase?.position || 0,
-          progress_percent: item.progress_percent || 0,
+          // Campos de fase (simulados por ahora)
+          phase_instance_id: '',
+          phase_name: 'Sin fase',
+          phase_position: 0,
+          progress_percent: 0,
           
           // Compatibilidad con sistema existente
-          id: item.id, // ID principal para compatibilidad
+          id: item.id,
           organization_id: organizationId,
           created_at: item.created_at,
           updated_at: item.updated_at,
           
           // Crear objeto task para compatibilidad con componentes existentes
           task: {
-            id: item.task_id,
-            code: `CT-${String(item.id).slice(-6)}`,
-            display_name: `Tarea de construcción ${String(item.id).slice(-6)}`, // Nombre por defecto
-            rubro_name: null, // Por ahora sin rubro
-            category_name: null, // Por ahora sin categoría
+            id: item.id,
+            code: item.code || `000${index + 1}`.slice(-3),
+            display_name: item.display_name || `Tarea paramétrica ${item.code || index + 1}`,
+            rubro_name: null,
+            category_name: null,
             unit_id: null,
-            unit_name: null,
-            unit_symbol: null,
+            unit_name: 'm²', // Unidad por defecto
+            unit_symbol: 'm²',
             rubro_id: null,
-            param_values: taskParametric?.param_values || {}
+            param_values: typeof item.param_values === 'string' ? JSON.parse(item.param_values) : (item.param_values || {})
           }
         };
       });
