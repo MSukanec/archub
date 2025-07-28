@@ -672,12 +672,12 @@ function ParameterNodeEditorContent() {
     }
   }, [parametersData.length, savedPositions.length]);
 
-  // Configurar nodos SOLO desde posiciones guardadas (sin crear automáticamente)
+  // Configurar nodos desde posiciones guardadas Y dependencias existentes
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
-      console.log('🎯 Configurando nodos SOLO desde posiciones guardadas. Posiciones:', savedPositions.length);
+      console.log('🎯 Configurando nodos desde posiciones guardadas y dependencias. Posiciones:', savedPositions.length, 'Dependencias:', dependencies.length);
       
-      // SOLO crear nodos que tienen posiciones guardadas explícitas
+      // 1. Crear nodos desde posiciones guardadas
       const nodesFromPositions: Node[] = savedPositions
         .map(pos => {
           // Buscar el parámetro correspondiente
@@ -688,7 +688,7 @@ function ParameterNodeEditorContent() {
           }
           
           const isOriginal = pos.id === pos.parameter_id;
-          console.log(`📌 Nodo ${isOriginal ? 'original' : 'duplicado'} ${parameterData.parameter.slug}:`, 'posición guardada', { x: pos.x, y: pos.y });
+          console.log(`📌 Nodo ${isOriginal ? 'original' : 'duplicado'} ${parameterData.parameter.slug}:`, 'desde posición guardada', { x: pos.x, y: pos.y });
           
           return {
             id: pos.id,
@@ -721,8 +721,71 @@ function ParameterNodeEditorContent() {
         })
         .filter(node => node !== null) as Node[];
 
-      setNodes(nodesFromPositions);
-      console.log(`✅ Nodos configurados: ${nodesFromPositions.length} total (SOLO desde posiciones guardadas)`);
+      // 2. Obtener parámetros que están en dependencias pero NO tienen posiciones guardadas
+      const parametersWithPositions = new Set(savedPositions.map(pos => pos.parameter_id));
+      const parametersInDependencies = new Set([
+        ...dependencies.map(dep => dep.parent_parameter_id),
+        ...dependencies.map(dep => dep.child_parameter_id)
+      ]);
+      
+      const parametersWithoutPositions = [...parametersInDependencies].filter(
+        paramId => !parametersWithPositions.has(paramId)
+      );
+      
+      console.log('📊 Parámetros en dependencias sin posiciones:', parametersWithoutPositions.length);
+      
+      // 3. Crear nodos para parámetros en dependencias (con posiciones por defecto)
+      const nodesFromDependencies: Node[] = parametersWithoutPositions
+        .map((paramId, index) => {
+          const parameterData = parametersData.find(item => item.parameter.id === paramId);
+          if (!parameterData) {
+            console.log(`⚠️ Parámetro ${paramId} no encontrado para dependencia`);
+            return null;
+          }
+          
+          // Posición por defecto en grid
+          const position = {
+            x: (index % 3) * 320,
+            y: Math.floor(index / 3) * 200
+          };
+          
+          console.log(`📌 Nodo ${parameterData.parameter.slug}:`, 'desde dependencia', position);
+          
+          return {
+            id: parameterData.parameter.id,
+            type: 'parameterNode',
+            position,
+            data: {
+              parameter: parameterData.parameter,
+              options: parameterData.options,
+              visibleOptions: nodeVisibleOptions[parameterData.parameter.id] || [],
+              onVisibleOptionsChange: (optionIds: string[]) => {
+                setNodeVisibleOptions(prev => ({
+                  ...prev,
+                  [parameterData.parameter.id]: optionIds
+                }));
+                
+                // Guardar posición automáticamente cuando se cambian opciones
+                savePositionMutation.mutate({
+                  parameter_id: parameterData.parameter.id,
+                  x: position.x,
+                  y: position.y,
+                  visible_options: optionIds
+                });
+              },
+              onDuplicate: handleDuplicateNode,
+              onEdit: handleEditNode,
+              onDelete: handleDeleteNode
+            },
+          };
+        })
+        .filter(node => node !== null) as Node[];
+
+      // 4. Combinar ambos tipos de nodos
+      const allNodes = [...nodesFromPositions, ...nodesFromDependencies];
+      setNodes(allNodes);
+      
+      console.log(`✅ Nodos configurados: ${nodesFromPositions.length} desde posiciones + ${nodesFromDependencies.length} desde dependencias = ${allNodes.length} total`);
     }
   }, [parametersData.length, nodeVisibleOptions, savedPositions.length, dependencies.length]);
 
