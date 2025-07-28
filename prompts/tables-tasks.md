@@ -107,7 +107,7 @@ TABLA TASK_CATEGORIES:
   }
 ]
 
-TABLA (VISTA) TASK_GENERATED_VIEW:
+TABLA (VISTA) TASK_PARAMETRIC_VIEW:
 
 [
   {
@@ -119,31 +119,23 @@ TABLA (VISTA) TASK_GENERATED_VIEW:
     "data_type": "text"
   },
   {
-    "column_name": "template_id",
-    "data_type": "uuid"
+    "column_name": "param_order",
+    "data_type": "ARRAY"
   },
   {
     "column_name": "param_values",
     "data_type": "jsonb"
   },
   {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
+    "column_name": "name_rendered",
+    "data_type": "text"
   },
   {
     "column_name": "unit_id",
     "data_type": "uuid"
   },
   {
-    "column_name": "task_group_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "task_group_name",
+    "column_name": "unit_name",
     "data_type": "text"
   },
   {
@@ -155,36 +147,12 @@ TABLA (VISTA) TASK_GENERATED_VIEW:
     "data_type": "text"
   },
   {
-    "column_name": "category_code",
-    "data_type": "text"
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
   },
   {
-    "column_name": "subcategory_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "subcategory_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "subcategory_code",
-    "data_type": "text"
-  },
-  {
-    "column_name": "rubro_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "rubro_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "rubro_code",
-    "data_type": "text"
-  },
-  {
-    "column_name": "display_name",
-    "data_type": "text"
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
   }
 ]
 

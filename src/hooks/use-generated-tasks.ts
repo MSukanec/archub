@@ -5,8 +5,13 @@ import { useToast } from "@/hooks/use-toast";
 export interface GeneratedTask {
   id: string;
   code: string;
-  param_values: string; // JSON string from database
+  param_values: any; // JSONB from database
   param_order?: string[]; // Array of parameter slugs in order
+  name_rendered: string;
+  unit_id?: string;
+  unit_name?: string;
+  category_id?: string;
+  category_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -30,12 +35,12 @@ export interface TaskMaterial {
 
 export function useGeneratedTasks() {
   return useQuery({
-    queryKey: ['task-parametric'],
+    queryKey: ['task-parametric-view'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('task_parametric')
+        .from('task_parametric_view')
         .select(`*`)
         .order('created_at', { ascending: false });
       
@@ -153,6 +158,7 @@ export function useCreateGeneratedTask() {
     onSuccess: (data) => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
@@ -198,6 +204,7 @@ export function useDeleteGeneratedTask() {
     onSuccess: () => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
@@ -406,6 +413,7 @@ export function useUpdateGeneratedTask() {
     onSuccess: () => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
