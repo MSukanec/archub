@@ -15,6 +15,7 @@ import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryC
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
+import { ExpensesRadialGridChart } from '@/components/charts/ExpensesRadialGridChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -606,6 +607,13 @@ export default function FinancesAnalysis() {
             <Card>
               <CardContent className="p-6">
                 <ExpensesSunburstRadialChart data={sunburstRadialData || []} isLoading={isLoading} />
+              </CardContent>
+            </Card>
+
+            {/* Cuarta fila - Radial Grid Chart (estilo Data Visualization Society) */}
+            <Card>
+              <CardContent className="p-6">
+                <ExpensesRadialGridChart data={sunburstRadialData || []} isLoading={isLoading} />
               </CardContent>
             </Card>
           </div>
