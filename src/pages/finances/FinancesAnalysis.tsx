@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText, TrendingUp } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -11,10 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
+import { ExpensesTrendChart } from '@/components/charts/ExpensesTrendChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -575,30 +575,31 @@ export default function FinancesAnalysis() {
           <div className="space-y-6">
             {/* Primera fila - Gráficos de categorías */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nuevo gráfico creativo */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <PieChart className="h-5 w-5" />
-                    Egresos por Categorías
+                    <TrendingUp className="h-5 w-5" />
+                    Análisis de Tendencias
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Distribución de gastos por tipo de categoría
+                    Gráfico de barras con proyección y análisis comparativo
                   </p>
                 </CardHeader>
                 <CardContent className="pb-2">
-                  <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
+                  <ExpensesTrendChart data={chartData || []} isLoading={isLoading} />
                 </CardContent>
               </Card>
               
-              {/* Sunburst Chart */}
+              {/* Sunburst Chart con título cambiado */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <LayoutGrid className="h-5 w-5" />
-                    Vista Alternativa por Categorías
+                    Egresos por Categorías
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Distribución de gastos por categorías principales
+                    Distribución circular de gastos por categorías principales
                   </p>
                 </CardHeader>
                 <CardContent className="pb-2">
