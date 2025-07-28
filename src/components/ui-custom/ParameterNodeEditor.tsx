@@ -679,17 +679,20 @@ function ParameterNodeEditorContent() {
       
       // Crear nodos originales
       const originalNodes: Node[] = parametersData.map((item, index) => {
-        const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
+        // Buscar específicamente la posición del nodo original (id === parameter_id)
+        const originalPosition = savedPositions.find(pos => 
+          pos.parameter_id === item.parameter.id && pos.id === pos.parameter_id
+        );
         
-        const position = savedPosition ? { 
-          x: savedPosition.x, 
-          y: savedPosition.y 
+        const position = originalPosition ? { 
+          x: originalPosition.x, 
+          y: originalPosition.y 
         } : { 
           x: (index % 3) * 320, // 3 columnas
           y: Math.floor(index / 3) * 200 // Separación vertical
         };
         
-        console.log(`📌 Nodo ${item.parameter.slug}:`, savedPosition ? 'posición guardada' : 'posición por defecto', position);
+        console.log(`📌 Nodo ${item.parameter.slug}:`, originalPosition ? 'posición guardada' : 'posición por defecto', position);
         
         return {
           id: item.parameter.id,
@@ -698,7 +701,7 @@ function ParameterNodeEditorContent() {
           data: {
             parameter: item.parameter,
             options: item.options,
-            visibleOptions: nodeVisibleOptions[item.parameter.id] || [],
+            visibleOptions: originalPosition?.visible_options || nodeVisibleOptions[item.parameter.id] || [],
             onVisibleOptionsChange: (optionIds: string[]) => {
               setNodeVisibleOptions(prev => ({
                 ...prev,
