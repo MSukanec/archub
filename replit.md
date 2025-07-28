@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. FINANCIAL DASHBOARD MAJOR LAYOUT REORGANIZATION COMPLETED: Successfully implemented new 3-row structure for Resumen Financiero page as requested by user - COMPLETED
+  • FILA 1 REDESIGNED: 3 columns layout with Balances por Billetera y Moneda / Este Mes / Movimientos Recientes cards
+  • FILA 2 REPOSITIONED: 4 KPIs (Movimientos, Ingresos Totales, Egresos Totales, Balance Neto) moved to second row in horizontal layout
+  • FILA 3 SIMPLIFIED: Monthly financial flow chart now occupies full width as single column
+  • EGRESOS POR CATEGORIA ELIMINATED: Removed expenses by category chart completely as requested
+  • ACTIONBAR SPACING FIXED: Moved FeatureIntroduction outside space-y-6 container to eliminate excess top spacing
+  • TIMEPERIODSELECTOR MODERNIZED: Replaced DropdownMenu with elegant Selector component matching budget page style
+  • LAYOUT OPTIMIZATION: Improved visual hierarchy and data organization with clear separation between summary metrics and detailed analysis
 - July 28, 2025. FINANCIAL DASHBOARD REDESIGN COMPLETED: Successfully restructured Resumen Financiero page with optimized layout and modern UI components - COMPLETED
   • TIME PERIOD SELECTOR MODERNIZED: Replaced Select component with DropdownMenu styled as ghost button matching ProjectSelector pattern
   • ACTIONBAR SELECTOR INTEGRATION: Time period selector now displays as "Desde Siempre" with dropdown options (Último Mes, Trimestre, Semestre, Año)

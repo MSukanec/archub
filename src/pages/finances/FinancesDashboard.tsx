@@ -140,7 +140,113 @@ export default function FinancesDashboard() {
           />
         ) : (
           <>
-        {/* 1 FILA: 4 KPIs - Movimientos, Ingresos, Egresos, Balance */}
+        {/* FILA 1: 3 columnas - Balances por Billetera y Moneda / Este Mes / Movimientos Recientes */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          {/* Balances por Billetera y Moneda */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Balances por Billetera y Moneda
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Resumen detallado de saldos
+              </p>
+            </CardHeader>
+            <CardContent>
+              <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
+            </CardContent>
+          </Card>
+
+          {/* Este Mes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Este Mes
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {format(new Date(), 'MMMM yyyy', { locale: es })}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Ingresos</span>
+                  <span className="font-medium" style={{ color: 'var(--chart-positive)' }}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Egresos</span>
+                  <span className="font-medium" style={{ color: 'var(--chart-negative)' }}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0)}
+                  </span>
+                </div>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Balance Mensual</span>
+                    <span className="font-bold" style={getBalanceColor(financialSummary?.thisMonthBalance || 0)}>
+                      {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Movimientos Recientes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Movimientos Recientes
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Últimos 5 movimientos registrados
+              </p>
+            </CardHeader>
+            <CardContent>
+              {recentMovements && recentMovements.length > 0 ? (
+                <div className="space-y-3">
+                  {recentMovements.slice(0, 5).map((movement, index) => (
+                    <div key={movement.id || index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[var(--accent)]"></div>
+                        <div>
+                          <p className="text-sm font-medium truncate max-w-32">
+                            {movement.description || 'Sin descripción'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {movement.movement_date && format(new Date(movement.movement_date), 'dd/MM', { locale: es })}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-medium">
+                        {formatCurrency(movement.amount || 0)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <ArrowUpDown className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground mb-3">
+                    No hay movimientos registrados
+                  </p>
+                  <Link 
+                    href="/finances/movements"
+                    className="inline-flex items-center px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    Crear Primer Movimiento
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* FILA 2: 4 columnas - KPIs (Movimientos, Ingresos, Egresos, Balance) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Movements Card */}
           <motion.div
@@ -287,23 +393,7 @@ export default function FinancesDashboard() {
           </motion.div>
         </div>
 
-        {/* 2 FILA: Balances por Billetera y Moneda (100% ancho) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Balances por Billetera y Moneda
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Resumen detallado de saldos organizados por billetera y moneda
-            </p>
-          </CardHeader>
-          <CardContent>
-            <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
-          </CardContent>
-        </Card>
-
-        {/* 3 FILA: Gráfico de Flujo Financiero Mensual (100% ancho) */}
+        {/* FILA 3: 1 columna - Gráfico de Flujo Financiero Mensual (100% ancho) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -318,112 +408,6 @@ export default function FinancesDashboard() {
             <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
           </CardContent>
         </Card>
-
-        {/* 4 FILA: 3 cards - Egresos por Categoría, Este Mes, Movimientos Recientes */}
-        <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
-          {/* Gráfico de Egresos por Categoría */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingDown className="h-5 w-5" />
-                Egresos por Categoría
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Distribución de gastos por tipo de categoría
-              </p>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <ExpensesByCategoryChart data={expensesByCategory || []} isLoading={categoriesLoading} />
-            </CardContent>
-          </Card>
-
-          {/* Este Mes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Este Mes
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(), 'MMMM yyyy', { locale: es })}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Ingresos</span>
-                  <span className="font-medium" style={{ color: 'var(--chart-positive)' }}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthIncome || 0)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Egresos</span>
-                  <span className="font-medium" style={{ color: 'var(--chart-negative)' }}>
-                    {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthExpenses || 0)}
-                  </span>
-                </div>
-                <div className="border-t pt-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Balance Mensual</span>
-                    <span className="font-bold" style={getBalanceColor(financialSummary?.thisMonthBalance || 0)}>
-                      {summaryLoading ? '...' : formatCurrency(financialSummary?.thisMonthBalance || 0)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Movimientos Recientes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Movimientos Recientes
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Últimos 5 movimientos registrados
-              </p>
-            </CardHeader>
-            <CardContent>
-              {recentMovements && recentMovements.length > 0 ? (
-                <div className="space-y-3">
-                  {recentMovements.slice(0, 5).map((movement, index) => (
-                    <div key={movement.id || index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[var(--accent)]"></div>
-                        <div>
-                          <p className="text-sm font-medium truncate max-w-32">
-                            {movement.description || 'Sin descripción'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {movement.movement_date && format(new Date(movement.movement_date), 'dd/MM', { locale: es })}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium">
-                        {formatCurrency(movement.amount || 0)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <ArrowUpDown className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">
-                    No hay movimientos registrados
-                  </p>
-                  <Link 
-                    href="/finances/movements"
-                    className="inline-flex items-center px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    Crear Primer Movimiento
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Mobile Layout - Cards apiladas verticalmente */}
         <div className="md:hidden space-y-4">
