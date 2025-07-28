@@ -60,12 +60,12 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         enabled: !!projectId && !!organizationId
       });
       
-      // Consultar construction_tasks para el proyecto específico con JOIN a task_parametric
+      // Consultar construction_tasks para el proyecto específico con JOIN a task_parametric_view
       const { data: constructionTasks, error } = await supabase
         .from('construction_tasks')
         .select(`
           *,
-          task_parametric!inner (
+          task_parametric_view!inner (
             id,
             code,
             name_rendered,
