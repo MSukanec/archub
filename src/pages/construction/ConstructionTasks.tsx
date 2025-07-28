@@ -320,9 +320,9 @@ export default function ConstructionTasks() {
   // Definir columnas específicas para agrupación por tareas
   const taskGroupingColumns = [
     {
-      key: 'display_name',
-      label: 'Tarea',
-      render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
+      key: 'phase',
+      label: 'Fase',
+      render: (task: any) => task.phase_name || 'Sin fase',
       width: 'auto' // Máximo espacio posible
     },
     {
@@ -491,13 +491,33 @@ export default function ConstructionTasks() {
               isLoading={isLoading}
               mode="construction"
               groupBy={'groupKey'}
-              renderGroupHeader={(groupKey: string, groupRows: any[]) => (
-                <>
-                  <div className="col-span-full text-sm font-medium">
-                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'instancia' : 'instancias'})
-                  </div>
-                </>
-              )}
+              renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+                if (groupingType === 'tasks') {
+                  // Para agrupación por tareas, calcular suma de cantidades
+                  const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
+                  const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
+                  
+                  return (
+                    <div className="grid grid-cols-12 gap-2 text-sm font-medium">
+                      <div className="col-span-7 truncate">
+                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'instancia' : 'instancias'})
+                      </div>
+                      <div className="col-span-1"></div> {/* Rubro */}
+                      <div className="col-span-1"></div> {/* Unidad */}
+                      <div className="col-span-1">{totalQuantity} {unitSymbol}</div> {/* Cantidad total */}
+                      <div className="col-span-2"></div> {/* Espacio restante */}
+                    </div>
+                  );
+                } else {
+                  return (
+                    <>
+                      <div className="col-span-full text-sm font-medium">
+                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'instancia' : 'instancias'})
+                      </div>
+                    </>
+                  );
+                }
+              }}
               emptyState={
                 <EmptyState
                   icon={<CheckSquare className="h-8 w-8" />}
