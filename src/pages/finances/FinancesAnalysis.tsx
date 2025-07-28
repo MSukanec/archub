@@ -19,7 +19,7 @@ import { ExpensesTrendChart } from '@/components/charts/ExpensesTrendChart'
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
   const [groupByCategory, setGroupByCategory] = useState(true)
-  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado')
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('pesificado')
   const [activeTab, setActiveTab] = useState("analysis")
   
   const { data: userData } = useCurrentUser()
@@ -187,18 +187,22 @@ export default function FinancesAnalysis() {
     }))
   }, [filteredData, groupByCategory])
 
-  // Process data for pie chart - group by main categories
+  // Process data for pie chart - group by main categories (with currency conversion)
   const chartData = useMemo(() => {
     const categoryTotals = new Map<string, number>()
     let totalAmount = 0
 
-    // Group by category and sum amounts
+    // Group by category and sum amounts with currency conversion
     expenseMovements.forEach(movement => {
       const category = movement.movement_data?.category?.name || 'Sin categoría'
-      const amount = Math.abs(movement.amount)
+      const currencyCode = movement.movement_data?.currency?.code || 'ARS'
+      const exchangeRate = movement.exchange_rate || 1
       
-      categoryTotals.set(category, (categoryTotals.get(category) || 0) + amount)
-      totalAmount += amount
+      // Convert amount based on currency view for charts
+      const convertedAmount = convertAmount(Math.abs(movement.amount), currencyCode, exchangeRate)
+      
+      categoryTotals.set(category, (categoryTotals.get(category) || 0) + convertedAmount)
+      totalAmount += convertedAmount
     })
 
     // Convert to chart format with specific colors for our 3 categories
@@ -217,7 +221,7 @@ export default function FinancesAnalysis() {
       }))
       .sort((a, b) => b.amount - a.amount) // Sort by amount descending
       .filter(item => item.amount > 0) // Only include positive amounts
-  }, [expenseMovements])
+  }, [expenseMovements, currencyView])
 
   // Process data for sunburst chart - categories only (same as pie chart)
   const sunburstData = chartData
@@ -273,18 +277,22 @@ export default function FinancesAnalysis() {
     expenseMovements.forEach(movement => {
       const category = movement.movement_data?.category?.name || 'Sin categoría'
       const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
-      const amount = Math.abs(movement.amount)
+      const currencyCode = movement.movement_data?.currency?.code || 'ARS'
+      const exchangeRate = movement.exchange_rate || 1
+      
+      // Convert amount based on currency view for treemap
+      const convertedAmount = convertAmount(Math.abs(movement.amount), currencyCode, exchangeRate)
       
       const key = `${category}-${subcategory}`
       const existing = subcategoryMap.get(key)
       
       if (existing) {
-        existing.amount += amount
+        existing.amount += convertedAmount
       } else {
-        subcategoryMap.set(key, { category, amount })
+        subcategoryMap.set(key, { category, amount: convertedAmount })
       }
       
-      totalAmount += amount
+      totalAmount += convertedAmount
     })
 
     // Convert to treemap format with color variations
@@ -322,7 +330,7 @@ export default function FinancesAnalysis() {
     return result
       .filter(item => item.size > 0)
       .sort((a, b) => b.size - a.size) // Sort by size descending
-  }, [expenseMovements])
+  }, [expenseMovements, currencyView])
 
   // Process data for radial sunburst chart - hierarchical structure
   const sunburstRadialData = useMemo(() => {
@@ -332,7 +340,11 @@ export default function FinancesAnalysis() {
     expenseMovements.forEach(movement => {
       const category = movement.movement_data?.category?.name || 'Sin categoría'
       const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
-      const amount = Math.abs(movement.amount)
+      const currencyCode = movement.movement_data?.currency?.code || 'ARS'
+      const exchangeRate = movement.exchange_rate || 1
+      
+      // Convert amount based on currency view for sunburst radial
+      const convertedAmount = convertAmount(Math.abs(movement.amount), currencyCode, exchangeRate)
       
       if (!categoryGroups.has(category)) {
         categoryGroups.set(category, [])
@@ -340,12 +352,12 @@ export default function FinancesAnalysis() {
       
       const existing = categoryGroups.get(category)!.find(item => item.subcategory === subcategory)
       if (existing) {
-        existing.amount += amount
+        existing.amount += convertedAmount
       } else {
-        categoryGroups.get(category)!.push({ subcategory, amount, percentage: 0 })
+        categoryGroups.get(category)!.push({ subcategory, amount: convertedAmount, percentage: 0 })
       }
       
-      totalAmount += amount
+      totalAmount += convertedAmount
     })
 
     // Calculate percentages and convert to sunburst format
@@ -377,7 +389,7 @@ export default function FinancesAnalysis() {
       const totalB = b.children.reduce((sum, child) => sum + child.value, 0)
       return totalB - totalA
     })
-  }, [expenseMovements])
+  }, [expenseMovements, currencyView])
 
   // Columns for grouped view (without category column)
   const getGroupedColumns = () => {
@@ -468,9 +480,15 @@ export default function FinancesAnalysis() {
               key="currency-view"
               variant="ghost"
               onClick={() => {
-                const nextView = currencyView === 'discriminado' ? 'pesificado' : 
-                                currencyView === 'pesificado' ? 'dolarizado' : 'discriminado'
-                setCurrencyView(nextView)
+                if (activeTab === "charts") {
+                  // En pestaña de gráficos: solo pesificado <-> dolarizado
+                  setCurrencyView(currencyView === 'pesificado' ? 'dolarizado' : 'pesificado')
+                } else {
+                  // En pestaña de análisis: ciclo completo con discriminado
+                  const nextView = currencyView === 'discriminado' ? 'pesificado' : 
+                                  currencyView === 'pesificado' ? 'dolarizado' : 'discriminado'
+                  setCurrencyView(nextView)
+                }
               }}
               className="flex items-center gap-2"
             >
