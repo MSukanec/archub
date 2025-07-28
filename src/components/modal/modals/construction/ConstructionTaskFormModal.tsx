@@ -11,10 +11,12 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter, X } from "lucide-react";
+import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
+import { ParametricTaskBuilder } from "@/components/ui-custom/ParametricTaskBuilder";
+import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 
 
 import { toast } from "@/hooks/use-toast";
@@ -40,6 +42,15 @@ interface SelectedTask {
   project_phase_id?: string;
 }
 
+interface ParameterSelection {
+  parameterId: string;
+  optionId: string;
+  parameterSlug: string;
+  parameterLabel: string;
+  optionName: string;
+  optionLabel: string;
+}
+
 interface ConstructionTaskFormModalProps {
   modalData: {
     projectId: string;
@@ -60,8 +71,18 @@ export function ConstructionTaskFormModal({
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
   const [rubroFilter, setRubroFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [showParametricTaskCreator, setShowParametricTaskCreator] = useState(false);
+  
+  // Estados para el subformulario paramétrico
+  const [parametricSelections, setParametricSelections] = useState<ParameterSelection[]>([]);
+  const [parametricTaskPreview, setParametricTaskPreview] = useState<string>('');
+  const [parametricParameterOrder, setParametricParameterOrder] = useState<string[]>([]);
+  const [isCreatingParametricTask, setIsCreatingParametricTask] = useState(false);
   
   const { data: userData } = useCurrentUser();
+  
+  // Hook para crear tarea paramétrica
+  const createGeneratedTask = useCreateGeneratedTask();
   
   // Query para obtener la membresía actual del usuario en la organización
   const { data: organizationMember } = useQuery({
@@ -216,6 +237,68 @@ export function ConstructionTaskFormModal({
 
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
+
+  // Función para manejar la creación de tarea paramétrica
+  const handleCreateParametricTask = async () => {
+    if (parametricSelections.length === 0) {
+      toast({
+        title: "Error",
+        description: "Debes seleccionar al menos un parámetro",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingParametricTask(true);
+
+    try {
+      // Preparar los datos para crear la tarea paramétrica
+      const paramValues: Record<string, string> = {};
+      parametricSelections.forEach(selection => {
+        paramValues[selection.parameterSlug] = selection.optionId;
+      });
+
+      console.log('🚀 Creando tarea paramétrica con valores:', {
+        paramValues,
+        paramOrder: parametricParameterOrder,
+        preview: parametricTaskPreview
+      });
+
+      const newTask = await createGeneratedTask.mutateAsync({
+        param_values: paramValues,
+        param_order: parametricParameterOrder
+      });
+
+      console.log('✅ Nueva tarea paramétrica creada:', newTask);
+
+      // Agregar la nueva tarea como seleccionada en el formulario principal
+      setSelectedTasks(prev => [...prev, { 
+        task_id: newTask.id, 
+        quantity: 1 
+      }]);
+
+      // Limpiar el subformulario
+      setParametricSelections([]);
+      setParametricTaskPreview('');
+      setParametricParameterOrder([]);
+      setShowParametricTaskCreator(false);
+
+      toast({
+        title: "Tarea creada",
+        description: "La nueva tarea paramétrica se creó y agregó correctamente",
+      });
+
+    } catch (error) {
+      console.error('❌ Error creando tarea paramétrica:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la tarea paramétrica",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingParametricTask(false);
+    }
+  };
 
   const onSubmit = async (data: AddTaskFormData) => {
     console.log('🚀 SUBMIT INICIADO - Datos del formulario:', data);
@@ -441,8 +524,27 @@ export function ConstructionTaskFormModal({
           <ScrollArea className="h-[350px]">
             <div className="divide-y">
               {filteredTasks.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
+                <div className="text-center py-8 space-y-4">
+                  <div className="text-muted-foreground">
+                    {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
+                  </div>
+                  {searchQuery && (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        ¿No encuentras la tarea que necesitas?
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowParametricTaskCreator(true)}
+                        className="gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Crear Tarea Personalizada
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 filteredTasks.map((task) => {
@@ -579,6 +681,79 @@ export function ConstructionTaskFormModal({
           </ScrollArea>
         </div>
       </div>
+
+      {/* Subformulario Paramétrico */}
+      {showParametricTaskCreator && (
+        <div className="border-t pt-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-accent" />
+              <h3 className="text-lg font-semibold">Crear Nueva Tarea Paramétrica</h3>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowParametricTaskCreator(false);
+                setParametricSelections([]);
+                setParametricTaskPreview('');
+                setParametricParameterOrder([]);
+              }}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {/* ParametricTaskBuilder Component */}
+            <ParametricTaskBuilder
+              selections={parametricSelections}
+              onSelectionsChange={setParametricSelections}
+              taskPreview={parametricTaskPreview}
+              onTaskPreviewChange={setParametricTaskPreview}
+              parameterOrder={parametricParameterOrder}
+              onParameterOrderChange={setParametricParameterOrder}
+              existingParamValues={null}
+              existingParamOrder={null}
+            />
+
+            {/* Botones del subformulario */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowParametricTaskCreator(false);
+                  setParametricSelections([]);
+                  setParametricTaskPreview('');
+                  setParametricParameterOrder([]);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCreateParametricTask}
+                disabled={parametricSelections.length === 0 || isCreatingParametricTask}
+                className="gap-2"
+              >
+                {isCreatingParametricTask ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Crear Nueva Tarea
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 
