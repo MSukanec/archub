@@ -70,8 +70,8 @@ export default function FinancesAnalysis() {
         id: key,
         category,
         subcategory,
-        currency_symbol: currencyView === 'discriminado' ? currencyCode : 
-          (currencyView === 'pesificado' ? 'ARS' : 'USD'),
+        currency_symbol: currencyView === 'discriminado' ? (currencyCode === 'USD' ? 'US$' : '$') : 
+          (currencyView === 'pesificado' ? '$' : 'US$'),
         amount: convertedAmount,
         original_currency: currencyCode
       })
@@ -98,20 +98,21 @@ export default function FinancesAnalysis() {
     item.subcategory.toLowerCase().includes(searchValue.toLowerCase())
   )
 
-  const formatAmount = (amount: number): string => {
-    return new Intl.NumberFormat('es-AR', {
+  const formatAmount = (amount: number, currencySymbol: string = 'ARS'): string => {
+    const formattedNumber = new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount)
+    return `${currencySymbol} ${formattedNumber}`
   }
 
-  // Define table columns based on currency view
+  // Define table columns (always 4 columns, no currency column)
   const getColumns = () => {
-    const baseColumns = [
+    return [
       {
         key: 'category',
         label: 'Categoría',
-        width: currencyView === 'discriminado' ? '20%' : '25%',
+        width: '25%',
         render: (item: any) => (
           <Badge variant="outline" className="text-xs">
             {item.category}
@@ -121,38 +122,20 @@ export default function FinancesAnalysis() {
       {
         key: 'subcategory',
         label: 'Subcategoría',
-        width: currencyView === 'discriminado' ? '20%' : '25%',
+        width: '25%',
         render: (item: any) => (
           <Badge variant="secondary" className="text-xs">
             {item.subcategory}
           </Badge>
         )
       },
-    ]
-
-    // Add currency column only for discriminado view
-    if (currencyView === 'discriminado') {
-      baseColumns.push({
-        key: 'currency_symbol',
-        label: 'Moneda',
-        width: '15%',
-        render: (item: any) => (
-          <div className="font-medium text-sm">
-            {item.currency_symbol}
-          </div>
-        )
-      })
-    }
-
-    // Add amount and percentage columns
-    baseColumns.push(
       {
         key: 'amount',
         label: 'Monto',
-        width: currencyView === 'discriminado' ? '20%' : '25%',
+        width: '25%',
         render: (item: any) => (
           <div className="font-medium text-sm text-red-600 dark:text-red-400">
-            {formatAmount(item.amount)}
+            {formatAmount(item.amount, item.currency_symbol)}
           </div>
         )
       },
@@ -166,9 +149,7 @@ export default function FinancesAnalysis() {
           </div>
         )
       }
-    )
-
-    return baseColumns
+    ]
   }
 
   const columns = getColumns()
@@ -195,7 +176,42 @@ export default function FinancesAnalysis() {
   }, [filteredData, groupByCategory])
 
   // Columns for grouped view (without category column)
-  const groupedColumns = columns.filter(col => col.key !== 'category')
+  const getGroupedColumns = () => {
+    return [
+      {
+        key: 'subcategory',
+        label: 'Subcategoría',
+        width: '40%',
+        render: (item: any) => (
+          <Badge variant="secondary" className="text-xs">
+            {item.subcategory}
+          </Badge>
+        )
+      },
+      {
+        key: 'amount',
+        label: 'Monto',
+        width: '30%',
+        render: (item: any) => (
+          <div className="font-medium text-sm text-red-600 dark:text-red-400">
+            {formatAmount(item.amount, item.currency_symbol)}
+          </div>
+        )
+      },
+      {
+        key: 'percentage',
+        label: '% de Incidencia',
+        width: '30%',
+        render: (item: any) => (
+          <div className="font-medium text-sm">
+            {item.percentage}%
+          </div>
+        )
+      }
+    ]
+  }
+
+  const groupedColumns = getGroupedColumns()
 
   const features = [
     {
@@ -272,25 +288,16 @@ export default function FinancesAnalysis() {
               renderGroupHeader={(groupKey: string, groupRows: any[]) => {
                 const totalAmount = groupRows.reduce((sum, item) => sum + item.amount, 0);
                 const totalPercentage = groupRows.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2);
+                // Use the currency from the first item in the group for the total
+                const currencySymbol = groupRows[0]?.currency_symbol || 'ARS';
                 
-                if (currencyView === 'discriminado') {
-                  return (
-                    <>
-                      <div className="col-span-1 truncate">{groupKey}</div>
-                      <div className="col-span-1"></div> {/* Moneda - vacío en header */}
-                      <div className="col-span-1">{formatAmount(totalAmount)}</div>
-                      <div className="col-span-1">{totalPercentage}%</div>
-                    </>
-                  );
-                } else {
-                  return (
-                    <>
-                      <div className="col-span-1 truncate">{groupKey}</div>
-                      <div className="col-span-1">{formatAmount(totalAmount)}</div>
-                      <div className="col-span-1">{totalPercentage}%</div>
-                    </>
-                  );
-                }
+                return (
+                  <>
+                    <div className="col-span-1 truncate">{groupKey}</div>
+                    <div className="col-span-1">{formatAmount(totalAmount, currencySymbol)}</div>
+                    <div className="col-span-1">{totalPercentage}%</div>
+                  </>
+                );
               }}
               emptyState={
                 <EmptyState
