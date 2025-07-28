@@ -7,9 +7,11 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -18,10 +20,9 @@ export default function FinancesAnalysis() {
   const [activeTab, setActiveTab] = useState("analysis")
   
   const { data: userData } = useCurrentUser()
-  const { selectedProject, selectedOrganization } = useNavigationStore()
   
-  const organizationId = selectedOrganization?.id || userData?.preferences?.last_organization_id
-  const projectId = selectedProject?.id || userData?.preferences?.last_project_id
+  const organizationId = userData?.preferences?.last_organization_id
+  const projectId = userData?.preferences?.last_project_id
 
   // Get movements data
   const { data: movements = [], isLoading } = useMovements(
@@ -183,6 +184,38 @@ export default function FinancesAnalysis() {
     }))
   }, [filteredData, groupByCategory])
 
+  // Process data for pie chart - group by main categories
+  const chartData = useMemo(() => {
+    const categoryTotals = new Map<string, number>()
+    let totalAmount = 0
+
+    // Group by category and sum amounts
+    expenseMovements.forEach(movement => {
+      const category = movement.movement_data?.category?.name || 'Sin categoría'
+      const amount = Math.abs(movement.amount)
+      
+      categoryTotals.set(category, (categoryTotals.get(category) || 0) + amount)
+      totalAmount += amount
+    })
+
+    // Convert to chart format with specific colors for our 3 categories
+    const colors = {
+      'Mano de Obra': 'hsl(110, 40%, 50%)', // Verde
+      'Materiales': 'hsl(0, 87%, 67%)',     // Rojo
+      'Indirectos': 'hsl(43, 74%, 66%)'     // Amarillo
+    }
+
+    return Array.from(categoryTotals.entries())
+      .map(([category, amount]) => ({
+        category,
+        amount,
+        percentage: totalAmount > 0 ? Number(((amount / totalAmount) * 100).toFixed(1)) : 0,
+        color: colors[category as keyof typeof colors] || 'hsl(0, 0%, 50%)'
+      }))
+      .sort((a, b) => b.amount - a.amount) // Sort by amount descending
+      .filter(item => item.amount > 0) // Only include positive amounts
+  }, [expenseMovements])
+
   // Columns for grouped view (without category column)
   const getGroupedColumns = () => {
     return [
@@ -312,7 +345,7 @@ export default function FinancesAnalysis() {
                 mode="construction"
                 renderGroupHeader={(groupKey: string, groupRows: any[]) => {
                   // Check if all items in group have same currency
-                  const currencies = [...new Set(groupRows.map(item => item.currency_symbol))];
+                  const currencies = Array.from(new Set(groupRows.map(item => item.currency_symbol)));
                   const hasMixedCurrencies = currencies.length > 1;
                   
                   if (currencyView === 'discriminado' && hasMixedCurrencies) {
@@ -375,15 +408,33 @@ export default function FinancesAnalysis() {
             />
           )
         ) : (
-          // Tab Gráficos - Contenido futuro
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-12 text-center">
-            <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-            <h3 className="text-lg font-medium text-muted-foreground mb-2">
-              Gráficos en Desarrollo
-            </h3>
-            <p className="text-sm text-muted-foreground/75">
-              Próximamente: visualizaciones gráficas del análisis de gastos por categoría.
-            </p>
+          // Tab Gráficos - Gráfico de torta por categorías
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <PieChart className="h-5 w-5" />
+                  Egresos por Subcategorías
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Distribución de gastos por tipo de categoría
+                </p>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
+              </CardContent>
+            </Card>
+            
+            {/* Placeholder para futuros gráficos */}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 flex flex-col items-center justify-center text-center">
+              <BarChart3 className="h-8 w-8 mb-3 text-muted-foreground/50" />
+              <h3 className="text-base font-medium text-muted-foreground mb-2">
+                Próximo Gráfico
+              </h3>
+              <p className="text-sm text-muted-foreground/75">
+                Espacio reservado para visualizaciones adicionales.
+              </p>
+            </div>
           </div>
         )}
       </div>
