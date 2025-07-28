@@ -37,7 +37,7 @@ type AddTaskFormData = z.infer<typeof addTaskSchema>;
 interface SelectedTask {
   task_id: string;
   quantity: number;
-  phase_id?: string;
+  project_phase_id?: string;
 }
 
 interface ConstructionTaskFormModalProps {
@@ -263,7 +263,7 @@ export function ConstructionTaskFormModal({
           quantity: firstSelected.quantity,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
-          phase_id: firstSelected.phase_id || undefined
+          project_phase_id: firstSelected.project_phase_id || undefined
         });
 
         toast({
@@ -280,7 +280,7 @@ export function ConstructionTaskFormModal({
           taskDetails: selectedTasks.map(st => ({
             task_id: st.task_id,
             quantity: st.quantity,
-            phase_id: st.phase_id
+            project_phase_id: st.project_phase_id
           }))
         });
 
@@ -297,7 +297,7 @@ export function ConstructionTaskFormModal({
             organization_id: modalData.organizationId,
             project_id: modalData.projectId,
             created_by: createdById,
-            phase_id: selectedTask.phase_id || undefined
+            project_phase_id: selectedTask.project_phase_id || undefined
           });
           
           return createTask.mutateAsync({
@@ -306,7 +306,7 @@ export function ConstructionTaskFormModal({
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
             created_by: createdById,
-            phase_id: selectedTask.phase_id || undefined
+            project_phase_id: selectedTask.project_phase_id || undefined
           }).catch(error => {
             console.error(`❌ Error en tarea ${index + 1}:`, error);
             throw error;
@@ -536,11 +536,11 @@ export function ConstructionTaskFormModal({
                       {/* Fase Select */}
                       <div className="w-20">
                         <Select 
-                          value={selectedTask.phase_id || ""}
+                          value={selectedTask.project_phase_id || ""}
                           onValueChange={(value) => {
                             setSelectedTasks(prev => 
                               prev.map((t, i) => 
-                                i === index ? { ...t, phase_id: value } : t
+                                i === index ? { ...t, project_phase_id: value } : t
                               )
                             );
                           }}

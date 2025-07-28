@@ -196,7 +196,7 @@ export function useCreateConstructionTask() {
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
-      phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id)
+      project_phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id) para crear en construction_phase_tasks
       progress_percent?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -212,11 +212,10 @@ export function useCreateConstructionTask() {
         created_by: taskData.created_by,
         start_date: taskData.start_date || null,
         end_date: taskData.end_date || null,
-        duration_in_days: taskData.duration_in_days || null,
-        phase_id: taskData.phase_id || null
+        duration_in_days: taskData.duration_in_days || null
       };
 
-      console.log('📝 DATOS PREPARADOS PARA INSERT (con phase_id):', insertData);
+      console.log('📝 DATOS PREPARADOS PARA INSERT (construction_tasks):', insertData);
 
       // Crear la tarea de construcción
       const { data: constructionTask, error: taskError } = await supabase
@@ -233,6 +232,27 @@ export function useCreateConstructionTask() {
       }
 
       console.log('✅ TAREA DE CONSTRUCCION CREADA EXITOSAMENTE:', constructionTask);
+
+      // Si se especifica una fase, crear la relación en construction_phase_tasks
+      if (taskData.project_phase_id) {
+        console.log('📋 CREANDO RELACION FASE-TAREA para phase_id:', taskData.project_phase_id);
+        
+        const { error: phaseTaskError } = await supabase
+          .from('construction_phase_tasks')
+          .insert({
+            construction_task_id: constructionTask.id,
+            project_phase_id: taskData.project_phase_id,
+            project_id: taskData.project_id,
+            progress_percent: 0
+          });
+
+        if (phaseTaskError) {
+          console.error('❌ ERROR CREANDO RELACION FASE-TAREA:', phaseTaskError);
+          // No lanzamos error porque la tarea principal ya se creó
+        } else {
+          console.log('✅ RELACION FASE-TAREA CREADA EXITOSAMENTE');
+        }
+      }
 
       return constructionTask;
     },
