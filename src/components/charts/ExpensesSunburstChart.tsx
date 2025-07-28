@@ -32,18 +32,25 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
     )
   }
 
-  // Map CSS variables to actual HSL values for display
-  const colorMap = {
-    'var(--chart-1)': 'hsl(76, 100%, 40%)',   // Verde - Mano de Obra
-    'var(--chart-2)': 'hsl(173, 58%, 39%)',   // Azul-Verde - Materiales
-    'var(--chart-3)': 'hsl(197, 37%, 24%)'    // Azul - Indirectos
+  // Create category color mapping based on category names
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Mano de Obra':
+        return 'hsl(76, 100%, 40%)'   // Verde - var(--chart-1)
+      case 'Materiales':
+        return 'hsl(173, 58%, 39%)'   // Azul-Verde - var(--chart-2)
+      case 'Indirectos':
+        return 'hsl(197, 37%, 24%)'   // Azul - var(--chart-3)
+      default:
+        return 'hsl(76, 100%, 40%)'   // Fallback verde
+    }
   }
 
   // Prepare data for the single ring - categories only
   const categoryData = data.map(item => ({
     name: item.category,
     value: item.amount,
-    color: colorMap[item.color as keyof typeof colorMap] || item.color,
+    color: getCategoryColor(item.category),
     percentage: item.percentage
   }))
 
@@ -85,32 +92,22 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
         </ResponsiveContainer>
       </div>
       
-      {/* Legend - Compact for mobile */}
+      {/* Legend with correct colors */}
       <div className="border-t pt-3">
-        <div className="text-xs font-medium text-muted-foreground mb-2">Leyenda de Rubros:</div>
-        <div className="grid grid-cols-3 md:grid-cols-1 gap-1 md:gap-2 text-xs">
+        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda de Rubros:</div>
+        <div className="space-y-2">
           {categoryData.map((category, index) => (
-            <div key={index} className="flex items-center md:justify-between">
-              <div className="flex items-center gap-1 md:gap-2 min-w-0">
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 <div 
-                  className="w-2 h-2 md:w-3 md:h-3 rounded-sm flex-shrink-0"
+                  className="w-4 h-4 rounded-sm flex-shrink-0"
                   style={{ backgroundColor: category.color }}
                 />
-                <span className="font-medium truncate text-xs">{category.name}</span>
+                <span className="font-medium text-sm">{category.name}</span>
               </div>
-              <span className="hidden md:inline text-muted-foreground font-medium text-xs">
+              <span className="text-muted-foreground font-medium text-sm">
                 {formatCurrency(category.value)}
               </span>
-            </div>
-          ))}
-        </div>
-        
-        {/* Mobile summary */}
-        <div className="md:hidden mt-2 pt-2 border-t space-y-1">
-          {categoryData.map((category, index) => (
-            <div key={`mobile-${index}`} className="flex justify-between text-xs">
-              <span className="font-medium">{category.name}:</span>
-              <span className="text-muted-foreground">{category.percentage}%</span>
             </div>
           ))}
         </div>
