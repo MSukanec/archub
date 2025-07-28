@@ -13,7 +13,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
-  const [groupingType, setGroupingType] = useState('category')
+  const [groupByCategory, setGroupByCategory] = useState(true)
   
   const { data: userData } = useCurrentUser()
   const { selectedProject, selectedOrganization } = useNavigationStore()
@@ -68,22 +68,14 @@ export default function FinancesAnalysis() {
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(2) : '0.00'
   }))
 
-  // Sort by amount (highest first), then by subcategory alphabetically
-  const sortedAnalysis = analysisWithPercentage.sort((a, b) => {
-    if (b.amount !== a.amount) {
-      return b.amount - a.amount  // Ordenar por monto primero
-    }
-    return a.subcategory.localeCompare(b.subcategory)  // Luego por subcategoría A-Z
-  })
+  // Sort by amount (highest first)
+  const sortedAnalysis = analysisWithPercentage.sort((a, b) => b.amount - a.amount)
 
-  // Filter by search and add groupKey
+  // Filter by search
   const filteredData = sortedAnalysis.filter(item =>
     item.category.toLowerCase().includes(searchValue.toLowerCase()) ||
     item.subcategory.toLowerCase().includes(searchValue.toLowerCase())
-  ).map(item => ({
-    ...item,
-    groupKey: groupingType === 'category' ? item.category : 'Todas las categorías'
-  }))
+  )
 
   const formatAmount = (amount: number): string => {
     return new Intl.NumberFormat('es-AR', {
@@ -147,7 +139,7 @@ export default function FinancesAnalysis() {
 
   // Group data by category when grouping is enabled
   const groupedData = useMemo(() => {
-    if (groupingType !== 'category') return null
+    if (!groupByCategory) return null
     
     const groups = filteredData.reduce((acc: { [key: string]: any[] }, item) => {
       const category = item.category
@@ -164,7 +156,7 @@ export default function FinancesAnalysis() {
       totalAmount: items.reduce((sum, item) => sum + item.amount, 0),
       totalPercentage: items.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2)
     }))
-  }, [filteredData, groupingType])
+  }, [filteredData, groupByCategory])
 
   // Columns for grouped view (without category column)
   const groupedColumns = columns.filter(col => col.key !== 'category')
@@ -208,42 +200,58 @@ export default function FinancesAnalysis() {
           onSearchChange={setSearchValue}
           features={features}
           showProjectSelector={true}
-          showGrouping={true}
-          groupingType={groupingType}
-          onGroupingChange={setGroupingType}
+          customFilters={
+            <Button
+              variant={groupByCategory ? "default" : "outline"}
+              onClick={() => setGroupByCategory(!groupByCategory)}
+              className="h-8"
+            >
+              Agrupar por Categoría
+            </Button>
+          }
         />
 
         {filteredData.length > 0 ? (
-          <Table
-            columns={groupingType === 'category' ? groupedColumns : columns}
-            data={filteredData}
-            isLoading={isLoading}
-            groupBy={groupingType === 'category' ? 'groupKey' : undefined}
-            renderGroupHeader={(groupKey: string, groupRows: any[]) => {
-              const groupInfo = groupedData?.find(g => g.category === groupKey)
-              return (
-                <div className="grid grid-cols-4 gap-4 py-3 px-4 bg-muted/50 font-medium text-sm border-b">
-                  <div className="col-span-1">
-                    {groupKey}
+          groupByCategory && groupedData ? (
+            <Table
+              columns={groupedColumns}
+              data={filteredData}
+              isLoading={isLoading}
+              groupBy="category"
+              renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+                const groupInfo = groupedData.find(g => g.category === groupKey)
+                return (
+                  <div className="flex justify-between items-center py-2 px-4 bg-muted/50 font-medium text-sm">
+                    <span>{groupKey}</span>
+                    <div className="flex gap-4 text-xs text-muted-foreground">
+                      <span>Total: {formatAmount(groupInfo?.totalAmount || 0)}</span>
+                      <span>{groupInfo?.totalPercentage}%</span>
+                    </div>
                   </div>
-                  <div className="col-span-1 text-right">
-                    Total: {formatAmount(groupInfo?.totalAmount || 0)}
-                  </div>
-                  <div className="col-span-1 text-right">
-                    {groupInfo?.totalPercentage}%
-                  </div>
-                  <div className="col-span-1"></div>
-                </div>
-              )
-            }}
-            emptyState={
-              <EmptyState
-                icon={<BarChart3 className="h-8 w-8" />}
-                title="No hay datos que coincidan"
-                description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
-              />
-            }
-          />
+                )
+              }}
+              emptyState={
+                <EmptyState
+                  icon={<BarChart3 className="h-8 w-8" />}
+                  title="No hay datos que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+                />
+              }
+            />
+          ) : (
+            <Table
+              columns={columns}
+              data={filteredData}
+              isLoading={isLoading}
+              emptyState={
+                <EmptyState
+                  icon={<BarChart3 className="h-8 w-8" />}
+                  title="No hay datos que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+                />
+              }
+            />
+          )
         ) : expenseMovements.length === 0 ? (
           <EmptyState
             icon={<TrendingDown className="h-8 w-8" />}
