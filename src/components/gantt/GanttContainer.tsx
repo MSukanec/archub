@@ -446,8 +446,12 @@ export function GanttContainer({
         >
           {/* Columna Fase/Tarea - ancho calculado */}
           <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30"
-            style={{ width: `${leftPanelWidth - 150}px` }}>
+            style={{ width: `${leftPanelWidth - 225}px` }}>
             Fase / Tarea
+          </div>
+          {/* Columna Cantidad - 75px fijo */}
+          <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
+            Cantidad
           </div>
           {/* Columna Inicio - 75px fijo */}
           <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
@@ -578,7 +582,7 @@ export function GanttContainer({
                   <div className="bg-muted/30 w-full h-full flex relative">
                     {/* Columna Nombre - ancho calculado */}
                     <div className="flex items-center px-4 border-r border-[var(--table-header-border)]/30 overflow-hidden"
-                      style={{ width: `${leftPanelWidth - 150}px` }}>
+                      style={{ width: `${leftPanelWidth - 225}px` }}>
                       {/* Icono de colapso para fases header */}
                       {item.type === 'phase' && (
                         <button
@@ -598,6 +602,11 @@ export function GanttContainer({
                       <span className="text-xs text-foreground font-medium uppercase leading-tight line-clamp-2" title={item.name}>
                         {item.name}
                       </span>
+                    </div>
+                    
+                    {/* Columna Cantidad - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                      {/* Las fases no muestran cantidad */}
                     </div>
                     
                     {/* Columna Inicio - 75px fijo */}
@@ -693,7 +702,7 @@ export function GanttContainer({
                     {/* Columna Nombre - ancho calculado */}
                     <div className="flex items-center border-r border-[var(--table-header-border)]/30 overflow-hidden"
                       style={{ 
-                        width: `${leftPanelWidth - 150}px`,
+                        width: `${leftPanelWidth - 225}px`,
                         paddingLeft: `${4 + item.level * 16}px`, 
                         paddingRight: '16px' 
                       }}
@@ -722,6 +731,15 @@ export function GanttContainer({
                       >
                         {item.name}
                       </span>
+                    </div>
+                    
+                    {/* Columna Cantidad - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
+                      {item.type === 'task' && item.taskData?.quantity && item.taskData?.unit_name && (
+                        <span className="text-xs text-[var(--table-row-fg)]">
+                          {item.taskData.quantity} {item.taskData.unit_name}
+                        </span>
+                      )}
                     </div>
                     
                     {/* Columna Inicio - 75px fijo */}
@@ -782,7 +800,7 @@ export function GanttContainer({
                     
                     {/* Floating Action buttons - al final de la columna FASE/TAREA */}
                     {(onItemEdit || onItemDelete) && hoveredRowId === item.id && (
-                      <div className="absolute right-[152px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
+                      <div className="absolute right-[227px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onItemEdit && (
                           <button
                             onClick={(e) => {

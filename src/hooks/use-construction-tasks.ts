@@ -632,9 +632,17 @@ export function useDeleteConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-tasks', data.project_id, data.organization_id] 
       });
+      // ✅ INVALIDAR CACHE DE LA VISTA PARA CRONOGRAMA
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-tasks-view', data.project_id] 
+      });
       // Invalidar cache de materiales para que se actualice automáticamente
       queryClient.invalidateQueries({ 
         queryKey: ['construction-materials', data.project_id] 
+      });
+      // También invalidar dependencias para el cronograma
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-dependencies'] 
       });
       toast({
         title: "Tarea eliminada",
