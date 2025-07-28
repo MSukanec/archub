@@ -11,6 +11,7 @@ import UserSelector from "@/components/ui-custom/UserSelector"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Button } from "@/components/ui/button"
 import { Link } from "wouter"
+import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore"
 
 interface Props {
   form: UseFormReturn<MovementForm>
@@ -23,6 +24,7 @@ interface Props {
 
 export function AportesFields({ form, currencies, wallets, members, concepts, projectClients }: Props) {
   const { userData } = useCurrentUser()
+  const { closeModal } = useGlobalModalStore()
   
 
   
@@ -143,7 +145,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
                         Aún no tienes Clientes, ¿quieres agregar uno?
                       </p>
                       <Link href="/project/clients">
-                        <Button variant="default" size="sm">
+                        <Button variant="default" size="sm" onClick={closeModal}>
                           Agregar
                         </Button>
                       </Link>
