@@ -378,7 +378,7 @@ export function ConstructionTaskFormModal({
                     <div 
                       key={task.id} 
                       className={`p-3 hover:bg-muted/50 cursor-pointer border-b transition-all ${
-                        isSelected ? 'border-r-4 border-r-accent bg-muted/30' : ''
+                        isSelected ? 'border-l-4 border-l-accent bg-accent/10' : ''
                       }`}
                       onClick={() => {
                         // Permite agregar la misma tarea múltiples veces
@@ -432,11 +432,11 @@ export function ConstructionTaskFormModal({
                     <div key={`${selectedTask.task_id}-${index}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto auto auto"}}>
                       {/* Task Name */}
                       <div>
-                        <div className="text-sm leading-tight line-clamp-1">
-                          {task.display_name || 'Sin nombre'}
+                        <div className="text-sm leading-tight line-clamp-2">
+                          {task.name_rendered || 'Sin nombre'}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.rubro_name || 'Sin rubro'}</span>
+                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.unit_name || 'Sin unidad'}
                         </div>
                       </div>
 
