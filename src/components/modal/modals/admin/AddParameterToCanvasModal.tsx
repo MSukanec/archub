@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Parameter {
   id: string;
-  name: string;
   slug: string;
 }
 
@@ -30,33 +29,16 @@ export function AddParameterToCanvasModal() {
       
       const { data, error } = await supabase
         .from('task_parameters')
-        .select('id, name, slug')
-        .order('name');
+        .select('id, slug')
+        .order('slug');
       
       if (error) throw error;
       return data as Parameter[];
     }
   });
 
-  // Obtener parámetros que ya están en el canvas
-  const { data: existingPositions = [] } = useQuery({
-    queryKey: ['parameter-positions'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not available');
-      
-      const { data, error } = await supabase
-        .from('task_parameter_positions')
-        .select('parameter_id');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  // Filtrar parámetros que aún no están en el canvas
-  const availableParameters = parameters.filter(param => 
-    !existingPositions.some(pos => pos.parameter_id === param.id)
-  );
+  // Todos los parámetros están disponibles (se pueden crear múltiples nodos del mismo parámetro)
+  const availableParameters = parameters;
 
   const handleAdd = async () => {
     if (!selectedParameterId) {
@@ -134,7 +116,7 @@ export function AddParameterToCanvasModal() {
           <SelectContent>
             {availableParameters.map((parameter) => (
               <SelectItem key={parameter.id} value={parameter.id}>
-                {parameter.name} ({parameter.slug})
+                {parameter.slug}
               </SelectItem>
             ))}
           </SelectContent>
@@ -143,7 +125,7 @@ export function AddParameterToCanvasModal() {
 
       {availableParameters.length === 0 && !parametersLoading && (
         <div className="text-sm text-muted-foreground">
-          Todos los parámetros ya están en el canvas o no hay parámetros disponibles.
+          No hay parámetros disponibles en el sistema.
         </div>
       )}
     </div>
