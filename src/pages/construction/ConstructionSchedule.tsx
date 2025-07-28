@@ -280,7 +280,7 @@ export default function ConstructionSchedule() {
                 {
                   key: 'name_rendered',
                   label: 'Tarea',
-                  width: 'flex-1',
+                  width: '60%',
                   render: (task) => (
                     <span className="text-sm">
                       {cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre')}
