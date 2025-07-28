@@ -14,6 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
+import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -302,6 +303,61 @@ export default function FinancesAnalysis() {
       .sort((a, b) => b.size - a.size) // Sort by size descending
   }, [expenseMovements])
 
+  // Process data for radial sunburst chart - hierarchical structure
+  const sunburstRadialData = useMemo(() => {
+    const categoryGroups = new Map<string, Array<{ subcategory: string; amount: number; percentage: number }>>()
+    let totalAmount = 0
+    
+    expenseMovements.forEach(movement => {
+      const category = movement.movement_data?.category?.name || 'Sin categoría'
+      const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
+      const amount = Math.abs(movement.amount)
+      
+      if (!categoryGroups.has(category)) {
+        categoryGroups.set(category, [])
+      }
+      
+      const existing = categoryGroups.get(category)!.find(item => item.subcategory === subcategory)
+      if (existing) {
+        existing.amount += amount
+      } else {
+        categoryGroups.get(category)!.push({ subcategory, amount, percentage: 0 })
+      }
+      
+      totalAmount += amount
+    })
+
+    // Calculate percentages and convert to sunburst format
+    const result: Array<{
+      name: string
+      children: Array<{ name: string; value: number; percentage: number }>
+    }> = []
+
+    categoryGroups.forEach((subcategories, category) => {
+      const children = subcategories
+        .map(sub => ({
+          name: sub.subcategory,
+          value: sub.amount,
+          percentage: totalAmount > 0 ? Number(((sub.amount / totalAmount) * 100).toFixed(1)) : 0
+        }))
+        .filter(item => item.value > 0)
+        .sort((a, b) => b.value - a.value)
+
+      if (children.length > 0) {
+        result.push({
+          name: category,
+          children
+        })
+      }
+    })
+
+    return result.sort((a, b) => {
+      const totalA = a.children.reduce((sum, child) => sum + child.value, 0)
+      const totalB = b.children.reduce((sum, child) => sum + child.value, 0)
+      return totalB - totalA
+    })
+  }, [expenseMovements])
+
   // Columns for grouped view (without category column)
   const getGroupedColumns = () => {
     return [
@@ -543,6 +599,13 @@ export default function FinancesAnalysis() {
               </CardHeader>
               <CardContent className="pb-2">
                 <ExpensesTreemapChart data={treemapData || []} isLoading={isLoading} />
+              </CardContent>
+            </Card>
+
+            {/* Tercera fila - Sunburst Radial */}
+            <Card>
+              <CardContent className="p-6">
+                <ExpensesSunburstRadialChart data={sunburstRadialData || []} isLoading={isLoading} />
               </CardContent>
             </Card>
           </div>
