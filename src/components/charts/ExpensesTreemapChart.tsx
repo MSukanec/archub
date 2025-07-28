@@ -17,6 +17,8 @@ interface ExpensesTreemapChartProps {
 
 export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartProps) {
   
+  console.log('Treemap data received:', data)
+  
   if (isLoading) {
     return (
       <div className="h-80 flex items-center justify-center">
@@ -26,6 +28,7 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
   }
 
   if (!data || data.length === 0) {
+    console.log('No treemap data available')
     return (
       <div className="h-80 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">No hay datos de subcategorías</div>
@@ -41,53 +44,16 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
     }).format(value)
   }
 
-  const CustomizedContent = (props: any) => {
-    const { x, y, width, height, payload } = props
-    
-    if (!payload) return null
 
-    return (
-      <g>
-        <rect
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          style={{
-            fill: payload.color || '#8884d8',
-            stroke: '#fff',
-            strokeWidth: 2,
-            strokeOpacity: 1,
-          }}
-        />
-        {/* Only show text if rectangle is large enough */}
-        {width > 60 && height > 40 && payload.subcategory && (
-          <text
-            x={x + width / 2}
-            y={y + height / 2 - 8}
-            textAnchor="middle"
-            fill="#fff"
-            fontSize="12"
-            fontWeight="bold"
-          >
-            {payload.subcategory}
-          </text>
-        )}
-        {width > 80 && height > 60 && payload.percentage && (
-          <text
-            x={x + width / 2}
-            y={y + height / 2 + 8}
-            textAnchor="middle"
-            fill="#fff"
-            fontSize="10"
-            opacity={0.9}
-          >
-            {payload.percentage}%
-          </text>
-        )}
-      </g>
-    )
-  }
+
+  // Simplify data structure for treemap
+  const treemapData = data.map((item, index) => ({
+    name: item.subcategory,
+    size: item.size,
+    fill: item.color
+  }))
+
+  console.log('Processed treemap data:', treemapData)
 
   return (
     <div className="space-y-4">
@@ -95,11 +61,10 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <Treemap
-            data={data}
+            data={treemapData}
             dataKey="size"
             stroke="#fff"
-            fill="#8884d8"
-            content={<CustomizedContent />}
+            strokeWidth={1}
           />
         </ResponsiveContainer>
       </div>
