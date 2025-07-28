@@ -132,7 +132,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
               <Handle
                 type="source"
                 position={Position.Right}
-                id={`${parameter.id}-${option.id}`}
+                id={`${id}-${option.id}`}
                 style={{
                   right: -8, // Mismo nivel que el handle azul
                   top: '50%',
@@ -155,7 +155,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
       <Handle
         type="target"
         position={Position.Left}
-        id={`target-${parameter.id}`}
+        id={`target-${id}`}
         style={{
           left: -8, // Posición original del handle azul
           top: '50%',
@@ -785,33 +785,64 @@ function ParameterNodeEditorContent() {
 
   // Configurar edges desde dependencias
   useEffect(() => {
-    if (dependencies.length > 0) {
-      const initialEdges: Edge[] = dependencies.map((dep) => ({
-        id: `${dep.parent_parameter_id}-${dep.parent_option_id}-${dep.child_parameter_id}`,
-        source: dep.parent_parameter_id,
-        sourceHandle: `${dep.parent_parameter_id}-${dep.parent_option_id}`,
-        target: dep.child_parameter_id,
-        targetHandle: `target-${dep.child_parameter_id}`,
-        type: 'default',
-        animated: true,
-        style: {
-          stroke: '#10b981',
-          strokeWidth: 3,
-          cursor: 'pointer',
-        },
-        className: 'hoverable-edge',
-        data: {
-          parentParameterId: dep.parent_parameter_id,
-          parentOptionId: dep.parent_option_id,
-          childParameterId: dep.child_parameter_id
-        }
-      }));
+    if (dependencies.length > 0 && nodes.length > 0) {
+      console.log('🔗 Configurando edges desde dependencias:', dependencies.length);
+      
+      const initialEdges: Edge[] = dependencies.map((dep) => {
+        // Buscar todos los nodos que representan el parámetro parent
+        const parentNodes = nodes.filter(node => node.data.parameter.id === dep.parent_parameter_id);
+        // Buscar todos los nodos que representan el parámetro child
+        const childNodes = nodes.filter(node => node.data.parameter.id === dep.child_parameter_id);
+        
+        console.log(`🔗 Dependencia ${dep.parent_parameter_id} -> ${dep.child_parameter_id}:`, {
+          parentNodes: parentNodes.length,
+          childNodes: childNodes.length,
+          parentOptionId: dep.parent_option_id
+        });
+        
+        // Crear edges entre todas las combinaciones de nodos parent-child
+        // Solo si la opción parent está visible en el nodo
+        return parentNodes.flatMap(parentNode => {
+          const hasVisibleOption = parentNode.data.visibleOptions.includes(dep.parent_option_id);
+          if (!hasVisibleOption) {
+            console.log(`⚠️ Opción ${dep.parent_option_id} no visible en nodo ${parentNode.id}`);
+            return [];
+          }
+          
+          return childNodes.map(childNode => {
+            const edge = {
+              id: `${parentNode.id}-${dep.parent_option_id}-${childNode.id}`,
+              source: parentNode.id,
+              sourceHandle: `${parentNode.id}-${dep.parent_option_id}`,
+              target: childNode.id,
+              targetHandle: `target-${childNode.id}`,
+              type: 'default',
+              animated: true,
+              style: {
+                stroke: '#10b981',
+                strokeWidth: 3,
+                cursor: 'pointer',
+              },
+              className: 'hoverable-edge',
+              data: {
+                parentParameterId: dep.parent_parameter_id,
+                parentOptionId: dep.parent_option_id,
+                childParameterId: dep.child_parameter_id
+              }
+            };
+            
+            console.log(`✅ Edge creado: ${edge.source} (${edge.sourceHandle}) -> ${edge.target} (${edge.targetHandle})`);
+            return edge;
+          });
+        });
+      }).flat();
 
+      console.log(`🔗 Total edges configurados: ${initialEdges.length}`);
       setEdges(initialEdges);
     } else {
       setEdges([]);
     }
-  }, [dependencies.length]);
+  }, [dependencies.length, nodes.length, nodeVisibleOptions]);
 
   // Manejar nuevas conexiones
   const onConnect = useCallback(
@@ -859,7 +890,7 @@ function ParameterNodeEditorContent() {
         childParameterId: targetParamId
       });
     },
-    [createDependencyMutation, savedPositions]
+    [createDependencyMutation, nodes]
   );
 
   // Manejar eliminación de conexiones
