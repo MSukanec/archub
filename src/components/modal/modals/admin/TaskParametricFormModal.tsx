@@ -1,15 +1,21 @@
 import React, { useState } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useCreateGeneratedTask, useUpdateGeneratedTask } from '@/hooks/use-generated-tasks'
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial } from '@/hooks/use-generated-tasks'
+import { useMaterials } from '@/hooks/use-materials'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
-import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
+import { FormModalStepFooter } from '@/components/modal/form/FormModalStepFooter'
+import { FormModalStepHeader } from '@/components/modal/form/FormModalStepHeader'
 import { ParametricTaskBuilder } from '@/components/ui-custom/ParametricTaskBuilder'
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
-import { Zap, Sparkles } from 'lucide-react'
+import { Zap, Package, Plus, Trash2 } from 'lucide-react'
 
 interface ParametricTaskFormModalProps {
   modalData?: {
@@ -30,10 +36,16 @@ interface ParameterSelection {
 }
 
 export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFormModalProps) {
+  const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [parameterOrder, setParameterOrder] = useState<string[]>([])
+  const [savedTaskId, setSavedTaskId] = useState<string | null>(null)
+  const [taskMaterials, setTaskMaterials] = useState<Array<{id?: string, material_id: string, amount: number, material_name?: string, unit_name?: string}>>([])
+  const [selectedMaterialId, setSelectedMaterialId] = useState<string>('')
+  const [materialAmount, setMaterialAmount] = useState<string>('')
+  
   const { task, isEditing, taskData } = modalData || {}
   const actualTask = task || taskData
   
@@ -84,8 +96,34 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   // Use the new hooks for creating and updating tasks
   const createTaskMutation = useCreateGeneratedTask()
   const updateTaskMutation = useUpdateGeneratedTask()
+  const createTaskMaterialMutation = useCreateTaskMaterial()
+  
+  // Data hooks
+  const { userData } = useCurrentUser()
+  const { data: materials = [] } = useMaterials()
+  const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
 
-  const handleSubmit = async () => {
+  // Initialize task materials when editing
+  React.useEffect(() => {
+    if (isEditing && actualTask?.id) {
+      setSavedTaskId(actualTask.id)
+    }
+  }, [isEditing, actualTask?.id])
+
+  React.useEffect(() => {
+    if (existingTaskMaterials.length > 0) {
+      setTaskMaterials(existingTaskMaterials.map(tm => ({
+        id: tm.id,
+        material_id: tm.material_id,
+        amount: tm.amount,
+        material_name: tm.materials?.name,
+        unit_name: tm.materials?.units?.name
+      })))
+    }
+  }, [existingTaskMaterials])
+
+  // Step 1: Save task (existing functionality)
+  const handleStep1Submit = async () => {
     if (selections.length === 0) {
       toast({
         title: "Error",
@@ -128,9 +166,10 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
           param_order: parameterOrder
         })
         
+        setSavedTaskId(actualTask.id)
         toast({
           title: "Tarea actualizada",
-          description: `Tarea actualizada: "${taskPreview}"`,
+          description: `Tarea actualizada: "${taskPreview}". Ahora puedes agregar materiales.`,
         })
       } else {
         // Create new task using the centralized SQL function
@@ -140,14 +179,16 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         })
         
         console.log('✅ Task created with code:', result.generated_code);
+        setSavedTaskId(result.new_task?.id)
         
         toast({
           title: "Tarea generada",
-          description: `Tarea creada con código ${result.generated_code}: "${taskPreview}"`,
+          description: `Tarea creada con código ${result.generated_code}: "${taskPreview}". Ahora puedes agregar materiales.`,
         })
       }
       
-      onClose()
+      // Move to step 2
+      setCurrentStep(2)
     } catch (error) {
       console.error('Error processing task:', error)
       toast({
@@ -160,60 +201,232 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     }
   }
 
-  const viewPanel = (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-sm font-medium">Tarea generada</Label>
-        <p className="text-sm text-muted-foreground mt-1">{task?.preview || 'Sin vista previa'}</p>
-      </div>
-      <div>
-        <Label className="text-sm font-medium">Parámetros configurados</Label>
-        <p className="text-sm text-muted-foreground mt-1">
-          {Object.keys(task?.parameter_config || {}).length} parámetros seleccionados
-        </p>
-      </div>
-    </div>
-  )
+  // Step 2: Add material to task
+  const handleAddMaterial = async () => {
+    if (!selectedMaterialId || !materialAmount || !savedTaskId || !userData?.organization?.id) {
+      toast({
+        title: "Error",
+        description: "Debes seleccionar un material y especificar la cantidad.",
+        variant: "destructive",
+      })
+      return
+    }
 
-  const editPanel = (
-    <div className="space-y-6">
-      {/* Componente constructor de parámetros */}
-      <ParametricTaskBuilder 
-        onSelectionChange={setSelections}
-        onPreviewChange={setTaskPreview}
-        onOrderChange={setParameterOrder}
-        initialParameters={existingParamValues ? JSON.stringify(existingParamValues) : null}
-        initialParameterOrder={existingParamOrder || null}
-      />
-    </div>
-  )
+    try {
+      setIsLoading(true)
+      
+      await createTaskMaterialMutation.mutateAsync({
+        task_id: savedTaskId,
+        material_id: selectedMaterialId,
+        amount: parseFloat(materialAmount),
+        organization_id: userData.organization.id
+      })
 
+      // Add to local state for immediate UI update
+      const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
+      setTaskMaterials(prev => [...prev, {
+        material_id: selectedMaterialId,
+        amount: parseFloat(materialAmount),
+        material_name: selectedMaterial?.name,
+        unit_name: selectedMaterial?.unit?.name
+      }])
+
+      // Clear form
+      setSelectedMaterialId('')
+      setMaterialAmount('')
+      
+      toast({
+        title: "Material agregado",
+        description: "El material se agregó correctamente a la tarea.",
+      })
+    } catch (error) {
+      console.error('Error adding material:', error)
+      toast({
+        title: "Error",
+        description: "Error al agregar el material.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Final step: Complete and close
+  const handleComplete = () => {
+    toast({
+      title: "Tarea completada",
+      description: `Tarea guardada con ${taskMaterials.length} materiales.`,
+    })
+    onClose()
+  }
+
+  // Get material options for ComboBox
+  const materialOptions = materials.map(material => ({
+    value: material.id,
+    label: material.name
+  }))
+
+  // Get selected material unit
+  const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
+  const selectedMaterialUnit = selectedMaterial?.unit?.name || ''
+
+  // Step panel content
+  const getStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground">PASO 1 DE 2</Label>
+              <h3 className="text-lg font-medium mt-1">Configurar Parámetros de Tarea</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Selecciona los parámetros para generar la tarea paramétrica.
+              </p>
+            </div>
+            
+            <Separator />
+            
+            {/* Componente constructor de parámetros */}
+            <ParametricTaskBuilder 
+              onSelectionChange={setSelections}
+              onPreviewChange={setTaskPreview}
+              onOrderChange={setParameterOrder}
+              initialParameters={existingParamValues ? JSON.stringify(existingParamValues) : null}
+              initialParameterOrder={existingParamOrder || null}
+            />
+          </div>
+        )
+      
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground">PASO 2 DE 2</Label>
+              <h3 className="text-lg font-medium mt-1">Agregar Materiales</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Agrega materiales necesarios para esta tarea. La tarea ya fue guardada exitosamente.
+              </p>
+            </div>
+            
+            <Separator />
+            
+            {/* Agregar material */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="material-select" className="text-xs font-medium">Material</Label>
+                  <ComboBox
+                    options={materialOptions}
+                    value={selectedMaterialId}
+                    onValueChange={setSelectedMaterialId}
+                    placeholder="Buscar material..."
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="material-amount" className="text-xs font-medium">Cantidad</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="material-amount"
+                      type="number"
+                      value={materialAmount}
+                      onChange={(e) => setMaterialAmount(e.target.value)}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                    />
+                    {selectedMaterialUnit && (
+                      <Badge variant="outline" className="text-xs">
+                        {selectedMaterialUnit}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={handleAddMaterial}
+                disabled={!selectedMaterialId || !materialAmount || isLoading}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Material
+              </Button>
+            </div>
+            
+            {/* Lista de materiales agregados */}
+            {taskMaterials.length > 0 && (
+              <>
+                <Separator />
+                <div>
+                  <Label className="text-sm font-medium">Materiales Agregados</Label>
+                  <div className="mt-2 space-y-2">
+                    {taskMaterials.map((material, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{material.material_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {material.amount} {material.unit_name}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setTaskMaterials(prev => prev.filter((_, i) => i !== index))
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )
+      
+      default:
+        return null
+    }
+  }
+
+  // Header content
   const headerContent = (
-    <FormModalHeader 
-      title={actualTask ? "Editar Tarea Paramétrica" : "Nueva Tarea Paramétrica"}
+    <FormModalStepHeader 
+      title="Editar Tarea para Métrica"
       icon={Zap}
+      currentStep={currentStep}
+      totalSteps={2}
+      stepDescription={currentStep === 1 ? "Configurar parámetros de la tarea" : "Agregar materiales a la tarea"}
     />
   )
 
+  // Footer content
   const footerContent = (
-    <FormModalFooter
+    <FormModalStepFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={actualTask ? "Actualizar Tarea" : "Crear Tarea"}
-      onRightClick={handleSubmit}
-      isLoading={isLoading}
+      rightLabel={currentStep === 1 ? "Guardar y Continuar" : "Finalizar"}
+      onRightClick={currentStep === 1 ? handleStep1Submit : handleComplete}
+      rightLoading={isLoading}
+      showBackButton={currentStep > 1}
+      onBackClick={() => setCurrentStep(1)}
     />
   )
 
   return (
-    <FormModalLayout
-      columns={1}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={onClose}
-      isEditing={true}
-    />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-background border rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+        {headerContent}
+        
+        <div className="flex-1 overflow-y-auto p-6">
+          {getStepContent()}
+        </div>
+        
+        {footerContent}
+      </div>
+    </div>
   )
 }
