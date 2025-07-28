@@ -406,13 +406,21 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   // Footer content
   const footerContent = (
     <FormModalStepFooter
-      leftLabel="Cancelar"
-      onLeftClick={onClose}
-      rightLabel={currentStep === 1 ? "Guardar y Continuar" : "Finalizar"}
-      onRightClick={currentStep === 1 ? handleStep1Submit : handleComplete}
-      rightLoading={isLoading}
-      showBackButton={currentStep > 1}
-      onBackClick={() => setCurrentStep(1)}
+      config={{
+        cancelAction: {
+          label: "Cancelar",
+          onClick: onClose
+        },
+        previousAction: currentStep > 1 ? {
+          label: "Atrás",
+          onClick: () => setCurrentStep(1)
+        } : undefined,
+        submitAction: {
+          label: currentStep === 1 ? "Guardar y Continuar" : "Finalizar",
+          onClick: currentStep === 1 ? handleStep1Submit : handleComplete,
+          loading: isLoading
+        }
+      }}
     />
   )
 
