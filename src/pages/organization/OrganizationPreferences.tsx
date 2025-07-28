@@ -6,7 +6,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
+import { ComboBoxMultiRows } from '@/components/ui-custom/ComboBoxMultiRows';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Button } from '@/components/ui/button';
@@ -466,15 +466,15 @@ export default function OrganizationPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-                <ComboBoxMultiSelect
+                <ComboBoxMultiRows
                   options={availableSecondaryCurrencies.map(currency => ({
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
                   }))}
                   value={secondaryCurrencies}
                   onChange={handleSecondaryCurrenciesChange}
-                  placeholder="Selecciona monedas secundarias"
-                  searchPlaceholder="Buscar monedas..."
+                  placeholder="Selecciona una moneda secundaria"
+                  addButtonText="Agregar Moneda"
                 />
               </div>
 
@@ -496,15 +496,15 @@ export default function OrganizationPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
-                <ComboBoxMultiSelect
+                <ComboBoxMultiRows
                   options={availableSecondaryWallets.map(wallet => ({
                     value: wallet.id,
                     label: wallet.name
                   }))}
                   value={secondaryWallets}
                   onChange={handleSecondaryWalletsChange}
-                  placeholder="Selecciona billeteras secundarias"
-                  searchPlaceholder="Buscar billeteras..."
+                  placeholder="Selecciona una billetera secundaria"
+                  addButtonText="Agregar Billetera"
                 />
               </div>
             </div>
