@@ -32,25 +32,11 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
     )
   }
 
-  // Create category color mapping based on category names
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'Mano de Obra':
-        return 'hsl(76, 100%, 40%)'   // Verde - var(--chart-1)
-      case 'Materiales':
-        return 'hsl(173, 58%, 39%)'   // Azul-Verde - var(--chart-2)
-      case 'Indirectos':
-        return 'hsl(197, 37%, 24%)'   // Azul - var(--chart-3)
-      default:
-        return 'hsl(76, 100%, 40%)'   // Fallback verde
-    }
-  }
-
   // Prepare data for the single ring - categories only
   const categoryData = data.map(item => ({
     name: item.category,
     value: item.amount,
-    color: getCategoryColor(item.category),
+    color: item.color,
     percentage: item.percentage
   }))
 
@@ -64,26 +50,24 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
 
   return (
     <div className="space-y-4">
-      {/* Chart - Responsive height and width */}
-      <div className="h-48 md:h-64 flex justify-center">
-        <div className="w-72 md:w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              {/* Single ring - Categories only */}
+      {/* Chart */}
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            {/* Single ring - Categories only */}
             <Pie
               data={categoryData}
               dataKey="value"
               cx="50%"
               cy="50%"
-              innerRadius={25}
-              outerRadius={55}
+              innerRadius={40}
+              outerRadius={90}
               startAngle={90}
               endAngle={450}
               label={({ name, percentage }) => 
-                percentage > 8 ? `${name}` : '' // Simplified labels for mobile
+                percentage > 5 ? `${name} (${percentage}%)` : ''
               }
               labelLine={false}
-              style={{ fontSize: '11px' }} // Smaller font for mobile
             >
               {categoryData.map((entry, index) => (
                 <Cell key={`category-cell-${index}`} fill={entry.color} />
@@ -91,23 +75,22 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        </div>
       </div>
       
-      {/* Legend with correct colors */}
-      <div className="border-t pt-3">
-        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda de Rubros:</div>
-        <div className="space-y-2">
+      {/* Legend inside card */}
+      <div className="border-t pt-4">
+        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda:</div>
+        <div className="grid grid-cols-1 gap-2 text-xs">
           {categoryData.map((category, index) => (
             <div key={index} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div 
-                  className="w-4 h-4 rounded-sm flex-shrink-0"
+                  className="w-3 h-3 rounded-sm"
                   style={{ backgroundColor: category.color }}
                 />
-                <span className="font-medium text-sm">{category.name}</span>
+                <span className="font-medium">{category.name}</span>
               </div>
-              <span className="text-muted-foreground font-medium text-sm">
+              <span className="text-muted-foreground font-medium">
                 {formatCurrency(category.value)}
               </span>
             </div>

@@ -233,15 +233,15 @@ export function ExpensesSunburstRadialChart({ data, isLoading }: ExpensesSunburs
         <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda de Rubros:</div>
         <div className="flex justify-center gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(76, 100%, 40%)' }} />
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(110, 40%, 50%)' }} />
             <span>Mano de Obra</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(173, 58%, 39%)' }} />
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(0, 87%, 67%)' }} />
             <span>Materiales</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(197, 37%, 24%)' }} />
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(43, 74%, 66%)' }} />
             <span>Indirectos</span>
           </div>
         </div>
