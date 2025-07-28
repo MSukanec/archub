@@ -12,6 +12,7 @@ import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
+import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -214,6 +215,62 @@ export default function FinancesAnalysis() {
       }))
       .sort((a, b) => b.amount - a.amount) // Sort by amount descending
       .filter(item => item.amount > 0) // Only include positive amounts
+  }, [expenseMovements])
+
+  // Process data for sunburst chart - include subcategories
+  const sunburstData = useMemo(() => {
+    const categoryColors = {
+      'Mano de Obra': 'hsl(110, 40%, 50%)', // Verde
+      'Materiales': 'hsl(0, 87%, 67%)',     // Rojo
+      'Indirectos': 'hsl(43, 74%, 66%)'     // Amarillo
+    }
+
+    // Generate lighter variations for subcategories
+    const getSubcategoryColor = (categoryColor: string, index: number) => {
+      const lightness = 60 + (index * 10) // Varying lightness for subcategories
+      return categoryColor.replace(/(\d+)%\)/, `${lightness}%)`)
+    }
+
+    const subcategoryMap = new Map<string, { category: string; amount: number; index: number }>()
+    
+    expenseMovements.forEach(movement => {
+      const category = movement.movement_data?.category?.name || 'Sin categoría'
+      const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
+      const amount = Math.abs(movement.amount)
+      
+      const key = `${category}-${subcategory}`
+      const existing = subcategoryMap.get(key)
+      
+      if (existing) {
+        existing.amount += amount
+      } else {
+        const categorySubcategories = Array.from(subcategoryMap.values())
+          .filter(item => item.category === category)
+        
+        subcategoryMap.set(key, {
+          category,
+          amount,
+          index: categorySubcategories.length
+        })
+      }
+    })
+
+    return Array.from(subcategoryMap.entries())
+      .map(([key, data]) => {
+        const [category, subcategory] = key.split('-')
+        const categoryColor = categoryColors[category as keyof typeof categoryColors] || 'hsl(0, 0%, 50%)'
+        
+        return {
+          category,
+          subcategory,
+          amount: data.amount,
+          percentage: 0, // Will be calculated if needed
+          categoryColor,
+          subcategoryColor: getSubcategoryColor(categoryColor, data.index)
+        }
+      })
+      .filter(item => item.amount > 0)
+      .sort((a, b) => b.amount - a.amount)
   }, [expenseMovements])
 
   // Columns for grouped view (without category column)
@@ -425,16 +482,21 @@ export default function FinancesAnalysis() {
               </CardContent>
             </Card>
             
-            {/* Placeholder para futuros gráficos */}
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 flex flex-col items-center justify-center text-center">
-              <BarChart3 className="h-8 w-8 mb-3 text-muted-foreground/50" />
-              <h3 className="text-base font-medium text-muted-foreground mb-2">
-                Próximo Gráfico
-              </h3>
-              <p className="text-sm text-muted-foreground/75">
-                Espacio reservado para visualizaciones adicionales.
-              </p>
-            </div>
+            {/* Sunburst Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <LayoutGrid className="h-5 w-5" />
+                  Análisis Jerárquico por Categorías
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Vista jerárquica de categorías y subcategorías
+                </p>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
