@@ -30,9 +30,9 @@ export default function FinancesAnalysis() {
 
   // Filter only expense movements (EGRESOS) by UUID and specific categories
   const allowedCategoryIds = [
-    'd3764404-734a-47a9-b851-d112d64147db', // Mano de Obra
-    'a8cab4bd-3d66-4022-a264-4c208d0baccb', // Materiales
-    '4a9be4c7-34ec-4e12-a001-17b4c5cbd89e'  // Indirectos
+    'd376d404-734a-47a9-b851-d112d64147db', // Mano de Obra
+    'a8cab4bd-3d66-4022-a26d-4c208d0baccb', // Materiales
+    'e854de08-da8f-4769-a2c5-b24b622f20b0'  // Indirectos
   ]
   
   const expenseMovements = movements.filter(movement => 
