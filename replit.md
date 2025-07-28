@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. FINANCIAL DASHBOARD CURRENCY SELECTOR DYNAMIC CONFIGURATION COMPLETED: Successfully implemented automatic organization default currency detection in Resumen Financiero ActionBar selector - COMPLETED
+  • DYNAMIC CURRENCY OPTIONS: Currency selector now automatically shows organization's default currency instead of hardcoded "Pesificado"
+  • ORGANIZATION CURRENCY INTEGRATION: Added useOrganizationCurrencies hook to detect default currency from organization_currencies table
+  • AUTOMATIC INITIALIZATION: Currency view state initializes with organization's default currency code (ARS, COP, USD, etc.)
+  • FLEXIBLE CURRENCY FORMATTING: formatCurrency function now works with any organization default currency, not just ARS
+  • UNIVERSAL COMPATIBILITY: System works for organizations with any default currency (Peso Argentino, Peso Colombiano, etc.)
+  • CURRENCY BADGE UPDATES: Badge displays actual organization currency code instead of hardcoded "ARS" or "USD"
+  • SELECTOR OPTIONS DYNAMIC: Currency options array builds dynamically based on organization's default currency vs USD
 - July 28, 2025. COMBBOXMULTIROWS COMPONENT SIMPLIFICATION COMPLETED: Successfully replaced ComboBoxMultiSelect with new simplified ComboBoxMultiRows component in organization preferences - COMPLETED
   • SIMPLIFIED WORKFLOW: Component now shows single "Agregar" button initially instead of complex multi-select interface
   • COMBOBOXWRITE INTEGRATION: When user clicks add button, ComboBoxWrite appears for option selection with search functionality

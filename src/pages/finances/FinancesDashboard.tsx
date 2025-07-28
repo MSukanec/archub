@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
@@ -19,30 +20,34 @@ import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
   
+  // Get organization currencies to determine default currency
+  const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
+  const defaultCurrency = organizationCurrencies?.find(c => c.is_default)?.currency
+  
   // Time period filter state
   const [timePeriod, setTimePeriod] = useState('desde-siempre')
-  // Currency view state for ActionBar button
-  const [currencyView, setCurrencyView] = useState<'pesificado' | 'dolarizado'>('pesificado')
+  // Currency view state for ActionBar button - initialize with default currency
+  const [currencyView, setCurrencyView] = useState<string>(defaultCurrency?.code || 'ARS')
 
-  // Currency options for Selector
+  // Currency options for Selector - dynamic based on organization's default currency
   const currencyOptions = [
-    { value: 'pesificado', label: 'Pesificado' },
-    { value: 'dolarizado', label: 'Dolarizado' }
+    { value: defaultCurrency?.code || 'ARS', label: defaultCurrency?.name || 'Peso Argentino' },
+    { value: 'USD', label: 'Dólar Estadounidense' }
   ]
 
   // Exchange rate - hardcoded for now, should come from API
   const USD_TO_ARS_RATE = 1200 // Example rate
 
   // Convert amounts based on currency view
-  const convertAmount = (amount: number, currency: 'pesificado' | 'dolarizado' = currencyView) => {
-    if (currency === 'dolarizado') {
+  const convertAmount = (amount: number, currency: string = currencyView) => {
+    if (currency === 'USD') {
       return amount / USD_TO_ARS_RATE
     }
     return amount
@@ -60,6 +65,13 @@ export default function FinancesDashboard() {
   const expensesTrend = monthlyFlow?.map(month => ({ value: convertAmount(Math.abs(month.expenses || 0)) })) || []
   const balanceTrend = monthlyFlow?.map(month => ({ value: convertAmount(month.net || 0) })) || []
   const movementsTrend = monthlyFlow?.map(month => ({ value: convertAmount((month.income || 0) + Math.abs(month.expenses || 0)) })) || []
+
+  // Update currency view when default currency changes
+  useEffect(() => {
+    if (defaultCurrency && currencyView !== defaultCurrency.code) {
+      setCurrencyView(defaultCurrency.code)
+    }
+  }, [defaultCurrency])
   
   // Calculate movements from last 30 days
   const movementsLast30Days = financialSummary ? 
@@ -95,8 +107,8 @@ export default function FinancesDashboard() {
     }
   ]
 
-  const formatCurrency = (amount: number, currency: 'pesificado' | 'dolarizado' = currencyView) => {
-    if (currency === 'dolarizado') {
+  const formatCurrency = (amount: number, currency: string = currencyView) => {
+    if (currency === 'USD') {
       const dollarAmount = amount / USD_TO_ARS_RATE
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -104,9 +116,12 @@ export default function FinancesDashboard() {
         minimumFractionDigits: 0
       }).format(dollarAmount)
     } else {
-      return new Intl.NumberFormat('es-AR', {
+      // Use the default currency for formatting
+      const defaultCurrencyCode = defaultCurrency?.code || 'ARS'
+      const locale = defaultCurrencyCode === 'ARS' ? 'es-AR' : 'es-ES'
+      return new Intl.NumberFormat(locale, {
         style: 'currency',
-        currency: 'ARS',
+        currency: defaultCurrencyCode,
         minimumFractionDigits: 0
       }).format(amount)
     }
@@ -134,7 +149,7 @@ export default function FinancesDashboard() {
   // Get currency badge component
   const getCurrencyBadge = () => (
     <Badge variant="secondary" className="text-xs">
-      {currencyView === 'pesificado' ? 'ARS' : 'USD'}
+      {currencyView === 'USD' ? 'USD' : (defaultCurrency?.code || 'ARS')}
     </Badge>
   )
 
@@ -168,7 +183,7 @@ export default function FinancesDashboard() {
               <Selector
                 options={currencyOptions}
                 value={currencyView}
-                onValueChange={(value) => setCurrencyView(value as 'pesificado' | 'dolarizado')}
+                onValueChange={(value) => setCurrencyView(value)}
                 className="h-8"
               />
             </div>,
