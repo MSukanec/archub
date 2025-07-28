@@ -1,0 +1,59 @@
+Estoy trabajando en el componente ParameterNodeEditor.tsx y necesito que corrijas y simplifiques la lógica de duplicación y eliminación de nodos de parámetros.
+
+✅ Contexto importante (por favor, leé bien esto antes de modificar):
+
+Cuando yo duplico un nodo, no estoy creando un nuevo parámetro real, solo estoy creando una nueva visualización del mismo parámetro (con el mismo parameter_id).
+
+El nodo duplicado debe tener:
+
+Un nuevo id (autogenerado por Supabase al insertarse en task_parameter_positions)
+
+El mismo parameter_id que el nodo original
+
+Una posición distinta (x, y)
+
+Y un visible_options propio
+
+Ya eliminé la columna original_parameter_id porque no necesito distinguir nodos duplicados desde la DB. La única diferencia entre el nodo original y uno duplicado es que su id !== parameter_id.
+
+✅ Qué necesito que arregles:
+
+🔁 DUPLICACIÓN
+Al hacer clic en duplicar:
+
+Insertar en task_parameter_positions una nueva fila con:
+
+parameter_id: el mismo que el nodo original
+
+x, y: desplazados un poco
+
+visible_options: las mismas que el original
+
+Usar el id generado como id del nuevo nodo
+
+Mostrarlo correctamente en el canvas con las opciones correspondientes
+
+¡Nada más! No hay que duplicar el parámetro ni hacer lógica extra
+
+🗑 ELIMINACIÓN
+Cuando elimino un nodo del canvas, debe eliminarse su task_parameter_positions de la DB y no debe volver a aparecer.
+
+Actualmente, el nodo se vuelve a crear automáticamente porque justo después de eliminar, se guarda su posición al soltar el mouse.
+
+Esto hay que corregir: si estoy eliminando el nodo, no deberías guardar su posición al mismo tiempo.
+
+✅ ¿Cómo identificar si un nodo es duplicado?
+
+Muy fácil: si node.id !== node.data.parameter.id, entonces es una visualización duplicada.
+
+✅ En resumen:
+
+La duplicación es solo visual (misma lógica que duplicar una tarjeta en Trello).
+
+La tabla task_parameter_positions representa visualizaciones, no parámetros nuevos.
+
+El parameter_id siempre apunta al parámetro real.
+
+Eliminé original_parameter_id para simplificar, así que no lo uses más.
+
+Si necesitás ayuda para detectar estos casos o reestructurar las funciones, preguntame. Pero no agregues lógica nueva sin que lo pida. Solo arreglá lo que te marqué.

@@ -330,7 +330,7 @@ const useSaveParameterPosition = () => {
     mutationFn: async (position: any) => {
       console.log('🔄 Intentando guardar en DB:', position);
       
-      // Si tiene un ID específico (nodo duplicado), buscar por ID
+      // Si tiene un ID específico (nodo duplicado), actualizar por ID
       if (position.id) {
         const { data, error } = await supabase!
           .from('task_parameter_positions')
@@ -351,12 +351,12 @@ const useSaveParameterPosition = () => {
         return data;
       }
       
-      // Para nodos originales, buscar por parameter_id
+      // Para nodos originales, buscar por parameter_id donde id = parameter_id
       const { data: existing } = await supabase!
         .from('task_parameter_positions')
         .select('id')
         .eq('parameter_id', position.parameter_id)
-        .is('original_parameter_id', null) // Solo nodos originales
+        .eq('id', position.parameter_id) // Nodo original: id === parameter_id
         .single();
 
       if (existing) {
@@ -369,8 +369,7 @@ const useSaveParameterPosition = () => {
             visible_options: position.visible_options,
             updated_at: new Date().toISOString()
           })
-          .eq('parameter_id', position.parameter_id)
-          .is('original_parameter_id', null)
+          .eq('id', position.parameter_id)
           .select();
 
         if (error) {
@@ -380,10 +379,9 @@ const useSaveParameterPosition = () => {
         console.log('✅ Posición actualizada exitosamente:', data);
         return data;
       } else {
-        // Si no existe, crear nuevo registro
+        // Si no existe, crear nuevo registro original
         const insertData = {
           parameter_id: position.parameter_id,
-          original_parameter_id: position.original_parameter_id || null,
           x: position.x,
           y: position.y,
           visible_options: position.visible_options
@@ -461,18 +459,18 @@ function ParameterNodeEditorContent() {
     if (!originalParameter) return;
 
     // Encontrar posición para el nuevo nodo (ligeramente desplazado del original)
-    const originalNode = nodes.find(n => n.id === parameterId);
+    const originalNode = nodes.find(n => n.data.parameter.id === parameterId);
     const newPosition = originalNode ? 
       { x: originalNode.position.x + 20, y: originalNode.position.y + 20 } :
       { x: 20, y: 20 };
 
     try {
       // Crear una nueva entrada en la base de datos para el nodo duplicado
+      // Solo insertar: parameter_id (mismo que el original), x, y, visible_options
       const { data: dbPosition, error } = await supabase!
         .from('task_parameter_positions')
         .insert({
-          parameter_id: null, // NULL para nodos duplicados
-          original_parameter_id: parameterId, // Referencia al parámetro original
+          parameter_id: parameterId, // El mismo parameter_id que el original
           x: Math.round(newPosition.x),
           y: Math.round(newPosition.y),
           visible_options: nodeVisibleOptions[parameterId] || []
@@ -486,7 +484,7 @@ function ParameterNodeEditorContent() {
         return;
       }
 
-      // Usar el UUID generado por la base de datos como ID del nodo duplicado
+      // Usar el UUID generado por Supabase como ID del nodo duplicado
       const duplicateId = dbPosition.id;
 
       const duplicateNode: Node = {
@@ -494,12 +492,7 @@ function ParameterNodeEditorContent() {
         type: 'parameterNode',
         position: newPosition,
         data: {
-          parameter: { 
-            ...originalParameter.parameter,
-            // Marcar como duplicado para identificación
-            isDuplicate: true,
-            original_id: originalParameter.parameter.id 
-          },
+          parameter: originalParameter.parameter,
           options: originalParameter.options,
           visibleOptions: nodeVisibleOptions[parameterId] || [],
           onVisibleOptionsChange: (optionIds: string[]) => {
@@ -510,8 +503,7 @@ function ParameterNodeEditorContent() {
             // Actualizar las opciones visibles en la base de datos
             savePositionMutation.mutate({
               id: duplicateId,
-              parameter_id: null,
-              original_parameter_id: parameterId,
+              parameter_id: parameterId,
               x: Math.round(newPosition.x),
               y: Math.round(newPosition.y),
               visible_options: optionIds
@@ -545,48 +537,38 @@ function ParameterNodeEditorContent() {
     }
   }, [parametersData]);
 
+  // Estado para rastrear nodos que se están eliminando
+  const [deletingNodes, setDeletingNodes] = useState<Set<string>>(new Set());
+
   // Función para borrar un nodo del canvas
   const handleDeleteNode = useCallback(async (nodeId: string) => {
     console.log('🗑️ Borrando nodo:', nodeId);
     
+    // Marcar el nodo como en proceso de eliminación
+    setDeletingNodes(prev => new Set(prev).add(nodeId));
+    
     try {
-      // Determinar si es un nodo duplicado o original
-      const isDuplicatedNode = savedPositions.find(pos => pos.id === nodeId && pos.original_parameter_id !== null);
-      
-      if (isDuplicatedNode) {
-        // Es un nodo duplicado - eliminar por ID
-        console.log('🗑️ Eliminando nodo duplicado de BD:', nodeId);
-        const { error } = await supabase!
-          .from('task_parameter_positions')
-          .delete()
-          .eq('id', nodeId);
-          
-        if (error) {
-          console.error('❌ Error eliminando nodo duplicado:', error);
-          toast({ title: "Error", description: "No se pudo eliminar el nodo duplicado" });
-          return;
-        }
+      // Eliminar el nodo de la base de datos por ID
+      // Esto funciona tanto para nodos originales (id === parameter_id) como duplicados (id !== parameter_id)
+      console.log('🗑️ Eliminando nodo de BD:', nodeId);
+      const { error } = await supabase!
+        .from('task_parameter_positions')
+        .delete()
+        .eq('id', nodeId);
         
-        console.log('✅ Nodo duplicado eliminado de BD');
-        toast({ title: "Visualización eliminada", description: "Nodo duplicado removido permanentemente" });
-      } else {
-        // Es un nodo original - eliminar por parameter_id
-        console.log('🗑️ Eliminando nodo original de BD:', nodeId);
-        const { error } = await supabase!
-          .from('task_parameter_positions')
-          .delete()
-          .eq('parameter_id', nodeId)
-          .is('original_parameter_id', null);
-          
-        if (error) {
-          console.error('❌ Error eliminando nodo original:', error);
-          toast({ title: "Error", description: "No se pudo eliminar el nodo original" });
-          return;
-        }
-        
-        console.log('✅ Nodo original eliminado de BD');
-        toast({ title: "Nodo eliminado", description: "Parámetro removido del canvas permanentemente" });
+      if (error) {
+        console.error('❌ Error eliminando nodo:', error);
+        toast({ title: "Error", description: "No se pudo eliminar el nodo" });
+        setDeletingNodes(prev => {
+          const updated = new Set(prev);
+          updated.delete(nodeId);
+          return updated;
+        });
+        return;
       }
+      
+      console.log('✅ Nodo eliminado de BD');
+      toast({ title: "Nodo eliminado", description: "Visualización removida permanentemente" });
       
       // Actualizar la interfaz - remover del canvas
       setNodes(prev => prev.filter(n => n.id !== nodeId));
@@ -598,14 +580,18 @@ function ParameterNodeEditorContent() {
         return updated;
       });
       
-      // NO invalidar cache - esto causaba que reaparecieran los nodos
-      // La eliminación ya se hizo en la DB, simplemente actualizamos el estado local
-      
     } catch (error) {
       console.error('❌ Error eliminando nodo:', error);
       toast({ title: "Error", description: "No se pudo eliminar el nodo" });
+    } finally {
+      // Remover el nodo del conjunto de eliminación
+      setDeletingNodes(prev => {
+        const updated = new Set(prev);
+        updated.delete(nodeId);
+        return updated;
+      });
     }
-  }, [toast, savedPositions, supabase, queryClient]);
+  }, [toast, supabase]);
 
   // Manejo del pan con botón central del ratón
   useEffect(() => {
@@ -744,11 +730,12 @@ function ParameterNodeEditorContent() {
       });
 
       // Crear nodos duplicados desde posiciones guardadas
+      // Un nodo es duplicado si su id !== parameter_id
       const duplicatedNodes: Node[] = savedPositions
-        .filter(pos => pos.original_parameter_id !== null) // Nodos con original_parameter_id son duplicados
+        .filter(pos => pos.id !== pos.parameter_id) // Nodo duplicado: id diferente al parameter_id
         .map(pos => {
-          // Buscar el parámetro original usando original_parameter_id
-          const originalParameter = parametersData.find(item => item.parameter.id === pos.original_parameter_id);
+          // Buscar el parámetro original usando parameter_id
+          const originalParameter = parametersData.find(item => item.parameter.id === pos.parameter_id);
           
           if (!originalParameter) return null;
           
@@ -770,6 +757,7 @@ function ParameterNodeEditorContent() {
                 
                 // Guardar opciones visibles para el nodo duplicado
                 savePositionMutation.mutate({
+                  id: pos.id,
                   parameter_id: pos.parameter_id,
                   x: pos.x,
                   y: pos.y,
@@ -830,18 +818,18 @@ function ParameterNodeEditorContent() {
       let sourceParamId = params.source;
       let targetParamId = params.target;
       
-      // Verificar si el source es un nodo duplicado
-      const sourcePosition = savedPositions.find(pos => pos.id === params.source && pos.original_parameter_id !== null);
-      if (sourcePosition && sourcePosition.original_parameter_id) {
-        sourceParamId = sourcePosition.original_parameter_id;
-        console.log('🔗 Nodo source es duplicado, usando original_parameter_id:', sourceParamId);
+      // Verificar si el source es un nodo duplicado (id !== parameter_id)
+      const sourceNode = nodes.find(n => n.id === params.source);
+      if (sourceNode && sourceNode.id !== sourceNode.data.parameter.id) {
+        sourceParamId = sourceNode.data.parameter.id;
+        console.log('🔗 Nodo source es duplicado, usando parameter_id:', sourceParamId);
       }
       
-      // Verificar si el target es un nodo duplicado
-      const targetPosition = savedPositions.find(pos => pos.id === params.target && pos.original_parameter_id !== null);
-      if (targetPosition && targetPosition.original_parameter_id) {
-        targetParamId = targetPosition.original_parameter_id;
-        console.log('🔗 Nodo target es duplicado, usando original_parameter_id:', targetParamId);
+      // Verificar si el target es un nodo duplicado (id !== parameter_id)
+      const targetNode = nodes.find(n => n.id === params.target);
+      if (targetNode && targetNode.id !== targetNode.data.parameter.id) {
+        targetParamId = targetNode.data.parameter.id;
+        console.log('🔗 Nodo target es duplicado, usando parameter_id:', targetParamId);
       }
 
       // Extraer correctamente el option ID del sourceHandle
@@ -911,20 +899,28 @@ function ParameterNodeEditorContent() {
           onNodeDragStop={(event, node) => {
             console.log('🎯 Nodo arrastrado y soltado:', node.id, 'nueva posición:', node.position);
             
-            // Detectar si es un nodo duplicado verificando si el ID existe en savedPositions con original_parameter_id
-            const isDuplicateNode = savedPositions.some(pos => pos.id === node.id && pos.original_parameter_id !== null);
+            // Si el nodo se está eliminando, no guardar la posición
+            if (deletingNodes.has(node.id)) {
+              console.log('🚫 Nodo en proceso de eliminación, no guardando posición:', node.id);
+              return;
+            }
+            
+            // Detectar si es un nodo duplicado: id !== parameter_id
+            const isDuplicateNode = node.id !== node.data.parameter.id;
             
             if (isDuplicateNode) {
               console.log('📍 Guardando posición de nodo DUPLICADO:', {
                 id: node.id,
+                parameter_id: node.data.parameter.id,
                 x: Math.round(node.position.x),
                 y: Math.round(node.position.y),
                 visible_options: nodeVisibleOptions[node.id] || []
               });
               
-              // Para nodos duplicados, actualizar directamente por ID sin usar parameter_id
+              // Para nodos duplicados, actualizar directamente por ID
               savePositionMutation.mutate({
                 id: node.id,
+                parameter_id: node.data.parameter.id,
                 x: Math.round(node.position.x),
                 y: Math.round(node.position.y),
                 visible_options: nodeVisibleOptions[node.id] || []
