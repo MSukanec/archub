@@ -24,14 +24,20 @@ export function ProjectSelector() {
   // Initialize project context with user preference ONLY on first load
   useEffect(() => {
     // Only set initial project if context is null AND we haven't explicitly set it to null
-    if (selectedProjectId === null && userData?.preferences?.last_project_id) {
-      // Check if this is the initial load by seeing if we have a stored preference
-      const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
-      if (!hasExplicitGeneralSelection) {
-        setSelectedProject(userData.preferences.last_project_id)
+    if (selectedProjectId === null && userData?.organization?.id) {
+      // Check first localStorage for org-specific project, then fallback to global preference
+      const orgSpecificProject = localStorage.getItem(`last-project-${userData.organization.id}`)
+      const projectToSet = orgSpecificProject || userData?.preferences?.last_project_id
+      
+      if (projectToSet) {
+        // Check if this is the initial load by seeing if we have a stored preference
+        const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
+        if (!hasExplicitGeneralSelection) {
+          setSelectedProject(projectToSet)
+        }
       }
     }
-  }, [userData?.preferences?.last_project_id])
+  }, [userData?.preferences?.last_project_id, userData?.organization?.id])
   
   // Find current project SOLO basado en selectedProjectId, SIN fallback a last_project_id
   const currentProject = selectedProjectId 
@@ -42,6 +48,16 @@ export function ProjectSelector() {
   const updateProjectMutation = useMutation({
     mutationFn: async (projectId: string | null) => {
       if (!userData?.preferences?.id || !supabase) return
+      
+      // Guardar en localStorage específico de la organización
+      const currentOrgId = userData?.organization?.id
+      if (currentOrgId) {
+        if (projectId) {
+          localStorage.setItem(`last-project-${currentOrgId}`, projectId)
+        } else {
+          localStorage.removeItem(`last-project-${currentOrgId}`)
+        }
+      }
       
       const { error } = await supabase
         .from('user_preferences')

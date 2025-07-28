@@ -110,26 +110,39 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         throw new Error('No user preferences available');
       }
 
-      // Al cambiar de organización, siempre establecer en modo General (project_id = null)
+      // Guardar el proyecto actual en localStorage antes de cambiar organización
+      const currentOrgId = userData.organization?.id;
+      if (currentOrgId && selectedProjectId) {
+        localStorage.setItem(`last-project-${currentOrgId}`, selectedProjectId);
+      }
+
+      // Obtener el último proyecto de la nueva organización
+      const savedProjectId = localStorage.getItem(`last-project-${organizationId}`);
+
       const { error } = await supabase
         .from('user_preferences')
         .update({ 
           last_organization_id: organizationId,
-          last_project_id: null  // Siempre General al cambiar organización
+          last_project_id: savedProjectId || null  // Restaurar último proyecto o null si no existe
         })
         .eq('id', userData.preferences.id);
 
       if (error) throw error;
-      return organizationId;
+      return { organizationId, savedProjectId };
     },
-    onSuccess: () => {
-      // Resetear el contexto del proyecto a General
-      setSelectedProject(null);
-      // Marcar explícitamente que estamos en modo General
-      localStorage.setItem('explicit-general-mode', 'true');
+    onSuccess: ({ organizationId, savedProjectId }) => {
+      // Restaurar el contexto del proyecto de la nueva organización
+      setSelectedProject(savedProjectId || null);
+      
+      // Solo marcar modo general si realmente no hay proyecto guardado
+      if (!savedProjectId) {
+        localStorage.setItem('explicit-general-mode', 'true');
+      } else {
+        localStorage.removeItem('explicit-general-mode');
+      }
       
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      setExpandedOrgSelector(false);
+      setExpandedProjectSelector(false);
       setSidebarContext('organization');
       setActiveSidebarSection('organizacion');
       navigate('/organization/dashboard');
@@ -141,6 +154,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     mutationFn: async (projectId: string | null) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
+      }
+
+      // Guardar en localStorage específico de la organización
+      const currentOrgId = userData?.organization?.id;
+      if (currentOrgId) {
+        if (projectId) {
+          localStorage.setItem(`last-project-${currentOrgId}`, projectId);
+        } else {
+          localStorage.removeItem(`last-project-${currentOrgId}`);
+        }
       }
 
       const { error } = await supabase
