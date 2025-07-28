@@ -107,6 +107,20 @@ export default function ConstructionTasks() {
     })
   }
 
+  const handleAddSingleTask = () => {
+    if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for single task creation')
+      return
+    }
+
+    openModal('construction-single-task', {
+      projectId,
+      organizationId,
+      userId: userData.user.id,
+      isEditing: false
+    })
+  }
+
   const handleAddPhase = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for phase creation')
@@ -122,7 +136,7 @@ export default function ConstructionTasks() {
   }
 
   const handleEditTask = (task: any) => {
-    openModal('construction-task', {
+    openModal('construction-single-task', {
       projectId,
       organizationId,
       userId: userData?.user?.id,
@@ -376,6 +390,8 @@ export default function ConstructionTasks() {
           onGroupingChange={setGroupingType}
           primaryActionLabel={activeTab === "tasks" ? "Agregar Tareas en Masa" : "Crear Fase"}
           onPrimaryActionClick={activeTab === "tasks" ? handleAddTask : handleAddPhase}
+          secondaryActionLabel={activeTab === "tasks" ? "Agregar Tarea" : undefined}
+          onSecondaryActionClick={activeTab === "tasks" ? handleAddSingleTask : undefined}
           tabs={[
             {
               value: "tasks",
