@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -206,6 +206,7 @@ export default function FinancesAnalysis() {
               onClick={() => setGroupByCategory(!groupByCategory)}
               className="h-8"
             >
+              <LayoutGrid className="w-4 h-4 mr-2" />
               Agrupar por Categoría
             </Button>
           }
