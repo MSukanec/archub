@@ -31,14 +31,14 @@ export default function FinancesAnalysis() {
 
   // Filter only expense movements (EGRESOS)
   const expenseMovements = movements.filter(movement => 
-    movement.type === 'Egreso'
+    movement.movement_data?.type?.name === 'Egresos'
   )
 
   // Group expenses by category and subcategory with calculations
   const analysisData = expenseMovements.reduce((acc: any[], movement) => {
-    const categoryName = movement.category || 'Sin categoría'
-    const subcategoryName = movement.subcategory || 'Sin subcategoría'
-    const currencySymbol = movement.currency || '$'
+    const categoryName = movement.movement_data?.category?.name || 'Sin categoría'
+    const subcategoryName = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
+    const currencySymbol = movement.movement_data?.currency?.code || '$'
     const amount = movement.amount || 0
 
     const existingIndex = acc.findIndex(item => 
@@ -79,6 +79,12 @@ export default function FinancesAnalysis() {
     item.category.toLowerCase().includes(searchValue.toLowerCase()) ||
     item.subcategory.toLowerCase().includes(searchValue.toLowerCase())
   )
+
+  // Debug: Log table data for verification
+  if (filteredData.length > 0) {
+    console.log('Table should render with', filteredData.length, 'items')
+    console.log('First item for table:', filteredData[0])
+  }
 
   const formatAmount = (amount: number): string => {
     return new Intl.NumberFormat('es-AR', {
