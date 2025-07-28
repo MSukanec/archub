@@ -94,6 +94,7 @@ export default function ConstructionMaterials() {
     {
       key: 'category_name',
       label: 'Categoría',
+      width: '20%',
       render: (material: any) => (
         <span className="text-sm font-medium">{material.category_name}</span>
       )
@@ -101,6 +102,7 @@ export default function ConstructionMaterials() {
     {
       key: 'name',
       label: 'Nombre',
+      width: '35%',
       render: (material: any) => (
         <span className="text-sm">{material.name}</span>
       )
@@ -108,6 +110,7 @@ export default function ConstructionMaterials() {
     {
       key: 'computed_quantity',
       label: 'Cantidad Computada',
+      width: '15%',
       render: (material: any) => (
         <span className="text-sm font-medium">{material.computed_quantity.toFixed(2)}</span>
       )
@@ -115,6 +118,7 @@ export default function ConstructionMaterials() {
     {
       key: 'purchased_quantity',
       label: 'Cantidad Comprada',
+      width: '15%',
       render: (material: any) => (
         <span className="text-sm text-muted-foreground">
           {material.purchased_quantity.toFixed(2)}
@@ -124,6 +128,7 @@ export default function ConstructionMaterials() {
     {
       key: 'to_purchase_quantity',
       label: 'Cantidad A Comprar',
+      width: '15%',
       render: (material: any) => (
         <span className="text-sm text-muted-foreground">
           {material.to_purchase_quantity.toFixed(2)}
