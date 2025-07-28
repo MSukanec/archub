@@ -12,10 +12,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Zap, Sparkles } from 'lucide-react'
 
 interface ParametricTaskFormModalProps {
-  modalData: {
+  modalData?: {
     isEditing?: boolean
     task?: any
-  }
+    taskData?: any
+  } | null
   onClose: () => void
 }
 
@@ -33,7 +34,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [parameterOrder, setParameterOrder] = useState<string[]>([])
-  const { task, isEditing, taskData } = modalData
+  const { task, isEditing, taskData } = modalData || {}
   const actualTask = task || taskData
   
   console.log('🔍 Modal data received:', modalData);
