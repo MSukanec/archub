@@ -117,7 +117,6 @@ export function ActionBarDesktop({
   const hasBottomContent = Boolean(
     (tabs && activeTab && onTabChange) || // Tabs
     budgetSelector || // Budget selector
-    showSearch || // Search
     (showGrouping && onGroupingChange) || // Grouping
     customFilters || // Custom filters
     onClearFilters || // Clear filters
@@ -292,15 +291,7 @@ export function ActionBarDesktop({
 
       {/* Right side - SEARCH → GHOST BUTTONS → SECONDARY → PRIMARY */}
       <div className="flex items-center gap-2">
-        {/* 1. SEARCH */}
-        {showSearch && (
-          <ExpandableSearchButton
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            onSearchSubmit={onSearchClick}
-            placeholder="Buscar tareas, rubros o fases..."
-          />
-        )}
+        {/* 1. SEARCH - REMOVED */}
 
         {/* 2. GHOST BUTTONS */}
         {showGrouping && onGroupingChange && (
