@@ -98,6 +98,14 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     try {
       // Construir objeto JSON con los valores de parámetros usando IDs para resistir cambios de nombre
       const paramValues: Record<string, string> = {}
+      
+      // Si estamos editando una tarea existente, empezar con los valores existentes
+      if (isEditing && actualTask && existingParamValues) {
+        Object.assign(paramValues, existingParamValues)
+        console.log('🔄 Starting with existing param values:', existingParamValues)
+      }
+      
+      // Aplicar las nuevas selecciones (esto sobrescribe los valores existentes si hay cambios)
       selections.forEach(selection => {
         paramValues[selection.parameterId] = selection.optionId
       })
