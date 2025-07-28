@@ -81,7 +81,6 @@ export default function ConstructionSchedule() {
     return tasks.filter(task => 
       task.name_rendered?.toLowerCase().includes(searchTerm) ||
       task.category_name?.toLowerCase().includes(searchTerm) ||
-      task.subcategory_name?.toLowerCase().includes(searchTerm) ||
       task.unit_name?.toLowerCase().includes(searchTerm) ||
       task.phase_name?.toLowerCase().includes(searchTerm)
     )
@@ -90,7 +89,7 @@ export default function ConstructionSchedule() {
   // Función para obtener el rubro de una tarea
   function getRubroName(taskId: string) {
     const task = filteredTasks.find(t => t.id === taskId)
-    return task?.subcategory_name || 'Sin rubro'
+    return task?.category_name || 'Sin rubro'
   }
 
   // Función para obtener nombre de unidad
@@ -218,8 +217,6 @@ export default function ConstructionSchedule() {
         ]}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        primaryActionLabel="Nueva Tarea"
-        onPrimaryActionClick={() => openModal('construction-task')}
       />
 
       {/* Tab Content */}
@@ -235,13 +232,12 @@ export default function ConstructionSchedule() {
             <GanttContainer
               data={ganttData}
               dependencies={dependencies}
-              onTaskEdit={(taskId) => openModal('construction-task-schedule', { taskId })}
-              onTaskDelete={(taskId) => {
-                const task = filteredTasks.find(t => t.id === taskId)
+              onItemEdit={(item) => openModal('construction-task-schedule', { taskId: item.id })}
+              onItemDelete={(item) => {
+                const task = filteredTasks.find(t => t.id === item.id)
                 showDeleteConfirmation({
-                  title: 'Eliminar Tarea',
-                  message: `¿Estás seguro de que deseas eliminar "${task?.name_rendered || 'esta tarea'}"?`,
-                  onConfirm: () => deleteTask.mutate(taskId)
+                  itemName: task?.name_rendered || 'esta tarea',
+                  onConfirm: () => deleteTask.mutate(item.id)
                 })
               }}
             />
@@ -263,29 +259,29 @@ export default function ConstructionSchedule() {
               columns={[
                 {
                   key: 'phase_name',
-                  title: 'Fase',
-                  width: '15%',
-                  render: (task: any) => (
+                  label: 'Fase',
+                  width: '10%',
+                  render: (task) => (
                     <Badge variant="secondary" className="text-xs">
                       {task.phase_name || 'Sin fase'}
                     </Badge>
                   )
                 },
                 {
-                  key: 'subcategory_name',
-                  title: 'Rubro',
+                  key: 'category_name',
+                  label: 'Rubro',
                   width: '10%',
-                  render: (task: any) => (
+                  render: (task) => (
                     <Badge variant="outline" className="text-xs">
-                      {task.subcategory_name || 'Sin rubro'}
+                      {task.category_name || 'Sin rubro'}
                     </Badge>
                   )
                 },
                 {
                   key: 'name_rendered',
-                  title: 'Tarea',
-                  width: '70%',
-                  render: (task: any) => (
+                  label: 'Tarea',
+                  width: 'flex-1',
+                  render: (task) => (
                     <span className="text-sm">
                       {cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre')}
                     </span>
@@ -293,20 +289,29 @@ export default function ConstructionSchedule() {
                 },
                 {
                   key: 'unit_name',
-                  title: 'Unidad',
-                  width: '5%',
-                  render: (task: any) => (
+                  label: 'Unidad',
+                  width: '10%',
+                  render: (task) => (
                     <Badge variant="outline" className="text-xs">
                       {task.unit_name || 'N/A'}
                     </Badge>
+                  )
+                },
+                {
+                  key: 'quantity',
+                  label: 'Cantidad',
+                  width: '10%',
+                  render: (task) => (
+                    <span className="text-sm font-medium">
+                      {task.quantity || 0}
+                    </span>
                   )
                 }
               ]}
               onEdit={(task) => openModal('construction-task-schedule', { taskId: task.id })}
               onDelete={(task) => {
                 showDeleteConfirmation({
-                  title: 'Eliminar Tarea',
-                  message: `¿Estás seguro de que deseas eliminar "${task.name_rendered || 'esta tarea'}"?`,
+                  itemName: task.name_rendered || 'esta tarea',
                   onConfirm: () => deleteTask.mutate(task.id)
                 })
               }}
