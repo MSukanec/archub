@@ -49,43 +49,48 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
   }
 
   return (
-    <div className="h-72">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          {/* Single ring - Categories only */}
-          <Pie
-            data={categoryData}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={40}
-            outerRadius={100}
-            startAngle={90}
-            endAngle={450}
-            label={({ name, percentage }) => 
-              percentage > 5 ? `${name} (${percentage}%)` : ''
-            }
-            labelLine={false}
-          >
-            {categoryData.map((entry, index) => (
-              <Cell key={`category-cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+    <div className="space-y-4">
+      {/* Chart */}
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            {/* Single ring - Categories only */}
+            <Pie
+              data={categoryData}
+              dataKey="value"
+              cx="50%"
+              cy="50%"
+              innerRadius={40}
+              outerRadius={90}
+              startAngle={90}
+              endAngle={450}
+              label={({ name, percentage }) => 
+                percentage > 5 ? `${name} (${percentage}%)` : ''
+              }
+              labelLine={false}
+            >
+              {categoryData.map((entry, index) => (
+                <Cell key={`category-cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
       
-      {/* Legend */}
-      <div className="mt-4 space-y-2">
-        <div className="text-xs font-medium text-muted-foreground mb-2">Leyenda:</div>
-        <div className="grid grid-cols-1 gap-1 text-xs">
+      {/* Legend inside card */}
+      <div className="border-t pt-4">
+        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda:</div>
+        <div className="grid grid-cols-1 gap-2 text-xs">
           {categoryData.map((category, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-sm"
-                style={{ backgroundColor: category.color }}
-              />
-              <span className="font-medium">{category.name}</span>
-              <span className="text-muted-foreground">
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: category.color }}
+                />
+                <span className="font-medium">{category.name}</span>
+              </div>
+              <span className="text-muted-foreground font-medium">
                 {formatCurrency(category.value)}
               </span>
             </div>
