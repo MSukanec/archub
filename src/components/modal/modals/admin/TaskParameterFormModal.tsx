@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
 import { useUnits } from '@/hooks/use-units';
+import { useTaskCategories } from '@/hooks/use-task-categories';
 
 const taskParameterSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido'),
@@ -24,6 +25,8 @@ const taskParameterSchema = z.object({
     required_error: 'El tipo es requerido' 
   }),
   expression_template: z.string().optional(),
+  category_id: z.string().optional(),
+  unit_id: z.string().optional(),
 });
 
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
@@ -44,8 +47,9 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
   const createMutation = useCreateTaskParameter();
   const updateMutation = useUpdateTaskParameter();
   
-  // Load units for the selector
+  // Load units and categories for the selectors
   const { data: units, isLoading: unitsLoading } = useUnits();
+  const { data: categories, isLoading: categoriesLoading } = useTaskCategories();
   
   const form = useForm<TaskParameterFormData>({
     resolver: zodResolver(taskParameterSchema),
@@ -54,6 +58,8 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       label: '',
       type: 'text',
       expression_template: '{value}',
+      category_id: '',
+      unit_id: '',
     },
   });
 
@@ -65,6 +71,8 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
         label: parameter.label || '',
         type: parameter.type as any || 'text',
         expression_template: parameter.expression_template || '{value}',
+        category_id: parameter.category_id || '',
+        unit_id: parameter.unit_id || '',
       });
     }
   }, [parameter, form]);
@@ -238,6 +246,61 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
           <div className="text-sm text-muted-foreground">
             Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
           </div>
+
+          {/* Rubro y Unidad inline */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rubro</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar rubro" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="">Sin rubro</SelectItem>
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="unit_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unidad</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar unidad" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-[9999]">
+                      <SelectItem value="">Sin unidad</SelectItem>
+                      {units?.map((unit) => (
+                        <SelectItem key={unit.id} value={unit.id}>
+                          {unit.name} {unit.symbol ? `(${unit.symbol})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </form>
       </Form>
 
@@ -261,7 +324,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       onLeftClick={onClose}
       rightLabel={parameter ? "Actualizar" : "Guardar"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 

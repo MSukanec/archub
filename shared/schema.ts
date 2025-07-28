@@ -116,6 +116,26 @@ export type User = typeof users.$inferSelect;
 export type Country = typeof countries.$inferSelect;
 export type UserData = typeof user_data.$inferSelect;
 export type UserPreferences = typeof user_preferences.$inferSelect;
+
+// Task Categories Table
+export const task_categories = pgTable("task_categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  parent_id: uuid("parent_id"), // Self-referential for hierarchy
+  code: text("code"),
+  position: text("position"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+// Units Table
+export const units = pgTable("units", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  symbol: text("symbol"),
+  type: text("type"), // e.g., "volumen", "superficie", "longitud", etc.
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 // Task Parameters System
 export const task_parameters = pgTable("task_parameters", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -123,6 +143,8 @@ export const task_parameters = pgTable("task_parameters", {
   label: text("label").notNull(), // e.g., "Tipo de Ladrillo / Bloque"
   type: text("type", { enum: ["text", "number", "select", "boolean"] }).notNull(),
   required: boolean("required").default(false),
+  category_id: uuid("category_id"), // FK to task_categories
+  unit_id: uuid("unit_id"), // FK to units
   created_at: timestamp("created_at").defaultNow(),
 });
 
@@ -170,6 +192,16 @@ export const task_parameter_dependency_options = pgTable("task_parameter_depende
 });
 
 export const insertTaskParameterSchema = createInsertSchema(task_parameters).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertTaskCategorySchema = createInsertSchema(task_categories).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertUnitSchema = createInsertSchema(units).omit({
   id: true,
   created_at: true,
 });
@@ -239,10 +271,14 @@ export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type DesignDocument = typeof design_documents.$inferSelect;
 export type InsertDesignDocument = z.infer<typeof insertDesignDocumentSchema>;
+export type TaskCategory = typeof task_categories.$inferSelect;
+export type Unit = typeof units.$inferSelect;
 export type TaskParameter = typeof task_parameters.$inferSelect;
 export type TaskParameterOption = typeof task_parameter_options.$inferSelect;
 export type TaskParameterOptionGroup = typeof task_parameter_option_groups.$inferSelect;
 export type TaskParameterOptionGroupItem = typeof task_parameter_option_group_items.$inferSelect;
+export type InsertTaskCategory = z.infer<typeof insertTaskCategorySchema>;
+export type InsertUnit = z.infer<typeof insertUnitSchema>;
 export type InsertTaskParameter = z.infer<typeof insertTaskParameterSchema>;
 export type InsertTaskParameterOption = z.infer<typeof insertTaskParameterOptionSchema>;
 export type InsertTaskParameterOptionGroup = z.infer<typeof insertTaskParameterOptionGroupSchema>;
