@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -14,6 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
   const [groupByCategory, setGroupByCategory] = useState(true)
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado')
   
   const { data: userData } = useCurrentUser()
   const { selectedProject, selectedOrganization } = useNavigationStore()
@@ -32,27 +33,47 @@ export default function FinancesAnalysis() {
     movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7'
   )
 
+  // Function to convert amounts based on currency view
+  const convertAmount = (amount: number, currencyCode: string, exchangeRate: number) => {
+    if (currencyView === 'discriminado') {
+      return amount
+    } else if (currencyView === 'pesificado') {
+      return currencyCode === 'USD' ? amount * exchangeRate : amount
+    } else if (currencyView === 'dolarizado') {
+      return currencyCode === 'ARS' ? amount / exchangeRate : amount
+    }
+    return amount
+  }
+
   // Group expenses by category and subcategory with calculations
   const analysisData = expenseMovements.reduce((acc: any[], movement) => {
     const category = movement.movement_data?.category?.name || 'Sin categoría'
     const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
     const currencyCode = movement.movement_data?.currency?.code || 'ARS'
+    const exchangeRate = movement.exchange_rate || 1
     
-    // Create unique key for grouping
-    const key = `${category}-${subcategory}-${currencyCode}`
+    // Convert amount based on currency view
+    const convertedAmount = convertAmount(movement.amount, currencyCode, exchangeRate)
+    
+    // Create unique key for grouping (include currency only if discriminado)
+    const key = currencyView === 'discriminado' 
+      ? `${category}-${subcategory}-${currencyCode}`
+      : `${category}-${subcategory}`
     
     // Find existing group or create new one
     const existingIndex = acc.findIndex(item => item.id === key)
     
     if (existingIndex >= 0) {
-      acc[existingIndex].amount += movement.amount
+      acc[existingIndex].amount += convertedAmount
     } else {
       acc.push({
         id: key,
         category,
         subcategory,
-        currency_symbol: currencyCode,
-        amount: movement.amount
+        currency_symbol: currencyView === 'discriminado' ? currencyCode : 
+          (currencyView === 'pesificado' ? 'ARS' : 'USD'),
+        amount: convertedAmount,
+        original_currency: currencyCode
       })
     }
     
@@ -84,58 +105,73 @@ export default function FinancesAnalysis() {
     }).format(amount)
   }
 
-  const columns = [
-    {
-      key: 'category',
-      label: 'Categoría',
-      width: '20%',
-      render: (item: any) => (
-        <Badge variant="outline" className="text-xs">
-          {item.category}
-        </Badge>
-      )
-    },
-    {
-      key: 'subcategory',
-      label: 'Subcategoría',
-      width: '20%',
-      render: (item: any) => (
-        <Badge variant="secondary" className="text-xs">
-          {item.subcategory}
-        </Badge>
-      )
-    },
-    {
-      key: 'currency_symbol',
-      label: 'Moneda',
-      width: '15%',
-      render: (item: any) => (
-        <div className="font-medium text-sm">
-          {item.currency_symbol}
-        </div>
-      )
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      width: '20%',
-      render: (item: any) => (
-        <div className="font-medium text-sm text-red-600 dark:text-red-400">
-          {formatAmount(item.amount)}
-        </div>
-      )
-    },
-    {
-      key: 'percentage',
-      label: '% de Incidencia',
-      width: '25%',
-      render: (item: any) => (
-        <div className="font-medium text-sm">
-          {item.percentage}%
-        </div>
-      )
+  // Define table columns based on currency view
+  const getColumns = () => {
+    const baseColumns = [
+      {
+        key: 'category',
+        label: 'Categoría',
+        width: currencyView === 'discriminado' ? '20%' : '25%',
+        render: (item: any) => (
+          <Badge variant="outline" className="text-xs">
+            {item.category}
+          </Badge>
+        )
+      },
+      {
+        key: 'subcategory',
+        label: 'Subcategoría',
+        width: currencyView === 'discriminado' ? '20%' : '25%',
+        render: (item: any) => (
+          <Badge variant="secondary" className="text-xs">
+            {item.subcategory}
+          </Badge>
+        )
+      },
+    ]
+
+    // Add currency column only for discriminado view
+    if (currencyView === 'discriminado') {
+      baseColumns.push({
+        key: 'currency_symbol',
+        label: 'Moneda',
+        width: '15%',
+        render: (item: any) => (
+          <div className="font-medium text-sm">
+            {item.currency_symbol}
+          </div>
+        )
+      })
     }
-  ]
+
+    // Add amount and percentage columns
+    baseColumns.push(
+      {
+        key: 'amount',
+        label: 'Monto',
+        width: currencyView === 'discriminado' ? '20%' : '25%',
+        render: (item: any) => (
+          <div className="font-medium text-sm text-red-600 dark:text-red-400">
+            {formatAmount(item.amount)}
+          </div>
+        )
+      },
+      {
+        key: 'percentage',
+        label: '% de Incidencia',
+        width: '25%',
+        render: (item: any) => (
+          <div className="font-medium text-sm">
+            {item.percentage}%
+          </div>
+        )
+      }
+    )
+
+    return baseColumns
+  }
+
+  const columns = getColumns()
 
   // Group data by category when grouping is enabled
   const groupedData = useMemo(() => {
@@ -207,6 +243,22 @@ export default function FinancesAnalysis() {
             { value: 'none', label: 'No agrupar' },
             { value: 'subcategory', label: 'Agrupar por Subcategoría' }
           ]}
+          customGhostButtons={[
+            <Button
+              key="currency-view"
+              variant="ghost"
+              onClick={() => {
+                const nextView = currencyView === 'discriminado' ? 'pesificado' : 
+                                currencyView === 'pesificado' ? 'dolarizado' : 'discriminado'
+                setCurrencyView(nextView)
+              }}
+              className="flex items-center gap-2"
+            >
+              <DollarSign className="w-4 h-4" />
+              {currencyView === 'discriminado' ? 'Discriminado' : 
+               currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
+            </Button>
+          ]}
         />
 
         {filteredData.length > 0 ? (
@@ -221,16 +273,24 @@ export default function FinancesAnalysis() {
                 const totalAmount = groupRows.reduce((sum, item) => sum + item.amount, 0);
                 const totalPercentage = groupRows.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2);
                 
-                return (
-                  <>
-                    <div className="col-span-1 truncate">
-                      {groupKey}
-                    </div>
-                    <div className="col-span-1"></div> {/* Moneda - vacío en header */}
-                    <div className="col-span-1">Total: {formatAmount(totalAmount)}</div>
-                    <div className="col-span-1">{totalPercentage}%</div>
-                  </>
-                );
+                if (currencyView === 'discriminado') {
+                  return (
+                    <>
+                      <div className="col-span-1 truncate">{groupKey}</div>
+                      <div className="col-span-1"></div> {/* Moneda - vacío en header */}
+                      <div className="col-span-1">{formatAmount(totalAmount)}</div>
+                      <div className="col-span-1">{totalPercentage}%</div>
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <div className="col-span-1 truncate">{groupKey}</div>
+                      <div className="col-span-1">{formatAmount(totalAmount)}</div>
+                      <div className="col-span-1">{totalPercentage}%</div>
+                    </>
+                  );
+                }
               }}
               emptyState={
                 <EmptyState

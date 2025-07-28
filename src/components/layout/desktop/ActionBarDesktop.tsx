@@ -65,6 +65,7 @@ interface ActionBarDesktopProps {
   secondaryActionLabel?: string
   onSecondaryActionClick?: () => void
   customActions?: React.ReactNode[]
+  customGhostButtons?: React.ReactNode[]
   budgetSelector?: BudgetSelectorProps
   parameterSelector?: ParameterSelectorProps
   tabs?: Tab[]
@@ -98,6 +99,7 @@ export function ActionBarDesktop({
   secondaryActionLabel,
   onSecondaryActionClick,
   customActions = [],
+  customGhostButtons = [],
   budgetSelector,
   parameterSelector,
   tabs,
@@ -120,6 +122,7 @@ export function ActionBarDesktop({
     customFilters || // Custom filters
     onClearFilters || // Clear filters
     customActions.length > 0 || // Custom actions
+    customGhostButtons.length > 0 || // Custom ghost buttons
     onTodayClick || // Today button
     (primaryActionLabel && onPrimaryActionClick) || // Primary action
     (secondaryActionLabel && onSecondaryActionClick) // Secondary action
@@ -418,6 +421,11 @@ export function ActionBarDesktop({
         {customActions.map((action, index) => (
           <div key={index}>{action}</div>
         ))}
+
+        {/* Custom Ghost Buttons */}
+        {customGhostButtons && customGhostButtons.map((button, index) => 
+          <React.Fragment key={`ghost-btn-${index}`}>{button}</React.Fragment>
+        )}
 
         {/* Today Button - For gradebook pages */}
         {onTodayClick && (
