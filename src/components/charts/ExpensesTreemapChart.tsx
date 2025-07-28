@@ -64,10 +64,47 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
             data={treemapData}
             dataKey="size"
             stroke="#fff"
+            content={({ root, depth, x, y, width, height, index, name }) => {
+              // Solo renderizar contenido si es un nodo hoja y tiene suficiente espacio
+              if (depth === 1 && width > 50 && height > 25) {
+                return (
+                  <g>
+                    <rect
+                      x={x}
+                      y={y}
+                      width={width}
+                      height={height}
+                      style={{
+                        fill: treemapData[index]?.fill || '#ccc',
+                        stroke: '#fff',
+                        strokeWidth: 1
+                      }}
+                    />
+                    {/* Solo mostrar texto si hay suficiente espacio */}
+                    {width > 80 && height > 40 && (
+                      <text
+                        x={x + width / 2}
+                        y={y + height / 2}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        style={{
+                          fontSize: '11px', // Tamaño como en la leyenda (text-xs)
+                          fontWeight: 'normal', // Sin negrita
+                          fill: '#fff'
+                        }}
+                      >
+                        {name}
+                      </text>
+                    )}
+                  </g>
+                )
+              }
+              return null
+            }}
           >
             <Tooltip 
               formatter={(value: number) => [formatCurrency(value), 'Monto']}
-              labelFormatter={(label) => `Subcategoría: ${label}`}
+              labelFormatter={(label) => label} // Solo mostrar el nombre de la subcategoría
               contentStyle={{
                 backgroundColor: 'var(--toast-bg)',
                 color: 'var(--toast-fg)',
