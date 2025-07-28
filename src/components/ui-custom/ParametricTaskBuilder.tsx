@@ -72,25 +72,37 @@ export const ParametricTaskBuilder = forwardRef<
 
   // Función para ejecutar el callback de creación de tarea con datos completos
   const executeCreateTaskCallback = () => {
+    console.log('🔥 executeCreateTaskCallback llamada');
+    console.log('📊 Estado actual - selections:', selections);
+    console.log('📊 Estado actual - availableParameters:', availableParameters);
+    console.log('📊 Estado actual - taskPreview:', taskPreview);
+    
     if (onCreateTask) {
       const paramValues: Record<string, string> = {};
       selections.forEach(selection => {
         paramValues[selection.parameterSlug] = selection.optionId;
       });
 
+      // Obtener los parámetros ordenados actual
+      const orderedParameterIds = getOrderedParameters();
+      const paramOrder = orderedParameterIds.map(paramId => {
+        const parameter = parameters.find(p => p.id === paramId);
+        return parameter?.slug || '';
+      }).filter(Boolean);
+
       const taskData = {
         selections,
         preview: taskPreview,
         paramValues,
-        paramOrder: getOrderedParameters().map(paramId => {
-          const parameter = parameters.find(p => p.id === paramId);
-          return parameter?.slug || '';
-        }).filter(Boolean),
-        availableParameters: availableParameters
+        paramOrder,
+        availableParameters
       };
 
-      console.log('🚀 ParametricTaskBuilder ejecutando callback con datos:', taskData);
+      console.log('🚀 ParametricTaskBuilder ejecutando callback con datos completos:', taskData);
+      console.log('🎯 availableParameters que se pasan:', availableParameters);
       onCreateTask(taskData);
+    } else {
+      console.log('❌ onCreateTask no está definido');
     }
   };
 
