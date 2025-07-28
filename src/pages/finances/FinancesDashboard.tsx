@@ -1,15 +1,14 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building, Wallet, Clock } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet, Clock, ChevronDown } from 'lucide-react'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
-import { WalletBalanceChart } from '@/components/charts/WalletBalanceChart'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
@@ -18,19 +17,7 @@ import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { motion } from 'framer-motion'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { useState } from 'react'
-
-// Function to get organization initials
-const getOrganizationInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
@@ -106,9 +93,20 @@ export default function FinancesDashboard() {
   const currentOrganization = userData?.organization;
   const currentProject = userData?.organizations?.[0]?.projects?.[0];
 
+  // Time period options
+  const timePeriodOptions = [
+    { value: 'desde-siempre', label: 'Desde Siempre' },
+    { value: 'ultimo-mes', label: 'Último Mes' },
+    { value: 'ultimo-trimestre', label: 'Último Trimestre' },
+    { value: 'ultimo-semestre', label: 'Último Semestre' },
+    { value: 'ultimo-año', label: 'Último Año' }
+  ]
+
+  const currentTimePeriodLabel = timePeriodOptions.find(option => option.value === timePeriod)?.label || 'Desde Siempre'
+
   return (
     <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <FeatureIntroduction
           title="Resumen Financiero"
           features={features}
@@ -132,18 +130,32 @@ export default function FinancesDashboard() {
               <DollarSign className="w-4 h-4" />
               {currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
             </Button>,
-            <Select value={timePeriod} onValueChange={setTimePeriod}>
-              <SelectTrigger className="w-32">
-                <Clock className="w-4 h-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="desde-siempre">Todo</SelectItem>
-                <SelectItem value="ultimo-mes">Último mes</SelectItem>
-                <SelectItem value="ultimo-trimestre">Último trimestre</SelectItem>
-                <SelectItem value="ultimo-año">Último año</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu key="time-period">
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 px-2 py-1 h-auto text-sm font-medium hover:bg-muted/50 data-[state=open]:bg-muted/50"
+                >
+                  <Clock className="w-4 h-4" />
+                  <span className="truncate max-w-32">{currentTimePeriodLabel}</span>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {timePeriodOptions.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => setTimePeriod(option.value)}
+                    className="flex items-center justify-between"
+                  >
+                    <span>{option.label}</span>
+                    {timePeriod === option.value && (
+                      <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           ]}
         />
 
@@ -156,143 +168,13 @@ export default function FinancesDashboard() {
           />
         ) : (
           <>
-        {/* 1 FILA: Card de TÍTULO (75%) + Card de MOVIMIENTOS (25%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
-          {/* Welcome Card - Financial Summary (75% width) */}
+        {/* 1 FILA: 4 KPIs - Movimientos, Ingresos, Egresos, Balance */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          {/* Movements Card */}
           <motion.div
-            className="lg:col-span-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-          >
-            <Card className="h-full">
-              <CardContent className="p-4 md:p-6 h-full flex flex-col">
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
-                  {/* Mobile Layout: Icon left, title right */}
-                  <div className="flex md:hidden items-center gap-3 w-full">
-                    {/* Financial Icon */}
-                    <div className="flex-shrink-0">
-                      <Avatar className="h-12 w-12 border-2 border-border">
-                        <AvatarFallback className="text-sm font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
-                          <DollarSign className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    
-                    {/* Title and organization info */}
-                    <div className="flex-1">
-                      <motion.h1
-                        className="text-xl font-black text-foreground"
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.2, duration: 0.3 }}
-                      >
-                        Resumen de Finanzas
-                      </motion.h1>
-                      <p className="text-base text-muted-foreground">
-                        {currentProject ? (
-                          <>
-                            Proyecto{" "}
-                            <span className="font-semibold text-foreground">
-                              {currentProject.name}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            Organización{" "}
-                            <span className="font-semibold text-foreground">
-                              {currentOrganization?.name || "Sin organización"}
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout: Icon + info side by side */}
-                  <div className="hidden md:flex items-start gap-6 w-full">
-                    {/* Financial Icon */}
-                    <div className="flex-shrink-0">
-                      <Avatar className="h-16 w-16 border-2 border-border">
-                        <AvatarFallback className="text-lg font-bold text-[var(--accent-foreground)] bg-[var(--accent)]">
-                          <DollarSign className="h-8 w-8" />
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-
-                    {/* Financial Summary Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-4 mb-1">
-                        <motion.h1
-                          className="text-4xl font-black text-foreground"
-                          initial={{ scale: 0.8 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.2, duration: 0.3 }}
-                        >
-                          Resumen de Finanzas
-                        </motion.h1>
-                        
-                        {/* Time Period Selector */}
-                        <Select value={timePeriod} onValueChange={setTimePeriod}>
-                          <SelectTrigger className="w-48">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="desde-siempre">DESDE SIEMPRE</SelectItem>
-                            <SelectItem value="este-mes">Este mes</SelectItem>
-                            <SelectItem value="trimestre">Trimestre</SelectItem>
-                            <SelectItem value="semestre">Semestre</SelectItem>
-                            <SelectItem value="ano">Año</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <p className="text-xl text-muted-foreground">
-                        {currentProject ? (
-                          <>
-                            Proyecto{" "}
-                            <span className="font-semibold text-foreground">
-                              {currentProject.name}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            Organización{" "}
-                            <span className="font-semibold text-foreground">
-                              {currentOrganization?.name || "Sin organización"}
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Mobile Time Period Selector */}
-                  <div className="flex md:hidden w-full">
-                    <Select value={timePeriod} onValueChange={setTimePeriod}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="desde-siempre">DESDE SIEMPRE</SelectItem>
-                        <SelectItem value="este-mes">Este mes</SelectItem>
-                        <SelectItem value="trimestre">Trimestre</SelectItem>
-                        <SelectItem value="semestre">Semestre</SelectItem>
-                        <SelectItem value="ano">Año</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Movements Card - Recent Activity (25% width) */}
-          <motion.div
-            className="lg:col-span-1"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
           >
             <Card className="h-full relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
@@ -310,9 +192,9 @@ export default function FinancesDashboard() {
                 
                 {/* Icon and Title Section - positioned lower */}
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    Movimientos (30 días)
+                    Movimientos
                   </span>
                 </div>
                 
@@ -323,30 +205,14 @@ export default function FinancesDashboard() {
               </CardContent>
             </Card>
           </motion.div>
-        </div>
 
-        {/* 2 FILA: Balances por Billetera y Moneda (100% ancho) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Balances por Billetera y Moneda
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Resumen detallado de saldos organizados por billetera y moneda
-            </p>
-          </CardHeader>
-          <CardContent>
-            <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
-          </CardContent>
-        </Card>
-
-        {/* 3 FILA: Métricas (1 col) + Gráfico de Flujo Financiero (3 cols) */}
-        <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6">
-          {/* Columna de Métricas Verticales */}
-          <div className="flex flex-col gap-4 lg:gap-6 h-full">
-            {/* Card de Ingresos */}
-            <Card className="flex-1 relative overflow-hidden">
+          {/* Income Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="h-full relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
                 {/* Mini Chart */}
                 <div className="mb-4">
@@ -374,9 +240,15 @@ export default function FinancesDashboard() {
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Card de Egresos */}
-            <Card className="flex-1 relative overflow-hidden">
+          </motion.div>
+
+          {/* Expenses Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="h-full relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
                 {/* Mini Chart */}
                 <div className="mb-4">
@@ -404,9 +276,15 @@ export default function FinancesDashboard() {
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Card de Balance */}
-            <Card className="flex-1 relative overflow-hidden">
+          </motion.div>
+
+          {/* Balance Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="h-full relative overflow-hidden">
               <CardContent className="p-4 h-full flex flex-col">
                 {/* Mini Chart */}
                 <div className="mb-4">
@@ -422,9 +300,9 @@ export default function FinancesDashboard() {
                 
                 {/* Icon and Title Section - positioned lower */}
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4" style={{ color: 'var(--chart-neutral)' }} />
+                  <DollarSign className="h-4 w-4" style={getBalanceColor(financialSummary?.balance || 0)} />
                   <span className="text-sm text-muted-foreground">
-                    Balance General
+                    Balance Neto
                   </span>
                 </div>
                 
@@ -434,23 +312,40 @@ export default function FinancesDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Flujo Financiero Mensual
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Ingresos, egresos y flujo neto del período seleccionado
-              </p>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
-            </CardContent>
-          </Card>
+          </motion.div>
         </div>
+
+        {/* 2 FILA: Balances por Billetera y Moneda (100% ancho) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Balances por Billetera y Moneda
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Resumen detallado de saldos organizados por billetera y moneda
+            </p>
+          </CardHeader>
+          <CardContent>
+            <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
+          </CardContent>
+        </Card>
+
+        {/* 3 FILA: Gráfico de Flujo Financiero Mensual (100% ancho) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Flujo Financiero Mensual
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Ingresos, egresos y flujo neto del período seleccionado
+            </p>
+          </CardHeader>
+          <CardContent className="pb-2">
+            <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
+          </CardContent>
+        </Card>
 
         {/* 4 FILA: 3 cards - Egresos por Categoría, Este Mes, Movimientos Recientes */}
         <div className="hidden md:grid grid-cols-3 gap-4 lg:gap-6">
