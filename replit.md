@@ -118,13 +118,6 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 28, 2025. ACTIONBAR CSS VARIABLES SYSTEM IMPLEMENTED: Successfully created comprehensive CSS variable system for ActionBar theming with light/dark mode support - COMPLETED
-  • CSS VARIABLES ADDED: Created 5 ActionBar-specific variables (--actionbar-bg, --actionbar-border, --actionbar-title-text, --actionbar-icon-text, --actionbar-content-text)
-  • LIGHT THEME CONFIGURED: ActionBar background matches card system (hsl(60, 8%, 95%)) with proper border and text colors
-  • DARK THEME CONFIGURED: ActionBar uses darker background (hsl(0, 0%, 16%)) with appropriate contrast for text and borders
-  • COMPONENT INTEGRATION: Applied all CSS variables to ActionBarDesktop component replacing hardcoded card variables
-  • THEME CONSISTENCY: Icon color uses accent green, titles use high contrast, content uses muted colors for proper hierarchy
-  • EXPANDABLE CONTENT STYLED: Features grid and divider lines now use ActionBar-specific variables instead of generic card variables
 - July 28, 2025. FINANCIAL DASHBOARD REDESIGN COMPLETED: Successfully restructured Resumen Financiero page with optimized layout and modern UI components - COMPLETED
   • TIME PERIOD SELECTOR MODERNIZED: Replaced Select component with DropdownMenu styled as ghost button matching ProjectSelector pattern
   • ACTIONBAR SELECTOR INTEGRATION: Time period selector now displays as "Desde Siempre" with dropdown options (Último Mes, Trimestre, Semestre, Año)

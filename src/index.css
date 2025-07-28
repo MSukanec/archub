@@ -52,13 +52,6 @@
   --secondary-card-fg: hsl(0, 0%, 90%);
   --secondary-card-border: hsl(0, 0%, 50%);
 
-  /* ActionBar */
-  --actionbar-bg: hsl(0, 0%, 25%);
-  --actionbar-border: hsl(0, 0%, 90%);
-  --actionbar-title-text: hsl(0, 0%, 70%);
-  --actionbar-icon-text: hsl(76, 100%, 40%);
-  --actionbar-content-text: hsl(0, 0%, 70%);
-
   /* Button Shadows */
   --button-shadow-normal: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   --button-shadow-hover: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
@@ -277,13 +270,6 @@
   --secondary-card-bg: hsl(0, 0%, 50%);
   --secondary-card-fg: hsl(0, 0%, 85%);
   --secondary-card-border: hsl(0, 0%, 50%);
-
-  /* ActionBar */
-  --actionbar-bg: hsl(0, 0%, 16%);
-  --actionbar-border: hsl(0, 0%, 20%);
-  --actionbar-title-text: hsl(0, 0%, 90%);
-  --actionbar-icon-text: hsl(76, 100%, 40%);
-  --actionbar-content-text: hsl(0, 0%, 70%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(76, 100%, 40%);
