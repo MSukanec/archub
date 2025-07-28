@@ -15,7 +15,6 @@ import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryC
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
-import { ExpensesRadialGridChart } from '@/components/charts/ExpensesRadialGridChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -204,9 +203,9 @@ export default function FinancesAnalysis() {
 
     // Convert to chart format with specific colors for our 3 categories
     const colors = {
-      'Mano de Obra': 'hsl(110, 40%, 50%)', // Verde
-      'Materiales': 'hsl(0, 87%, 67%)',     // Rojo
-      'Indirectos': 'hsl(43, 74%, 66%)'     // Amarillo
+      'Mano de Obra': 'var(--chart-1)', // Verde
+      'Materiales': 'var(--chart-5)',   // Rojo
+      'Indirectos': 'var(--chart-4)'    // Amarillo
     }
 
     return Array.from(categoryTotals.entries())
@@ -226,24 +225,45 @@ export default function FinancesAnalysis() {
   // Process data for treemap chart - subcategories
   const treemapData = useMemo(() => {
     const categoryColors = {
-      'Mano de Obra': 'hsl(110, 40%, 50%)', // Verde
-      'Materiales': 'hsl(0, 87%, 67%)',     // Rojo
-      'Indirectos': 'hsl(43, 74%, 66%)'     // Amarillo
+      'Mano de Obra': 'var(--chart-1)', // Verde
+      'Materiales': 'var(--chart-5)',   // Rojo
+      'Indirectos': 'var(--chart-4)'    // Amarillo
     }
 
     // Generate color variations for subcategories within each category
     const getSubcategoryColor = (categoryColor: string, index: number, total: number) => {
-      // Extract HSL values
-      const match = categoryColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/)
-      if (!match) return categoryColor
+      // For CSS variables, we need to get the computed color and vary it
+      // Since we can't easily parse CSS variables, we'll use predefined variations
+      const colorVariations = {
+        'var(--chart-1)': [ // Mano de Obra (Verde)
+          'hsl(110, 40%, 35%)',
+          'hsl(110, 40%, 40%)', 
+          'hsl(110, 40%, 45%)',
+          'hsl(110, 40%, 50%)',
+          'hsl(110, 40%, 55%)'
+        ],
+        'var(--chart-5)': [ // Materiales (Rojo)
+          'hsl(0, 87%, 35%)',
+          'hsl(0, 87%, 40%)',
+          'hsl(0, 87%, 45%)',
+          'hsl(0, 87%, 50%)',
+          'hsl(0, 87%, 55%)'
+        ],
+        'var(--chart-4)': [ // Indirectos (Amarillo)
+          'hsl(43, 74%, 35%)',
+          'hsl(43, 74%, 40%)',
+          'hsl(43, 74%, 45%)',
+          'hsl(43, 74%, 50%)',
+          'hsl(43, 74%, 55%)'
+        ]
+      }
       
-      const [, h, s, l] = match
-      // Vary lightness from darker to lighter within category
-      const minLightness = 35
-      const maxLightness = 65
-      const lightness = minLightness + ((maxLightness - minLightness) * index / Math.max(1, total - 1))
+      const variations = colorVariations[categoryColor as keyof typeof colorVariations]
+      if (variations) {
+        return variations[index % variations.length]
+      }
       
-      return `hsl(${h}, ${s}%, ${Math.round(lightness)}%)`
+      return categoryColor
     }
 
     // Group by category and subcategory
@@ -610,12 +630,7 @@ export default function FinancesAnalysis() {
               </CardContent>
             </Card>
 
-            {/* Cuarta fila - Radial Grid Chart (estilo Data Visualization Society) */}
-            <Card>
-              <CardContent className="p-6">
-                <ExpensesRadialGridChart data={sunburstRadialData || []} isLoading={isLoading} />
-              </CardContent>
-            </Card>
+
           </div>
         )}
       </div>

@@ -36,10 +36,16 @@ export function ExpensesSunburstRadialChart({ data, isLoading }: ExpensesSunburs
     const height = 500
     const radius = Math.min(width, height) / 2 - 10
 
-    // Color scale for main categories
+    // Color scale for main categories using CSS variables
+    const categoryColors = {
+      'Mano de Obra': 'hsl(76, 100%, 40%)',   // --chart-1
+      'Materiales': 'hsl(0, 87%, 67%)',       // --chart-5  
+      'Indirectos': 'hsl(43, 74%, 66%)'       // --chart-4
+    }
+    
     const colorScale = d3.scaleOrdinal()
       .domain(['Mano de Obra', 'Materiales', 'Indirectos'])
-      .range(['hsl(110, 40%, 50%)', 'hsl(0, 87%, 67%)', 'hsl(43, 74%, 66%)'])
+      .range([categoryColors['Mano de Obra'], categoryColors['Materiales'], categoryColors['Indirectos']])
 
     // Create hierarchy
     const hierarchy = d3.hierarchy({ name: 'root', children: data } as any)
