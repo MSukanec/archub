@@ -119,7 +119,7 @@ export default function ConstructionSchedule() {
       ganttRows.push({
         id: `phase-${phaseName.replace(/\s+/g, '-')}`,
         name: phaseName,
-        type: 'group',
+        type: 'phase',
         level: 0,
         isHeader: true,
         startDate: undefined,
@@ -260,7 +260,7 @@ export default function ConstructionSchedule() {
                 {
                   key: 'phase_name',
                   label: 'Fase',
-                  width: '10%',
+                  width: '15%',
                   render: (task) => (
                     <Badge variant="secondary" className="text-xs">
                       {task.phase_name || 'Sin fase'}
@@ -270,7 +270,7 @@ export default function ConstructionSchedule() {
                 {
                   key: 'category_name',
                   label: 'Rubro',
-                  width: '10%',
+                  width: '15%',
                   render: (task) => (
                     <Badge variant="outline" className="text-xs">
                       {task.category_name || 'Sin rubro'}
@@ -280,7 +280,7 @@ export default function ConstructionSchedule() {
                 {
                   key: 'name_rendered',
                   label: 'Tarea',
-                  width: '60%',
+                  width: '35%',
                   render: (task) => (
                     <span className="text-sm">
                       {cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre')}
@@ -306,15 +306,39 @@ export default function ConstructionSchedule() {
                       {task.quantity || 0}
                     </span>
                   )
+                },
+                {
+                  key: 'actions',
+                  label: 'Acciones',
+                  width: '15%',
+                  sortable: false,
+                  render: (task) => (
+                    <div className="flex items-center space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openModal('construction-task-schedule', { taskId: task.id })}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          showDeleteConfirmation({
+                            itemName: task.name_rendered || 'esta tarea',
+                            onConfirm: () => deleteTask.mutate(task.id)
+                          })
+                        }}
+                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )
                 }
               ]}
-              onEdit={(task) => openModal('construction-task-schedule', { taskId: task.id })}
-              onDelete={(task) => {
-                showDeleteConfirmation({
-                  itemName: task.name_rendered || 'esta tarea',
-                  onConfirm: () => deleteTask.mutate(task.id)
-                })
-              }}
             />
           )}
         </div>
