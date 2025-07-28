@@ -257,8 +257,30 @@ export function ConstructionSingleTaskModal({
 
   const editPanel = (
     <div className="space-y-4">
-      {/* Información básica - Centrados como en MovementFormModal */}
+      {/* Información básica - Orden solicitado: Fase - Cantidad */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Fase del Proyecto
+          </label>
+          <Select 
+            value={form.watch('project_phase_id') || ''} 
+            onValueChange={(value) => form.setValue('project_phase_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar fase" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Sin fase</SelectItem>
+              {projectPhases.map((phase) => (
+                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
+                  {phase.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Cantidad *
@@ -283,139 +305,105 @@ export function ConstructionSingleTaskModal({
             </p>
           )}
         </div>
-        
+      </div>
+
+      {/* Filtros de búsqueda - Orden solicitado: Filtrar por Rubro - Búsqueda de Texto */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Fase del Proyecto
+          <label className="text-xs font-medium leading-none text-muted-foreground">
+            Filtrar por Rubro
           </label>
-          <Select 
-            value={form.watch('project_phase_id') || ''} 
-            onValueChange={(value) => form.setValue('project_phase_id', value)}
-          >
+          <Select value={rubroFilter} onValueChange={setRubroFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="Seleccionar fase" />
+              <SelectValue placeholder="Todos los rubros" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Sin fase</SelectItem>
-              {projectPhases.map((phase) => (
-                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
-                  {phase.name}
+              <SelectItem value="">Todos los rubros</SelectItem>
+              {uniqueRubros.map((rubro) => (
+                <SelectItem key={rubro} value={rubro}>
+                  {rubro}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      {/* Selección de tarea */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Tarea de la Librería *
+        
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none text-muted-foreground">
+            Búsqueda de Texto
           </label>
-          <Badge variant="secondary" className="text-xs">
-            {filteredTasks.length} disponibles
-          </Badge>
-        </div>
-        
-        {/* Filtros de búsqueda - Responsive grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-xs font-medium leading-none text-muted-foreground">
-              Filtrar por Rubro
-            </label>
-            <Select value={rubroFilter} onValueChange={setRubroFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todos los rubros" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todos los rubros</SelectItem>
-                {uniqueRubros.map((rubro) => (
-                  <SelectItem key={rubro} value={rubro}>
-                    {rubro}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-xs font-medium leading-none text-muted-foreground">
-              Búsqueda de Texto
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar tarea..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar tarea..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
-        
-        {/* Lista de tareas con scroll - Altura ajustada para mobile */}
-        <div className="border rounded-lg">
-          <ScrollArea className="h-64 md:h-80">
-            <div className="p-4 space-y-2">
-              {tasksLoading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <div className="animate-pulse">Cargando tareas...</div>
-                </div>
-              ) : filteredTasks.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <div className="mb-2">No se encontraron tareas</div>
-                  <div className="text-xs">Intenta ajustar los filtros de búsqueda</div>
-                </div>
-              ) : (
-                filteredTasks.map((task) => (
-                  <div 
-                    key={task.id}
-                    onClick={() => handleTaskSelect(task.id)}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                      selectedTaskId === task.id 
-                        ? 'border-accent bg-accent/10 shadow-sm' 
-                        : 'border-border hover:border-accent/50 hover:bg-accent/5'
-                    }`}
-                  >
-                    <div className="space-y-2">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="outline" className="text-xs font-mono">
-                            {task.code}
+      </div>
+      
+      {/* Lista de tareas con scroll - Sin texto innecesario */}
+      <div className="border rounded-lg">
+        <ScrollArea className="h-64 md:h-80">
+          <div className="p-4 space-y-2">
+            {tasksLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <div className="animate-pulse">Cargando tareas...</div>
+              </div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <div className="mb-2">No se encontraron tareas</div>
+                <div className="text-xs">Intenta ajustar los filtros de búsqueda</div>
+              </div>
+            ) : (
+              filteredTasks.map((task) => (
+                <div 
+                  key={task.id}
+                  onClick={() => handleTaskSelect(task.id)}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                    selectedTaskId === task.id 
+                      ? 'border-accent bg-accent/10 shadow-sm' 
+                      : 'border-border hover:border-accent/50 hover:bg-accent/5'
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="text-xs font-mono">
+                          {task.code}
+                        </Badge>
+                        {task.category_name && (
+                          <Badge variant="secondary" className="text-xs">
+                            {task.category_name}
                           </Badge>
-                          {task.category_name && (
-                            <Badge variant="secondary" className="text-xs">
-                              {task.category_name}
-                            </Badge>
-                          )}
-                        </div>
-                        {task.unit_symbol && (
-                          <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            {task.unit_symbol}
-                          </div>
                         )}
                       </div>
-                      <p className="text-sm font-medium leading-tight text-left">
-                        {task.name_rendered || task.code || 'Sin nombre'}
-                      </p>
+                      {task.unit_symbol && (
+                        <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                          {task.unit_symbol}
+                        </div>
+                      )}
                     </div>
+                    <p className="text-sm font-medium leading-tight text-left">
+                      {task.name_rendered || task.code || 'Sin nombre'}
+                    </p>
                   </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </div>
-        
-        {/* Validación de selección */}
-        {form.formState.errors.task_id && (
-          <p className="text-xs text-destructive flex items-center gap-1">
-            <span className="w-1 h-1 bg-destructive rounded-full"></span>
-            {form.formState.errors.task_id.message}
-          </p>
-        )}
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
       </div>
+      
+      {/* Validación de selección */}
+      {form.formState.errors.task_id && (
+        <p className="text-xs text-destructive flex items-center gap-1">
+          <span className="w-1 h-1 bg-destructive rounded-full"></span>
+          {form.formState.errors.task_id.message}
+        </p>
+      )}
     </div>
   );
 

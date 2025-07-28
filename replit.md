@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. CONSTRUCTION SINGLE TASK MODAL FIELD ORDERING FINALIZED: Successfully reorganized modal fields per user specifications with clean professional layout - COMPLETED
+  • FIELD ORDER CORRECTED: Restructured to exact order requested - "Fase del Proyecto - Cantidad" then "Filtrar por Rubro - Búsqueda de Texto"
+  • UNNECESSARY TEXT ELIMINATED: Removed "TAREA DE LA LIBRERÍA * disponibles" label and badge completely per user request
+  • PROFESSIONAL STYLING MAINTAINED: Preserved MovementFormModal-style design with text-xs font-medium labels and responsive grid layout
+  • CLEAN INTERFACE: Modal now displays only essential fields in specified order without distracting status text or counters
+  • MOBILE RESPONSIVENESS: Single column layout on mobile devices maintained with proper field stacking
 - July 28, 2025. CONSTRUCTION PHASE MODAL SIMPLIFIED: Eliminated "use existing phase" functionality and streamlined modal to only create new phases with name and description fields - COMPLETED
   • SIMPLIFIED INTERFACE: Removed checkbox and dropdown for selecting existing phases, modal now only creates new phases
   • CLEAN VALIDATION: Updated schema to simple name (required) and description (optional) validation
