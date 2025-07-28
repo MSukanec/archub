@@ -37,21 +37,20 @@ BEGIN
   -- Extract tipo_tarea value from input_param_values
   tipo_tarea_value := input_param_values->>'tipo_tarea';
   
-  -- Logic to assign unit_id and category_id based on tipo_tarea
-  -- First, get the option ID for 'ejecucion-de-muros' from task_parameter_options
+  -- Logic to assign unit_id and category_id based on tipo_tarea value (UUID)
+  -- Check if the tipo_tarea UUID corresponds to 'ejecucion-de-muros' option
   IF EXISTS (
     SELECT 1 FROM task_parameter_options tpo
-    JOIN task_parameters tp ON tpo.parameter_id = tp.id
-    WHERE tp.slug = 'tipo_tarea' AND tpo.name = tipo_tarea_value
+    WHERE tpo.id = tipo_tarea_value::UUID AND tpo.name = 'ejecucion-de-muros'
   ) THEN
-    -- Get unit_id and category_id from the matching option
-    SELECT tpo.unit_id, tpo.category_id 
-    INTO calculated_unit_id, calculated_category_id
-    FROM task_parameter_options tpo
-    JOIN task_parameters tp ON tpo.parameter_id = tp.id
-    WHERE tp.slug = 'tipo_tarea' AND tpo.name = tipo_tarea_value;
+    -- Set specific UUIDs for muros category and m2 unit
+    -- You need to replace these with actual UUIDs from your database:
+    -- Query: SELECT id FROM task_categories WHERE name ILIKE '%muro%' AND parent_id IS NULL;
+    -- Query: SELECT id FROM units WHERE name ILIKE '%m2%' OR abbreviation = 'm²';
+    calculated_category_id := (SELECT id FROM task_categories WHERE name ILIKE '%muro%' AND parent_id IS NULL LIMIT 1);
+    calculated_unit_id := (SELECT id FROM units WHERE abbreviation = 'm²' OR name ILIKE '%metro%cuadrado%' LIMIT 1);
   ELSE
-    -- For unknown values, set to null
+    -- For other values, set to null
     calculated_unit_id := NULL;
     calculated_category_id := NULL;
   END IF;
