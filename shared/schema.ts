@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -218,7 +218,24 @@ export const task_parameter_positions = pgTable("task_parameter_positions", {
 // Task Parametric Table - Para guardar tareas generadas con configuración paramétrica
 export const task_parametric = pgTable("task_parametric", {
   id: uuid("id").primaryKey().defaultRandom(),
-  param_values: text("param_values").notNull(), // JSON con los valores de parámetros
+  code: text("code"),
+  template_id: uuid("template_id"),
+  param_values: jsonb("param_values").notNull(), // JSONB con los valores de parámetros
+  param_order: text("param_order").array(), // Array con el orden de parámetros
+  organization_id: uuid("organization_id"),
+  unit_id: uuid("unit_id"),
+  task_group_id: uuid("task_group_id"),
+  task_group_name: text("task_group_name"),
+  category_id: uuid("category_id"),
+  category_name: text("category_name"),
+  category_code: text("category_code"),
+  subcategory_id: uuid("subcategory_id"),
+  subcategory_name: text("subcategory_name"),
+  subcategory_code: text("subcategory_code"),
+  rubro_id: uuid("rubro_id"),
+  rubro_name: text("rubro_name"),
+  rubro_code: text("rubro_code"),
+  display_name: text("display_name"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });

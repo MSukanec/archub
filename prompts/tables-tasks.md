@@ -256,6 +256,26 @@ TABLA TASK_PARAMETRIC:
   {
     "column_name": "param_values",
     "data_type": "jsonb"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "param_order",
+    "data_type": "ARRAY"
+  },
+  {
+    "column_name": "name_rendered",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
   }
 ]
 
