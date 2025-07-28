@@ -403,10 +403,36 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
     const updatedSelections = selections.filter(s => s.parameterId !== parameterId)
     setSelections([...updatedSelections, newSelection])
 
-    // Actualizar el orden de parámetros
+    // Actualizar el orden de parámetros con inserción inteligente
     const updatedOrder = [...parameterOrder]
     if (!updatedOrder.includes(parameter.slug)) {
-      updatedOrder.push(parameter.slug)
+      // Usar el mismo algoritmo de inserción inteligente
+      const standardOrder = ['tipo_tarea', 'tipo_de_muro', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos']
+      const standardIndex = standardOrder.indexOf(parameter.slug)
+      
+      if (standardIndex !== -1) {
+        // Encontrar la posición correcta para insertar
+        let insertIndex = updatedOrder.length // Por defecto al final
+        
+        // Buscar hacia atrás en standardOrder para encontrar un parámetro que ya esté en updatedOrder
+        for (let i = standardIndex - 1; i >= 0; i--) {
+          const beforeParam = standardOrder[i]
+          const beforeIndex = updatedOrder.indexOf(beforeParam)
+          if (beforeIndex !== -1) {
+            insertIndex = beforeIndex + 1
+            break
+          }
+        }
+        
+        // Insertar el parámetro en la posición correcta
+        updatedOrder.splice(insertIndex, 0, parameter.slug)
+        console.log(`🎯 Parameter ${parameter.slug} intelligently inserted at position ${insertIndex}`)
+      } else {
+        // Si no está en standardOrder, agregarlo al final
+        updatedOrder.push(parameter.slug)
+        console.log(`🎯 Parameter ${parameter.slug} added at end (not in standard order)`)
+      }
+      
       setParameterOrder(updatedOrder)
       console.log('🎯 Parameter order updated:', updatedOrder)
     }
