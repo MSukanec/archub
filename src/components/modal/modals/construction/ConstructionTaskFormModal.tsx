@@ -195,6 +195,12 @@ export function ConstructionTaskFormModal({
   const updateTask = useUpdateConstructionTask();
 
   const onSubmit = async (data: AddTaskFormData) => {
+    console.log('🚀 SUBMIT INICIADO - Datos del formulario:', data);
+    console.log('🚀 SUBMIT INICIADO - selectedTasks:', selectedTasks);
+    console.log('🚀 SUBMIT INICIADO - modalData:', modalData);
+    console.log('🚀 SUBMIT INICIADO - userData:', userData?.user);
+    console.log('🚀 SUBMIT INICIADO - currentMember:', currentMember);
+
     if (!userData?.user?.id) {
       toast({
         title: "Error",
@@ -205,12 +211,8 @@ export function ConstructionTaskFormModal({
     }
 
     if (!currentMember?.id) {
-      toast({
-        title: "Error", 
-        description: "No se pudo identificar el miembro de la organización",
-        variant: "destructive"
-      });
-      return;
+      console.log('⚠️ currentMember es null, usando userData.user.id como fallback');
+      // Usar userData.user.id como fallback cuando currentMember es null
     }
 
     if (selectedTasks.length === 0) {
@@ -246,7 +248,7 @@ export function ConstructionTaskFormModal({
           numberOfTasks: selectedTasks.length,
           organizationId: modalData.organizationId,
           projectId: modalData.projectId,
-          createdBy: currentMember.id,
+          createdBy: currentMember?.id || userData.user.id,
           taskDetails: selectedTasks.map(st => ({
             task_id: st.task_id,
             quantity: st.quantity,
@@ -260,7 +262,7 @@ export function ConstructionTaskFormModal({
             quantity: selectedTask.quantity,
             organization_id: modalData.organizationId,
             project_id: modalData.projectId,
-            created_by: currentMember.id,
+            created_by: currentMember?.id || userData.user.id,
             project_phase_id: selectedTask.phase_instance_id || undefined
           });
           
@@ -269,7 +271,7 @@ export function ConstructionTaskFormModal({
             project_id: modalData.projectId,
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
-            created_by: currentMember.id,
+            created_by: currentMember?.id || userData.user.id,
             project_phase_id: selectedTask.phase_instance_id || undefined
           }).catch(error => {
             console.error(`❌ Error en tarea ${index + 1}:`, error);
@@ -558,7 +560,13 @@ export function ConstructionTaskFormModal({
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
-      onRightClick={handleSubmit(onSubmit)}
+      onRightClick={() => {
+        console.log('🎯 BOTÓN PRESIONADO - Form errors:', form.formState.errors);
+        console.log('🎯 BOTÓN PRESIONADO - Form isValid:', form.formState.isValid);
+        console.log('🎯 BOTÓN PRESIONADO - Form values:', form.getValues());
+        console.log('🎯 BOTÓN PRESIONADO - selectedTasks:', selectedTasks);
+        handleSubmit(onSubmit)();
+      }}
       rightLoading={isSubmitting}
     />
   );

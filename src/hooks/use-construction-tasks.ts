@@ -203,7 +203,7 @@ export function useCreateConstructionTask() {
 
       console.log('🔧 HOOK useCreateConstructionTask - DATOS RECIBIDOS:', taskData);
 
-      // Preparar datos para inserción
+      // Preparar datos para inserción (solo campos que existen en construction_tasks)
       const insertData = {
         organization_id: taskData.organization_id,
         project_id: taskData.project_id,
@@ -212,12 +212,10 @@ export function useCreateConstructionTask() {
         created_by: taskData.created_by,
         start_date: taskData.start_date || null,
         end_date: taskData.end_date || null,
-        duration_in_days: taskData.duration_in_days || null,
-        project_phase_id: taskData.project_phase_id || null,
-        progress_percent: taskData.progress_percent || 0
+        duration_in_days: taskData.duration_in_days || null
       };
 
-      console.log('📝 DATOS PREPARADOS PARA INSERT:', insertData);
+      console.log('📝 DATOS PREPARADOS PARA INSERT (sin project_phase_id):', insertData);
 
       // Crear la tarea de construcción
       const { data: constructionTask, error: taskError } = await supabase
