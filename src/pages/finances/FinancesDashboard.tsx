@@ -97,13 +97,13 @@ export default function FinancesDashboard() {
 
   return (
     <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
+      <FeatureIntroduction
+        title="Resumen Financiero"
+        features={features}
+        className="md:hidden"
+      />
+      
       <div className="space-y-6">
-        <FeatureIntroduction
-          title="Resumen Financiero"
-          features={features}
-          className="md:hidden"
-        />
-
         <ActionBarDesktop
           title="Resumen Financiero"
           icon={<DollarSign className="w-5 h-5" />}
