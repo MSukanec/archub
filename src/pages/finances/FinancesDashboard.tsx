@@ -246,168 +246,137 @@ export default function FinancesDashboard() {
           </Card>
         </div>
 
-        {/* FILA 2: 4 columnas - KPIs (Movimientos, Ingresos, Egresos, Balance) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {/* Movements Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="h-full relative overflow-hidden">
-              <CardContent className="p-4 h-full flex flex-col">
-                {/* Mini Chart */}
-                <div className="mb-4">
-                  <MiniTrendChart 
-                    data={movementsTrend} 
-                    color="var(--chart-neutral)" 
-                    isLoading={summaryLoading} 
-                  />
-                </div>
-                
-                {/* Spacer to push content down */}
-                <div className="flex-1"></div>
-                
-                {/* Icon and Title Section - positioned lower */}
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    Movimientos
-                  </span>
-                </div>
-                
-                {/* Amount - smaller size like reference */}
-                <div className="text-lg font-bold text-foreground">
-                  {summaryLoading ? '...' : formatCurrency(movementsLast30Days)}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        {/* FILA 2: 4 columnas - 3 KPIs apilados + Gráfico de Flujo Financiero */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
+          {/* Columna 1: 3 KPIs apilados */}
+          <div className="space-y-4">
+            {/* Income Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="h-full relative overflow-hidden">
+                <CardContent className="p-4 h-full flex flex-col">
+                  {/* Mini Chart */}
+                  <div className="mb-4">
+                    <MiniTrendChart 
+                      data={incomeTrend} 
+                      color="var(--chart-positive)" 
+                      isLoading={flowLoading} 
+                    />
+                  </div>
+                  
+                  {/* Spacer to push content down */}
+                  <div className="flex-1"></div>
+                  
+                  {/* Icon and Title Section - positioned lower */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
+                    <span className="text-sm text-muted-foreground">
+                      Ingresos Totales
+                    </span>
+                  </div>
+                  
+                  {/* Amount - smaller size like reference */}
+                  <div className="text-lg font-bold" style={{ color: 'var(--chart-positive)' }}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Income Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Card className="h-full relative overflow-hidden">
-              <CardContent className="p-4 h-full flex flex-col">
-                {/* Mini Chart */}
-                <div className="mb-4">
-                  <MiniTrendChart 
-                    data={incomeTrend} 
-                    color="var(--chart-positive)" 
-                    isLoading={flowLoading} 
-                  />
-                </div>
-                
-                {/* Spacer to push content down */}
-                <div className="flex-1"></div>
-                
-                {/* Icon and Title Section - positioned lower */}
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
-                  <span className="text-sm text-muted-foreground">
-                    Ingresos Totales
-                  </span>
-                </div>
-                
-                {/* Amount - smaller size like reference */}
-                <div className="text-lg font-bold" style={{ color: 'var(--chart-positive)' }}>
-                  {summaryLoading ? '...' : formatCurrency(financialSummary?.totalIncome || 0)}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Expenses Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Card className="h-full relative overflow-hidden">
+                <CardContent className="p-4 h-full flex flex-col">
+                  {/* Mini Chart */}
+                  <div className="mb-4">
+                    <MiniTrendChart 
+                      data={expensesTrend} 
+                      color="var(--chart-negative)" 
+                      isLoading={flowLoading} 
+                    />
+                  </div>
+                  
+                  {/* Spacer to push content down */}
+                  <div className="flex-1"></div>
+                  
+                  {/* Icon and Title Section - positioned lower */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
+                    <span className="text-sm text-muted-foreground">
+                      Egresos Totales
+                    </span>
+                  </div>
+                  
+                  {/* Amount - smaller size like reference */}
+                  <div className="text-lg font-bold" style={{ color: 'var(--chart-negative)' }}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Expenses Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Card className="h-full relative overflow-hidden">
-              <CardContent className="p-4 h-full flex flex-col">
-                {/* Mini Chart */}
-                <div className="mb-4">
-                  <MiniTrendChart 
-                    data={expensesTrend} 
-                    color="var(--chart-negative)" 
-                    isLoading={flowLoading} 
-                  />
-                </div>
-                
-                {/* Spacer to push content down */}
-                <div className="flex-1"></div>
-                
-                {/* Icon and Title Section - positioned lower */}
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
-                  <span className="text-sm text-muted-foreground">
-                    Egresos Totales
-                  </span>
-                </div>
-                
-                {/* Amount - smaller size like reference */}
-                <div className="text-lg font-bold" style={{ color: 'var(--chart-negative)' }}>
-                  {summaryLoading ? '...' : formatCurrency(financialSummary?.totalExpenses || 0)}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Balance Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="h-full relative overflow-hidden">
+                <CardContent className="p-4 h-full flex flex-col">
+                  {/* Mini Chart */}
+                  <div className="mb-4">
+                    <MiniTrendChart 
+                      data={balanceTrend} 
+                      color="var(--chart-neutral)" 
+                      isLoading={flowLoading} 
+                    />
+                  </div>
+                  
+                  {/* Spacer to push content down */}
+                  <div className="flex-1"></div>
+                  
+                  {/* Icon and Title Section - positioned lower */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="h-4 w-4" style={getBalanceColor(financialSummary?.balance || 0)} />
+                    <span className="text-sm text-muted-foreground">
+                      Balance Neto
+                    </span>
+                  </div>
+                  
+                  {/* Amount - smaller size like reference */}
+                  <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
+                    {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
 
-          {/* Balance Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="h-full relative overflow-hidden">
-              <CardContent className="p-4 h-full flex flex-col">
-                {/* Mini Chart */}
-                <div className="mb-4">
-                  <MiniTrendChart 
-                    data={balanceTrend} 
-                    color="var(--chart-neutral)" 
-                    isLoading={flowLoading} 
-                  />
-                </div>
-                
-                {/* Spacer to push content down */}
-                <div className="flex-1"></div>
-                
-                {/* Icon and Title Section - positioned lower */}
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4" style={getBalanceColor(financialSummary?.balance || 0)} />
-                  <span className="text-sm text-muted-foreground">
-                    Balance Neto
-                  </span>
-                </div>
-                
-                {/* Amount - smaller size like reference */}
-                <div className="text-lg font-bold" style={getBalanceColor(financialSummary?.balance || 0)}>
-                  {summaryLoading ? '...' : formatCurrency(financialSummary?.balance || 0)}
-                </div>
+          {/* Columnas 2-4: Gráfico de Flujo Financiero Mensual */}
+          <div className="lg:col-span-3">
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Flujo Financiero Mensual
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Ingresos, egresos y flujo neto del período seleccionado
+                </p>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         </div>
-
-        {/* FILA 3: 1 columna - Gráfico de Flujo Financiero Mensual (100% ancho) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Flujo Financiero Mensual
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Ingresos, egresos y flujo neto del período seleccionado
-            </p>
-          </CardHeader>
-          <CardContent className="pb-2">
-            <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
-          </CardContent>
-        </Card>
 
         {/* Mobile Layout - Cards apiladas verticalmente */}
         <div className="md:hidden space-y-4">
