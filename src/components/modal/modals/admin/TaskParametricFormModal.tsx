@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial } from '@/hooks/use-generated-tasks'
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from '@/hooks/use-generated-tasks'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -99,6 +99,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const createTaskMutation = useCreateGeneratedTask()
   const updateTaskMutation = useUpdateGeneratedTask()
   const createTaskMaterialMutation = useCreateTaskMaterial()
+  const deleteTaskMaterialMutation = useDeleteTaskMaterial()
   
   // Data hooks
   const { data: userData } = useCurrentUser()
@@ -405,7 +406,19 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
+                          onClick={async () => {
+                            // If material has ID, delete from database
+                            if (material.id) {
+                              try {
+                                console.log('🗑️ Deleting material from database:', material.id);
+                                await deleteTaskMaterialMutation.mutateAsync(material.id);
+                                console.log('✅ Material deleted from database');
+                              } catch (error) {
+                                console.error('❌ Error deleting material from database:', error);
+                                return; // Don't remove from local state if database deletion fails
+                              }
+                            }
+                            // Remove from local state
                             setTaskMaterials(prev => prev.filter((_, i) => i !== index))
                           }}
                         >
