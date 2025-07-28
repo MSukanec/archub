@@ -12,7 +12,7 @@ import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap, ArrowLeft } from "lucide-react";
+import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap, ArrowLeft, Layers, Wrench } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
@@ -27,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const addTaskSchema = z.object({
   selectedTasks: z.array(z.object({
@@ -87,6 +88,9 @@ export function ConstructionTaskFormModal({
 
   // Panel store para manejar subforms
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
+  
+  // Estado para manejo de tabs dentro del subform
+  const [activeTab, setActiveTab] = useState<'parametric' | 'custom'>('parametric');
   
   // Query para obtener la membresía actual del usuario en la organización
   const { data: organizationMember } = useQuery({
@@ -700,16 +704,59 @@ export function ConstructionTaskFormModal({
     switch (currentSubform) {
       case 'parametric-task':
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              {/* ParametricTaskBuilder Component */}
-              <ParametricTaskBuilder
-                onSelectionChange={setParametricSelections}
-                onPreviewChange={setParametricTaskPreview}
-                onOrderChange={setParametricParameterOrder}
-                initialParameters={null}
-                initialParameterOrder={null}
-              />
+          <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'parametric' | 'custom')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="parametric">Nueva Tarea Paramétrica</TabsTrigger>
+                  <TabsTrigger value="custom">Nueva Tarea Personalizada</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="parametric" className="mt-6">
+                  {/* Separador y título de sección para tarea paramétrica */}
+                  <div className="mb-4">
+                    <Separator className="mb-4" />
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                        <Layers className="w-4 h-4 text-accent" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-foreground">Tarea Paramétrica de la Comunidad</h3>
+                        <p className="text-xs text-muted-foreground">Esta tarea se generará mediante parámetros configurables y formará parte de la librería de tareas disponible para toda la comunidad de usuarios.</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <ParametricTaskBuilder
+                    onSelectionChange={setParametricSelections}
+                    onPreviewChange={setParametricTaskPreview}
+                    onOrderChange={setParametricParameterOrder}
+                    initialParameters={null}
+                    initialParameterOrder={null}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="custom" className="mt-6">
+                  {/* Separador y título de sección para tarea personalizada */}
+                  <div className="mb-4">
+                    <Separator className="mb-4" />
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+                        <Wrench className="w-4 h-4 text-accent" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-foreground">Tarea Completamente Personalizada</h3>
+                        <p className="text-xs text-muted-foreground">Esta tarea será completamente personalizada y única para tu proyecto. Solo estará disponible para ti y no se compartirá con otros usuarios.</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Por ahora solo mostrar el mensaje */}
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Funcionalidad en desarrollo</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         );
@@ -720,9 +767,9 @@ export function ConstructionTaskFormModal({
 
   const headerContent = currentPanel === 'subform' ? (
     <FormModalHeader
-      title={currentSubform === 'parametric-task' ? "Crear Nueva Tarea Paramétrica" : "Seleccionar Tareas del Proyecto"}
-      description={currentSubform === 'parametric-task' ? "Configura los parámetros para generar una nueva tarea personalizada" : undefined}
-      icon={currentSubform === 'parametric-task' ? Zap : CheckSquare}
+      title="Crear Nueva Tarea Personalizada"
+      description="Elige el método para crear tu nueva tarea de construcción"
+      icon={Plus}
       leftActions={
         <Button
           variant="ghost"
