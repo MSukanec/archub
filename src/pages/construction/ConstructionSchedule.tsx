@@ -16,7 +16,7 @@ import StatusBreakdown from '@/components/charts/gantt/StatusBreakdown'
 import CriticalPathDistribution from '@/components/charts/gantt/CriticalPathDistribution'
 import WeeklyProgressHeatmap from '@/components/charts/gantt/WeeklyProgressHeatmap'
 import DependencyNetwork from '@/components/charts/gantt/DependencyNetwork'
-import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
+import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -58,7 +58,6 @@ export default function ConstructionSchedule() {
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
-  // const deletePhase = useDeleteProjectPhase() // Commented out until implemented
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
 
@@ -70,28 +69,15 @@ export default function ConstructionSchedule() {
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
 
-  const { data: tasks = [], isLoading } = useConstructionTasks(
-    projectId || '', 
-    organizationId || ''
-  )
+  const { data: tasks = [], isLoading } = useConstructionTasksView(projectId || '')
 
   // Obtener las fases del proyecto y dependencias
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
   // const updatePhasesDates = useUpdatePhasesDates() // Commented out until implemented
 
-  // Procesar los nombres de las tareas de forma simplificada
-  const processedTasks = useMemo(() => {
-    if (!tasks.length) return []
-    
-    return tasks.map((task) => ({
-      ...task,
-      task: {
-        ...task.task,
-        processed_display_name: task.task?.display_name || task.task?.code || 'Tarea sin nombre'
-      }
-    }))
-  }, [tasks])
+  // Los datos ya vienen procesados de la vista CONSTRUCTION_TASK_VIEW
+  const processedTasks = tasks
 
 
 
@@ -187,28 +173,27 @@ export default function ConstructionSchedule() {
       itemName: item.name,
       onConfirm: async () => {
         console.log('Deleting phase:', item.phaseData.id);
-        await deletePhase.mutateAsync({
-          id: item.phaseData.id,
-          project_id: projectId || ''
-        });
+        // TODO: Implement phase deletion
+        // await deletePhase.mutateAsync({
+        //   id: item.phaseData.id,
+        //   project_id: projectId || ''
+        // });
       }
     })
   }
 
-  // Filtrar tareas según búsqueda
+  // Filtrar tareas según búsqueda usando los datos de la vista
   const filteredTasks = useMemo(() => {
     if (!searchValue.trim()) return processedTasks
     
     return processedTasks.filter(task => {
-      const cleanName = cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || '')
-      return cleanName.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.task.rubro_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.task.code?.toLowerCase().includes(searchValue.toLowerCase())
+      return task.name_rendered?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.category_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.phase_name?.toLowerCase().includes(searchValue.toLowerCase())
     })
   }, [processedTasks, searchValue])
 
-  // Transformar construction tasks al formato que espera Table
+  // Simplificado: usar directamente los datos de la vista
   const budgetTasks = useMemo(() => {
     if (!filteredTasks) return []
     
@@ -216,50 +201,48 @@ export default function ConstructionSchedule() {
       id: task.id,
       budget_id: 'construction-schedule',
       task_id: task.task_id,
-      organization_id: task.organization_id || '',
-      project_id: task.project_id || '',
-      created_at: task.created_at || new Date().toISOString(),
-      updated_at: task.updated_at || new Date().toISOString(),
+      organization_id: organizationId || '',
+      project_id: task.project_id,
+      created_at: task.created_at,
+      updated_at: task.updated_at,
       task: {
         task_instance_id: task.id,
-        project_id: task.project_id || '',
+        project_id: task.project_id,
         task_id: task.task_id,
-        task_code: task.task?.code || '',
-        start_date: task.start_date || null,
-        end_date: task.end_date || null,
-        duration_in_days: task.duration_in_days || null,
-        quantity: task.quantity || 0,
-        phase_instance_id: task.phase_instance_id || '',
+        task_code: task.id, // Usar ID como código temporal
+        start_date: task.start_date,
+        end_date: task.end_date,
+        duration_in_days: task.duration_in_days,
+        quantity: task.quantity,
+        phase_instance_id: task.id,
         phase_name: task.phase_name || '',
-        phase_position: 1,
-        progress_percent: task.progress_percent || 0,
-        unit_id: task.task?.unit_id || '',
-        unit_name: task.task?.unit_name || '',
-        unit_symbol: task.task?.unit_symbol || '',
-        display_name: task.task?.processed_display_name || task.task?.display_name || task.task?.code || '',
+        phase_position: task.phase_position || 1,
+        progress_percent: task.progress_percent,
+        unit_id: '',
+        unit_name: task.unit_name || '',
+        unit_symbol: task.unit_name || '',
+        display_name: task.name_rendered,
         subcategory_id: '',
         subcategory_name: '',
         category_id: '',
-        category_name: task.task?.category_name || '',
-        rubro_id: task.task?.rubro_id || '',
-        rubro_name: task.task?.rubro_name || '',
+        category_name: task.category_name || '',
+        rubro_id: '',
+        rubro_name: task.category_name || '',
         task_group_id: '',
         task_group_name: ''
       }
     }))
-  }, [filteredTasks])
+  }, [filteredTasks, organizationId])
 
-  // Funciones helper requeridas por Table
-  const generateTaskDisplayName = (task: any, parameterValues: any[]) => {
-    if (!task) return 'Tarea sin nombre'
-    return cleanTaskDisplayName(task.processed_display_name || task.display_name || task.code || 'Tarea sin nombre')
+  // Funciones helper simplificadas
+  const generateTaskDisplayName = (task: any) => {
+    return task?.display_name || task?.name_rendered || 'Tarea sin nombre'
   }
 
   const getUnitName = (unitId: string | null) => {
     if (!unitId) return 'Sin unidad'
-    // Buscar en los datos de las tareas la unidad correspondiente
-    const taskWithUnit = filteredTasks.find(t => t.task?.unit_id === unitId)
-    return taskWithUnit?.task?.unit_name || taskWithUnit?.task?.unit_symbol || 'Sin unidad'
+    const taskWithUnit = filteredTasks.find(t => t.unit_name)
+    return taskWithUnit?.unit_name || 'Sin unidad'
   }
 
   // Crear estructura Gantt con tareas organizadas dentro de fases

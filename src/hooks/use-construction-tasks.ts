@@ -2,6 +2,58 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
+// Nueva interfaz para la vista CONSTRUCTION_TASK_VIEW
+export interface ConstructionTaskView {
+  id: string;
+  project_id: string;
+  task_id: string;
+  name_rendered: string;
+  unit_name: string;
+  category_name: string;
+  quantity: number;
+  start_date: string | null;
+  end_date: string | null;
+  duration_in_days: number | null;
+  progress_percent: number;
+  phase_name: string | null;
+  phase_position: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Hook específico para la vista CONSTRUCTION_TASK_VIEW optimizada para cronograma
+export function useConstructionTasksView(projectId: string) {
+  return useQuery({
+    queryKey: ['construction-tasks-view', projectId],
+    queryFn: async (): Promise<ConstructionTaskView[]> => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      console.log('🔍 FETCHING CONSTRUCTION TASKS VIEW FOR PROJECT:', projectId);
+      
+      const { data, error } = await supabase
+        .from('construction_task_view')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('phase_position', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching construction tasks view:', error);
+        throw error;
+      }
+
+      console.log('✅ CONSTRUCTION TASKS VIEW DATA:', {
+        projectId,
+        tasksCount: data?.length || 0,
+        sampleTask: data?.[0] || null
+      });
+
+      return data || [];
+    },
+    enabled: !!projectId,
+  });
+}
+
 export interface ConstructionTask {
   // Identificadores principales de la vista
   task_instance_id: string;  // ID principal de la instancia de tarea
