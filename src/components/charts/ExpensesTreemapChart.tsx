@@ -1,5 +1,5 @@
 import React from 'react'
-import { ResponsiveContainer, Treemap, Cell } from 'recharts'
+import { ResponsiveContainer, Treemap, Cell, Tooltip } from 'recharts'
 
 interface ExpensesTreemapData {
   name: string
@@ -64,8 +64,19 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
             data={treemapData}
             dataKey="size"
             stroke="#fff"
-            strokeWidth={1}
-          />
+          >
+            <Tooltip 
+              formatter={(value: number) => [formatCurrency(value), 'Monto']}
+              labelFormatter={(label) => `Subcategoría: ${label}`}
+              contentStyle={{
+                backgroundColor: 'var(--toast-bg)',
+                color: 'var(--toast-fg)',
+                border: '1px solid var(--toast-border)',
+                borderRadius: '8px',
+                fontSize: '12px'
+              }}
+            />
+          </Treemap>
         </ResponsiveContainer>
       </div>
       

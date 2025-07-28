@@ -97,8 +97,9 @@ export function ExpensesTrendChart({ data, isLoading }: ExpensesTrendChartProps)
               ]}
               labelFormatter={(label) => `Categoría: ${label}`}
               contentStyle={{
-                backgroundColor: 'var(--popover)',
-                border: '1px solid var(--border)',
+                backgroundColor: 'var(--toast-bg)',
+                color: 'var(--toast-fg)',
+                border: '1px solid var(--toast-border)',
                 borderRadius: '8px',
                 fontSize: '12px'
               }}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ResponsiveContainer, Cell } from 'recharts'
+import { ResponsiveContainer, Cell, Tooltip } from 'recharts'
 import { PieChart, Pie } from 'recharts'
 
 interface ExpensesCategoryData {
@@ -73,6 +73,17 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
                 <Cell key={`category-cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
+            <Tooltip 
+              formatter={(value: number) => [formatCurrency(value), 'Monto']}
+              labelFormatter={(label) => `Categoría: ${label}`}
+              contentStyle={{
+                backgroundColor: 'var(--toast-bg)',
+                color: 'var(--toast-fg)',
+                border: '1px solid var(--toast-border)',
+                borderRadius: '8px',
+                fontSize: '12px'
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
