@@ -1,0 +1,48 @@
+Quiero que mejores el funcionamiento del componente ParameterNodeEditor.tsx para que la experiencia de edición visual de nodos paramétricos sea clara, fluida y sin bugs. Acá te explico bien lo que necesito:
+
+✅ Contexto General
+Estoy desarrollando un sistema que permite al usuario crear tareas paramétricas mediante un editor visual tipo canvas. Cada tarea se genera combinando opciones de distintos parámetros conectados entre sí (por ejemplo: tipo de tarea, tipo de muro, tipo de mortero, etc.).
+
+Cada nodo representa un parámetro (como “Tipo de Tarea”), y el usuario puede crear un flujo visual conectando parámetros entre sí, eligiendo sólo algunas opciones visibles (por ejemplo, “Ejecución de Muro” en vez de mostrar todas las posibles).
+
+🔁 Lógica de Duplicación
+Cuando el usuario duplica un nodo, no quiero que se cree un nuevo parámetro real, ni una nueva opción, ni nada complejo. El objetivo es simplemente que:
+
+Se cree una nueva instancia del mismo parámetro (parameter_id), con su propio id y position, y que se comporte de forma independiente a nivel visual y de conexiones.
+
+Al duplicar, debe mantener:
+
+las opciones visibles seleccionadas en esa instancia (las copio tal cual)
+
+las conexiones existentes con otros nodos (si es posible)
+
+No debe usar ninguna columna extra como original_parameter_id, esa columna ya fue eliminada.
+
+🗑 Lógica de Eliminación
+Cuando se elimina un nodo visual:
+
+Debe eliminarse por completo de task_parameter_positions.
+
+Actualmente hay un bug: aunque se elimina, al moverse el canvas o interactuar, vuelve a aparecer.
+
+Esto pasa porque al guardar la posición o las conexiones, vuelve a crearse automáticamente el nodo.
+
+Necesito que este comportamiento se corrija: si se eliminó un nodo, no debe volver a generarse automáticamente por ninguna razón.
+
+⚠️ Bug actual con visibilidad de opciones
+Hay un bug crítico: si el usuario modifica las opciones visibles de un solo nodo, se borran las opciones visibles de todos los demás nodos.
+
+Esto es inaceptable. Cada task_parameter_position debe tener su propio estado de opciones visibles (visible_option_ids) sin afectar a las otras posiciones del mismo parámetro.
+
+🎯 Objetivo
+Necesito que el sistema sea:
+
+Flexible: cada posición de un parámetro puede tener sus propias opciones visibles y conexiones.
+
+Estable: sin recreaciones automáticas de nodos borrados.
+
+Escalable: que se puedan duplicar y mover nodos libremente sin generar errores o conflictos.
+
+¿Podés corregir todo eso en ParameterNodeEditor.tsx? Ya tenés toda la lógica, sólo hace falta depurar estos detalles para que el flujo sea completamente robusto.
+
+Gracias 🙌

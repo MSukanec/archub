@@ -445,7 +445,11 @@ function ParameterNodeEditorContent() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  
+  // Estado para tracking de opciones visibles POR NODO INDIVIDUAL (usando node.id)
   const [nodeVisibleOptions, setNodeVisibleOptions] = useState<Record<string, string[]>>({});
+  // Estado para tracking de nodos eliminados (evitar recreación automática)
+  const [deletedNodeIds, setDeletedNodeIds] = useState<Set<string>>(new Set());
 
   // Tipos de nodos - definidos fuera para evitar recreación
   const nodeTypes = useMemo(() => ({
@@ -465,15 +469,24 @@ function ParameterNodeEditorContent() {
       { x: 20, y: 20 };
 
     try {
+      // Obtener opciones visibles del nodo original (buscar por cualquier nodo del mismo parámetro)
+      const originalVisibleOptions = Object.keys(nodeVisibleOptions).find(nodeId => {
+        const node = nodes.find(n => n.id === nodeId);
+        return node?.data.parameter.id === parameterId;
+      });
+      
+      const defaultVisibleOptions = originalVisibleOptions 
+        ? nodeVisibleOptions[originalVisibleOptions]
+        : originalParameter.options.slice(0, 3).map(opt => opt.id);
+
       // Crear una nueva entrada en la base de datos para el nodo duplicado
-      // Solo insertar: parameter_id (mismo que el original), x, y, visible_options
       const { data: dbPosition, error } = await supabase!
         .from('task_parameter_positions')
         .insert({
           parameter_id: parameterId, // El mismo parameter_id que el original
           x: Math.round(newPosition.x),
           y: Math.round(newPosition.y),
-          visible_options: nodeVisibleOptions[parameterId] || []
+          visible_options: defaultVisibleOptions
         })
         .select()
         .single();
@@ -486,6 +499,12 @@ function ParameterNodeEditorContent() {
 
       // Usar el UUID generado por Supabase como ID del nodo duplicado
       const duplicateId = dbPosition.id;
+      
+      // Establecer las opciones visibles INMEDIATAMENTE para el nuevo nodo
+      setNodeVisibleOptions(prev => ({
+        ...prev,
+        [duplicateId]: defaultVisibleOptions
+      }));
 
       const duplicateNode: Node = {
         id: duplicateId,
@@ -494,11 +513,11 @@ function ParameterNodeEditorContent() {
         data: {
           parameter: originalParameter.parameter,
           options: originalParameter.options,
-          visibleOptions: nodeVisibleOptions[parameterId] || [],
+          visibleOptions: defaultVisibleOptions,
           onVisibleOptionsChange: (optionIds: string[]) => {
             setNodeVisibleOptions(prev => ({
               ...prev,
-              [duplicateId]: optionIds
+              [duplicateId]: optionIds  // Usar el ID único del nodo duplicado
             }));
             // Actualizar las opciones visibles en la base de datos
             savePositionMutation.mutate({
@@ -540,16 +559,16 @@ function ParameterNodeEditorContent() {
   // Estado para rastrear nodos que se están eliminando
   const [deletingNodes, setDeletingNodes] = useState<Set<string>>(new Set());
 
-  // Función para borrar un nodo del canvas
+  // Función para borrar un nodo del canvas (COMPLETAMENTE MEJORADA)
   const handleDeleteNode = useCallback(async (nodeId: string) => {
-    console.log('🗑️ Borrando nodo:', nodeId);
+    console.log('🗑️ Borrando nodo permanentemente:', nodeId);
     
-    // Marcar el nodo como en proceso de eliminación
+    // Marcar el nodo como eliminado INMEDIATAMENTE para evitar recreación
+    setDeletedNodeIds(prev => new Set(prev).add(nodeId));
     setDeletingNodes(prev => new Set(prev).add(nodeId));
     
     try {
       // Eliminar el nodo de la base de datos por ID
-      // Esto funciona tanto para nodos originales (id === parameter_id) como duplicados (id !== parameter_id)
       console.log('🗑️ Eliminando nodo de BD:', nodeId);
       const { error } = await supabase!
         .from('task_parameter_positions')
@@ -559,6 +578,12 @@ function ParameterNodeEditorContent() {
       if (error) {
         console.error('❌ Error eliminando nodo:', error);
         toast({ title: "Error", description: "No se pudo eliminar el nodo" });
+        // Si falla, remover de la lista de eliminados
+        setDeletedNodeIds(prev => {
+          const updated = new Set(prev);
+          updated.delete(nodeId);
+          return updated;
+        });
         setDeletingNodes(prev => {
           const updated = new Set(prev);
           updated.delete(nodeId);
@@ -567,31 +592,40 @@ function ParameterNodeEditorContent() {
         return;
       }
       
-      console.log('✅ Nodo eliminado de BD');
+      console.log('✅ Nodo eliminado PERMANENTEMENTE de BD');
       toast({ title: "Nodo eliminado", description: "Visualización removida permanentemente" });
       
       // Actualizar la interfaz - remover del canvas
       setNodes(prev => prev.filter(n => n.id !== nodeId));
       
-      // Actualizar también las opciones visibles del nodo eliminado
+      // Limpiar opciones visibles del nodo eliminado
       setNodeVisibleOptions(prev => {
         const updated = { ...prev };
         delete updated[nodeId];
         return updated;
       });
       
+      // Revalidar datos para evitar inconsistencias
+      queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+      
     } catch (error) {
       console.error('❌ Error eliminando nodo:', error);
       toast({ title: "Error", description: "No se pudo eliminar el nodo" });
+      // Revertir marcado como eliminado si hay error
+      setDeletedNodeIds(prev => {
+        const updated = new Set(prev);
+        updated.delete(nodeId);
+        return updated;
+      });
     } finally {
-      // Remover el nodo del conjunto de eliminación
+      // Remover del conjunto de procesamiento
       setDeletingNodes(prev => {
         const updated = new Set(prev);
         updated.delete(nodeId);
         return updated;
       });
     }
-  }, [toast, supabase]);
+  }, [toast, supabase, queryClient]);
 
   // Manejo del pan con botón central del ratón
   useEffect(() => {
@@ -650,35 +684,41 @@ function ParameterNodeEditorContent() {
     };
   }, [getViewport, setViewport]);
 
-  // Inicializar opciones visibles por primera vez desde posiciones guardadas
+  // Inicializar opciones visibles por primera vez desde posiciones guardadas (CORREGIDO PARA USAR NODE IDs)
   useEffect(() => {
-    if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length === 0) {
-      console.log('🔍 Inicializando opciones visibles. Posiciones guardadas:', savedPositions);
+    if (parametersData.length > 0 && savedPositions.length > 0 && Object.keys(nodeVisibleOptions).length === 0) {
+      console.log('🔍 Inicializando opciones visibles POR NODO INDIVIDUAL. Posiciones guardadas:', savedPositions.length);
       const newVisibleOptions: Record<string, string[]> = {};
-      parametersData.forEach((item) => {
-        const savedPosition = savedPositions.find(pos => pos.parameter_id === item.parameter.id);
-        if (savedPosition && savedPosition.visible_options.length > 0) {
-          // Usar opciones guardadas
-          console.log('✅ Usando opciones guardadas para:', item.parameter.slug, savedPosition.visible_options);
-          newVisibleOptions[item.parameter.id] = savedPosition.visible_options;
-        } else {
-          // Por defecto mostrar las primeras 5 opciones
-          const defaultOptions = item.options.slice(0, 5).map(opt => opt.id);
-          console.log('🔧 Usando opciones por defecto para:', item.parameter.slug, defaultOptions);
-          newVisibleOptions[item.parameter.id] = defaultOptions;
+      
+      // Procesar CADA posición guardada como un nodo individual
+      savedPositions.forEach((position) => {
+        const parameterData = parametersData.find(item => item.parameter.id === position.parameter_id);
+        if (parameterData) {
+          if (position.visible_options && position.visible_options.length > 0) {
+            // Usar opciones guardadas para ESTE nodo específico
+            console.log('✅ Usando opciones guardadas para nodo:', position.id, 'parámetro:', parameterData.parameter.slug, position.visible_options);
+            newVisibleOptions[position.id] = position.visible_options;
+          } else {
+            // Por defecto mostrar las primeras 5 opciones para ESTE nodo
+            const defaultOptions = parameterData.options.slice(0, 5).map(opt => opt.id);
+            console.log('🔧 Usando opciones por defecto para nodo:', position.id, 'parámetro:', parameterData.parameter.slug, defaultOptions);
+            newVisibleOptions[position.id] = defaultOptions;
+          }
         }
       });
+      
       setNodeVisibleOptions(newVisibleOptions);
     }
   }, [parametersData.length, savedPositions.length]);
 
-  // Configurar nodos desde posiciones guardadas Y dependencias existentes
+  // Configurar nodos desde posiciones guardadas SOLAMENTE (filtrar eliminados)
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
-      console.log('🎯 Configurando nodos desde posiciones guardadas y dependencias. Posiciones:', savedPositions.length, 'Dependencias:', dependencies.length);
+      console.log('🎯 Configurando nodos ÚNICAMENTE desde posiciones guardadas. Posiciones:', savedPositions.length, 'Eliminados:', deletedNodeIds.size);
       
-      // 1. Crear nodos desde posiciones guardadas
+      // 1. Crear nodos SOLO desde posiciones guardadas (FILTRAR ELIMINADOS)
       const nodesFromPositions: Node[] = savedPositions
+        .filter(pos => !deletedNodeIds.has(pos.id)) // FILTRAR NODOS ELIMINADOS
         .map(pos => {
           // Buscar el parámetro correspondiente
           const parameterData = parametersData.find(item => item.parameter.id === pos.parameter_id);
@@ -697,16 +737,16 @@ function ParameterNodeEditorContent() {
             data: {
               parameter: parameterData.parameter,
               options: parameterData.options,
-              visibleOptions: pos.visible_options || nodeVisibleOptions[pos.id] || [],
+              visibleOptions: nodeVisibleOptions[pos.id] || pos.visible_options || [],
               onVisibleOptionsChange: (optionIds: string[]) => {
                 setNodeVisibleOptions(prev => ({
                   ...prev,
-                  [pos.id]: optionIds
+                  [pos.id]: optionIds  // Usar pos.id (node ID), NO parameter ID
                 }));
                 
-                // Guardar opciones visibles
+                // Guardar opciones visibles usando el ID del nodo específico
                 savePositionMutation.mutate({
-                  id: isOriginal ? undefined : pos.id,
+                  id: pos.id,  // Siempre usar el ID específico del nodo
                   parameter_id: pos.parameter_id,
                   x: pos.x,
                   y: pos.y,
@@ -721,73 +761,12 @@ function ParameterNodeEditorContent() {
         })
         .filter(node => node !== null) as Node[];
 
-      // 2. Obtener parámetros que están en dependencias pero NO tienen posiciones guardadas
-      const parametersWithPositions = new Set(savedPositions.map(pos => pos.parameter_id));
-      const parametersInDependencies = new Set([
-        ...dependencies.map(dep => dep.parent_parameter_id),
-        ...dependencies.map(dep => dep.child_parameter_id)
-      ]);
+      // Solo usar nodos desde posiciones guardadas (eliminada lógica de dependencias)
+      setNodes(nodesFromPositions);
       
-      const parametersWithoutPositions = Array.from(parametersInDependencies).filter(
-        paramId => !parametersWithPositions.has(paramId)
-      );
-      
-      console.log('📊 Parámetros en dependencias sin posiciones:', parametersWithoutPositions.length);
-      
-      // 3. Crear nodos para parámetros en dependencias (con posiciones por defecto)
-      const nodesFromDependencies: Node[] = parametersWithoutPositions
-        .map((paramId, index) => {
-          const parameterData = parametersData.find(item => item.parameter.id === paramId);
-          if (!parameterData) {
-            console.log(`⚠️ Parámetro ${paramId} no encontrado para dependencia`);
-            return null;
-          }
-          
-          // Posición por defecto en grid
-          const position = {
-            x: (index % 3) * 320,
-            y: Math.floor(index / 3) * 200
-          };
-          
-          console.log(`📌 Nodo ${parameterData.parameter.slug}:`, 'desde dependencia', position);
-          
-          return {
-            id: parameterData.parameter.id,
-            type: 'parameterNode',
-            position,
-            data: {
-              parameter: parameterData.parameter,
-              options: parameterData.options,
-              visibleOptions: nodeVisibleOptions[parameterData.parameter.id] || [],
-              onVisibleOptionsChange: (optionIds: string[]) => {
-                setNodeVisibleOptions(prev => ({
-                  ...prev,
-                  [parameterData.parameter.id]: optionIds
-                }));
-                
-                // Guardar posición automáticamente cuando se cambian opciones
-                savePositionMutation.mutate({
-                  parameter_id: parameterData.parameter.id,
-                  x: position.x,
-                  y: position.y,
-                  visible_options: optionIds
-                });
-              },
-              onDuplicate: handleDuplicateNode,
-              onEdit: handleEditNode,
-              onDelete: handleDeleteNode
-            },
-          };
-        })
-        .filter(node => node !== null) as Node[];
-
-      // 4. Combinar ambos tipos de nodos
-      const allNodes = [...nodesFromPositions, ...nodesFromDependencies];
-      setNodes(allNodes);
-      
-      console.log(`✅ Nodos configurados: ${nodesFromPositions.length} desde posiciones + ${nodesFromDependencies.length} desde dependencias = ${allNodes.length} total`);
+      console.log(`✅ Nodos configurados: ${nodesFromPositions.length} únicamente desde posiciones guardadas`);
     }
-  }, [parametersData.length, nodeVisibleOptions, savedPositions.length, dependencies.length]);
+  }, [parametersData.length, nodeVisibleOptions, savedPositions.length, deletedNodeIds]);
 
   // Configurar edges desde dependencias (OPTIMIZADO para evitar múltiples conexiones)
   useEffect(() => {
