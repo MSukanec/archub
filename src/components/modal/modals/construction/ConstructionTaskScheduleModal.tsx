@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
-import { useProjectPhases } from "@/hooks/use-construction-phases";
+import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,7 +55,7 @@ export function ConstructionTaskScheduleModal({
 }: ConstructionTaskScheduleModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: userData } = useCurrentUser();
-  const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
+  const { data: projectPhases = [] } = useConstructionProjectPhases(modalData.projectId);
   
   const updateTask = useUpdateConstructionTask();
 
@@ -130,8 +130,8 @@ export function ConstructionTaskScheduleModal({
     
     try {
       // Calculate end_date if start_date and duration_in_days are provided
-      let endDate = data.end_date;
-      if (data.start_date && data.duration_in_days && !data.end_date) {
+      let endDate: string | undefined;
+      if (data.start_date && data.duration_in_days) {
         const startDate = new Date(data.start_date);
         startDate.setDate(startDate.getDate() + data.duration_in_days);
         endDate = startDate.toISOString().split('T')[0];
@@ -208,7 +208,7 @@ export function ConstructionTaskScheduleModal({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Sin fase asignada</SelectItem>
-              {projectPhases.map((phase) => (
+              {projectPhases.map((phase: any) => (
                 <SelectItem key={phase.id} value={phase.id}>
                   {phase.phase?.name || 'Fase sin nombre'}
                 </SelectItem>

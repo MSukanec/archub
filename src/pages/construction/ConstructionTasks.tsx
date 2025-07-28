@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
+import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
@@ -14,7 +15,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
-  const [groupingType, setGroupingType] = useState('none')
+  const [groupingType, setGroupingType] = useState('phases')
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -34,6 +35,8 @@ export default function ConstructionTasks() {
     projectId || '', 
     organizationId || ''
   )
+
+  const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
 
   // Debug: verificar datos de tareas
   console.log('ConstructionTasks - projectId:', projectId)
@@ -297,27 +300,48 @@ export default function ConstructionTasks() {
           ]}
         />
 
-        {/* Table or Empty State */}
+        {/* Table with phase headers always visible or Empty State */}
         {tasks.length === 0 ? (
-          <EmptyState
-            icon={<CheckSquare className="h-8 w-8" />}
-            title="No hay tareas en el proyecto"
-            description="Comienza creando la primera tarea de construcción para organizar el trabajo del proyecto."
-          />
+          <div className="space-y-4">
+            {/* Show phase headers even when empty */}
+            {projectPhases.length > 0 ? (
+              <div className="space-y-4">
+                {projectPhases.map(phase => (
+                  <div key={phase.id} className="border rounded-lg">
+                    <div className="bg-muted/50 px-4 py-3 border-b">
+                      <h3 className="font-medium text-sm text-muted-foreground">
+                        {phase.name}
+                      </h3>
+                    </div>
+                    <div className="p-8 text-center text-muted-foreground">
+                      <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No hay tareas en esta fase</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<CheckSquare className="h-8 w-8" />}
+                title="No hay tareas en el proyecto"
+                description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
+              />
+            )}
+          </div>
         ) : (
           <Table
             columns={columns}
             data={filteredTasks}
             isLoading={isLoading}
             mode="construction"
-            groupBy={groupingType !== 'none' ? 'groupKey' : undefined}
-            renderGroupHeader={groupingType !== 'none' ? (groupKey: string, groupRows: any[]) => (
+            groupBy={'groupKey'}
+            renderGroupHeader={(groupKey: string, groupRows: any[]) => (
               <>
                 <div className="col-span-full text-sm font-medium">
                   {groupKey} ({groupRows.length} tareas)
                 </div>
               </>
-            ) : undefined}
+            )}
             emptyState={
               <EmptyState
                 icon={<CheckSquare className="h-8 w-8" />}

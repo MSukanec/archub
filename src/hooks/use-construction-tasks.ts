@@ -60,7 +60,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         enabled: !!projectId && !!organizationId
       });
       
-      // Primero obtener las tareas de construcción del proyecto
+      // Obtener las tareas de construcción básicas primero
       const { data: constructionTasks, error: constructionError } = await supabase
         .from('construction_tasks')
         .select('*')
@@ -72,20 +72,48 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         console.error('Error fetching construction tasks:', constructionError);
         throw constructionError;
       }
-
+      
       if (!constructionTasks || constructionTasks.length === 0) {
         console.log('No construction tasks found for project:', projectId);
         return [];
       }
 
+      console.log('🔍 DEBUG: Found construction tasks:', constructionTasks.length);
+
       // Obtener los IDs de las tareas para buscar en task_parametric_view
       const taskIds = constructionTasks.map(ct => ct.task_id);
+      const constructionTaskIds = constructionTasks.map(ct => ct.id);
       
       // Consultar los detalles de las tareas en task_parametric_view
       const { data: taskDetails, error } = await supabase
         .from('task_parametric_view')
         .select('*')
         .in('id', taskIds);
+
+      // Obtener las relaciones de fases para las tareas de construcción
+      const { data: phaseRelations, error: phaseError } = await supabase
+        .from('construction_phase_tasks')
+        .select(`
+          construction_task_id,
+          project_phase_id,
+          progress_percent,
+          construction_project_phases (
+            id,
+            position,
+            construction_phases (
+              id,
+              name
+            )
+          )
+        `)
+        .in('construction_task_id', constructionTaskIds);
+
+      if (phaseError) {
+        console.error('Error fetching phase relations:', phaseError);
+      }
+
+      console.log('🔍 DEBUG: Phase relations found:', phaseRelations?.length || 0);
+      console.log('🔍 DEBUG: Phase relations data:', JSON.stringify(phaseRelations, null, 2));
         
       console.log('📊 CONSTRUCTION TASKS QUERY RESULT:', {
         projectId,
@@ -116,9 +144,30 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         });
       }
 
+      // Crear un mapa de las relaciones de fases por construction_task_id
+      const phaseRelationsMap = new Map();
+      if (phaseRelations) {
+        phaseRelations.forEach(relation => {
+          phaseRelationsMap.set(relation.construction_task_id, relation);
+        });
+      }
+
       // Mapear datos de construction_tasks con task_parametric_view al formato esperado
       const mappedTasks: ConstructionTask[] = constructionTasks.map((item: any) => {
         const taskData = taskDetailsMap.get(item.task_id);
+        const phaseRelation = phaseRelationsMap.get(item.id);
+        
+        // Extraer información de fase si existe
+        const projectPhase = phaseRelation?.construction_project_phases;
+        const phase = projectPhase?.construction_phases;
+        
+        console.log(`🔍 DEBUG Task ${item.id}:`, {
+          hasPhaseRelation: !!phaseRelation,
+          hasProjectPhase: !!projectPhase,
+          hasPhase: !!phase,
+          phaseName: phase?.name,
+          phaseRelationData: phaseRelation
+        });
         
         return {
           // Campos principales de construction_tasks
@@ -132,11 +181,11 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           duration_in_days: item.duration_in_days,
           quantity: item.quantity,
           
-          // Campos de fase - por ahora simulados hasta implementar las fases
-          phase_instance_id: '', 
-          phase_name: 'Sin fase',
-          phase_position: 0,
-          progress_percent: 0,
+          // Campos de fase - obtenidos de la relación
+          phase_instance_id: projectPhase?.id || '', 
+          phase_name: phase?.name || 'Sin fase',
+          phase_position: projectPhase?.position || 0,
+          progress_percent: phaseRelation?.progress_percent || 0,
           
           // Compatibilidad con sistema existente
           id: item.id, // ID de construction_tasks para compatibilidad

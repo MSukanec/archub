@@ -312,26 +312,6 @@ export function ActionBarDesktop({
             >
               <div className="py-1">
                 <button
-                  onClick={() => onGroupingChange('none')}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
-                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    groupingType === 'none' && "bg-[var(--button-ghost-hover-bg)]"
-                  )}
-                >
-                  Sin agrupar
-                </button>
-                <button
-                  onClick={() => onGroupingChange('rubros')}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
-                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    groupingType === 'rubros' && "bg-[var(--button-ghost-hover-bg)]"
-                  )}
-                >
-                  Agrupar por Rubros
-                </button>
-                <button
                   onClick={() => onGroupingChange('phases')}
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
@@ -342,16 +322,6 @@ export function ActionBarDesktop({
                   Agrupar por Fases
                 </button>
                 <button
-                  onClick={() => onGroupingChange('rubros-phases')}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
-                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    groupingType === 'rubros-phases' && "bg-[var(--button-ghost-hover-bg)]"
-                  )}
-                >
-                  Rubros y Fases
-                </button>
-                <button
                   onClick={() => onGroupingChange('phases-rubros')}
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
@@ -359,7 +329,7 @@ export function ActionBarDesktop({
                     groupingType === 'phases-rubros' && "bg-[var(--button-ghost-hover-bg)]"
                   )}
                 >
-                  Fases y Rubros
+                  Agrupar por Fases y Rubros
                 </button>
               </div>
             </PopoverContent>

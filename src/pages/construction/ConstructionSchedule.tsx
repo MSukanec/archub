@@ -17,7 +17,7 @@ import CriticalPathDistribution from '@/components/charts/gantt/CriticalPathDist
 import WeeklyProgressHeatmap from '@/components/charts/gantt/WeeklyProgressHeatmap'
 import DependencyNetwork from '@/components/charts/gantt/DependencyNetwork'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
-import { useProjectPhases, useUpdatePhasesDates, useDeleteProjectPhase } from '@/hooks/use-construction-phases'
+import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -58,7 +58,7 @@ export default function ConstructionSchedule() {
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
-  const deletePhase = useDeleteProjectPhase()
+  // const deletePhase = useDeleteProjectPhase() // Commented out until implemented
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
 
@@ -76,9 +76,9 @@ export default function ConstructionSchedule() {
   )
 
   // Obtener las fases del proyecto y dependencias
-  const { data: projectPhases = [] } = useProjectPhases(projectId || '')
+  const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
-  const updatePhasesDates = useUpdatePhasesDates()
+  // const updatePhasesDates = useUpdatePhasesDates() // Commented out until implemented
 
   // Procesar los nombres de las tareas de forma simplificada
   const processedTasks = useMemo(() => {
@@ -268,7 +268,7 @@ export default function ConstructionSchedule() {
 
     // Si hay fases del proyecto, organizar tareas dentro de fases
     if (projectPhases.length > 0) {
-      projectPhases.forEach((projectPhase) => {
+      projectPhases.forEach((projectPhase: any) => {
         // Filtrar tareas que pertenecen a esta fase del proyecto
         const tasksInPhase = filteredTasks.filter(task => 
           task.phase_name === projectPhase.phase.name
@@ -592,22 +592,12 @@ export default function ConstructionSchedule() {
             )}
 
             {activeTab === "table" && (
-              <Table
-              budgetId="construction-tasks"
-              budgetTasks={budgetTasks}
-              isLoading={isLoading}
-              groupingType={groupingType}
-              selectedTasks={selectedTasks}
-              setSelectedTasks={setSelectedTasks}
-              generateTaskDisplayName={generateTaskDisplayName}
-              parameterValues={[]}
-              getUnitName={getUnitName}
-              handleDeleteTask={handleDeleteTask}
-              handleAddTask={() => handleAddTask()}
-              onGroupingChange={setGroupingType}
-              mode="construction"
-              handleEditTask={handleEditTask}
-            />
+              <div className="rounded-lg border">
+                <div className="p-4 text-center text-muted-foreground">
+                  <TableIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Vista de tabla en desarrollo</p>
+                </div>
+              </div>
             )}
 
             {activeTab === "analytics" && (

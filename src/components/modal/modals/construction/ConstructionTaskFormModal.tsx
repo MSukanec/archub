@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Settings, Search, CheckSquare, Square, Filter, X } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
-import { useProjectPhases } from "@/hooks/use-construction-phases";
+import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 
 
 import { toast } from "@/hooks/use-toast";
@@ -116,7 +116,7 @@ export function ConstructionTaskFormModal({
   });
 
   // Hook para obtener las fases del proyecto
-  const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useProjectPhases(modalData.projectId);
+  const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useConstructionProjectPhases(modalData.projectId);
   
   // Log para debug
   useEffect(() => {
@@ -196,7 +196,7 @@ export function ConstructionTaskFormModal({
       setSelectedTasks([{
         task_id: task.task_id || '',
         quantity: task.quantity || 1,
-        phase_instance_id: task.phase_instance_id || ''
+        project_phase_id: task.phase_instance_id || ''
       }]);
       
       // Reset del formulario con valores básicos
@@ -551,7 +551,7 @@ export function ConstructionTaskFormModal({
                           <SelectContent>
                             {projectPhases.map((projectPhase) => (
                               <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                                {projectPhase.phase.name}
+                                {(projectPhase as any).name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -601,7 +601,7 @@ export function ConstructionTaskFormModal({
         console.log('🎯 BOTÓN PRESIONADO - selectedTasks:', selectedTasks);
         handleSubmit(onSubmit)();
       }}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 
