@@ -103,19 +103,6 @@ export default function FinancesDashboard() {
     return { color: 'var(--chart-neutral)' }
   }
 
-  // Show empty state if no movements exist
-  if (!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0)) {
-    return (
-      <Layout headerProps={headerProps} wide={true}>
-        <EmptyState 
-          icon={<DollarSign className="h-12 w-12" />}
-          title="Sin movimientos financieros registrados"
-          description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."
-        />
-      </Layout>
-    )
-  }
-
   const currentOrganization = userData?.organization;
   const currentProject = userData?.organizations?.[0]?.projects?.[0];
 
@@ -159,7 +146,16 @@ export default function FinancesDashboard() {
             </Select>
           ]}
         />
-      
+
+        {/* Show empty state if no movements exist */}
+        {!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0) ? (
+          <EmptyState 
+            icon={<DollarSign className="h-12 w-12" />}
+            title="Sin movimientos financieros registrados"
+            description="Comienza registrando tu primer ingreso o egreso para ver el resumen completo de tus finanzas."
+          />
+        ) : (
+          <>
         {/* 1 FILA: Card de TÍTULO (75%) + Card de MOVIMIENTOS (25%) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Welcome Card - Financial Summary (75% width) */}
@@ -776,6 +772,8 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
         </div>
+        </>
+        )}
       </div>
     </Layout>
   )
