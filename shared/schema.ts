@@ -132,7 +132,10 @@ export const task_parameter_options = pgTable("task_parameter_options", {
   name: text("name").notNull(), // e.g., "acindar"
   label: text("label").notNull(), // e.g., "Acindar"
   description: text("description"), // e.g., "Descripción detallada de la opción"
+  unit_id: uuid("unit_id"), // For TIPO DE TAREA parameter: linked unit
+  category_id: uuid("category_id"), // For TIPO DE TAREA parameter: linked category
   created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
 });
 
 export const task_parameter_option_groups = pgTable("task_parameter_option_groups", {
@@ -177,6 +180,7 @@ export const insertTaskParameterSchema = createInsertSchema(task_parameters).omi
 export const insertTaskParameterOptionSchema = createInsertSchema(task_parameter_options).omit({
   id: true,
   created_at: true,
+  updated_at: true,
 });
 
 export const insertTaskParameterOptionGroupSchema = createInsertSchema(task_parameter_option_groups).omit({

@@ -59,6 +59,18 @@ TABLA TASK_PARAMETER_OPTIONS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
   }
 ]
 
