@@ -404,7 +404,15 @@ export function useUpdateGeneratedTask() {
       return data;
     },
     onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
       toast({
         title: "Tarea Actualizada",
         description: "La tarea se ha actualizado exitosamente"
