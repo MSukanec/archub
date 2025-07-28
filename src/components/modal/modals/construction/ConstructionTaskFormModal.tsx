@@ -74,15 +74,26 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const { handleSubmit, watch, setValue } = form;
 
   // Query para obtener tareas paramétricas de la biblioteca
-  const { data: tasks, isLoading: isLoadingTasks } = useQuery({
+  const { data: tasks, isLoading: isLoadingTasks, error: tasksError } = useQuery({
     queryKey: ['parametric-tasks-library'],
     queryFn: async () => {
+      console.log('🔍 Fetching parametric tasks from library...');
       const { data, error } = await supabase
         .from('task_parametric')
         .select('*')
         .order('created_at', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching parametric tasks:', error);
+        throw error;
+      }
+      
+      console.log('✅ Parametric tasks fetched:', data?.length || 0, 'tasks');
+
+      if (!data || data.length === 0) {
+        console.warn('⚠️ No parametric tasks found in database');
+        return [];
+      }
 
       // Generar nombres descriptivos para cada tarea
       const tasksWithNames = await Promise.all((data || []).map(async (task: any) => {
@@ -130,8 +141,22 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         }
       }));
 
+      console.log('📋 Tasks with names generated:', tasksWithNames.length, 'tasks');
+      console.log('📋 Sample task:', tasksWithNames[0]);
       return tasksWithNames;
     }
+  });
+
+  // Debug: mostrar errores y estado de carga
+  if (tasksError) {
+    console.error('🚨 Tasks error:', tasksError);
+  }
+  
+  console.log('📊 Modal render state:', {
+    isLoadingTasks,
+    tasksCount: tasks?.length || 0,
+    projectPhasesCount: projectPhases.length,
+    hasError: !!tasksError
   });
 
   // Crear mutación para agregar tareas
@@ -323,9 +348,13 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                 <div className="text-center text-muted-foreground">
                   Cargando tareas...
                 </div>
+              ) : tasksError ? (
+                <div className="text-center text-red-600">
+                  Error cargando tareas: {tasksError.message}
+                </div>
               ) : filteredTasks.length === 0 ? (
                 <div className="text-center text-muted-foreground">
-                  No se encontraron tareas
+                  No se encontraron tareas ({tasks?.length || 0} total, {filteredTasks.length} filtradas)
                 </div>
               ) : (
                 filteredTasks.map((task) => {
