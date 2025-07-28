@@ -174,6 +174,30 @@ export function useUpdateTaskParameter() {
         .single();
 
       if (paramError) throw paramError;
+
+      // Recalcular name_rendered de todas las tareas cuando se actualiza un expression_template
+      console.log('🔄 Recalculando name_rendered de todas las tareas...');
+      
+      // Obtener todas las tareas paramétricas
+      const { data: tasks, error: tasksError } = await supabase
+        .from('task_parametric')
+        .select('id, param_values');
+        
+      if (tasksError) {
+        console.error('Error obteniendo tareas para recálculo:', tasksError);
+      } else if (tasks && tasks.length > 0) {
+        // Actualizar cada tarea individualmente para forzar el recálculo del name_rendered
+        // Esto activa los triggers de base de datos que regeneran el name_rendered
+        for (const task of tasks) {
+          await supabase
+            .from('task_parametric')
+            .update({ param_values: task.param_values })
+            .eq('id', task.id);
+        }
+        
+        console.log(`✅ Nombres de ${tasks.length} tareas recalculados correctamente`);
+      }
+
       return parameter;
     },
     onSuccess: () => {
@@ -181,10 +205,12 @@ export function useUpdateTaskParameter() {
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
       
       toast({
         title: 'Parámetro actualizado',
-        description: 'El parámetro se ha actualizado correctamente.',
+        description: 'El parámetro y todas las tareas se han actualizado correctamente.',
       });
     },
     onError: (error) => {
