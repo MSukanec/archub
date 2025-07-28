@@ -13,7 +13,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
-  const [groupingType, setGroupingType] = useState('category')
+  const [groupByCategory, setGroupByCategory] = useState(true)
   
   const { data: userData } = useCurrentUser()
   const { selectedProject, selectedOrganization } = useNavigationStore()
@@ -139,7 +139,7 @@ export default function FinancesAnalysis() {
 
   // Group data by category when grouping is enabled
   const groupedData = useMemo(() => {
-    if (groupingType === 'none') return null
+    if (!groupByCategory) return null
     
     const groups = filteredData.reduce((acc: { [key: string]: any[] }, item) => {
       const category = item.category
@@ -156,7 +156,7 @@ export default function FinancesAnalysis() {
       totalAmount: items.reduce((sum, item) => sum + item.amount, 0),
       totalPercentage: items.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2)
     }))
-  }, [filteredData, groupingType])
+  }, [filteredData, groupByCategory])
 
   // Columns for grouped view (without category column)
   const groupedColumns = columns.filter(col => col.key !== 'category')
@@ -200,13 +200,19 @@ export default function FinancesAnalysis() {
           onSearchChange={setSearchValue}
           features={features}
           showProjectSelector={true}
-          showGrouping={true}
-          groupingType={groupingType}
-          onGroupingChange={setGroupingType}
+          customFilters={
+            <Button
+              variant={groupByCategory ? "default" : "outline"}
+              onClick={() => setGroupByCategory(!groupByCategory)}
+              className="h-8"
+            >
+              Agrupar por Categoría
+            </Button>
+          }
         />
 
         {filteredData.length > 0 ? (
-          groupingType !== 'none' && groupedData ? (
+          groupByCategory && groupedData ? (
             <Table
               columns={groupedColumns}
               data={filteredData}
