@@ -59,6 +59,118 @@ export function useConstructionProjectPhases(projectId: string) {
   })
 }
 
+export function useConstructionPhases(organizationId: string) {
+  return useQuery({
+    queryKey: ['construction-phases', organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const { data, error } = await supabase
+        .from('construction_phases')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('name', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching construction phases:', error)
+        throw error
+      }
+
+      return data || []
+    },
+    enabled: !!organizationId,
+  })
+}
+
+export function useCreateConstructionPhase() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (phaseData: {
+      projectId: string
+      organizationId: string
+      name: string
+      description?: string
+      createdBy: string
+      useExisting?: boolean
+      existingPhaseId?: string
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+
+      let phaseId = phaseData.existingPhaseId
+
+      // Si no está usando una fase existente, crear nueva fase
+      if (!phaseData.useExisting) {
+        const { data: newPhase, error: phaseError } = await supabase
+          .from('construction_phases')
+          .insert({
+            name: phaseData.name,
+            description: phaseData.description,
+            organization_id: phaseData.organizationId,
+            created_by: phaseData.createdBy
+          })
+          .select()
+          .single()
+
+        if (phaseError) {
+          console.error('Error creating phase:', phaseError)
+          throw phaseError
+        }
+
+        phaseId = newPhase.id
+      }
+
+      // Obtener la próxima posición
+      const { count } = await supabase
+        .from('construction_project_phases')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', phaseData.projectId)
+
+      const nextPosition = (count || 0) + 1
+
+      // Crear relación proyecto-fase
+      const { data: projectPhase, error: projectPhaseError } = await supabase
+        .from('construction_project_phases')
+        .insert({
+          project_id: phaseData.projectId,
+          phase_id: phaseId,
+          position: nextPosition,
+          created_by: phaseData.createdBy
+        })
+        .select()
+        .single()
+
+      if (projectPhaseError) {
+        console.error('Error creating project phase:', projectPhaseError)
+        throw projectPhaseError
+      }
+
+      return { success: true, projectPhase }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-project-phases', variables.projectId] 
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-tasks', variables.projectId] 
+      })
+      
+      toast({
+        title: "Fase creada exitosamente",
+        description: "La nueva fase ha sido agregada al proyecto."
+      })
+    },
+    onError: (error) => {
+      console.error('Error creating phase:', error)
+      toast({
+        title: "Error al crear fase",
+        description: "No se pudo crear la fase. Inténtalo de nuevo.",
+        variant: "destructive"
+      })
+    }
+  })
+}
+
 export function useUpdatePhasePositions() {
   const queryClient = useQueryClient()
 

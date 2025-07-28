@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Layers } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
+import { useConstructionProjectPhases, useCreateConstructionPhase, useConstructionPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -24,6 +24,19 @@ const phaseSchema = z.object({
   description: z.string().optional(),
   use_existing_phase: z.boolean().optional(),
   existing_phase_id: z.string().optional(),
+}).refine((data) => {
+  // Si usa fase existente, debe seleccionar una
+  if (data.use_existing_phase && !data.existing_phase_id) {
+    return false;
+  }
+  // Si no usa fase existente, debe tener nombre
+  if (!data.use_existing_phase && !data.name) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Debe seleccionar una fase existente o crear una nueva",
+  path: ["existing_phase_id"],
 });
 
 type PhaseFormData = z.infer<typeof phaseSchema>;
@@ -76,7 +89,7 @@ export function ConstructionPhaseFormModal({
   });
 
   // Get existing phases for selection  
-  const { data: existingPhases = [] } = useConstructionProjectPhases(modalData.projectId);
+  const { data: existingPhases = [] } = useConstructionPhases(modalData.organizationId);
 
   // Force edit mode on modal open
   useEffect(() => {
@@ -95,9 +108,7 @@ export function ConstructionPhaseFormModal({
 
   const { handleSubmit, setValue, watch, register, formState: { errors } } = form;
 
-  // TODO: Implement phase creation hooks
-  // const createPhase = useCreateConstructionPhase();
-  // const createProjectPhase = useCreateProjectPhase();
+  const createPhase = useCreateConstructionPhase();
 
   const watchUseExisting = watch('use_existing_phase');
   
@@ -149,15 +160,15 @@ export function ConstructionPhaseFormModal({
 
       } else {
         // Modo creación: crear nueva fase
-        let phaseId = data.existing_phase_id;
-
-        // TODO: Implement phase creation functionality
-        toast({
-          title: "Funcionalidad en desarrollo",
-          description: "La creación de fases estará disponible próximamente",
-          variant: "destructive",
+        await createPhase.mutateAsync({
+          projectId: modalData.projectId,
+          organizationId: modalData.organizationId,
+          name: data.name,
+          description: data.description,
+          createdBy: currentMember.id,
+          useExisting: data.use_existing_phase,
+          existingPhaseId: data.existing_phase_id
         });
-        return;
       }
 
       onClose();
