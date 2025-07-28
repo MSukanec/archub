@@ -498,14 +498,14 @@ export default function ConstructionTasks() {
                   const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
                   
                   return (
-                    <div className="grid gap-2 text-sm font-medium" style={{ gridTemplateColumns: 'auto 10% 10% 10%' }}>
-                      <div className="truncate">
+                    <>
+                      <div className="col-span-1 truncate">
                         {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
                       </div>
-                      <div></div> {/* Rubro (vacío en header) */}
-                      <div className="text-center">{unitSymbol}</div> {/* Unidad */}
-                      <div className="text-center">{totalQuantity}</div> {/* Cantidad total */}
-                    </div>
+                      <div className="col-span-1"></div> {/* Rubro (vacío en header) */}
+                      <div className="col-span-1 text-center">{unitSymbol}</div> {/* Unidad */}
+                      <div className="col-span-1 text-center">{totalQuantity}</div> {/* Cantidad total */}
+                    </>
                   );
                 } else {
                   return (
