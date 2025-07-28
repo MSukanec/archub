@@ -622,13 +622,10 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
                   <PopoverTrigger asChild>
                     <Button 
                       variant={selection ? "default" : "outline"}
-                      className={`px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full ${
-                        parameter.is_required && !selection ? 'border-red-500 dark:border-red-400' : ''
-                      }`}
+                      className="px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full"
                     >
                       <span>
                         {selection ? selection.optionLabel : parameter.label}
-                        {parameter.is_required && !selection && <span className="text-red-500 ml-1">*</span>}
                       </span>
                       <ChevronDown className="w-3 h-3" />
                     </Button>

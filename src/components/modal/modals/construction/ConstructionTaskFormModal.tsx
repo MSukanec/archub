@@ -246,9 +246,9 @@ export function ConstructionTaskFormModal({
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
 
-  // Hook para obtener parámetros para validar obligatorios
+  // Hook para obtener parámetros con información de is_required
   const { data: allParameters = [] } = useQuery({
-    queryKey: ['parameters-for-validation'],
+    queryKey: ['task-parameters-with-required'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       const { data, error } = await supabase
@@ -270,19 +270,23 @@ export function ConstructionTaskFormModal({
       return;
     }
 
-    // Validar parámetros obligatorios
+    // Validar parámetros obligatorios entre los disponibles
     console.log('🔍 DEBUG: Validando parámetros obligatorios');
     console.log('📊 allParameters:', allParameters);
     console.log('📊 parametricSelections:', parametricSelections);
+    console.log('📊 availableParameters (del ParametricTaskBuilder):', availableParameters);
     
-    const requiredParameters = allParameters.filter(param => param.is_required);
-    console.log('📊 requiredParameters:', requiredParameters);
+    // Solo validar parámetros obligatorios que están actualmente disponibles/visibles
+    const availableRequiredParams = allParameters.filter(param => 
+      param.is_required && availableParameters.includes(param.id)
+    );
+    console.log('📊 availableRequiredParams:', availableRequiredParams);
     
-    const selectedParameterSlugs = parametricSelections.map(sel => sel.parameterSlug);
-    console.log('📊 selectedParameterSlugs:', selectedParameterSlugs);
+    const selectedParameterIds = parametricSelections.map(sel => sel.parameterId);
+    console.log('📊 selectedParameterIds:', selectedParameterIds);
     
-    const missingRequiredParams = requiredParameters.filter(param => 
-      !selectedParameterSlugs.includes(param.slug)
+    const missingRequiredParams = availableRequiredParams.filter(param => 
+      !selectedParameterIds.includes(param.id)
     );
     console.log('📊 missingRequiredParams:', missingRequiredParams);
 
