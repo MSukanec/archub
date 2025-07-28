@@ -336,6 +336,16 @@ export function ActionBarDesktop({
                 >
                   Agrupar por Fases y Rubros
                 </button>
+                <button
+                  onClick={() => onGroupingChange('tasks')}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                    groupingType === 'tasks' && "bg-[var(--button-ghost-hover-bg)]"
+                  )}
+                >
+                  Agrupar por Tarea
+                </button>
               </div>
             </PopoverContent>
           </Popover>
