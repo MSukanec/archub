@@ -6,6 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { FormModalStepFooter } from '@/components/modal/form/FormModalStepFooter'
 import { FormModalStepHeader } from '@/components/modal/form/FormModalStepHeader'
+import { StepModalConfig } from '@/components/modal/form/types'
 import { ParametricTaskBuilder } from '@/components/ui-custom/ParametricTaskBuilder'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Label } from '@/components/ui/label'
@@ -327,16 +328,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       case 1:
         return (
           <div className="space-y-6">
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">PASO 1 DE 2</Label>
-              <h3 className="text-lg font-medium mt-1">Configurar Parámetros de Tarea</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Selecciona los parámetros para generar la tarea paramétrica.
-              </p>
-            </div>
-            
-            <Separator />
-            
             {/* Componente constructor de parámetros */}
             <ParametricTaskBuilder 
               onSelectionChange={setSelections}
@@ -351,16 +342,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       case 2:
         return (
           <div className="space-y-6">
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">PASO 2 DE 2</Label>
-              <h3 className="text-lg font-medium mt-1">Agregar Materiales</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Agrega materiales necesarios para esta tarea. La tarea ya fue guardada exitosamente.
-              </p>
-            </div>
-            
-            <Separator />
-            
             {/* Agregar material */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -443,12 +424,19 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     }
   }
 
+  // Step configuration
+  const stepConfig: StepModalConfig = {
+    currentStep,
+    totalSteps: 2,
+    stepTitle: currentStep === 1 ? 'Configurar Parámetros' : 'Agregar Materiales'
+  }
+
   // Header content
   const headerContent = (
     <FormModalStepHeader 
       title="Editar Tarea para Métrica"
       icon={Zap}
-      stepDescription={currentStep === 1 ? "Configurar parámetros de la tarea" : "Agregar materiales a la tarea"}
+      stepConfig={stepConfig}
     />
   )
 
