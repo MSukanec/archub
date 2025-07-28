@@ -550,8 +550,8 @@ export function ConstructionTaskFormModal({
                           </SelectTrigger>
                           <SelectContent>
                             {projectPhases.map((projectPhase) => (
-                              <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                                {(projectPhase as any).name}
+                              <SelectItem key={projectPhase.project_phase_id} value={projectPhase.project_phase_id}>
+                                {projectPhase.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -601,7 +601,7 @@ export function ConstructionTaskFormModal({
         console.log('🎯 BOTÓN PRESIONADO - selectedTasks:', selectedTasks);
         handleSubmit(onSubmit)();
       }}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 
