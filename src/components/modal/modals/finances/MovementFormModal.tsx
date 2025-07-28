@@ -539,9 +539,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         const preserveValues = !!editingMovement
         const currentMember = members?.find(m => m.user_id === userData?.user?.id)?.id
         
-        // Obtener los valores por defecto desde organization_preferences o usar el primero disponible
-        const defaultCurrency = userData?.organization_preferences?.default_currency || currencies?.[0]?.currency_id
-        const defaultWallet = userData?.organization_preferences?.default_wallet || wallets?.[0]?.id
+        // Obtener los valores por defecto desde organization.preferences o usar el primero disponible
+        const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
+        const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
         
         if (isAportesCategory) {
           // APORTES: Cliente + Cotización

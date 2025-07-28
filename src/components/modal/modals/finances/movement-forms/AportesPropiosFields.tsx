@@ -67,7 +67,7 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
                       <p className="text-sm text-muted-foreground mb-2">
                         Aún no tienes Socios, ¿quieres agregar uno?
                       </p>
-                      <Button variant="outline" size="sm" disabled>
+                      <Button variant="default" size="sm" disabled>
                         Agregar
                       </Button>
                     </div>

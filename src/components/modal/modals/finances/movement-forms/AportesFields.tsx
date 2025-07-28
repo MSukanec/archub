@@ -142,8 +142,8 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
                       <p className="text-sm text-muted-foreground mb-2">
                         Aún no tienes Clientes, ¿quieres agregar uno?
                       </p>
-                      <Link href="/contacts/clients">
-                        <Button variant="outline" size="sm">
+                      <Link href="/project/clients">
+                        <Button variant="default" size="sm">
                           Agregar
                         </Button>
                       </Link>
