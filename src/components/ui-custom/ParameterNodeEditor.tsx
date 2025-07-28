@@ -20,7 +20,7 @@ import 'reactflow/dist/style.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Edit, Trash2 } from 'lucide-react';
+import { Copy, Edit, Trash2, Settings } from 'lucide-react';
 import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -53,11 +53,13 @@ interface ParameterNodeData {
   onDuplicate: (parameterId: string) => void;
   onEdit: (parameterId: string) => void;
   onDelete: (nodeId: string) => void;
+  onConfigureVisibility?: (parameterId: string) => void; // Nueva función para configurar visibilidad
+  hasParentDependencies?: boolean; // Indica si el nodo tiene padres conectados
 }
 
 // Componente de nodo personalizado
 function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
-  const { parameter, options, visibleOptions, onVisibleOptionsChange, onDuplicate, onEdit, onDelete } = data;
+  const { parameter, options, visibleOptions, onVisibleOptionsChange, onDuplicate, onEdit, onDelete, onConfigureVisibility, hasParentDependencies } = data;
   
   const visibleOptionsList = options.filter(option => visibleOptions.includes(option.id));
   const comboBoxOptions = options.map(option => ({
@@ -98,6 +100,20 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
               >
                 <Edit className="h-3 w-3" />
               </Button>
+              {hasParentDependencies && onConfigureVisibility && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onConfigureVisibility(parameter.id);
+                  }}
+                  title="Configurar visibilidad por opción"
+                >
+                  <Settings className="h-3 w-3" />
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="ghost"
@@ -551,7 +567,9 @@ function ParameterNodeEditorContent() {
           },
           onDuplicate: handleDuplicateNode,
           onEdit: handleEditNode,
-          onDelete: handleDeleteNode
+          onDelete: handleDeleteNode,
+          onConfigureVisibility: handleConfigureVisibility,
+          hasParentDependencies: getParameterWithParentDependencies(parameterId)
         }
       };
 
@@ -576,6 +594,18 @@ function ParameterNodeEditorContent() {
       openModal('task-parameter', { parameter: parameterData.parameter, isEditing: true });
     }
   }, [parametersData]);
+
+  // Función para configurar visibilidad de opciones por parámetro padre
+  const handleConfigureVisibility = useCallback((parameterId: string) => {
+    console.log('⚙️ Configurando visibilidad para parámetro:', parameterId);
+    const { openModal } = useGlobalModalStore.getState();
+    openModal('parameter-visibility-config', { parameterId });
+  }, []);
+
+  // Función para detectar si un parámetro tiene dependencias padre
+  const getParameterWithParentDependencies = useCallback((parameterId: string) => {
+    return dependencies.some(dep => dep.child_parameter_id === parameterId);
+  }, [dependencies]);
 
   // Estado para rastrear nodos que se están eliminando
   const [deletingNodes, setDeletingNodes] = useState<Set<string>>(new Set());
@@ -776,7 +806,9 @@ function ParameterNodeEditorContent() {
               },
               onDuplicate: handleDuplicateNode,
               onEdit: handleEditNode,
-              onDelete: handleDeleteNode
+              onDelete: handleDeleteNode,
+              onConfigureVisibility: handleConfigureVisibility,
+              hasParentDependencies: getParameterWithParentDependencies(parameterData.parameter.id)
             },
           };
         })

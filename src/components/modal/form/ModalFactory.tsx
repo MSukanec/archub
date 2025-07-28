@@ -39,6 +39,7 @@ import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizat
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogFormModal } from '../modals/construction/SiteLogFormModal';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
+import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -135,6 +136,8 @@ export function ModalFactory() {
       return <SiteLogFormModal data={data} />;
     case 'attendance':
       return <AttendanceFormModal modalData={data} onClose={closeModal} />;
+    case 'parameter-visibility-config':
+      return <ParameterVisibilityConfigModal parameterId={data?.parameterId} onClose={closeModal} />;
     default:
       return null;
   }
