@@ -40,7 +40,7 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     
     if (paramValue) {
       // Usar expression_template si existe, sino usar label
-      let replacement = paramValue.task_parameters?.expression_template || paramValue.label;
+      let replacement = (paramValue.task_parameters as any)?.expression_template || paramValue.label;
       
       // Si el replacement contiene {value}, reemplazarlo con el label
       if (replacement.includes('{value}')) {
@@ -101,7 +101,7 @@ export function useTaskSearch(
 
       // Construir query con filtros
       let query = supabase
-        .from("task_generated_view")
+        .from("task_parametric_view")
         .select(`
           *,
           units!inner(
@@ -171,7 +171,7 @@ export function useTaskSearchFilterOptions(organizationId: string) {
 
       // Obtener todos los valores únicos para los filtros
       const { data: filterData, error } = await supabase
-        .from("task_generated_view")
+        .from("task_parametric_view")
         .select("rubro_name, category_name, subcategory_name")
         .limit(1000);
 
@@ -181,9 +181,9 @@ export function useTaskSearchFilterOptions(organizationId: string) {
       }
 
       // Extraer valores únicos
-      const rubros = [...new Set(filterData?.map(item => item.rubro_name).filter(Boolean))].sort();
-      const categories = [...new Set(filterData?.map(item => item.category_name).filter(Boolean))].sort();
-      const subcategories = [...new Set(filterData?.map(item => item.subcategory_name).filter(Boolean))].sort();
+      const rubros = Array.from(new Set(filterData?.map(item => item.rubro_name).filter(Boolean))).sort();
+      const categories = Array.from(new Set(filterData?.map(item => item.category_name).filter(Boolean))).sort();
+      const subcategories = Array.from(new Set(filterData?.map(item => item.subcategory_name).filter(Boolean))).sort();
 
       return {
         rubros,

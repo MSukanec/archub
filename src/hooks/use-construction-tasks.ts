@@ -296,7 +296,7 @@ export function useUpdateConstructionTask() {
         .eq('id', data.id)
         .select(`
           *,
-          task:task_generated_view!inner (
+          task:task_parametric_view!inner (
             id,
             code,
             display_name,

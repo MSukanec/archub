@@ -30,7 +30,7 @@ export function useTaskLibrary(organizationId: string) {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('task_generated_view')
+        .from('task_parametric_view')
         .select('*')
         .eq('organization_id', organizationId)
         .order('display_name', { ascending: true });
