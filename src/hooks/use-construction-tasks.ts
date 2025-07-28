@@ -86,29 +86,44 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       // Debug: ver qué campos están llegando exactamente
       console.log('RAW PARAMETRIC TASKS SAMPLE:', JSON.stringify(parametricTasks?.[0], null, 2));
 
-      // Generar nombres de tareas usando la función RPC
-      const tasksWithNames = await Promise.all(
-        parametricTasks.map(async (task: any) => {
-          try {
-            // Llamar a la función RPC para generar el nombre
-            const { data: renderedName, error: rpcError } = await supabase
-              .rpc('render_task_name_from_param_values', {
-                input_param_values: task.param_values,
-                input_param_order: task.param_order || []
-              });
-
-            if (rpcError) {
-              console.error('Error rendering task name:', rpcError);
-              return { ...task, display_name: `Tarea ${task.code || 'sin código'}` };
+      // Generar nombres descriptivos basados en los parámetros
+      const tasksWithNames = await Promise.all(parametricTasks.map(async (task: any) => {
+        try {
+          // Intentar generar un nombre más descriptivo
+          let displayName = task.name_rendered;
+          
+          if (!displayName && task.param_values) {
+            // Si param_values es string, parsearlo
+            const paramValues = typeof task.param_values === 'string' 
+              ? JSON.parse(task.param_values) 
+              : task.param_values;
+            
+            if (Object.keys(paramValues).length > 0) {
+              // Obtener las opciones de parámetros para crear un nombre descriptivo
+              const { data: paramOptions } = await supabase
+                .from('task_parameter_options')
+                .select('id, label')
+                .in('id', Object.values(paramValues));
+              
+              if (paramOptions && paramOptions.length > 0) {
+                // Crear nombre concatenando las opciones
+                const optionLabels = paramOptions.map(opt => opt.label).join(' ');
+                displayName = `Ejecución de ${optionLabels.toLowerCase()}`;
+              }
             }
-
-            return { ...task, display_name: renderedName || `Tarea ${task.code || 'sin código'}` };
-          } catch (error) {
-            console.error('Error processing task name:', error);
-            return { ...task, display_name: `Tarea ${task.code || 'sin código'}` };
           }
-        })
-      );
+          
+          // Fallback al código de tarea
+          if (!displayName) {
+            displayName = `Tarea paramétrica ${task.code || 'sin código'}`;
+          }
+          
+          return { ...task, display_name: displayName };
+        } catch (error) {
+          console.error('Error generating task name:', error);
+          return { ...task, display_name: `Tarea paramétrica ${task.code || 'sin código'}` };
+        }
+      }));
 
       // Mapear datos de task_parametric al formato esperado para construcción
       const mappedTasks: ConstructionTask[] = tasksWithNames.map((item: any, index: number) => {

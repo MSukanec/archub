@@ -52,6 +52,10 @@ interface ConstructionTaskFormModalProps {
 }
 
 export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTaskFormModalProps) {
+  // Si modalData es null, no renderizar el componente
+  if (!modalData) {
+    return null;
+  }
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState('');
@@ -73,14 +77,14 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
   const { handleSubmit, watch, setValue } = form;
 
-  // Query para obtener tareas de la biblioteca
+  // Query para obtener tareas de la biblioteca (usando task_parametric directamente)
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
     queryKey: ['task-library', modalData.organizationId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('task_generated_view')
+        .from('task_parametric')
         .select('*')
-        .order('rubro_name', { ascending: true });
+        .order('created_at', { ascending: true });
       
       if (error) throw error;
       return data || [];
