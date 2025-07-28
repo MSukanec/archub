@@ -272,51 +272,23 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
           setSelections(initialSelections);
           setAvailableParameters(initialAvailableParams);
           
-          // Establecer el orden inicial - siempre usar orden inteligente que incluya parámetros nuevos
-          const standardOrder = ['tipo_tarea', 'tipo_de_muro', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos'];
+          // Establecer el orden inicial basado solo en los parámetros seleccionados
           const availableSlugs = initialSelections.map(sel => sel.parameterSlug);
+          const standardOrder = ['tipo_tarea', 'tipo_de_muro', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos'];
           
-          // Si tenemos un orden guardado, usarlo como base pero insertar parámetros nuevos inteligentemente
           let initialOrder: string[];
           if (initialParameterOrder && initialParameterOrder.length > 0) {
-            // Comenzar con el orden guardado
-            const savedOrder = [...initialParameterOrder];
+            // Usar orden guardado pero solo incluir parámetros que están en las selecciones iniciales
+            initialOrder = initialParameterOrder.filter(slug => availableSlugs.includes(slug));
             
-            // Encontrar parámetros que están disponibles pero no en el orden guardado
-            const missingParams = availableSlugs.filter(slug => !savedOrder.includes(slug));
-            
-            if (missingParams.length > 0) {
-              console.log('🔄 Inserting missing parameters:', missingParams);
-              
-              // Para cada parámetro faltante, insertarlo en la posición correcta según standardOrder
-              missingParams.forEach(missingParam => {
-                const standardIndex = standardOrder.indexOf(missingParam);
-                if (standardIndex !== -1) {
-                  // Encontrar la posición correcta para insertar
-                  let insertIndex = savedOrder.length; // Por defecto al final
-                  
-                  // Buscar hacia atrás en standardOrder para encontrar un parámetro que ya esté en savedOrder
-                  for (let i = standardIndex - 1; i >= 0; i--) {
-                    const beforeParam = standardOrder[i];
-                    const beforeIndex = savedOrder.indexOf(beforeParam);
-                    if (beforeIndex !== -1) {
-                      insertIndex = beforeIndex + 1;
-                      break;
-                    }
-                  }
-                  
-                  // Insertar el parámetro en la posición correcta
-                  savedOrder.splice(insertIndex, 0, missingParam);
-                  console.log(`🎯 Inserted ${missingParam} at position ${insertIndex}`);
-                } else {
-                  // Si no está en standardOrder, agregarlo al final
-                  savedOrder.push(missingParam);
-                }
-              });
+            // Agregar parámetros seleccionados que no están en el orden guardado
+            const missingFromOrder = availableSlugs.filter(slug => !initialOrder.includes(slug));
+            if (missingFromOrder.length > 0) {
+              console.log('🔄 Adding missing params to saved order:', missingFromOrder);
+              initialOrder.push(...missingFromOrder);
             }
             
-            initialOrder = savedOrder;
-            console.log('📊 Using enhanced saved parameter order:', initialOrder);
+            console.log('📊 Using filtered saved parameter order:', initialOrder);
           } else {
             // Filtrar el orden estándar para incluir solo los parámetros disponibles
             const filteredStandardOrder = standardOrder.filter(slug => availableSlugs.includes(slug));
@@ -510,18 +482,60 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
       slugToIdMap[param.slug] = param.id
     })
     
-    // Ordenar según parameterOrder, agregando al final los parámetros no especificados
+    // Usar orden estándar mejorado para insertar parámetros faltantes inteligentemente
+    const standardOrder = ['tipo_tarea', 'tipo_de_muro', 'tipo_elemento', 'tipo_ladrillo', 'tipo_mortero', 'aditivos']
     const orderedIds: string[] = []
     
-    // Primero, agregar parámetros en el orden especificado
-    parameterOrder.forEach(slug => {
+    // Crear un orden mejorado que incluya parámetros disponibles según el orden estándar
+    const enhancedOrder = [...parameterOrder]
+    
+    // Verificar si hay parámetros disponibles que no están en parameterOrder
+    const availableSlugs = availableParameters.map(paramId => {
+      const param = parameters.find(p => p.id === paramId)
+      return param?.slug
+    }).filter(Boolean) as string[]
+    
+    const missingParams = availableSlugs.filter(slug => !enhancedOrder.includes(slug))
+    
+    if (missingParams.length > 0) {
+      console.log('🔄 Detected missing parameters in order:', missingParams)
+      
+      // Para cada parámetro faltante, insertarlo en la posición correcta según standardOrder
+      missingParams.forEach(missingParam => {
+        const standardIndex = standardOrder.indexOf(missingParam)
+        if (standardIndex !== -1) {
+          // Encontrar la posición correcta para insertar
+          let insertIndex = enhancedOrder.length // Por defecto al final
+          
+          // Buscar hacia atrás en standardOrder para encontrar un parámetro que ya esté en enhancedOrder
+          for (let i = standardIndex - 1; i >= 0; i--) {
+            const beforeParam = standardOrder[i]
+            const beforeIndex = enhancedOrder.indexOf(beforeParam)
+            if (beforeIndex !== -1) {
+              insertIndex = beforeIndex + 1
+              break
+            }
+          }
+          
+          // Insertar el parámetro en la posición correcta
+          enhancedOrder.splice(insertIndex, 0, missingParam)
+          console.log(`🎯 Intelligently inserted ${missingParam} at position ${insertIndex}`)
+        } else {
+          // Si no está en standardOrder, agregarlo al final
+          enhancedOrder.push(missingParam)
+        }
+      })
+    }
+    
+    // Ahora ordenar según el orden mejorado
+    enhancedOrder.forEach(slug => {
       const paramId = slugToIdMap[slug]
       if (paramId && availableParameters.includes(paramId)) {
         orderedIds.push(paramId)
       }
     })
     
-    // Luego, agregar parámetros no especificados en parameterOrder
+    // Luego, agregar parámetros no especificados en enhancedOrder
     availableParameters.forEach(paramId => {
       if (!orderedIds.includes(paramId)) {
         orderedIds.push(paramId)
@@ -530,6 +544,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
     
     console.log('🔀 Parameter ordering:', {
       parameterOrder,
+      enhancedOrder,
       availableParameters,
       orderedIds,
       slugToIdMap
