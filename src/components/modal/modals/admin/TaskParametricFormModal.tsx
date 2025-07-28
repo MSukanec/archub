@@ -226,11 +226,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     // Clear form
     setSelectedMaterialId('')
     setMaterialAmount('')
-    
-    toast({
-      title: "Material agregado",
-      description: "El material se agregó a la lista. Se guardará al finalizar.",
-    })
   }
 
   // Final step: Complete and close
@@ -250,16 +245,27 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       // Save all materials to database
       if (taskMaterials.length > 0) {
         console.log('💾 Saving materials to database:', taskMaterials);
+        console.log('💾 Using task_id:', savedTaskId);
+        console.log('💾 Using organization_id:', userData.organization.id);
         
         for (const material of taskMaterials) {
           // Skip materials that already have an ID (already saved)
           if (!material.id) {
-            await createTaskMaterialMutation.mutateAsync({
+            const materialData = {
               task_id: savedTaskId,
               material_id: material.material_id,
               amount: material.amount,
               organization_id: userData.organization.id
-            })
+            };
+            console.log('💾 Attempting to save material:', materialData);
+            
+            try {
+              await createTaskMaterialMutation.mutateAsync(materialData)
+              console.log('✅ Material saved successfully');
+            } catch (materialError) {
+              console.error('❌ Error saving individual material:', materialError);
+              throw materialError;
+            }
           }
         }
       }
