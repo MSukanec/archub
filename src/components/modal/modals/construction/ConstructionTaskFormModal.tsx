@@ -1,36 +1,30 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from "@/lib/supabase";
-import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
-import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
-import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { Settings, Search, X, CheckSquare, Square } from 'lucide-react';
 
-import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter, X, LayoutGrid, Plus } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
-import { useProjectPhases } from "@/hooks/use-construction-phases";
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
 
-import { toast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjectPhases } from '@/hooks/use-construction-phases';
+import { useCreateConstructionTask } from '@/hooks/use-construction-tasks';
+import { supabase } from '@/lib/supabase';
 
 const addTaskSchema = z.object({
-  project_phase_id: z.string().min(1, "Debe seleccionar una fase de proyecto"),
+  project_phase_id: z.string().min(1, 'Selecciona una fase'),
   selectedTasks: z.array(z.object({
     task_id: z.string(),
-    quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0")
-  })).min(1, "Debe seleccionar al menos una tarea")
+    quantity: z.number().min(0.01)
+  })).min(1, 'Selecciona al menos una tarea')
 });
 
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
@@ -38,15 +32,11 @@ type AddTaskFormData = z.infer<typeof addTaskSchema>;
 interface SelectedTask {
   task_id: string;
   quantity: number;
-  phase_instance_id?: string;
 }
 
 interface ConstructionTaskFormModalProps {
   modalData: {
     projectId: string;
-    organizationId: string;
-    isEditing?: boolean;
-    editingTask?: any;
   };
   onClose: () => void;
 }
@@ -55,8 +45,6 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState('');
-  const [phaseFilter, setPhaseFilter] = useState('');
-  const [groupingType, setGroupingType] = useState('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { data: userData } = useCurrentUser();
@@ -71,7 +59,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     }
   });
 
-  const { handleSubmit, watch, setValue } = form;
+  const { handleSubmit } = form;
 
   // Query para obtener tareas paramétricas de la biblioteca
   const { data: tasks, isLoading: isLoadingTasks, error: tasksError } = useQuery({
@@ -172,10 +160,12 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         task.task_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Por ahora sin filtros hasta que tengamos datos reales
-      return matchesSearch;
+      const matchesRubro = !rubroFilter ||
+        task.rubro_name?.toLowerCase().includes(rubroFilter.toLowerCase());
+      
+      return matchesSearch && matchesRubro;
     });
-  }, [tasks, searchQuery]);
+  }, [tasks, searchQuery, rubroFilter]);
 
   // Por ahora rubros simplificados hasta que tengamos datos reales
   const uniqueRubros = ['Mampostería', 'Estructura', 'General'];
@@ -185,45 +175,40 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     const isSelected = selectedTasks.some(st => st.task_id === taskId);
     
     if (isSelected) {
+      // Deseleccionar tarea
       setSelectedTasks(prev => prev.filter(st => st.task_id !== taskId));
     } else {
+      // Seleccionar tarea
       setSelectedTasks(prev => [...prev, { task_id: taskId, quantity: 1 }]);
     }
   };
 
-  // Actualizar cantidad de tarea seleccionada
+  // Manejar cambio de cantidad
   const handleQuantityChange = (taskId: string, quantity: number) => {
-    setSelectedTasks(prev => 
-      prev.map(st => 
-        st.task_id === taskId ? { ...st, quantity } : st
-      )
-    );
+    setSelectedTasks(prev => prev.map(st => 
+      st.task_id === taskId ? { ...st, quantity } : st
+    ));
   };
 
-  // Función para enviar el formulario
+  // Manejar envío del formulario
   const onSubmit = async (data: AddTaskFormData) => {
-    if (selectedTasks.length === 0) {
-      toast({
-        title: "Error",
-        description: "Debe seleccionar al menos una tarea",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    
     try {
+      setIsSubmitting(true);
+      
+      // Agregar cada tarea seleccionada
       for (const selectedTask of selectedTasks) {
-        const taskData = {
-          project_id: modalData.projectId,
-          task_id: selectedTask.task_id,
-          quantity: selectedTask.quantity,
-          project_phase_id: data.project_phase_id,
-          organization_id: modalData.organizationId
-        };
+        const task = tasks?.find(t => t.id === selectedTask.task_id);
+        if (task) {
+          const taskData = {
+            project_id: modalData.projectId,
+            task_id: task.id,
+            quantity: selectedTask.quantity,
+            phase_instance_id: data.project_phase_id,
+            organization_id: userData?.organization?.id || ''
+          };
         
-        await createTaskMutation.mutateAsync(taskData);
+          await createTaskMutation.mutateAsync(taskData);
+        }
       }
       
       toast({
@@ -247,7 +232,6 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const clearFilters = () => {
     setSearchQuery('');
     setRubroFilter('');
-    setPhaseFilter('');
   };
 
   // Configuración del header del modal
@@ -271,148 +255,157 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     }
   };
 
-  return (
-    <FormModalLayout>
-      <FormModalHeader headerContent={headerContent} />
-      
-      <div className="space-y-6">
-        {/* Selección de fase del proyecto */}
-        <div className="space-y-2">
-          <Label htmlFor="project_phase_id">Fase del Proyecto *</Label>
-          <Select onValueChange={(value) => form.setValue('project_phase_id', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona una fase del proyecto" />
+  const viewPanel = (
+    <div className="space-y-6">
+      <div className="text-center py-8 text-muted-foreground">
+        Vista de tareas disponibles
+      </div>
+    </div>
+  );
+
+  const editPanel = (
+    <div className="space-y-6">
+      {/* Selección de fase del proyecto */}
+      <div className="space-y-2">
+        <Label htmlFor="project_phase_id">Fase del Proyecto *</Label>
+        <Select onValueChange={(value) => form.setValue('project_phase_id', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecciona una fase del proyecto" />
+          </SelectTrigger>
+          <SelectContent>
+            {projectPhases.map((phase) => (
+              <SelectItem key={phase.id} value={phase.id}>
+                {phase.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Filtros y búsqueda */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar tareas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={rubroFilter} onValueChange={setRubroFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filtrar por rubro" />
             </SelectTrigger>
             <SelectContent>
-              {projectPhases.map((phase) => (
-                <SelectItem key={phase.id} value={phase.id}>
-                  {phase.name}
+              <SelectItem value="">Todos los rubros</SelectItem>
+              {uniqueRubros.map((rubro) => (
+                <SelectItem key={rubro} value={rubro}>
+                  {rubro}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-
-        {/* Filtros y búsqueda */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar tareas..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={rubroFilter} onValueChange={setRubroFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrar por rubro" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todos los rubros</SelectItem>
-                {uniqueRubros.map((rubro) => (
-                  <SelectItem key={rubro} value={rubro}>
-                    {rubro}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {(searchQuery || rubroFilter || phaseFilter) && (
-              <Button variant="outline" size="sm" onClick={clearFilters}>
-                <X className="w-4 h-4 mr-2" />
-                Limpiar
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Lista de tareas */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-medium">
-              Tareas Disponibles ({filteredTasks.length})
-            </Label>
-            {selectedTasks.length > 0 && (
-              <Badge variant="secondary">
-                {selectedTasks.length} seleccionada(s)
-              </Badge>
-            )}
-          </div>
           
-          <ScrollArea className="h-96 border rounded-lg">
-            <div className="p-4 space-y-3">
-              {isLoadingTasks ? (
-                <div className="text-center text-muted-foreground">
-                  Cargando tareas...
-                </div>
-              ) : tasksError ? (
-                <div className="text-center text-red-600">
-                  Error cargando tareas: {tasksError.message}
-                </div>
-              ) : filteredTasks.length === 0 ? (
-                <div className="text-center text-muted-foreground">
-                  No se encontraron tareas ({tasks?.length || 0} total, {filteredTasks.length} filtradas)
-                </div>
-              ) : (
-                filteredTasks.map((task) => {
-                  const isSelected = selectedTasks.some(st => st.task_id === task.id);
-                  const selectedTask = selectedTasks.find(st => st.task_id === task.id);
-                  
-                  return (
-                    <div
-                      key={task.id}
-                      className={cn(
-                        "p-3 border rounded-lg cursor-pointer transition-colors",
-                        isSelected 
-                          ? "border-primary bg-primary/5" 
-                          : "border-border hover:border-primary/50"
-                      )}
-                      onClick={() => handleTaskSelect(task.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3 flex-1">
-                          {isSelected ? (
-                            <CheckSquare className="w-5 h-5 text-primary mt-0.5" />
-                          ) : (
-                            <Square className="w-5 h-5 text-muted-foreground mt-0.5" />
-                          )}
-                          
-                          <div className="flex-1 space-y-1">
-                            <div className="font-medium">{task.task_name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {task.rubro_name} • {task.unit_symbol}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {isSelected && (
-                          <div className="flex items-center gap-2 ml-2">
-                            <Label className="text-sm">Cantidad:</Label>
-                            <Input
-                              type="number"
-                              min="0.01"
-                              step="0.01"
-                              value={selectedTask?.quantity || 1}
-                              onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
-                              className="w-20 h-8"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </ScrollArea>
+          {(searchQuery || rubroFilter) && (
+            <Button variant="outline" size="sm" onClick={clearFilters}>
+              <X className="w-4 h-4 mr-2" />
+              Limpiar
+            </Button>
+          )}
         </div>
       </div>
-      
-      <FormModalFooter footerContent={footerContent} />
-    </FormModalLayout>
+
+      {/* Lista de tareas */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-medium">
+            Tareas Disponibles ({filteredTasks.length})
+          </Label>
+          {selectedTasks.length > 0 && (
+            <Badge variant="secondary">
+              {selectedTasks.length} seleccionada(s)
+            </Badge>
+          )}
+        </div>
+        
+        <ScrollArea className="h-96 border rounded-lg">
+          <div className="p-4 space-y-3">
+            {isLoadingTasks ? (
+              <div className="text-center text-muted-foreground">
+                Cargando tareas...
+              </div>
+            ) : tasksError ? (
+              <div className="text-center text-red-600">
+                Error cargando tareas: {tasksError.message}
+              </div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="text-center text-muted-foreground">
+                No se encontraron tareas ({tasks?.length || 0} total, {filteredTasks.length} filtradas)
+              </div>
+            ) : (
+              filteredTasks.map((task: any) => {
+                const isSelected = selectedTasks.some(st => st.task_id === task.id);
+                const selectedTask = selectedTasks.find(st => st.task_id === task.id);
+
+                return (
+                  <div
+                    key={task.id}
+                    className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                      isSelected ? 'bg-accent border-accent-foreground' : 'hover:bg-muted'
+                    }`}
+                    onClick={() => handleTaskSelect(task.id)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        {isSelected ? (
+                          <CheckSquare className="w-5 h-5 text-primary mt-0.5" />
+                        ) : (
+                          <Square className="w-5 h-5 text-muted-foreground mt-0.5" />
+                        )}
+                        
+                        <div className="flex-1 space-y-1">
+                          <div className="font-medium">{task.task_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {task.rubro_name} • {task.unit_symbol}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {isSelected && (
+                        <div className="flex items-center gap-2 ml-2">
+                          <Label className="text-sm">Cantidad:</Label>
+                          <Input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            value={selectedTask?.quantity || 1}
+                            onChange={(e) => handleQuantityChange(task.id, parseFloat(e.target.value) || 1)}
+                            className="w-20 h-8"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
+
+  return (
+    <FormModalLayout 
+      isEditing={true}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+    />
   );
 }
