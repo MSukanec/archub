@@ -140,17 +140,26 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
     }
   })
 
-  // Inicializar con "TIPO DE TAREA" al cargar
+  // Inicializar con "TIPO DE TAREA" al cargar (solo si no hay parámetros iniciales)
   useEffect(() => {
     const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
-    if (tipoTareaParam && availableParameters.length === 0) {
+    if (tipoTareaParam && availableParameters.length === 0 && !initialParameters) {
       console.log('🎯 Parámetro inicial encontrado:', tipoTareaParam)
       setAvailableParameters([tipoTareaParam.id])
     }
-  }, [parameters, availableParameters.length])
+  }, [parameters, availableParameters.length, initialParameters])
 
   // Calcular parámetros disponibles basado en selecciones actuales
   useEffect(() => {
+    // En modo edición con parámetros iniciales, no limitar los parámetros disponibles
+    if (initialParameters && selections.length > 0) {
+      // En modo edición, mantener todos los parámetros que están en las selecciones
+      const editModeParams = selections.map(s => s.parameterId)
+      console.log('📝 Modo edición - manteniendo todos los parámetros seleccionados:', editModeParams.length)
+      setAvailableParameters(editModeParams)
+      return
+    }
+
     if (selections.length === 0) {
       const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
       if (tipoTareaParam) {
@@ -228,22 +237,38 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
               option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter.id);
             }
           } else {
-            // Legacy format: key is parameter slug, value is option label/name
+            // Legacy format: key is parameter slug, value is option ID or label/name
             parameter = parameters.find(p => p.slug === key);
             if (parameter) {
-              // Find the option that matches the value (try multiple approaches)
-              option = allOptions.find(opt => 
-                opt.parameter_id === parameter.id && 
-                (opt.label === value || opt.name === value)
-              );
+              // First try to find by exact option ID
+              if (typeof value === 'string' && value.length === 36 && value.includes('-')) {
+                option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter.id);
+              }
               
-              // If not found, try case-insensitive search
+              // If not found by ID, try to find by label/name
+              if (!option) {
+                option = allOptions.find(opt => 
+                  opt.parameter_id === parameter.id && 
+                  (opt.label === value || opt.name === value)
+                );
+              }
+              
+              // If still not found, try case-insensitive search
               if (!option) {
                 option = allOptions.find(opt => 
                   opt.parameter_id === parameter.id && 
                   (opt.label?.toLowerCase() === (value as string)?.toLowerCase() || 
                    opt.name?.toLowerCase() === (value as string)?.toLowerCase())
                 );
+              }
+              
+              // If still not found but we have a parameter, take the first available option as fallback
+              if (!option) {
+                const availableOptions = allOptions.filter(opt => opt.parameter_id === parameter.id);
+                if (availableOptions.length > 0) {
+                  option = availableOptions[0];
+                  console.log('⚠️ Using fallback option for', key, ':', option.label);
+                }
               }
             }
           }
