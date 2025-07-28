@@ -56,11 +56,10 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
   }
 
   return (
-    <div className="space-y-4">
-      {/* Chart - Responsive height and width */}
-      <div className="h-48 md:h-64 flex justify-center">
-        <div className="w-72 md:w-full">
-          <ResponsiveContainer width="100%" height="100%">
+    <div className="space-y-3 overflow-hidden">
+      {/* Chart - Responsive and contained */}
+      <div className="h-44 md:h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             {/* Single ring - Categories only */}
             <Pie
@@ -68,8 +67,8 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
               dataKey="value"
               cx="50%"
               cy="50%"
-              innerRadius={25}
-              outerRadius={55}
+              innerRadius={20}
+              outerRadius={50}
               startAngle={90}
               endAngle={450}
               label={({ name, percentage }) => 
@@ -84,7 +83,6 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        </div>
       </div>
       
       {/* Legend - Compact for mobile */}

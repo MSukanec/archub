@@ -14,7 +14,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
-import { ExpensesTrendChart } from '@/components/charts/ExpensesTrendChart'
+
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -587,7 +587,9 @@ export default function FinancesAnalysis() {
                   </p>
                 </CardHeader>
                 <CardContent className="pb-2">
-                  <ExpensesTrendChart data={chartData || []} isLoading={isLoading} />
+                  <div className="h-72 flex items-center justify-center">
+                    <div className="text-sm text-muted-foreground">Gráfico de tendencias en desarrollo</div>
+                  </div>
                 </CardContent>
               </Card>
               
