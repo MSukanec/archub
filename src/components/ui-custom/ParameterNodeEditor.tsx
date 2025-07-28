@@ -728,7 +728,7 @@ function ParameterNodeEditorContent() {
         ...dependencies.map(dep => dep.child_parameter_id)
       ]);
       
-      const parametersWithoutPositions = [...parametersInDependencies].filter(
+      const parametersWithoutPositions = Array.from(parametersInDependencies).filter(
         paramId => !parametersWithPositions.has(paramId)
       );
       

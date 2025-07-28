@@ -118,16 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 28, 2025. PARAMETER NODE DUPLICATION LOGIC COMPLETELY FIXED: Successfully resolved auto-duplication bug when moving nodes in visual parameter editor - COMPLETED
-  • SIMPLIFIED DUPLICATION ARCHITECTURE: Eliminated original_parameter_id column, now uses simple id !== parameter_id detection for duplicated nodes
-  • AUTO-DUPLICATION BUG FIXED: Corrected logic where nodes duplicated automatically when moved due to incorrect position matching in node creation
-  • CLEAN NODE SEPARATION: Original nodes use positions where id === parameter_id, duplicated nodes use positions where id !== parameter_id
-  • DELETION STATE TRACKING: Added deletingNodes state to prevent position saving during node elimination operations
-  • POSITION PERSISTENCE CORRECTED: Fixed savePositionMutation to handle both original nodes (parameter_id based) and duplicated nodes (id based) properly
-  • VISUAL CONSISTENCY MAINTAINED: Duplicated nodes remain as visual instances of same parameter with independent positions and visible_options
-  • DATABASE CLEANUP: Removed all references to obsolete original_parameter_id column throughout codebase
-  • CONNECTION LOGIC UPDATED: Fixed connection creation to work with simplified duplication detection using node.data.parameter.id
-  • DRAG AND DROP FIXED: Nodes now move without creating unwanted duplicates, maintaining clean one-to-one relationship between canvas and database
+- July 28, 2025. VISUAL PARAMETER EDITOR DISPLAY LOGIC OPTIMIZATION COMPLETED: Successfully fixed node display and connection issues in visual parameter tree editor - COMPLETED
+  • NODE DISPLAY OPTIMIZATION: Nodes now appear ONLY when they have saved positions OR are involved in existing dependencies, eliminating auto-creation for all parameters
+  • MULTIPLE CONNECTION BUG FIXED: Optimized edge creation logic to show only ONE connection per dependency instead of multiple lines between duplicated nodes
+  • SET ITERATION ERROR RESOLVED: Fixed TypeScript error by using Array.from() instead of spread operator for Set iteration
+  • CRITICAL VISIBLE OPTIONS BUG: Identified issue where editing options in one node clears visible_options across all other nodes globally
+  • CONNECTION OPTIMIZATION: Reduced visual complexity by selecting first available node with visible option for parent and first child node for connections
+  • EDGE HANDLE ERRORS: React Flow showing "Couldn't create edge" warnings for missing source handles when nodes don't have required visible options
+  • VISUAL CLEANUP: System now creates clean connection lines without excessive visual clutter between parameter nodes
 - July 27, 2025. TASK PARAMETRIC SYSTEM BUG FIXES COMPLETED: Successfully resolved critical issues in parametric task creation and editing system - COMPLETED
   • SQL FUNCTION BYPASS: Implemented direct table insertion to bypass database function sync issues (create_parametric_task function still references non-existent input_template_id)
   • TASK CREATION WORKING: Fixed useCreateGeneratedTask to use direct table operations with automatic code generation (000001, 000002, etc.)
