@@ -117,7 +117,7 @@ export function ParameterVisibilityConfigModal({
   };
 
   const headerContent = {
-    icon: <Settings className="h-5 w-5" />,
+    icon: Settings,
     title: 'Configurar Visibilidad por Opción',
     description: `Configure qué opciones de "${childParameter?.label}" se muestran según la opción seleccionada en los parámetros padre.`
   };

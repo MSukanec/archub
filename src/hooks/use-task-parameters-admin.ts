@@ -17,6 +17,7 @@ export interface TaskParameterOption {
   parameter_id: string;
   name: string;
   label: string;
+  description?: string;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +45,7 @@ export interface CreateTaskParameterOptionData {
   parameter_id: string;
   name: string;
   label: string;
+  description?: string;
 }
 
 export interface UpdateTaskParameterOptionData {
@@ -51,6 +53,7 @@ export interface UpdateTaskParameterOptionData {
   parameter_id: string;
   name: string;
   label: string;
+  description?: string;
 }
 
 export interface UpdateTaskParameterData extends CreateTaskParameterData {
@@ -258,7 +261,8 @@ export function useCreateTaskParameterOption() {
         .insert([{
           parameter_id: optionData.parameter_id,
           name: optionData.name,
-          label: optionData.label
+          label: optionData.label,
+          description: optionData.description
         }])
         .select()
         .single();
@@ -302,7 +306,8 @@ export function useUpdateTaskParameterOption() {
         .update({
           parameter_id: updateData.parameter_id,
           name: updateData.name,
-          label: updateData.label
+          label: updateData.label,
+          description: updateData.description
         })
         .eq('id', id)
         .select()

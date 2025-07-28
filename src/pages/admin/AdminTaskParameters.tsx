@@ -224,6 +224,15 @@ export default function AdminTaskParameters() {
         )
       },
       {
+        key: 'description',
+        label: 'Descripción',
+        render: (value: TaskParameterOption) => (
+          <div className="text-sm text-muted-foreground">
+            {value.description || 'Sin descripción'}
+          </div>
+        )
+      },
+      {
         key: 'name',
         label: 'Slug',
         render: (value: TaskParameterOption) => (

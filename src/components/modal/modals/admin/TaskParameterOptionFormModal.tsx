@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,6 +20,7 @@ import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParamet
 const taskParameterOptionSchema = z.object({
   value: z.string().min(1, 'El valor es requerido'),
   label: z.string().min(1, 'La etiqueta es requerida'),
+  description: z.string().optional(),
 });
 
 type TaskParameterOptionFormData = z.infer<typeof taskParameterOptionSchema>;
@@ -54,6 +56,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
     defaultValues: {
       value: '',
       label: '',
+      description: '',
     },
   });
 
@@ -63,11 +66,13 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       form.reset({
         value: option.name || '',
         label: option.label || '',
+        description: option.description || '',
       });
     } else {
       form.reset({
         value: '',
         label: '',
+        description: '',
       });
     }
   }, [option, form]);
@@ -101,7 +106,8 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
           id: option.id,
           parameter_id: parameterId,
           name: data.value,
-          label: data.label
+          label: data.label,
+          description: data.description
         });
         
         toast({
@@ -113,7 +119,8 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
         await createMutation.mutateAsync({
           parameter_id: parameterId,
           name: data.value,
-          label: data.label
+          label: data.label,
+          description: data.description
         });
         
         toast({
@@ -143,6 +150,11 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       </div>
       
       <div>
+        <h4 className="font-medium">Descripción</h4>
+        <p className="text-muted-foreground mt-1">{option?.description || 'Sin descripción'}</p>
+      </div>
+      
+      <div>
         <h4 className="font-medium">Slug</h4>
         <p className="text-muted-foreground mt-1 font-mono text-sm">{option?.name || 'Sin slug'}</p>
       </div>
@@ -164,6 +176,25 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
                   <Input 
                     placeholder="Ej: Ladrillo cerámico hueco" 
                     {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Description Field */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Descripción detallada de la opción (opcional)" 
+                    {...field} 
+                    rows={3}
                   />
                 </FormControl>
                 <FormMessage />
@@ -211,7 +242,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       onRightClick={() => {
         form.handleSubmit(handleSubmit)();
       }}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 

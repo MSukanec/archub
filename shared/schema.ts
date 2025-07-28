@@ -131,6 +131,7 @@ export const task_parameter_options = pgTable("task_parameter_options", {
   parameter_id: uuid("parameter_id").notNull(),
   name: text("name").notNull(), // e.g., "acindar"
   label: text("label").notNull(), // e.g., "Acindar"
+  description: text("description"), // e.g., "Descripción detallada de la opción"
   created_at: timestamp("created_at").defaultNow(),
 });
 
