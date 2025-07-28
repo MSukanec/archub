@@ -61,17 +61,18 @@ export function ConstructionTaskFormModal({
   const [rubroFilter, setRubroFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   
-  const { userData, currentMember } = useCurrentUser();
+  const { data: userData } = useCurrentUser();
+  const currentMember = userData?.current_member;
 
 
 
-  // Hook para cargar TODAS las tareas SIN FILTRAR
+  // Hook para cargar TODAS las tareas de la librería parametrica (sin filtrar por proyecto)
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['all-tasks-no-filter'],
+    queryKey: ['task-parametric-library'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 Cargando TODAS las tareas SIN FILTRAR');
+      console.log('🔍 Cargando librería completa de tareas parametricas');
       
       const { data: allTasks, error } = await supabase
         .from('task_parametric_view')
@@ -79,11 +80,11 @@ export function ConstructionTaskFormModal({
         .order('name_rendered', { ascending: true });
       
       if (error) {
-        console.error('❌ Error cargando tareas:', error);
+        console.error('❌ Error cargando librería de tareas:', error);
         throw error;
       }
       
-      console.log('✅ TODAS las tareas cargadas SIN FILTRO:', allTasks?.length || 0);
+      console.log('✅ Librería de tareas cargada:', allTasks?.length || 0);
       console.log('📋 Primeras 3 tareas:', allTasks?.slice(0, 3));
       
       return allTasks || [];
@@ -179,8 +180,7 @@ export function ConstructionTaskFormModal({
       form.reset({
         selectedTasks: [{
           task_id: task.task_id || '',
-          quantity: task.quantity || 1,
-          phase_instance_id: task.phase_instance_id || ''
+          quantity: task.quantity || 1
         }]
       });
     }
@@ -233,7 +233,7 @@ export function ConstructionTaskFormModal({
           quantity: firstSelected.quantity,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
-          project_phase_id: firstSelected.phase_instance_id || null
+          project_phase_id: firstSelected.phase_instance_id || undefined
         });
 
         toast({
@@ -249,7 +249,7 @@ export function ConstructionTaskFormModal({
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
             created_by: currentMember.id,
-            project_phase_id: selectedTask.phase_instance_id || null
+            project_phase_id: selectedTask.phase_instance_id || undefined
           })
         );
 
@@ -521,7 +521,7 @@ export function ConstructionTaskFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
       onRightClick={handleSubmit(onSubmit)}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 
