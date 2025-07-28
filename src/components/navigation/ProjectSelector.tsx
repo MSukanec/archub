@@ -21,23 +21,34 @@ export function ProjectSelector() {
   const { data: projects = [] } = useProjects(userData?.organization?.id)
   const { selectedProjectId, setSelectedProject } = useProjectContext()
 
-  // Initialize project context with user preference ONLY on first load
+  // Reset project context when organization changes
   useEffect(() => {
-    // Only set initial project if context is null AND we haven't explicitly set it to null
-    if (selectedProjectId === null && userData?.organization?.id) {
-      // Check first localStorage for org-specific project, then fallback to global preference
+    if (userData?.organization?.id) {
+      // Check if we have an org-specific project saved
       const orgSpecificProject = localStorage.getItem(`last-project-${userData.organization.id}`)
-      const projectToSet = orgSpecificProject || userData?.preferences?.last_project_id
       
-      if (projectToSet) {
-        // Check if this is the initial load by seeing if we have a stored preference
-        const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
-        if (!hasExplicitGeneralSelection) {
-          setSelectedProject(projectToSet)
-        }
+      if (orgSpecificProject) {
+        // Set to saved project for this organization
+        setSelectedProject(orgSpecificProject)
+        localStorage.removeItem('explicit-general-mode')
+      } else {
+        // No saved project for this org, force to General mode
+        setSelectedProject(null)
+        localStorage.setItem('explicit-general-mode', 'true')
       }
     }
-  }, [userData?.preferences?.last_project_id, userData?.organization?.id])
+  }, [userData?.organization?.id])
+
+  // Initialize project context with user preference ONLY on first app load
+  useEffect(() => {
+    // Only initialize if we don't have any organization context yet
+    if (selectedProjectId === null && userData?.preferences?.last_project_id && !userData?.organization?.id) {
+      const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
+      if (!hasExplicitGeneralSelection) {
+        setSelectedProject(userData.preferences.last_project_id)
+      }
+    }
+  }, [userData?.preferences?.last_project_id])
   
   // Find current project SOLO basado en selectedProjectId, SIN fallback a last_project_id
   const currentProject = selectedProjectId 
