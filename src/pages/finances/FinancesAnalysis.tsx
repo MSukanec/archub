@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -15,6 +15,7 @@ export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
   const [groupByCategory, setGroupByCategory] = useState(true)
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado')
+  const [activeTab, setActiveTab] = useState("analysis")
   
   const { data: userData } = useCurrentUser()
   const { selectedProject, selectedOrganization } = useNavigationStore()
@@ -245,7 +246,7 @@ export default function FinancesAnalysis() {
 
   return (
     <Layout headerProps={{ title: "Análisis de Obra" }}>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <FeatureIntroduction
           title="Análisis de Obra"
           features={features}
@@ -259,7 +260,7 @@ export default function FinancesAnalysis() {
           onSearchChange={setSearchValue}
           features={features}
           showProjectSelector={true}
-          showGrouping={true}
+          showGrouping={activeTab === "analysis"}
           groupingType={groupByCategory ? 'subcategory' : 'none'}
           onGroupingChange={(type) => setGroupByCategory(type === 'subcategory')}
           groupingOptions={[
@@ -282,79 +283,108 @@ export default function FinancesAnalysis() {
                currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
             </Button>
           ]}
+          tabs={[
+            {
+              value: "analysis",
+              label: "Análisis por Subcategorías",
+              icon: <FileText className="h-4 w-4" />
+            },
+            {
+              value: "charts",
+              label: "Gráficos",
+              icon: <BarChart3 className="h-4 w-4" />
+            }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
 
-        {filteredData.length > 0 ? (
-          groupByCategory && groupedData ? (
-            <Table
-              columns={groupedColumns}
-              data={filteredData}
-              isLoading={isLoading}
-              groupBy="category"
-              mode="construction"
-              renderGroupHeader={(groupKey: string, groupRows: any[]) => {
-                // Check if all items in group have same currency
-                const currencies = [...new Set(groupRows.map(item => item.currency_symbol))];
-                const hasMixedCurrencies = currencies.length > 1;
-                
-                if (currencyView === 'discriminado' && hasMixedCurrencies) {
-                  // Don't show totals for mixed currencies in discriminado mode
+        {/* Tab Content */}
+        {activeTab === "analysis" ? (
+          // Tab Análisis por Subcategorías - Contenido actual
+          filteredData.length > 0 ? (
+            groupByCategory && groupedData ? (
+              <Table
+                columns={groupedColumns}
+                data={filteredData}
+                isLoading={isLoading}
+                groupBy="category"
+                mode="construction"
+                renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+                  // Check if all items in group have same currency
+                  const currencies = [...new Set(groupRows.map(item => item.currency_symbol))];
+                  const hasMixedCurrencies = currencies.length > 1;
+                  
+                  if (currencyView === 'discriminado' && hasMixedCurrencies) {
+                    // Don't show totals for mixed currencies in discriminado mode
+                    return (
+                      <>
+                        <div className="col-span-1 truncate">{groupKey}</div>
+                        <div className="col-span-1 text-muted-foreground">-</div>
+                        <div className="col-span-1 text-muted-foreground">-</div>
+                      </>
+                    );
+                  }
+                  
+                  // Calculate totals (safe for same currency or converted currencies)
+                  const totalAmount = groupRows.reduce((sum, item) => sum + item.amount, 0);
+                  const totalPercentage = groupRows.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2);
+                  const currencySymbol = groupRows[0]?.currency_symbol || 'ARS';
+                  
                   return (
                     <>
                       <div className="col-span-1 truncate">{groupKey}</div>
-                      <div className="col-span-1 text-muted-foreground">-</div>
-                      <div className="col-span-1 text-muted-foreground">-</div>
+                      <div className="col-span-1">{formatAmount(totalAmount, currencySymbol)}</div>
+                      <div className="col-span-1">{totalPercentage}%</div>
                     </>
                   );
+                }}
+                emptyState={
+                  <EmptyState
+                    icon={<BarChart3 className="h-8 w-8" />}
+                    title="No hay datos que coincidan"
+                    description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+                  />
                 }
-                
-                // Calculate totals (safe for same currency or converted currencies)
-                const totalAmount = groupRows.reduce((sum, item) => sum + item.amount, 0);
-                const totalPercentage = groupRows.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2);
-                const currencySymbol = groupRows[0]?.currency_symbol || 'ARS';
-                
-                return (
-                  <>
-                    <div className="col-span-1 truncate">{groupKey}</div>
-                    <div className="col-span-1">{formatAmount(totalAmount, currencySymbol)}</div>
-                    <div className="col-span-1">{totalPercentage}%</div>
-                  </>
-                );
-              }}
-              emptyState={
-                <EmptyState
-                  icon={<BarChart3 className="h-8 w-8" />}
-                  title="No hay datos que coincidan"
-                  description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
-                />
-              }
+              />
+            ) : (
+              <Table
+                columns={columns}
+                data={filteredData}
+                isLoading={isLoading}
+                emptyState={
+                  <EmptyState
+                    icon={<BarChart3 className="h-8 w-8" />}
+                    title="No hay datos que coincidan"
+                    description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+                  />
+                }
+              />
+            )
+          ) : expenseMovements.length === 0 ? (
+            <EmptyState
+              icon={<TrendingDown className="h-8 w-8" />}
+              title="No hay egresos registrados"
+              description="Comienza registrando movimientos de egreso en la sección de Movimientos para ver el análisis de gastos por categoría."
             />
           ) : (
-            <Table
-              columns={columns}
-              data={filteredData}
-              isLoading={isLoading}
-              emptyState={
-                <EmptyState
-                  icon={<BarChart3 className="h-8 w-8" />}
-                  title="No hay datos que coincidan"
-                  description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
-                />
-              }
+            <EmptyState
+              icon={<BarChart3 className="h-8 w-8" />}
+              title="No hay datos que coincidan"
+              description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
             />
           )
-        ) : expenseMovements.length === 0 ? (
-          <EmptyState
-            icon={<TrendingDown className="h-8 w-8" />}
-            title="No hay egresos registrados"
-            description="Comienza registrando movimientos de egreso en la sección de Movimientos para ver el análisis de gastos por categoría."
-          />
         ) : (
-          <EmptyState
-            icon={<BarChart3 className="h-8 w-8" />}
-            title="No hay datos que coincidan"
-            description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
-          />
+          // Tab Gráficos - Contenido futuro
+          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-12 text-center">
+            <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-lg font-medium text-muted-foreground mb-2">
+              Gráficos en Desarrollo
+            </h3>
+            <p className="text-sm text-muted-foreground/75">
+              Próximamente: visualizaciones gráficas del análisis de gastos por categoría.
+            </p>
+          </div>
         )}
       </div>
     </Layout>
