@@ -344,7 +344,7 @@ export function ActionBarDesktop({
                     groupingType === 'tasks' && "bg-[var(--button-ghost-hover-bg)]"
                   )}
                 >
-                  Agrupar por Tarea
+                  Agrupar por Rubros y Tareas
                 </button>
               </div>
             </PopoverContent>

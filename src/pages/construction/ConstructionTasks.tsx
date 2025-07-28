@@ -317,19 +317,13 @@ export default function ConstructionTasks() {
     return filteredTasks;
   }, [filteredTasks]);
 
-  // Definir columnas específicas para agrupación por tareas
+  // Definir columnas específicas para agrupación por rubros y tareas (sin columna RUBRO)
   const taskGroupingColumns = [
     {
       key: 'phase',
       label: 'Fase',
       render: (task: any) => task.phase_name || 'Sin fase',
       width: 'auto' // Máximo espacio posible
-    },
-    {
-      key: 'rubro_name',
-      label: 'Rubro',
-      render: (task: any) => task.task?.rubro_name || 'Sin rubro',
-      width: '10%'
     },
     {
       key: 'unit',
@@ -493,18 +487,18 @@ export default function ConstructionTasks() {
               groupBy={'groupKey'}
               renderGroupHeader={(groupKey: string, groupRows: any[]) => {
                 if (groupingType === 'tasks') {
-                  // Para agrupación por tareas, calcular suma de cantidades
+                  // Para agrupación por rubros y tareas, calcular suma de cantidades
                   const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
                   const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
+                  const rubroName = groupRows[0]?.task?.rubro_name || '';
                   
                   return (
                     <>
                       <div className="col-span-1 truncate">
-                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
+                        {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
                       </div>
-                      <div className="col-span-1"></div> {/* Rubro (vacío en header) */}
-                      <div className="col-span-1 text-center">{unitSymbol}</div> {/* Unidad */}
-                      <div className="col-span-1 text-center">{totalQuantity}</div> {/* Cantidad total */}
+                      <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
+                      <div className="col-span-1">{totalQuantity}</div> {/* Cantidad total */}
                     </>
                   );
                 } else {
