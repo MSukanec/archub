@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameter, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ParameterNodeEditor } from '@/components/ui-custom/ParameterNodeEditor';
+import { useTopLevelCategories, useUnits } from '@/hooks/use-task-categories';
 // Removed NewTaskParameterOptionModal - now using ModalFactory with 'task-parameter-option' type
 
 
@@ -195,6 +196,13 @@ export default function AdminTaskParameters() {
   function ParameterValuesTable({ parameterId }: { parameterId: string }) {
     const parameter = filteredAndSortedParameters.find(p => p.id === parameterId);
     const parameterValues = parameter?.options || [];
+    
+    // Fetch categories and units for display
+    const { data: categories = [] } = useTopLevelCategories();
+    const { data: units = [] } = useUnits();
+    
+    // Check if this is the "Tipo de Tarea" parameter
+    const isTipoTareaParameter = parameterId === '42d5048d-e839-496d-ad6c-9d185002eee8';
 
     if (!parameter) {
       return (
@@ -232,6 +240,44 @@ export default function AdminTaskParameters() {
           </div>
         )
       },
+      ...(isTipoTareaParameter ? [
+        {
+          key: 'unit_id',
+          label: 'Unidad',
+          render: (value: TaskParameterOption) => {
+            const unit = units.find(u => u.id === value.unit_id);
+            return (
+              <div className="text-sm">
+                {unit ? (
+                  <Badge variant="outline" className="text-xs">
+                    {unit.abbreviation || unit.name}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground">Sin unidad</span>
+                )}
+              </div>
+            );
+          }
+        },
+        {
+          key: 'category_id',
+          label: 'Categoría',
+          render: (value: TaskParameterOption) => {
+            const category = categories.find(c => c.id === value.category_id);
+            return (
+              <div className="text-sm">
+                {category ? (
+                  <Badge variant="secondary" className="text-xs">
+                    {category.code} - {category.name}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground">Sin categoría</span>
+                )}
+              </div>
+            );
+          }
+        }
+      ] : []),
       {
         key: 'name',
         label: 'Slug',

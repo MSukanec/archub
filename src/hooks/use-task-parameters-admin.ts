@@ -18,6 +18,8 @@ export interface TaskParameterOption {
   name: string;
   label: string;
   description?: string;
+  unit_id?: string;
+  category_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -46,6 +48,8 @@ export interface CreateTaskParameterOptionData {
   name: string;
   label: string;
   description?: string;
+  unit_id?: string;
+  category_id?: string;
 }
 
 export interface UpdateTaskParameterOptionData {
@@ -54,19 +58,11 @@ export interface UpdateTaskParameterOptionData {
   name: string;
   label: string;
   description?: string;
+  unit_id?: string;
+  category_id?: string;
 }
 
 export interface UpdateTaskParameterData extends CreateTaskParameterData {
-  id: string;
-}
-
-export interface CreateTaskParameterOptionData {
-  parameter_id: string;
-  name: string;
-  label: string;
-}
-
-export interface UpdateTaskParameterOptionData extends CreateTaskParameterOptionData {
   id: string;
 }
 
