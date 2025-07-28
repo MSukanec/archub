@@ -4,6 +4,8 @@ import { es } from 'date-fns/locale'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
@@ -149,38 +151,45 @@ export default function AdminGeneratedTasks() {
     }
   ]
 
-  const customFilters = [
-    {
-      key: 'type' as const,
-      label: 'Tipo',
-      value: typeFilter,
-      onChange: setTypeFilter,
-      options: [
-        { value: 'all', label: 'Todas las tareas' },
-        { value: 'system', label: 'Tareas del sistema' },
-        { value: 'user', label: 'Tareas de usuario' }
-      ]
-    }
-  ]
+  // Custom filters component
+  const customFilters = (
+    <div className="space-y-4">
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por tipo
+        </Label>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las tareas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las tareas</SelectItem>
+            <SelectItem value="system">Tareas del sistema</SelectItem>
+            <SelectItem value="user">Tareas de usuario</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
 
   const features = [
     {
-      icon: Zap,
+      icon: <Zap className="w-5 h-5" />,
       title: "Gestión Avanzada de Tareas",
       description: "Administra tareas paramétricas generadas automáticamente con códigos únicos, categorización por rubros y seguimiento completo de configuración."
     },
     {
-      icon: Target,
+      icon: <Target className="w-5 h-5" />,
       title: "Sistema de Plantillas",
       description: "Utiliza plantillas predefinidas para generar tareas consistentes con parámetros configurables y opciones de personalización avanzada."
     },
     {
-      icon: CheckSquare,
+      icon: <CheckSquare className="w-5 h-5" />,
       title: "Control de Visibilidad",
       description: "Controla qué tareas son visibles según el contexto del proyecto y las necesidades específicas de cada fase de construcción."
     },
     {
-      icon: Clock,
+      icon: <Clock className="w-5 h-5" />,
       title: "Seguimiento Temporal",
       description: "Monitorea la creación y modificación de tareas con registros temporales completos para auditoría y control de cambios."
     }
@@ -191,7 +200,7 @@ export default function AdminGeneratedTasks() {
       <div className="space-y-6">
         <ActionBarDesktop
           title="Gestión de Tareas Generadas"
-          icon={Target}
+          icon={<Target className="w-6 h-6" />}
           features={features}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
