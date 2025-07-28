@@ -24,9 +24,9 @@ export function Tabs({ tabs, value, onValueChange, className }: TabsProps) {
         className
       )}
     >
-      {tabs.map((tab) => (
+      {tabs.map((tab, index) => (
         <button
-          key={tab.value}
+          key={`${tab.value}-${index}`}
           onClick={() => onValueChange(tab.value)}
           className={cn(
             "inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150",

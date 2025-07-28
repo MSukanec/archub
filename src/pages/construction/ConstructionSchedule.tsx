@@ -212,16 +212,14 @@ export default function ConstructionSchedule() {
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         tabs={[
-          { id: 'gantt', label: 'Vista Gantt', icon: <Calendar className="h-4 w-4" /> },
-          { id: 'list', label: 'Listado de Tareas', icon: <TableIcon className="h-4 w-4" /> },
-          { id: 'analytics', label: 'Análisis Visual', icon: <BarChart3 className="h-4 w-4" /> }
+          { value: 'gantt', label: 'Vista Gantt', icon: <Calendar className="h-4 w-4" /> },
+          { value: 'list', label: 'Listado de Tareas', icon: <TableIcon className="h-4 w-4" /> },
+          { value: 'analytics', label: 'Análisis Visual', icon: <BarChart3 className="h-4 w-4" /> }
         ]}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         primaryActionLabel="Nueva Tarea"
         onPrimaryActionClick={() => openModal('construction-task')}
-        secondaryActionLabel="Crear Fase"
-        onSecondaryActionClick={() => openModal('construction-phase')}
       />
 
       {/* Tab Content */}
