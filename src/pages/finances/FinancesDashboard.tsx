@@ -1,7 +1,10 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, CreditCard, User, ArrowUpDown, Plus, Building, Wallet, Clock } from 'lucide-react'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
@@ -17,7 +20,6 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
 // Function to get organization initials
@@ -37,6 +39,8 @@ export default function FinancesDashboard() {
   
   // Time period filter state
   const [timePeriod, setTimePeriod] = useState('desde-siempre')
+  // Currency view state for ActionBar button
+  const [currencyView, setCurrencyView] = useState<'pesificado' | 'dolarizado'>('pesificado')
 
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, projectId, timePeriod)
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId, timePeriod)
@@ -60,6 +64,30 @@ export default function FinancesDashboard() {
     showSearch: false,
     showFilters: false,
   }
+
+  // Features for ActionBar
+  const features = [
+    {
+      icon: <TrendingUp className="w-6 h-6" />,
+      title: "Resumen Financiero Integral",
+      description: "Visualiza un panorama completo de ingresos, egresos y balance neto de tu proyecto en tiempo real."
+    },
+    {
+      icon: <Wallet className="w-6 h-6" />,
+      title: "Análisis por Billeteras",
+      description: "Monitorea el estado de cada billetera con balances actualizados y distribución de fondos."
+    },
+    {
+      icon: <DollarSign className="w-6 h-6" />,
+      title: "Multi-moneda y Conversión",
+      description: "Maneja múltiples monedas con conversión automática y visualización pesificada o dolarizada."
+    },
+    {
+      icon: <Calendar className="w-6 h-6" />,
+      title: "Tendencias Temporales",
+      description: "Analiza la evolución de tus finanzas con gráficos de flujo mensual y mini tendencias."
+    }
+  ]
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -92,8 +120,46 @@ export default function FinancesDashboard() {
   const currentProject = userData?.organizations?.[0]?.projects?.[0];
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
+    <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
+      <div className="space-y-4">
+        <FeatureIntroduction
+          title="Resumen Financiero"
+          features={features}
+          className="md:hidden"
+        />
+
+        <ActionBarDesktop
+          title="Resumen Financiero"
+          icon={<DollarSign className="w-5 h-5" />}
+          features={features}
+          showProjectSelector={true}
+          customGhostButtons={[
+            <Button
+              key="currency-view"
+              variant="ghost"
+              onClick={() => {
+                setCurrencyView(currencyView === 'pesificado' ? 'dolarizado' : 'pesificado')
+              }}
+              className="flex items-center gap-2"
+            >
+              <DollarSign className="w-4 h-4" />
+              {currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
+            </Button>,
+            <Select value={timePeriod} onValueChange={setTimePeriod}>
+              <SelectTrigger className="w-32">
+                <Clock className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desde-siempre">Todo</SelectItem>
+                <SelectItem value="ultimo-mes">Último mes</SelectItem>
+                <SelectItem value="ultimo-trimestre">Último trimestre</SelectItem>
+                <SelectItem value="ultimo-año">Último año</SelectItem>
+              </SelectContent>
+            </Select>
+          ]}
+        />
+      
         {/* 1 FILA: Card de TÍTULO (75%) + Card de MOVIMIENTOS (25%) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Welcome Card - Financial Summary (75% width) */}
