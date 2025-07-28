@@ -201,9 +201,9 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     }
   }
 
-  // Step 2: Add material to task
-  const handleAddMaterial = async () => {
-    if (!selectedMaterialId || !materialAmount || !savedTaskId || !userData?.organization?.id) {
+  // Step 2: Add material to local state only
+  const handleAddMaterial = () => {
+    if (!selectedMaterialId || !materialAmount) {
       toast({
         title: "Error",
         description: "Debes seleccionar un material y especificar la cantidad.",
@@ -212,59 +212,74 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       return
     }
 
+    // Add to local state only (no database save yet)
+    const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
+    const newMaterial = {
+      material_id: selectedMaterialId,
+      amount: parseFloat(materialAmount),
+      material_name: selectedMaterial?.name,
+      unit_name: selectedMaterial?.unit?.name
+    }
+    
+    setTaskMaterials(prev => [...prev, newMaterial])
+
+    // Clear form
+    setSelectedMaterialId('')
+    setMaterialAmount('')
+    
+    toast({
+      title: "Material agregado",
+      description: "El material se agregó a la lista. Se guardará al finalizar.",
+    })
+  }
+
+  // Final step: Complete and close
+  const handleComplete = async () => {
+    if (!savedTaskId || !userData?.organization?.id) {
+      toast({
+        title: "Error",
+        description: "No se puede completar la tarea sin ID válido.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       setIsLoading(true)
       
-      console.log('🔧 Creating task material with data:', {
-        task_id: savedTaskId,
-        material_id: selectedMaterialId,
-        amount: parseFloat(materialAmount),
-        organization_id: userData.organization.id
-      });
-      
-      await createTaskMaterialMutation.mutateAsync({
-        task_id: savedTaskId,
-        material_id: selectedMaterialId,
-        amount: parseFloat(materialAmount),
-        organization_id: userData.organization.id
-      })
-
-      // Add to local state for immediate UI update
-      const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
-      setTaskMaterials(prev => [...prev, {
-        material_id: selectedMaterialId,
-        amount: parseFloat(materialAmount),
-        material_name: selectedMaterial?.name,
-        unit_name: selectedMaterial?.unit?.name
-      }])
-
-      // Clear form
-      setSelectedMaterialId('')
-      setMaterialAmount('')
+      // Save all materials to database
+      if (taskMaterials.length > 0) {
+        console.log('💾 Saving materials to database:', taskMaterials);
+        
+        for (const material of taskMaterials) {
+          // Skip materials that already have an ID (already saved)
+          if (!material.id) {
+            await createTaskMaterialMutation.mutateAsync({
+              task_id: savedTaskId,
+              material_id: material.material_id,
+              amount: material.amount,
+              organization_id: userData.organization.id
+            })
+          }
+        }
+      }
       
       toast({
-        title: "Material agregado",
-        description: "El material se agregó correctamente a la tarea.",
+        title: "Tarea completada",
+        description: `Tarea guardada exitosamente con ${taskMaterials.length} materiales.`,
       })
+      
+      onClose()
     } catch (error: any) {
-      console.error('Error adding material:', error)
+      console.error('Error completing task:', error)
       toast({
         title: "Error",
-        description: error.message || "Error al agregar el material.",
+        description: error.message || "Error al finalizar la tarea.",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
-  }
-
-  // Final step: Complete and close
-  const handleComplete = () => {
-    toast({
-      title: "Tarea completada",
-      description: `Tarea guardada con ${taskMaterials.length} materiales.`,
-    })
-    onClose()
   }
 
   // Get material options for ComboBox
