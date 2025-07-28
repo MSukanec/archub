@@ -216,17 +216,21 @@ export default function FinancesAnalysis() {
               data={filteredData}
               isLoading={isLoading}
               groupBy="category"
+              mode="construction"
               renderGroupHeader={(groupKey: string, groupRows: any[]) => {
-                const groupInfo = groupedData.find(g => g.category === groupKey)
+                const totalAmount = groupRows.reduce((sum, item) => sum + item.amount, 0);
+                const totalPercentage = groupRows.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2);
+                
                 return (
-                  <div className="flex justify-between items-center py-2 px-4 bg-muted/50 font-medium text-sm">
-                    <span>{groupKey}</span>
-                    <div className="flex gap-4 text-xs text-muted-foreground">
-                      <span>Total: {formatAmount(groupInfo?.totalAmount || 0)}</span>
-                      <span>{groupInfo?.totalPercentage}%</span>
+                  <>
+                    <div className="col-span-1 truncate">
+                      {groupKey}
                     </div>
-                  </div>
-                )
+                    <div className="col-span-1"></div> {/* Moneda - vacío en header */}
+                    <div className="col-span-1">Total: {formatAmount(totalAmount)}</div>
+                    <div className="col-span-1">{totalPercentage}%</div>
+                  </>
+                );
               }}
               emptyState={
                 <EmptyState
