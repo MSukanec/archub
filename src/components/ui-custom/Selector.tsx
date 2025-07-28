@@ -74,7 +74,7 @@ export function Selector({
           // Ghost button styling exactly from buttonVariants (without hover translate)
           "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)]",
           "hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]",
-          "rounded-lg px-3 py-2 shadow-button-normal hover:shadow-button-hover",
+          "rounded-lg px-2 py-2 shadow-button-normal hover:shadow-button-hover",
           "text-sm font-medium",
           "w-full min-w-0", // Full width and allow text truncation
           className
@@ -113,7 +113,7 @@ export function Selector({
                   type="button"
                   onClick={() => handleSelect(option.value)}
                   className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                    "w-full text-left px-2 py-2 text-sm font-medium transition-colors",
                     "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
                     value === option.value && "bg-[var(--button-ghost-hover-bg)]",
                     "whitespace-nowrap" // Prevenir wrap de texto
@@ -124,7 +124,7 @@ export function Selector({
               ))}
               
               {options.length === 0 && (
-                <div className="px-3 py-2 text-sm text-[var(--button-ghost-text)]">
+                <div className="px-2 py-2 text-sm text-[var(--button-ghost-text)]">
                   No hay opciones disponibles
                 </div>
               )}
