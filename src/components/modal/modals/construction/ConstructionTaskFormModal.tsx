@@ -52,10 +52,6 @@ interface ConstructionTaskFormModalProps {
 }
 
 export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTaskFormModalProps) {
-  // Si modalData es null, no renderizar el componente
-  if (!modalData) {
-    return null;
-  }
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState('');

@@ -44,6 +44,11 @@ import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibil
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
 
+  // Debug: log modal state
+  if (open) {
+    console.log('ModalFactory state:', { open, type, data });
+  }
+
   if (!open) return null;
 
   switch (type) {
@@ -78,6 +83,12 @@ export function ModalFactory() {
     case 'budget':
       return <BudgetFormModal modalData={data} onClose={closeModal} />;
     case 'construction-task':
+      // Verificar que data existe antes de renderizar el modal
+      if (!data) {
+        console.warn('construction-task modal opened without data, closing...');
+        closeModal();
+        return null;
+      }
       return <ConstructionTaskFormModal modalData={data} onClose={closeModal} />;
     case 'construction-task-schedule':
       return <ConstructionTaskScheduleModal modalData={data} onClose={closeModal} />;
