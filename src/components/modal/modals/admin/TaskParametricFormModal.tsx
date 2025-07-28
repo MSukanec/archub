@@ -99,7 +99,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const createTaskMaterialMutation = useCreateTaskMaterial()
   
   // Data hooks
-  const { userData } = useCurrentUser()
+  const { data: userData } = useCurrentUser()
   const { data: materials = [] } = useMaterials()
   const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
 
@@ -243,6 +243,13 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       setIsLoading(true)
       
       // Save all materials to database
+      console.log('🔍 STARTING MATERIAL SAVE PROCESS');
+      console.log('🔍 taskMaterials.length:', taskMaterials.length);
+      console.log('🔍 savedTaskId:', savedTaskId);
+      console.log('🔍 userData:', userData);
+      console.log('🔍 userData.organization:', userData?.organization);
+      console.log('🔍 userData.organization.id:', userData?.organization?.id);
+      
       if (taskMaterials.length > 0) {
         console.log('💾 Saving materials to database:', taskMaterials);
         console.log('💾 Using task_id:', savedTaskId);
@@ -258,16 +265,32 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
               organization_id: userData.organization.id
             };
             console.log('💾 Attempting to save material:', materialData);
+            console.log('💾 Material data types:', {
+              task_id: typeof materialData.task_id,
+              material_id: typeof materialData.material_id,
+              amount: typeof materialData.amount,
+              organization_id: typeof materialData.organization_id
+            });
             
             try {
-              await createTaskMaterialMutation.mutateAsync(materialData)
-              console.log('✅ Material saved successfully');
-            } catch (materialError) {
+              const result = await createTaskMaterialMutation.mutateAsync(materialData);
+              console.log('✅ Material saved successfully:', result);
+            } catch (materialError: any) {
               console.error('❌ Error saving individual material:', materialError);
+              console.error('❌ Error details:', {
+                message: materialError.message,
+                code: materialError.code,
+                details: materialError.details,
+                hint: materialError.hint
+              });
               throw materialError;
             }
+          } else {
+            console.log('⏭️ Skipping material (already has ID):', material.id);
           }
         }
+      } else {
+        console.log('⚠️ No materials to save');
       }
       
       toast({
@@ -425,8 +448,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     <FormModalStepHeader 
       title="Editar Tarea para Métrica"
       icon={Zap}
-      currentStep={currentStep}
-      totalSteps={2}
       stepDescription={currentStep === 1 ? "Configurar parámetros de la tarea" : "Agregar materiales a la tarea"}
     />
   )
