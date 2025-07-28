@@ -28,6 +28,7 @@ import ProjectBasicData from "@/pages/project/ProjectBasicData";
 import ProjectClients from "@/pages/project/ProjectClients";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import FinancesMovements from "@/pages/finances/FinancesMovements";
+import FinancesAnalysis from "@/pages/finances/FinancesAnalysis";
 import FinancesInstallments from "@/pages/finances/FinancesInstallments";
 
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
@@ -239,6 +240,11 @@ function Router() {
         <Route path="/finances/movements">
           <ProtectedRoute>
             <FinancesMovements />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/finances/analysis">
+          <ProtectedRoute>
+            <FinancesAnalysis />
           </ProtectedRoute>
         </Route>
         <Route path="/finances/installments">

@@ -118,6 +118,17 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. FINANCES ANALYSIS PAGE IMPLEMENTATION COMPLETED: Successfully created new "Análisis de Obra" page in finances section with expense breakdown by category and subcategory - COMPLETED
+  • NEW PAGE CREATED: FinancesAnalysis.tsx with complete expense analysis functionality
+  • SIDEBAR INTEGRATION: Added "Análisis de Obra" option above "Aportes de Terceros" in finances menu with BarChart3 icon
+  • ROUTE CONFIGURATION: Added /finances/analysis route in App.tsx with proper ProtectedRoute wrapper
+  • TABLE IMPLEMENTATION: Custom Table component displaying 5 columns - Categoría, Subcategoría, Moneda, Monto, % de Incidencia
+  • DATA PROCESSING: Filters expense movements, groups by category/subcategory, calculates totals and percentages
+  • ACTIONBAR INTEGRATION: Complete ActionBarDesktop with search functionality and 4 feature descriptions
+  • EXPENSE FILTERING: Automatically filters movements where type === 'Egreso' for accurate analysis
+  • PERCENTAGE CALCULATION: Dynamic percentage calculation showing each concept's impact on total expenses
+  • SORT FUNCTIONALITY: Expenses sorted by amount (highest impact first) for better insight visibility
+  • MOBILE CARD INTEGRATION: Created ConstructionTaskCard.tsx following MovementCard pattern for mobile view
 - July 28, 2025. CONSTRUCTION TASK SUBFORM TABS SYSTEM COMPLETED: Successfully implemented tab system within subform for creating parametric and custom tasks with proper ActionBar styling - COMPLETED
   • TAB SYSTEM IMPLEMENTED: Added two tabs in subform - "Nueva Tarea Paramétrica" (default active) and "Nueva Tarea Personalizada"
   • ACTIONBAR-STYLE TABS: Tabs use identical styling to ActionBar tabs with proper hover states, active states, and visual consistency

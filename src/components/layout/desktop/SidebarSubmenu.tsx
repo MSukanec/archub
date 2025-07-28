@@ -138,6 +138,7 @@ export function SidebarSubmenu() {
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
+      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments', generalModeRestricted: true },
     ],
 
