@@ -58,7 +58,7 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
   return (
     <div className="space-y-4">
       {/* Chart */}
-      <div className="h-80">
+      <div className="h-80 rounded-lg" style={{ backgroundColor: 'var(--accent)' }}>
         <ResponsiveContainer width="100%" height="100%">
           <Treemap
             data={treemapData}
