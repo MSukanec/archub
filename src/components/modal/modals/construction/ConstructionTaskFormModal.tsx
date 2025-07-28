@@ -63,6 +63,30 @@ export function ConstructionTaskFormModal({
   
   const { data: userData } = useCurrentUser();
   const currentMember = userData?.current_member;
+  
+  // Query para obtener la membresía actual del usuario en la organización
+  const { data: organizationMember } = useQuery({
+    queryKey: ['organization-member', modalData.organizationId, userData?.user?.id],
+    queryFn: async () => {
+      if (!supabase || !userData?.user?.id || !modalData.organizationId) return null;
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id, user_id, organization_id')
+        .eq('organization_id', modalData.organizationId)
+        .eq('user_id', userData.user.id)
+        .single();
+        
+      if (error) {
+        console.error('❌ Error obteniendo membresía de organización:', error);
+        return null;
+      }
+      
+      console.log('✅ Membresía encontrada:', data);
+      return data;
+    },
+    enabled: !!userData?.user?.id && !!modalData.organizationId
+  });
 
 
 
@@ -248,12 +272,19 @@ export function ConstructionTaskFormModal({
           numberOfTasks: selectedTasks.length,
           organizationId: modalData.organizationId,
           projectId: modalData.projectId,
-          createdBy: currentMember?.id || userData.user.id,
+          createdBy: currentMember?.id || organizationMember?.id,
           taskDetails: selectedTasks.map(st => ({
             task_id: st.task_id,
             quantity: st.quantity,
             phase_instance_id: st.phase_instance_id
           }))
+        });
+
+        const createdById = currentMember?.id || organizationMember?.id;
+        console.log('🔧 ID A USAR PARA created_by:', {
+          currentMember: currentMember?.id,
+          organizationMember: organizationMember?.id,
+          finalId: createdById
         });
 
         const promises = selectedTasks.map((selectedTask, index) => {
@@ -262,7 +293,7 @@ export function ConstructionTaskFormModal({
             quantity: selectedTask.quantity,
             organization_id: modalData.organizationId,
             project_id: modalData.projectId,
-            created_by: currentMember?.id || userData.user.id,
+            created_by: createdById,
             project_phase_id: selectedTask.phase_instance_id || undefined
           });
           
@@ -271,7 +302,7 @@ export function ConstructionTaskFormModal({
             project_id: modalData.projectId,
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
-            created_by: currentMember?.id || userData.user.id,
+            created_by: createdById,
             project_phase_id: selectedTask.phase_instance_id || undefined
           }).catch(error => {
             console.error(`❌ Error en tarea ${index + 1}:`, error);
