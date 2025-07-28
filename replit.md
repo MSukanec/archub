@@ -118,6 +118,19 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. TABLE COLUMN WIDTHS OPTIMIZED: Updated AdminGeneratedTasks table columns to user-specified proportions for better data display - COMPLETED
+  • CÓDIGO COLUMN: Reduced from 15% to 5% for compact code display
+  • RUBRO COLUMN: Reduced from 20% to 10% for efficient category badges
+  • TAREA COLUMN: Changed to flex-1 (remainder) to display full task names without truncation
+  • UNIDAD COLUMN: Reduced from 15% to 5% for compact unit badges
+  • FECHA COLUMN: Maintained at 10% but shortened label from "Fecha de Creación" to "Fecha"
+  • ACCIONES COLUMN: Maintained at 5% for edit/delete button actions
+- July 28, 2025. AUTOMATIC TASK NAME RECALCULATION SYSTEM IMPLEMENTED: Successfully created system to recalculate all task names when expression_templates are updated - COMPLETED
+  • PARAMETER UPDATE HOOK ENHANCED: Modified useUpdateTaskParameter to automatically recalculate name_rendered for all tasks when expression_template changes
+  • BATCH RECALCULATION: System queries all task_parametric records and updates each one to trigger database name regeneration
+  • COMPREHENSIVE CACHE INVALIDATION: Added invalidation for generated-tasks and task-parametric-view queries after parameter updates
+  • ENHANCED USER FEEDBACK: Updated toast message to indicate both parameter and task updates completion
+  • AUTOMATIC SYNCHRONIZATION: All existing tasks now automatically reflect changes when parameter templates are modified
 - July 28, 2025. UNIT AND CATEGORY PERSISTENCE BUG COMPLETELY FIXED: Successfully resolved issue where modal wasn't saving unit_id and category_id values to Supabase - COMPLETED
   • MUTACION CREACION CORREGIDA: Fixed useCreateTaskParameterOption to include unit_id and category_id in insert payload
   • MUTACION ACTUALIZACION CORREGIDA: Fixed useUpdateTaskParameterOption to include unit_id and category_id in update payload

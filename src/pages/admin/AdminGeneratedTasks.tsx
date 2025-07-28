@@ -65,7 +65,7 @@ export default function AdminGeneratedTasks() {
     { 
       key: 'code', 
       label: 'Código', 
-      className: 'w-[15%]',
+      className: 'w-[5%]',
       render: (task: GeneratedTask) => (
         <div className="font-mono text-sm font-medium">
           {task.code}
@@ -75,7 +75,7 @@ export default function AdminGeneratedTasks() {
     { 
       key: 'category_name', 
       label: 'Rubro', 
-      className: 'w-[20%]',
+      className: 'w-[10%]',
       render: (task: GeneratedTask) => (
         <div>
           {task.category_name ? (
@@ -91,7 +91,7 @@ export default function AdminGeneratedTasks() {
     { 
       key: 'name_rendered', 
       label: 'Tarea', 
-      className: 'w-[35%]',
+      className: 'flex-1',
       render: (task: GeneratedTask) => (
         <div className="font-medium">
           {task.name_rendered || 'Sin nombre'}
@@ -101,7 +101,7 @@ export default function AdminGeneratedTasks() {
     { 
       key: 'unit_name', 
       label: 'Unidad', 
-      className: 'w-[15%]',
+      className: 'w-[5%]',
       render: (task: GeneratedTask) => (
         <div>
           {task.unit_name ? (
@@ -116,7 +116,7 @@ export default function AdminGeneratedTasks() {
     },
     { 
       key: 'created_at', 
-      label: 'Fecha de Creación', 
+      label: 'Fecha', 
       className: 'w-[10%]',
       render: (task: GeneratedTask) => (
         <div className="text-sm text-muted-foreground">
