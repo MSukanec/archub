@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { BarChart3, TrendingDown, Calculator, PieChart } from 'lucide-react'
@@ -6,66 +6,63 @@ import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { Badge } from '@/components/ui/badge'
 import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
+  const [groupByCategory, setGroupByCategory] = useState(true)
   
   const { data: userData } = useCurrentUser()
-  const { setSidebarContext } = useNavigationStore()
+  const { selectedProject, selectedOrganization } = useNavigationStore()
+  
+  const organizationId = selectedOrganization?.id || userData?.preferences?.last_organization_id
+  const projectId = selectedProject?.id || userData?.preferences?.last_project_id
 
-  // Set sidebar context on mount
-  useEffect(() => {
-    setSidebarContext('finances')
-  }, [setSidebarContext])
-
-  const projectId = userData?.preferences?.last_project_id
-  const organizationId = userData?.preferences?.last_organization_id
-
+  // Get movements data
   const { data: movements = [], isLoading } = useMovements(
     organizationId || '',
     projectId || ''
   )
 
-  // Filter only expense movements (EGRESOS)
+  // Filter only expense movements (EGRESOS) by UUID
   const expenseMovements = movements.filter(movement => 
-    movement.movement_data?.type?.name === 'Egresos'
+    movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7'
   )
 
   // Group expenses by category and subcategory with calculations
   const analysisData = expenseMovements.reduce((acc: any[], movement) => {
-    const categoryName = movement.movement_data?.category?.name || 'Sin categoría'
-    const subcategoryName = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
-    const currencySymbol = movement.movement_data?.currency?.code || '$'
-    const amount = movement.amount || 0
-
-    const existingIndex = acc.findIndex(item => 
-      item.category === categoryName && 
-      item.subcategory === subcategoryName &&
-      item.currency_symbol === currencySymbol
-    )
-
+    const category = movement.movement_data?.category?.name || 'Sin categoría'
+    const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
+    const currencyCode = movement.movement_data?.currency?.code || 'ARS'
+    
+    // Create unique key for grouping
+    const key = `${category}-${subcategory}-${currencyCode}`
+    
+    // Find existing group or create new one
+    const existingIndex = acc.findIndex(item => item.id === key)
+    
     if (existingIndex >= 0) {
-      acc[existingIndex].amount += amount
+      acc[existingIndex].amount += movement.amount
     } else {
       acc.push({
-        id: `${categoryName}-${subcategoryName}-${currencySymbol}`,
-        category: categoryName,
-        subcategory: subcategoryName,
-        currency_symbol: currencySymbol,
-        amount: amount
+        id: key,
+        category,
+        subcategory,
+        currency_symbol: currencyCode,
+        amount: movement.amount
       })
     }
-
+    
     return acc
   }, [])
 
   // Calculate total expenses for percentage calculation
-  const totalExpenses = analysisData.reduce((sum, item) => sum + item.amount, 0)
+  const totalExpenses = analysisData.reduce((total, item) => total + item.amount, 0)
 
-  // Add percentage calculation to each item
+  // Add percentage to each item
   const analysisWithPercentage = analysisData.map(item => ({
     ...item,
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(2) : '0.00'
@@ -80,16 +77,10 @@ export default function FinancesAnalysis() {
     item.subcategory.toLowerCase().includes(searchValue.toLowerCase())
   )
 
-  // Debug: Log table data for verification
-  if (filteredData.length > 0) {
-    console.log('Table should render with', filteredData.length, 'items')
-    console.log('First item for table:', filteredData[0])
-  }
-
   const formatAmount = (amount: number): string => {
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount)
   }
 
@@ -97,29 +88,29 @@ export default function FinancesAnalysis() {
     {
       key: 'category',
       label: 'Categoría',
-      width: '25%',
+      width: '20%',
       render: (item: any) => (
-        <div className="font-medium text-sm">
+        <Badge variant="outline" className="text-xs">
           {item.category}
-        </div>
+        </Badge>
       )
     },
     {
-      key: 'subcategory', 
+      key: 'subcategory',
       label: 'Subcategoría',
-      width: '25%',
+      width: '20%',
       render: (item: any) => (
-        <div className="text-sm text-muted-foreground">
+        <Badge variant="secondary" className="text-xs">
           {item.subcategory}
-        </div>
+        </Badge>
       )
     },
     {
-      key: 'currency',
+      key: 'currency_symbol',
       label: 'Moneda',
       width: '15%',
       render: (item: any) => (
-        <div className="text-sm">
+        <div className="font-medium text-sm">
           {item.currency_symbol}
         </div>
       )
@@ -130,14 +121,14 @@ export default function FinancesAnalysis() {
       width: '20%',
       render: (item: any) => (
         <div className="font-medium text-sm text-red-600 dark:text-red-400">
-          {item.currency_symbol} {formatAmount(item.amount)}
+          {formatAmount(item.amount)}
         </div>
       )
     },
     {
       key: 'percentage',
       label: '% de Incidencia',
-      width: '15%',
+      width: '25%',
       render: (item: any) => (
         <div className="font-medium text-sm">
           {item.percentage}%
@@ -146,19 +137,43 @@ export default function FinancesAnalysis() {
     }
   ]
 
+  // Group data by category when grouping is enabled
+  const groupedData = useMemo(() => {
+    if (!groupByCategory) return null
+    
+    const groups = filteredData.reduce((acc: { [key: string]: any[] }, item) => {
+      const category = item.category
+      if (!acc[category]) {
+        acc[category] = []
+      }
+      acc[category].push(item)
+      return acc
+    }, {})
+
+    return Object.entries(groups).map(([category, items]) => ({
+      category,
+      items,
+      totalAmount: items.reduce((sum, item) => sum + item.amount, 0),
+      totalPercentage: items.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2)
+    }))
+  }, [filteredData, groupByCategory])
+
+  // Columns for grouped view (without category column)
+  const groupedColumns = columns.filter(col => col.key !== 'category')
+
   const features = [
     {
-      icon: <BarChart3 className="w-6 h-6" />,
-      title: "Análisis por Categoría",
-      description: "Visualiza el desglose de gastos organizados por categorías y subcategorías de movimientos."
+      icon: <Calculator className="w-6 h-6" />,
+      title: "Cálculo Automático de Porcentajes",
+      description: "Calcula automáticamente el porcentaje de incidencia de cada categoría sobre el total de egresos."
     },
     {
       icon: <PieChart className="w-6 h-6" />,
-      title: "Porcentaje de Incidencia",
-      description: "Calcula automáticamente qué porcentaje representa cada concepto del total de egresos."
+      title: "Agrupación por Categoría",
+      description: "Organiza los gastos por categoría y subcategoría para un análisis detallado de la distribución."
     },
     {
-      icon: <Calculator className="w-6 h-6" />,
+      icon: <BarChart3 className="w-6 h-6" />,
       title: "Totales por Moneda",
       description: "Agrupa y suma los montos por tipo de moneda para análisis multi-divisa."
     },
@@ -185,21 +200,58 @@ export default function FinancesAnalysis() {
           onSearchChange={setSearchValue}
           features={features}
           showProjectSelector={true}
+          customFilters={
+            <Button
+              variant={groupByCategory ? "default" : "outline"}
+              onClick={() => setGroupByCategory(!groupByCategory)}
+              className="h-8"
+            >
+              Agrupar por Categoría
+            </Button>
+          }
         />
 
         {filteredData.length > 0 ? (
-          <Table
-            columns={columns}
-            data={filteredData}
-            isLoading={isLoading}
-            emptyState={
-              <EmptyState
-                icon={<BarChart3 className="h-8 w-8" />}
-                title="No hay datos que coincidan"
-                description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
-              />
-            }
-          />
+          groupByCategory && groupedData ? (
+            <Table
+              columns={groupedColumns}
+              data={filteredData}
+              isLoading={isLoading}
+              groupBy="category"
+              renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+                const groupInfo = groupedData.find(g => g.category === groupKey)
+                return (
+                  <div className="flex justify-between items-center py-2 px-4 bg-muted/50 font-medium text-sm">
+                    <span>{groupKey}</span>
+                    <div className="flex gap-4 text-xs text-muted-foreground">
+                      <span>Total: {formatAmount(groupInfo?.totalAmount || 0)}</span>
+                      <span>{groupInfo?.totalPercentage}%</span>
+                    </div>
+                  </div>
+                )
+              }}
+              emptyState={
+                <EmptyState
+                  icon={<BarChart3 className="h-8 w-8" />}
+                  title="No hay datos que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+                />
+              }
+            />
+          ) : (
+            <Table
+              columns={columns}
+              data={filteredData}
+              isLoading={isLoading}
+              emptyState={
+                <EmptyState
+                  icon={<BarChart3 className="h-8 w-8" />}
+                  title="No hay datos que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+                />
+              }
+            />
+          )
         ) : expenseMovements.length === 0 ? (
           <EmptyState
             icon={<TrendingDown className="h-8 w-8" />}
