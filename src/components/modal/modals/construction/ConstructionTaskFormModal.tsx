@@ -581,6 +581,7 @@ export function ConstructionTaskFormModal({
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true}
       className="max-w-[1440px] w-[1440px]"
     />
   );
