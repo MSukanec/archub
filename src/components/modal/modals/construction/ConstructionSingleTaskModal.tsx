@@ -8,19 +8,15 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
-import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Settings, Search, Filter, Plus } from "lucide-react";
+import { Settings, Search, Plus } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 
 const singleTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
@@ -214,23 +210,120 @@ export function ConstructionSingleTaskModal({
     }
   };
 
-  const viewPanel = (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Vista de la tarea seleccionada
-      </p>
-    </div>
-  );
+  const viewPanel = isEditing && modalData.editingTask ? (
+    <>
+      <div>
+        <h4 className="font-medium">Tarea</h4>
+        <p className="text-muted-foreground mt-1">
+          {modalData.editingTask.task?.display_name || modalData.editingTask.task_code || 'Sin tarea'}
+        </p>
+      </div>
+      
+      <div>
+        <h4 className="font-medium">Código</h4>
+        <p className="text-muted-foreground mt-1">
+          {modalData.editingTask.task_code || 'Sin código'}
+        </p>
+      </div>
+
+      <div>
+        <h4 className="font-medium">Cantidad</h4>
+        <p className="text-muted-foreground mt-1">
+          {modalData.editingTask.quantity || 0}
+        </p>
+      </div>
+
+      <div>
+        <h4 className="font-medium">Fase</h4>
+        <p className="text-muted-foreground mt-1">
+          {modalData.editingTask.phase_name || 'Sin fase'}
+        </p>
+      </div>
+
+      {modalData.editingTask.created_at && (
+        <div>
+          <h4 className="font-medium">Fecha de Creación</h4>
+          <p className="text-muted-foreground mt-1">
+            {new Date(modalData.editingTask.created_at).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
+        </div>
+      )}
+    </>
+  ) : null;
 
   const editPanel = (
-    <div className="space-y-6">
-      {/* Filtros y búsqueda */}
+    <div className="space-y-4">
+      {/* Información básica - Centrados como en MovementFormModal */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Cantidad *
+          </label>
+          <Input
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="1"
+            value={form.watch('quantity') || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (!isNaN(value)) {
+                form.setValue('quantity', value);
+              }
+            }}
+            className={form.formState.errors.quantity ? 'border-destructive' : ''}
+          />
+          {form.formState.errors.quantity && (
+            <p className="text-xs text-destructive">
+              {form.formState.errors.quantity.message}
+            </p>
+          )}
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Fase del Proyecto
+          </label>
+          <Select 
+            value={form.watch('project_phase_id') || ''} 
+            onValueChange={(value) => form.setValue('project_phase_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar fase" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Sin fase</SelectItem>
+              {projectPhases.map((phase) => (
+                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
+                  {phase.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Selección de tarea */}
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="rubro-filter" className="text-sm font-medium">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Tarea de la Librería *
+          </label>
+          <Badge variant="secondary" className="text-xs">
+            {filteredTasks.length} disponibles
+          </Badge>
+        </div>
+        
+        {/* Filtros de búsqueda - Responsive grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-xs font-medium leading-none text-muted-foreground">
               Filtrar por Rubro
-            </Label>
+            </label>
             <Select value={rubroFilter} onValueChange={setRubroFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos los rubros" />
@@ -246,111 +339,82 @@ export function ConstructionSingleTaskModal({
             </Select>
           </div>
           
-          <div>
-            <Label htmlFor="search" className="text-sm font-medium">
+          <div className="space-y-2">
+            <label className="text-xs font-medium leading-none text-muted-foreground">
               Búsqueda de Texto
-            </Label>
+            </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                id="search"
-                placeholder="Buscar por nombre o categoría..."
+                placeholder="Buscar tarea..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="pl-10"
               />
             </div>
           </div>
         </div>
-      </div>
-
-      <Separator />
-
-      {/* Lista de tareas */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">TAREA</Label>
-        <ScrollArea className="h-[300px] border rounded-md p-4">
-          {tasksLoading ? (
-            <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">Cargando tareas...</p>
-            </div>
-          ) : filteredTasks.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">No se encontraron tareas</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredTasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() => handleTaskSelect(task.id)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                    selectedTaskId === task.id 
-                      ? 'border-primary bg-accent border-r-4 border-r-primary' 
-                      : 'border-border hover:border-accent-foreground'
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <p className="font-medium text-sm leading-tight">
-                      {task.name_rendered}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {task.category_name} - {task.code}
-                      </Badge>
+        
+        {/* Lista de tareas con scroll - Altura ajustada para mobile */}
+        <div className="border rounded-lg">
+          <ScrollArea className="h-64 md:h-80">
+            <div className="p-4 space-y-2">
+              {tasksLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="animate-pulse">Cargando tareas...</div>
+                </div>
+              ) : filteredTasks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="mb-2">No se encontraron tareas</div>
+                  <div className="text-xs">Intenta ajustar los filtros de búsqueda</div>
+                </div>
+              ) : (
+                filteredTasks.map((task) => (
+                  <div 
+                    key={task.id}
+                    onClick={() => handleTaskSelect(task.id)}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                      selectedTaskId === task.id 
+                        ? 'border-accent bg-accent/10 shadow-sm' 
+                        : 'border-border hover:border-accent/50 hover:bg-accent/5'
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="text-xs font-mono">
+                            {task.code}
+                          </Badge>
+                          {task.category_name && (
+                            <Badge variant="secondary" className="text-xs">
+                              {task.category_name}
+                            </Badge>
+                          )}
+                        </div>
+                        {task.unit_symbol && (
+                          <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            {task.unit_symbol}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm font-medium leading-tight text-left">
+                        {task.name_rendered || task.code || 'Sin nombre'}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-          )}
-        </ScrollArea>
-      </div>
-
-      <Separator />
-
-      {/* Campos de configuración */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="quantity" className="text-sm font-medium">
-            CANTIDAD
-          </Label>
-          <Input
-            id="quantity"
-            type="number"
-            step="0.01"
-            min="0.01"
-            {...form.register('quantity', { valueAsNumber: true })}
-            className={form.formState.errors.quantity ? 'border-destructive' : ''}
-          />
-          {form.formState.errors.quantity && (
-            <p className="text-sm text-destructive mt-1">
-              {form.formState.errors.quantity.message}
-            </p>
-          )}
+          </ScrollArea>
         </div>
-
-        <div>
-          <Label htmlFor="phase" className="text-sm font-medium">
-            FASE
-          </Label>
-          <Select
-            value={form.watch('project_phase_id') || ''}
-            onValueChange={(value) => form.setValue('project_phase_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sin fase" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Sin fase</SelectItem>
-              {projectPhases.map((phase) => (
-                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
-                  {phase.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        
+        {/* Validación de selección */}
+        {form.formState.errors.task_id && (
+          <p className="text-xs text-destructive flex items-center gap-1">
+            <span className="w-1 h-1 bg-destructive rounded-full"></span>
+            {form.formState.errors.task_id.message}
+          </p>
+        )}
       </div>
     </div>
   );
