@@ -460,6 +460,46 @@ function ParameterNodeEditorContent() {
   const queryClient = useQueryClient();
   const { openModal } = useGlobalModalStore();
 
+// Componente separado para el botón que accede a ReactFlow
+function AddParameterButton() {
+  const { openModal } = useGlobalModalStore();
+  
+  const handleAddParameter = () => {
+    // Obtener el centro del viewport actual
+    const reactFlowInstance = window.reactFlowInstance;
+    if (reactFlowInstance) {
+      const viewport = reactFlowInstance.getViewport();
+      
+      // Calcular las coordenadas del centro del viewport
+      const viewportCenterX = -viewport.x / viewport.zoom + (300); // 300px es aproximadamente la mitad del ancho visible
+      const viewportCenterY = -viewport.y / viewport.zoom + (150); // 150px es aproximadamente la mitad del alto visible
+      
+      openModal('add-parameter-to-canvas', {
+        viewportCenter: {
+          x: viewportCenterX,
+          y: viewportCenterY
+        }
+      });
+    } else {
+      // Fallback si no hay instancia disponible
+      openModal('add-parameter-to-canvas', {
+        viewportCenter: { x: 0, y: 0 }
+      });
+    }
+  };
+
+  return (
+    <Button 
+      onClick={handleAddParameter}
+      className="absolute top-4 right-4 z-10 rounded-full w-10 h-10 p-0"
+      size="sm"
+      title="Agregar parámetro al canvas"
+    >
+      <Plus className="w-4 h-4" />
+    </Button>
+  );
+}
+
   // Debug: mostrar estado de carga de posiciones
   useEffect(() => {
     console.log('🔄 Estado de posiciones:', { positionsLoading, savedPositions: savedPositions.length });
@@ -964,14 +1004,19 @@ function ParameterNodeEditorContent() {
       {/* Canvas de React Flow */}
       <div className="h-[600px] border rounded-lg overflow-hidden relative" style={{ backgroundColor: 'var(--card-bg)' }}>
         {/* Botón flotante para agregar parámetros */}
-        <Button 
-          onClick={() => openModal('add-parameter-to-canvas')}
-          className="absolute top-4 right-4 z-10 rounded-full w-10 h-10 p-0"
-          size="sm"
-          title="Agregar parámetro al canvas"
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
+        <AddParameterButton />
+        
+        {/* Componente interno que tiene acceso a ReactFlow */}
+        {React.createElement(() => {
+          const reactFlowInstance = useReactFlow();
+          
+          // Guardar la instancia en window para acceso desde AddParameterButton
+          React.useEffect(() => {
+            window.reactFlowInstance = reactFlowInstance;
+          }, [reactFlowInstance]);
+          
+          return null;
+        })}
         <ReactFlow
           nodes={nodes}
           edges={edges}

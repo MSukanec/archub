@@ -4,9 +4,9 @@ import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
 import { Label } from '@/components/ui/label';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,6 +20,7 @@ export function AddParameterToCanvasModal() {
   const [selectedParameterId, setSelectedParameterId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Obtener todos los parámetros disponibles
   const { data: parameters = [], isLoading: parametersLoading } = useQuery({
@@ -55,18 +56,27 @@ export function AddParameterToCanvasModal() {
     try {
       if (!supabase) throw new Error('Supabase client not available');
       
+      // Obtener las coordenadas del centro del viewport actual desde modalData
+      const centerX = modalData?.viewportCenter?.x || 0;
+      const centerY = modalData?.viewportCenter?.y || 0;
+      
       // Crear una nueva posición para el parámetro en el canvas
-      // Posición inicial: centro del viewport
+      // Posición: centro del viewport actual
       const { error } = await supabase
         .from('task_parameter_positions')
         .insert({
           parameter_id: selectedParameterId,
-          x: 0,
-          y: 0,
+          x: centerX,
+          y: centerY,
           visible_options: [] // Sin opciones visibles inicialmente
         });
 
       if (error) throw error;
+
+      // Invalidar las queries para actualizar el canvas automáticamente
+      await queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+      await queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      await queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
 
       toast({
         title: "Éxito",
@@ -93,34 +103,30 @@ export function AddParameterToCanvasModal() {
 
   const viewPanel = null;
 
+  // Convertir parámetros a formato ComboBoxWrite
+  const comboBoxOptions = availableParameters.map(param => ({
+    value: param.id,
+    label: param.slug
+  }));
+
   const editPanel = (
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="parameter-select">Seleccionar Parámetro</Label>
-        <Select
+        <ComboBox
+          options={comboBoxOptions}
           value={selectedParameterId}
           onValueChange={setSelectedParameterId}
+          placeholder={
+            parametersLoading 
+              ? "Cargando parámetros..." 
+              : availableParameters.length === 0
+                ? "No hay parámetros disponibles"
+                : "Buscar parámetro..."
+          }
           disabled={parametersLoading || availableParameters.length === 0}
-        >
-          <SelectTrigger>
-            <SelectValue 
-              placeholder={
-                parametersLoading 
-                  ? "Cargando parámetros..." 
-                  : availableParameters.length === 0
-                    ? "No hay parámetros disponibles"
-                    : "Selecciona un parámetro"
-              } 
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {availableParameters.map((parameter) => (
-              <SelectItem key={parameter.id} value={parameter.id}>
-                {parameter.slug}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          className="w-full"
+        />
       </div>
 
       {availableParameters.length === 0 && !parametersLoading && (
@@ -144,7 +150,7 @@ export function AddParameterToCanvasModal() {
       onLeftClick={closeModal}
       rightLabel={isSubmitting ? 'Agregando...' : 'Agregar Parámetro'}
       onRightClick={handleAdd}
-      rightDisabled={isSubmitting || !selectedParameterId || availableParameters.length === 0}
+      submitDisabled={isSubmitting || !selectedParameterId || availableParameters.length === 0}
     />
   );
 
