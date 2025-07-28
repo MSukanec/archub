@@ -13,6 +13,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
+import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 
 export default function FinancesAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -220,6 +221,87 @@ export default function FinancesAnalysis() {
   // Process data for sunburst chart - categories only (same as pie chart)
   const sunburstData = chartData
 
+  // Process data for treemap chart - subcategories
+  const treemapData = useMemo(() => {
+    const categoryColors = {
+      'Mano de Obra': 'hsl(110, 40%, 50%)', // Verde
+      'Materiales': 'hsl(0, 87%, 67%)',     // Rojo
+      'Indirectos': 'hsl(43, 74%, 66%)'     // Amarillo
+    }
+
+    // Generate color variations for subcategories within each category
+    const getSubcategoryColor = (categoryColor: string, index: number, total: number) => {
+      // Extract HSL values
+      const match = categoryColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/)
+      if (!match) return categoryColor
+      
+      const [, h, s, l] = match
+      // Vary lightness from darker to lighter within category
+      const minLightness = 35
+      const maxLightness = 65
+      const lightness = minLightness + ((maxLightness - minLightness) * index / Math.max(1, total - 1))
+      
+      return `hsl(${h}, ${s}%, ${Math.round(lightness)}%)`
+    }
+
+    // Group by category and subcategory
+    const subcategoryMap = new Map<string, { category: string; amount: number }>()
+    let totalAmount = 0
+    
+    expenseMovements.forEach(movement => {
+      const category = movement.movement_data?.category?.name || 'Sin categoría'
+      const subcategory = movement.movement_data?.subcategory?.name || 'Sin subcategoría'
+      const amount = Math.abs(movement.amount)
+      
+      const key = `${category}-${subcategory}`
+      const existing = subcategoryMap.get(key)
+      
+      if (existing) {
+        existing.amount += amount
+      } else {
+        subcategoryMap.set(key, { category, amount })
+      }
+      
+      totalAmount += amount
+    })
+
+    // Convert to treemap format with color variations
+    const result: any[] = []
+    const categoryGroups = new Map<string, Array<{ subcategory: string; amount: number }>>()
+    
+    // Group subcategories by category
+    subcategoryMap.forEach((data, key) => {
+      const [category, subcategory] = key.split('-')
+      if (!categoryGroups.has(category)) {
+        categoryGroups.set(category, [])
+      }
+      categoryGroups.get(category)!.push({ subcategory, amount: data.amount })
+    })
+
+    // Generate treemap data with proper colors
+    categoryGroups.forEach((subcategories, category) => {
+      const categoryColor = categoryColors[category as keyof typeof categoryColors] || 'hsl(0, 0%, 50%)'
+      
+      // Sort subcategories by amount (largest first)
+      subcategories.sort((a, b) => b.amount - a.amount)
+      
+      subcategories.forEach((sub, index) => {
+        result.push({
+          name: `${category} - ${sub.subcategory}`,
+          size: sub.amount,
+          category,
+          subcategory: sub.subcategory,
+          color: getSubcategoryColor(categoryColor, index, subcategories.length),
+          percentage: totalAmount > 0 ? Number(((sub.amount / totalAmount) * 100).toFixed(1)) : 0
+        })
+      })
+    })
+
+    return result
+      .filter(item => item.size > 0)
+      .sort((a, b) => b.size - a.size) // Sort by size descending
+  }, [expenseMovements])
+
   // Columns for grouped view (without category column)
   const getGroupedColumns = () => {
     return [
@@ -412,36 +494,55 @@ export default function FinancesAnalysis() {
             />
           )
         ) : (
-          // Tab Gráficos - Gráfico de torta por categorías
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          // Tab Gráficos - Múltiples visualizaciones
+          <div className="space-y-6">
+            {/* Primera fila - Gráficos de categorías */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <PieChart className="h-5 w-5" />
+                    Egresos por Categorías
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Distribución de gastos por tipo de categoría
+                  </p>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
+                </CardContent>
+              </Card>
+              
+              {/* Sunburst Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <LayoutGrid className="h-5 w-5" />
+                    Vista Alternativa por Categorías
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Distribución de gastos por categorías principales
+                  </p>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Segunda fila - Treemap de subcategorías */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <PieChart className="h-5 w-5" />
-                  Egresos por Subcategorías
+                  <Calculator className="h-5 w-5" />
+                  Mapa de Subcategorías
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Distribución de gastos por tipo de categoría
+                  Visualización jerárquica de subcategorías con áreas proporcionales a los montos
                 </p>
               </CardHeader>
               <CardContent className="pb-2">
-                <ExpensesByCategoryChart data={chartData || []} isLoading={isLoading} />
-              </CardContent>
-            </Card>
-            
-            {/* Sunburst Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <LayoutGrid className="h-5 w-5" />
-                  Vista Alternativa por Categorías
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Distribución de gastos por categorías principales
-                </p>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
+                <ExpensesTreemapChart data={treemapData || []} isLoading={isLoading} />
               </CardContent>
             </Card>
           </div>
