@@ -200,16 +200,9 @@ export default function FinancesAnalysis() {
           onSearchChange={setSearchValue}
           features={features}
           showProjectSelector={true}
-          customFilters={
-            <Button
-              variant={groupByCategory ? "default" : "outline"}
-              onClick={() => setGroupByCategory(!groupByCategory)}
-              className="h-8"
-            >
-              <LayoutGrid className="w-4 h-4 mr-2" />
-              Agrupar por Categoría
-            </Button>
-          }
+          showGrouping={true}
+          groupingType={groupByCategory ? 'category' : 'none'}
+          onGroupingChange={(type) => setGroupByCategory(type !== 'none')}
         />
 
         {filteredData.length > 0 ? (
