@@ -26,7 +26,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
 const addTaskSchema = z.object({
-  project_phase_id: z.string().min(1, "Debe seleccionar una fase de proyecto"),
   selectedTasks: z.array(z.object({
     task_id: z.string(),
     quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0")
@@ -106,7 +105,6 @@ export function ConstructionTaskFormModal({
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
-      project_phase_id: "",
       selectedTasks: []
     }
   });
@@ -185,7 +183,6 @@ export function ConstructionTaskFormModal({
       
       // Reset del formulario con valores básicos
       form.reset({
-        project_phase_id: task.phase_instance_id || '',
         selectedTasks: [{
           task_id: task.task_id || '',
           quantity: task.quantity || 1
@@ -239,7 +236,6 @@ export function ConstructionTaskFormModal({
         await updateTask.mutateAsync({
           id: modalData.editingTask.id,
           quantity: firstSelected.quantity,
-          project_phase_id: data.project_phase_id,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId
         });
@@ -256,8 +252,7 @@ export function ConstructionTaskFormModal({
             project_id: modalData.projectId,
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
-            created_by: currentMember.id,
-            project_phase_id: data.project_phase_id
+            created_by: currentMember.id
           })
         );
 
@@ -302,78 +297,10 @@ export function ConstructionTaskFormModal({
     >
       {/* Sección fija superior */}
       <div className="flex-shrink-0 space-y-6">
-        {/* Tres columnas inline: Fase, Filtro Rubro, Búsqueda */}
-        <div className="grid grid-cols-3 gap-4">
-          {/* Columna 1: Phase Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="project_phase_id" className="text-xs font-medium text-muted-foreground">
-              Fase de Proyecto
-            </Label>
-            <Select 
-              value={watch('project_phase_id') || ""}
-              onValueChange={(value) => setValue('project_phase_id', value)}
-            >
-              <SelectTrigger className="text-xs">
-                <SelectValue placeholder="Seleccionar fase" />
-              </SelectTrigger>
-              <SelectContent>
-                {projectPhases.map((projectPhase) => (
-                  <SelectItem key={projectPhase.id} value={projectPhase.id}>
-                    {projectPhase.phase.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
-          {/* Columna 2: Filtro por Rubro */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
-              Filtrar por Rubro
-            </Label>
-            <ComboBox
-              value={rubroFilter}
-              onValueChange={setRubroFilter}
-              options={rubroOptions}
-              placeholder="Todos los rubros"
-              searchPlaceholder="Buscar rubro..."
-              emptyMessage="No se encontraron rubros"
-              className="text-xs"
-            />
-          </div>
-          
-          {/* Columna 3: Campo de búsqueda */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
-              Búsqueda de Texto
-            </Label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar por nombre o categoría..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Errores y estado */}
         <div className="space-y-2">
-          {errors.project_phase_id && (
-            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
-          )}
-          
           {selectedTasks.length > 0 && (
             <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
               {selectedTasks.length} tarea{selectedTasks.length > 1 ? 's' : ''} seleccionada{selectedTasks.length > 1 ? 's' : ''}
@@ -392,6 +319,50 @@ export function ConstructionTaskFormModal({
         <div className="border rounded-lg">
           <div className="p-3 border-b bg-muted">
             <h3 className="text-sm font-medium">Tareas Disponibles</h3>
+          </div>
+          
+          {/* Filtros en la columna izquierda */}
+          <div className="p-3 border-b space-y-3">
+            {/* Filtro por Rubro */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Filtrar por Rubro
+              </Label>
+              <ComboBox
+                value={rubroFilter}
+                onValueChange={setRubroFilter}
+                options={rubroOptions}
+                placeholder="Todos los rubros"
+                searchPlaceholder="Buscar rubro..."
+                emptyMessage="No se encontraron rubros"
+                className="text-xs"
+              />
+            </div>
+            
+            {/* Campo de búsqueda */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Búsqueda de Texto
+              </Label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o categoría..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           
           {/* Table Header */}
@@ -458,10 +429,9 @@ export function ConstructionTaskFormModal({
           </div>
           
           {/* Selected Tasks Header */}
-          <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "1fr auto auto auto"}}>
+          <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "1fr auto auto"}}>
             <div className="text-xs font-medium">TAREA</div>
             <div className="text-xs font-medium w-16">CANT.</div>
-            <div className="text-xs font-medium w-20">FASE</div>
             <div className="text-xs font-medium w-8"></div>
           </div>
 
@@ -478,7 +448,7 @@ export function ConstructionTaskFormModal({
                   if (!task) return null;
                   
                   return (
-                    <div key={selectedTask.task_id} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto auto auto"}}>
+                    <div key={selectedTask.task_id} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto auto"}}>
                       {/* Task Name */}
                       <div>
                         <div className="text-sm leading-tight line-clamp-1">
@@ -508,30 +478,6 @@ export function ConstructionTaskFormModal({
                           min="0"
                           step="0.01"
                         />
-                      </div>
-
-                      {/* Fase Select */}
-                      <div className="w-20">
-                        <select
-                          value={selectedTask.phase_instance_id || ''}
-                          onChange={(e) => {
-                            setSelectedTasks(prev => 
-                              prev.map(t => 
-                                t.task_id === selectedTask.task_id 
-                                  ? { ...t, phase_instance_id: e.target.value }
-                                  : t
-                              )
-                            );
-                          }}
-                          className="h-8 text-xs border rounded px-1 w-full"
-                        >
-                          <option value="">Fase</option>
-                          {projectPhases.map(phase => (
-                            <option key={phase.id} value={phase.id}>
-                              {phase.phase?.name}
-                            </option>
-                          ))}
-                        </select>
                       </div>
 
                       {/* Delete Button */}
