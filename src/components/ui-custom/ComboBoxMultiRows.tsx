@@ -68,16 +68,18 @@ export function ComboBoxMultiRows({
           {value.map((selectedValue) => (
             <div
               key={selectedValue}
-              className="flex items-center justify-between h-10 px-3 py-2 text-sm bg-background border border-input rounded-md"
+              className="flex items-center gap-2"
             >
-              <span className="flex-1">
-                {getOptionLabel(selectedValue)}
-              </span>
+              <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <span className="flex-1">
+                  {getOptionLabel(selectedValue)}
+                </span>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleRemove(selectedValue)}
-                className="text-destructive hover:text-destructive h-6 w-6 p-0 ml-2"
+                className="text-destructive hover:text-destructive h-10 w-10 p-0 shrink-0"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
