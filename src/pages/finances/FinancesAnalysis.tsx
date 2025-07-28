@@ -68,8 +68,8 @@ export default function FinancesAnalysis() {
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(2) : '0.00'
   }))
 
-  // Sort by amount (highest first)
-  const sortedAnalysis = analysisWithPercentage.sort((a, b) => b.amount - a.amount)
+  // Sort alphabetically by subcategory
+  const sortedAnalysis = analysisWithPercentage.sort((a, b) => a.subcategory.localeCompare(b.subcategory))
 
   // Filter by search
   const filteredData = sortedAnalysis.filter(item =>
@@ -152,7 +152,7 @@ export default function FinancesAnalysis() {
 
     return Object.entries(groups).map(([category, items]) => ({
       category,
-      items,
+      items: items.sort((a, b) => a.subcategory.localeCompare(b.subcategory)),
       totalAmount: items.reduce((sum, item) => sum + item.amount, 0),
       totalPercentage: items.reduce((sum, item) => sum + parseFloat(item.percentage), 0).toFixed(2)
     }))
