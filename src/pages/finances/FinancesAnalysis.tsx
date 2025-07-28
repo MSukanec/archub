@@ -204,8 +204,8 @@ export default function FinancesAnalysis() {
     // Convert to chart format with specific colors for our 3 categories
     const colors = {
       'Mano de Obra': 'var(--chart-1)', // Verde
-      'Materiales': 'var(--chart-5)',   // Rojo
-      'Indirectos': 'var(--chart-4)'    // Amarillo
+      'Materiales': 'var(--chart-2)',   // Azul-Verde
+      'Indirectos': 'var(--chart-3)'    // Azul
     }
 
     return Array.from(categoryTotals.entries())
@@ -226,8 +226,8 @@ export default function FinancesAnalysis() {
   const treemapData = useMemo(() => {
     const categoryColors = {
       'Mano de Obra': 'var(--chart-1)', // Verde
-      'Materiales': 'var(--chart-5)',   // Rojo
-      'Indirectos': 'var(--chart-4)'    // Amarillo
+      'Materiales': 'var(--chart-2)',   // Azul-Verde
+      'Indirectos': 'var(--chart-3)'    // Azul
     }
 
     // Generate color variations for subcategories within each category
@@ -242,19 +242,19 @@ export default function FinancesAnalysis() {
           'hsl(110, 40%, 50%)',
           'hsl(110, 40%, 55%)'
         ],
-        'var(--chart-5)': [ // Materiales (Rojo)
-          'hsl(0, 87%, 35%)',
-          'hsl(0, 87%, 40%)',
-          'hsl(0, 87%, 45%)',
-          'hsl(0, 87%, 50%)',
-          'hsl(0, 87%, 55%)'
+        'var(--chart-2)': [ // Materiales (Azul-Verde)
+          'hsl(173, 58%, 25%)',
+          'hsl(173, 58%, 30%)',
+          'hsl(173, 58%, 35%)',
+          'hsl(173, 58%, 40%)',
+          'hsl(173, 58%, 45%)'
         ],
-        'var(--chart-4)': [ // Indirectos (Amarillo)
-          'hsl(43, 74%, 35%)',
-          'hsl(43, 74%, 40%)',
-          'hsl(43, 74%, 45%)',
-          'hsl(43, 74%, 50%)',
-          'hsl(43, 74%, 55%)'
+        'var(--chart-3)': [ // Indirectos (Azul)
+          'hsl(197, 37%, 15%)',
+          'hsl(197, 37%, 20%)',
+          'hsl(197, 37%, 25%)',
+          'hsl(197, 37%, 30%)',
+          'hsl(197, 37%, 35%)'
         ]
       }
       

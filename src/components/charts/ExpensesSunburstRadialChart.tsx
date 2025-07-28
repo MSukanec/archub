@@ -39,8 +39,8 @@ export function ExpensesSunburstRadialChart({ data, isLoading }: ExpensesSunburs
     // Color scale for main categories using CSS variables
     const categoryColors = {
       'Mano de Obra': 'hsl(76, 100%, 40%)',   // --chart-1
-      'Materiales': 'hsl(0, 87%, 67%)',       // --chart-5  
-      'Indirectos': 'hsl(43, 74%, 66%)'       // --chart-4
+      'Materiales': 'hsl(173, 58%, 39%)',     // --chart-2  
+      'Indirectos': 'hsl(197, 37%, 24%)'      // --chart-3
     }
     
     const colorScale = d3.scaleOrdinal()
