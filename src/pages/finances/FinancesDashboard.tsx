@@ -112,6 +112,25 @@ export default function FinancesDashboard() {
     }
   }
 
+  // Format movement amount with original currency symbol
+  const formatMovementAmount = (movement: any) => {
+    // Get currency symbol from movement data
+    const currencyName = movement.currency?.name || movement.currencies?.name
+    const amount = movement.amount || 0
+    
+    if (currencyName === 'Dólar Estadounidense') {
+      return `USD ${new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(Math.abs(amount))}`
+    } else {
+      return `ARS ${new Intl.NumberFormat('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(Math.abs(amount))}`
+    }
+  }
+
   // Get currency badge component
   const getCurrencyBadge = () => (
     <Badge variant="secondary" className="text-xs">
@@ -267,7 +286,7 @@ export default function FinancesDashboard() {
                         </div>
                       </div>
                       <span className="text-sm font-medium">
-                        {formatCurrency(movement.amount || 0)}
+                        {formatMovementAmount(movement)}
                       </span>
                     </div>
                   ))}
