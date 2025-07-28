@@ -82,7 +82,14 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         .select('*')
         .order('category_name', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading task library:', error);
+        throw error;
+      }
+      
+      console.log('🔍 MODAL - Tasks loaded:', data?.length, 'tasks');
+      console.log('🔍 MODAL - Sample task:', data?.[0]);
+      
       return data || [];
     }
   });
@@ -152,7 +159,8 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
           task_id: selectedTask.task_id,
           quantity: selectedTask.quantity,
           project_phase_id: data.project_phase_id,
-          organization_id: modalData.organizationId
+          organization_id: modalData.organizationId,
+          created_by: currentMember?.member_id || userData?.id || ''
         };
         
         await createTaskMutation.mutateAsync(taskData);

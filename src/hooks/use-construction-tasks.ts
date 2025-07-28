@@ -187,18 +187,7 @@ export function useCreateConstructionTask() {
           end_date: taskData.end_date,
           duration_in_days: taskData.duration_in_days,
         })
-        .select(`
-          *,
-          task:task_generated_view!inner (
-            id,
-            code,
-            display_name,
-            rubro_name,
-            category_name,
-            unit_id,
-            rubro_id
-          )
-        `)
+        .select('*')
         .single();
 
       if (taskError) {
