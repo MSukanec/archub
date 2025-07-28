@@ -10,7 +10,7 @@ export function useDependencyOptions(dependencyId: string | null) {
     queryFn: async () => {
       if (!dependencyId) return [];
       
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('task_parameter_dependency_options')
         .select('*')
         .eq('dependency_id', dependencyId);
@@ -92,7 +92,7 @@ export function useParameterAsChild(parameterId: string | null) {
     queryFn: async () => {
       if (!parameterId) return [];
       
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('task_parameter_dependencies')
         .select(`
           *,
@@ -115,7 +115,7 @@ export function useConfiguredOptionsForDependency(dependencyId: string | null) {
     queryFn: async () => {
       if (!dependencyId) return [];
       
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('task_parameter_dependency_options')
         .select(`
           *,

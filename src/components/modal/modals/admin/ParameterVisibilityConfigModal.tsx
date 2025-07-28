@@ -14,11 +14,12 @@ import { supabase } from '@/lib/supabase';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 
 export function ParameterVisibilityConfigModal() {
-  const { modalData, modalType, open, closeModal } = useGlobalModalStore();
+  const { data: modalData, type: modalType, open, closeModal } = useGlobalModalStore();
   const parameterId = modalData?.parameterId;
   const [configuredOptions, setConfiguredOptions] = useState<Record<string, string[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // TODOS LOS HOOKS DEBEN ESTAR AL PRINCIPIO
   // Obtener dependencias donde este parámetro es hijo
   const { data: dependencies = [], isLoading: dependenciesLoading } = useParameterAsChild(parameterId);
   
@@ -53,6 +54,14 @@ export function ParameterVisibilityConfigModal() {
   });
 
   const saveDependencyOptionsMutation = useSaveDependencyOptions();
+
+  // LOGS DE DEBUG DESPUÉS DE TODOS LOS HOOKS
+  console.log('🔧 ParameterVisibilityConfigModal render:', {
+    open,
+    modalType,
+    parameterId,
+    modalData
+  });
 
   // Cargar configuraciones existentes para cada dependencia
   useEffect(() => {
