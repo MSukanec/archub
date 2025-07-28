@@ -57,8 +57,8 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
 
   return (
     <div className="space-y-4">
-      {/* Chart */}
-      <div className="h-64">
+      {/* Chart - Responsive height */}
+      <div className="h-48 md:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             {/* Single ring - Categories only */}
@@ -67,14 +67,15 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
               dataKey="value"
               cx="50%"
               cy="50%"
-              innerRadius={40}
-              outerRadius={90}
+              innerRadius={30}
+              outerRadius={70}
               startAngle={90}
               endAngle={450}
               label={({ name, percentage }) => 
-                percentage > 5 ? `${name} (${percentage}%)` : ''
+                percentage > 8 ? `${name}` : '' // Simplified labels for mobile
               }
               labelLine={false}
+              style={{ fontSize: '11px' }} // Smaller font for mobile
             >
               {categoryData.map((entry, index) => (
                 <Cell key={`category-cell-${index}`} fill={entry.color} />
@@ -84,22 +85,32 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
         </ResponsiveContainer>
       </div>
       
-      {/* Legend inside card */}
-      <div className="border-t pt-4">
-        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda:</div>
-        <div className="grid grid-cols-1 gap-2 text-xs">
+      {/* Legend - Compact for mobile */}
+      <div className="border-t pt-3">
+        <div className="text-xs font-medium text-muted-foreground mb-2">Leyenda de Rubros:</div>
+        <div className="grid grid-cols-3 md:grid-cols-1 gap-1 md:gap-2 text-xs">
           {categoryData.map((category, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div key={index} className="flex items-center md:justify-between">
+              <div className="flex items-center gap-1 md:gap-2 min-w-0">
                 <div 
-                  className="w-3 h-3 rounded-sm"
+                  className="w-2 h-2 md:w-3 md:h-3 rounded-sm flex-shrink-0"
                   style={{ backgroundColor: category.color }}
                 />
-                <span className="font-medium">{category.name}</span>
+                <span className="font-medium truncate text-xs">{category.name}</span>
               </div>
-              <span className="text-muted-foreground font-medium">
+              <span className="hidden md:inline text-muted-foreground font-medium text-xs">
                 {formatCurrency(category.value)}
               </span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Mobile summary */}
+        <div className="md:hidden mt-2 pt-2 border-t space-y-1">
+          {categoryData.map((category, index) => (
+            <div key={`mobile-${index}`} className="flex justify-between text-xs">
+              <span className="font-medium">{category.name}:</span>
+              <span className="text-muted-foreground">{category.percentage}%</span>
             </div>
           ))}
         </div>
