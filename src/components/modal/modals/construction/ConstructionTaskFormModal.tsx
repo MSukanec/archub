@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -80,6 +80,9 @@ export function ConstructionTaskFormModal({
   const [parametricTaskPreview, setParametricTaskPreview] = useState<string>('');
   const [parametricParameterOrder, setParametricParameterOrder] = useState<string[]>([]);
   const [isCreatingParametricTask, setIsCreatingParametricTask] = useState(false);
+  
+  // Referencia al ParametricTaskBuilder
+  const parametricTaskBuilderRef = useRef<{ executeCreateTaskCallback: () => void }>(null);
   
   const { data: userData } = useCurrentUser();
   
@@ -260,8 +263,19 @@ export function ConstructionTaskFormModal({
   });
 
   // Función para manejar la creación de tarea paramétrica
-  const handleCreateParametricTask = async () => {
-    if (parametricSelections.length === 0) {
+  const handleCreateParametricTask = async (taskData?: { selections: ParameterSelection[], preview: string, paramValues: Record<string, string>, paramOrder: string[], availableParameters: string[] }) => {
+    // Usar datos del callback si están disponibles, sino usar estados locales
+    const selections = taskData?.selections || parametricSelections;
+    const preview = taskData?.preview || parametricTaskPreview;
+    const paramOrder = taskData?.paramOrder || parametricParameterOrder;
+    const availableParams = taskData?.availableParameters || [];
+
+    console.log('🔍 DEBUG: Iniciando handleCreateParametricTask');
+    console.log('📊 taskData recibida:', taskData);
+    console.log('📊 selections:', selections);
+    console.log('📊 availableParams:', availableParams);
+
+    if (selections.length === 0) {
       toast({
         title: "Error",
         description: "Debes seleccionar al menos un parámetro",
@@ -273,16 +287,16 @@ export function ConstructionTaskFormModal({
     // Validar parámetros obligatorios entre los disponibles
     console.log('🔍 DEBUG: Validando parámetros obligatorios');
     console.log('📊 allParameters:', allParameters);
-    console.log('📊 parametricSelections:', parametricSelections);
-    console.log('📊 availableParameters (del ParametricTaskBuilder):', availableParameters);
+    console.log('📊 selections:', selections);
+    console.log('📊 availableParams (del ParametricTaskBuilder):', availableParams);
     
     // Solo validar parámetros obligatorios que están actualmente disponibles/visibles
     const availableRequiredParams = allParameters.filter(param => 
-      param.is_required && availableParameters.includes(param.id)
+      param.is_required && availableParams.includes(param.id)
     );
     console.log('📊 availableRequiredParams:', availableRequiredParams);
     
-    const selectedParameterIds = parametricSelections.map(sel => sel.parameterId);
+    const selectedParameterIds = selections.map(sel => sel.parameterId);
     console.log('📊 selectedParameterIds:', selectedParameterIds);
     
     const missingRequiredParams = availableRequiredParams.filter(param => 
@@ -292,6 +306,7 @@ export function ConstructionTaskFormModal({
 
     if (missingRequiredParams.length > 0) {
       const missingNames = missingRequiredParams.map(param => param.label).join(', ');
+      console.log('❌ VALIDACIÓN FALLÓ - Parámetros faltantes:', missingNames);
       toast({
         title: "Parámetros obligatorios faltantes",
         description: `Debes completar los siguientes parámetros obligatorios: ${missingNames}`,
@@ -300,24 +315,29 @@ export function ConstructionTaskFormModal({
       return;
     }
 
+    console.log('✅ VALIDACIÓN EXITOSA - Todos los parámetros obligatorios están presentes');
+
     setIsCreatingParametricTask(true);
 
     try {
-      // Preparar los datos para crear la tarea paramétrica
-      const paramValues: Record<string, string> = {};
-      parametricSelections.forEach(selection => {
-        paramValues[selection.parameterSlug] = selection.optionId;
-      });
+      // Usar paramValues del callback si está disponible, sino crear desde selections
+      const paramValuesToUse = taskData?.paramValues || (() => {
+        const paramValues: Record<string, string> = {};
+        selections.forEach(selection => {
+          paramValues[selection.parameterSlug] = selection.optionId;
+        });
+        return paramValues;
+      })();
 
       console.log('🚀 Creando tarea paramétrica con valores:', {
-        paramValues,
-        paramOrder: parametricParameterOrder,
-        preview: parametricTaskPreview
+        paramValues: paramValuesToUse,
+        paramOrder: paramOrder,
+        preview: preview
       });
 
       const response = await createGeneratedTask.mutateAsync({
-        param_values: paramValues,
-        param_order: parametricParameterOrder
+        param_values: paramValuesToUse,
+        param_order: paramOrder
       });
 
       console.log('✅ Nueva tarea paramétrica creada:', response);
@@ -805,9 +825,11 @@ export function ConstructionTaskFormModal({
                   </div>
                   
                   <ParametricTaskBuilder
+                    ref={parametricTaskBuilderRef}
                     onSelectionChange={setParametricSelections}
                     onPreviewChange={setParametricTaskPreview}
                     onOrderChange={setParametricParameterOrder}
+                    onCreateTask={handleCreateParametricTask}
                     initialParameters={null}
                     initialParameterOrder={null}
                   />
@@ -872,7 +894,28 @@ export function ConstructionTaskFormModal({
       leftLabel="Cancelar"
       onLeftClick={() => setPanel('edit')}
       rightLabel="Crear Nueva Tarea"
-      onRightClick={handleCreateParametricTask}
+      onRightClick={() => {
+        // Llamar al callback del ParametricTaskBuilder para que pase los datos completos
+        if (parametricTaskBuilderRef.current?.executeCreateTaskCallback) {
+          parametricTaskBuilderRef.current.executeCreateTaskCallback();
+        } else {
+          // Fallback: crear los datos manualmente desde los estados actuales
+          const taskData = {
+            selections: parametricSelections,
+            preview: parametricTaskPreview,
+            paramValues: (() => {
+              const values: Record<string, string> = {};
+              parametricSelections.forEach(sel => {
+                values[sel.parameterSlug] = sel.optionId;
+              });
+              return values;
+            })(),
+            paramOrder: parametricParameterOrder,
+            availableParameters: [] // No disponible en fallback
+          };
+          handleCreateParametricTask(taskData);
+        }
+      }}
       showLoadingSpinner={isCreatingParametricTask}
       submitDisabled={parametricSelections.length === 0 || isCreatingParametricTask}
     />

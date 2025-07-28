@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -52,6 +52,7 @@ interface ParametricTaskBuilderProps {
   onSelectionChange?: (selections: ParameterSelection[]) => void
   onPreviewChange?: (preview: string) => void
   onOrderChange?: (order: string[]) => void
+  onCreateTask?: (data: { selections: ParameterSelection[], preview: string, paramValues: Record<string, string>, paramOrder: string[], availableParameters: string[] }) => void
   initialParameters?: string | null
   initialParameterOrder?: string[] | null
 }
@@ -59,12 +60,44 @@ interface ParametricTaskBuilderProps {
 // Variable para mantener la última vista previa
 let lastPreview = ''
 
-export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOrderChange, initialParameters, initialParameterOrder }: ParametricTaskBuilderProps) {
+export const ParametricTaskBuilder = forwardRef<
+  { executeCreateTaskCallback: () => void },
+  ParametricTaskBuilderProps
+>(({ onSelectionChange, onPreviewChange, onOrderChange, onCreateTask, initialParameters, initialParameterOrder }, ref) => {
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [availableParameters, setAvailableParameters] = useState<string[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
   const [parameterOrder, setParameterOrder] = useState<string[]>([])
+
+  // Función para ejecutar el callback de creación de tarea con datos completos
+  const executeCreateTaskCallback = () => {
+    if (onCreateTask) {
+      const paramValues: Record<string, string> = {};
+      selections.forEach(selection => {
+        paramValues[selection.parameterSlug] = selection.optionId;
+      });
+
+      const taskData = {
+        selections,
+        preview: taskPreview,
+        paramValues,
+        paramOrder: getOrderedParameters().map(paramId => {
+          const parameter = parameters.find(p => p.id === paramId);
+          return parameter?.slug || '';
+        }).filter(Boolean),
+        availableParameters: availableParameters
+      };
+
+      console.log('🚀 ParametricTaskBuilder ejecutando callback con datos:', taskData);
+      onCreateTask(taskData);
+    }
+  };
+
+  // Exponer la función al componente padre
+  useImperativeHandle(ref, () => ({
+    executeCreateTaskCallback
+  }));
 
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({
@@ -681,4 +714,4 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
       )}
     </div>
   )
-}
+});
