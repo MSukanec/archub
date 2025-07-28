@@ -28,9 +28,16 @@ export default function FinancesAnalysis() {
     projectId || ''
   )
 
-  // Filter only expense movements (EGRESOS) by UUID
+  // Filter only expense movements (EGRESOS) by UUID and specific categories
+  const allowedCategoryIds = [
+    'd3764404-734a-47a9-b851-d112d64147db', // Mano de Obra
+    'a8cab4bd-3d66-4022-a264-4c208d0baccb', // Materiales
+    '4a9be4c7-34ec-4e12-a001-17b4c5cbd89e'  // Indirectos
+  ]
+  
   const expenseMovements = movements.filter(movement => 
-    movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7'
+    movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7' && // EGRESOS
+    allowedCategoryIds.includes(movement.category_id) // Only specified categories
   )
 
   // Function to convert amounts based on currency view
