@@ -215,6 +215,13 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     try {
       setIsLoading(true)
       
+      console.log('🔧 Creating task material with data:', {
+        task_id: savedTaskId,
+        material_id: selectedMaterialId,
+        amount: parseFloat(materialAmount),
+        organization_id: userData.organization.id
+      });
+      
       await createTaskMaterialMutation.mutateAsync({
         task_id: savedTaskId,
         material_id: selectedMaterialId,
@@ -239,11 +246,11 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         title: "Material agregado",
         description: "El material se agregó correctamente a la tarea.",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding material:', error)
       toast({
         title: "Error",
-        description: "Error al agregar el material.",
+        description: error.message || "Error al agregar el material.",
         variant: "destructive",
       })
     } finally {
