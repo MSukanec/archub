@@ -68,15 +68,16 @@ export function ComboBoxMultiRows({
           {value.map((selectedValue) => (
             <div
               key={selectedValue}
-              className="flex items-center justify-between p-3 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)]"
+              className="flex items-center justify-between h-10 px-3 py-2 text-sm bg-background border border-input rounded-md"
             >
-              <span className="text-sm font-medium">
+              <span className="flex-1">
                 {getOptionLabel(selectedValue)}
               </span>
               <Button
-                variant="ghost-icon"
+                variant="ghost"
+                size="sm"
                 onClick={() => handleRemove(selectedValue)}
-                className="text-destructive hover:text-destructive h-8 w-8"
+                className="text-destructive hover:text-destructive h-6 w-6 p-0 ml-2"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

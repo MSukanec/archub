@@ -474,7 +474,7 @@ export default function OrganizationPreferences() {
                   value={secondaryCurrencies}
                   onChange={handleSecondaryCurrenciesChange}
                   placeholder="Selecciona una moneda secundaria"
-                  addButtonText="Agregar Moneda"
+                  addButtonText="Agregar Moneda Secundaria"
                 />
               </div>
 
@@ -504,7 +504,7 @@ export default function OrganizationPreferences() {
                   value={secondaryWallets}
                   onChange={handleSecondaryWalletsChange}
                   placeholder="Selecciona una billetera secundaria"
-                  addButtonText="Agregar Billetera"
+                  addButtonText="Agregar Billetera Secundaria"
                 />
               </div>
             </div>
