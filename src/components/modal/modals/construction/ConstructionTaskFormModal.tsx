@@ -73,9 +73,9 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
 
   const { handleSubmit, watch, setValue } = form;
 
-  // Query para obtener tareas de la biblioteca (usando task_parametric directamente)
+  // Query para obtener tareas paramétricas de la biblioteca
   const { data: tasks, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['task-library', modalData.organizationId],
+    queryKey: ['parametric-tasks-library'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_parametric')
@@ -83,7 +83,54 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
         .order('created_at', { ascending: true });
       
       if (error) throw error;
-      return data || [];
+
+      // Generar nombres descriptivos para cada tarea
+      const tasksWithNames = await Promise.all((data || []).map(async (task: any) => {
+        try {
+          let displayName = task.name_rendered;
+          
+          if (!displayName && task.param_values) {
+            const paramValues = typeof task.param_values === 'string' 
+              ? JSON.parse(task.param_values) 
+              : task.param_values;
+            
+            if (Object.keys(paramValues).length > 0) {
+              const { data: paramOptions } = await supabase
+                .from('task_parameter_options')
+                .select('id, label')
+                .in('id', Object.values(paramValues));
+              
+              if (paramOptions && paramOptions.length > 0) {
+                const optionLabels = paramOptions.map(opt => opt.label).join(' ');
+                displayName = `${optionLabels}`;
+              }
+            }
+          }
+          
+          if (!displayName) {
+            displayName = `Tarea ${task.code || 'sin código'}`;
+          }
+          
+          return { 
+            ...task, 
+            display_name: displayName,
+            task_name: displayName,
+            unit_symbol: 'm²', // Default hasta que tengamos unidades
+            rubro_name: 'Mampostería' // Default hasta que tengamos rubros
+          };
+        } catch (error) {
+          console.error('Error generating task name:', error);
+          return { 
+            ...task, 
+            display_name: `Tarea ${task.code || 'sin código'}`,
+            task_name: `Tarea ${task.code || 'sin código'}`,
+            unit_symbol: 'm²',
+            rubro_name: 'General'
+          };
+        }
+      }));
+
+      return tasksWithNames;
     }
   });
 
@@ -96,22 +143,17 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     
     return tasks.filter(task => {
       const matchesSearch = !searchQuery || 
+        task.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.task_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesRubro = !rubroFilter || task.rubro_name === rubroFilter;
-      const matchesPhase = !phaseFilter || task.phase_name === phaseFilter;
-      
-      return matchesSearch && matchesRubro && matchesPhase;
+      // Por ahora sin filtros hasta que tengamos datos reales
+      return matchesSearch;
     });
-  }, [tasks, searchQuery, rubroFilter, phaseFilter]);
+  }, [tasks, searchQuery]);
 
-  // Obtener rubros únicos para el filtro
-  const uniqueRubros = useMemo(() => {
-    if (!tasks) return [];
-    const rubros = [...new Set(tasks.map(task => task.rubro_name).filter(Boolean))];
-    return rubros;
-  }, [tasks]);
+  // Por ahora rubros simplificados hasta que tengamos datos reales
+  const uniqueRubros = ['Mampostería', 'Estructura', 'General'];
 
   // Manejar selección de tarea
   const handleTaskSelect = (taskId: string) => {
@@ -312,7 +354,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                           <div className="flex-1 space-y-1">
                             <div className="font-medium">{task.task_name}</div>
                             <div className="text-sm text-muted-foreground">
-                              {task.rubro_name} • {task.unit_name}
+                              {task.rubro_name} • {task.unit_symbol}
                             </div>
                           </div>
                         </div>

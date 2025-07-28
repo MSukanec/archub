@@ -44,10 +44,7 @@ import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibil
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
 
-  // Debug: log modal state
-  if (open) {
-    console.log('ModalFactory state:', { open, type, data });
-  }
+
 
   if (!open) return null;
 
