@@ -152,7 +152,7 @@ export default function ConstructionTasks() {
       key: 'phase',
       label: 'Fase',
       render: (task: any) => task.phase_name || 'Sin fase',
-      width: '10%'
+      width: '15%'
     },
     {
       key: 'rubro_name',
@@ -164,19 +164,19 @@ export default function ConstructionTasks() {
       key: 'display_name',
       label: 'Tarea',
       render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
-      width: 'auto' // El resto del espacio disponible
+      width: 'auto' // El resto del espacio disponible (70%)
     },
     {
       key: 'unit',
       label: 'Unidad',
       render: (task: any) => task.task?.unit_symbol || 'Sin unidad',
-      width: '10%'
+      width: '5%'
     },
     {
       key: 'quantity',
       label: 'Cantidad',
       render: (task: any) => task.quantity || 0,
-      width: '10%'
+      width: '5%'
     },
     {
       key: 'actions',
@@ -199,7 +199,7 @@ export default function ConstructionTasks() {
           </Button>
         </div>
       ),
-      width: '10%',
+      width: '5%',
       sortable: false
     }
   ]

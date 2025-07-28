@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Layers } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateConstructionPhase, useCreateProjectPhase, useConstructionPhases } from "@/hooks/use-construction-phases";
+import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -75,8 +75,8 @@ export function ConstructionPhaseFormModal({
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
 
-  // Get existing phases for selection
-  const { data: existingPhases = [] } = useConstructionPhases(modalData.organizationId);
+  // Get existing phases for selection  
+  const { data: existingPhases = [] } = useConstructionProjectPhases(modalData.projectId);
 
   // Force edit mode on modal open
   useEffect(() => {
@@ -95,8 +95,9 @@ export function ConstructionPhaseFormModal({
 
   const { handleSubmit, setValue, watch, register, formState: { errors } } = form;
 
-  const createPhase = useCreateConstructionPhase();
-  const createProjectPhase = useCreateProjectPhase();
+  // TODO: Implement phase creation hooks
+  // const createPhase = useCreateConstructionPhase();
+  // const createProjectPhase = useCreateProjectPhase();
 
   const watchUseExisting = watch('use_existing_phase');
   
@@ -150,37 +151,13 @@ export function ConstructionPhaseFormModal({
         // Modo creación: crear nueva fase
         let phaseId = data.existing_phase_id;
 
-        // If creating new phase, create it first
-        if (!useExisting) {
-          const newPhase = await createPhase.mutateAsync({
-            name: data.name,
-            description: data.description,
-            organization_id: modalData.organizationId,
-            is_system: false, // Las fases creadas por usuarios nunca son del sistema
-          });
-          phaseId = newPhase.id;
-        }
-
-        if (!phaseId) {
-          toast({
-            title: "Error",
-            description: "Debe seleccionar o crear una fase",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // Add phase to project (fechas se calculan automáticamente)
-        await createProjectPhase.mutateAsync({
-          project_id: modalData.projectId,
-          phase_id: phaseId,
-          created_by: currentMember.id,
-        });
-
+        // TODO: Implement phase creation functionality
         toast({
-          title: "Fase creada exitosamente",
-          description: useExisting ? "La fase existente se agregó al proyecto" : "Nueva fase creada y agregada al proyecto",
+          title: "Funcionalidad en desarrollo",
+          description: "La creación de fases estará disponible próximamente",
+          variant: "destructive",
         });
+        return;
       }
 
       onClose();
@@ -299,7 +276,7 @@ export function ConstructionPhaseFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Crear Fase"}
       onRightClick={handleSubmit(onSubmit)}
-      isLoading={isSubmitting}
+      rightLoading={isSubmitting}
     />
   );
 

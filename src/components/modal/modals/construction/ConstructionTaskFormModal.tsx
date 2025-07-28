@@ -325,7 +325,7 @@ export function ConstructionTaskFormModal({
     } catch (error) {
       console.error('❌ ERROR COMPLETO AL ENVIAR TAREAS:', error);
       console.error('❌ Error type:', typeof error);
-      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error message:', (error as any)?.message);
       console.error('❌ Error details:', JSON.stringify(error, null, 2));
       
       let errorMessage = "Error desconocido";
@@ -601,7 +601,7 @@ export function ConstructionTaskFormModal({
         console.log('🎯 BOTÓN PRESIONADO - selectedTasks:', selectedTasks);
         handleSubmit(onSubmit)();
       }}
-      rightLoading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 
