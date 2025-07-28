@@ -7,7 +7,8 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
-import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
+import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
+import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
@@ -21,6 +22,7 @@ export default function ConstructionTasks() {
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
+  const updatePhasePositions = useUpdatePhasePositions()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
 
@@ -149,10 +151,12 @@ export default function ConstructionTasks() {
 
   const handleEditPhase = (phase: any) => {
     openModal('construction-phase', {
+      data: {
+        id: phase.project_phase_id,
+        phase_id: phase.id,
+        position: phase.position
+      },
       projectId,
-      organizationId,
-      userId: userData?.user?.id,
-      editingPhase: phase,
       isEditing: true
     })
   }
@@ -169,6 +173,15 @@ export default function ConstructionTasks() {
         // TODO: Implementar eliminación de fase
         console.log('Delete phase:', phaseId)
       }
+    })
+  }
+
+  const handleReorderPhases = (reorderedPhases: any[]) => {
+    if (!projectId) return
+    
+    updatePhasePositions.mutate({
+      projectId,
+      phases: reorderedPhases
     })
   }
 
@@ -444,7 +457,7 @@ export default function ConstructionTasks() {
             />
           )
         ) : (
-          // Tab Fases - Nueva tabla de fases
+          // Tab Fases - Drag & Drop Phase Manager
           projectPhases.length === 0 ? (
             <EmptyState
               icon={<Settings className="h-8 w-8" />}
@@ -452,18 +465,12 @@ export default function ConstructionTasks() {
               description="Comienza creando la primera fase del proyecto para organizar las tareas por etapas."
             />
           ) : (
-            <Table
-              columns={phaseColumns}
-              data={projectPhases}
-              isLoading={isLoading}
-              mode="admin"
-              emptyState={
-                <EmptyState
-                  icon={<Settings className="h-8 w-8" />}
-                  title="No hay fases que coincidan"
-                  description="Intenta cambiar los filtros de búsqueda para encontrar las fases que buscas."
-                />
-              }
+            <PhaseOrderManager
+              phases={projectPhases}
+              onReorder={handleReorderPhases}
+              onEdit={handleEditPhase}
+              onDelete={handleDeletePhase}
+              isUpdating={updatePhasePositions.isPending}
             />
           )
         )}

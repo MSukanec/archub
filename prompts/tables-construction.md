@@ -78,16 +78,20 @@ TABLA CONSTRUCTION_PHASES:
     "data_type": "uuid"
   },
   {
-    "column_name": "is_system",
-    "data_type": "boolean"
-  },
-  {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
   },
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "position",
+    "data_type": "integer"
   }
 ]
 
