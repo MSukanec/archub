@@ -3,22 +3,19 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useTaskLibrary } from '@/hooks/use-task-library'
+import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { BarChart3, Search, Layers, Grid } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 
-export default function ConstructionLibrary() {
+export default function ConstructionCostAnalysis() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedSubcategory, setSelectedSubcategory] = useState("")
+
   
-  const { data: userData, isLoading } = useCurrentUser()
-  const { data: tasks = [], isLoading: tasksLoading } = useTaskLibrary(
-    userData?.organization?.id || ''
-  )
+  const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -26,32 +23,27 @@ export default function ConstructionLibrary() {
     setSidebarContext('construction')
   }, [setSidebarContext])
 
-  // Get unique categories and subcategories for filters
-  const uniqueCategories = Array.from(new Set(tasks.map(t => t.category_name))).sort()
-  const uniqueSubcategories = Array.from(new Set(tasks.map(t => t.subcategory_name))).sort()
+  // Get unique categories for filters (use category_name field)
+  const uniqueCategories = Array.from(new Set(tasks.map(t => t.category_name).filter(Boolean))).sort()
 
   // Filter tasks
   const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = task.display_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+    const matchesSearch = task.name_rendered.toLowerCase().includes(searchValue.toLowerCase()) ||
       task.code.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.category_name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.subcategory_name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.rubro_name.toLowerCase().includes(searchValue.toLowerCase())
+      (task.category_name && task.category_name.toLowerCase().includes(searchValue.toLowerCase()))
     
     const matchesCategory = !selectedCategory || task.category_name === selectedCategory
-    const matchesSubcategory = !selectedSubcategory || task.subcategory_name === selectedSubcategory
     
-    return matchesSearch && matchesCategory && matchesSubcategory
+    return matchesSearch && matchesCategory
   })
 
   // Clear all filters
   const handleClearFilters = () => {
     setSearchValue("")
     setSelectedCategory("")
-    setSelectedSubcategory("")
   }
 
-  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== "" || selectedSubcategory !== ""
+  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== ""
 
   const features = [
     {
@@ -91,20 +83,20 @@ export default function ConstructionLibrary() {
       )
     },
     {
-      key: 'rubro_name',
+      key: 'category_name',
       label: 'Rubro',
       width: '10%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
-          {task.rubro_name}
+          {task.category_name || 'Sin categoría'}
         </Badge>
       )
     },
     {
-      key: 'display_name',
+      key: 'name_rendered',
       label: 'Tarea',
       render: (task: any) => (
-        <span className="text-sm">{task.display_name}</span>
+        <span className="text-sm">{task.name_rendered}</span>
       )
     },
     {
@@ -150,28 +142,10 @@ export default function ConstructionLibrary() {
           </SelectContent>
         </Select>
       </div>
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Filtrar por subcategoría
-        </Label>
-        <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Todas las subcategorías" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todas las subcategorías</SelectItem>
-            {uniqueSubcategories.map((subcategory) => (
-              <SelectItem key={subcategory} value={subcategory}>
-                {subcategory}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
     </div>
   )
 
-  if (isLoading || tasksLoading) {
+  if (tasksLoading) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="flex items-center justify-center h-64">

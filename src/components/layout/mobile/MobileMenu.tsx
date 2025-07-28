@@ -299,7 +299,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Users, label: 'Asistencia', href: '/construction/personnel' },
-      { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/library' },
+      { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/cost-analysis' },
     ],
     finanzas: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
