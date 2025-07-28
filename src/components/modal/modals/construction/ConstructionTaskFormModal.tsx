@@ -55,7 +55,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState('');
-  const [phaseFilter, setPhaseFilter] = useState('');
+
   const [groupingType, setGroupingType] = useState('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -78,9 +78,9 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     queryKey: ['task-library', modalData.organizationId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('task_generated_view')
+        .from('task_parametric_view')
         .select('*')
-        .order('rubro_name', { ascending: true });
+        .order('category_name', { ascending: true });
       
       if (error) throw error;
       return data || [];
@@ -96,20 +96,19 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
     
     return tasks.filter(task => {
       const matchesSearch = !searchQuery || 
-        task.task_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.rubro_name?.toLowerCase().includes(searchQuery.toLowerCase());
+        task.name_rendered?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.category_name?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesRubro = !rubroFilter || task.rubro_name === rubroFilter;
-      const matchesPhase = !phaseFilter || task.phase_name === phaseFilter;
+      const matchesRubro = !rubroFilter || task.category_name === rubroFilter;
       
-      return matchesSearch && matchesRubro && matchesPhase;
+      return matchesSearch && matchesRubro;
     });
-  }, [tasks, searchQuery, rubroFilter, phaseFilter]);
+  }, [tasks, searchQuery, rubroFilter]);
 
-  // Obtener rubros únicos para el filtro
+  // Obtener categorías únicas para el filtro
   const uniqueRubros = useMemo(() => {
     if (!tasks) return [];
-    const rubros = [...new Set(tasks.map(task => task.rubro_name).filter(Boolean))];
+    const rubros = [...new Set(tasks.map(task => task.category_name).filter(Boolean))];
     return rubros;
   }, [tasks]);
 
@@ -180,7 +179,6 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const clearFilters = () => {
     setSearchQuery('');
     setRubroFilter('');
-    setPhaseFilter('');
   };
 
   // Configuración del header del modal
@@ -253,7 +251,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
               </SelectContent>
             </Select>
             
-            {(searchQuery || rubroFilter || phaseFilter) && (
+            {(searchQuery || rubroFilter) && (
               <Button variant="outline" size="sm" onClick={clearFilters}>
                 <X className="w-4 h-4 mr-2" />
                 Limpiar
@@ -310,9 +308,9 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
                           )}
                           
                           <div className="flex-1 space-y-1">
-                            <div className="font-medium">{task.task_name}</div>
+                            <div className="font-medium">{task.name_rendered}</div>
                             <div className="text-sm text-muted-foreground">
-                              {task.rubro_name} • {task.unit_name}
+                              {task.category_name} • {task.unit_name}
                             </div>
                           </div>
                         </div>

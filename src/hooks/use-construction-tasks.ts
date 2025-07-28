@@ -62,10 +62,9 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       });
       
       const { data: ganttData, error } = await supabase
-        .from('construction_gantt_view')
+        .from('task_parametric_view')
         .select('*')
-        .eq('project_id', projectId)
-        .order('phase_position', { ascending: true });
+        .order('created_at', { ascending: true });
         
       console.log('📊 CONSTRUCTION GANTT QUERY RESULT:', {
         projectId,
@@ -87,41 +86,43 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       // Debug: ver qué campos están llegando exactamente
       console.log('RAW GANTT DATA SAMPLE:', JSON.stringify(ganttData?.[0], null, 2));
 
-      // Mapear datos de construction_gantt_view al formato esperado
+      // Mapear datos de task_parametric_view al formato esperado
       const mappedTasks: ConstructionTask[] = ganttData.map((item: any) => {
         return {
           // Campos principales de la vista
-          task_instance_id: item.task_instance_id,
-          project_id: item.project_id,
-          task_id: item.task_id,
-          task_code: item.task_code,
+          task_instance_id: item.id, // Usar el ID de task_parametric como task_instance_id
+          project_id: projectId, // Del parámetro
+          task_id: item.id,
+          task_code: item.code,
           param_values: item.param_values,
-          start_date: item.start_date,
-          end_date: item.end_date,
-          duration_in_days: item.duration_in_days,
-          quantity: item.quantity || 0, // CANTIDAD DIRECTA DE LA VISTA
+          start_date: null, // No disponible en task_parametric_view
+          end_date: null,
+          duration_in_days: null,
+          quantity: 1, // Valor por defecto
           
-          // Campos de fase de la vista
-          phase_instance_id: item.phase_instance_id,
-          phase_name: item.phase_name,
-          phase_position: item.phase_position,
-          progress_percent: item.progress_percent || 0,
+          // Campos de fase simulados (no disponibles en task_parametric_view)
+          phase_instance_id: '', 
+          phase_name: 'Sin fase',
+          phase_position: 0,
+          progress_percent: 0,
           
           // Compatibilidad con sistema existente
-          id: item.task_instance_id, // ID principal para compatibilidad
+          id: item.id, // ID principal para compatibilidad
           organization_id: organizationId, // Del contexto
+          created_at: item.created_at,
+          updated_at: item.updated_at,
           
           // Crear objeto task para compatibilidad con componentes existentes
           task: {
-            id: item.task_id,
-            code: item.task_code,
-            display_name: item.display_name || item.task_code, // DISPLAY_NAME DIRECTO DE LA VISTA
-            rubro_name: item.rubro_name || null, // RUBRO_NAME DIRECTO DE LA VISTA
-            category_name: item.category_name || null, // CATEGORY_NAME DIRECTO DE LA VISTA
+            id: item.id,
+            code: item.code,
+            display_name: item.name_rendered || item.code, // Usar name_rendered de task_parametric_view
+            rubro_name: item.category_name || null, // Usar category_name como rubro_name
+            category_name: item.category_name || null,
             unit_id: item.unit_id,
-            unit_name: item.unit_name || null, // UNIT_NAME DIRECTO DE LA VISTA
-            unit_symbol: item.unit_symbol || null, // UNIT_SYMBOL DIRECTO DE LA VISTA
-            rubro_id: item.rubro_id || null, // RUBRO_ID DIRECTO DE LA VISTA
+            unit_name: item.unit_name || null,
+            unit_symbol: item.unit_name || null, // Usar unit_name como symbol también
+            rubro_id: item.category_id || null, // Usar category_id como rubro_id
             param_values: item.param_values
           }
         };
