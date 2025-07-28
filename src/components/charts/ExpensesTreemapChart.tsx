@@ -64,53 +64,35 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
             data={treemapData}
             dataKey="size"
             stroke="#fff"
-            content={({ root, depth, x, y, width, height, index, name }) => {
-              // Solo renderizar contenido si es un nodo hoja y tiene suficiente espacio
-              if (depth === 1 && width > 50 && height > 25) {
-                return (
-                  <g>
-                    <rect
-                      x={x}
-                      y={y}
-                      width={width}
-                      height={height}
-                      style={{
-                        fill: treemapData[index]?.fill || '#ccc',
-                        stroke: '#fff',
-                        strokeWidth: 1
-                      }}
-                    />
-                    {/* Solo mostrar texto si hay suficiente espacio */}
-                    {width > 80 && height > 40 && (
-                      <text
-                        x={x + width / 2}
-                        y={y + height / 2}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        style={{
-                          fontSize: '11px', // Tamaño como en la leyenda (text-xs)
-                          fontWeight: 'normal', // Sin negrita
-                          fill: '#fff'
-                        }}
-                      >
-                        {name}
-                      </text>
-                    )}
-                  </g>
-                )
-              }
-              return null
-            }}
+            strokeWidth={1}
           >
             <Tooltip 
-              formatter={(value: number) => [formatCurrency(value), 'Monto']}
-              labelFormatter={(label) => label} // Solo mostrar el nombre de la subcategoría
-              contentStyle={{
-                backgroundColor: 'var(--toast-bg)',
-                color: 'var(--toast-fg)',
-                border: '1px solid var(--toast-border)',
-                borderRadius: '8px',
-                fontSize: '12px'
+              formatter={(value: number, name: string) => [formatCurrency(value), name]}
+              labelFormatter={(label) => label} // Mostrar el nombre de la subcategoría
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0]
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: 'var(--toast-bg)',
+                        color: 'var(--toast-fg)',
+                        border: '1px solid var(--toast-border)',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        padding: '8px 12px'
+                      }}
+                    >
+                      <div style={{ fontWeight: '500', marginBottom: '4px' }}>
+                        {data.payload.name}
+                      </div>
+                      <div>
+                        Monto: {formatCurrency(data.value as number)}
+                      </div>
+                    </div>
+                  )
+                }
+                return null
               }}
             />
           </Treemap>
