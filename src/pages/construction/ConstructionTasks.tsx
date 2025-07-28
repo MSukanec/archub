@@ -317,11 +317,39 @@ export default function ConstructionTasks() {
     return filteredTasks;
   }, [filteredTasks]);
 
+  // Definir columnas específicas para agrupación por tareas
+  const taskGroupingColumns = [
+    {
+      key: 'display_name',
+      label: 'Tarea',
+      render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
+      width: 'auto' // Máximo espacio posible
+    },
+    {
+      key: 'rubro_name',
+      label: 'Rubro',
+      render: (task: any) => task.task?.rubro_name || 'Sin rubro',
+      width: '10%'
+    },
+    {
+      key: 'unit',
+      label: 'Unidad',
+      render: (task: any) => task.task?.unit_symbol || 'Sin unidad',
+      width: '10%'
+    },
+    {
+      key: 'quantity',
+      label: 'Cantidad',
+      render: (task: any) => task.quantity || 0,
+      width: '10%'
+    }
+  ]
+
   // Seleccionar columnas según el tipo de agrupación  
   const columns = useMemo(() => {
-    // Para agrupación por tareas, usar columnas base pero ocultar columna de tarea ya que será el header del grupo
+    // Para agrupación por tareas, usar columnas específicas sin acciones y reordenadas
     if (groupingType === 'tasks') {
-      return baseColumns.filter(column => column.key !== 'display_name');
+      return taskGroupingColumns;
     }
     
     // Filtrar columnas base para otros tipos de agrupación
