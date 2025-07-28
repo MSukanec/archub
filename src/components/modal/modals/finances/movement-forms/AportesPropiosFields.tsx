@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { DollarSign } from 'lucide-react'
+import { DollarSign, Users } from 'lucide-react'
 import UserSelector from '@/components/ui-custom/UserSelector'
+import { Button } from '@/components/ui/button'
 
 interface AportesPropriosForm {
   created_by: string
@@ -53,20 +54,45 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
       <FormField
         control={form.control}
         name="member_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Socio *</FormLabel>
-            <FormControl>
-              <UserSelector
-                users={members || []}
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Seleccionar socio"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        render={({ field }) => {
+          // Mostrar estado vacío si no hay socios
+          if (!members || members.length === 0) {
+            return (
+              <FormItem>
+                <FormLabel>Socio</FormLabel>
+                <FormControl>
+                  <div className="flex items-center justify-center p-4 border border-dashed rounded-lg bg-muted/50">
+                    <div className="text-center">
+                      <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Aún no tienes Socios, ¿quieres agregar uno?
+                      </p>
+                      <Button variant="outline" size="sm" disabled>
+                        Agregar
+                      </Button>
+                    </div>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )
+          }
+
+          return (
+            <FormItem>
+              <FormLabel>Socio</FormLabel>
+              <FormControl>
+                <UserSelector
+                  users={members || []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar socio"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
       />
 
       {/* Fila: Moneda | Billetera */}

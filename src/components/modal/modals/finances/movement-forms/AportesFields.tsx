@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { DollarSign } from "lucide-react"
+import { DollarSign, Users } from "lucide-react"
 import UserSelector from "@/components/ui-custom/UserSelector"
 import { useCurrentUser } from "@/hooks/use-current-user"
+import { Button } from "@/components/ui/button"
+import { Link } from "wouter"
 
 interface Props {
   form: UseFormReturn<MovementForm>
@@ -128,9 +130,34 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
             avatar_url: projectClient.contact.avatar_url
           })) || []
           
+          // Mostrar estado vacío si no hay clientes
+          if (!clientsData || clientsData.length === 0) {
+            return (
+              <FormItem>
+                <FormLabel>Cliente</FormLabel>
+                <FormControl>
+                  <div className="flex items-center justify-center p-4 border border-dashed rounded-lg bg-muted/50">
+                    <div className="text-center">
+                      <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Aún no tienes Clientes, ¿quieres agregar uno?
+                      </p>
+                      <Link href="/contacts/clients">
+                        <Button variant="outline" size="sm">
+                          Agregar
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )
+          }
+
           return (
             <FormItem>
-              <FormLabel>Cliente *</FormLabel>
+              <FormLabel>Cliente</FormLabel>
               <FormControl>
                 <UserSelector
                   users={clientsData}

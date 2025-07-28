@@ -90,7 +90,7 @@ const aportesFormSchema = z.object({
   category_id: z.string().min(1, 'Categoría es requerida'),
   subcategory_id: z.string().optional(), // Agregar subcategoría para aportes
   // Campos para aportes
-  contact_id: z.string().min(1, 'Cliente es requerido'),
+  contact_id: z.string().optional(), // Campo opcional - Cliente
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -104,7 +104,7 @@ const aportesPropriosFormSchema = z.object({
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
   // Campos para aportes propios
-  member_id: z.string().min(1, 'Socio es requerido'),
+  member_id: z.string().optional(), // Campo opcional - Socio
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -118,7 +118,7 @@ const retirosPropriosFormSchema = z.object({
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
   // Campos para retiros propios
-  member_id: z.string().min(1, 'Socio es requerido'),
+  member_id: z.string().optional(), // Campo opcional - Socio
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),

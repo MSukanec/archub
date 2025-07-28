@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. MOVEMENT FORM OPTIONAL CLIENT/PARTNER FIELDS WITH EMPTY STATE NAVIGATION COMPLETED: Successfully implemented optional client/partner fields in movement forms with empty state guidance - COMPLETED
+  • OPTIONAL FIELD VALIDATION: Made contact_id and member_id fields optional in all movement form schemas (aportes, aportes_propios, retiros_propios)
+  • EMPTY STATE UI: Added visual empty state when no clients/partners exist showing "Aún no tienes Clientes/Socios, ¿quieres agregar uno?"
+  • NAVIGATION INTEGRATION: Empty state includes "Agregar" button for clients that navigates to /contacts/clients page
+  • FIELD LABELS UPDATED: Removed asterisks (*) from Cliente and Socio labels since fields are now optional
+  • PARTNER FUNCTIONALITY: Partner "Agregar" button temporarily disabled as requested until partner management page exists
+  • FORM VALIDATION: Updated Zod schemas to allow null/empty values for contact_id and member_id fields
+  • CONSISTENT UX: All three movement forms (AportesFields, AportesPropiosFields, RetirosPropiosFields) now follow same pattern
 - July 28, 2025. FINANCIAL DASHBOARD CURRENCY SELECTOR DYNAMIC CONFIGURATION COMPLETED: Successfully implemented automatic organization default currency detection in Resumen Financiero ActionBar selector - COMPLETED
   • DYNAMIC CURRENCY OPTIONS: Currency selector now automatically shows organization's default currency instead of hardcoded "Pesificado"
   • ORGANIZATION CURRENCY INTEGRATION: Added useOrganizationCurrencies hook to detect default currency from organization_currencies table
