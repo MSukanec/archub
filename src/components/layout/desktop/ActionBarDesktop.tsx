@@ -131,10 +131,13 @@ export function ActionBarDesktop({
   return (
     <div 
       className={cn(
-        "hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg",
+        "hidden md:flex flex-col rounded-lg border mb-6 shadow-lg",
         className
       )}
-      style={{ backgroundColor: "var(--card-bg)" }}
+      style={{ 
+        backgroundColor: "var(--actionbar-bg)",
+        borderColor: "var(--actionbar-border)"
+      }}
     >
       {/* Top Row - Title and Icon */}
       {(title || icon) && (
@@ -143,12 +146,12 @@ export function ActionBarDesktop({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {icon && (
-                  <div className="text-accent">
+                  <div style={{ color: "var(--actionbar-icon-text)" }}>
                     {icon}
                   </div>
                 )}
                 {title && (
-                  <h2 className="text-xl font-semibold text-foreground">
+                  <h2 className="text-xl font-semibold" style={{ color: "var(--actionbar-title-text)" }}>
                     {title}
                   </h2>
                 )}
@@ -181,14 +184,14 @@ export function ActionBarDesktop({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 mt-1 text-primary">
+                    <div className="flex-shrink-0 mt-1" style={{ color: "var(--actionbar-icon-text)" }}>
                       {feature.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-foreground mb-1">
+                      <h3 className="text-sm font-medium mb-1" style={{ color: "var(--actionbar-title-text)" }}>
                         {feature.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--actionbar-content-text)" }}>
                         {feature.description}
                       </p>
                     </div>
@@ -199,7 +202,7 @@ export function ActionBarDesktop({
           )}
 
           {/* Divider line - only show if there's bottom content */}
-          {hasBottomContent && <div className="border-t border-[var(--card-border)]" />}
+          {hasBottomContent && <div className="border-t" style={{ borderColor: "var(--actionbar-border)" }} />}
         </>
       )}
 
