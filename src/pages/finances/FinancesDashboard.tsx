@@ -1,10 +1,10 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet, Clock, ChevronDown } from 'lucide-react'
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet } from 'lucide-react'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { TimePeriodSelector } from '@/components/ui-custom/TimePeriodSelector'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
@@ -93,16 +93,7 @@ export default function FinancesDashboard() {
   const currentOrganization = userData?.organization;
   const currentProject = userData?.organizations?.[0]?.projects?.[0];
 
-  // Time period options
-  const timePeriodOptions = [
-    { value: 'desde-siempre', label: 'Desde Siempre' },
-    { value: 'ultimo-mes', label: 'Último Mes' },
-    { value: 'ultimo-trimestre', label: 'Último Trimestre' },
-    { value: 'ultimo-semestre', label: 'Último Semestre' },
-    { value: 'ultimo-año', label: 'Último Año' }
-  ]
 
-  const currentTimePeriodLabel = timePeriodOptions.find(option => option.value === timePeriod)?.label || 'Desde Siempre'
 
   return (
     <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
@@ -130,32 +121,13 @@ export default function FinancesDashboard() {
               <DollarSign className="w-4 h-4" />
               {currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
             </Button>,
-            <DropdownMenu key="time-period">
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 px-2 py-1 h-auto text-sm font-medium hover:bg-muted/50 data-[state=open]:bg-muted/50"
-                >
-                  <Clock className="w-4 h-4" />
-                  <span className="truncate max-w-32">{currentTimePeriodLabel}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                {timePeriodOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => setTimePeriod(option.value)}
-                    className="flex items-center justify-between"
-                  >
-                    <span>{option.label}</span>
-                    {timePeriod === option.value && (
-                      <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div key="time-period" className="flex items-center">
+              <TimePeriodSelector
+                value={timePeriod}
+                onValueChange={setTimePeriod}
+                className="h-8"
+              />
+            </div>
           ]}
         />
 
