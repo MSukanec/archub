@@ -242,16 +242,40 @@ export function ConstructionTaskFormModal({
         });
       } else {
         // Modo creación - crear múltiples tareas
-        const promises = selectedTasks.map(selectedTask => 
-          createTask.mutateAsync({
+        console.log('🚀 CREANDO TAREAS - DATOS A ENVIAR:', {
+          numberOfTasks: selectedTasks.length,
+          organizationId: modalData.organizationId,
+          projectId: modalData.projectId,
+          createdBy: currentMember.id,
+          taskDetails: selectedTasks.map(st => ({
+            task_id: st.task_id,
+            quantity: st.quantity,
+            phase_instance_id: st.phase_instance_id
+          }))
+        });
+
+        const promises = selectedTasks.map((selectedTask, index) => {
+          console.log(`🔄 Preparando tarea ${index + 1}:`, {
+            task_id: selectedTask.task_id,
+            quantity: selectedTask.quantity,
+            organization_id: modalData.organizationId,
+            project_id: modalData.projectId,
+            created_by: currentMember.id,
+            project_phase_id: selectedTask.phase_instance_id || undefined
+          });
+          
+          return createTask.mutateAsync({
             organization_id: modalData.organizationId,
             project_id: modalData.projectId,
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
             created_by: currentMember.id,
             project_phase_id: selectedTask.phase_instance_id || undefined
-          })
-        );
+          }).catch(error => {
+            console.error(`❌ Error en tarea ${index + 1}:`, error);
+            throw error;
+          });
+        });
 
         await Promise.all(promises);
 
@@ -263,10 +287,24 @@ export function ConstructionTaskFormModal({
 
       onClose();
     } catch (error) {
-      console.error('Error submitting tasks:', error);
+      console.error('❌ ERROR COMPLETO AL ENVIAR TAREAS:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      
+      let errorMessage = "Error desconocido";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.details) {
+        errorMessage = error.details;
+      }
+      
       toast({
         title: "Error",
-        description: modalData.isEditing ? "No se pudo actualizar la tarea" : "No se pudo agregar las tareas",
+        description: `${modalData.isEditing ? "No se pudo actualizar la tarea" : "No se pudo agregar las tareas"}: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {

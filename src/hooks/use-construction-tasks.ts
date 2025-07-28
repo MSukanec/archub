@@ -201,6 +201,8 @@ export function useCreateConstructionTask() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
+      console.log('🔧 HOOK useCreateConstructionTask - DATOS RECIBIDOS:', taskData);
+
       // Crear la tarea de construcción
       const { data: constructionTask, error: taskError } = await supabase
         .from('construction_tasks')
@@ -218,9 +220,13 @@ export function useCreateConstructionTask() {
         .single();
 
       if (taskError) {
-        console.error('Error creating construction task:', taskError);
+        console.error('❌ ERROR CREANDO CONSTRUCCION TASK:', taskError);
+        console.error('❌ Datos que causaron el error:', taskData);
+        console.error('❌ Error completo:', JSON.stringify(taskError, null, 2));
         throw taskError;
       }
+
+      console.log('✅ TAREA DE CONSTRUCCION CREADA EXITOSAMENTE:', constructionTask);
 
       // Si se especificó una fase, crear la vinculación en construction_phase_tasks
       if (taskData.project_phase_id && constructionTask) {
