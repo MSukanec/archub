@@ -246,12 +246,43 @@ export function ConstructionTaskFormModal({
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
 
+  // Hook para obtener parámetros para validar obligatorios
+  const { data: allParameters = [] } = useQuery({
+    queryKey: ['parameters-for-validation'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      const { data, error } = await supabase
+        .from('task_parameters')
+        .select('id, slug, label, is_required');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Función para manejar la creación de tarea paramétrica
   const handleCreateParametricTask = async () => {
     if (parametricSelections.length === 0) {
       toast({
         title: "Error",
         description: "Debes seleccionar al menos un parámetro",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar parámetros obligatorios
+    const requiredParameters = allParameters.filter(param => param.is_required);
+    const selectedParameterSlugs = parametricSelections.map(sel => sel.parameterSlug);
+    
+    const missingRequiredParams = requiredParameters.filter(param => 
+      !selectedParameterSlugs.includes(param.slug)
+    );
+
+    if (missingRequiredParams.length > 0) {
+      const missingNames = missingRequiredParams.map(param => param.label).join(', ');
+      toast({
+        title: "Parámetros obligatorios faltantes",
+        description: `Debes completar los siguientes parámetros obligatorios: ${missingNames}`,
         variant: "destructive",
       });
       return;

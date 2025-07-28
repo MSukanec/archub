@@ -7,7 +7,8 @@ import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
@@ -24,6 +25,7 @@ const taskParameterSchema = z.object({
     required_error: 'El tipo es requerido' 
   }),
   expression_template: z.string().optional(),
+  is_required: z.boolean().default(false),
 });
 
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
@@ -54,6 +56,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       label: '',
       type: 'text',
       expression_template: '{value}',
+      is_required: false,
     },
   });
 
@@ -65,6 +68,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
         label: parameter.label || '',
         type: parameter.type as any || 'text',
         expression_template: parameter.expression_template || '{value}',
+        is_required: parameter.is_required || false,
       });
     }
   }, [parameter, form]);
@@ -238,6 +242,30 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
           <div className="text-sm text-muted-foreground">
             Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
           </div>
+
+          {/* Campo is_required */}
+          <FormField
+            control={form.control}
+            name="is_required"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Parámetro obligatorio
+                  </FormLabel>
+                  <FormDescription>
+                    Si está marcado, el usuario deberá seleccionar una opción para este parámetro antes de poder crear la tarea.
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
         </form>
       </Form>
 

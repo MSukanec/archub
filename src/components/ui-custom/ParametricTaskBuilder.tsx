@@ -16,6 +16,7 @@ interface TaskParameter {
   label: string
   type: string
   expression_template: string
+  is_required?: boolean
 }
 
 interface TaskParameterOption {
@@ -225,7 +226,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
             // New format: key is parameter ID, value is option ID
             parameter = parameters.find(p => p.id === key);
             if (parameter && typeof value === 'string' && value.length === 36 && value.includes('-')) {
-              option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter.id);
+              option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter!.id);
             }
           } else {
             // Legacy format: key is parameter slug, value is option ID or label/name
@@ -233,13 +234,13 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
             if (parameter) {
               // First try to find by exact option ID
               if (typeof value === 'string' && value.length === 36 && value.includes('-')) {
-                option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter.id);
+                option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter!.id);
               }
               
               // If not found by ID, try to find by label/name
               if (!option) {
                 option = allOptions.find(opt => 
-                  opt.parameter_id === parameter.id && 
+                  opt.parameter_id === parameter!.id && 
                   (opt.label === value || opt.name === value)
                 );
               }
@@ -247,7 +248,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
               // If still not found, try case-insensitive search
               if (!option) {
                 option = allOptions.find(opt => 
-                  opt.parameter_id === parameter.id && 
+                  opt.parameter_id === parameter!.id && 
                   (opt.label?.toLowerCase() === (value as string)?.toLowerCase() || 
                    opt.name?.toLowerCase() === (value as string)?.toLowerCase())
                 );
@@ -255,7 +256,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
               
               // If still not found but we have a parameter, take the first available option as fallback
               if (!option) {
-                const availableOptions = allOptions.filter(opt => opt.parameter_id === parameter.id);
+                const availableOptions = allOptions.filter(opt => opt.parameter_id === parameter!.id);
                 if (availableOptions.length > 0) {
                   option = availableOptions[0];
                   console.log('⚠️ Using fallback option for', key, ':', option.label);
@@ -621,9 +622,14 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
                   <PopoverTrigger asChild>
                     <Button 
                       variant={selection ? "default" : "outline"}
-                      className="px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full"
+                      className={`px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full ${
+                        parameter.is_required ? 'border-red-500 dark:border-red-400' : ''
+                      }`}
                     >
-                      <span>{selection ? selection.optionLabel : parameter.label}</span>
+                      <span>
+                        {selection ? selection.optionLabel : parameter.label}
+                        {parameter.is_required && !selection && <span className="text-red-500 ml-1">*</span>}
+                      </span>
                       <ChevronDown className="w-3 h-3" />
                     </Button>
                   </PopoverTrigger>

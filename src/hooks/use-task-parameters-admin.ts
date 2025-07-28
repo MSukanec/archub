@@ -8,6 +8,7 @@ export interface TaskParameter {
   label: string;
   type: string;
   expression_template: string;
+  is_required: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +34,7 @@ export interface CreateTaskParameterData {
   label: string;
   type: string;
   expression_template?: string;
+  is_required?: boolean;
 }
 
 export interface UpdateTaskParameterData {
@@ -41,6 +43,7 @@ export interface UpdateTaskParameterData {
   label: string;
   type: string;
   expression_template?: string;
+  is_required?: boolean;
 }
 
 export interface CreateTaskParameterOptionData {
@@ -122,7 +125,8 @@ export function useCreateTaskParameter() {
           slug: parameterData.slug,
           label: parameterData.label,
           type: parameterData.type,
-          expression_template: parameterData.expression_template
+          expression_template: parameterData.expression_template,
+          is_required: parameterData.is_required || false
         }])
         .select()
         .single();
@@ -167,7 +171,8 @@ export function useUpdateTaskParameter() {
           slug: updateData.slug,
           label: updateData.label,
           type: updateData.type,
-          expression_template: updateData.expression_template
+          expression_template: updateData.expression_template,
+          is_required: updateData.is_required
         })
         .eq('id', id)
         .select()

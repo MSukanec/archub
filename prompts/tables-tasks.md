@@ -30,6 +30,10 @@ TABLA TASK_PARAMETERS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "is_required",
+    "data_type": "boolean"
   }
 ]
 

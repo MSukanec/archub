@@ -122,8 +122,10 @@ export const task_parameters = pgTable("task_parameters", {
   slug: text("slug").notNull(), // e.g., "brick-type"
   label: text("label").notNull(), // e.g., "Tipo de Ladrillo / Bloque"
   type: text("type", { enum: ["text", "number", "select", "boolean"] }).notNull(),
-  required: boolean("required").default(false),
+  expression_template: text("expression_template").notNull().default("{value}"),
+  is_required: boolean("is_required").default(false),
   created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
 });
 
 export const task_parameter_options = pgTable("task_parameter_options", {
