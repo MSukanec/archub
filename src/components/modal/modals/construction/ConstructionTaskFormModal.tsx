@@ -271,12 +271,20 @@ export function ConstructionTaskFormModal({
     }
 
     // Validar parámetros obligatorios
+    console.log('🔍 DEBUG: Validando parámetros obligatorios');
+    console.log('📊 allParameters:', allParameters);
+    console.log('📊 parametricSelections:', parametricSelections);
+    
     const requiredParameters = allParameters.filter(param => param.is_required);
+    console.log('📊 requiredParameters:', requiredParameters);
+    
     const selectedParameterSlugs = parametricSelections.map(sel => sel.parameterSlug);
+    console.log('📊 selectedParameterSlugs:', selectedParameterSlugs);
     
     const missingRequiredParams = requiredParameters.filter(param => 
       !selectedParameterSlugs.includes(param.slug)
     );
+    console.log('📊 missingRequiredParams:', missingRequiredParams);
 
     if (missingRequiredParams.length > 0) {
       const missingNames = missingRequiredParams.map(param => param.label).join(', ');

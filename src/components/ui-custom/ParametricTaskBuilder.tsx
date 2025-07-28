@@ -623,7 +623,7 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
                     <Button 
                       variant={selection ? "default" : "outline"}
                       className={`px-3 py-1.5 h-auto text-xs flex items-center gap-2 rounded-full ${
-                        parameter.is_required ? 'border-red-500 dark:border-red-400' : ''
+                        parameter.is_required && !selection ? 'border-red-500 dark:border-red-400' : ''
                       }`}
                     >
                       <span>
