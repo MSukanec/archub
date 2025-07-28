@@ -151,7 +151,14 @@ export function useCreateGeneratedTask() {
       }
     },
     onSuccess: (data) => {
+      // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
       
       toast({
         title: "Tarea Generada",
@@ -189,7 +196,15 @@ export function useDeleteGeneratedTask() {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
       toast({
         title: "Tarea Eliminada",
         description: "La tarea generada se ha eliminado exitosamente",

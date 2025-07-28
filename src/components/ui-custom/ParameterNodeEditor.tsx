@@ -251,7 +251,14 @@ const useCreateDependency = () => {
       return data;
     },
     onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas con parámetros y dependencias
       queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
       toast({
         title: "Dependencia creada",
         description: "La conexión entre parámetros ha sido guardada exitosamente.",
@@ -293,7 +300,14 @@ const useDeleteDependency = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas con parámetros y dependencias
       queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
       toast({
         title: "Dependencia eliminada",
         description: "La conexión ha sido eliminada exitosamente.",
@@ -401,7 +415,14 @@ const useSaveParameterPosition = () => {
       }
     },
     onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
     },
     onError: (error) => {
       console.error('❌ Error en mutación:', error);

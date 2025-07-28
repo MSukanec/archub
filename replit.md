@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. CACHE SYNCHRONIZATION BUG COMPLETELY FIXED: Successfully resolved critical issue where modal "Nueva Tarea Paramétrica" required F5 refresh to see dependency changes from visual editor - COMPLETED
+  • COMPREHENSIVE CACHE INVALIDATION: Added complete query invalidation system to all parameter-related mutations (create, delete dependencies, save positions)
+  • MODAL SYNC ACHIEVED: Modal now updates automatically when dependencies or parameter positions change in visual editor
+  • REAL-TIME UPDATES: All parameter queries invalidated: parameters-with-options, task-parameters-admin, task-parameter-values, parameter-dependencies-flow, task-parameter-dependencies
+  • BIDIRECTIONAL SYNC: Both visual editor and parametric task modal stay synchronized without manual refresh
+  • USER EXPERIENCE PERFECTED: System now provides seamless real-time updates between visual parameter editor and task creation modal
 - July 28, 2025. VISUAL PARAMETER EDITOR DISPLAY LOGIC OPTIMIZATION COMPLETED: Successfully fixed node display and connection issues in visual parameter tree editor - COMPLETED
   • NODE DISPLAY OPTIMIZATION: Nodes now appear ONLY when they have saved positions OR are involved in existing dependencies, eliminating auto-creation for all parameters
   • MULTIPLE CONNECTION BUG FIXED: Optimized edge creation logic to show only ONE connection per dependency instead of multiple lines between duplicated nodes
