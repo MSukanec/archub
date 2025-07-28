@@ -53,6 +53,7 @@ interface ActionBarDesktopProps {
   showGrouping?: boolean
   groupingType?: string
   onGroupingChange?: (type: string) => void
+  groupingOptions?: Array<{ value: string; label: string }>
   primaryActionLabel?: string
   onPrimaryActionClick?: () => void
   primaryActionRestriction?: {
@@ -90,6 +91,7 @@ export function ActionBarDesktop({
   showGrouping = true,
   groupingType = 'none',
   onGroupingChange,
+  groupingOptions,
   primaryActionLabel,
   onPrimaryActionClick,
   primaryActionRestriction,
@@ -316,36 +318,56 @@ export function ActionBarDesktop({
               }}
             >
               <div className="py-1">
-                <button
-                  onClick={() => onGroupingChange('phases')}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
-                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    groupingType === 'phases' && "bg-[var(--button-ghost-hover-bg)]"
-                  )}
-                >
-                  Agrupar por Fases
-                </button>
-                <button
-                  onClick={() => onGroupingChange('phases-rubros')}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
-                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    groupingType === 'phases-rubros' && "bg-[var(--button-ghost-hover-bg)]"
-                  )}
-                >
-                  Agrupar por Fases y Rubros
-                </button>
-                <button
-                  onClick={() => onGroupingChange('tasks')}
-                  className={cn(
-                    "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
-                    "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
-                    groupingType === 'tasks' && "bg-[var(--button-ghost-hover-bg)]"
-                  )}
-                >
-                  Agrupar por Rubros y Tareas
-                </button>
+                {groupingOptions ? (
+                  // Usar opciones personalizadas si están disponibles
+                  groupingOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => onGroupingChange(option.value)}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                        "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                        groupingType === option.value && "bg-[var(--button-ghost-hover-bg)]"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))
+                ) : (
+                  // Opciones por defecto para construcción
+                  <>
+                    <button
+                      onClick={() => onGroupingChange('phases')}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                        "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                        groupingType === 'phases' && "bg-[var(--button-ghost-hover-bg)]"
+                      )}
+                    >
+                      Agrupar por Fases
+                    </button>
+                    <button
+                      onClick={() => onGroupingChange('phases-rubros')}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                        "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                        groupingType === 'phases-rubros' && "bg-[var(--button-ghost-hover-bg)]"
+                      )}
+                    >
+                      Agrupar por Fases y Rubros
+                    </button>
+                    <button
+                      onClick={() => onGroupingChange('tasks')}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                        "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
+                        groupingType === 'tasks' && "bg-[var(--button-ghost-hover-bg)]"
+                      )}
+                    >
+                      Agrupar por Rubros y Tareas
+                    </button>
+                  </>
+                )}
               </div>
             </PopoverContent>
           </Popover>

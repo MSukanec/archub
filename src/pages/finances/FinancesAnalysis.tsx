@@ -201,8 +201,12 @@ export default function FinancesAnalysis() {
           features={features}
           showProjectSelector={true}
           showGrouping={true}
-          groupingType={groupByCategory ? 'category' : 'none'}
-          onGroupingChange={(type) => setGroupByCategory(type !== 'none')}
+          groupingType={groupByCategory ? 'subcategory' : 'none'}
+          onGroupingChange={(type) => setGroupByCategory(type === 'subcategory')}
+          groupingOptions={[
+            { value: 'none', label: 'No agrupar' },
+            { value: 'subcategory', label: 'Agrupar por Subcategoría' }
+          ]}
         />
 
         {filteredData.length > 0 ? (
