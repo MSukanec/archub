@@ -2,17 +2,15 @@ import React from 'react'
 import { ResponsiveContainer, Cell } from 'recharts'
 import { PieChart, Pie } from 'recharts'
 
-interface ExpensesSunburstData {
+interface ExpensesCategoryData {
   category: string
-  subcategory: string
   amount: number
   percentage: number
-  categoryColor: string
-  subcategoryColor: string
+  color: string
 }
 
 interface ExpensesSunburstChartProps {
-  data: ExpensesSunburstData[]
+  data: ExpensesCategoryData[]
   isLoading?: boolean
 }
 
@@ -21,7 +19,7 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
   if (isLoading) {
     return (
       <div className="h-72 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">Cargando gráfico sunburst...</div>
+        <div className="text-sm text-muted-foreground">Cargando gráfico de categorías...</div>
       </div>
     )
   }
@@ -29,38 +27,17 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
   if (!data || data.length === 0) {
     return (
       <div className="h-72 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">No hay datos de subcategorías</div>
+        <div className="text-sm text-muted-foreground">No hay datos de categorías</div>
       </div>
     )
   }
 
-  // Prepare data for categories (inner ring)
-  const categoryTotals = new Map<string, { amount: number; color: string }>()
-  
-  data.forEach(item => {
-    const existing = categoryTotals.get(item.category)
-    if (existing) {
-      existing.amount += item.amount
-    } else {
-      categoryTotals.set(item.category, {
-        amount: item.amount,
-        color: item.categoryColor
-      })
-    }
-  })
-
-  const categoryData = Array.from(categoryTotals.entries()).map(([name, info]) => ({
-    name,
-    value: info.amount,
-    color: info.color
-  }))
-
-  // Prepare data for subcategories (outer ring)
-  const subcategoryData = data.map(item => ({
-    name: item.subcategory,
+  // Prepare data for the single ring - categories only
+  const categoryData = data.map(item => ({
+    name: item.category,
     value: item.amount,
-    color: item.subcategoryColor,
-    category: item.category
+    color: item.color,
+    percentage: item.percentage
   }))
 
   const formatCurrency = (value: number) => {
@@ -71,67 +48,29 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
     }).format(value)
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload
-      return (
-        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-          <p className="font-medium">{data.name}</p>
-          <p className="text-sm text-muted-foreground">
-            {formatCurrency(data.value)}
-          </p>
-          {data.category && (
-            <p className="text-xs text-muted-foreground">
-              Categoría: {data.category}
-            </p>
-          )}
-        </div>
-      )
-    }
-    return null
-  }
-
   return (
     <div className="h-72">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          {/* Inner ring - Categories */}
+          {/* Single ring - Categories only */}
           <Pie
             data={categoryData}
             dataKey="value"
             cx="50%"
             cy="50%"
-            innerRadius={20}
-            outerRadius={60}
+            innerRadius={40}
+            outerRadius={100}
             startAngle={90}
             endAngle={450}
+            label={({ name, percentage }) => 
+              percentage > 5 ? `${name} (${percentage}%)` : ''
+            }
+            labelLine={false}
           >
             {categoryData.map((entry, index) => (
               <Cell key={`category-cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          
-          {/* Outer ring - Subcategories */}
-          <Pie
-            data={subcategoryData}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={70}
-            outerRadius={110}
-            startAngle={90}
-            endAngle={450}
-            label={({ name, percent }) => 
-              percent > 0.1 ? `${name} (${(percent * 100).toFixed(0)}%)` : ''
-            }
-            labelLine={false}
-          >
-            {subcategoryData.map((entry, index) => (
-              <Cell key={`subcategory-cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          
-          {/* <Tooltip content={<CustomTooltip />} /> */}
         </PieChart>
       </ResponsiveContainer>
       
