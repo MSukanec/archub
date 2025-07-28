@@ -280,17 +280,28 @@ export function ConstructionTaskFormModal({
       console.log('✅ Nueva tarea paramétrica creada:', response);
 
       // Agregar la nueva tarea como seleccionada en el formulario principal
-      const newTaskId = response.new_task?.id || response.id;
-      setSelectedTasks(prev => [...prev, { 
-        task_id: newTaskId, 
-        quantity: 1 
-      }]);
+      const newTaskId = response.new_task?.id;
+      if (newTaskId) {
+        setSelectedTasks(prev => [...prev, { 
+          task_id: newTaskId, 
+          quantity: 1 
+        }]);
+      }
+
+      // Limpiar filtros y búsqueda para mostrar todas las tareas incluyendo la nueva
+      setSearchQuery('');
+      setRubroFilter('');
+      setCategoryFilter('');
 
       // Limpiar el subformulario
       setParametricSelections([]);
       setParametricTaskPreview('');
       setParametricParameterOrder([]);
       setShowParametricTaskCreator(false);
+
+      // Volver al panel principal
+      setPanel('edit');
+      setActiveTab('parametric'); // Reset tab al por defecto
 
       toast({
         title: "Tarea creada",
@@ -705,14 +716,37 @@ export function ConstructionTaskFormModal({
       case 'parametric-task':
         return (
           <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'parametric' | 'custom')}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="parametric">Nueva Tarea Paramétrica</TabsTrigger>
-                  <TabsTrigger value="custom">Nueva Tarea Personalizada</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="parametric" className="mt-6">
+            <div className="flex-1 overflow-y-auto space-y-6">
+              {/* Tabs personalizadas al estilo ActionBar */}
+              <div className="p-6 pb-0">
+                <div 
+                  className="inline-flex items-center rounded-lg p-1 gap-0.5 bg-[var(--button-ghost-bg)] border border-[var(--card-border)] shadow-button-normal"
+                >
+                  <button
+                    onClick={() => setActiveTab('parametric')}
+                    className={`inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 px-3 py-1.5 h-8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ${
+                      activeTab === 'parametric'
+                        ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm rounded-lg"
+                        : "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-md"
+                    }`}
+                  >
+                    Nueva Tarea Paramétrica
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('custom')}
+                    className={`inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 px-3 py-1.5 h-8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ${
+                      activeTab === 'custom'
+                        ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm rounded-lg"
+                        : "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-md"
+                    }`}
+                  >
+                    Nueva Tarea Personalizada
+                  </button>
+                </div>
+              </div>
+              
+              {activeTab === 'parametric' && (
+                <div className="px-6">
                   {/* Separador y título de sección para tarea paramétrica */}
                   <div className="mb-4">
                     <Separator className="mb-4" />
@@ -734,9 +768,11 @@ export function ConstructionTaskFormModal({
                     initialParameters={null}
                     initialParameterOrder={null}
                   />
-                </TabsContent>
+                </div>
+              )}
                 
-                <TabsContent value="custom" className="mt-6">
+              {activeTab === 'custom' && (
+                <div className="px-6">
                   {/* Separador y título de sección para tarea personalizada */}
                   <div className="mb-4">
                     <Separator className="mb-4" />
@@ -755,8 +791,8 @@ export function ConstructionTaskFormModal({
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">Funcionalidad en desarrollo</p>
                   </div>
-                </TabsContent>
-              </Tabs>
+                </div>
+              )}
             </div>
           </div>
         );

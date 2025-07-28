@@ -118,6 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. CONSTRUCTION TASK SUBFORM TABS SYSTEM COMPLETED: Successfully implemented tab system within subform for creating parametric and custom tasks with proper ActionBar styling - COMPLETED
+  • TAB SYSTEM IMPLEMENTED: Added two tabs in subform - "Nueva Tarea Paramétrica" (default active) and "Nueva Tarea Personalizada"
+  • ACTIONBAR-STYLE TABS: Tabs use identical styling to ActionBar tabs with proper hover states, active states, and visual consistency
+  • ICON/TITLE/DESCRIPTION FORMAT: Each tab includes icon (Layers/Wrench), title, and descriptive text following AportesFields.tsx pattern
+  • PADDING OPTIMIZATION: Removed extra padding from subform content, maintaining proper spacing through selective px-6 classes
+  • PARAMETRIC TAB CONTENT: Explains community-wide task generation with ParametricTaskBuilder integration
+  • CUSTOM TAB PLACEHOLDER: Shows "Funcionalidad en desarrollo" message for future custom task creation
+  • IMPROVED TASK CREATION FLOW: After creating parametric task, modal returns to main panel with task auto-selected and filters cleared
+  • TITLE UPDATE: Subform header changed to "Crear Nueva Tarea Personalizada" for clarity
 - July 28, 2025. CONSTRUCTION SINGLE TASK MODAL FIELD ORDERING FINALIZED: Successfully reorganized modal fields per user specifications with clean professional layout - COMPLETED
   • FIELD ORDER CORRECTED: Restructured to exact order requested - "Fase del Proyecto - Cantidad" then "Filtrar por Rubro - Búsqueda de Texto"
   • UNNECESSARY TEXT ELIMINATED: Removed "TAREA DE LA LIBRERÍA * disponibles" label and badge completely per user request
