@@ -17,15 +17,14 @@ export default function ConstructionTasks() {
   const [groupingType, setGroupingType] = useState('none')
   
   const { data: userData } = useCurrentUser()
-  const { openModal, closeModal } = useGlobalModalStore()
+  const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
 
-  // Set sidebar context on mount and close any open modals
+  // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
-    closeModal() // Cerrar cualquier modal abierto
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const projectId = userData?.preferences?.last_project_id

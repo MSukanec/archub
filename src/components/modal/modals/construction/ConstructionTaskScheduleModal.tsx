@@ -59,28 +59,28 @@ export function ConstructionTaskScheduleModal({
   
   const updateTask = useUpdateConstructionTask();
 
-  // Hook para obtener la tarea actual de construcción 
-  const { data: currentTask, isLoading: isLoadingTask } = useQuery({
-    queryKey: ['construction-task-instance', modalData.editingTask?.task_instance_id],
+  // Hook para obtener la fase actual de la tarea
+  const { data: currentPhaseTask, isLoading: isLoadingPhase } = useQuery({
+    queryKey: ['construction-phase-task', modalData.editingTask?.id],
     queryFn: async () => {
-      if (!modalData.editingTask?.task_instance_id || !supabase) {
+      if (!modalData.editingTask?.id || !supabase) {
         return null;
       }
       
       const { data, error } = await supabase
-        .from('construction_task_instances')
-        .select('*')
-        .eq('id', modalData.editingTask.task_instance_id)
+        .from('construction_phase_tasks')
+        .select('project_phase_id, progress_percent')
+        .eq('construction_task_id', modalData.editingTask.id)
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching construction task instance:', error);
+        console.error('Error fetching current phase task:', error);
         return null;
       }
 
       return data;
     },
-    enabled: !!modalData.editingTask?.task_instance_id,
+    enabled: !!modalData.editingTask?.id,
     staleTime: 0
   });
 
@@ -99,18 +99,22 @@ export function ConstructionTaskScheduleModal({
 
   // Cargar datos cuando el modal se abre o cambian los datos
   useEffect(() => {
-    if (modalData.editingTask && !isLoadingTask) {
+    if (modalData.editingTask && !isLoadingPhase) {
+      console.log('Loading schedule data for task:', modalData.editingTask);
+      
       // Resetear el formulario con los datos de la tarea
       const taskData = {
         start_date: modalData.editingTask.start_date || "",
         duration_in_days: modalData.editingTask.duration_in_days || undefined,
         progress_percent: modalData.editingTask.progress_percent || 0,
-        project_phase_id: currentTask?.phase_instance_id || modalData.editingTask.phase_instance_id || "",
+        project_phase_id: currentPhaseTask?.project_phase_id || modalData.editingTask.phase_instance_id || "",
         notes: modalData.editingTask.notes || ""
       };
+      
+      console.log('Setting form data:', taskData);
       reset(taskData);
     }
-  }, [modalData.editingTask, currentTask, isLoadingTask, reset]);
+  }, [modalData.editingTask, currentPhaseTask, isLoadingPhase, reset]);
 
   const onSubmit = async (data: ScheduleTaskFormData) => {
     if (!userData?.user?.id) {
@@ -126,23 +130,24 @@ export function ConstructionTaskScheduleModal({
     
     try {
       // Calculate end_date if start_date and duration_in_days are provided
-      let endDate = undefined;
-      if (data.start_date && data.duration_in_days) {
+      let endDate = data.end_date;
+      if (data.start_date && data.duration_in_days && !data.end_date) {
         const startDate = new Date(data.start_date);
         startDate.setDate(startDate.getDate() + data.duration_in_days);
         endDate = startDate.toISOString().split('T')[0];
       }
 
-      // Update construction task instance with schedule data 
+      // Update task with schedule data
       await updateTask.mutateAsync({
-        id: modalData.editingTask.task_instance_id,
+        id: modalData.editingTask.id,
         project_id: modalData.projectId,
         organization_id: modalData.organizationId,
         start_date: data.start_date || undefined,
-        end_date: endDate,
+        end_date: endDate || undefined,
         duration_in_days: data.duration_in_days || undefined,
         progress_percent: data.progress_percent || 0,
-        phase_instance_id: data.project_phase_id || undefined
+        project_phase_id: data.project_phase_id || undefined,
+
       });
 
       toast({

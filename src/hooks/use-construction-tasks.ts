@@ -54,128 +54,98 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      // Usar construction_gantt_view simplificada - sin rubros por ahora
       console.log('🔍 FETCHING CONSTRUCTION TASKS:', {
         projectId,
         organizationId,
         enabled: !!projectId && !!organizationId
       });
       
-      // Ya que construction_tasks está vacía, usar task_parametric directamente
-      // que contiene las nuevas tareas generadas del sistema
-      const { data: parametricTasks, error } = await supabase
-        .from('task_parametric')
+      const { data: ganttData, error } = await supabase
+        .from('construction_gantt_view')
         .select('*')
-        .order('created_at', { ascending: true });
+        .eq('project_id', projectId)
+        .order('phase_position', { ascending: true });
         
-      console.log('📊 PARAMETRIC TASKS QUERY RESULT:', {
-        totalTasks: parametricTasks?.length || 0,
+      console.log('📊 CONSTRUCTION GANTT QUERY RESULT:', {
+        projectId,
+        dataLength: ganttData?.length || 0,
         error: error?.message,
-        firstRecord: parametricTasks?.[0]
+        firstRecord: ganttData?.[0]
       });
 
       if (error) {
-        console.error('Error fetching parametric tasks:', error);
+        console.error('Error fetching construction gantt view:', error);
         throw error;
       }
 
-      if (!parametricTasks || parametricTasks.length === 0) {
-        console.log('No parametric tasks found');
+      if (!ganttData || ganttData.length === 0) {
+        console.log('No construction tasks found for project:', projectId);
         return [];
       }
 
       // Debug: ver qué campos están llegando exactamente
-      console.log('RAW PARAMETRIC TASKS SAMPLE:', JSON.stringify(parametricTasks?.[0], null, 2));
+      console.log('RAW GANTT DATA SAMPLE:', JSON.stringify(ganttData?.[0], null, 2));
 
-      // Generar nombres descriptivos basados en los parámetros
-      const tasksWithNames = await Promise.all(parametricTasks.map(async (task: any) => {
-        try {
-          // Intentar generar un nombre más descriptivo
-          let displayName = task.name_rendered;
-          
-          if (!displayName && task.param_values) {
-            // Si param_values es string, parsearlo
-            const paramValues = typeof task.param_values === 'string' 
-              ? JSON.parse(task.param_values) 
-              : task.param_values;
-            
-            if (Object.keys(paramValues).length > 0) {
-              // Obtener las opciones de parámetros para crear un nombre descriptivo
-              const { data: paramOptions } = await supabase
-                .from('task_parameter_options')
-                .select('id, label')
-                .in('id', Object.values(paramValues));
-              
-              if (paramOptions && paramOptions.length > 0) {
-                // Crear nombre concatenando las opciones
-                const optionLabels = paramOptions.map(opt => opt.label).join(' ');
-                displayName = `Ejecución de ${optionLabels.toLowerCase()}`;
-              }
-            }
-          }
-          
-          // Fallback al código de tarea
-          if (!displayName) {
-            displayName = `Tarea paramétrica ${task.code || 'sin código'}`;
-          }
-          
-          return { ...task, display_name: displayName };
-        } catch (error) {
-          console.error('Error generating task name:', error);
-          return { ...task, display_name: `Tarea paramétrica ${task.code || 'sin código'}` };
-        }
-      }));
-
-      // Mapear datos de task_parametric al formato esperado para construcción
-      const mappedTasks: ConstructionTask[] = tasksWithNames.map((item: any, index: number) => {
+      // Mapear datos de construction_gantt_view al formato esperado
+      const mappedTasks: ConstructionTask[] = ganttData.map((item: any) => {
         return {
-          // Campos principales usando task_parametric
-          task_instance_id: item.id,
-          project_id: projectId, // Asignar projectId actual
-          task_id: item.id, // Usar mismo ID de task_parametric
-          task_code: item.code || `000${index + 1}`.slice(-3), // Usar código generado o crear uno
-          param_values: typeof item.param_values === 'string' ? JSON.parse(item.param_values) : (item.param_values || {}),
-          start_date: null, // Por defecto null
-          end_date: null,
-          duration_in_days: null,
-          quantity: 1, // Cantidad por defecto
+          // Campos principales de la vista
+          task_instance_id: item.task_instance_id,
+          project_id: item.project_id,
+          task_id: item.task_id,
+          task_code: item.task_code,
+          param_values: item.param_values,
+          start_date: item.start_date,
+          end_date: item.end_date,
+          duration_in_days: item.duration_in_days,
+          quantity: item.quantity || 0, // CANTIDAD DIRECTA DE LA VISTA
           
-          // Campos de fase (simulados por ahora)
-          phase_instance_id: '',
-          phase_name: 'Sin fase',
-          phase_position: 0,
-          progress_percent: 0,
+          // Campos de fase de la vista
+          phase_instance_id: item.phase_instance_id,
+          phase_name: item.phase_name,
+          phase_position: item.phase_position,
+          progress_percent: item.progress_percent || 0,
           
           // Compatibilidad con sistema existente
-          id: item.id,
-          organization_id: organizationId,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
+          id: item.task_instance_id, // ID principal para compatibilidad
+          organization_id: organizationId, // Del contexto
           
           // Crear objeto task para compatibilidad con componentes existentes
           task: {
-            id: item.id,
-            code: item.code || `000${index + 1}`.slice(-3),
-            display_name: item.display_name || `Tarea paramétrica ${item.code || index + 1}`,
-            rubro_name: null,
-            category_name: null,
-            unit_id: null,
-            unit_name: 'm²', // Unidad por defecto
-            unit_symbol: 'm²',
-            rubro_id: null,
-            param_values: typeof item.param_values === 'string' ? JSON.parse(item.param_values) : (item.param_values || {})
+            id: item.task_id,
+            code: item.task_code,
+            display_name: item.display_name || item.task_code, // DISPLAY_NAME DIRECTO DE LA VISTA
+            rubro_name: item.rubro_name || null, // RUBRO_NAME DIRECTO DE LA VISTA
+            category_name: item.category_name || null, // CATEGORY_NAME DIRECTO DE LA VISTA
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || null, // UNIT_NAME DIRECTO DE LA VISTA
+            unit_symbol: item.unit_symbol || null, // UNIT_SYMBOL DIRECTO DE LA VISTA
+            rubro_id: item.rubro_id || null, // RUBRO_ID DIRECTO DE LA VISTA
+            param_values: item.param_values
           }
         };
       });
 
-      console.log('CONSTRUCTION TASKS MAPPED DATA:', {
+      console.log('UPDATED GANTT VIEW DATA WITH RUBROS:', {
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
         sample: {
           display_name: mappedTasks[0]?.task?.display_name,
-          task_code: mappedTasks[0]?.task_code,
+          rubro_name: mappedTasks[0]?.task?.rubro_name,
+          category_name: mappedTasks[0]?.task?.category_name,
+          unit_name: mappedTasks[0]?.task?.unit_name,
+          unit_symbol: mappedTasks[0]?.task?.unit_symbol,
           quantity: mappedTasks[0]?.quantity,
-          progress: mappedTasks[0]?.progress_percent
+          view_fields: {
+            display_name: ganttData?.[0]?.display_name,
+            rubro_name: ganttData?.[0]?.rubro_name,
+            category_name: ganttData?.[0]?.category_name,
+            unit_name: ganttData?.[0]?.unit_name,
+            unit_symbol: ganttData?.[0]?.unit_symbol,
+            quantity: ganttData?.[0]?.quantity
+          }
         }
       });
 
