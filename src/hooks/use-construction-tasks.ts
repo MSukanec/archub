@@ -60,18 +60,12 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         enabled: !!projectId && !!organizationId
       });
       
-      // Obtener tareas paramétricas directamente y simular datos de construcción
-      // Ya que no hay relación real entre construction_tasks y task_parametric
+      // Ya que construction_tasks está vacía, usar task_parametric directamente
+      // que contiene las nuevas tareas generadas del sistema
       const { data: parametricTasks, error } = await supabase
         .from('task_parametric')
         .select('*')
         .order('created_at', { ascending: true });
-        
-      console.log('📊 PARAMETRIC TASKS QUERY RESULT:', {
-        totalTasks: parametricTasks?.length || 0,
-        error: error?.message,
-        firstRecord: parametricTasks?.[0]
-      });
         
       console.log('📊 CONSTRUCTION TASKS QUERY RESULT:', {
         projectId,
@@ -138,25 +132,15 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         };
       });
 
-      console.log('UPDATED GANTT VIEW DATA WITH RUBROS:', {
+      console.log('CONSTRUCTION TASKS MAPPED DATA:', {
         projectId,
         totalTasks: mappedTasks.length,
         phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
         sample: {
           display_name: mappedTasks[0]?.task?.display_name,
-          rubro_name: mappedTasks[0]?.task?.rubro_name,
-          category_name: mappedTasks[0]?.task?.category_name,
-          unit_name: mappedTasks[0]?.task?.unit_name,
-          unit_symbol: mappedTasks[0]?.task?.unit_symbol,
+          task_code: mappedTasks[0]?.task_code,
           quantity: mappedTasks[0]?.quantity,
-          view_fields: {
-            display_name: ganttData?.[0]?.display_name,
-            rubro_name: ganttData?.[0]?.rubro_name,
-            category_name: ganttData?.[0]?.category_name,
-            unit_name: ganttData?.[0]?.unit_name,
-            unit_symbol: ganttData?.[0]?.unit_symbol,
-            quantity: ganttData?.[0]?.quantity
-          }
+          progress: mappedTasks[0]?.progress_percent
         }
       });
 
