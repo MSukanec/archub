@@ -59,7 +59,7 @@ export function ConstructionTaskFormModal({ modalData, onClose }: ConstructionTa
   const [groupingType, setGroupingType] = useState('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { userData, currentMember } = useCurrentUser();
+  const { data: userData } = useCurrentUser();
   const { data: projectPhases = [] } = useProjectPhases(modalData.projectId);
   
   // Hook para el formulario
