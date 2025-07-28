@@ -260,51 +260,7 @@ export default function ConstructionTasks() {
     }
   ]
 
-  // Definir columnas específicas para agrupación por tarea
-  const taskGroupColumns = [
-    {
-      key: 'task_name',
-      label: 'Nombre de Tarea',
-      render: (task: any) => task.task?.display_name || 'Sin nombre',
-      width: 'auto' // El resto del espacio disponible
-    },
-    {
-      key: 'unit',
-      label: 'Unidad',
-      render: (task: any) => task.task?.unit_symbol || 'Sin unidad',
-      width: '10%'
-    },
-    {
-      key: 'total_quantity',
-      label: 'Cantidad Total',
-      render: (task: any) => {
-        const total = task.quantity || 0;
-        const instanceCount = task.instances ? task.instances.length : 1;
-        return `${total} (${instanceCount} instancias)`;
-      },
-      width: '15%'
-    },
-    {
-      key: 'phases_count',
-      label: 'Fases',
-      render: (task: any) => {
-        if (!task.instances) return '1';
-        const uniquePhases = new Set(task.instances.map((inst: any) => inst.phase_name || 'Sin fase'));
-        return `${uniquePhases.size} fase${uniquePhases.size !== 1 ? 's' : ''}`;
-      },
-      width: '10%'
-    },
-    {
-      key: 'rubros_count',
-      label: 'Rubros',
-      render: (task: any) => {
-        if (!task.instances) return task.task?.rubro_name || 'Sin rubro';
-        const uniqueRubros = new Set(task.instances.map((inst: any) => inst.task?.rubro_name || 'Sin rubro'));
-        return `${uniqueRubros.size} rubro${uniqueRubros.size !== 1 ? 's' : ''}`;
-      },
-      width: '10%'
-    }
-  ]
+
 
   // Definir columnas para la tabla de fases
   const phaseColumns = [
@@ -356,38 +312,16 @@ export default function ConstructionTasks() {
     }
   ]
 
-  // Preparar datos agregados para agrupación por tarea
-  const aggregatedTasks = useMemo(() => {
-    if (groupingType !== 'tasks') return filteredTasks;
+  // Para agrupación por tarea, simplemente usar filteredTasks con groupKey
+  const finalTasks = useMemo(() => {
+    return filteredTasks;
+  }, [filteredTasks]);
 
-    // Agrupar tareas por nombre y sumar cantidades
-    const taskGroups = new Map();
-    
-    filteredTasks.forEach(task => {
-      const taskName = task.task?.display_name || 'Sin nombre';
-      const key = taskName;
-      
-      if (taskGroups.has(key)) {
-        const existing = taskGroups.get(key);
-        existing.quantity += task.quantity || 0;
-        existing.instances.push(task);
-      } else {
-        taskGroups.set(key, {
-          ...task,
-          quantity: task.quantity || 0,
-          instances: [task],
-          groupKey: taskName
-        });
-      }
-    });
-
-    return Array.from(taskGroups.values());
-  }, [filteredTasks, groupingType]);
-
-  // Seleccionar columnas según el tipo de agrupación
+  // Seleccionar columnas según el tipo de agrupación  
   const columns = useMemo(() => {
+    // Para agrupación por tareas, usar columnas base pero ocultar columna de tarea ya que será el header del grupo
     if (groupingType === 'tasks') {
-      return taskGroupColumns;
+      return baseColumns.filter(column => column.key !== 'display_name');
     }
     
     // Filtrar columnas base para otros tipos de agrupación
@@ -525,14 +459,14 @@ export default function ConstructionTasks() {
           ) : (
             <Table
               columns={columns}
-              data={groupingType === 'tasks' ? aggregatedTasks : filteredTasks}
+              data={finalTasks}
               isLoading={isLoading}
               mode="construction"
-              groupBy={groupingType === 'tasks' ? undefined : 'groupKey'}
-              renderGroupHeader={groupingType === 'tasks' ? undefined : (groupKey: string, groupRows: any[]) => (
+              groupBy={'groupKey'}
+              renderGroupHeader={(groupKey: string, groupRows: any[]) => (
                 <>
                   <div className="col-span-full text-sm font-medium">
-                    {groupKey} ({groupRows.length} tareas)
+                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'instancia' : 'instancias'})
                   </div>
                 </>
               )}
