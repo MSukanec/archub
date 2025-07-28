@@ -781,13 +781,13 @@ export function ConstructionTaskFormModal({
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto space-y-6">
               {/* Tabs personalizadas al estilo ActionBar */}
-              <div className="p-6 pb-0">
+              <div className="px-6 pt-6 pb-0">
                 <div 
-                  className="inline-flex items-center rounded-lg p-1 gap-0.5 bg-[var(--button-ghost-bg)] border border-[var(--card-border)] shadow-button-normal"
+                  className="flex items-center rounded-lg p-1 gap-0.5 bg-[var(--button-ghost-bg)] border border-[var(--card-border)] shadow-button-normal w-full"
                 >
                   <button
                     onClick={() => setActiveTab('parametric')}
-                    className={`inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 px-3 py-1.5 h-8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ${
+                    className={`flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 px-3 py-1.5 h-8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ${
                       activeTab === 'parametric'
                         ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm rounded-lg"
                         : "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-md"
@@ -797,7 +797,7 @@ export function ConstructionTaskFormModal({
                   </button>
                   <button
                     onClick={() => setActiveTab('custom')}
-                    className={`inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 px-3 py-1.5 h-8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ${
+                    className={`flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 px-3 py-1.5 h-8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 ${
                       activeTab === 'custom'
                         ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm rounded-lg"
                         : "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-md"
@@ -809,9 +809,9 @@ export function ConstructionTaskFormModal({
               </div>
               
               {activeTab === 'parametric' && (
-                <div className="px-6">
+                <div>
                   {/* Separador y título de sección para tarea paramétrica */}
-                  <div className="mb-4">
+                  <div className="mb-4 px-6">
                     <Separator className="mb-4" />
                     <div className="flex items-center gap-3 mb-6">
                       <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
@@ -824,22 +824,24 @@ export function ConstructionTaskFormModal({
                     </div>
                   </div>
                   
-                  <ParametricTaskBuilder
-                    ref={parametricTaskBuilderRef}
-                    onSelectionChange={setParametricSelections}
-                    onPreviewChange={setParametricTaskPreview}
-                    onOrderChange={setParametricParameterOrder}
-                    onCreateTask={handleCreateParametricTask}
-                    initialParameters={null}
-                    initialParameterOrder={null}
-                  />
+                  <div className="px-6">
+                    <ParametricTaskBuilder
+                      ref={parametricTaskBuilderRef}
+                      onSelectionChange={setParametricSelections}
+                      onPreviewChange={setParametricTaskPreview}
+                      onOrderChange={setParametricParameterOrder}
+                      onCreateTask={handleCreateParametricTask}
+                      initialParameters={null}
+                      initialParameterOrder={null}
+                    />
+                  </div>
                 </div>
               )}
                 
               {activeTab === 'custom' && (
-                <div className="px-6">
+                <div>
                   {/* Separador y título de sección para tarea personalizada */}
-                  <div className="mb-4">
+                  <div className="mb-4 px-6">
                     <Separator className="mb-4" />
                     <div className="flex items-center gap-3 mb-6">
                       <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
@@ -853,7 +855,7 @@ export function ConstructionTaskFormModal({
                   </div>
                   
                   {/* Por ahora solo mostrar el mensaje */}
-                  <div className="text-center py-8">
+                  <div className="text-center py-8 px-6">
                     <p className="text-muted-foreground">Funcionalidad en desarrollo</p>
                   </div>
                 </div>
