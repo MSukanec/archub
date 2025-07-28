@@ -37,7 +37,11 @@ interface ParameterSelection {
 }
 
 export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFormModalProps) {
-  const [currentStep, setCurrentStep] = useState(1)
+  const { task, isEditing, taskData } = modalData || {}
+  const actualTask = task || taskData
+  
+  // If editing existing task, start at step 2 (materials), otherwise step 1 (parameters)
+  const [currentStep, setCurrentStep] = useState(isEditing && actualTask ? 2 : 1)
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
@@ -46,9 +50,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [taskMaterials, setTaskMaterials] = useState<Array<{id?: string, material_id: string, amount: number, material_name?: string, unit_name?: string}>>([])
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('')
   const [materialAmount, setMaterialAmount] = useState<string>('')
-  
-  const { task, isEditing, taskData } = modalData || {}
-  const actualTask = task || taskData
   
   console.log('🔍 Modal data received:', modalData);
   console.log('📝 Task data:', actualTask);
