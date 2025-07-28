@@ -118,14 +118,15 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 28, 2025. CONSTRUCTION TASK MODAL COMPLETELY RESTORED AND OPTIMIZED: Successfully restored two-column interface with proper field organization and eliminated unnecessary components - COMPLETED
-  • TWO-COLUMN INTERFACE RESTORED: Modal now displays proper left column (task library with filters) and right column (selected tasks with quantities)
-  • FASE DE PROYECTO FIELD ELIMINATED: Removed project phase field from form schema, UI, and submission logic
-  • FILTER ORGANIZATION IMPROVED: Moved "Filtrar por Rubro" and "Búsqueda de Texto" filters to left column only, stacked vertically within task library section
-  • OLD FILE CLEANUP: Deleted ConstructionTaskFormModal_OLD.tsx and unified codebase to single modal implementation
-  • COLUMN SIMPLIFICATION: Right column now shows only TAREA, CANT., and delete button (removed FASE column)
-  • FORCED EDIT MODE: Added isEditing={true} to ensure modal opens directly in two-column interface instead of preview mode
-  • DATABASE REFERENCES CORRECTED: Uses task_parametric_view with proper field mappings (name_rendered, category_name, unit_name)
+- July 28, 2025. CONSTRUCTION TASK MODAL CLICK-BASED SELECTION SYSTEM COMPLETED: Successfully implemented click-based task selection with visual feedback and enhanced interface - COMPLETED
+  • CLICK-BASED SELECTION IMPLEMENTED: Tasks now selected by clicking (no checkboxes) with colored right border visual feedback for selected items
+  • MULTIPLE SELECTION SUPPORT: Users can add same task multiple times by clicking repeatedly, allowing for flexible quantity management
+  • FILTER LAYOUT OPTIMIZED: "Filtrar por Rubro" and "Búsqueda de Texto" now displayed inline (side by side) in left column using grid-cols-2
+  • FASE FIELD ADDED TO SELECTED TASKS: Right column includes FASE dropdown with proper Select component connected to project phases
+  • COUNTER MESSAGE ELIMINATED: Removed "X tareas seleccionadas" status message for cleaner interface
+  • CHECKBOX SYSTEM REMOVED: Eliminated all checkbox components and related functions (handleSelectAll, handleClearAll)
+  • COLUMN STRUCTURE UPDATED: Right column displays TAREA, CANT., FASE, and delete button with proper grid layout
+  • PHASE PERSISTENCE: Selected task phases properly saved to database with project_phase_id field integration
 - July 28, 2025. TABLE COLUMN WIDTHS OPTIMIZED: Updated AdminGeneratedTasks table columns to user-specified proportions for better data display - COMPLETED
   • CÓDIGO COLUMN: Reduced from 15% to 5% for compact code display
   • RUBRO COLUMN: Reduced from 20% to 10% for efficient category badges
