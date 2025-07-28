@@ -379,8 +379,12 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
     finalText = finalText.replace(/,\s*,/g, ',') // Eliminar comas duplicadas
     finalText = finalText.replace(/\.\s*\./g, '.') // Eliminar puntos duplicados
     
-    // Asegurar que termine con punto si no tiene
-    if (finalText && !finalText.endsWith('.') && !finalText.endsWith(',')) {
+    // Eliminar coma final si existe y reemplazar con punto
+    if (finalText.endsWith(',')) {
+      finalText = finalText.slice(0, -1) + '.'
+    }
+    // Si no termina con punto, agregarlo
+    else if (finalText && !finalText.endsWith('.')) {
       finalText += '.'
     }
     
