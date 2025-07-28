@@ -21,17 +21,17 @@ export interface ConstructionTaskView {
   updated_at: string;
 }
 
-// Hook específico para la vista CONSTRUCTION_TASK_VIEW optimizada para cronograma
+// Hook específico para la vista CONSTRUCTION_TASKS_VIEW optimizada para cronograma
 export function useConstructionTasksView(projectId: string) {
   return useQuery({
     queryKey: ['construction-tasks-view', projectId],
     queryFn: async (): Promise<ConstructionTaskView[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 FETCHING CONSTRUCTION TASKS VIEW FOR PROJECT:', projectId);
+      console.log('🔍 FETCHING CONSTRUCTION TASKS_VIEW FOR PROJECT:', projectId);
       
       const { data, error } = await supabase
-        .from('construction_task_view')
+        .from('construction_tasks_view')
         .select('*')
         .eq('project_id', projectId)
         .order('phase_position', { ascending: true })
@@ -42,7 +42,7 @@ export function useConstructionTasksView(projectId: string) {
         throw error;
       }
 
-      console.log('✅ CONSTRUCTION TASKS VIEW DATA:', {
+      console.log('✅ CONSTRUCTION TASKS_VIEW DATA:', {
         projectId,
         tasksCount: data?.length || 0,
         sampleTask: data?.[0] || null

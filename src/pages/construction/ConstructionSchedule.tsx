@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -48,7 +48,6 @@ function cleanTaskDisplayName(name: string): string {
   return cleanedName || 'Tarea sin nombre'
 }
 
-
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("gantt")
@@ -74,364 +73,92 @@ export default function ConstructionSchedule() {
   // Obtener las fases del proyecto y dependencias
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
-  // const updatePhasesDates = useUpdatePhasesDates() // Commented out until implemented
 
-  // Los datos ya vienen procesados de la vista CONSTRUCTION_TASK_VIEW
-  const processedTasks = tasks
-
-
-
-  const handleAddTask = () => {
-    if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing project, organization ID, or user data', {
-        projectId,
-        organizationId,
-        userId: userData?.user?.id
-      });
-      return
-    }
-
-    openModal('construction-task', {
-      projectId,
-      organizationId,
-      userId: userData.user.id
-    });
-  }
-
-  const handleAddPhase = () => {
-    if (!projectId || !organizationId || !userData?.user?.id) {
-      console.error('Missing project, organization ID, or user data for phase modal', {
-        projectId,
-        organizationId,
-        userId: userData?.user?.id
-      });
-      return
-    }
-
-    openModal('construction-phase', {
-      projectId,
-      organizationId,
-      userId: userData.user.id
-    });
-  }
-
-  const handleDeleteTask = async (taskId: string) => {
-    if (!projectId || !organizationId) return
-
-    await deleteTask.mutateAsync({
-      id: taskId,
-      project_id: projectId,
-      organization_id: organizationId
-    })
-  }
-
-  // Manejar edición de tarea desde Gantt
-  const handleEditTask = (item: GanttRowProps) => {
-    if (item.type !== 'task') return
-    
-    openModal('construction-task-schedule', {
-      projectId,
-      organizationId,
-      userId: userData?.user?.id,
-      editingTask: item.taskData,
-      isEditing: true
-    })
-  }
-
-  // Manejar eliminación de tarea desde Gantt
-  const handleDeleteTaskFromGantt = (item: GanttRowProps) => {
-    if (item.type !== 'task' || !item.taskData) return
-    
-    showDeleteConfirmation({
-      title: "Eliminar Tarea",
-      description: "¿Estás seguro de que deseas eliminar esta tarea del proyecto?",
-      itemName: item.name,
-      onConfirm: () => handleDeleteTask(item.taskData.id)
-    })
-  }
-
-  // Manejar edición de fase desde Gantt
-  const handleEditPhase = (item: GanttRowProps) => {
-    if (item.type !== 'phase' || !item.phaseData) return
-    
-    openModal('construction-phase', {
-      projectId,
-      organizationId,
-      userId: userData?.user?.id,
-      editingPhase: item.phaseData,
-      isEditing: true
-    });
-  }
-
-  // Manejar eliminación de fase desde Gantt
-  const handleDeletePhase = (item: GanttRowProps) => {
-    if (item.type !== 'phase' || !item.phaseData) return
-    
-    showDeleteConfirmation({
-      title: "Eliminar Fase",
-      description: "¿Estás seguro de que deseas eliminar esta fase del proyecto?",
-      itemName: item.name,
-      onConfirm: async () => {
-        console.log('Deleting phase:', item.phaseData.id);
-        // TODO: Implement phase deletion
-        // await deletePhase.mutateAsync({
-        //   id: item.phaseData.id,
-        //   project_id: projectId || ''
-        // });
-      }
-    })
-  }
-
-  // Filtrar tareas según búsqueda usando los datos de la vista
+  // Filtrar tareas por búsqueda
   const filteredTasks = useMemo(() => {
-    if (!searchValue.trim()) return processedTasks
-    
-    return processedTasks.filter(task => {
-      return task.name_rendered?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.category_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.phase_name?.toLowerCase().includes(searchValue.toLowerCase())
-    })
-  }, [processedTasks, searchValue])
+    if (!searchValue.trim()) return tasks
+    const searchTerm = searchValue.toLowerCase()
+    return tasks.filter(task => 
+      task.name_rendered?.toLowerCase().includes(searchTerm) ||
+      task.category_name?.toLowerCase().includes(searchTerm) ||
+      task.subcategory_name?.toLowerCase().includes(searchTerm) ||
+      task.unit_name?.toLowerCase().includes(searchTerm) ||
+      task.phase_name?.toLowerCase().includes(searchTerm)
+    )
+  }, [tasks, searchValue])
 
-  // Simplificado: usar directamente los datos de la vista
-  const budgetTasks = useMemo(() => {
-    if (!filteredTasks) return []
-    
-    return filteredTasks.map((task) => ({
-      id: task.id,
-      budget_id: 'construction-schedule',
-      task_id: task.task_id,
-      organization_id: organizationId || '',
-      project_id: task.project_id,
-      created_at: task.created_at,
-      updated_at: task.updated_at,
-      task: {
-        task_instance_id: task.id,
-        project_id: task.project_id,
-        task_id: task.task_id,
-        task_code: task.id, // Usar ID como código temporal
-        start_date: task.start_date,
-        end_date: task.end_date,
-        duration_in_days: task.duration_in_days,
-        quantity: task.quantity,
-        phase_instance_id: task.id,
-        phase_name: task.phase_name || '',
-        phase_position: task.phase_position || 1,
-        progress_percent: task.progress_percent,
-        unit_id: '',
-        unit_name: task.unit_name || '',
-        unit_symbol: task.unit_name || '',
-        display_name: task.name_rendered,
-        subcategory_id: '',
-        subcategory_name: '',
-        category_id: '',
-        category_name: task.category_name || '',
-        rubro_id: '',
-        rubro_name: task.category_name || '',
-        task_group_id: '',
-        task_group_name: ''
-      }
-    }))
-  }, [filteredTasks, organizationId])
-
-  // Funciones helper simplificadas
-  const generateTaskDisplayName = (task: any) => {
-    return task?.display_name || task?.name_rendered || 'Tarea sin nombre'
+  // Función para obtener el rubro de una tarea
+  function getRubroName(taskId: string) {
+    const task = filteredTasks.find(t => t.id === taskId)
+    return task?.subcategory_name || 'Sin rubro'
   }
 
+  // Función para obtener nombre de unidad
   const getUnitName = (unitId: string | null) => {
     if (!unitId) return 'Sin unidad'
     const taskWithUnit = filteredTasks.find(t => t.unit_name)
     return taskWithUnit?.unit_name || 'Sin unidad'
   }
 
-  // Crear estructura Gantt con tareas organizadas dentro de fases
+  // Crear estructura Gantt simplificada con las tareas de la vista
   const ganttData = useMemo(() => {
     const ganttRows: any[] = [];
 
-    // Si hay fases del proyecto, organizar tareas dentro de fases
-    if (projectPhases.length > 0) {
-      projectPhases.forEach((projectPhase: any) => {
-        // Filtrar tareas que pertenecen a esta fase del proyecto
-        const tasksInPhase = filteredTasks.filter(task => 
-          task.phase_name === projectPhase.phase.name
-        );
+    // Agrupar tareas por phase_name usando los datos de la vista
+    const tasksByPhase = filteredTasks.reduce((acc, task) => {
+      const phaseName = task.phase_name || 'TAREAS SIN FASE ASIGNADA';
+      if (!acc[phaseName]) {
+        acc[phaseName] = [];
+      }
+      acc[phaseName].push(task);
+      return acc;
+    }, {} as Record<string, typeof filteredTasks>);
 
-        // Calcular fechas de inicio y fin basándose en las tareas de la fase
-        let phaseStartDate = projectPhase.start_date;
-        let phaseEndDate = projectPhase.end_date;
-        let phaseDuration = projectPhase.duration_in_days;
-
-        if (tasksInPhase.length > 0) {
-          // Encontrar la fecha de inicio más temprana de las tareas
-          const taskStartDates = tasksInPhase
-            .map(task => task.start_date)
-            .filter(date => date !== null && date !== undefined)
-            .sort();
-
-          // Encontrar la fecha de fin más tardía de las tareas
-          const taskEndDates = tasksInPhase
-            .map(task => {
-              if (task.end_date) {
-                return task.end_date;
-              } else if (task.start_date && task.duration_in_days) {
-                const startDate = new Date(task.start_date);
-                startDate.setDate(startDate.getDate() + task.duration_in_days - 1);
-                return startDate.toISOString().split('T')[0];
-              }
-              return null;
-            })
-            .filter(date => date !== null)
-            .sort().reverse();
-
-          // Actualizar fechas de la fase si hay tareas con fechas
-          if (taskStartDates.length > 0) {
-            phaseStartDate = taskStartDates[0];
-          }
-          if (taskEndDates.length > 0) {
-            phaseEndDate = taskEndDates[0];
-          }
-
-          // Calcular duración en días si tenemos ambas fechas
-          if (phaseStartDate && phaseEndDate) {
-            const startDate = new Date(phaseStartDate);
-            const endDate = new Date(phaseEndDate);
-            phaseDuration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-          }
-        }
-
-        // Solo usar valores por defecto si la fase tiene tareas
-        // Si no hay tareas, la fase NO debe mostrar fechas ni barras
-        if (tasksInPhase.length === 0) {
-          // Limpiar fechas para fases sin tareas
-          phaseStartDate = undefined;
-          phaseEndDate = undefined;
-          phaseDuration = undefined;
-        }
-
-        // Agregar la fase como fila de grupo (en mayúsculas)
-        ganttRows.push({
-          id: `phase-${projectPhase.id}`,
-          name: projectPhase.phase.name.toUpperCase(),
-          type: 'phase',
-          level: 0,
-          isHeader: true,
-          startDate: phaseStartDate,
-          endDate: phaseEndDate,
-          durationInDays: phaseDuration,
-          phaseData: projectPhase,
-          phaseTasks: tasksInPhase // Agregar las tareas contenidas para calculateResolvedEndDate
-        });
-
-        // Agregar las tareas de esta fase
-        tasksInPhase.forEach((task) => {
-          // Validar y establecer fechas por defecto
-          let validStartDate = task.start_date;
-          let validEndDate = task.end_date;
-          let validDuration = task.duration_in_days;
-
-          // Si no hay start_date, usar fecha de hoy
-          if (!validStartDate) {
-            validStartDate = new Date().toISOString().split('T')[0];
-          }
-
-          // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
-          if (validStartDate && !validEndDate && !validDuration) {
-            validDuration = 1;
-          }
-
-          // Validar que las fechas sean válidas
-          const startDateObj = new Date(validStartDate);
-          const endDateObj = validEndDate ? new Date(validEndDate) : null;
-
-          // Si end_date existe pero es anterior a start_date, corregir
-          if (endDateObj && startDateObj > endDateObj) {
-            validEndDate = validStartDate;
-            validDuration = 1;
-          }
-
-          ganttRows.push({
-            id: task.id,
-            name: cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre'),
-            type: 'task',
-            level: 1,
-            startDate: validStartDate,
-            endDate: validEndDate,
-            durationInDays: validDuration,
-            taskData: task
-          });
-        });
+    // Procesar cada fase
+    Object.entries(tasksByPhase).forEach(([phaseName, tasksInPhase]) => {
+      // Agregar encabezado de fase
+      ganttRows.push({
+        id: `phase-${phaseName.replace(/\s+/g, '-')}`,
+        name: phaseName,
+        type: 'group',
+        level: 0,
+        isHeader: true,
+        startDate: undefined,
+        endDate: undefined,
+        durationInDays: undefined
       });
 
-      // Agregar tareas sin fase asignada si las hay
-      const tasksWithoutPhase = filteredTasks.filter(task => !task.phase_name);
-      if (tasksWithoutPhase.length > 0) {
-        ganttRows.push({
-          id: 'no-phase-header',
-          name: 'TAREAS SIN FASE ASIGNADA',
-          type: 'group',
-          level: 0,
-          isHeader: true,
-          startDate: undefined,
-          endDate: undefined,
-          durationInDays: undefined
-        });
-
-        tasksWithoutPhase.forEach((task) => {
-          let validStartDate = task.start_date;
-          let validEndDate = task.end_date;
-          let validDuration = task.duration_in_days;
-
-          if (!validStartDate) {
-            validStartDate = new Date().toISOString().split('T')[0];
-          }
-
-          if (validStartDate && !validEndDate && !validDuration) {
-            validDuration = 1;
-          }
-
-          ganttRows.push({
-            id: task.id,
-            name: cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre'),
-            type: 'task',
-            level: 1,
-            startDate: validStartDate,
-            endDate: validEndDate,
-            durationInDays: validDuration,
-            taskData: task
-          });
-        });
-      }
-    } else {
-      // Si no hay fases del proyecto, mostrar todas las tareas sin agrupación
-      filteredTasks.forEach((task) => {
+      // Agregar las tareas de esta fase
+      tasksInPhase.forEach((task) => {
         let validStartDate = task.start_date;
         let validEndDate = task.end_date;
         let validDuration = task.duration_in_days;
 
+        // Si no hay start_date, usar fecha de hoy
         if (!validStartDate) {
           validStartDate = new Date().toISOString().split('T')[0];
         }
 
+        // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
         if (validStartDate && !validEndDate && !validDuration) {
           validDuration = 1;
         }
 
         ganttRows.push({
           id: task.id,
-          name: cleanTaskDisplayName(task.task.processed_display_name || task.task.display_name || task.task.code || 'Tarea sin nombre'),
+          name: cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre'),
           type: 'task',
-          level: 0,
+          level: 1,
           startDate: validStartDate,
           endDate: validEndDate,
           durationInDays: validDuration,
           taskData: task
         });
       });
-    }
+    });
 
     return ganttRows;
-  }, [filteredTasks, projectPhases]);
+  }, [filteredTasks]);
 
   const headerProps = {
     title: "Cronograma de Construcción"
@@ -453,164 +180,165 @@ export default function ConstructionSchedule() {
       <FeatureIntroduction
         icon={<Calendar className="h-6 w-6" />}
         title="Cronograma de Construcción"
+        description="Planifica, visualiza y controla el cronograma de construcción de tu proyecto con herramientas avanzadas de gestión temporal."
         features={[
           {
-            icon: <Calendar className="h-5 w-5" />,
-            title: "Visualización temporal",
-            description: "Cronograma visual tipo Gantt con barras temporales"
+            icon: <Clock className="h-5 w-5" />,
+            title: "Vista Gantt Avanzada",
+            description: "Visualiza el cronograma con barras temporales, dependencias y fases del proyecto organizadas jerárquicamente."
           },
           {
             icon: <Activity className="h-5 w-5" />,
-            title: "Organización por fases",
-            description: "Tareas agrupadas jerárquicamente por fases del proyecto"
+            title: "Análisis Visual",
+            description: "Gráficos de progreso, burndown charts y análisis de rutas críticas para optimizar el cronograma."
           },
           {
             icon: <CheckSquare className="h-5 w-5" />,
-            title: "Gestión de dependencias",
-            description: "Control de precedencias y relaciones entre tareas"
+            title: "Gestión de Dependencias",
+            description: "Define y visualiza dependencias entre tareas para identificar bottlenecks y rutas críticas."
           },
           {
-            icon: <Clock className="h-5 w-5" />,
-            title: "Control de tiempo",
-            description: "Fechas de inicio, fin y duración de cada elemento"
+            icon: <BarChart3 className="h-5 w-5" />,
+            title: "Reportes de Avance",
+            description: "Métricas de progreso temporal, distribución de carga de trabajo y análisis de desviaciones."
           }
         ]}
       />
 
-      {/* Action Bar Desktop - siempre visible */}
+      {/* ActionBar */}
       <ActionBarDesktop
         title="Cronograma de Construcción"
-        icon={<Calendar className="w-6 h-6" />}
-        features={[
-          {
-            icon: <BarChart3 className="w-4 h-4" />,
-            title: "Vista Gantt Profesional",
-            description: "Cronograma visual con barras temporales, dependencias entre tareas y gestión de fechas tipo MS Project."
-          },
-          {
-            icon: <Activity className="w-4 h-4" />,
-            title: "Gestión por Fases",
-            description: "Organización jerárquica con fases expandibles/colapsables y cálculo automático de fechas."
-          },
-          {
-            icon: <CheckSquare className="w-4 h-4" />,
-            title: "Control de Dependencias",
-            description: "Visualización de precedencias con flechas SVG y arrastre automático de tareas dependientes."
-          },
-          {
-            icon: <Clock className="w-4 h-4" />,
-            title: "Análisis Visual Avanzado",
-            description: "9 gráficos profesionales: curva de progreso, burndown, heatmap semanal, red de dependencias."
-          }
-        ]}
+        icon={<Calendar className="h-5 w-5" />}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        showGrouping={false}
-        primaryActionLabel="Nueva Tarea"
-        onPrimaryActionClick={handleAddTask}
-        customActions={[
-          <Button 
-            key="create-phase"
-            onClick={handleAddPhase} 
-            variant="secondary" 
-            className="h-9 px-4"
-          >
-            <Plus />
-            Crear Fase
-          </Button>
-        ]}
         tabs={[
-          {
-            value: "gantt",
-            label: "Vista Gantt",
-            icon: <BarChart3 className="h-4 w-4" />
-          },
-          {
-            value: "table",
-            label: "Listado de Tareas",
-            icon: <TableIcon className="h-4 w-4" />
-          },
-          {
-            value: "analytics",
-            label: "Análisis Visual",
-            icon: <Activity className="h-4 w-4" />
-          }
+          { id: 'gantt', label: 'Vista Gantt', icon: <Calendar className="h-4 w-4" /> },
+          { id: 'list', label: 'Listado de Tareas', icon: <TableIcon className="h-4 w-4" /> },
+          { id: 'analytics', label: 'Análisis Visual', icon: <BarChart3 className="h-4 w-4" /> }
         ]}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        primaryActionLabel="Nueva Tarea"
+        onPrimaryActionClick={() => openModal('construction-task')}
+        secondaryActionLabel="Crear Fase"
+        onSecondaryActionClick={() => openModal('construction-phase')}
       />
 
-      {/* Conditional Content - EmptyState or Tab Content */}
-      {filteredTasks.length === 0 ? (
-        <EmptyState
-          icon={<Calendar className="h-8 w-8" />}
-          title="No hay tareas en el cronograma"
-          description="Comienza creando tareas para ver el cronograma del proyecto."
-        />
-      ) : (
-        <>
-          {/* Tab Content Based on activeTab */}
-          <div className="space-y-4">
-            {activeTab === "gantt" && (
-              <GanttContainer
+      {/* Tab Content */}
+      {activeTab === 'gantt' && (
+        <div className="space-y-6">
+          {filteredTasks.length === 0 ? (
+            <EmptyState
+              icon={<Calendar className="h-16 w-16" />}
+              title="No hay tareas en el cronograma"
+              description="Comienza agregando tareas de construcción para visualizar el cronograma del proyecto."
+            />
+          ) : (
+            <GanttContainer
               data={ganttData}
               dependencies={dependencies}
-              allTasks={processedTasks}
-              projectId={projectId}
-              onItemEdit={(item) => {
-                if (item.type === 'task') {
-                  handleEditTask(item);
-                } else if (item.type === 'phase') {
-                  handleEditPhase(item);
-                }
-              }}
-              onItemDelete={(item) => {
-                if (item.type === 'task') {
-                  handleDeleteTaskFromGantt(item);
-                } else if (item.type === 'phase') {
-                  handleDeletePhase(item);
-                }
+              onTaskEdit={(taskId) => openModal('construction-task-schedule', { taskId })}
+              onTaskDelete={(taskId) => {
+                const task = filteredTasks.find(t => t.id === taskId)
+                showDeleteConfirmation({
+                  title: 'Eliminar Tarea',
+                  message: `¿Estás seguro de que deseas eliminar "${task?.name_rendered || 'esta tarea'}"?`,
+                  onConfirm: () => deleteTask.mutate(taskId)
+                })
               }}
             />
-            )}
+          )}
+        </div>
+      )}
 
-            {activeTab === "table" && (
-              <div className="rounded-lg border">
-                <div className="p-4 text-center text-muted-foreground">
-                  <TableIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Vista de tabla en desarrollo</p>
-                </div>
-              </div>
-            )}
+      {activeTab === 'list' && (
+        <div className="space-y-6">
+          {filteredTasks.length === 0 ? (
+            <EmptyState
+              icon={<TableIcon className="h-16 w-16" />}
+              title="No hay tareas para mostrar"
+              description="Las tareas que agregues aparecerán en esta lista con detalles completos."
+            />
+          ) : (
+            <Table
+              data={filteredTasks}
+              columns={[
+                {
+                  key: 'phase_name',
+                  title: 'Fase',
+                  width: '15%',
+                  render: (task: any) => (
+                    <Badge variant="secondary" className="text-xs">
+                      {task.phase_name || 'Sin fase'}
+                    </Badge>
+                  )
+                },
+                {
+                  key: 'subcategory_name',
+                  title: 'Rubro',
+                  width: '10%',
+                  render: (task: any) => (
+                    <Badge variant="outline" className="text-xs">
+                      {task.subcategory_name || 'Sin rubro'}
+                    </Badge>
+                  )
+                },
+                {
+                  key: 'name_rendered',
+                  title: 'Tarea',
+                  width: '70%',
+                  render: (task: any) => (
+                    <span className="text-sm">
+                      {cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre')}
+                    </span>
+                  )
+                },
+                {
+                  key: 'unit_name',
+                  title: 'Unidad',
+                  width: '5%',
+                  render: (task: any) => (
+                    <Badge variant="outline" className="text-xs">
+                      {task.unit_name || 'N/A'}
+                    </Badge>
+                  )
+                }
+              ]}
+              onEdit={(task) => openModal('construction-task-schedule', { taskId: task.id })}
+              onDelete={(task) => {
+                showDeleteConfirmation({
+                  title: 'Eliminar Tarea',
+                  message: `¿Estás seguro de que deseas eliminar "${task.name_rendered || 'esta tarea'}"?`,
+                  onConfirm: () => deleteTask.mutate(task.id)
+                })
+              }}
+            />
+          )}
+        </div>
+      )}
 
-            {activeTab === "analytics" && (
-              <div className="space-y-4">
-                {/* Primera fila - 3 columnas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  <ProgressCurve data={processedTasks} />
-                  <BurndownChart data={processedTasks} />
-                  <WorkloadOverTime data={processedTasks} />
-                </div>
-                
-                {/* Segunda fila - 4 columnas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                  <TasksByPhase data={processedTasks} />
-                  <DurationByRubro data={processedTasks} />
-                  <StatusBreakdown data={processedTasks} />
-                  <CriticalPathDistribution data={processedTasks} dependencies={dependencies} />
-                </div>
-                
-                {/* Tercera fila - Heatmap (1 col) y Red (3 cols) */}
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-                  <WeeklyProgressHeatmap data={processedTasks} />
-                  <div className="xl:col-span-3">
-                    <DependencyNetwork data={processedTasks} dependencies={dependencies} />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </>
+      {activeTab === 'analytics' && (
+        <div className="space-y-6">
+          {filteredTasks.length === 0 ? (
+            <EmptyState
+              icon={<BarChart3 className="h-16 w-16" />}
+              title="No hay datos para analizar"
+              description="Agrega tareas con fechas y duraciones para generar análisis visuales del cronograma."
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProgressCurve tasks={filteredTasks} />
+              <BurndownChart tasks={filteredTasks} />
+              <WorkloadOverTime tasks={filteredTasks} />
+              <TasksByPhase tasks={filteredTasks} />
+              <DurationByRubro tasks={filteredTasks} />
+              <StatusBreakdown tasks={filteredTasks} />
+              <CriticalPathDistribution tasks={filteredTasks} dependencies={dependencies} />
+              <WeeklyProgressHeatmap tasks={filteredTasks} />
+              <DependencyNetwork tasks={filteredTasks} dependencies={dependencies} />
+            </div>
+          )}
+        </div>
       )}
     </Layout>
   )
