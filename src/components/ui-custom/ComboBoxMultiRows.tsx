@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { cn } from '@/lib/utils';
 
@@ -25,16 +25,18 @@ export function ComboBoxMultiRows({
   addButtonText = "Agregar",
   className,
 }: ComboBoxMultiRowsProps) {
+  const [showComboBox, setShowComboBox] = useState(false);
   const [newValue, setNewValue] = useState<string>('');
   const { openModal } = useGlobalModalStore();
 
   // Get available options (excluding already selected ones)
   const availableOptions = options.filter(option => !value.includes(option.value));
 
-  const handleAdd = () => {
-    if (newValue && !value.includes(newValue)) {
-      onChange([...value, newValue]);
+  const handleAdd = (selectedValue: string) => {
+    if (selectedValue && !value.includes(selectedValue)) {
+      onChange([...value, selectedValue]);
       setNewValue('');
+      setShowComboBox(false);
     }
   };
 
@@ -55,6 +57,8 @@ export function ComboBoxMultiRows({
   const getOptionLabel = (optionValue: string) => {
     return options.find(opt => opt.value === optionValue)?.label || optionValue;
   };
+
+  const showAddButton = availableOptions.length > 0 && (!showComboBox || value.length === 0);
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -81,33 +85,32 @@ export function ComboBoxMultiRows({
         </div>
       )}
 
-      {/* Add new item */}
-      {availableOptions.length > 0 && (
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <Select value={newValue} onValueChange={setNewValue}>
-              <SelectTrigger>
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button
-            variant="secondary"
-            onClick={handleAdd}
-            disabled={!newValue}
-            className="shrink-0"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {addButtonText}
-          </Button>
+      {/* ComboBox for adding new item */}
+      {showComboBox && availableOptions.length > 0 && (
+        <div className="space-y-2">
+          <ComboBox
+            options={availableOptions}
+            value={newValue}
+            onValueChange={(selectedValue) => {
+              setNewValue(selectedValue);
+              handleAdd(selectedValue);
+            }}
+            placeholder={placeholder}
+            searchPlaceholder="Buscar opciones..."
+          />
         </div>
+      )}
+
+      {/* Add button */}
+      {showAddButton && (
+        <Button
+          variant="default"
+          onClick={() => setShowComboBox(true)}
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {addButtonText}
+        </Button>
       )}
 
       {/* No more options available */}

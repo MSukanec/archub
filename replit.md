@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. COMBBOXMULTIROWS COMPONENT SIMPLIFICATION COMPLETED: Successfully replaced ComboBoxMultiSelect with new simplified ComboBoxMultiRows component in organization preferences - COMPLETED
+  • SIMPLIFIED WORKFLOW: Component now shows single "Agregar" button initially instead of complex multi-select interface
+  • COMBOBOXWRITE INTEGRATION: When user clicks add button, ComboBoxWrite appears for option selection with search functionality
+  • INDIVIDUAL ROW DISPLAY: Each selected item displays as individual row with delete button and confirmation modal
+  • DELETECONFIRMATIONMODAL INTEGRATION: Delete actions trigger modal in 'dangerous' mode for confirmation
+  • PROGRESSIVE DISCLOSURE: Interface reveals selection options progressively instead of showing all controls upfront
+  • ORGANIZATION PREFERENCES UPDATED: Both secondary currencies and wallets now use new simplified component
 - July 28, 2025. FINANCIAL DASHBOARD FINAL LAYOUT RESTRUCTURE COMPLETED: Successfully implemented final 2-row structure for Resumen Financiero page as requested by user - COMPLETED
   • MOVEMENTS CARD ELIMINATED: Removed "Movimientos" KPI card completely as requested
   • FILA 1 MAINTAINED: 3 columns layout with Balances por Billetera y Moneda / Este Mes / Movimientos Recientes cards
