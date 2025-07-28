@@ -5,6 +5,8 @@ import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, 
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { TimePeriodSelector } from '@/components/ui-custom/TimePeriodSelector'
+import { Selector } from '@/components/ui-custom/Selector'
+import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
@@ -29,6 +31,23 @@ export default function FinancesDashboard() {
   // Currency view state for ActionBar button
   const [currencyView, setCurrencyView] = useState<'pesificado' | 'dolarizado'>('pesificado')
 
+  // Currency options for Selector
+  const currencyOptions = [
+    { value: 'pesificado', label: 'Pesificado' },
+    { value: 'dolarizado', label: 'Dolarizado' }
+  ]
+
+  // Exchange rate - hardcoded for now, should come from API
+  const USD_TO_ARS_RATE = 1200 // Example rate
+
+  // Convert amounts based on currency view
+  const convertAmount = (amount: number, currency: 'pesificado' | 'dolarizado' = currencyView) => {
+    if (currency === 'dolarizado') {
+      return amount / USD_TO_ARS_RATE
+    }
+    return amount
+  }
+
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, projectId, timePeriod)
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId, timePeriod)
   const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId, timePeriod)
@@ -36,11 +55,11 @@ export default function FinancesDashboard() {
   const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5, timePeriod)
   const { data: expensesByCategory, isLoading: categoriesLoading } = useExpensesByCategory(organizationId, projectId, timePeriod)
   
-  // Generate mini trend data from monthly flow for each metric
-  const incomeTrend = monthlyFlow?.map(month => ({ value: month.income || 0 })) || []
-  const expensesTrend = monthlyFlow?.map(month => ({ value: Math.abs(month.expenses || 0) })) || []
-  const balanceTrend = monthlyFlow?.map(month => ({ value: month.net || 0 })) || []
-  const movementsTrend = monthlyFlow?.map(month => ({ value: (month.income || 0) + Math.abs(month.expenses || 0) })) || []
+  // Generate mini trend data from monthly flow for each metric (converted to selected currency)
+  const incomeTrend = monthlyFlow?.map(month => ({ value: convertAmount(month.income || 0) })) || []
+  const expensesTrend = monthlyFlow?.map(month => ({ value: convertAmount(Math.abs(month.expenses || 0)) })) || []
+  const balanceTrend = monthlyFlow?.map(month => ({ value: convertAmount(month.net || 0) })) || []
+  const movementsTrend = monthlyFlow?.map(month => ({ value: convertAmount((month.income || 0) + Math.abs(month.expenses || 0)) })) || []
   
   // Calculate movements from last 30 days
   const movementsLast30Days = financialSummary ? 
@@ -76,13 +95,29 @@ export default function FinancesDashboard() {
     }
   ]
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(amount)
+  const formatCurrency = (amount: number, currency: 'pesificado' | 'dolarizado' = currencyView) => {
+    if (currency === 'dolarizado') {
+      const dollarAmount = amount / USD_TO_ARS_RATE
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0
+      }).format(dollarAmount)
+    } else {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0
+      }).format(amount)
+    }
   }
+
+  // Get currency badge component
+  const getCurrencyBadge = () => (
+    <Badge variant="secondary" className="text-xs">
+      {currencyView === 'pesificado' ? 'ARS' : 'USD'}
+    </Badge>
+  )
 
   const getBalanceColor = (balance: number) => {
     if (balance > 0) return { color: 'var(--chart-positive)' }
@@ -110,17 +145,14 @@ export default function FinancesDashboard() {
           features={features}
           showProjectSelector={true}
           customGhostButtons={[
-            <Button
-              key="currency-view"
-              variant="ghost"
-              onClick={() => {
-                setCurrencyView(currencyView === 'pesificado' ? 'dolarizado' : 'pesificado')
-              }}
-              className="flex items-center gap-2"
-            >
-              <DollarSign className="w-4 h-4" />
-              {currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
-            </Button>,
+            <div key="currency-selector" className="flex items-center">
+              <Selector
+                options={currencyOptions}
+                value={currencyView}
+                onValueChange={(value) => setCurrencyView(value as 'pesificado' | 'dolarizado')}
+                className="h-8"
+              />
+            </div>,
             <div key="time-period" className="flex items-center">
               <TimePeriodSelector
                 value={timePeriod}
@@ -145,13 +177,20 @@ export default function FinancesDashboard() {
           {/* Balances por Billetera y Moneda */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Balances por Billetera y Moneda
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Resumen detallado de saldos
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    Balances por Billetera y Moneda
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Resumen detallado de saldos
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  MULTI
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent>
               <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
@@ -161,13 +200,18 @@ export default function FinancesDashboard() {
           {/* Este Mes */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Este Mes
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(), 'MMMM yyyy', { locale: es })}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Este Mes
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(), 'MMMM yyyy', { locale: es })}
+                  </p>
+                </div>
+                {getCurrencyBadge()}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -271,11 +315,14 @@ export default function FinancesDashboard() {
                   <div className="flex-1"></div>
                   
                   {/* Icon and Title Section - positioned lower */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
-                    <span className="text-sm text-muted-foreground">
-                      Ingresos Totales
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" style={{ color: 'var(--chart-positive)' }} />
+                      <span className="text-sm text-muted-foreground">
+                        Ingresos Totales
+                      </span>
+                    </div>
+                    {getCurrencyBadge()}
                   </div>
                   
                   {/* Amount - smaller size like reference */}
@@ -307,11 +354,14 @@ export default function FinancesDashboard() {
                   <div className="flex-1"></div>
                   
                   {/* Icon and Title Section - positioned lower */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
-                    <span className="text-sm text-muted-foreground">
-                      Egresos Totales
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <TrendingDown className="h-4 w-4" style={{ color: 'var(--chart-negative)' }} />
+                      <span className="text-sm text-muted-foreground">
+                        Egresos Totales
+                      </span>
+                    </div>
+                    {getCurrencyBadge()}
                   </div>
                   
                   {/* Amount - smaller size like reference */}
@@ -343,11 +393,14 @@ export default function FinancesDashboard() {
                   <div className="flex-1"></div>
                   
                   {/* Icon and Title Section - positioned lower */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="h-4 w-4" style={getBalanceColor(financialSummary?.balance || 0)} />
-                    <span className="text-sm text-muted-foreground">
-                      Balance Neto
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" style={getBalanceColor(financialSummary?.balance || 0)} />
+                      <span className="text-sm text-muted-foreground">
+                        Balance Neto
+                      </span>
+                    </div>
+                    {getCurrencyBadge()}
                   </div>
                   
                   {/* Amount - smaller size like reference */}
@@ -363,16 +416,29 @@ export default function FinancesDashboard() {
           <div className="lg:col-span-3">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Flujo Financiero Mensual
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Ingresos, egresos y flujo neto del período seleccionado
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Flujo Financiero Mensual
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Ingresos, egresos y flujo neto del período seleccionado
+                    </p>
+                  </div>
+                  {getCurrencyBadge()}
+                </div>
               </CardHeader>
               <CardContent className="pb-2">
-                <MonthlyFlowChart data={monthlyFlow || []} isLoading={flowLoading} />
+                <MonthlyFlowChart 
+                  data={monthlyFlow?.map(month => ({
+                    ...month,
+                    income: convertAmount(month.income || 0),
+                    expenses: convertAmount(month.expenses || 0),
+                    net: convertAmount(month.net || 0)
+                  })) || []} 
+                  isLoading={flowLoading} 
+                />
               </CardContent>
             </Card>
           </div>
