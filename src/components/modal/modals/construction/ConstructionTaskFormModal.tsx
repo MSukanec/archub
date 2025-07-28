@@ -7,11 +7,12 @@ import { supabase } from "@/lib/supabase";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
+import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap } from "lucide-react";
+import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap, ArrowLeft } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
@@ -83,6 +84,9 @@ export function ConstructionTaskFormModal({
   
   // Hook para crear tarea paramétrica
   const createGeneratedTask = useCreateGeneratedTask();
+
+  // Panel store para manejar subforms
+  const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   
   // Query para obtener la membresía actual del usuario en la organización
   const { data: organizationMember } = useQuery({
@@ -264,16 +268,17 @@ export function ConstructionTaskFormModal({
         preview: parametricTaskPreview
       });
 
-      const newTask = await createGeneratedTask.mutateAsync({
+      const response = await createGeneratedTask.mutateAsync({
         param_values: paramValues,
         param_order: parametricParameterOrder
       });
 
-      console.log('✅ Nueva tarea paramétrica creada:', newTask);
+      console.log('✅ Nueva tarea paramétrica creada:', response);
 
       // Agregar la nueva tarea como seleccionada en el formulario principal
+      const newTaskId = response.new_task?.id || response.id;
       setSelectedTasks(prev => [...prev, { 
-        task_id: newTask.id, 
+        task_id: newTaskId, 
         quantity: 1 
       }]);
 
@@ -535,9 +540,13 @@ export function ConstructionTaskFormModal({
                       </p>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="default"
                         size="sm"
-                        onClick={() => setShowParametricTaskCreator(true)}
+                        onClick={() => {
+                          // Navegar al subform
+                          setPanel('subform');
+                          setCurrentSubform('parametric-task');
+                        }}
                         className="gap-2"
                       >
                         <Plus className="w-4 h-4" />
@@ -682,89 +691,66 @@ export function ConstructionTaskFormModal({
         </div>
       </div>
 
-      {/* Subformulario Paramétrico */}
-      {showParametricTaskCreator && (
-        <div className="border-t pt-6 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-accent" />
-              <h3 className="text-lg font-semibold">Crear Nueva Tarea Paramétrica</h3>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setShowParametricTaskCreator(false);
-                setParametricSelections([]);
-                setParametricTaskPreview('');
-                setParametricParameterOrder([]);
-              }}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
 
-          <div className="space-y-4">
-            {/* ParametricTaskBuilder Component */}
-            <ParametricTaskBuilder
-              selections={parametricSelections}
-              onSelectionsChange={setParametricSelections}
-              taskPreview={parametricTaskPreview}
-              onTaskPreviewChange={setParametricTaskPreview}
-              parameterOrder={parametricParameterOrder}
-              onParameterOrderChange={setParametricParameterOrder}
-              existingParamValues={null}
-              existingParamOrder={null}
-            />
-
-            {/* Botones del subformulario */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowParametricTaskCreator(false);
-                  setParametricSelections([]);
-                  setParametricTaskPreview('');
-                  setParametricParameterOrder([]);
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                onClick={handleCreateParametricTask}
-                disabled={parametricSelections.length === 0 || isCreatingParametricTask}
-                className="gap-2"
-              >
-                {isCreatingParametricTask ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creando...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4" />
-                    Crear Nueva Tarea
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </form>
   );
 
-  const headerContent = (
+  // Función para crear el subform paramétrico
+  const getSubform = () => {
+    switch (currentSubform) {
+      case 'parametric-task':
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              {/* ParametricTaskBuilder Component */}
+              <ParametricTaskBuilder
+                onSelectionChange={setParametricSelections}
+                onPreviewChange={setParametricTaskPreview}
+                onOrderChange={setParametricParameterOrder}
+                initialParameters={null}
+                initialParameterOrder={null}
+              />
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const headerContent = currentPanel === 'subform' ? (
+    <FormModalHeader
+      title={currentSubform === 'parametric-task' ? "Crear Nueva Tarea Paramétrica" : "Seleccionar Tareas del Proyecto"}
+      description={currentSubform === 'parametric-task' ? "Configura los parámetros para generar una nueva tarea personalizada" : undefined}
+      icon={currentSubform === 'parametric-task' ? Zap : CheckSquare}
+      leftActions={
+        <Button
+          variant="ghost"
+          onClick={() => setPanel('edit')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver
+        </Button>
+      }
+    />
+  ) : (
     <FormModalHeader 
       title={modalData.isEditing ? "Editar Tarea de Construcción" : "Seleccionar Tareas del Proyecto"}
       icon={CheckSquare}
     />
   );
 
-  const footerContent = (
+  const footerContent = currentPanel === 'subform' ? (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={() => setPanel('edit')}
+      rightLabel="Crear Nueva Tarea"
+      onRightClick={handleCreateParametricTask}
+      showLoadingSpinner={isCreatingParametricTask}
+      submitDisabled={parametricSelections.length === 0 || isCreatingParametricTask}
+    />
+  ) : (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
@@ -776,7 +762,7 @@ export function ConstructionTaskFormModal({
         console.log('🎯 BOTÓN PRESIONADO - selectedTasks:', selectedTasks);
         handleSubmit(onSubmit)();
       }}
-      rightLoading={isSubmitting}
+      showLoadingSpinner={isSubmitting}
     />
   );
 
@@ -785,6 +771,7 @@ export function ConstructionTaskFormModal({
       columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={getSubform()}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
