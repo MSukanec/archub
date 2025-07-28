@@ -40,6 +40,7 @@ import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogFormModal } from '../modals/construction/SiteLogFormModal';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
+import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -138,6 +139,8 @@ export function ModalFactory() {
       return <AttendanceFormModal modalData={data} onClose={closeModal} />;
     case 'parameter-visibility-config':
       return <ParameterVisibilityConfigModal />;
+    case 'add-parameter-to-canvas':
+      return <AddParameterToCanvasModal />;
     default:
       return null;
   }

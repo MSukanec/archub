@@ -20,7 +20,7 @@ import 'reactflow/dist/style.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Edit, Trash2, Settings } from 'lucide-react';
+import { Copy, Edit, Trash2, Settings, Plus } from 'lucide-react';
 import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -958,10 +958,21 @@ function ParameterNodeEditorContent() {
 
   console.log('DEBUG - Parameters:', parametersData.length, 'Dependencies:', dependencies.length, 'Nodes:', nodes.length, 'Edges:', edges.length);
 
+  const { openModal } = useGlobalModalStore();
+
   return (
     <div className="space-y-4">
       {/* Canvas de React Flow */}
-      <div className="h-[600px] border rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <div className="h-[600px] border rounded-lg overflow-hidden relative" style={{ backgroundColor: 'var(--card-bg)' }}>
+        {/* Botón flotante para agregar parámetros */}
+        <Button 
+          onClick={() => openModal('add-parameter-to-canvas')}
+          className="absolute top-4 right-4 z-10 rounded-full w-10 h-10 p-0"
+          size="sm"
+          title="Agregar parámetro al canvas"
+        >
+          <Plus className="w-4 h-4" />
+        </Button>
         <ReactFlow
           nodes={nodes}
           edges={edges}
