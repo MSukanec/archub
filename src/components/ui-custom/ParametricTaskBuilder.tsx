@@ -151,15 +151,6 @@ export function ParametricTaskBuilder({ onSelectionChange, onPreviewChange, onOr
 
   // Calcular parámetros disponibles basado en selecciones actuales
   useEffect(() => {
-    // En modo edición con parámetros iniciales, no limitar los parámetros disponibles
-    if (initialParameters && selections.length > 0) {
-      // En modo edición, mantener todos los parámetros que están en las selecciones
-      const editModeParams = selections.map(s => s.parameterId)
-      console.log('📝 Modo edición - manteniendo todos los parámetros seleccionados:', editModeParams.length)
-      setAvailableParameters(editModeParams)
-      return
-    }
-
     if (selections.length === 0) {
       const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
       if (tipoTareaParam) {
