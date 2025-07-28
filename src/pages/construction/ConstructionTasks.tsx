@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2 } from 'lucide-react'
+import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -15,6 +15,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
+  const [activeTab, setActiveTab] = useState("tasks")
   const [groupingType, setGroupingType] = useState('phases')
   
   const { data: userData } = useCurrentUser()
@@ -146,6 +147,31 @@ export default function ConstructionTasks() {
     })
   }
 
+  const handleEditPhase = (phase: any) => {
+    openModal('construction-phase', {
+      projectId,
+      organizationId,
+      userId: userData?.user?.id,
+      editingPhase: phase,
+      isEditing: true
+    })
+  }
+
+  const handleDeletePhase = (phaseId: string) => {
+    const phase = projectPhases.find(p => p.project_phase_id === phaseId)
+    const phaseName = phase?.name || 'Fase'
+    
+    showDeleteConfirmation({
+      title: "Eliminar fase",
+      description: "¿Estás seguro de que deseas eliminar esta fase del proyecto?",
+      itemName: phaseName, 
+      onConfirm: async () => {
+        // TODO: Implementar eliminación de fase
+        console.log('Delete phase:', phaseId)
+      }
+    })
+  }
+
   // Definir columnas base para la tabla
   const baseColumns = [
     {
@@ -200,6 +226,56 @@ export default function ConstructionTasks() {
         </div>
       ),
       width: '5%',
+      sortable: false
+    }
+  ]
+
+  // Definir columnas para la tabla de fases
+  const phaseColumns = [
+    {
+      key: 'position',
+      label: 'Posición',
+      render: (phase: any) => phase.position,
+      width: '10%'
+    },
+    {
+      key: 'name',
+      label: 'Nombre de Fase',
+      render: (phase: any) => phase.name || 'Sin nombre',
+      width: 'auto' // El resto del espacio disponible
+    },
+    {
+      key: 'task_count',
+      label: 'Tareas',
+      render: (phase: any) => {
+        // Contar tareas que pertenecen a esta fase
+        const taskCount = tasks.filter(task => task.phase_name === phase.name).length;
+        return taskCount;
+      },
+      width: '10%'
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (phase: any) => (
+        <div className="flex gap-1 justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditPhase(phase)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeletePhase(phase.project_phase_id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      width: '10%',
       sortable: false
     }
   ]
@@ -287,6 +363,20 @@ export default function ConstructionTasks() {
           onGroupingChange={setGroupingType}
           primaryActionLabel="Agregar Tareas en Masa"
           onPrimaryActionClick={handleAddTask}
+          tabs={[
+            {
+              value: "tasks",
+              label: "Tareas",
+              icon: <TableIcon className="h-4 w-4" />
+            },
+            {
+              value: "phases",
+              label: "Fases",
+              icon: <Settings className="h-4 w-4" />
+            }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
           customActions={[
             <Button 
               key="create-phase"
@@ -300,56 +390,82 @@ export default function ConstructionTasks() {
           ]}
         />
 
-        {/* Table with phase headers always visible or Empty State */}
-        {tasks.length === 0 ? (
-          <div className="space-y-4">
-            {/* Show phase headers even when empty */}
-            {projectPhases.length > 0 ? (
-              <div className="space-y-4">
-                {projectPhases.map(phase => (
-                  <div key={phase.id} className="border rounded-lg">
-                    <div className="bg-muted/50 px-4 py-3 border-b">
-                      <h3 className="font-medium text-sm text-muted-foreground">
-                        {phase.name}
-                      </h3>
+        {/* Tab Content */}
+        {activeTab === "tasks" ? (
+          // Tab Tareas - Contenido actual
+          tasks.length === 0 ? (
+            <div className="space-y-4">
+              {/* Show phase headers even when empty */}
+              {projectPhases.length > 0 ? (
+                <div className="space-y-4">
+                  {projectPhases.map(phase => (
+                    <div key={phase.id} className="border rounded-lg">
+                      <div className="bg-muted/50 px-4 py-3 border-b">
+                        <h3 className="font-medium text-sm text-muted-foreground">
+                          {phase.name}
+                        </h3>
+                      </div>
+                      <div className="p-8 text-center text-muted-foreground">
+                        <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No hay tareas en esta fase</p>
+                      </div>
                     </div>
-                    <div className="p-8 text-center text-muted-foreground">
-                      <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No hay tareas en esta fase</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={<CheckSquare className="h-8 w-8" />}
-                title="No hay tareas en el proyecto"
-                description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
-              />
-            )}
-          </div>
-        ) : (
-          <Table
-            columns={columns}
-            data={filteredTasks}
-            isLoading={isLoading}
-            mode="construction"
-            groupBy={'groupKey'}
-            renderGroupHeader={(groupKey: string, groupRows: any[]) => (
-              <>
-                <div className="col-span-full text-sm font-medium">
-                  {groupKey} ({groupRows.length} tareas)
+                  ))}
                 </div>
-              </>
-            )}
-            emptyState={
-              <EmptyState
-                icon={<CheckSquare className="h-8 w-8" />}
-                title="No hay tareas que coincidan"
-                description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
-              />
-            }
-          />
+              ) : (
+                <EmptyState
+                  icon={<CheckSquare className="h-8 w-8" />}
+                  title="No hay tareas en el proyecto"
+                  description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
+                />
+              )}
+            </div>
+          ) : (
+            <Table
+              columns={columns}
+              data={filteredTasks}
+              isLoading={isLoading}
+              mode="construction"
+              groupBy={'groupKey'}
+              renderGroupHeader={(groupKey: string, groupRows: any[]) => (
+                <>
+                  <div className="col-span-full text-sm font-medium">
+                    {groupKey} ({groupRows.length} tareas)
+                  </div>
+                </>
+              )}
+              emptyState={
+                <EmptyState
+                  icon={<CheckSquare className="h-8 w-8" />}
+                  title="No hay tareas que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
+                />
+              }
+            />
+          )
+        ) : (
+          // Tab Fases - Nueva tabla de fases
+          projectPhases.length === 0 ? (
+            <EmptyState
+              icon={<Settings className="h-8 w-8" />}
+              title="No hay fases en el proyecto"
+              description="Comienza creando la primera fase del proyecto para organizar las tareas por etapas."
+            />
+          ) : (
+            <Table
+              columns={phaseColumns}
+              data={projectPhases}
+              isLoading={isLoading}
+              mode="admin"
+              emptyState={
+                <EmptyState
+                  icon={<Settings className="h-8 w-8" />}
+                  title="No hay fases que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar las fases que buscas."
+                />
+              }
+            />
+          )
         )}
       </div>
     </Layout>
