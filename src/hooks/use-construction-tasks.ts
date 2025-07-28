@@ -67,28 +67,27 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .select('*')
         .order('created_at', { ascending: true });
         
-      console.log('📊 CONSTRUCTION TASKS QUERY RESULT:', {
-        projectId,
-        dataLength: constructionTasks?.length || 0,
+      console.log('📊 PARAMETRIC TASKS QUERY RESULT:', {
+        totalTasks: parametricTasks?.length || 0,
         error: error?.message,
-        firstRecord: constructionTasks?.[0]
+        firstRecord: parametricTasks?.[0]
       });
 
       if (error) {
-        console.error('Error fetching construction tasks:', error);
+        console.error('Error fetching parametric tasks:', error);
         throw error;
       }
 
-      if (!constructionTasks || constructionTasks.length === 0) {
-        console.log('No construction tasks found for project:', projectId);
+      if (!parametricTasks || parametricTasks.length === 0) {
+        console.log('No parametric tasks found');
         return [];
       }
 
       // Debug: ver qué campos están llegando exactamente
-      console.log('RAW CONSTRUCTION TASKS SAMPLE:', JSON.stringify(constructionTasks?.[0], null, 2));
+      console.log('RAW PARAMETRIC TASKS SAMPLE:', JSON.stringify(parametricTasks?.[0], null, 2));
 
-      // Mapear datos de construction_tasks con task_parametric al formato esperado
-      const mappedTasks: ConstructionTask[] = constructionTasks.map((item: any) => {
+      // Mapear datos de task_parametric al formato esperado para construcción
+      const mappedTasks: ConstructionTask[] = parametricTasks.map((item: any) => {
         const taskParametric = item.task_parametric;
         const phase = item.construction_project_phases;
         
