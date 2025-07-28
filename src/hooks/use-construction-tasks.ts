@@ -196,7 +196,7 @@ export function useCreateConstructionTask() {
       start_date?: string;
       end_date?: string;
       duration_in_days?: number;
-      project_phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id)
+      phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id)
       progress_percent?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -212,10 +212,11 @@ export function useCreateConstructionTask() {
         created_by: taskData.created_by,
         start_date: taskData.start_date || null,
         end_date: taskData.end_date || null,
-        duration_in_days: taskData.duration_in_days || null
+        duration_in_days: taskData.duration_in_days || null,
+        phase_id: taskData.phase_id || null
       };
 
-      console.log('📝 DATOS PREPARADOS PARA INSERT (sin project_phase_id):', insertData);
+      console.log('📝 DATOS PREPARADOS PARA INSERT (con phase_id):', insertData);
 
       // Crear la tarea de construcción
       const { data: constructionTask, error: taskError } = await supabase

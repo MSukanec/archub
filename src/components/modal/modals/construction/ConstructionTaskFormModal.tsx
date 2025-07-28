@@ -37,7 +37,7 @@ type AddTaskFormData = z.infer<typeof addTaskSchema>;
 interface SelectedTask {
   task_id: string;
   quantity: number;
-  phase_instance_id?: string;
+  phase_id?: string;
 }
 
 interface ConstructionTaskFormModalProps {
@@ -62,7 +62,6 @@ export function ConstructionTaskFormModal({
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   
   const { data: userData } = useCurrentUser();
-  const currentMember = userData?.current_member;
   
   // Query para obtener la membresía actual del usuario en la organización
   const { data: organizationMember } = useQuery({
@@ -223,7 +222,7 @@ export function ConstructionTaskFormModal({
     console.log('🚀 SUBMIT INICIADO - selectedTasks:', selectedTasks);
     console.log('🚀 SUBMIT INICIADO - modalData:', modalData);
     console.log('🚀 SUBMIT INICIADO - userData:', userData?.user);
-    console.log('🚀 SUBMIT INICIADO - currentMember:', currentMember);
+    console.log('🚀 SUBMIT INICIADO - organizationMember:', organizationMember);
 
     if (!userData?.user?.id) {
       toast({
@@ -234,9 +233,14 @@ export function ConstructionTaskFormModal({
       return;
     }
 
-    if (!currentMember?.id) {
-      console.log('⚠️ currentMember es null, usando userData.user.id como fallback');
-      // Usar userData.user.id como fallback cuando currentMember es null
+    if (!organizationMember?.id) {
+      console.log('⚠️ organizationMember es null');
+      toast({
+        title: "Error",
+        description: "No se pudo verificar tu membresía en la organización",
+        variant: "destructive"
+      });
+      return;
     }
 
     if (selectedTasks.length === 0) {
@@ -259,7 +263,7 @@ export function ConstructionTaskFormModal({
           quantity: firstSelected.quantity,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
-          project_phase_id: firstSelected.phase_instance_id || undefined
+          phase_id: firstSelected.phase_id || undefined
         });
 
         toast({
@@ -272,17 +276,16 @@ export function ConstructionTaskFormModal({
           numberOfTasks: selectedTasks.length,
           organizationId: modalData.organizationId,
           projectId: modalData.projectId,
-          createdBy: currentMember?.id || organizationMember?.id,
+          createdBy: organizationMember?.id,
           taskDetails: selectedTasks.map(st => ({
             task_id: st.task_id,
             quantity: st.quantity,
-            phase_instance_id: st.phase_instance_id
+            phase_id: st.phase_id
           }))
         });
 
-        const createdById = currentMember?.id || organizationMember?.id;
+        const createdById = organizationMember?.id;
         console.log('🔧 ID A USAR PARA created_by:', {
-          currentMember: currentMember?.id,
           organizationMember: organizationMember?.id,
           finalId: createdById
         });
@@ -294,7 +297,7 @@ export function ConstructionTaskFormModal({
             organization_id: modalData.organizationId,
             project_id: modalData.projectId,
             created_by: createdById,
-            project_phase_id: selectedTask.phase_instance_id || undefined
+            phase_id: selectedTask.phase_id || undefined
           });
           
           return createTask.mutateAsync({
@@ -303,7 +306,7 @@ export function ConstructionTaskFormModal({
             task_id: selectedTask.task_id,
             quantity: selectedTask.quantity,
             created_by: createdById,
-            project_phase_id: selectedTask.phase_instance_id || undefined
+            phase_id: selectedTask.phase_id || undefined
           }).catch(error => {
             console.error(`❌ Error en tarea ${index + 1}:`, error);
             throw error;
@@ -327,12 +330,12 @@ export function ConstructionTaskFormModal({
       
       let errorMessage = "Error desconocido";
       
-      if (error?.message) {
-        errorMessage = error.message;
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = String(error.message);
       } else if (typeof error === 'string') {
         errorMessage = error;
-      } else if (error?.details) {
-        errorMessage = error.details;
+      } else if (error && typeof error === 'object' && 'details' in error) {
+        errorMessage = String(error.details);
       }
       
       toast({
@@ -533,11 +536,11 @@ export function ConstructionTaskFormModal({
                       {/* Fase Select */}
                       <div className="w-20">
                         <Select 
-                          value={selectedTask.phase_instance_id || ""}
+                          value={selectedTask.phase_id || ""}
                           onValueChange={(value) => {
                             setSelectedTasks(prev => 
                               prev.map((t, i) => 
-                                i === index ? { ...t, phase_instance_id: value } : t
+                                i === index ? { ...t, phase_id: value } : t
                               )
                             );
                           }}
@@ -598,7 +601,7 @@ export function ConstructionTaskFormModal({
         console.log('🎯 BOTÓN PRESIONADO - selectedTasks:', selectedTasks);
         handleSubmit(onSubmit)();
       }}
-      rightLoading={isSubmitting}
+      isLoading={isSubmitting}
     />
   );
 
