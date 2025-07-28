@@ -43,6 +43,8 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
 
   const CustomizedContent = (props: any) => {
     const { x, y, width, height, payload } = props
+    
+    if (!payload) return null
 
     return (
       <g>
@@ -52,14 +54,14 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
           width={width}
           height={height}
           style={{
-            fill: payload.color,
+            fill: payload.color || '#8884d8',
             stroke: '#fff',
             strokeWidth: 2,
             strokeOpacity: 1,
           }}
         />
         {/* Only show text if rectangle is large enough */}
-        {width > 60 && height > 40 && (
+        {width > 60 && height > 40 && payload.subcategory && (
           <text
             x={x + width / 2}
             y={y + height / 2 - 8}
@@ -71,7 +73,7 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
             {payload.subcategory}
           </text>
         )}
-        {width > 80 && height > 60 && (
+        {width > 80 && height > 60 && payload.percentage && (
           <text
             x={x + width / 2}
             y={y + height / 2 + 8}
