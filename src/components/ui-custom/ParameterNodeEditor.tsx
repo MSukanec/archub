@@ -672,95 +672,41 @@ function ParameterNodeEditorContent() {
     }
   }, [parametersData.length, savedPositions.length]);
 
-  // Configurar nodos desde datos de parámetros con posiciones guardadas
+  // Configurar nodos SOLO desde posiciones guardadas (sin crear automáticamente)
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
-      console.log('🎯 Configurando nodos. Parámetros:', parametersData.length, 'Posiciones guardadas:', savedPositions.length);
+      console.log('🎯 Configurando nodos SOLO desde posiciones guardadas. Posiciones:', savedPositions.length);
       
-      // Crear nodos originales
-      const originalNodes: Node[] = parametersData.map((item, index) => {
-        // Buscar específicamente la posición del nodo original (id === parameter_id)
-        const originalPosition = savedPositions.find(pos => 
-          pos.parameter_id === item.parameter.id && pos.id === pos.parameter_id
-        );
-        
-        const position = originalPosition ? { 
-          x: originalPosition.x, 
-          y: originalPosition.y 
-        } : { 
-          x: (index % 3) * 320, // 3 columnas
-          y: Math.floor(index / 3) * 200 // Separación vertical
-        };
-        
-        console.log(`📌 Nodo ${item.parameter.slug}:`, originalPosition ? 'posición guardada' : 'posición por defecto', position);
-        
-        return {
-          id: item.parameter.id,
-          type: 'parameterNode',
-          position,
-          data: {
-            parameter: item.parameter,
-            options: item.options,
-            visibleOptions: originalPosition?.visible_options || nodeVisibleOptions[item.parameter.id] || [],
-            onVisibleOptionsChange: (optionIds: string[]) => {
-              setNodeVisibleOptions(prev => ({
-                ...prev,
-                [item.parameter.id]: optionIds
-              }));
-              
-              // Guardar opciones visibles en la base de datos
-              const currentNode = nodes.find(n => n.id === item.parameter.id);
-              if (currentNode) {
-                console.log('💾 Guardando opciones visibles:', {
-                  parameter_id: item.parameter.id,
-                  x: currentNode.position.x,
-                  y: currentNode.position.y,
-                  visible_options: optionIds
-                });
-                savePositionMutation.mutate({
-                  parameter_id: item.parameter.id,
-                  x: currentNode.position.x,
-                  y: currentNode.position.y,
-                  visible_options: optionIds
-                });
-              }
-            },
-            onDuplicate: handleDuplicateNode,
-            onEdit: handleEditNode,
-            onDelete: handleDeleteNode
-          },
-        };
-      });
-
-      // Crear nodos duplicados desde posiciones guardadas
-      // Un nodo es duplicado si su id !== parameter_id
-      const duplicatedNodes: Node[] = savedPositions
-        .filter(pos => pos.id !== pos.parameter_id) // Nodo duplicado: id diferente al parameter_id
+      // SOLO crear nodos que tienen posiciones guardadas explícitas
+      const nodesFromPositions: Node[] = savedPositions
         .map(pos => {
-          // Buscar el parámetro original usando parameter_id
-          const originalParameter = parametersData.find(item => item.parameter.id === pos.parameter_id);
+          // Buscar el parámetro correspondiente
+          const parameterData = parametersData.find(item => item.parameter.id === pos.parameter_id);
+          if (!parameterData) {
+            console.log(`⚠️ Parámetro ${pos.parameter_id} no encontrado para posición ${pos.id}`);
+            return null;
+          }
           
-          if (!originalParameter) return null;
-          
-          console.log(`📌 Nodo duplicado ${originalParameter.parameter.slug}:`, 'posición guardada', { x: pos.x, y: pos.y });
+          const isOriginal = pos.id === pos.parameter_id;
+          console.log(`📌 Nodo ${isOriginal ? 'original' : 'duplicado'} ${parameterData.parameter.slug}:`, 'posición guardada', { x: pos.x, y: pos.y });
           
           return {
-            id: pos.id, // Usar el ID de la entrada en task_parameter_positions
+            id: pos.id,
             type: 'parameterNode',
             position: { x: pos.x, y: pos.y },
             data: {
-              parameter: originalParameter.parameter,
-              options: originalParameter.options,
-              visibleOptions: pos.visible_options || [],
+              parameter: parameterData.parameter,
+              options: parameterData.options,
+              visibleOptions: pos.visible_options || nodeVisibleOptions[pos.id] || [],
               onVisibleOptionsChange: (optionIds: string[]) => {
                 setNodeVisibleOptions(prev => ({
                   ...prev,
                   [pos.id]: optionIds
                 }));
                 
-                // Guardar opciones visibles para el nodo duplicado
+                // Guardar opciones visibles
                 savePositionMutation.mutate({
-                  id: pos.id,
+                  id: isOriginal ? undefined : pos.id,
                   parameter_id: pos.parameter_id,
                   x: pos.x,
                   y: pos.y,
@@ -775,13 +721,10 @@ function ParameterNodeEditorContent() {
         })
         .filter(node => node !== null) as Node[];
 
-      // Combinar nodos originales y duplicados
-      const allNodes = [...originalNodes, ...duplicatedNodes];
-      setNodes(allNodes);
-      
-      console.log(`✅ Nodos configurados: ${originalNodes.length} originales + ${duplicatedNodes.length} duplicados = ${allNodes.length} total`);
+      setNodes(nodesFromPositions);
+      console.log(`✅ Nodos configurados: ${nodesFromPositions.length} total (SOLO desde posiciones guardadas)`);
     }
-  }, [parametersData.length, nodeVisibleOptions, savedPositions.length]);
+  }, [parametersData.length, nodeVisibleOptions, savedPositions.length, dependencies.length]);
 
   // Configurar edges desde dependencias
   useEffect(() => {
