@@ -15,8 +15,8 @@ function getSupabaseClient() {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
-        storageKey: 'supabase-auth-token',
-        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
       },
     })
   }
