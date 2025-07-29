@@ -19,7 +19,6 @@ import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 
 export default function ConstructionCostAnalysis() {
   const [searchValue, setSearchValue] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("")
   const [activeTab, setActiveTab] = useState("tareas")
   const [dataType, setDataType] = useState("todos")
 
@@ -35,18 +34,13 @@ export default function ConstructionCostAnalysis() {
     setSidebarContext('construction')
   }, [setSidebarContext])
 
-  // Get unique categories for filters (use category_name field)
-  const uniqueCategories = Array.from(new Set(tasks.map(t => t.category_name).filter(Boolean))).sort()
-
   // Filter tasks
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.name_rendered.toLowerCase().includes(searchValue.toLowerCase()) ||
       task.code.toLowerCase().includes(searchValue.toLowerCase()) ||
       (task.category_name && task.category_name.toLowerCase().includes(searchValue.toLowerCase()))
     
-    const matchesCategory = !selectedCategory || task.category_name === selectedCategory
-    
-    return matchesSearch && matchesCategory
+    return matchesSearch
   })
 
   // Filter materials by type and search
@@ -72,14 +66,7 @@ export default function ConstructionCostAnalysis() {
     { value: "organizacion", label: "De la Organización" }
   ]
 
-  // Clear all filters
-  const handleClearFilters = () => {
-    setSearchValue("")
-    setSelectedCategory("")
-    setDataType("todos")
-  }
 
-  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== "" || dataType !== "todos"
 
   const features = [
     {
@@ -242,42 +229,7 @@ export default function ConstructionCostAnalysis() {
     }
   ]
 
-  // Custom filters for ActionBar (similar to AdminGeneratedTasks)
-  const customFilters = (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Filtrar por categoría
-        </Label>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Todas las categorías" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todas las categorías</SelectItem>
-            {uniqueCategories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Tipo de datos
-        </Label>
-        <div className="mt-1">
-          <Selector
-            options={dataTypeOptions}
-            value={dataType}
-            onValueChange={setDataType}
-            placeholder="Tipo de datos"
-          />
-        </div>
-      </div>
-    </div>
-  )
+
 
   if (tasksLoading) {
     return (
@@ -299,10 +251,17 @@ export default function ConstructionCostAnalysis() {
           features={features}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          customFilters={customFilters}
-          onClearFilters={handleClearFilters}
-          hasActiveFilters={hasActiveFilters}
           showProjectSelector={false}
+          customGhostButtons={[
+            <div key="data-type-selector" className="flex items-center">
+              <Selector
+                options={dataTypeOptions}
+                value={dataType}
+                onValueChange={setDataType}
+                className="h-8"
+              />
+            </div>
+          ]}
           tabs={[
             { value: 'tareas', label: 'Tareas', icon: <TableIcon className="h-4 w-4" /> },
             { value: 'mano-obra', label: 'Mano de Obra', icon: <Users className="h-4 w-4" /> },
