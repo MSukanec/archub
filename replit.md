@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 29, 2025. TASK EDIT MODAL IMMUTABILITY ENFORCEMENT COMPLETED: Successfully prevented parameter editing in existing tasks by disabling step 1 navigation in edit mode - COMPLETED
+  • IMMUTABLE TASK PARAMETERS: Editing existing tasks now restricts access to step 1 (parameter configuration), enforcing task immutability after creation
+  • MATERIALS-ONLY EDITING: Edit mode automatically starts at step 2 and prevents returning to parameter configuration via "Atrás" button removal
+  • STEP DISPLAY CORRECTED: Header shows "Paso 2 de 2" when editing existing tasks instead of allowing step 1 navigation
+  • CACHE INVALIDATION ENHANCED: Added 'task-parametric-library' invalidation to all task creation, deletion, and update hooks for real-time synchronization
+  • USER WORKFLOW PRESERVED: New task creation still allows full parameter configuration while maintaining security for existing tasks
 - July 28, 2025. ACTIONBAR PROJECT SELECTOR UPDATED TO USE SELECTOR COMPONENT: Successfully replaced DropdownMenu-based project selector with Selector.tsx component for visual consistency - COMPLETED
   • COMPONENT INTEGRATION: Replaced ProjectSelector component with ProjectSelectorComponent using Selector.tsx for consistent styling
   • VISUAL CONSISTENCY: Project selector now uses same popover design as other selectors throughout the application

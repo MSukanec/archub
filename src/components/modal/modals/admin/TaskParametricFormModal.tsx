@@ -487,7 +487,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
   // Step configuration
   const stepConfig: StepModalConfig = {
-    currentStep,
+    currentStep: isEditingMode ? 2 : currentStep,
     totalSteps: 2,
     stepTitle: currentStep === 1 ? 'Configurar Parámetros' : 'Agregar Materiales'
   }
@@ -509,7 +509,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
           label: "Cancelar",
           onClick: onClose
         },
-        previousAction: currentStep > 1 ? {
+        previousAction: (currentStep > 1 && !isEditingMode) ? {
           label: "Atrás",
           onClick: () => setCurrentStep(1)
         } : undefined,
