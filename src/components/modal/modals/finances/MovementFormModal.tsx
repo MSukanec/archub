@@ -2606,19 +2606,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO NORMAL
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
-            {/* Separador y título de sección de movimiento financiero */}
-            <div className="col-span-2">
-              <Separator className="mb-4" />
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-                  <DollarSign className="w-4 h-4 text-accent" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-foreground">Información Financiera</h3>
-                  <p className="text-xs text-muted-foreground">Detalles específicos del movimiento financiero</p>
-                </div>
-              </div>
-            </div>
+
 
             {/* Fila: Moneda | Billetera */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
