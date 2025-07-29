@@ -111,7 +111,7 @@ export function FormModalLayout({
           "w-full h-full rounded-none", // Mobile: full viewport
           // Desktop width control based on wide prop
           wide 
-            ? "md:w-auto md:h-auto md:min-w-[900px] md:max-w-[1200px] md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12" // WIDE: 900px min, 1200px max
+            ? "md:w-[1200px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12" // WIDE: fixed 1200px
             : "md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // DEFAULT: fixed 600px
           "flex flex-col overflow-auto",
           className,

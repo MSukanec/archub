@@ -25,8 +25,8 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
   const { data: userData } = useCurrentUser();
   
   // Obtener tareas ya existentes en el presupuesto para excluirlas
-  const { data: existingBudgetTasks = [], createMultipleBudgetTasks } = useBudgetTasks(budgetId || '');
-  const excludeTaskIds = existingBudgetTasks.map(bt => bt.task_id);
+  const { budgetTasks: existingBudgetTasks = [], createMultipleBudgetTasks } = useBudgetTasks(budgetId || '');
+  const excludeTaskIds = existingBudgetTasks.map((bt: any) => bt.task_id);
 
   useEffect(() => {
     setPanel('edit');
@@ -43,8 +43,8 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
     const tasksToAdd = selectedTasks.map(task => ({
       budget_id: budgetId,
       task_id: task.task_instance_id, // task_instance_id es el ID correcto
-      organization_id: userData.organization.id,
-      project_id: userData.preferences.last_project_id || '',
+      organization_id: userData.organization?.id || '',
+      project_id: userData.preferences?.last_project_id || '',
     }));
 
     try {
