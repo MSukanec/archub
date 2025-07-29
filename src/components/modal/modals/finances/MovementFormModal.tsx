@@ -267,7 +267,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const { data: existingMovementTasks } = useMovementTasks(editingMovement?.id)
   
   // Hook para cargar las tareas de construcción disponibles
-  const { data: constructionTasks, isLoading: isTasksLoading } = useConstructionTasks()
+  const { data: rawConstructionTasks, isLoading: isTasksLoading } = useConstructionTasks(
+    userData?.preferences?.last_project_id || '',
+    userData?.organization?.id || ''
+  )
+  
+  // Transform construction tasks to match TaskMultiSelector interface
+  const constructionTasks = React.useMemo(() => {
+    if (!rawConstructionTasks) return []
+    
+    console.log('MovementFormModal - Raw construction tasks:', rawConstructionTasks)
+    
+    return rawConstructionTasks.map((task: any) => ({
+      id: task.task_instance_id,
+      name_rendered: task.task?.display_name || task.display_name || task.task_code,
+      unit_name: task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || 'ud'
+    }))
+  }, [rawConstructionTasks])
   
   // Cargar tareas existentes en el estado cuando estamos editando
   React.useEffect(() => {
