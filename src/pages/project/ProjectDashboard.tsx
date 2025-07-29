@@ -2,12 +2,11 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FolderOpen, BarChart3, TrendingUp, Users, Calendar } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { useProjectStats, useProjectActivity } from '@/hooks/use-project-stats'
+import { useProjectStats } from '@/hooks/use-project-stats'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useMobile } from '@/hooks/use-mobile'
-import { ProjectStatsCards } from '@/components/cards/ProjectStatsCards'
-import { ProjectActivityChart } from '@/components/charts/ProjectActivityChart'
+
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Button } from '@/components/ui/button'
@@ -23,9 +22,8 @@ export default function ProjectDashboard() {
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
 
-  // Fetch project stats and activity
-  const { data: stats, isLoading: statsLoading, error: statsError } = useProjectStats(projectId)
-  const { data: activityData, isLoading: activityLoading } = useProjectActivity(projectId)
+  // Fetch project stats
+  const { data: stats, isLoading: statsLoading } = useProjectStats(projectId)
 
 
 
@@ -105,18 +103,12 @@ export default function ProjectDashboard() {
           />
         )}
 
-        {/* Statistics Cards */}
-        <ProjectStatsCards stats={stats} isLoading={statsLoading} />
-
-        {/* Activity Chart - Full Width */}
-        <ProjectActivityChart data={activityData || []} isLoading={activityLoading} />
-
         {/* Coming Soon Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-12"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-8"
         >
           <div 
             className="rounded-lg p-8 text-center border"
