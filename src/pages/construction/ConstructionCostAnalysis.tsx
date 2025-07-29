@@ -4,7 +4,7 @@ import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { useMaterials } from '@/hooks/use-materials'
+import { useMaterials, useDeleteMaterial } from '@/hooks/use-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { BarChart3, Search, Layers, Grid, TableIcon, Users, Package, DollarSign, Edit, Trash2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
@@ -25,6 +25,7 @@ export default function ConstructionCostAnalysis() {
   
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { data: materials = [], isLoading: materialsLoading } = useMaterials()
+  const deleteMaterialMutation = useDeleteMaterial()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -215,8 +216,7 @@ export default function ConstructionCostAnalysis() {
               showDeleteConfirmation({
                 itemName: material.name || 'este material',
                 onConfirm: () => {
-                  // TODO: Implementar eliminación de material
-                  console.log('Eliminar material:', material.id)
+                  deleteMaterialMutation.mutate(material.id)
                 }
               })
             }}

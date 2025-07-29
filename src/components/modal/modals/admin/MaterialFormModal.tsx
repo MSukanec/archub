@@ -15,14 +15,16 @@ import { useCreateMaterial, useUpdateMaterial, useCreateMaterialPrice, Material,
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrencies } from '@/hooks/use-currencies'
 import { HelpPopover } from '@/components/ui-custom/HelpPopover'
 
 import { Package } from 'lucide-react'
 
 const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  unit_id: z.string().min(1, 'La unidad es requerida'),
   category_id: z.string().min(1, 'La categoría es requerida'),
+  unit_id: z.string().min(1, 'La unidad es requerida'),
+  currency_id: z.string().optional(),
   price: z.string().optional().refine((val) => !val || !isNaN(Number(val)), {
     message: 'El precio debe ser un número válido',
   }),
@@ -48,6 +50,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const { data: userData } = useCurrentUser()
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
+  const { data: currencies = [] } = useCurrencies()
   const { setPanel } = useModalPanelStore()
 
   // Force edit mode when modal opens
@@ -60,8 +63,9 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     resolver: zodResolver(materialSchema),
     defaultValues: {
       name: '',
-      unit_id: '',
       category_id: '',
+      unit_id: '',
+      currency_id: '',
       price: '',
     },
   })
@@ -71,15 +75,17 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     if (isEditing && editingMaterial) {
       form.reset({
         name: editingMaterial.name,
-        unit_id: editingMaterial.unit_id,
         category_id: editingMaterial.category_id,
+        unit_id: editingMaterial.unit_id,
+        currency_id: '', // Moneda se cargará por separado desde organization_material_prices
         price: '', // Precio se cargará por separado desde organization_material_prices
       })
     } else {
       form.reset({
         name: '',
-        unit_id: '',
         category_id: '',
+        unit_id: '',
+        currency_id: '',
         price: '',
       })
     }
@@ -104,8 +110,8 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         // Crear material
         const materialData: NewMaterialData = {
           name: values.name,
-          unit_id: values.unit_id,
           category_id: values.category_id,
+          unit_id: values.unit_id,
           organization_id: userData?.organization?.id,
           is_system: false,
         }
@@ -118,7 +124,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
             price: parseFloat(values.price),
-            currency_id: undefined, // Por ahora sin moneda específica
+            currency_id: values.currency_id || undefined,
           }
           
           await createPriceMutation.mutateAsync(priceData)
@@ -157,83 +163,115 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           )}
         />
 
-        {/* Category */}
-        <FormField
-          control={form.control}
-          name="category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoría *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Category and Unit Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Category */}
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Unit */}
-        <FormField
-          control={form.control}
-          name="unit_id"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center gap-2">
-                <FormLabel>Unidad de Cómputo *</FormLabel>
-                <HelpPopover
-                  title="¿Qué es la Unidad de Cómputo?"
-                  description="Esta no es la unidad de venta del material, sino la unidad con la que se calculan las cantidades en el proyecto. Por ejemplo: la cal se computa por kilogramos (KG) para los cálculos de obra, pero se vende por bolsas de 25kg. El cemento se computa por kilogramos pero se vende por bolsas de 50kg. Esta unidad te ayuda a hacer cálculos precisos de materiales."
-                />
-              </div>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar unidad de cómputo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Unit */}
+          <FormField
+            control={form.control}
+            name="unit_id"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <FormLabel>Unidad de Cómputo *</FormLabel>
+                  <HelpPopover
+                    title="¿Qué es la Unidad de Cómputo?"
+                    description="Esta no es la unidad de venta del material, sino la unidad con la que se calculan las cantidades en el proyecto. Por ejemplo: la cal se computa por kilogramos (KG) para los cálculos de obra, pero se vende por bolsas de 25kg. El cemento se computa por kilogramos pero se vende por bolsas de 50kg. Esta unidad te ayuda a hacer cálculos precisos de materiales."
+                  />
+                </div>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar unidad de cómputo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        {/* Price */}
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Costo por Unidad (Opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="Ej: 1250.00"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Currency and Price Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Currency */}
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moneda (Opcional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar moneda" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency.id} value={currency.id}>
+                        {currency.name} ({currency.symbol})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Price */}
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Costo por Unidad (Opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Ej: 1250.00"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
 
       </form>
