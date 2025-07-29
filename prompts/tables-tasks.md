@@ -260,6 +260,18 @@ TABLA TASK_PARAMETRIC:
   {
     "column_name": "category_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "custom_name",
+    "data_type": "text"
   }
 ]
 
