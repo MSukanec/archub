@@ -11,8 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
-import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
-
+import { useOrganizationCurrencies } from "@/hooks/use-organization-currencies";
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +28,7 @@ const subcontractSchema = z.object({
   title: z.string().min(1, "El título es obligatorio"),
   contact_id: z.string().min(1, "Debe seleccionar un proveedor"),
   status: z.string().min(1, "Debe seleccionar un estado"),
+  currency_id: z.string().min(1, "Debe seleccionar una moneda"),
   amount_total: z.number().min(0, "El monto debe ser mayor o igual a 0").optional(),
   notes: z.string().optional(),
 });
@@ -62,6 +62,9 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   
   // Obtener todas las tareas del proyecto
   const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId || '');
+  
+  // Obtener monedas de la organización
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId || '');
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
@@ -69,6 +72,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       title: '',
       contact_id: '',
       status: 'pendiente',
+      currency_id: '',
       amount_total: 0,
       notes: '',
     }
