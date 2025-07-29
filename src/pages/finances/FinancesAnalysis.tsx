@@ -453,7 +453,7 @@ export default function FinancesAnalysis() {
   ]
 
   return (
-    <Layout headerProps={{ title: "Análisis de Obra" }}>
+    <Layout>
       <div className="space-y-4">
         <FeatureIntroduction
           title="Análisis de Obra"
