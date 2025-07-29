@@ -96,15 +96,6 @@ function ProjectSelectorComponent() {
     mutationFn: async (projectId: string | null) => {
       if (!userData?.preferences?.id || !supabase) return
       
-      const currentOrgId = userData?.organization?.id
-      if (currentOrgId) {
-        if (projectId) {
-          localStorage.setItem(`last-project-${currentOrgId}`, projectId)
-        } else {
-          localStorage.removeItem(`last-project-${currentOrgId}`)
-        }
-      }
-      
       const { error } = await supabase
         .from('user_preferences')
         .update({ last_project_id: projectId })
@@ -122,12 +113,6 @@ function ProjectSelectorComponent() {
     
     if (selectedProjectId === actualProjectId) {
       return
-    }
-    
-    if (actualProjectId === null) {
-      localStorage.setItem('explicit-general-mode', 'true')
-    } else {
-      localStorage.removeItem('explicit-general-mode')
     }
     
     setSelectedProject(actualProjectId)

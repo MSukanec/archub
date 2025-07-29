@@ -21,34 +21,21 @@ export function ProjectSelector() {
   const { data: projects = [] } = useProjects(userData?.organization?.id)
   const { selectedProjectId, setSelectedProject } = useProjectContext()
 
-  // Reset project context when organization changes
+  // Initialize project from user preferences, but default to General if no preference exists
   useEffect(() => {
-    if (userData?.organization?.id) {
-      // Check if we have an org-specific project saved
-      const orgSpecificProject = localStorage.getItem(`last-project-${userData.organization.id}`)
+    if (userData?.organization?.id && userData?.preferences) {
+      const savedProjectId = userData.preferences.last_project_id
       
-      if (orgSpecificProject) {
-        // Set to saved project for this organization
-        setSelectedProject(orgSpecificProject)
-        localStorage.removeItem('explicit-general-mode')
+      // Always initialize to user's saved preference or General mode
+      if (savedProjectId && projects.some(p => p.id === savedProjectId)) {
+        // Set to saved project if it exists in current organization
+        setSelectedProject(savedProjectId)
       } else {
-        // No saved project for this org, force to General mode
+        // Default to General mode if no valid saved project
         setSelectedProject(null)
-        localStorage.setItem('explicit-general-mode', 'true')
       }
     }
-  }, [userData?.organization?.id])
-
-  // Initialize project context with user preference ONLY on first app load
-  useEffect(() => {
-    // Only initialize if we don't have any organization context yet
-    if (selectedProjectId === null && userData?.preferences?.last_project_id && !userData?.organization?.id) {
-      const hasExplicitGeneralSelection = localStorage.getItem('explicit-general-mode') === 'true'
-      if (!hasExplicitGeneralSelection) {
-        setSelectedProject(userData.preferences.last_project_id)
-      }
-    }
-  }, [userData?.preferences?.last_project_id])
+  }, [userData?.organization?.id, userData?.preferences?.last_project_id, projects])
   
   // Find current project SOLO basado en selectedProjectId, SIN fallback a last_project_id
   const currentProject = selectedProjectId 
@@ -59,16 +46,6 @@ export function ProjectSelector() {
   const updateProjectMutation = useMutation({
     mutationFn: async (projectId: string | null) => {
       if (!userData?.preferences?.id || !supabase) return
-      
-      // Guardar en localStorage específico de la organización
-      const currentOrgId = userData?.organization?.id
-      if (currentOrgId) {
-        if (projectId) {
-          localStorage.setItem(`last-project-${currentOrgId}`, projectId)
-        } else {
-          localStorage.removeItem(`last-project-${currentOrgId}`)
-        }
-      }
       
       const { error } = await supabase
         .from('user_preferences')
@@ -94,13 +71,7 @@ export function ProjectSelector() {
       return
     }
     
-    // Mark when user explicitly selects General mode
-    if (projectId === null) {
-      localStorage.setItem('explicit-general-mode', 'true')
-    } else {
-      localStorage.removeItem('explicit-general-mode')
-    }
-    
+    // Update context and database
     setSelectedProject(projectId)
     updateProjectMutation.mutate(projectId)
   }
