@@ -5,12 +5,15 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { BarChart3, Search, Layers, Grid, TableIcon, Users, Package, DollarSign } from 'lucide-react'
+import { BarChart3, Search, Layers, Grid, TableIcon, Users, Package, DollarSign, Edit, Trash2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 
 export default function ConstructionCostAnalysis() {
   const [searchValue, setSearchValue] = useState("")
@@ -20,6 +23,8 @@ export default function ConstructionCostAnalysis() {
   
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { setSidebarContext } = useNavigationStore()
+  const { openModal } = useGlobalModalStore()
+  const { showDeleteConfirmation } = useDeleteConfirmation()
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -111,13 +116,36 @@ export default function ConstructionCostAnalysis() {
       )
     },
     {
-      key: 'created_at',
-      label: 'Fecha',
+      key: 'actions',
+      label: 'Acciones',
       width: '10%',
       render: (task: any) => (
-        <span className="text-xs text-muted-foreground">
-          {new Date(task.created_at).toLocaleDateString('es-ES')}
-        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => openModal('parametric-task', { taskId: task.id })}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              showDeleteConfirmation({
+                itemName: task.name_rendered || 'esta tarea',
+                onConfirm: () => {
+                  // TODO: Implementar eliminación de tarea
+                  console.log('Eliminar tarea:', task.id)
+                }
+              })
+            }}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       )
     }
   ]
