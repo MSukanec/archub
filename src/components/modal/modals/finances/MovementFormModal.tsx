@@ -23,6 +23,8 @@ import { TransferFields } from './movement-forms/TransferFields'
 import { AportesFields } from './movement-forms/AportesFields'
 import { AportesPropiosFields } from './movement-forms/AportesPropiosFields'
 import { RetirosPropiosFields } from './movement-forms/RetirosPropiosFields'
+import { MaterialesFields } from './movement-forms/MaterialesFields'
+import { ManoDeObraFields } from './movement-forms/ManoDeObraFields'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -117,6 +119,7 @@ const retirosPropriosFormSchema = z.object({
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
+  subcategory_id: z.string().optional(),
   // Campos para retiros propios
   member_id: z.string().optional(), // Campo opcional - Socio
   currency_id: z.string().min(1, 'Moneda es requerida'),
@@ -125,12 +128,43 @@ const retirosPropriosFormSchema = z.object({
   exchange_rate: z.number().optional()
 })
 
-type MovementForm = z.infer<typeof movementFormSchema>
+// Esquemas para materiales y mano de obra (con campo construction_task_id)
+const materialesFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
+  category_id: z.string().min(1, 'Categoría es requerida'),
+  subcategory_id: z.string().optional(),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional(),
+  construction_task_id: z.string().min(1, 'Tarea es requerida') // Campo obligatorio para tareas de construcción
+})
+
+const manoDeObraFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
+  category_id: z.string().min(1, 'Categoría es requerida'),
+  subcategory_id: z.string().optional(),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional(),
+  construction_task_id: z.string().min(1, 'Tarea es requerida') // Campo obligatorio para tareas de construcción
+})
+
+export type MovementForm = z.infer<typeof movementFormSchema>
 type ConversionForm = z.infer<typeof conversionFormSchema>
 type TransferForm = z.infer<typeof transferFormSchema>
 type AportesForm = z.infer<typeof aportesFormSchema>
 type AportesPropriosForm = z.infer<typeof aportesPropriosFormSchema>
 type RetirosPropriosForm = z.infer<typeof retirosPropriosFormSchema>
+type MaterialesForm = z.infer<typeof materialesFormSchema>
+type ManoDeObraForm = z.infer<typeof manoDeObraFormSchema>
 
 interface MovementFormModalProps {
   modalData?: {
@@ -200,7 +234,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
   
   // Estado centralizado para el tipo de movimiento
-  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios'>('normal')
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'mano_de_obra'>('normal')
   
 
 
@@ -210,6 +244,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isAportes = movementType === 'aportes'
   const isAportesPropios = movementType === 'aportes_propios'
   const isRetirosPropios = movementType === 'retiros_propios'
+  const isMateriales = movementType === 'materiales'
+  const isManoDeObra = movementType === 'mano_de_obra'
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
@@ -337,6 +373,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       description: '',
       type_id: '',
       category_id: '',
+      subcategory_id: '',
       member_id: '',
       currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
       wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
@@ -344,6 +381,42 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       exchange_rate: undefined
     }
   })
+
+  const materialesForm = useForm<MaterialesForm>({
+    resolver: zodResolver(materialesFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: userData?.user?.id || '',
+      description: '',
+      type_id: '',
+      category_id: '',
+      subcategory_id: '',
+      construction_task_id: '',
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
+      amount: 0,
+      exchange_rate: undefined
+    }
+  })
+
+  const manoDeObraForm = useForm<ManoDeObraForm>({
+    resolver: zodResolver(manoDeObraFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: userData?.user?.id || '',
+      description: '',
+      type_id: '',
+      category_id: '',
+      subcategory_id: '',
+      construction_task_id: '',
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
+      amount: 0,
+      exchange_rate: undefined
+    }
+  })
+
+
 
   // Manejar envío con ENTER
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -364,15 +437,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     // Actualizar estado
     setSelectedTypeId(newTypeId)
     
-    // Detectar formulario
+    // Detectar formulario por view_mode y nombre de categoría
     const selectedConcept = concepts.find((concept: any) => concept.id === newTypeId)
     const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+    const typeName = selectedConcept?.name?.toLowerCase()
     
     const isConversionType = viewMode === "conversion"
     const isTransferType = viewMode === "transfer"
     const isAportesType = viewMode === "aportes"
+    const isMaterialesType = typeName?.includes('material')
+    const isManoDeObraType = typeName?.includes('mano de obra') || typeName?.includes('labor')
     
-    console.log('Type detected:', { viewMode, isConversionType, isTransferType, isAportesType })
+    console.log('Type detected:', { viewMode, typeName, isConversionType, isTransferType, isAportesType, isMaterialesType, isManoDeObraType })
     
     // Cambiar formulario
     if (isConversionType) {
@@ -381,6 +457,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       setMovementType('transfer')
     } else if (isAportesType) {
       setMovementType('aportes')
+    } else if (isMaterialesType) {
+      setMovementType('materiales')
+    } else if (isManoDeObraType) {
+      setMovementType('mano_de_obra')
     } else {
       setMovementType('normal')
     }
@@ -392,6 +472,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     aportesForm.setValue('type_id', newTypeId)
     aportesPropriosForm.setValue('type_id', newTypeId)
     retirosPropriosForm.setValue('type_id', newTypeId)
+    materialesForm.setValue('type_id', newTypeId)
+    manoDeObraForm.setValue('type_id', newTypeId)
     
     // Reset de categorías solo en nuevo movimiento
     if (!editingMovement) {
@@ -401,7 +483,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
     
 
-  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm])
+  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, manoDeObraForm])
   
   // Escuchar cambios en el tipo de TODOS los formularios
   const typeId = form.watch('type_id')
@@ -410,6 +492,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const aportesTypeId = aportesForm.watch('type_id')
   const aportesPropriosTypeId = aportesPropriosForm.watch('type_id')
   const retirosPropriosTypeId = retirosPropriosForm.watch('type_id')
+  const materialesTypeId = materialesForm.watch('type_id')
+  const manoDeObraTypeId = manoDeObraForm.watch('type_id')
 
   // Solo escuchar cambios del formulario principal para simplificar
   React.useEffect(() => {
@@ -442,6 +526,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!aportesForm.watch('created_by')) aportesForm.setValue('created_by', currentMember.id)
       if (!aportesPropriosForm.watch('created_by')) aportesPropriosForm.setValue('created_by', currentMember.id)
       if (!retirosPropriosForm.watch('created_by')) retirosPropriosForm.setValue('created_by', currentMember.id)
+      if (!materialesForm.watch('created_by')) materialesForm.setValue('created_by', currentMember.id)
+      if (!manoDeObraForm.watch('created_by')) manoDeObraForm.setValue('created_by', currentMember.id)
     }
     
     // Inicializar PROYECTO (solo si no está editando)
@@ -462,6 +548,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!aportesForm.watch('currency_id')) aportesForm.setValue('currency_id', defaultCurrency)
       if (!aportesPropriosForm.watch('currency_id')) aportesPropriosForm.setValue('currency_id', defaultCurrency)
       if (!retirosPropriosForm.watch('currency_id')) retirosPropriosForm.setValue('currency_id', defaultCurrency)
+      if (!materialesForm.watch('currency_id')) materialesForm.setValue('currency_id', defaultCurrency)
+      if (!manoDeObraForm.watch('currency_id')) manoDeObraForm.setValue('currency_id', defaultCurrency)
     }
     
     if (defaultWallet) {
@@ -492,6 +580,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         retirosPropriosForm.setValue('wallet_id', defaultWallet)
         console.log('Set retiros propios wallet_id to:', defaultWallet)
       }
+      if (!materialesForm.watch('wallet_id')) {
+        materialesForm.setValue('wallet_id', defaultWallet)
+        console.log('Set materiales wallet_id to:', defaultWallet)
+      }
+      if (!manoDeObraForm.watch('wallet_id')) {
+        manoDeObraForm.setValue('wallet_id', defaultWallet)
+        console.log('Set mano de obra wallet_id to:', defaultWallet)
+      }
     }
     
   }, [members, userData?.user?.id, currencies, wallets, userData?.organization_preferences, editingMovement])
@@ -502,19 +598,21 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   React.useEffect(() => {
     // Ejecutar tanto en creación como en edición, pero con diferente lógica
     
-    const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id')
+    const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id') || materialesForm.watch('category_id') || manoDeObraForm.watch('category_id')
     if (categoryId && categories) {
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
       const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
       
 
       
-      // Detectar el tipo específico de aportes
+      // Detectar el tipo específico de formulario especial
       const isAportesCategory = viewMode === "aportes"
       const isAportesPropiosCategory = viewMode === "aportes_propios"
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
+      const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
+      const isManoDeObraCategory = viewMode === "mano_de_obra" || selectedCategory?.name?.toLowerCase().includes('mano de obra')
       
-      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory) {
+      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isManoDeObraCategory) {
         // Establecer el estado correcto
         if (isAportesCategory) {
           setMovementType('aportes')
@@ -522,6 +620,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setMovementType('aportes_propios')
         } else if (isRetirosPropiosCategory) {
           setMovementType('retiros_propios')
+        } else if (isMaterialesCategory) {
+          setMovementType('materiales')
+        } else if (isManoDeObraCategory) {
+          setMovementType('mano_de_obra')
         }
         
         // Sincronizar valores tanto en modo nuevo como en edición
@@ -590,15 +692,45 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
+        } else if (isMaterialesCategory) {
+          // MATERIALES: Tareas de construcción + Información financiera
+          console.log('Setting materiales form with preserved values:', preserveValues ? currentValues : 'using defaults')
+          
+          materialesForm.setValue('type_id', form.watch('type_id'))
+          materialesForm.setValue('category_id', categoryId)
+          materialesForm.setValue('description', preserveValues ? currentValues.description : '')
+          materialesForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
+          materialesForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
+          materialesForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          materialesForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) materialesForm.setValue('exchange_rate', currentValues.exchange_rate)
+          
+          // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+          form.setValue('category_id', categoryId)
+        } else if (isManoDeObraCategory) {
+          // MANO DE OBRA: Tareas de construcción + Información financiera
+          console.log('Setting mano de obra form with preserved values:', preserveValues ? currentValues : 'using defaults')
+          
+          manoDeObraForm.setValue('type_id', form.watch('type_id'))
+          manoDeObraForm.setValue('category_id', categoryId)
+          manoDeObraForm.setValue('description', preserveValues ? currentValues.description : '')
+          manoDeObraForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
+          manoDeObraForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
+          manoDeObraForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          manoDeObraForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) manoDeObraForm.setValue('exchange_rate', currentValues.exchange_rate)
+          
+          // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+          form.setValue('category_id', categoryId)
         }
       } else {
-        // Si no es una categoría de aportes, permitir regresar al formulario normal
-        if (isAportes || isAportesPropios || isRetirosPropios) {
+        // Si no es una categoría especial, permitir regresar al formulario normal
+        if (isAportes || isAportesPropios || isRetirosPropios || isMateriales || isManoDeObra) {
           setMovementType('normal')
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, editingMovement, currencies, wallets])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), manoDeObraForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isManoDeObra, editingMovement, currencies, wallets])
 
 
 
@@ -1576,6 +1708,170 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     await createRetirosPropriosMutation.mutateAsync(data)
   }
 
+  const createMaterialesMutation = useMutation({
+    mutationFn: async (data: MaterialesForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      const movementData = {
+        organization_id: userData.organization.id,
+        project_id: form.watch('project_id') || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Compra de Materiales',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id,
+        type_id: data.type_id,
+        category_id: data.category_id,
+        construction_task_id: data.construction_task_id, // Campo específico para tareas
+        exchange_rate: data.exchange_rate || null
+      }
+
+      // Si estamos editando, actualizar el movimiento existente
+      if (editingMovement?.id) {
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      } else {
+        // Si estamos creando, insertar nuevo movimiento
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert([movementData])
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      toast({
+        title: editingMovement ? 'Compra de Materiales actualizada' : 'Compra de Materiales registrada',
+        description: editingMovement 
+          ? 'La compra de materiales ha sido actualizada correctamente'
+          : 'La compra de materiales ha sido registrada correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} la compra de materiales: ${error.message}`,
+      })
+    }
+  })
+
+  const createManoDeObraMutation = useMutation({
+    mutationFn: async (data: ManoDeObraForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      const movementData = {
+        organization_id: userData.organization.id,
+        project_id: form.watch('project_id') || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Pago de Mano de Obra',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id,
+        type_id: data.type_id,
+        category_id: data.category_id,
+        construction_task_id: data.construction_task_id, // Campo específico para tareas
+        exchange_rate: data.exchange_rate || null
+      }
+
+      // Si estamos editando, actualizar el movimiento existente
+      if (editingMovement?.id) {
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      } else {
+        // Si estamos creando, insertar nuevo movimiento
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert([movementData])
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      toast({
+        title: editingMovement ? 'Pago de Mano de Obra actualizado' : 'Pago de Mano de Obra registrado',
+        description: editingMovement 
+          ? 'El pago de mano de obra ha sido actualizado correctamente'
+          : 'El pago de mano de obra ha sido registrado correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el pago de mano de obra: ${error.message}`,
+      })
+    }
+  })
+
+  const onSubmitMateriales = async (data: MaterialesForm) => {
+    console.log('Saving materiales data:', {
+      created_by: data.created_by,
+      wallet_id: data.wallet_id,
+      construction_task_id: data.construction_task_id,
+      category_id: data.category_id,
+      type_id: data.type_id,
+      amount: data.amount,
+      currency_id: data.currency_id
+    })
+    console.log('Full form data for materiales:', data)
+    await createMaterialesMutation.mutateAsync(data)
+  }
+
+  const onSubmitManoDeObra = async (data: ManoDeObraForm) => {
+    console.log('Saving mano de obra data:', {
+      created_by: data.created_by,
+      wallet_id: data.wallet_id,
+      construction_task_id: data.construction_task_id,
+      category_id: data.category_id,
+      type_id: data.type_id,
+      amount: data.amount,
+      currency_id: data.currency_id
+    })
+    console.log('Full form data for mano de obra:', data)
+    await createManoDeObraMutation.mutateAsync(data)
+  }
+
+
+
   const handleClose = () => {
     setPanel('edit')
     onClose()
@@ -1592,6 +1888,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const isCurrentAportes = currentCategoryViewMode === "aportes" && currentExtraFields.includes('cliente_id')
     const isCurrentAportesPropios = currentCategoryViewMode === "aportes" && currentExtraFields.includes('socio_id') && currentCategory?.name === "Aportes Propios"
     const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || (currentExtraFields.includes('socio_id') && currentCategory?.name?.includes('Retiro'))
+    const isCurrentMateriales = currentCategory?.name?.toLowerCase().includes('material')
+    const isCurrentManoDeObra = currentCategory?.name?.toLowerCase().includes('mano de obra') || currentCategory?.name?.toLowerCase().includes('labor')
     
     console.log('handleConfirm - detecting current movement type:', {
       currentCategoryId,
@@ -1601,6 +1899,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       isCurrentAportes,
       isCurrentAportesPropios,
       isCurrentRetirosPropios,
+      isCurrentMateriales,
+      isCurrentManoDeObra,
       originalMovementType: movementType
     })
     
@@ -1701,6 +2001,66 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
       
       retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
+    } else if (isCurrentMateriales) {
+      console.log('Submitting as materiales form')
+      
+      // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
+      const mainFormTypeId = form.watch('type_id')
+      const mainFormCreatedBy = form.watch('created_by')
+      const mainFormMovementDate = form.watch('movement_date')
+      const mainFormDescription = form.watch('description')
+      
+      if (mainFormTypeId) {
+        console.log('Synchronizing type_id before submit:', mainFormTypeId)
+        materialesForm.setValue('type_id', mainFormTypeId)
+      }
+      
+      if (mainFormCreatedBy) {
+        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
+        materialesForm.setValue('created_by', mainFormCreatedBy)
+      }
+      
+      if (mainFormMovementDate) {
+        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
+        materialesForm.setValue('movement_date', mainFormMovementDate)
+      }
+      
+      if (mainFormDescription) {
+        console.log('Synchronizing description before submit:', mainFormDescription)
+        materialesForm.setValue('description', mainFormDescription)
+      }
+      
+      materialesForm.handleSubmit(onSubmitMateriales)()
+    } else if (isCurrentManoDeObra) {
+      console.log('Submitting as mano de obra form')
+      
+      // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
+      const mainFormTypeId = form.watch('type_id')
+      const mainFormCreatedBy = form.watch('created_by')
+      const mainFormMovementDate = form.watch('movement_date')
+      const mainFormDescription = form.watch('description')
+      
+      if (mainFormTypeId) {
+        console.log('Synchronizing type_id before submit:', mainFormTypeId)
+        manoDeObraForm.setValue('type_id', mainFormTypeId)
+      }
+      
+      if (mainFormCreatedBy) {
+        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
+        manoDeObraForm.setValue('created_by', mainFormCreatedBy)
+      }
+      
+      if (mainFormMovementDate) {
+        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
+        manoDeObraForm.setValue('movement_date', mainFormMovementDate)
+      }
+      
+      if (mainFormDescription) {
+        console.log('Synchronizing description before submit:', mainFormDescription)
+        manoDeObraForm.setValue('description', mainFormDescription)
+      }
+      
+      manoDeObraForm.handleSubmit(onSubmitManoDeObra)()
     } else {
       // Usar el movementType original para casos como conversión/transferencia
       switch (movementType) {
@@ -1819,6 +2179,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               aportesForm.setValue('created_by', value)
               aportesPropriosForm.setValue('created_by', value)
               retirosPropriosForm.setValue('created_by', value)
+              materialesForm.setValue('created_by', value)
+              manoDeObraForm.setValue('created_by', value)
             }}
             placeholder="Seleccionar creador"
           />
@@ -1840,6 +2202,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               aportesForm.setValue('movement_date', localDate)
               aportesPropriosForm.setValue('movement_date', localDate)
               retirosPropriosForm.setValue('movement_date', localDate)
+              materialesForm.setValue('movement_date', localDate)
+              manoDeObraForm.setValue('movement_date', localDate)
             }}
           />
         </div>
@@ -1928,6 +2292,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 aportesForm.setValue('category_id', value)
                 aportesPropriosForm.setValue('category_id', value) 
                 retirosPropriosForm.setValue('category_id', value)
+                materialesForm.setValue('category_id', value)
+                manoDeObraForm.setValue('category_id', value)
                 setSelectedCategoryId(value)
                 
                 // CRITICAL: Detectar tipo de aportes en modo edición también
@@ -1937,17 +2303,27 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   
                   console.log('Detecting category type in edit mode:', { value, categoryName: selectedCategory?.name, viewMode })
                   
-                  // Detectar el tipo específico de aportes
+                  // Detectar el tipo específico de formulario especial
                   const isAportesCategory = viewMode === "aportes"
-                  
-                  // CRITICAL: Sincronizar type_id del formulario principal al formulario de aportes
-                  const currentTypeId = form.watch('type_id')
-                  if (currentTypeId && isAportesCategory) {
-                    console.log('Synchronizing type_id to aportes form in edit mode:', currentTypeId)
-                    aportesForm.setValue('type_id', currentTypeId)
-                  }
                   const isAportesPropiosCategory = viewMode === "aportes_propios"
                   const isRetirosPropiosCategory = viewMode === "retiros_propios"
+                  const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
+                  const isManoDeObraCategory = viewMode === "mano_de_obra" || selectedCategory?.name?.toLowerCase().includes('mano de obra')
+                  
+                  // CRITICAL: Sincronizar type_id del formulario principal a todos los formularios especiales
+                  const currentTypeId = form.watch('type_id')
+                  if (currentTypeId) {
+                    if (isAportesCategory) {
+                      console.log('Synchronizing type_id to aportes form in edit mode:', currentTypeId)
+                      aportesForm.setValue('type_id', currentTypeId)
+                    } else if (isMaterialesCategory) {
+                      console.log('Synchronizing type_id to materiales form in edit mode:', currentTypeId)
+                      materialesForm.setValue('type_id', currentTypeId)
+                    } else if (isManoDeObraCategory) {
+                      console.log('Synchronizing type_id to mano de obra form in edit mode:', currentTypeId)
+                      manoDeObraForm.setValue('type_id', currentTypeId)
+                    }
+                  }
                   
                   if (isAportesCategory) {
                     console.log('Switching to APORTES form in edit mode')
@@ -1958,6 +2334,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   } else if (isRetirosPropiosCategory) {
                     console.log('Switching to RETIROS PROPIOS form in edit mode')
                     setMovementType('retiros_propios')
+                  } else if (isMaterialesCategory) {
+                    console.log('Switching to MATERIALES form in edit mode')
+                    setMovementType('materiales')
+                  } else if (isManoDeObraCategory) {
+                    console.log('Switching to MANO DE OBRA form in edit mode')
+                    setMovementType('mano_de_obra')
                   } else {
                     console.log('Switching to NORMAL form in edit mode')
                     setMovementType('normal')
@@ -2000,6 +2382,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   aportesForm.setValue('subcategory_id', value)
                   aportesPropriosForm.setValue('subcategory_id', value)
                   retirosPropriosForm.setValue('subcategory_id', value)
+                  materialesForm.setValue('subcategory_id', value)
+                  manoDeObraForm.setValue('subcategory_id', value)
                 }} 
                 value={form.watch('subcategory_id')}
                 disabled={!selectedCategoryId}
@@ -2080,6 +2464,32 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
             <RetirosPropiosFields
               form={retirosPropriosForm}
+              currencies={currencies}
+              wallets={wallets}
+              members={members}
+              concepts={concepts}
+            />
+          </form>
+        </Form>
+      ) : isMateriales ? (
+        // FORMULARIO DE MATERIALES
+        <Form {...materialesForm}>
+          <form onSubmit={materialesForm.handleSubmit(onSubmitMateriales)} className="space-y-4">
+            <MaterialesFields
+              form={materialesForm}
+              currencies={currencies}
+              wallets={wallets}
+              members={members}
+              concepts={concepts}
+            />
+          </form>
+        </Form>
+      ) : isManoDeObra ? (
+        // FORMULARIO DE MANO DE OBRA
+        <Form {...manoDeObraForm}>
+          <form onSubmit={manoDeObraForm.handleSubmit(onSubmitManoDeObra)} className="space-y-4">
+            <ManoDeObraFields
+              form={manoDeObraForm}
               currencies={currencies}
               wallets={wallets}
               members={members}
@@ -2262,6 +2672,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           isAportes ? "Registrar Aporte" :
           isAportesPropios ? "Registrar Aporte Propio" :
           isRetirosPropios ? "Registrar Retiro Propio" :
+          isMateriales ? "Registrar Compra de Materiales" :
+          isManoDeObra ? "Registrar Pago de Mano de Obra" :
           "Guardar"
         )
       }
@@ -2272,7 +2684,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           handleConfirm()
         }
       }}
-      showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending}
+      showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createManoDeObraMutation.isPending}
     />
   )
 
