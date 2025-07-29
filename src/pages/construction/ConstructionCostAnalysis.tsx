@@ -5,14 +5,17 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { BarChart3, Search, Layers, Grid } from 'lucide-react'
+import { BarChart3, Search, Layers, Grid, TableIcon, Users, Package, DollarSign } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 
 export default function ConstructionCostAnalysis() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [activeTab, setActiveTab] = useState("tareas")
 
   
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -68,9 +71,7 @@ export default function ConstructionCostAnalysis() {
     }
   ]
 
-  const headerProps = {
-    title: "Análisis de Costos"
-  }
+
 
   // Table columns configuration - similar to AdminGeneratedTasks
   const columns = [
@@ -147,7 +148,7 @@ export default function ConstructionCostAnalysis() {
 
   if (tasksLoading) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <Layout wide>
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando análisis de costos...</div>
         </div>
@@ -156,8 +157,9 @@ export default function ConstructionCostAnalysis() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout wide>
       <div className="space-y-6">
+        {/* ActionBar with Tabs */}
         <ActionBarDesktop
           title="Análisis de Costos"
           icon={<BarChart3 className="w-6 h-6" />}
@@ -168,13 +170,79 @@ export default function ConstructionCostAnalysis() {
           onClearFilters={handleClearFilters}
           hasActiveFilters={hasActiveFilters}
           showProjectSelector={false}
+          tabs={[
+            { value: 'tareas', label: 'Tareas', icon: <TableIcon className="h-4 w-4" /> },
+            { value: 'mano-obra', label: 'Mano de Obra', icon: <Users className="h-4 w-4" /> },
+            { value: 'materiales', label: 'Materiales', icon: <Package className="h-4 w-4" /> },
+            { value: 'indirectos', label: 'Indirectos', icon: <DollarSign className="h-4 w-4" /> }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
 
-        <Table
-          data={filteredTasks}
-          columns={columns}
-          isLoading={tasksLoading}
-        />
+        {/* Tab Content */}
+        {activeTab === 'tareas' && (
+          <div className="space-y-6">
+            {filteredTasks.length === 0 ? (
+              <EmptyState
+                icon={<TableIcon className="h-16 w-16" />}
+                title="No hay tareas para analizar"
+                description="Las tareas parametrizadas aparecerán aquí para análisis de costos."
+              />
+            ) : (
+              <Table
+                data={filteredTasks}
+                columns={columns}
+                isLoading={tasksLoading}
+              />
+            )}
+          </div>
+        )}
+
+        {activeTab === 'mano-obra' && (
+          <div className="space-y-6">
+            <CustomRestricted
+              reason="coming_soon"
+              className="min-h-[400px] flex items-center justify-center"
+            >
+              <EmptyState
+                icon={<Users className="h-16 w-16" />}
+                title="Análisis de Mano de Obra"
+                description="Funcionalidad coming soon"
+              />
+            </CustomRestricted>
+          </div>
+        )}
+
+        {activeTab === 'materiales' && (
+          <div className="space-y-6">
+            <CustomRestricted
+              reason="coming_soon"
+              className="min-h-[400px] flex items-center justify-center"
+            >
+              <EmptyState
+                icon={<Package className="h-16 w-16" />}
+                title="Análisis de Materiales"
+                description="Funcionalidad coming soon"
+              />
+            </CustomRestricted>
+          </div>
+        )}
+
+        {activeTab === 'indirectos' && (
+          <div className="space-y-6">
+            <CustomRestricted
+              reason="coming_soon"
+              className="min-h-[400px] flex items-center justify-center"
+            >
+              <EmptyState
+                icon={<DollarSign className="h-16 w-16" />}
+                title="Análisis de Costos Indirectos"
+                description="Funcionalidad coming soon"
+              />
+            </CustomRestricted>
+          </div>
+        )}
       </div>
     </Layout>
   )
