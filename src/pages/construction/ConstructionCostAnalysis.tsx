@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { Selector } from '@/components/ui-custom/Selector'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 
@@ -20,6 +21,7 @@ export default function ConstructionCostAnalysis() {
   const [searchValue, setSearchValue] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [activeTab, setActiveTab] = useState("tareas")
+  const [dataType, setDataType] = useState("todos")
 
   
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -47,13 +49,37 @@ export default function ConstructionCostAnalysis() {
     return matchesSearch && matchesCategory
   })
 
+  // Filter materials by type and search
+  const filteredMaterials = materials.filter((material) => {
+    const matchesSearch = material.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      (material.category?.name && material.category.name.toLowerCase().includes(searchValue.toLowerCase()))
+    
+    let matchesType = true
+    if (dataType === "sistema") {
+      matchesType = material.is_system === true
+    } else if (dataType === "organizacion") {
+      matchesType = material.is_system === false && material.organization_id !== null
+    }
+    // "todos" shows all materials regardless of type
+    
+    return matchesSearch && matchesType
+  })
+
+  // Data type selector options
+  const dataTypeOptions = [
+    { value: "todos", label: "Todos" },
+    { value: "sistema", label: "Del Sistema" },
+    { value: "organizacion", label: "De la Organización" }
+  ]
+
   // Clear all filters
   const handleClearFilters = () => {
     setSearchValue("")
     setSelectedCategory("")
+    setDataType("todos")
   }
 
-  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== ""
+  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== "" || dataType !== "todos"
 
   const features = [
     {
@@ -237,6 +263,19 @@ export default function ConstructionCostAnalysis() {
           </SelectContent>
         </Select>
       </div>
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Tipo de datos
+        </Label>
+        <div className="mt-1">
+          <Selector
+            options={dataTypeOptions}
+            value={dataType}
+            onValueChange={setDataType}
+            placeholder="Tipo de datos"
+          />
+        </div>
+      </div>
     </div>
   )
 
@@ -310,15 +349,15 @@ export default function ConstructionCostAnalysis() {
 
         {activeTab === 'materiales' && (
           <div className="space-y-6">
-            {materials.length === 0 ? (
+            {filteredMaterials.length === 0 ? (
               <EmptyState
                 icon={<Package className="h-16 w-16" />}
-                title="No hay materiales registrados"
-                description="Los materiales de la base de datos aparecerán aquí para análisis de costos."
+                title="No hay materiales que coincidan"
+                description="No se encontraron materiales que coincidan con los filtros seleccionados."
               />
             ) : (
               <Table
-                data={materials}
+                data={filteredMaterials}
                 columns={materialsColumns}
                 isLoading={materialsLoading}
               />
