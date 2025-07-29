@@ -52,7 +52,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
   const { closeModal } = useGlobalModalStore();
-  const { currentSubform, setCurrentSubform } = useModalPanelStore();
+  const { currentSubform, setCurrentSubform, setPanel } = useModalPanelStore();
 
   const { data: userData } = useCurrentUser();
   const createSubcontract = useCreateSubcontract();
@@ -251,7 +251,10 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         icon={<Package />}
         title="Tareas del Subcontrato"
         description={selectedTasks.length > 0 ? `${selectedTasks.length} tarea${selectedTasks.length !== 1 ? 's' : ''} seleccionada${selectedTasks.length !== 1 ? 's' : ''}` : "Selecciona las tareas que incluirá este subcontrato"}
-        onClick={() => setCurrentSubform('tasks')}
+        onClick={() => {
+          setCurrentSubform('tasks');
+          setPanel('subform');
+        }}
       />
     </div>
   );
@@ -267,9 +270,15 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const footerContent = currentSubform === 'tasks' ? (
     <FormModalFooter
       leftLabel="Volver"
-      onLeftClick={() => setCurrentSubform(null)}
+      onLeftClick={() => {
+        setCurrentSubform(null);
+        setPanel('edit');
+      }}
       rightLabel={`Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
-      onRightClick={() => setCurrentSubform(null)}
+      onRightClick={() => {
+        setCurrentSubform(null);
+        setPanel('edit');
+      }}
       showLoadingSpinner={false}
       submitDisabled={selectedTasks.length === 0}
     />
