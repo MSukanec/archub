@@ -312,3 +312,44 @@ export type OrganizationMaterialPrice = typeof organization_material_prices.$inf
 export type InsertOrganizationMaterialPrice = z.infer<typeof insertOrganizationMaterialPriceSchema>;
 export type MovementTask = typeof movement_tasks.$inferSelect;
 export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
+
+// Subcontracts tables
+export const subcontracts = pgTable("subcontracts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  contact_id: uuid("contact_id").notNull(),
+  title: text("title").notNull(),
+  amount_total: real("amount_total").default(0),
+  status: text("status").default("pendiente"),
+  notes: text("notes"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const subcontract_tasks = pgTable("subcontract_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  subcontract_id: uuid("subcontract_id").notNull(),
+  task_id: uuid("task_id").notNull(),
+  amount: real("amount").default(0),
+  notes: text("notes"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+// Schemas for subcontracts
+export const insertSubcontractSchema = createInsertSchema(subcontracts).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertSubcontractTaskSchema = createInsertSchema(subcontract_tasks).omit({
+  id: true,
+  created_at: true,
+});
+
+// Types for subcontracts
+export type Subcontract = typeof subcontracts.$inferSelect;
+export type InsertSubcontract = z.infer<typeof insertSubcontractSchema>;
+export type SubcontractTask = typeof subcontract_tasks.$inferSelect;
+export type InsertSubcontractTask = z.infer<typeof insertSubcontractTaskSchema>;

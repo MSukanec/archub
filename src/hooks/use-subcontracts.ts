@@ -1,0 +1,146 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
+import type { InsertSubcontract, InsertSubcontractTask } from '@shared/schema';
+
+// Hook para obtener subcontratos de un proyecto
+export function useSubcontracts(projectId: string | null) {
+  return useQuery({
+    queryKey: ['subcontracts', projectId],
+    queryFn: async () => {
+      if (!projectId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('subcontracts')
+        .select(`
+          *,
+          contact:contacts(id, name, email),
+          subcontract_tasks:subcontract_tasks(
+            id,
+            task_id,
+            amount,
+            notes,
+            task:task_parametric(id, name_rendered, code)
+          )
+        `)
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!projectId,
+  });
+}
+
+// Hook para crear un subcontrato con tareas
+export function useCreateSubcontract() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      subcontract, 
+      taskIds 
+    }: { 
+      subcontract: InsertSubcontract; 
+      taskIds: string[] 
+    }) => {
+      if (!supabase) throw new Error('Supabase not available');
+
+      // Crear el subcontrato
+      const { data: newSubcontract, error: subcontractError } = await supabase
+        .from('subcontracts')
+        .insert(subcontract)
+        .select()
+        .single();
+
+      if (subcontractError) throw subcontractError;
+
+      // Crear las tareas del subcontrato
+      if (taskIds.length > 0) {
+        const subcontractTasks: InsertSubcontractTask[] = taskIds.map(taskId => ({
+          subcontract_id: newSubcontract.id,
+          task_id: taskId,
+          amount: 0,
+          notes: null,
+        }));
+
+        const { error: tasksError } = await supabase
+          .from('subcontract_tasks')
+          .insert(subcontractTasks);
+
+        if (tasksError) throw tasksError;
+      }
+
+      return newSubcontract;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['subcontracts', data.project_id] });
+      toast({
+        title: "Subcontrato creado",
+        description: "El pedido de subcontrato ha sido creado exitosamente",
+      });
+    },
+    onError: (error) => {
+      console.error('Error creating subcontract:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear el subcontrato",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+// Hook para eliminar un subcontrato
+export function useDeleteSubcontract() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (subcontractId: string) => {
+      if (!supabase) throw new Error('Supabase not available');
+
+      const { error } = await supabase
+        .from('subcontracts')
+        .delete()
+        .eq('id', subcontractId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subcontracts'] });
+      toast({
+        title: "Subcontrato eliminado",
+        description: "El subcontrato ha sido eliminado correctamente",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting subcontract:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el subcontrato",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+// Hook para obtener contactos/proveedores
+export function useContacts(organizationId: string | null) {
+  return useQuery({
+    queryKey: ['contacts', organizationId],
+    queryFn: async () => {
+      if (!organizationId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('id, name, email, phone, contact_type')
+        .eq('organization_id', organizationId)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+}

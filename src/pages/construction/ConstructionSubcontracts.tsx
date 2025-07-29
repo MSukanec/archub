@@ -8,10 +8,12 @@ import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction"
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function ConstructionSubcontracts() {
   const { data: userData } = useCurrentUser();
   const isMobile = useMobile();
+  const { openModal } = useGlobalModalStore();
   
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,8 +42,16 @@ export default function ConstructionSubcontracts() {
   ];
 
   const handleCreateSubcontract = () => {
-    // Por ahora no hace nada según lo solicitado
-    console.log('Crear Pedido de Subcontrato - Funcionalidad pendiente');
+    if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
+      console.log('Missing organization or project data');
+      return;
+    }
+
+    openModal('subcontract', {
+      projectId: userData.preferences.last_project_id,
+      organizationId: userData.organization.id,
+      userId: userData.user?.id
+    });
   };
 
   return (
