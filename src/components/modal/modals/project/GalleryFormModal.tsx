@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@supabase/supabase-js';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { uploadGalleryFiles, type GalleryFileInput } from '@/utils/uploadGalleryFiles';
@@ -19,11 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, X, File, Images } from 'lucide-react';
 import UserSelector from '@/components/ui-custom/UserSelector';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import { supabase } from '@/lib/supabase';
 
 const gallerySchema = z.object({
   title: z.string().min(1, 'El título es obligatorio'),

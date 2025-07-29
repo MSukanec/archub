@@ -3,8 +3,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
+import { supabase } from '@/lib/supabase';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
@@ -43,10 +43,7 @@ import { es } from 'date-fns/locale';
 
 
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+
 
 // Gallery file interface
 interface GalleryFile {

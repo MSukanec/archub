@@ -11,16 +11,7 @@ export async function generateTaskDescription(
   if (!nameTemplate) return nameTemplate;
 
   // Import supabase client for database access
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('Supabase configuration missing');
-    return nameTemplate;
-  }
-  
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const { supabase } = await import('@/lib/supabase');
   let result = nameTemplate;
 
   if (!paramValues || Object.keys(paramValues).length === 0) {
