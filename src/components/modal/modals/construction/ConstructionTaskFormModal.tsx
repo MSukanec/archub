@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from "@/lib/supabase";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
@@ -90,6 +90,9 @@ export function ConstructionTaskFormModal({
   
   // Hook para crear tarea paramétrica
   const createGeneratedTask = useCreateGeneratedTask();
+  
+  // Query client para invalidar caché
+  const queryClient = useQueryClient();
 
   // Panel store para manejar subforms
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
@@ -98,9 +101,9 @@ export function ConstructionTaskFormModal({
   const [activeTab, setActiveTab] = useState<'parametric' | 'custom'>('parametric');
   
   // Estados para el formulario de tarea personalizada
-  const [customTaskName, setCustomTaskName] = useState<string>('');
-  const [customTaskRubro, setCustomTaskRubro] = useState<string>('');
-  const [customTaskUnit, setCustomTaskUnit] = useState<string>('');
+  const [taskNameText, setTaskNameText] = useState<string>('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('');
   const [isCreatingCustomTask, setIsCreatingCustomTask] = useState(false);
   
   // Query para obtener la membresía actual del usuario en la organización
@@ -397,10 +400,29 @@ export function ConstructionTaskFormModal({
 
   // Función para crear tarea personalizada
   const handleCreateCustomTask = async () => {
-    if (!customTaskName.trim() || !customTaskRubro || !customTaskUnit) {
+    // Validación de campos obligatorios
+    if (!selectedCategoryId) {
       toast({
         title: "Error",
-        description: "Todos los campos son obligatorios",
+        description: "Debe seleccionar un rubro",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!selectedUnitId) {
+      toast({
+        title: "Error",
+        description: "Debe seleccionar una unidad",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!taskNameText.trim()) {
+      toast({
+        title: "Error",
+        description: "Debe ingresar el nombre de la tarea",
         variant: "destructive"
       });
       return;
@@ -419,38 +441,49 @@ export function ConstructionTaskFormModal({
 
     try {
       console.log('🚀 Creando tarea personalizada con datos:', {
-        custom_name: customTaskName,
-        unit_id: customTaskUnit,
-        category_id: customTaskRubro,
-        organization_id: userData.organization.id
+        input_custom_name: taskNameText.trim(),
+        input_unit_id: selectedUnitId,
+        input_category_id: selectedCategoryId,
+        input_organization_id: userData.organization.id
       });
 
-      // Llamar a la función SQL create_parametric_task con parámetros para tarea personalizada
-      const result = await createGeneratedTask.mutateAsync({
-        param_values: {}, // JSON vacío para tarea personalizada
-        param_order: [], // Array vacío para tarea personalizada
-        unit_id: customTaskUnit,
-        category_id: customTaskRubro,
-        organization_id: userData.organization.id,
-        custom_name: customTaskName
+      // Llamar directamente a la función SQL create_parametric_task usando supabase.rpc
+      if (!supabase) {
+        throw new Error('Supabase client no está disponible');
+      }
+      
+      const { data: result, error } = await supabase.rpc("create_parametric_task", {
+        input_param_values: {},                    // json vacío
+        input_param_order: [],                     // array vacío
+        input_unit_id: selectedUnitId,             // UUID de la unidad elegida
+        input_category_id: selectedCategoryId,     // UUID del rubro elegido
+        input_organization_id: userData.organization.id, // ID de la organización activa del usuario
+        input_custom_name: taskNameText.trim()     // nombre ingresado por el usuario
       });
+
+      if (error) {
+        console.error('❌ Error en create_parametric_task:', error);
+        throw error;
+      }
 
       console.log('✅ Tarea personalizada creada:', result);
 
       // Agregar la nueva tarea a la lista de tareas seleccionadas
-      const newTask = result.new_task;
-      if (newTask) {
+      if (result?.new_task) {
         setSelectedTasks(prev => [...prev, {
-          task_id: newTask.id,
+          task_id: result.new_task.id,
           quantity: 1,
           project_phase_id: '' // Sin fase por defecto
         }]);
       }
 
+      // Invalidar caché para que la tabla se actualice automáticamente
+      await queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
+      
       // Limpiar formulario y volver al panel principal
-      setCustomTaskName('');
-      setCustomTaskRubro('');
-      setCustomTaskUnit('');
+      setTaskNameText('');
+      setSelectedCategoryId('');
+      setSelectedUnitId('');
       setPanel('edit');
       setActiveTab('parametric');
 
@@ -957,8 +990,8 @@ export function ConstructionTaskFormModal({
                             value: rubro.id,
                             label: rubro.name
                           }))}
-                          value={customTaskRubro}
-                          onValueChange={setCustomTaskRubro}
+                          value={selectedCategoryId}
+                          onValueChange={setSelectedCategoryId}
                           disabled={rubrosLoading}
                         />
                       </div>
@@ -968,7 +1001,7 @@ export function ConstructionTaskFormModal({
                         <Label className="text-xs font-medium text-foreground">
                           Unidad *
                         </Label>
-                        <Select value={customTaskUnit} onValueChange={setCustomTaskUnit} disabled={unitsLoading}>
+                        <Select value={selectedUnitId} onValueChange={setSelectedUnitId} disabled={unitsLoading}>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecciona una unidad..." />
                           </SelectTrigger>
@@ -990,8 +1023,8 @@ export function ConstructionTaskFormModal({
                       </Label>
                       <Textarea
                         placeholder="Describe detalladamente la tarea a realizar..."
-                        value={customTaskName}
-                        onChange={(e) => setCustomTaskName(e.target.value)}
+                        value={taskNameText}
+                        onChange={(e) => setTaskNameText(e.target.value)}
                         rows={3}
                         className="resize-none"
                       />
@@ -1006,9 +1039,9 @@ export function ConstructionTaskFormModal({
                         variant="outline"
                         onClick={() => {
                           // Reset campos
-                          setCustomTaskName('');  
-                          setCustomTaskRubro('');
-                          setCustomTaskUnit('');
+                          setTaskNameText('');  
+                          setSelectedCategoryId('');
+                          setSelectedUnitId('');
                           // Volver al panel principal
                           setPanel('edit');
                           setActiveTab('parametric');
@@ -1020,7 +1053,7 @@ export function ConstructionTaskFormModal({
                       <Button
                         type="button"
                         onClick={handleCreateCustomTask}
-                        disabled={!customTaskName.trim() || !customTaskRubro || !customTaskUnit || isCreatingCustomTask}
+                        disabled={!taskNameText.trim() || !selectedCategoryId || !selectedUnitId || isCreatingCustomTask}
                         className="flex-1"
                       >
                         {isCreatingCustomTask ? "Creando..." : "Crear Nueva Tarea"}
