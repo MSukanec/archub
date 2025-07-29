@@ -44,6 +44,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
   Home,
   Edit3,
   Trash2,
@@ -131,7 +132,7 @@ export default function ProjectDocumentation() {
         actions.push({
           icon: FolderPlus,
           label: 'Nueva Carpeta',
-          onClick: () => openModal('document-folder-form', {})
+          onClick: () => openModal('document-folder', {})
         });
       }
       
@@ -139,7 +140,7 @@ export default function ProjectDocumentation() {
         actions.push({
           icon: Upload,
           label: 'Subir Documentos',
-          onClick: () => openModal('document-upload-form', { defaultFolderId: selectedFolderId })
+          onClick: () => openModal('document-upload', { defaultFolderId: selectedFolderId })
         });
       }
       
@@ -293,7 +294,7 @@ export default function ProjectDocumentation() {
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      openModal('document-folder-form', { folder, isEditing: true });
+                      openModal('document-folder', { folder, isEditing: true });
                     }}
                     className="h-8 w-8 p-0"
                   >
@@ -341,7 +342,7 @@ export default function ProjectDocumentation() {
             key={group.id}
             group={group}
             onViewDocuments={() => handleGroupClick(group.id, group.name)}
-            onEdit={() => openModal('document-upload-form', { defaultFolderId: selectedFolderId, defaultGroupId: group.id, editingGroup: group })}
+            onEdit={() => openModal('document-upload', { defaultFolderId: selectedFolderId, defaultGroupId: group.id, editingGroup: group })}
             onDelete={() => handleDeleteGroup(group.id, group.name)}
           />
         ))}
@@ -515,7 +516,7 @@ export default function ProjectDocumentation() {
       actions.push(
         <Button
           key="new-folder"
-          onClick={() => openModal('document-folder-form', {})}
+          onClick={() => openModal('document-folder', {})}
           className="gap-2"
         >
           <FolderPlus className="h-4 w-4" />
@@ -528,7 +529,7 @@ export default function ProjectDocumentation() {
       actions.push(
         <Button
           key="upload"
-          onClick={() => openModal('document-upload-form', { 
+          onClick={() => openModal('document-upload', { 
             defaultFolderId: selectedFolderId,
             defaultGroupId: selectedGroupId 
           })}
@@ -555,12 +556,12 @@ export default function ProjectDocumentation() {
           primaryActionLabel={selectedFolderId ? "Subir Documentos" : "Nueva Carpeta"}
           onPrimaryActionClick={() => {
             if (selectedFolderId) {
-              openModal('document-upload-form', { 
+              openModal('document-upload', { 
                 defaultFolderId: selectedFolderId,
                 defaultGroupId: selectedGroupId 
               });
             } else {
-              openModal('document-folder-form', {});
+              openModal('document-folder', {});
             }
           }}
           features={[
