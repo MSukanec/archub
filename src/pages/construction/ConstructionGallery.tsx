@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -376,75 +377,11 @@ export default function ConstructionGallery() {
 
 
 
-  // Header props configuration
-  const headerProps = {
-    title: "Galería Multimedia",
-    icon: Images,
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    customFilters: (
-      <div className="space-y-4">
-        <div>
-          <Label className="text-xs font-medium text-muted-foreground">
-            Filtrar por tipo de archivo
-          </Label>
-          <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Todos los archivos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los archivos</SelectItem>
-              <SelectItem value="image">Solo imágenes</SelectItem>
-              <SelectItem value="video">Solo videos</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
-        <div>
-          <Label className="text-xs font-medium text-muted-foreground">
-            Filtrar por tipo de entrada
-          </Label>
-          <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Todos los tipos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-              <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-              <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-              <SelectItem value="pedido_material">Pedido Material</SelectItem>
-              <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-              <SelectItem value="decision">Decisión</SelectItem>
-              <SelectItem value="inspeccion">Inspección</SelectItem>
-              <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-              <SelectItem value="registro_general">Registro General</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    ),
-    onClearFilters: () => {
-      setSearchTerm('');
-      setFileTypeFilter('all');
-      setEntryTypeFilter('all');
-    },
-    actions: [
-      <Button
-        key="new-file"
-        onClick={() => openModal('gallery')}
-        className="h-8"
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        Subir Archivo Multimedia
-      </Button>,
-    ],
-  };
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout>
         <div className="h-96 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -457,7 +394,7 @@ export default function ConstructionGallery() {
 
   if (error) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout>
         <div className="h-96 flex items-center justify-center">
           <div className="text-center">
             <p className="text-destructive mb-2">Error al cargar la galería</p>
@@ -472,9 +409,83 @@ export default function ConstructionGallery() {
 
   if (galleryFiles.length === 0) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout>
         <div className="space-y-6">
-          {/* Feature Introduction */}
+          {/* ActionBar */}
+          <ActionBarDesktop
+            title="Galería Multimedia del Proyecto"
+            icon={<Images className="w-5 h-5" />}
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            primaryActionLabel="Subir Archivo"
+            onPrimaryActionClick={() => openModal('gallery')}
+            customFilters={
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Filtrar por tipo de archivo
+                  </Label>
+                  <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Todos los archivos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los archivos</SelectItem>
+                      <SelectItem value="image">Solo imágenes</SelectItem>
+                      <SelectItem value="video">Solo videos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Filtrar por tipo de entrada
+                  </Label>
+                  <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Todos los tipos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los tipos</SelectItem>
+                      <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+                      <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                      <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                      <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                      <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                      <SelectItem value="decision">Decisión</SelectItem>
+                      <SelectItem value="inspeccion">Inspección</SelectItem>
+                      <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+                      <SelectItem value="registro_general">Registro General</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            }
+            features={[
+              {
+                icon: <Camera className="w-4 h-4" />,
+                title: "Fotos y Videos",
+                description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
+              },
+              {
+                icon: <FolderOpen className="w-4 h-4" />,
+                title: "Organización Automática",
+                description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
+              },
+              {
+                icon: <Calendar className="w-4 h-4" />,
+                title: "Histórico Visual",
+                description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
+              },
+              {
+                icon: <Eye className="w-4 h-4" />,
+                title: "Visor Integrado",
+                description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
+              }
+            ]}
+          />
+
+          {/* Feature Introduction - Mobile Only */}
           <FeatureIntroduction
             title="Galería Multimedia"
             icon={<Images className="w-6 h-6" />}
@@ -500,6 +511,7 @@ export default function ConstructionGallery() {
                 description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
               }
             ]}
+            className="md:hidden"
           />
 
           <EmptyState
@@ -513,9 +525,83 @@ export default function ConstructionGallery() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout>
       <div className="space-y-6">
-        {/* Feature Introduction */}
+        {/* ActionBar */}
+        <ActionBarDesktop
+          title="Galería Multimedia del Proyecto"
+          icon={<Images className="w-5 h-5" />}
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          primaryActionLabel="Subir Archivo"
+          onPrimaryActionClick={() => openModal('gallery')}
+          customFilters={
+            <div className="space-y-4">
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Filtrar por tipo de archivo
+                </Label>
+                <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Todos los archivos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los archivos</SelectItem>
+                    <SelectItem value="image">Solo imágenes</SelectItem>
+                    <SelectItem value="video">Solo videos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Filtrar por tipo de entrada
+                </Label>
+                <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Todos los tipos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los tipos</SelectItem>
+                    <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+                    <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                    <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                    <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                    <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                    <SelectItem value="decision">Decisión</SelectItem>
+                    <SelectItem value="inspeccion">Inspección</SelectItem>
+                    <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+                    <SelectItem value="registro_general">Registro General</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          }
+          features={[
+            {
+              icon: <Camera className="w-4 h-4" />,
+              title: "Fotos y Videos",
+              description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
+            },
+            {
+              icon: <FolderOpen className="w-4 h-4" />,
+              title: "Organización Automática",
+              description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
+            },
+            {
+              icon: <Calendar className="w-4 h-4" />,
+              title: "Histórico Visual",
+              description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
+            },
+            {
+              icon: <Eye className="w-4 h-4" />,
+              title: "Visor Integrado",
+              description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
+            }
+          ]}
+        />
+
+        {/* Feature Introduction - Mobile Only */}
         <FeatureIntroduction
           title="Galería Multimedia"
           icon={<Images className="w-6 h-6" />}
@@ -541,6 +627,7 @@ export default function ConstructionGallery() {
               description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
             }
           ]}
+          className="md:hidden"
         />
 
         {/* Gallery Grid */}
