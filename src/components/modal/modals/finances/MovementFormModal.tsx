@@ -34,6 +34,7 @@ import { useContacts } from '@/hooks/use-contacts'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useProjects } from '@/hooks/use-projects'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
+import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
 
 const movementFormSchema = z.object({
   movement_date: z.date(),
@@ -128,7 +129,7 @@ const retirosPropriosFormSchema = z.object({
   exchange_rate: z.number().optional()
 })
 
-// Esquemas para materiales y mano de obra (con campo construction_task_id)
+// Esquemas para materiales y mano de obra (ahora las tareas se manejan por estado)
 const materialesFormSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -140,7 +141,7 @@ const materialesFormSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
-  construction_task_id: z.string().min(1, 'Tarea es requerida') // Campo obligatorio para tareas de construcción
+  // construction_task_id se maneja ahora a través de selectedTaskIds estado
 })
 
 const manoDeObraFormSchema = z.object({
@@ -154,7 +155,7 @@ const manoDeObraFormSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
-  construction_task_id: z.string().min(1, 'Tarea es requerida') // Campo obligatorio para tareas de construcción
+  // construction_task_id se maneja ahora a través de selectedTaskIds estado
 })
 
 export type MovementForm = z.infer<typeof movementFormSchema>
@@ -235,6 +236,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Estado centralizado para el tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'mano_de_obra'>('normal')
+  
+  // Estado para las tareas seleccionadas (usado para Materiales y Mano de Obra)
+  const [selectedTaskIds, setSelectedTaskIds] = React.useState<string[]>([])
+  
+  // Hook para crear/actualizar relaciones de tareas con movimientos
+  const createMovementTasksMutation = useCreateMovementTasks()
+  
+  // Hook para cargar tareas existentes en modo edición
+  const { data: existingMovementTasks } = useMovementTasks(editingMovement?.id)
+  
+  // Cargar tareas existentes en el estado cuando estamos editando
+  React.useEffect(() => {
+    if (existingMovementTasks && existingMovementTasks.length > 0) {
+      const taskIds = existingMovementTasks.map(mt => mt.construction_task_id)
+      console.log('Loading existing movement tasks:', taskIds)
+      setSelectedTaskIds(taskIds)
+    }
+  }, [existingMovementTasks])
   
 
 
@@ -1725,7 +1744,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         wallet_id: data.wallet_id,
         type_id: data.type_id,
         category_id: data.category_id,
-        construction_task_id: data.construction_task_id, // Campo específico para tareas
+        // construction_task_id se maneja ahora por movement_tasks
         exchange_rate: data.exchange_rate || null
       }
 
@@ -1752,12 +1771,31 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         return result
       }
     },
-    onSuccess: () => {
+    onSuccess: async (createdMovement) => {
+      // Crear las relaciones movement_tasks después de crear el movimiento
+      if (selectedTaskIds && selectedTaskIds.length > 0) {
+        try {
+          await createMovementTasksMutation.mutateAsync({
+            movementId: createdMovement.id,
+            taskIds: selectedTaskIds
+          })
+          console.log('Movement tasks created successfully for materials')
+        } catch (error) {
+          console.error('Error creating movement tasks:', error)
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Movimiento creado pero hubo un error al vincular las tareas',
+          })
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
       toast({
         title: editingMovement ? 'Compra de Materiales actualizada' : 'Compra de Materiales registrada',
         description: editingMovement 
@@ -1792,7 +1830,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         wallet_id: data.wallet_id,
         type_id: data.type_id,
         category_id: data.category_id,
-        construction_task_id: data.construction_task_id, // Campo específico para tareas
+        // construction_task_id se maneja ahora por movement_tasks
         exchange_rate: data.exchange_rate || null
       }
 
@@ -1819,12 +1857,31 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         return result
       }
     },
-    onSuccess: () => {
+    onSuccess: async (createdMovement) => {
+      // Crear las relaciones movement_tasks después de crear el movimiento
+      if (selectedTaskIds && selectedTaskIds.length > 0) {
+        try {
+          await createMovementTasksMutation.mutateAsync({
+            movementId: createdMovement.id,
+            taskIds: selectedTaskIds
+          })
+          console.log('Movement tasks created successfully for mano de obra')
+        } catch (error) {
+          console.error('Error creating movement tasks:', error)
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Movimiento creado pero hubo un error al vincular las tareas',
+          })
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
       toast({
         title: editingMovement ? 'Pago de Mano de Obra actualizado' : 'Pago de Mano de Obra registrado',
         description: editingMovement 
@@ -1843,10 +1900,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
 
   const onSubmitMateriales = async (data: MaterialesForm) => {
+    // Validar que hay tareas seleccionadas
+    if (!selectedTaskIds || selectedTaskIds.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Error de validación',
+        description: 'Debes seleccionar al menos una tarea de construcción para este movimiento de materiales',
+      })
+      return
+    }
+
     console.log('Saving materiales data:', {
       created_by: data.created_by,
       wallet_id: data.wallet_id,
-      construction_task_id: data.construction_task_id,
+      selectedTaskIds,
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
@@ -1857,10 +1924,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   }
 
   const onSubmitManoDeObra = async (data: ManoDeObraForm) => {
+    // Validar que hay tareas seleccionadas
+    if (!selectedTaskIds || selectedTaskIds.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Error de validación',
+        description: 'Debes seleccionar al menos una tarea de construcción para este movimiento de mano de obra',
+      })
+      return
+    }
+
     console.log('Saving mano de obra data:', {
       created_by: data.created_by,
       wallet_id: data.wallet_id,
-      construction_task_id: data.construction_task_id,
+      selectedTaskIds,
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
@@ -2481,6 +2558,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets}
               members={members}
               concepts={concepts}
+              selectedTaskIds={selectedTaskIds}
+              setSelectedTaskIds={setSelectedTaskIds}
             />
           </form>
         </Form>
@@ -2494,6 +2573,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets}
               members={members}
               concepts={concepts}
+              selectedTaskIds={selectedTaskIds}
+              setSelectedTaskIds={setSelectedTaskIds}
             />
           </form>
         </Form>

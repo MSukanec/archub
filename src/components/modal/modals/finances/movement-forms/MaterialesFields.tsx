@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { DollarSign, Package } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useConstructionTasksView } from "@/hooks/use-construction-tasks"
+import { TaskMultiSelector } from "@/components/ui-custom/TaskMultiSelector"
 
 
 // Tipo específico para el formulario de materiales
@@ -31,9 +32,11 @@ interface Props {
   wallets: any[]
   members: any[]
   concepts: any[]
+  selectedTaskIds: string[]
+  setSelectedTaskIds: (taskIds: string[]) => void
 }
 
-export function MaterialesFields({ form, currencies, wallets, members, concepts }: Props) {
+export function MaterialesFields({ form, currencies, wallets, members, concepts, selectedTaskIds, setSelectedTaskIds }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica
@@ -251,32 +254,18 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts 
         />
       </div>
 
-      {/* Campo Tareas - específico para Materiales */}
+      {/* Campo Tareas - múltiple para Materiales */}
       <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name="construction_task_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tareas</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tarea de construcción..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {constructionTasks?.map((task) => (
-                    <SelectItem key={task.id} value={task.id}>
-                      {task.name_rendered} ({task.unit_name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Tareas de Construcción</label>
+          <TaskMultiSelector
+            tasks={constructionTasks || []}
+            selectedTaskIds={selectedTaskIds}
+            onSelectionChange={setSelectedTaskIds}
+            placeholder="Seleccionar tareas de construcción..."
+            isLoading={tasksLoading}
+          />
+        </div>
       </div>
     </>
   )

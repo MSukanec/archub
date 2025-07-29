@@ -256,6 +256,14 @@ export const organization_material_prices = pgTable("organization_material_price
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// Movement Tasks Junction Table
+export const movement_tasks = pgTable("movement_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  movement_id: uuid("movement_id").notNull(),
+  task_id: uuid("task_id").notNull(), // construction_tasks.id
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
   created_at: true,
@@ -272,6 +280,11 @@ export const insertOrganizationMaterialPriceSchema = createInsertSchema(organiza
   id: true,
   created_at: true,
   updated_at: true,
+});
+
+export const insertMovementTaskSchema = createInsertSchema(movement_tasks).omit({
+  id: true,
+  created_at: true,
 });
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
@@ -297,3 +310,5 @@ export type TaskParametric = typeof task_parametric.$inferSelect;
 export type InsertTaskParametric = z.infer<typeof insertTaskParametricSchema>;
 export type OrganizationMaterialPrice = typeof organization_material_prices.$inferSelect;
 export type InsertOrganizationMaterialPrice = z.infer<typeof insertOrganizationMaterialPriceSchema>;
+export type MovementTask = typeof movement_tasks.$inferSelect;
+export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
