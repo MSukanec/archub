@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,12 +6,11 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
-import { Package, X } from "lucide-react";
+import { Package } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
-import { useTaskSearch } from "@/hooks/use-task-search";
-import { useTopLevelCategories } from "@/hooks/use-task-categories";
+import { useConstructionTasks } from "@/hooks/use-construction-tasks";
 
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -19,16 +18,23 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const subcontractSchema = z.object({
   title: z.string().min(1, "El título es obligatorio"),
   contact_id: z.string().min(1, "Debe seleccionar un proveedor"),
+  status: z.string().min(1, "Debe seleccionar un estado"),
   amount_total: z.number().min(0, "El monto debe ser mayor o igual a 0").optional(),
   notes: z.string().optional(),
 });
 
 type SubcontractFormData = z.infer<typeof subcontractSchema>;
+
+interface SelectedTask {
+  task_id: string;
+  quantity: number;
+}
 
 interface SubcontractFormModalProps {
   modalData: {
@@ -36,14 +42,11 @@ interface SubcontractFormModalProps {
     organizationId: string;
     userId?: string;
   };
-  onClose: () => void;
 }
 
-export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModalProps) {
+export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rubroFilter, setRubroFilter] = useState('');
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
 
   const { data: userData } = useCurrentUser();
   const createSubcontract = useCreateSubcontract();
@@ -51,62 +54,46 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
   // Obtener contactos/proveedores
   const { data: contacts = [] } = useContacts(modalData.organizationId || '');
   
-  // Obtener tareas para selección usando el hook de búsqueda
-  const { data: availableTasks = [], isLoading: isLoadingTasks } = useTaskSearch(
-    searchQuery, 
-    modalData.organizationId || '',
-    { enabled: searchQuery.length >= 2 }
-  );
-
-  // Obtener categorías de primer nivel para filtro
-  const { data: topLevelCategories = [] } = useTopLevelCategories();
+  // Obtener todas las tareas del proyecto
+  const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId || '');
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
     defaultValues: {
       title: '',
       contact_id: '',
+      status: 'pendiente',
       amount_total: 0,
       notes: '',
     }
   });
 
-  // Filtrar tareas con ambos filtros
-  const filteredTasks = useMemo(() => {
-    let filtered = availableTasks;
-    
-    // Filtro por rubro
-    if (rubroFilter) {
-      filtered = filtered.filter(task => task.category_id === rubroFilter);
-    }
-    
-    return filtered;
-  }, [availableTasks, rubroFilter]);
-
   // Función para manejar selección/deselección de tareas
-  const handleTaskToggle = (taskId: string) => {
-    setSelectedTasks(prev => {
-      if (prev.includes(taskId)) {
-        return prev.filter(id => id !== taskId);
-      } else {
-        return [...prev, taskId];
-      }
-    });
+  const handleTaskSelection = (taskId: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedTasks(prev => [...prev, { task_id: taskId, quantity: 1 }]);
+    } else {
+      setSelectedTasks(prev => prev.filter(t => t.task_id !== taskId));
+    }
   };
 
-  // Limpiar filtros
-  const clearFilters = () => {
-    setSearchQuery('');
-    setRubroFilter('');
+  // Función para actualizar cantidad de una tarea seleccionada
+  const handleQuantityChange = (taskId: string, quantity: number) => {
+    setSelectedTasks(prev => 
+      prev.map(t => t.task_id === taskId ? { ...t, quantity } : t)
+    );
   };
 
-  // Obtener información de las tareas seleccionadas
-  const selectedTasksInfo = useMemo(() => {
-    return selectedTasks.map(taskId => {
-      const task = availableTasks.find(t => t.id === taskId);
-      return task;
-    }).filter(Boolean);
-  }, [selectedTasks, availableTasks]);
+  // Verificar si una tarea está seleccionada
+  const isTaskSelected = (taskId: string) => {
+    return selectedTasks.some(t => t.task_id === taskId);
+  };
+
+  // Obtener cantidad seleccionada de una tarea
+  const getSelectedQuantity = (taskId: string) => {
+    const selectedTask = selectedTasks.find(t => t.task_id === taskId);
+    return selectedTask?.quantity || 1;
+  };
 
   const onSubmit = async (data: SubcontractFormData) => {
     if (selectedTasks.length === 0) {
@@ -128,8 +115,8 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
         title: data.title,
         amount_total: data.amount_total || 0,
         notes: data.notes || null,
-        status: 'pendiente',
-        task_ids: selectedTasks
+        status: data.status,
+        task_ids: selectedTasks.map(t => t.task_id)
       });
 
       toast({
@@ -137,7 +124,6 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
         description: "El pedido de subcontrato se creó correctamente",
       });
 
-      onClose();
     } catch (error) {
       console.error('Error creando subcontrato:', error);
       toast({
@@ -159,12 +145,12 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
 
   // Panel principal para edición
   const editPanel = (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      {/* Campos básicos del subcontrato */}
-      <div className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-2 gap-8 h-[600px]">
+      {/* Columna Izquierda - Información del Subcontrato */}
+      <div className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="title" className="text-xs font-medium text-muted-foreground">
-            TÍTULO DEL SUBCONTRATO *
+            TÍTULO *
           </Label>
           <Input
             id="title"
@@ -177,47 +163,69 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="contact_id" className="text-xs font-medium text-muted-foreground">
-              PROVEEDOR *
-            </Label>
-            <Select
-              value={form.watch('contact_id') || ''}
-              onValueChange={(value) => form.setValue('contact_id', value)}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Seleccionar..." />
-              </SelectTrigger>
-              <SelectContent>
-                {contacts.map((contact) => (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    {contact.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.contact_id && (
-              <p className="text-xs text-destructive">{form.formState.errors.contact_id.message}</p>
-            )}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="contact_id" className="text-xs font-medium text-muted-foreground">
+            PROVEEDOR *
+          </Label>
+          <Select
+            value={form.watch('contact_id') || ''}
+            onValueChange={(value) => form.setValue('contact_id', value)}
+          >
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Seleccionar proveedor..." />
+            </SelectTrigger>
+            <SelectContent>
+              {contacts.map((contact) => (
+                <SelectItem key={contact.id} value={contact.id}>
+                  {contact.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {form.formState.errors.contact_id && (
+            <p className="text-xs text-destructive">{form.formState.errors.contact_id.message}</p>
+          )}
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount_total" className="text-xs font-medium text-muted-foreground">
-              MONTO TOTAL
-            </Label>
-            <Input
-              id="amount_total"
-              type="number"
-              step="0.01"
-              placeholder="0"
-              {...form.register('amount_total', { valueAsNumber: true })}
-              className="h-10"
-            />
-            {form.formState.errors.amount_total && (
-              <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
-            )}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="status" className="text-xs font-medium text-muted-foreground">
+            ESTADO *
+          </Label>
+          <Select
+            value={form.watch('status') || 'pendiente'}
+            onValueChange={(value) => form.setValue('status', value)}
+          >
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Seleccionar estado..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pendiente">Pendiente</SelectItem>
+              <SelectItem value="aprobado">Aprobado</SelectItem>
+              <SelectItem value="en_proceso">En Proceso</SelectItem>
+              <SelectItem value="completado">Completado</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+          {form.formState.errors.status && (
+            <p className="text-xs text-destructive">{form.formState.errors.status.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="amount_total" className="text-xs font-medium text-muted-foreground">
+            MONTO TOTAL
+          </Label>
+          <Input
+            id="amount_total"
+            type="number"
+            step="0.01"
+            placeholder="0"
+            {...form.register('amount_total', { valueAsNumber: true })}
+            className="h-10"
+          />
+          {form.formState.errors.amount_total && (
+            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -226,174 +234,95 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
           </Label>
           <Textarea
             id="notes"
-            placeholder="Notas adicionales..."
+            placeholder="Notas adicionales del subcontrato..."
             {...form.register('notes')}
-            className="min-h-[80px] resize-none"
+            className="min-h-[120px] resize-none"
           />
         </div>
       </div>
 
-      {/* Layout de dos columnas para selección de tareas */}
-      <div className="grid grid-cols-2 gap-6 h-[400px]">
-        {/* Columna Izquierda - Tareas Disponibles */}
-        <div className="border rounded-lg">
-          <div className="p-3 border-b bg-muted">
-            <h3 className="text-sm font-medium">Tareas Disponibles</h3>
-          </div>
-          
-          {/* Filtros en la columna izquierda - inline */}
-          <div className="p-3 border-b space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              {/* Filtro por Rubro */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Filtrar por Rubro
-                </Label>
-                <Select
-                  value={rubroFilter}
-                  onValueChange={setRubroFilter}
-                >
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Todos los rubros" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Todos los rubros</SelectItem>
-                    {topLevelCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {/* Campo de búsqueda */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Búsqueda de Texto
-                </Label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Buscar por nombre..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Table Header */}
-          <div className="py-2 px-3 bg-muted/50 font-medium text-xs border-b">
-            <div className="text-xs font-medium">TAREA</div>
-          </div>
-
-          {/* Table Body */}
-          <ScrollArea className="h-[270px]">
-            <div className="divide-y">
-              {isLoadingTasks ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Buscando tareas...
-                </div>
-              ) : filteredTasks.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  {searchQuery.length < 2 ? 'Escribe al menos 2 caracteres para buscar' : 'No se encontraron tareas'}
-                </div>
-              ) : (
-                filteredTasks.map((task) => {
-                  const isSelected = selectedTasks.includes(task.id);
-                  
-                  return (
-                    <div 
-                      key={task.id} 
-                      className={`p-3 hover:bg-muted/50 cursor-pointer border-b transition-all ${
-                        isSelected ? 'border-l-4 border-l-accent bg-accent/10' : ''
-                      }`}
-                      onClick={() => handleTaskToggle(task.id)}
-                    >
-                      {/* Task Name */}
-                      <div>
-                        <div className="text-sm leading-tight line-clamp-2">
-                          {task.display_name || 'Tarea sin nombre'}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.units?.name || 'UN'}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </ScrollArea>
+      {/* Columna Derecha - Selección de Tareas */}
+      <div className="border rounded-lg">
+        <div className="p-4 border-b bg-muted">
+          <h3 className="text-sm font-medium">Seleccionar Tareas del Proyecto</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Elige las tareas que incluirá este subcontrato
+          </p>
+        </div>
+        
+        {/* Header de la tabla */}
+        <div className="grid grid-cols-12 gap-2 py-3 px-4 bg-muted/50 font-medium text-xs border-b">
+          <div className="col-span-1 text-xs font-medium"></div>
+          <div className="col-span-8 text-xs font-medium">TAREA</div>
+          <div className="col-span-3 text-xs font-medium">CANTIDAD</div>
         </div>
 
-        {/* Columna Derecha - Tareas Seleccionadas */}
-        <div className="border rounded-lg">
-          <div className="p-3 border-b bg-muted">
-            <h3 className="text-sm font-medium">Tareas Seleccionadas ({selectedTasks.length})</h3>
-          </div>
-          
-          {/* Selected Tasks Header */}
-          <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "1fr auto"}}>
-            <div className="text-xs font-medium">TAREA</div>
-            <div className="text-xs font-medium w-8"></div>
-          </div>
+        {/* Lista de tareas */}
+        <ScrollArea className="h-[480px]">
+          <div className="divide-y">
+            {projectTasks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No hay tareas disponibles en este proyecto
+              </div>
+            ) : (
+              projectTasks.map((task) => {
+                const isSelected = isTaskSelected(task.task_id || '');
+                const selectedQuantity = getSelectedQuantity(task.task_id || '');
+                
+                return (
+                  <div key={task.id} className="grid grid-cols-12 gap-2 py-3 px-4 hover:bg-muted/30">
+                    {/* Checkbox */}
+                    <div className="col-span-1 flex items-center">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(checked) => 
+                          handleTaskSelection(task.task_id || '', checked === true)
+                        }
+                      />
+                    </div>
 
-          {/* Selected Tasks Body */}
-          <ScrollArea className="h-[320px]">
-            <div className="divide-y">
-              {selectedTasks.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No hay tareas seleccionadas
-                </div>
-              ) : (
-                selectedTasksInfo.map((task, index) => {
-                  if (!task) return null;
-                  
-                  return (
-                    <div key={`${task.id}-${index}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto"}}>
-                      {/* Task Name */}
-                      <div>
-                        <div className="text-sm leading-tight line-clamp-2">
-                          {task.display_name || 'Tarea sin nombre'}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.units?.name || 'UN'}
-                        </div>
+                    {/* Información de la tarea */}
+                    <div className="col-span-8">
+                      <div className="text-sm leading-tight line-clamp-2">
+                        {task.name_rendered || 'Tarea sin nombre'}
                       </div>
-
-                      {/* Delete Button */}
-                      <div className="w-8">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          onClick={() => handleTaskToggle(task.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                        <span className="font-bold">{task.category_name || 'Sin rubro'}</span>
+                        <span>•</span>
+                        <span>{task.unit_name || 'UN'}</span>
+                        <span>•</span>
+                        <span className="text-accent font-medium">
+                          Total: {task.quantity || 0}
+                        </span>
                       </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </ScrollArea>
-        </div>
+
+                    {/* Input de cantidad */}
+                    <div className="col-span-3">
+                      {isSelected && (
+                        <Input
+                          type="number"
+                          value={selectedQuantity}
+                          onChange={(e) => {
+                            const newQuantity = parseFloat(e.target.value) || 1;
+                            handleQuantityChange(task.task_id || '', newQuantity);
+                          }}
+                          className="h-8 text-xs"
+                          min="0.01"
+                          max={task.quantity || 999999}
+                          step="0.01"
+                          placeholder="Cantidad"
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </ScrollArea>
       </div>
-    </form>
+    </div>
   );
 
   const headerContent = {
@@ -404,7 +333,11 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
 
   const footerContent = {
     rightActions: [
-      { label: "Cancelar", variant: "ghost" as const, onClick: onClose },
+      { 
+        label: "Cancelar", 
+        variant: "ghost" as const, 
+        onClick: () => {} // Se maneja automáticamente por el modal
+      },
       { 
         label: "Crear Subcontrato", 
         variant: "default" as const, 
@@ -422,7 +355,7 @@ export function SubcontractFormModal({ modalData, onClose }: SubcontractFormModa
       headerContent={<FormModalHeader {...headerContent} />}
       footerContent={<FormModalFooter {...footerContent} />}
       isEditing={true}
-      maxWidth="1200px"
+      isWide={true}
     />
   );
 }
