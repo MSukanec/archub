@@ -153,8 +153,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   // Panel principal para edición
   const editPanel = (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-4">
+      <div className="space-y-1">
         <Label htmlFor="title" className="text-xs font-medium">
           Título *
         </Label>
@@ -169,7 +169,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label htmlFor="contact_id" className="text-xs font-medium">
             Proveedor *
           </Label>
@@ -193,7 +193,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label htmlFor="status" className="text-xs font-medium">
             Estado *
           </Label>
@@ -218,7 +218,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="amount_total" className="text-xs font-medium">
           Monto Total
         </Label>
@@ -234,7 +234,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="notes" className="text-xs font-medium">
           Notas
         </Label>
