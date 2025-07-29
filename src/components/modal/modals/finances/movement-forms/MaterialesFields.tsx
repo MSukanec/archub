@@ -31,12 +31,12 @@ interface Props {
   wallets: any[]
   members: any[]
   concepts: any[]
-  selectedTaskIds: string[]
-  setSelectedTaskIds: (taskIds: string[]) => void
+  selectedTaskId: string
+  setSelectedTaskId: (taskId: string) => void
   onOpenTasksSubform: () => void
 }
 
-export function MaterialesFields({ form, currencies, wallets, members, concepts, selectedTaskIds, setSelectedTaskIds, onOpenTasksSubform }: Props) {
+export function MaterialesFields({ form, currencies, wallets, members, concepts, selectedTaskId, setSelectedTaskId, onOpenTasksSubform }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica
@@ -244,8 +244,8 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts,
       <div className="col-span-2">
         <FormSubsectionButton
           icon={<Package />}
-          title="Seleccionar Tareas de Construcción"
-          description={selectedTaskIds.length > 0 ? `${selectedTaskIds.length} tarea${selectedTaskIds.length === 1 ? '' : 's'} seleccionada${selectedTaskIds.length === 1 ? '' : 's'}` : "Selecciona las tareas relacionadas con este material"}
+          title="Seleccionar Tarea de Construcción"
+          description={selectedTaskId ? "Tarea seleccionada" : "Selecciona la tarea relacionada con este material"}
           onClick={onOpenTasksSubform}
         />
       </div>

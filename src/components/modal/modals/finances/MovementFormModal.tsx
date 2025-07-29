@@ -38,7 +38,7 @@ import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButt
 import DatePicker from '@/components/ui-custom/DatePicker'
 import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
 import { useConstructionTasks } from '@/hooks/use-construction-tasks'
-import { TaskMultiSelector } from '@/components/ui-custom/TaskMultiSelector'
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
 
 const movementFormSchema = z.object({
@@ -254,8 +254,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Estado centralizado para el tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'mano_de_obra'>('normal')
   
-  // Estado para las tareas seleccionadas (usado para Materiales y Mano de Obra)
-  const [selectedTaskIds, setSelectedTaskIds] = React.useState<string[]>([])
+  // Estado para la tarea seleccionada (usado para Materiales y Mano de Obra)
+  const [selectedTaskId, setSelectedTaskId] = React.useState<string>('')
   
   // Estado para el subform actual
   const [currentSubform, setCurrentSubform] = React.useState<'tasks' | null>(null)
@@ -272,25 +272,26 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     userData?.organization?.id || ''
   )
   
-  // Transform construction tasks to match TaskMultiSelector interface
-  const constructionTasks = React.useMemo(() => {
+  // Transform construction tasks to match ComboBox interface
+  const constructionTaskOptions = React.useMemo(() => {
     if (!rawConstructionTasks) return []
     
     console.log('MovementFormModal - Raw construction tasks:', rawConstructionTasks)
     
     return rawConstructionTasks.map((task: any) => ({
-      id: task.task_instance_id,
-      name_rendered: task.task?.display_name || task.display_name || task.task_code,
-      unit_name: task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || 'ud'
+      value: task.task_instance_id,
+      label: `${task.task?.display_name || task.display_name || task.task_code} (${task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || 'ud'})`
     }))
   }, [rawConstructionTasks])
   
-  // Cargar tareas existentes en el estado cuando estamos editando
+  // Cargar tarea existente en el estado cuando estamos editando
   React.useEffect(() => {
     if (existingMovementTasks && existingMovementTasks.length > 0) {
-      const taskIds = existingMovementTasks.map(mt => mt.construction_task_id)
-      console.log('Loading existing movement tasks:', taskIds)
-      setSelectedTaskIds(taskIds)
+      const firstTaskId = existingMovementTasks[0]?.task_id
+      console.log('Loading existing movement task:', firstTaskId)
+      if (firstTaskId) {
+        setSelectedTaskId(firstTaskId)
+      }
     }
   }, [existingMovementTasks])
   
@@ -1811,16 +1812,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     },
     onSuccess: async (createdMovement) => {
-      // Crear las relaciones movement_tasks después de crear el movimiento
-      if (selectedTaskIds && selectedTaskIds.length > 0) {
+      // Crear relación con tarea después de crear el movimiento
+      if (selectedTaskId) {
         try {
           await createMovementTasksMutation.mutateAsync({
             movementId: createdMovement.id,
-            taskIds: selectedTaskIds
+            taskIds: [selectedTaskId]
           })
-          console.log('Movement tasks created successfully for materials')
+          console.log('Movement task created successfully for materials')
         } catch (error) {
-          console.error('Error creating movement tasks:', error)
+          console.error('Error creating movement task:', error)
           toast({
             variant: 'destructive',
             title: 'Error',
@@ -1897,16 +1898,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     },
     onSuccess: async (createdMovement) => {
-      // Crear las relaciones movement_tasks después de crear el movimiento
-      if (selectedTaskIds && selectedTaskIds.length > 0) {
+      // Crear relación con tarea después de crear el movimiento
+      if (selectedTaskId) {
         try {
           await createMovementTasksMutation.mutateAsync({
             movementId: createdMovement.id,
-            taskIds: selectedTaskIds
+            taskIds: [selectedTaskId]
           })
-          console.log('Movement tasks created successfully for mano de obra')
+          console.log('Movement task created successfully for mano de obra')
         } catch (error) {
-          console.error('Error creating movement tasks:', error)
+          console.error('Error creating movement task:', error)
           toast({
             variant: 'destructive',
             title: 'Error',
@@ -2560,8 +2561,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets}
               members={members}
               concepts={concepts}
-              selectedTaskIds={selectedTaskIds}
-              setSelectedTaskIds={setSelectedTaskIds}
+              selectedTaskId={selectedTaskId}
+              setSelectedTaskId={setSelectedTaskId}
               onOpenTasksSubform={openTasksSubform}
             />
           </form>
@@ -2576,8 +2577,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets}
               members={members}
               concepts={concepts}
-              selectedTaskIds={selectedTaskIds}
-              setSelectedTaskIds={setSelectedTaskIds}
+              selectedTaskId={selectedTaskId}
+              setSelectedTaskId={setSelectedTaskId}
               onOpenTasksSubform={openTasksSubform}
             />
           </form>
@@ -2788,16 +2789,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Subform para selección de tareas
   const tasksSubform = (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-          <Package className="w-4 h-4 text-accent" />
-        </div>
-        <div>
-          <h3 className="text-sm font-medium text-foreground">Selección de Tareas</h3>
-          <p className="text-xs text-muted-foreground">Selecciona las tareas relacionadas con este movimiento</p>
-        </div>
-      </div>
-      
       {isTasksLoading ? (
         <div className="flex items-center justify-center h-48">
           <div className="text-center">
@@ -2806,11 +2797,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           </div>
         </div>
       ) : (
-        <TaskMultiSelector
-          tasks={constructionTasks || []}
-          selectedTaskIds={selectedTaskIds}
-          onSelectionChange={setSelectedTaskIds}
-        />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              Tarea de Construcción
+            </label>
+            <ComboBox
+              value={selectedTaskId}
+              onValueChange={setSelectedTaskId}
+              options={constructionTaskOptions}
+              placeholder="Seleccionar tareas..."
+              searchPlaceholder="Buscar tarea..."
+              emptyMessage="No se encontraron tareas."
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Selecciona la tarea de construcción relacionada con este movimiento
+          </p>
+        </div>
       )}
     </div>
   )
