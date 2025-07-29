@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 const subcontractSchema = z.object({
   title: z.string().min(1, "El título es obligatorio"),
@@ -49,6 +50,7 @@ interface SubcontractFormModalProps {
 export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
+  const { closeModal } = useGlobalModalStore();
   const { currentSubform, setCurrentSubform } = useModalPanelStore();
 
   const { data: userData } = useCurrentUser();
@@ -126,6 +128,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         title: "Subcontrato creado",
         description: "El pedido de subcontrato se creó correctamente",
       });
+      
+      closeModal();
 
     } catch (error) {
       console.error('Error creando subcontrato:', error);
@@ -273,7 +277,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   ) : (
     <FormModalFooter
       leftLabel="Cancelar"
-      onLeftClick={() => {}} // Se maneja automáticamente por el modal
+      onLeftClick={closeModal}
       rightLabel="Crear Subcontrato"
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isSubmitting}
@@ -378,7 +382,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   return (
     <FormModalLayout
       columns={1}
-      wide={true}
       viewPanel={viewPanel}
       editPanel={editPanel}
       subformPanel={getSubform()}
