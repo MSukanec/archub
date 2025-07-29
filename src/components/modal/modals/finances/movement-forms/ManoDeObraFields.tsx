@@ -139,7 +139,7 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts 
       </div>
 
       {/* Fila: Moneda | Billetera */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="currency_id"
@@ -192,7 +192,7 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts 
       </div>
 
       {/* Fila: Monto | Cotización */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="amount"
@@ -237,45 +237,49 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts 
       </div>
 
       {/* Descripción */}
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Descripción (opcional)</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Descripción del movimiento..."
-                rows={3}
-                {...field}
-                value={field.value || ''} // Asegurar que inicie vacío
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="col-span-2">
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción (opcional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción del movimiento..."
+                  rows={3}
+                  {...field}
+                  value={field.value || ''} // Asegurar que inicie vacío
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       {/* Campo Tareas - específico para Mano de Obra */}
-      <FormField
-        control={form.control}
-        name="construction_task_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Tareas</FormLabel>
-            <FormControl>
-              <ComboBox
-                options={taskOptions}
-                value={field.value || ''}
-                onValueChange={field.onChange}
-                placeholder="Seleccionar tarea de construcción..."
-                emptyMessage="No se encontraron tareas"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="col-span-2">
+        <FormField
+          control={form.control}
+          name="construction_task_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tareas</FormLabel>
+              <FormControl>
+                <ComboBox
+                  options={taskOptions}
+                  value={field.value || ''}
+                  onValueChange={field.onChange}
+                  placeholder="Seleccionar tarea de construcción..."
+                  emptyMessage="No se encontraron tareas"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </>
   )
 }
