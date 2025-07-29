@@ -902,7 +902,7 @@ export function ConstructionTaskFormModal({
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto space-y-6">
               {/* Tabs personalizadas al estilo ActionBar */}
-              <div className="px-6 pt-6 pb-0">
+              <div className="px-6 pt-0 pb-0">
                 <div 
                   className="flex items-center rounded-lg p-1 gap-0.5 bg-[var(--button-ghost-bg)] border border-[var(--card-border)] shadow-button-normal w-full"
                 >
@@ -931,9 +931,8 @@ export function ConstructionTaskFormModal({
               
               {activeTab === 'parametric' && (
                 <div>
-                  {/* Separador y título de sección para tarea paramétrica */}
+                  {/* Título de sección para tarea paramétrica */}
                   <div className="mb-4 px-6">
-                    <Separator className="mb-4" />
                     <div className="flex items-center gap-3 mb-6">
                       <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
                         <Layers className="w-4 h-4 text-accent" />
@@ -961,9 +960,8 @@ export function ConstructionTaskFormModal({
                 
               {activeTab === 'custom' && (
                 <div>
-                  {/* Separador y título de sección para tarea personalizada */}
+                  {/* Título de sección para tarea personalizada */}
                   <div className="mb-4 px-6">
-                    <Separator className="mb-4" />
                     <div className="flex items-center gap-3 mb-6">
                       <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
                         <Wrench className="w-4 h-4 text-accent" />
