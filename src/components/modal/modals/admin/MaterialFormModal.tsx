@@ -245,27 +245,27 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
               name="unit_id"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel>Unidad de Cómputo *</FormLabel>
                   <div className="flex items-center gap-2">
-                    <FormLabel>Unidad de Cómputo *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar unidad de cómputo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {units.map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {unit.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <HelpPopover
                       title="¿Qué es la Unidad de Cómputo?"
                       description="Esta no es la unidad de venta del material, sino la unidad con la que se calculan las cantidades en el proyecto. Por ejemplo: la cal se computa por kilogramos (KG) para los cálculos de obra, pero se vende por bolsas de 25kg. El cemento se computa por kilogramos pero se vende por bolsas de 50kg. Esta unidad te ayuda a hacer cálculos precisos de materiales."
                     />
                   </div>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar unidad de cómputo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {units.map((unit) => (
-                        <SelectItem key={unit.id} value={unit.id}>
-                          {unit.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
