@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { supabase } from '@/lib/supabase'
-import { DollarSign, ArrowRightLeft, ArrowLeftRight } from 'lucide-react'
+import { DollarSign, ArrowRightLeft, ArrowLeftRight, Package, ArrowLeft } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -34,7 +34,11 @@ import { useContacts } from '@/hooks/use-contacts'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useProjects } from '@/hooks/use-projects'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
+import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
 import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
+import { useConstructionTasks } from '@/hooks/use-construction-tasks'
+import { TaskMultiSelector } from '@/components/ui-custom/TaskMultiSelector'
+import { Button } from '@/components/ui/button'
 
 const movementFormSchema = z.object({
   movement_date: z.date(),
@@ -178,6 +182,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const editingMovement = modalData?.editingMovement
   const { currentPanel, setPanel } = useModalPanelStore()
   
+  // Función para abrir el subform de tareas
+  const openTasksSubform = () => {
+    setCurrentSubform('tasks')
+    setPanel('subform')
+  }
+  
+  // Función para cerrar el subform y volver al panel principal
+  const closeSubform = () => {
+    setCurrentSubform(null)
+    setPanel('edit')
+  }
+  
   // Inicializar panel correcto según el modo
   React.useEffect(() => {
     setPanel('edit') // Siempre empezar en modo edición
@@ -240,11 +256,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Estado para las tareas seleccionadas (usado para Materiales y Mano de Obra)
   const [selectedTaskIds, setSelectedTaskIds] = React.useState<string[]>([])
   
+  // Estado para el subform actual
+  const [currentSubform, setCurrentSubform] = React.useState<'tasks' | null>(null)
+  
   // Hook para crear/actualizar relaciones de tareas con movimientos
   const createMovementTasksMutation = useCreateMovementTasks()
   
   // Hook para cargar tareas existentes en modo edición
   const { data: existingMovementTasks } = useMovementTasks(editingMovement?.id)
+  
+  // Hook para cargar las tareas de construcción disponibles
+  const { data: constructionTasks, isLoading: isTasksLoading } = useConstructionTasks()
   
   // Cargar tareas existentes en el estado cuando estamos editando
   React.useEffect(() => {
@@ -2560,6 +2582,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               concepts={concepts}
               selectedTaskIds={selectedTaskIds}
               setSelectedTaskIds={setSelectedTaskIds}
+              onOpenTasksSubform={openTasksSubform}
             />
           </form>
         </Form>
@@ -2575,6 +2598,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               concepts={concepts}
               selectedTaskIds={selectedTaskIds}
               setSelectedTaskIds={setSelectedTaskIds}
+              onOpenTasksSubform={openTasksSubform}
             />
           </form>
         </Form>
@@ -2723,7 +2747,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     </div>
   )
 
-  const headerContent = (
+  const headerContent = currentPanel === 'subform' ? (
+    <FormModalHeader
+      title={currentSubform === 'tasks' ? "Selección de Tareas" : "Subformulario"}
+      description={currentSubform === 'tasks' ? "Selecciona las tareas relacionadas con este movimiento" : "Subformulario"}
+      icon={Package}
+      leftActions={
+        <Button
+          variant="ghost"
+          onClick={closeSubform}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver
+        </Button>
+      }
+    />
+  ) : (
     <FormModalHeader
       title={editingMovement ? "Editar Movimiento" : "Nuevo Movimiento"}
       icon={DollarSign}
@@ -2741,7 +2781,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     />
   )
 
-  const footerContent = (
+  const footerContent = currentPanel === 'subform' ? (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel="Confirmar Selección"
+      onRightClick={closeSubform}
+      showLoadingSpinner={false}
+    />
+  ) : (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
@@ -2768,6 +2816,46 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createManoDeObraMutation.isPending}
     />
   )
+
+  // Subform para selección de tareas
+  const tasksSubform = (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+          <Package className="w-4 h-4 text-accent" />
+        </div>
+        <div>
+          <h3 className="text-sm font-medium text-foreground">Selección de Tareas</h3>
+          <p className="text-xs text-muted-foreground">Selecciona las tareas relacionadas con este movimiento</p>
+        </div>
+      </div>
+      
+      {isTasksLoading ? (
+        <div className="flex items-center justify-center h-48">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">Cargando tareas...</p>
+          </div>
+        </div>
+      ) : (
+        <TaskMultiSelector
+          tasks={constructionTasks || []}
+          selectedTaskIds={selectedTaskIds}
+          onSelectionChange={setSelectedTaskIds}
+        />
+      )}
+    </div>
+  )
+
+  // Función para obtener el subform actual
+  const getSubform = () => {
+    switch (currentSubform) {
+      case 'tasks':
+        return tasksSubform
+      default:
+        return null
+    }
+  }
 
   // Si los datos aún están cargando, mostrar estado de carga
   if (isDataLoading) {
@@ -2814,6 +2902,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       columns={1}
       viewPanel={currentPanel === 'view' ? viewPanel : null}
       editPanel={currentPanel === 'edit' ? editPanel : null}
+      subformPanel={currentPanel === 'subform' ? getSubform() : null}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}

@@ -7,8 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { DollarSign, Package } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { useConstructionTasksView } from "@/hooks/use-construction-tasks"
-import { TaskMultiSelector } from "@/components/ui-custom/TaskMultiSelector"
+import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButton"
 
 
 // Tipo específico para el formulario de materiales
@@ -34,18 +33,17 @@ interface Props {
   concepts: any[]
   selectedTaskIds: string[]
   setSelectedTaskIds: (taskIds: string[]) => void
+  onOpenTasksSubform: () => void
 }
 
-export function MaterialesFields({ form, currencies, wallets, members, concepts, selectedTaskIds, setSelectedTaskIds }: Props) {
+export function MaterialesFields({ form, currencies, wallets, members, concepts, selectedTaskIds, setSelectedTaskIds, onOpenTasksSubform }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(form.watch('category_id') || '')
   const [initialized, setInitialized] = React.useState(false)
   
-  // Obtener tareas de construcción para el selector
-  const projectId = userData?.preferences?.last_project_id
-  const { data: constructionTasks, isLoading: tasksLoading } = useConstructionTasksView(projectId || '')
+  // Ya no necesitamos cargar las tareas aquí, se manejan en el subform
   
   // Obtener categorías basadas en el tipo seleccionado
   const selectedTypeId = form.watch('type_id')
@@ -254,18 +252,14 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts,
         />
       </div>
 
-      {/* Campo Tareas - múltiple para Materiales */}
+      {/* Botón para Selección de Tareas */}
       <div className="col-span-2">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Tareas de Construcción</label>
-          <TaskMultiSelector
-            tasks={constructionTasks || []}
-            selectedTaskIds={selectedTaskIds}
-            onSelectionChange={setSelectedTaskIds}
-            placeholder="Seleccionar tareas de construcción..."
-            isLoading={tasksLoading}
-          />
-        </div>
+        <FormSubsectionButton
+          icon={<Package />}
+          title="Seleccionar Tareas de Construcción"
+          description={selectedTaskIds.length > 0 ? `${selectedTaskIds.length} tarea${selectedTaskIds.length === 1 ? '' : 's'} seleccionada${selectedTaskIds.length === 1 ? '' : 's'}` : "Selecciona las tareas relacionadas con este material"}
+          onClick={onOpenTasksSubform}
+        />
       </div>
     </>
   )
