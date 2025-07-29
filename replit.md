@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 28, 2025. ACTIONBAR PROJECT SELECTOR UPDATED TO USE SELECTOR COMPONENT: Successfully replaced DropdownMenu-based project selector with Selector.tsx component for visual consistency - COMPLETED
+  • COMPONENT INTEGRATION: Replaced ProjectSelector component with ProjectSelectorComponent using Selector.tsx for consistent styling
+  • VISUAL CONSISTENCY: Project selector now uses same popover design as other selectors throughout the application
+  • FUNCTIONALITY PRESERVED: Maintained all project selection logic, localStorage handling, and user preference updates
+  • ICON INTEGRATION: Added Building2 and Folder icons to match original ProjectSelector visual feedback
+  • SELECTOR STYLING: Applied min-w-fit and whitespace-nowrap classes to prevent text truncation
+  • ACTIONBAR COMPATIBILITY: Component works seamlessly within ActionBar layout without breaking existing functionality
 - July 28, 2025. PROJECT DASHBOARD ACTIONBAR IMPLEMENTATION COMPLETED: Successfully modernized project dashboard page with ActionBarDesktop system replacing legacy header - COMPLETED
   • ACTIONBAR INTEGRATION: Added complete ActionBarDesktop with "Resumen del Proyecto" title, FolderOpen icon, and 4 detailed features
   • EXECUTIVE DASHBOARD FEATURES: Implemented comprehensive features covering integral statistics, trend analysis, centralized team management, and executive control panel

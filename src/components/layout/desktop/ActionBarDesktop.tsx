@@ -1,12 +1,17 @@
 import React, { useState } from 'react'
-import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react'
+import { LayoutGrid, Plus, Edit, Trash2, X, Filter, CalendarDays, ChevronDown, ChevronUp, HelpCircle, Folder, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ExpandableSearchButton } from '@/components/ui/expandable-search-button'
 import { Tabs } from '@/components/ui-custom/Tabs'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Selector } from '@/components/ui-custom/Selector'
-import { ProjectSelector } from '@/components/navigation/ProjectSelector'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjects } from '@/hooks/use-projects'
+import { useProjectContext } from '@/stores/projectContext'
+import { useMutation } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 import { cn } from '@/lib/utils'
 
 interface BudgetSelectorProps {
@@ -78,6 +83,88 @@ interface ActionBarDesktopProps {
   // Today button for gradebook pages
   onTodayClick?: () => void
   className?: string
+}
+
+// Project Selector Component using Selector.tsx
+function ProjectSelectorComponent() {
+  const { data: userData } = useCurrentUser()
+  const { data: projects = [] } = useProjects(userData?.organization?.id)
+  const { selectedProjectId, setSelectedProject } = useProjectContext()
+  
+  // Update user preferences when project changes
+  const updateProjectMutation = useMutation({
+    mutationFn: async (projectId: string | null) => {
+      if (!userData?.preferences?.id || !supabase) return
+      
+      const currentOrgId = userData?.organization?.id
+      if (currentOrgId) {
+        if (projectId) {
+          localStorage.setItem(`last-project-${currentOrgId}`, projectId)
+        } else {
+          localStorage.removeItem(`last-project-${currentOrgId}`)
+        }
+      }
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({ last_project_id: projectId })
+        .eq('id', userData.preferences.id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    }
+  })
+
+  const handleProjectSelect = (projectId: string) => {
+    const actualProjectId = projectId === 'general' ? null : projectId
+    
+    if (selectedProjectId === actualProjectId) {
+      return
+    }
+    
+    if (actualProjectId === null) {
+      localStorage.setItem('explicit-general-mode', 'true')
+    } else {
+      localStorage.removeItem('explicit-general-mode')
+    }
+    
+    setSelectedProject(actualProjectId)
+    updateProjectMutation.mutate(actualProjectId)
+  }
+
+  // Prepare options for Selector
+  const options = [
+    { value: 'general', label: 'General' },
+    ...projects.map(project => ({
+      value: project.id,
+      label: project.name
+    }))
+  ]
+
+  const currentValue = selectedProjectId || 'general'
+  const currentProject = projects.find(p => p.id === selectedProjectId)
+  const displayName = selectedProjectId === null ? "General" : currentProject?.name || "General"
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="text-muted-foreground">
+        {selectedProjectId === null ? (
+          <Building2 className="w-4 h-4" />
+        ) : (
+          <Folder className="w-4 h-4" />
+        )}
+      </div>
+      <Selector
+        options={options}
+        value={currentValue}
+        onValueChange={handleProjectSelect}
+        placeholder="Seleccionar proyecto"
+        className="min-w-fit whitespace-nowrap"
+      />
+    </div>
+  )
 }
 
 export function ActionBarDesktop({
@@ -168,7 +255,7 @@ export function ActionBarDesktop({
               {/* Project Selector where the help button was */}
               {showProjectSelector && (
                 <div className="flex items-center">
-                  <ProjectSelector />
+                  <ProjectSelectorComponent />
                 </div>
               )}
             </div>
