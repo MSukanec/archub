@@ -39,23 +39,45 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     userData?.organization?.id || ''
   );
 
+  // Debug logging to understand data structure
+  React.useEffect(() => {
+    console.log('TaskSelectionTable - allTasks:', allTasks);
+    console.log('TaskSelectionTable - allTasks length:', allTasks.length);
+    if (allTasks.length > 0) {
+      console.log('TaskSelectionTable - sample task:', JSON.stringify(allTasks[0], null, 2));
+    }
+  }, [allTasks]);
+
   // Filtrar tareas disponibles (excluir las que ya están en el presupuesto)
   const availableTasks = useMemo(() => {
-    return allTasks.filter(task => 
+    const filtered = allTasks.filter(task => 
       !excludeTaskIds.includes(task.task_instance_id)
     );
+    console.log('TaskSelectionTable - availableTasks:', filtered.length);
+    return filtered;
   }, [allTasks, excludeTaskIds]);
 
   // Filtrar tareas por término de búsqueda
   const filteredTasks = useMemo(() => {
-    if (!searchTerm.trim()) return availableTasks;
+    if (!searchTerm.trim()) {
+      console.log('TaskSelectionTable - no search term, returning all available tasks:', availableTasks.length);
+      return availableTasks;
+    }
     
     const term = searchTerm.toLowerCase();
-    return availableTasks.filter(task => 
-      task.task?.display_name?.toLowerCase().includes(term) ||
-      task.task?.rubro_name?.toLowerCase().includes(term) ||
-      task.task_code?.toLowerCase().includes(term)
-    );
+    const filtered = availableTasks.filter(task => {
+      // Check multiple possible data structure paths
+      const displayName = task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered;
+      const rubroName = task.task?.rubro_name || task.rubro_name || task.task?.category_name;
+      const taskCode = task.task_code || task.task?.code;
+      
+      return displayName?.toLowerCase().includes(term) ||
+             rubroName?.toLowerCase().includes(term) ||
+             taskCode?.toLowerCase().includes(term);
+    });
+    
+    console.log('TaskSelectionTable - filtered by search:', filtered.length, 'from', availableTasks.length);
+    return filtered;
   }, [availableTasks, searchTerm]);
 
   // Agrupar tareas por rubro
@@ -63,24 +85,26 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     const groups: { [key: string]: typeof filteredTasks } = {};
     
     filteredTasks.forEach(task => {
-      const rubroName = task.task?.rubro_name || 'Sin Rubro';
+      // Check multiple possible data structure paths for rubro name
+      const rubroName = task.task?.rubro_name || task.rubro_name || task.task?.category_name || task.category_name || 'Sin Rubro';
       if (!groups[rubroName]) {
         groups[rubroName] = [];
       }
       groups[rubroName].push(task);
     });
     
+    console.log('TaskSelectionTable - groups by rubro:', Object.keys(groups), groups);
     return groups;
   }, [filteredTasks]);
 
   const handleTaskToggle = (task: any, isChecked: boolean) => {
     const selectedTask: SelectedTask = {
       task_instance_id: task.task_instance_id,
-      display_name: task.task?.display_name || task.task_code,
-      rubro_name: task.task?.rubro_name,
+      display_name: task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered || task.task_code,
+      rubro_name: task.task?.rubro_name || task.rubro_name || task.task?.category_name || task.category_name,
       quantity: task.quantity || 0,
-      unit_symbol: task.task?.unit_symbol,
-      task_code: task.task_code
+      unit_symbol: task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name,
+      task_code: task.task_code || task.task?.code
     };
 
     if (isChecked) {
@@ -212,11 +236,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                       />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm text-foreground line-clamp-1">
-                          {task.task?.display_name || task.task_code}
+                          {task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered || task.task_code}
                         </div>
                       </div>
                       <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
-                        {task.quantity || 0} {task.task?.unit_symbol || ''}
+                        {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || ''}
                       </div>
                     </div>
                   ))}
@@ -242,14 +266,14 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                   <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto] gap-3">
                     <div>
                       <div className="text-sm text-foreground line-clamp-1">
-                        {task.task?.display_name || task.task_code}
+                        {task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered || task.task_code}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {task.task?.rubro_name || 'Sin Rubro'}
+                        {task.task?.rubro_name || task.rubro_name || task.task?.category_name || task.category_name || 'Sin Rubro'}
                       </div>
                     </div>
                     <div className="text-sm font-medium text-muted-foreground text-right">
-                      {task.quantity || 0} {task.task?.unit_symbol || ''}
+                      {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || ''}
                     </div>
                   </div>
                 </div>
