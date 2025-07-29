@@ -287,6 +287,7 @@ export function useCreateTaskMaterial() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['task-materials', variables.task_id] });
+      queryClient.invalidateQueries({ queryKey: ['materials', variables.organization_id] });
       toast({
         title: "Material Agregado",
         description: "El material se ha agregado a la tarea exitosamente"
@@ -320,6 +321,7 @@ export function useDeleteTaskMaterial() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-materials'] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
       toast({
         title: "Material Eliminado",
         description: "El material se ha eliminado de la tarea"
@@ -356,6 +358,7 @@ export function useUpdateTaskMaterial() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-materials'] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
       toast({
         title: "Material Actualizado",
         description: "La cantidad del material se ha actualizado exitosamente"
