@@ -217,10 +217,10 @@ export default function ConstructionCostAnalysis() {
         // Buscar el precio del material en organization_material_prices
         const materialPrice = material.organization_material_prices?.[0]
         if (materialPrice?.unit_price && materialPrice?.currency) {
+          const formattedPrice = Number(materialPrice.unit_price).toFixed(2)
           return (
-            <div className="text-sm">
-              <div className="font-medium">{Number(materialPrice.unit_price).toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground">{materialPrice.currency.symbol}</div>
+            <div className="text-sm font-medium">
+              {materialPrice.currency.symbol} {formattedPrice}
             </div>
           )
         }
