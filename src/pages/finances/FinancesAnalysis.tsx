@@ -455,12 +455,6 @@ export default function FinancesAnalysis() {
   return (
     <Layout>
       <div className="space-y-4">
-        <FeatureIntroduction
-          title="Análisis de Obra"
-          features={features}
-          className="md:hidden"
-        />
-
         <ActionBarDesktop
           title="Análisis de Obra"
           icon={<BarChart3 className="w-5 h-5" />}
