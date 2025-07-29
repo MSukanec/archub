@@ -277,8 +277,8 @@ export function CustomRestricted({
           }}
           side="top"
           sideOffset={-2}
-          onMouseEnter={() => setIsPopoverOpen(true)}
-          onMouseLeave={() => setIsPopoverOpen(false)}
+          onMouseEnter={() => !isGeneralMode && setIsPopoverOpen(true)}
+          onMouseLeave={() => !isGeneralMode && setIsPopoverOpen(false)}
         >
           <div className="flex items-start gap-2">
             <div
