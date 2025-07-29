@@ -29,6 +29,7 @@ export default function ConstructionCostAnalysis() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
+  const { data: userData } = useCurrentUser()
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -145,22 +146,25 @@ export default function ConstructionCostAnalysis() {
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              showDeleteConfirmation({
-                itemName: task.name_rendered || 'esta tarea',
-                onConfirm: () => {
-                  // TODO: Implementar eliminación de tarea
-                  console.log('Eliminar tarea:', task.id)
-                }
-              })
-            }}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
+          {!task.is_system && task.organization_id === userData?.organization?.id && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                showDeleteConfirmation({
+                  itemName: task.name_rendered || 'esta tarea',
+                  onConfirm: () => {
+                    // TODO: Implementar eliminación de tarea
+                    console.log('Eliminar tarea:', task.id)
+                  }
+                })
+              }}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )
     }
@@ -209,21 +213,24 @@ export default function ConstructionCostAnalysis() {
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              showDeleteConfirmation({
-                itemName: material.name || 'este material',
-                onConfirm: () => {
-                  deleteMaterialMutation.mutate(material.id)
-                }
-              })
-            }}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
+          {!material.is_system && material.organization_id === userData?.organization?.id && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                showDeleteConfirmation({
+                  itemName: material.name || 'este material',
+                  onConfirm: () => {
+                    deleteMaterialMutation.mutate(material.id)
+                  }
+                })
+              }}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )
     }

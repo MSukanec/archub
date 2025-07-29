@@ -12,6 +12,7 @@ import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock } from 'lucide-react'
 
@@ -20,6 +21,7 @@ export default function AdminGeneratedTasks() {
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
   const { openModal } = useGlobalModalStore()
+  const { data: userData } = useCurrentUser()
 
   // Real data from useGeneratedTasks hook - now using task_parametric_view
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
@@ -138,14 +140,17 @@ export default function AdminGeneratedTasks() {
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(task)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
+          {!task.is_system && task.organization_id === userData?.organization?.id && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(task)}
+              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )
     }

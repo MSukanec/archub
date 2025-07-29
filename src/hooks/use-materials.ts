@@ -9,6 +9,8 @@ export interface Material {
   name: string
   unit_id: string
   category_id: string
+  organization_id?: string
+  is_system: boolean
   created_at: string
   unit?: { name: string }
   category?: { name: string }

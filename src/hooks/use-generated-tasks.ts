@@ -12,6 +12,8 @@ export interface GeneratedTask {
   unit_name?: string;
   category_id?: string;
   category_name?: string;
+  organization_id?: string;
+  is_system: boolean;
   created_at: string;
   updated_at: string;
 }
