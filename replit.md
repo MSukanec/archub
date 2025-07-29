@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 29, 2025. CUSTOM TASK CREATION FORM IMPLEMENTED: Successfully added complete custom task creation functionality in bulk task modal with three essential fields - COMPLETED
+  • RUBRO SELECTION: Added ComboBoxWrite component displaying all top-level task categories (parent_id = null) from task_categories table
+  • TASK NAME INPUT: Implemented textarea field for detailed task description with proper placeholder and resize control
+  • UNIT SELECTION: Added Select component showing all available units from units table with name and symbol display
+  • DATA INTEGRATION: Connected useTopLevelCategories and useUnits hooks for real-time data loading
+  • FORM VALIDATION: All three fields marked as required with proper labels and visual hierarchy
+  • CLEAN INTERFACE: Replaced "Funcionalidad en desarrollo" placeholder with fully functional custom task creation form
 - July 29, 2025. TASK EDIT MODAL IMMUTABILITY ENFORCEMENT COMPLETED: Successfully prevented parameter editing in existing tasks by disabling step 1 navigation in edit mode - COMPLETED
   • IMMUTABLE TASK PARAMETERS: Editing existing tasks now restricts access to step 1 (parameter configuration), enforcing task immutability after creation
   • MATERIALS-ONLY EDITING: Edit mode automatically starts at step 2 and prevents returning to parameter configuration via "Atrás" button removal

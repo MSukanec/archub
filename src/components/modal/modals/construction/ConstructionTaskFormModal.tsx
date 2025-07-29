@@ -18,6 +18,7 @@ import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/us
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { ParametricTaskBuilder } from "@/components/ui-custom/ParametricTaskBuilder";
 import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
+import { useTopLevelCategories, useUnits } from "@/hooks/use-task-categories";
 
 
 import { toast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 const addTaskSchema = z.object({
   selectedTasks: z.array(z.object({
@@ -95,6 +97,11 @@ export function ConstructionTaskFormModal({
   // Estado para manejo de tabs dentro del subform
   const [activeTab, setActiveTab] = useState<'parametric' | 'custom'>('parametric');
   
+  // Estados para el formulario de tarea personalizada
+  const [customTaskName, setCustomTaskName] = useState<string>('');
+  const [customTaskRubro, setCustomTaskRubro] = useState<string>('');
+  const [customTaskUnit, setCustomTaskUnit] = useState<string>('');
+  
   // Query para obtener la membresía actual del usuario en la organización
   const { data: organizationMember } = useQuery({
     queryKey: ['organization-member', modalData.organizationId, userData?.user?.id],
@@ -149,6 +156,10 @@ export function ConstructionTaskFormModal({
 
   // Hook para obtener las fases del proyecto
   const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useConstructionProjectPhases(modalData.projectId);
+  
+  // Hooks para datos de tarea personalizada
+  const { data: rubros = [], isLoading: rubrosLoading } = useTopLevelCategories();
+  const { data: units = [], isLoading: unitsLoading } = useUnits();
   
   // Log para debug
   useEffect(() => {
@@ -854,9 +865,58 @@ export function ConstructionTaskFormModal({
                     </div>
                   </div>
                   
-                  {/* Por ahora solo mostrar el mensaje */}
-                  <div className="text-center py-8 px-6">
-                    <p className="text-muted-foreground">Funcionalidad en desarrollo</p>
+                  {/* Formulario de tarea personalizada */}
+                  <div className="px-6 space-y-6">
+                    {/* 1. ComboBox para Rubros */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-foreground">
+                        Rubro *
+                      </Label>
+                      <ComboBox
+                        placeholder="Selecciona un rubro..."
+                        emptyText="No se encontraron rubros"
+                        options={rubros.map(rubro => ({
+                          value: rubro.id,
+                          label: rubro.name
+                        }))}
+                        value={customTaskRubro}
+                        onValueChange={setCustomTaskRubro}
+                        disabled={rubrosLoading}
+                      />
+                    </div>
+
+                    {/* 2. Textarea para Nombre de la Tarea */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-foreground">
+                        Nombre de la Tarea *
+                      </Label>
+                      <Textarea
+                        placeholder="Describe detalladamente la tarea a realizar..."
+                        value={customTaskName}
+                        onChange={(e) => setCustomTaskName(e.target.value)}
+                        rows={3}
+                        className="resize-none"
+                      />
+                    </div>
+
+                    {/* 3. Select para Unidades */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-foreground">
+                        Unidad *
+                      </Label>
+                      <Select value={customTaskUnit} onValueChange={setCustomTaskUnit} disabled={unitsLoading}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una unidad..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map((unit: any) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.name} ({unit.symbol})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               )}
