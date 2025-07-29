@@ -159,13 +159,9 @@ export default function ConstructionSchedule() {
     return ganttRows;
   }, [filteredTasks]);
 
-  const headerProps = {
-    title: "Cronograma de Construcción"
-  }
-
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando cronograma...</div>
         </div>
@@ -174,12 +170,13 @@ export default function ConstructionSchedule() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
-      {/* Feature Introduction */}
+    <Layout wide={true}>
+      {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
         icon={<Calendar className="h-6 w-6" />}
         title="Cronograma de Construcción"
         description="Planifica, visualiza y controla el cronograma de construcción de tu proyecto con herramientas avanzadas de gestión temporal."
+        className="md:hidden"
         features={[
           {
             icon: <Clock className="h-5 w-5" />,
@@ -210,6 +207,28 @@ export default function ConstructionSchedule() {
         icon={<Calendar className="h-5 w-5" />}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
+        features={[
+          {
+            icon: <Clock className="h-4 w-4" />,
+            title: "Vista Gantt Avanzada",
+            description: "Visualiza el cronograma con barras temporales, dependencias y fases del proyecto organizadas jerárquicamente."
+          },
+          {
+            icon: <Activity className="h-4 w-4" />,
+            title: "Análisis Visual",
+            description: "Gráficos de progreso, burndown charts y análisis de rutas críticas para optimizar el cronograma."
+          },
+          {
+            icon: <CheckSquare className="h-4 w-4" />,
+            title: "Gestión de Dependencias",
+            description: "Define y visualiza dependencias entre tareas para identificar bottlenecks y rutas críticas."
+          },
+          {
+            icon: <BarChart3 className="h-4 w-4" />,
+            title: "Reportes de Avance",
+            description: "Métricas de progreso temporal, distribución de carga de trabajo y análisis de desviaciones."
+          }
+        ]}
         tabs={[
           { value: 'gantt', label: 'Vista Gantt', icon: <Calendar className="h-4 w-4" /> },
           { value: 'list', label: 'Listado de Tareas', icon: <TableIcon className="h-4 w-4" /> },

@@ -359,7 +359,7 @@ export default function ConstructionTasks() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={{ title: "Listado de Tareas" }} wide={true}>
+      <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando tareas...</div>
         </div>
@@ -368,7 +368,7 @@ export default function ConstructionTasks() {
   }
 
   return (
-    <Layout headerProps={{ title: "Listado de Tareas" }} wide={true}>
+    <Layout wide={true}>
       <div className="space-y-6">
         {/* FeatureIntroduction - Mobile Only */}
         <FeatureIntroduction
