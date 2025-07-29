@@ -149,8 +149,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       {/* Columna Izquierda - Información del Subcontrato */}
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="title" className="text-xs font-medium text-muted-foreground">
-            TÍTULO *
+          <Label htmlFor="title" className="text-sm font-medium">
+            Título *
           </Label>
           <Input
             id="title"
@@ -164,8 +164,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="contact_id" className="text-xs font-medium text-muted-foreground">
-            PROVEEDOR *
+          <Label htmlFor="contact_id" className="text-sm font-medium">
+            Proveedor *
           </Label>
           <Select
             value={form.watch('contact_id') || ''}
@@ -188,8 +188,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="status" className="text-xs font-medium text-muted-foreground">
-            ESTADO *
+          <Label htmlFor="status" className="text-sm font-medium">
+            Estado *
           </Label>
           <Select
             value={form.watch('status') || 'pendiente'}
@@ -212,8 +212,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="amount_total" className="text-xs font-medium text-muted-foreground">
-            MONTO TOTAL
+          <Label htmlFor="amount_total" className="text-sm font-medium">
+            Monto Total
           </Label>
           <Input
             id="amount_total"
@@ -229,8 +229,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notes" className="text-xs font-medium text-muted-foreground">
-            NOTAS
+          <Label htmlFor="notes" className="text-sm font-medium">
+            Notas
           </Label>
           <Textarea
             id="notes"
@@ -253,8 +253,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         {/* Header de la tabla */}
         <div className="grid grid-cols-12 gap-2 py-3 px-4 bg-muted/50 font-medium text-xs border-b">
           <div className="col-span-1 text-xs font-medium"></div>
-          <div className="col-span-8 text-xs font-medium">TAREA</div>
-          <div className="col-span-3 text-xs font-medium">CANTIDAD</div>
+          <div className="col-span-8 text-xs font-medium">Tarea</div>
+          <div className="col-span-3 text-xs font-medium">Cantidad</div>
         </div>
 
         {/* Lista de tareas */}
@@ -325,37 +325,34 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
     </div>
   );
 
-  const headerContent = {
-    title: "Crear Pedido de Subcontrato",
-    subtitle: "Vincula tareas del proyecto con un subcontratista",
-    icon: Package,
-  };
+  const headerContent = (
+    <FormModalHeader 
+      title="Crear Pedido de Subcontrato"
+      subtitle="Vincula tareas del proyecto con un subcontratista"
+      icon={Package}
+    />
+  );
 
-  const footerContent = {
-    rightActions: [
-      { 
-        label: "Cancelar", 
-        variant: "ghost" as const, 
-        onClick: () => {} // Se maneja automáticamente por el modal
-      },
-      { 
-        label: "Crear Subcontrato", 
-        variant: "default" as const, 
-        onClick: form.handleSubmit(onSubmit),
-        isLoading: isSubmitting,
-        disabled: !form.formState.isValid || selectedTasks.length === 0 || isSubmitting
-      }
-    ]
-  };
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={() => {}} // Se maneja automáticamente por el modal
+      rightLabel="Crear Subcontrato"
+      onRightClick={form.handleSubmit(onSubmit)}
+      showLoadingSpinner={isSubmitting}
+      submitDisabled={!form.formState.isValid || selectedTasks.length === 0 || isSubmitting}
+    />
+  );
 
   return (
     <FormModalLayout
+      columns={1}
+      wide={true}
       viewPanel={viewPanel}
       editPanel={editPanel}
-      headerContent={<FormModalHeader {...headerContent} />}
-      footerContent={<FormModalFooter {...footerContent} />}
+      headerContent={headerContent}
+      footerContent={footerContent}
       isEditing={true}
-      isWide={true}
     />
   );
 }
