@@ -70,7 +70,7 @@ export function DocumentGroupCard({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('DocumentGroupCard - onEdit clicked with group:', group);
+
                   onEdit(group);
                 }}
                 className="h-8 w-8 p-0"

@@ -23,14 +23,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [initialized, initialize])
 
   useEffect(() => {
-    console.log('ProtectedRoute state:', { initialized, loading, user: !!user });
-    
     // Solo mostrar modal si ya se inicializó y no hay usuario
     if (initialized && !loading && !user) {
-      console.log('Showing auth modal');
       setShowAuthModal(true)
     } else if (user) {
-      console.log('User found, hiding auth modal');
       setShowAuthModal(false)
     }
   }, [user, initialized, loading])
@@ -42,27 +38,15 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
       
-      console.log('Checking user type:', { 
-        hasUser: !!user, 
-        hasUserData: !!userData, 
-        userDataLoading, 
-        hasUserType: !!hasUserType,
-        onboardingCompleted,
-        hasPersonalData: !!hasPersonalData,
-        currentLocation: location 
-      });
-      
       // Only redirect if not already on the target route to prevent loops
       if (!onboardingCompleted && location !== '/onboarding') {
         if (lastNavigationRef.current !== '/onboarding') {
-          console.log('User needs to complete onboarding, redirecting to /onboarding');
           lastNavigationRef.current = '/onboarding';
           navigate('/onboarding');
         }
       } else if (!hasPersonalData && location !== '/onboarding') {
         // Edge case: onboarding marked complete but missing basic data
         if (lastNavigationRef.current !== '/onboarding') {
-          console.log('Onboarding completed but missing personal data, redirecting to /onboarding');
           lastNavigationRef.current = '/onboarding';
           navigate('/onboarding');
         }
@@ -72,9 +56,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     }
   }, [user, userData, userDataLoading, location, navigate])
-
-  // Debug adicional
-  console.log('ProtectedRoute render:', { initialized, loading, user: !!user, showAuthModal })
 
   // Mostrar loading mientras se inicializa
   if (!initialized) {
@@ -96,12 +77,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Si hay usuario, mostrar contenido
   if (user) {
-    console.log('Rendering protected content for user:', user.email)
     return <>{children}</>
   }
 
   // Si no hay usuario, mostrar modal de autenticación
-  console.log('No user found, showing auth modal')
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <AuthModal open={true} onOpenChange={setShowAuthModal} />

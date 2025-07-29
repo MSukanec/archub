@@ -72,10 +72,8 @@ export const ParametricTaskBuilder = forwardRef<
 
   // Función para ejecutar el callback de creación de tarea con datos completos
   const executeCreateTaskCallback = () => {
-    console.log('🔥 executeCreateTaskCallback llamada');
-    console.log('📊 Estado actual - selections:', selections);
-    console.log('📊 Estado actual - availableParameters:', availableParameters);
-    console.log('📊 Estado actual - taskPreview:', taskPreview);
+
+
     
     if (onCreateTask) {
       const paramValues: Record<string, string> = {};
@@ -98,11 +96,7 @@ export const ParametricTaskBuilder = forwardRef<
         availableParameters
       };
 
-      console.log('🚀 ParametricTaskBuilder ejecutando callback con datos completos:', taskData);
-      console.log('🎯 availableParameters que se pasan:', availableParameters);
       onCreateTask(taskData);
-    } else {
-      console.log('❌ onCreateTask no está definido');
     }
   };
 
@@ -126,7 +120,7 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading parameters:', error)
         throw error
       }
-      console.log('📋 Parameters loaded:', data?.length || 0)
+
       return data as TaskParameter[]
     }
   })
@@ -145,7 +139,7 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading options:', error)
         throw error
       }
-      console.log('🎯 Options loaded:', data?.length || 0)
+
       return data as TaskParameterOption[]
     }
   })
@@ -163,7 +157,7 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading dependencies:', error)
         throw error
       }
-      console.log('🔗 Dependencies loaded:', data?.length || 0)
+
       return data as TaskParameterDependency[]
     }
   })
@@ -181,7 +175,7 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading dependency options:', error)
         throw error
       }
-      console.log('🎲 Dependency options loaded:', data?.length || 0)
+
       return data as TaskParameterDependencyOption[]
     }
   })
@@ -190,7 +184,7 @@ export const ParametricTaskBuilder = forwardRef<
   useEffect(() => {
     const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
     if (tipoTareaParam && availableParameters.length === 0 && !initialParameters) {
-      console.log('🎯 Parámetro inicial encontrado:', tipoTareaParam)
+
       setAvailableParameters([tipoTareaParam.id])
     }
   }, [parameters, availableParameters.length, initialParameters])
@@ -222,17 +216,17 @@ export const ParametricTaskBuilder = forwardRef<
 
     // Para cada selección actual, buscar qué parámetros puede desbloquear
     selections.forEach(selection => {
-      console.log('🔍 Buscando dependencias para:', selection.parameterSlug, '→', selection.optionLabel)
+
       
       const relevantDependencies = dependencies.filter(
         dep => dep.parent_parameter_id === selection.parameterId && 
                dep.parent_option_id === selection.optionId
       )
 
-      console.log('📋 Dependencias encontradas:', relevantDependencies.length)
+
 
       relevantDependencies.forEach(dep => {
-        console.log('🔗 Evaluando dependencia:', dep.child_parameter_id)
+
         
         // Verificar si este parámetro hijo ya está seleccionado
         const alreadySelected = selections.some(s => s.parameterId === dep.child_parameter_id)
@@ -240,12 +234,12 @@ export const ParametricTaskBuilder = forwardRef<
           // Agregar directamente el parámetro hijo sin verificar opciones específicas
           // Esto permite que aparezca el badge hijo
           newAvailableParams.push(dep.child_parameter_id)
-          console.log('✅ Parámetro hijo agregado:', dep.child_parameter_id)
+
         }
       })
     })
 
-    console.log('🎯 Parámetros disponibles actualizados:', newAvailableParams)
+
     setAvailableParameters(newAvailableParams)
   }, [selections, parameters, dependencies, dependencyOptions])
 
@@ -254,9 +248,7 @@ export const ParametricTaskBuilder = forwardRef<
     if (initialParameters && typeof initialParameters === 'string' && parameters.length > 0 && allOptions.length > 0 && selections.length === 0) {
       try {
         const parsedParams = JSON.parse(initialParameters);
-        console.log('🔄 PROCESANDO PARÁMETROS INICIALES:', parsedParams);
-        console.log('📋 Available parameters:', parameters.map(p => ({ id: p.id, slug: p.slug })));
-        console.log('🎯 Available options:', allOptions.slice(0, 5).map(o => ({ id: o.id, parameter_id: o.parameter_id, label: o.label })));
+
         
         // Convert parsedParams to ParameterSelection format
         const initialSelections: ParameterSelection[] = [];
@@ -304,7 +296,7 @@ export const ParametricTaskBuilder = forwardRef<
                 const availableOptions = allOptions.filter(opt => opt.parameter_id === parameter!.id);
                 if (availableOptions.length > 0) {
                   option = availableOptions[0];
-                  console.log('⚠️ Using fallback option for', key, ':', option.label);
+
                 }
               }
             }
@@ -320,13 +312,7 @@ export const ParametricTaskBuilder = forwardRef<
               optionLabel: option.label
             });
             initialAvailableParams.push(parameter.id);
-            console.log('✅ Loaded parameter:', key, '→', value, `(${parameter.slug} → ${option.label})`);
-          } else {
-            if (!parameter) {
-              console.log('❌ Parameter not found:', key);
-            } else {
-              console.log('❌ Option not found for:', key, '→', value, 'in parameter:', parameter.id);
-            }
+          }
           }
         }
         

@@ -337,7 +337,7 @@ const useParameterPositions = () => {
   return useQuery({
     queryKey: ['parameter-positions'],
     queryFn: async () => {
-      console.log('📥 Cargando posiciones desde DB...');
+
       const { data, error } = await supabase!
         .from('task_parameter_positions')
         .select('*');
@@ -346,7 +346,7 @@ const useParameterPositions = () => {
         console.error('❌ Error cargando posiciones:', error);
         throw error;
       }
-      console.log('📊 Posiciones cargadas desde DB:', data?.length || 0, 'registros');
+
       return data as TaskParameterPosition[];
     },
   });
@@ -358,7 +358,7 @@ const useSaveParameterPosition = () => {
 
   return useMutation({
     mutationFn: async (position: any) => {
-      console.log('🔄 Intentando guardar en DB:', position);
+
       
       // Si tiene un ID específico (nodo duplicado), actualizar por ID
       if (position.id) {
@@ -377,7 +377,7 @@ const useSaveParameterPosition = () => {
           console.error('❌ Error actualizando posición por ID:', error);
           throw error;
         }
-        console.log('✅ Posición de nodo duplicado actualizada:', data);
+
         return data;
       }
       
@@ -406,7 +406,7 @@ const useSaveParameterPosition = () => {
           console.error('❌ Error actualizando posición:', error);
           throw error;
         }
-        console.log('✅ Posición actualizada exitosamente:', data);
+
         return data;
       } else {
         // Si no existe, crear nuevo registro original
@@ -426,7 +426,7 @@ const useSaveParameterPosition = () => {
           console.error('❌ Error insertando posición:', error);
           throw error;
         }
-        console.log('✅ Posición insertada exitosamente:', data);
+
         return data;
       }
     },
@@ -503,14 +503,14 @@ function AddParameterButton() {
 
   // Debug: mostrar estado de carga de posiciones
   useEffect(() => {
-    console.log('🔄 Estado de posiciones:', { positionsLoading, savedPositions: savedPositions.length });
+
   }, [positionsLoading, savedPositions.length]);
 
   // Botón de test para verificar que el guardado funciona
   const testSavePosition = async () => {
     if (parametersData.length > 0) {
       const firstParam = parametersData[0];
-      console.log('🧪 Test: Guardando posición manual para:', firstParam.parameter.slug);
+
       savePositionMutation.mutate({
         parameter_id: firstParam.parameter.id,
         x: 100,
@@ -537,7 +537,7 @@ function AddParameterButton() {
 
   // Función para duplicar un nodo (crear visualización adicional)
   const handleDuplicateNode = useCallback(async (parameterId: string) => {
-    console.log('🔄 Duplicando nodo:', parameterId);
+
     const originalParameter = parametersData.find(item => item.parameter.id === parameterId);
     if (!originalParameter) return;
 
@@ -616,7 +616,7 @@ function AddParameterButton() {
       };
 
       setNodes(prev => [...prev, duplicateNode]);
-      console.log('✅ Nodo duplicado creado con ID:', duplicateId);
+
       toast({ title: "Parámetro duplicado", description: "Nueva visualización creada exitosamente" });
       
     } catch (error) {

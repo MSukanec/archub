@@ -399,20 +399,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       e.preventDefault();
       e.stopPropagation();
     }
-    console.log('🔴 handleCloseMenu called');
-    console.log('🔴 Before close - isOpen:', isOpen);
     closeMenu();
-    console.log('🔴 store closeMenu called');
-    
-    // Verificar el estado después del cierre
-    setTimeout(() => {
-      console.log('🔴 After 100ms - checking if menu closed');
-      const currentState = useMobileMenuStore.getState();
-      console.log('🔴 Current store state:', currentState.isOpen);
-    }, 100);
-    
     onClose();
-    console.log('🔴 onClose prop called');
   };
 
   const menuContent = (

@@ -59,12 +59,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
     return acc;
   }, {} as Record<string, KanbanCard[]>);
 
-  console.log('KanbanBox render:', {
-    listsCount: lists.length,
-    cardsCount: cards.length,
-    cardsByList,
-    loading
-  });
+
 
   // Sort cards by completion status first, then by creation date within each list
   Object.keys(cardsByList).forEach(listId => {
@@ -107,7 +102,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
     // Handle list movement - TODO: implement list reordering
     if (type === 'LIST') {
-      console.log('List reordering not implemented yet');
+      // List reordering not implemented yet
     }
   };
 

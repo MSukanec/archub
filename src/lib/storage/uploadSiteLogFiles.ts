@@ -26,8 +26,6 @@ export async function uploadSiteLogFiles(
       const extension = file.name.split('.').pop()
       const filePath = `${crypto.randomUUID()}.${extension}`
 
-      console.log('Subiendo archivo:', filePath, file)
-
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
         .from('site-log-files')

@@ -15,8 +15,6 @@ export function useConstructionMaterials(projectId: string) {
   return useQuery({
     queryKey: ["construction-materials", projectId],
     queryFn: async (): Promise<ConstructionMaterial[]> => {
-      console.log("Fetching construction materials for project:", projectId);
-      
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
@@ -39,11 +37,8 @@ export function useConstructionMaterials(projectId: string) {
       }
 
       if (!constructionTasksData || constructionTasksData.length === 0) {
-        console.log("No construction tasks found for project:", projectId);
         return [];
       }
-
-      console.log("Construction tasks found:", constructionTasksData.length);
 
       // Extract task IDs from construction tasks
       const taskIds = constructionTasksData.map(ct => ct.task_id);
@@ -72,8 +67,6 @@ export function useConstructionMaterials(projectId: string) {
         console.error("Error fetching task materials:", error);
         throw error;
       }
-
-      console.log("Task materials data received:", data?.length || 0, "materials");
 
       // Group materials by material_id and sum quantities
       const materialMap = new Map<string, ConstructionMaterial>();

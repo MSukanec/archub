@@ -33,8 +33,7 @@ export async function uploadGalleryFiles(
       const extension = file.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${extension}`;
 
-      console.log('Subiendo archivo:', filePath, file);
-      console.log('Upload params:', { projectId, organizationId, createdBy });
+
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage

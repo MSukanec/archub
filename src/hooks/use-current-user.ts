@@ -111,12 +111,10 @@ export function useCurrentUser() {
       const { data: mainData, error: rpcError } = await supabase.rpc('archub_get_user')
       
       if (rpcError) {
-        console.error('Supabase RPC Error:', rpcError)
         throw rpcError
       }
       
       if (!mainData) {
-        console.error('No user data returned from RPC function')
         throw new Error('No user data returned')
       }
 
@@ -140,8 +138,6 @@ export function useCurrentUser() {
         }
       }
 
-      console.log('User data received:', userData)
-      console.log('Discovery data:', discoveryData)
       return userData as UserData
     },
     enabled: !!authUser && !!supabase,

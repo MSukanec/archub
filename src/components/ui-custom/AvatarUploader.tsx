@@ -133,11 +133,7 @@ export function AvatarUploader({
       // Add timestamp to avoid browser caching issues
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-      console.log('Upload completed successfully:', {
-        uploadPath,
-        publicUrl,
-        bucketName
-      });
+
 
       // Call success callback
       onUploadSuccess(publicUrl);
