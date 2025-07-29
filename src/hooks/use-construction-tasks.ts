@@ -364,6 +364,10 @@ export function useCreateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-phase-task'] 
       });
+      // Invalidar cache de vista para modales de movimientos
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-tasks-view', data.project_id] 
+      });
       // Invalidar cache de materiales para que se actualice automáticamente
       queryClient.invalidateQueries({ 
         queryKey: ['construction-materials', data.project_id] 
@@ -469,6 +473,10 @@ export function useUpdateConstructionTask() {
       });
       queryClient.invalidateQueries({ 
         queryKey: ['construction-phase-task'] 
+      });
+      // Invalidar cache de vista para modales de movimientos
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-tasks-view', data.project_id] 
       });
       // Invalidar cache de materiales para que se actualice automáticamente
       queryClient.invalidateQueries({ 
