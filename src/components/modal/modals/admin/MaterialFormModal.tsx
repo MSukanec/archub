@@ -127,6 +127,11 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             currency_id: values.currency_id || undefined,
           })
           
+          console.log('🔍 userData:', userData)
+          console.log('🔍 newMaterial:', newMaterial)
+          console.log('🔍 values.currency_id:', values.currency_id)
+          console.log('🔍 values.price:', values.price)
+          
           const priceData = {
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
