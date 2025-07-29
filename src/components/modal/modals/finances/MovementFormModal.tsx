@@ -286,31 +286,37 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Cargar tarea existente en el estado cuando estamos editando
   React.useEffect(() => {
-    if (existingMovementTasks && existingMovementTasks.length > 0) {
+    if (existingMovementTasks && existingMovementTasks.length > 0 && rawConstructionTasks && rawConstructionTasks.length > 0) {
       const firstTask = existingMovementTasks[0]
       console.log('Loading existing movement task:', {
-        task_id: firstTask?.task_id,
-        construction_task_id: firstTask?.construction_task_id,
-        availableOptions: constructionTaskOptions.map(opt => opt.value)
+        movement_task_id: firstTask?.task_id,
+        movement_task_object: firstTask,
+        availableConstructionTasks: rawConstructionTasks.map(ct => ({
+          task_instance_id: ct.task_instance_id,
+          task_id: ct.task_id,
+          task_code: ct.task_code
+        }))
       })
       
-      // Buscar en las opciones disponibles por task_id (el ID de la tarea paramétrica)
-      const matchingOption = constructionTaskOptions.find(option => {
-        // Las opciones usan task_instance_id como value
-        // Necesitamos encontrar la tarea que corresponde al task_id del movement_task
-        return rawConstructionTasks?.find(ct => 
-          ct.task_instance_id === option.value && ct.task_id === firstTask?.task_id
-        )
-      })
+      // The movement_tasks.task_id should match construction_tasks.task_instance_id
+      // (the task_id in movement_tasks refers to the instance ID of the construction task)
+      const matchingTask = rawConstructionTasks.find(ct => 
+        ct.task_instance_id === firstTask?.task_id
+      )
       
-      if (matchingOption) {
-        console.log('Found matching task option:', matchingOption)
-        setSelectedTaskId(matchingOption.value)
+      if (matchingTask) {
+        console.log('Found matching construction task:', {
+          matched_task_instance_id: matchingTask.task_instance_id,
+          matched_task_code: matchingTask.task_code,
+          setting_selectedTaskId: matchingTask.task_instance_id
+        })
+        setSelectedTaskId(matchingTask.task_instance_id)
       } else {
-        console.log('No matching task found in available options')
+        console.log('No matching construction task found for movement task ID:', firstTask?.task_id)
+        console.log('Available construction task instance IDs:', rawConstructionTasks.map(ct => ct.task_instance_id))
       }
     }
-  }, [existingMovementTasks, constructionTaskOptions, rawConstructionTasks])
+  }, [existingMovementTasks, rawConstructionTasks])
   
 
 
