@@ -65,11 +65,13 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     }
     
     const term = searchTerm.toLowerCase();
-    const filtered = availableTasks.filter(task => {
-      // Check multiple possible data structure paths
-      const displayName = task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered;
-      const rubroName = task.task?.rubro_name || task.rubro_name || task.task?.category_name;
+    const filtered = availableTasks.filter((task: any) => {
+      // Based on console logs, data structure is: task.task.display_name, task.rubro_name, etc.
+      const displayName = task.task?.display_name || task.display_name;
+      const rubroName = task.task?.rubro_name || task.rubro_name;
       const taskCode = task.task_code || task.task?.code;
+      
+      console.log('TaskSelectionTable - checking task:', { displayName, rubroName, taskCode });
       
       return displayName?.toLowerCase().includes(term) ||
              rubroName?.toLowerCase().includes(term) ||
@@ -82,11 +84,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
 
   // Agrupar tareas por rubro
   const tasksByRubro = useMemo(() => {
-    const groups: { [key: string]: typeof filteredTasks } = {};
+    const groups: { [key: string]: any[] } = {};
     
-    filteredTasks.forEach(task => {
-      // Check multiple possible data structure paths for rubro name
-      const rubroName = task.task?.rubro_name || task.rubro_name || task.task?.category_name || task.category_name || 'Sin Rubro';
+    filteredTasks.forEach((task: any) => {
+      // Based on console logs: task.task.rubro_name or task.rubro_name
+      const rubroName = task.task?.rubro_name || task.rubro_name || 'Sin Rubro';
       if (!groups[rubroName]) {
         groups[rubroName] = [];
       }
@@ -100,10 +102,10 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
   const handleTaskToggle = (task: any, isChecked: boolean) => {
     const selectedTask: SelectedTask = {
       task_instance_id: task.task_instance_id,
-      display_name: task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered || task.task_code,
-      rubro_name: task.task?.rubro_name || task.rubro_name || task.task?.category_name || task.category_name,
+      display_name: task.task?.display_name || task.display_name || task.task_code,
+      rubro_name: task.task?.rubro_name || task.rubro_name || null,
       quantity: task.quantity || 0,
-      unit_symbol: task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name,
+      unit_symbol: task.task?.unit_symbol || task.unit_symbol || null,
       task_code: task.task_code || task.task?.code
     };
 
@@ -114,15 +116,15 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     }
   };
 
-  const handleSelectAllRubro = (rubroTasks: typeof filteredTasks, isChecked: boolean) => {
+  const handleSelectAllRubro = (rubroTasks: any[], isChecked: boolean) => {
     if (isChecked) {
-      const newTasks = rubroTasks.map(task => ({
+      const newTasks = rubroTasks.map((task: any) => ({
         task_instance_id: task.task_instance_id,
-        display_name: task.task?.display_name || task.task_code,
-        rubro_name: task.task?.rubro_name,
+        display_name: task.task?.display_name || task.display_name || task.task_code,
+        rubro_name: task.task?.rubro_name || task.rubro_name || null,
         quantity: task.quantity || 0,
-        unit_symbol: task.task?.unit_symbol,
-        task_code: task.task_code
+        unit_symbol: task.task?.unit_symbol || task.unit_symbol || null,
+        task_code: task.task_code || task.task?.code
       }));
       
       const currentIds = selectedTasks.map(t => t.task_instance_id);
@@ -130,7 +132,7 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       
       onTasksChange([...selectedTasks, ...filteredNewTasks]);
     } else {
-      const rubroTaskIds = rubroTasks.map(t => t.task_instance_id);
+      const rubroTaskIds = rubroTasks.map((t: any) => t.task_instance_id);
       onTasksChange(selectedTasks.filter(t => !rubroTaskIds.includes(t.task_instance_id)));
     }
   };
@@ -139,12 +141,12 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     return selectedTasks.some(t => t.task_instance_id === taskId);
   };
 
-  const isRubroFullySelected = (rubroTasks: typeof filteredTasks) => {
-    return rubroTasks.length > 0 && rubroTasks.every(task => isTaskSelected(task.task_instance_id));
+  const isRubroFullySelected = (rubroTasks: any[]) => {
+    return rubroTasks.length > 0 && rubroTasks.every((task: any) => isTaskSelected(task.task_instance_id));
   };
 
-  const isRubroPartiallySelected = (rubroTasks: typeof filteredTasks) => {
-    return rubroTasks.some(task => isTaskSelected(task.task_instance_id)) && !isRubroFullySelected(rubroTasks);
+  const isRubroPartiallySelected = (rubroTasks: any[]) => {
+    return rubroTasks.some((task: any) => isTaskSelected(task.task_instance_id)) && !isRubroFullySelected(rubroTasks);
   };
 
   if (isLoading) {
@@ -213,7 +215,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={isRubroFullySelected(rubroTasks)}
-                    indeterminate={isRubroPartiallySelected(rubroTasks) || undefined}
                     onCheckedChange={(checked) => handleSelectAllRubro(rubroTasks, !!checked)}
                   />
                   <Package className="w-4 h-4 text-muted-foreground" />
@@ -236,11 +237,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                       />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm text-foreground line-clamp-1">
-                          {task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered || task.task_code}
+                          {task.task?.display_name || task.display_name || task.task_code}
                         </div>
                       </div>
                       <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
-                        {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || ''}
+                        {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || ''}
                       </div>
                     </div>
                   ))}
@@ -266,14 +267,14 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
                   <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto] gap-3">
                     <div>
                       <div className="text-sm text-foreground line-clamp-1">
-                        {task.task?.display_name || task.display_name || task.task?.name_rendered || task.name_rendered || task.task_code}
+                        {task.task?.display_name || task.display_name || task.task_code}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {task.task?.rubro_name || task.rubro_name || task.task?.category_name || task.category_name || 'Sin Rubro'}
+                        {task.task?.rubro_name || task.rubro_name || 'Sin Rubro'}
                       </div>
                     </div>
                     <div className="text-sm font-medium text-muted-foreground text-right">
-                      {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || task.task?.unit_name || ''}
+                      {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || ''}
                     </div>
                   </div>
                 </div>
