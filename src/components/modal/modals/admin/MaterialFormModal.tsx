@@ -47,11 +47,18 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const createMutation = useCreateMaterial()
   const updateMutation = useUpdateMaterial()
   const createPriceMutation = useCreateMaterialPrice()
+  const updatePriceMutation = useUpdateMaterialPrice()
   const { data: userData } = useCurrentUser()
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
   const { data: currencies = [] } = useCurrencies()
   const { setPanel } = useModalPanelStore()
+  
+  // Hook para cargar precio del material cuando se está editando
+  const { data: materialPrice } = useMaterialPrice(
+    editingMaterial?.id || '',
+    userData?.organization?.id || ''
+  )
 
   // Force edit mode when modal opens
   useEffect(() => {
@@ -77,8 +84,8 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         name: editingMaterial.name,
         category_id: editingMaterial.category_id,
         unit_id: editingMaterial.unit_id,
-        currency_id: '', // Moneda se cargará por separado desde organization_material_prices
-        price: '', // Precio se cargará por separado desde organization_material_prices
+        currency_id: materialPrice?.currency_id || '',
+        price: materialPrice?.unit_price?.toString() || '',
       })
     } else {
       form.reset({
@@ -89,7 +96,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         price: '',
       })
     }
-  }, [editingMaterial, isEditing, form])
+  }, [editingMaterial, isEditing, materialPrice, form])
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
@@ -98,7 +105,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
     try {
       if (isEditing && editingMaterial) {
-        // Solo actualizar material (no precio por ahora en edición)
+        // Actualizar material
         await updateMutation.mutateAsync({
           id: editingMaterial.id,
           data: {
@@ -107,6 +114,27 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             category_id: values.category_id,
           },
         })
+        
+        // Actualizar o crear precio si se especificó
+        if (values.price && values.price.trim() !== '' && userData?.organization?.id) {
+          const priceData = {
+            organization_id: userData.organization.id,
+            material_id: editingMaterial.id,
+            unit_price: parseFloat(values.price),
+            currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
+          }
+          
+          if (materialPrice?.id) {
+            // Actualizar precio existente
+            await updatePriceMutation.mutateAsync({
+              id: materialPrice.id,
+              data: priceData
+            })
+          } else {
+            // Crear nuevo precio
+            await createPriceMutation.mutateAsync(priceData)
+          }
+        }
       } else {
         // Crear material
         const materialData: NewMaterialData = {

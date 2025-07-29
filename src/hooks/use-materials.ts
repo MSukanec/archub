@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
-import { InsertOrganizationMaterialPrice } from '@/shared/schema'
+import { InsertOrganizationMaterialPrice } from '../../shared/schema'
 
 export interface Material {
   id: string
