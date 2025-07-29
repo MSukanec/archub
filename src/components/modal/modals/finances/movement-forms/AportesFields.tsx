@@ -5,8 +5,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { DollarSign, Users } from "lucide-react"
+
+import { Users } from "lucide-react"
 import UserSelector from "@/components/ui-custom/UserSelector"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Button } from "@/components/ui/button"
@@ -103,19 +103,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
 
   return (
     <>
-      {/* Separador y título de sección de aportes */}
-      <div className="col-span-2">
-        <Separator className="mb-4" />
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-            <DollarSign className="w-4 h-4 text-accent" />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-foreground">Información del Aporte de Terceros</h3>
-            <p className="text-xs text-muted-foreground">Datos específicos del aporte de cliente</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Selector de Cliente (siempre para aportes de terceros) */}
       <FormField

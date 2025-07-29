@@ -4,8 +4,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { DollarSign, Package } from "lucide-react"
+
+import { Package } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButton"
 
@@ -118,19 +118,7 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts,
 
   return (
     <>
-      {/* Separador y título de sección de materiales */}
-      <div className="col-span-2">
-        <Separator className="mb-4" />
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-            <DollarSign className="w-4 h-4 text-accent" />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-foreground">Información Financiera</h3>
-            <p className="text-xs text-muted-foreground">Detalles específicos del movimiento financiero</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Fila: Moneda | Billetera */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
