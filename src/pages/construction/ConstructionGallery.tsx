@@ -13,18 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import * as AlertDialogPrimitive from '@/components/ui/alert-dialog';
 
-const {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} = AlertDialogPrimitive;
 import { useToast } from '@/hooks/use-toast';
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -68,6 +57,8 @@ interface GalleryFile {
   created_at: string;
   site_log_id?: string;
   description?: string;
+  project_id?: string;
+  project_name?: string;
 }
 
 export default function ConstructionGallery() {
@@ -83,7 +74,6 @@ export default function ConstructionGallery() {
   
   // Modal states  
   const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
-  const [fileToDelete, setFileToDelete] = useState<GalleryFile | null>(null);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -104,14 +94,13 @@ export default function ConstructionGallery() {
     queryKey: ['galleryFiles', projectId, userData?.preferences?.last_organization_id],
     queryFn: async () => {
       console.log('Fetching gallery files for project:', projectId);
-  console.log('Organization ID:', userData?.preferences?.last_organization_id);
+      console.log('Organization ID:', userData?.preferences?.last_organization_id);
       
-      if (!supabase || !projectId || !userData?.preferences?.last_organization_id) {
+      if (!supabase || !userData?.preferences?.last_organization_id) {
         throw new Error('Missing required data');
       }
 
-      // Get files from site_log_files table - both with and without site_log_id
-      const { data, error } = await supabase
+      let query = supabase
         .from('site_log_files')
         .select(`
           id,
@@ -130,11 +119,21 @@ export default function ConstructionGallery() {
             entry_type,
             log_date,
             created_by
+          ),
+          projects (
+            id,
+            name
           )
         `)
-        .eq('project_id', projectId)
-        .eq('organization_id', userData.preferences.last_organization_id)
-        .order('created_at', { ascending: false });
+        .eq('organization_id', userData.preferences.last_organization_id);
+
+      // If no project selected (GENERAL mode), show all projects' images
+      // If project selected, show only that project's images
+      if (projectId) {
+        query = query.eq('project_id', projectId);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching gallery files:', error);
@@ -159,6 +158,8 @@ export default function ConstructionGallery() {
           description: file.description || '',
           entry_type: file.site_logs?.entry_type || 'registro_general',
           created_at: file.created_at,
+          project_id: file.project_id,
+          project_name: file.projects?.name || 'Proyecto sin nombre',
           site_log: file.site_log_id ? {
             id: file.site_log_id,
             log_date: file.site_logs?.log_date || file.created_at,
@@ -172,7 +173,7 @@ export default function ConstructionGallery() {
         };
       }) || [];
     },
-    enabled: !!projectId && !!userData?.preferences?.last_organization_id
+    enabled: !!userData?.preferences?.last_organization_id
   });
 
   // Filter files
@@ -338,14 +339,15 @@ export default function ConstructionGallery() {
   };
 
   const handleDelete = (file: GalleryFile) => {
-    setFileToDelete(file);
-  };
-
-  const confirmDelete = () => {
-    if (fileToDelete) {
-      deleteFileMutation.mutate(fileToDelete.id);
-      setFileToDelete(null);
-    }
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar archivo',
+      description: `¿Estás seguro de que quieres eliminar "${file.file_name}"? Esta acción no se puede deshacer.`,
+      itemName: file.file_name,
+      destructiveActionText: 'Eliminar archivo',
+      onConfirm: () => deleteFileMutation.mutate(file.id),
+      isLoading: deleteFileMutation.isPending
+    });
   };
 
   const downloadFile = (file: GalleryFile) => {
@@ -413,7 +415,7 @@ export default function ConstructionGallery() {
         <div className="space-y-6">
           {/* ActionBar */}
           <ActionBarDesktop
-            title="Galería Multimedia del Proyecto"
+            title={projectId ? "Galería Multimedia del Proyecto" : "Galería Multimedia - Todos los Proyectos"}
             icon={<Images className="w-5 h-5" />}
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}
@@ -529,7 +531,7 @@ export default function ConstructionGallery() {
       <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktop
-          title="Galería Multimedia del Proyecto"
+          title={projectId ? "Galería Multimedia del Proyecto" : "Galería Multimedia - Todos los Proyectos"}
           icon={<Images className="w-5 h-5" />}
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
@@ -661,9 +663,16 @@ export default function ConstructionGallery() {
                   {/* Overlay with info and actions */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-2">
                     <div className="flex justify-between items-start">
-                      <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                        {getEntryTypeLabel(file.entry_type || 'registro_general')}
-                      </span>
+                      <div className="space-y-1">
+                        <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded block">
+                          {getEntryTypeLabel(file.entry_type || 'registro_general')}
+                        </span>
+                        {!projectId && file.project_name && (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded block">
+                            {file.project_name}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex gap-1">
                         <Button
                           size="sm"
@@ -712,30 +721,7 @@ export default function ConstructionGallery() {
         onClose={closeLightbox}
       />
 
-      {/* Delete Confirmation Modal */}
-      {fileToDelete && (
-        <AlertDialog open={!!fileToDelete} onOpenChange={() => setFileToDelete(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Eliminar archivo</AlertDialogTitle>
-              <AlertDialogDescription>
-                ¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setFileToDelete(null)}>
-                Cancelar
-              </AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={confirmDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+
 
 
 
