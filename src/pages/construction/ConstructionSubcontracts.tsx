@@ -18,22 +18,22 @@ export default function ConstructionSubcontracts() {
 
   const features = [
     {
-      icon: Package,
+      icon: <Package className="w-4 h-4" />,
       title: "Gestión de Subcontratos",
       description: "Crea y administra pedidos de subcontrato para diferentes especialidades de la obra."
     },
     {
-      icon: Search,
+      icon: <Search className="w-4 h-4" />,
       title: "Búsqueda Avanzada",
       description: "Encuentra rápidamente subcontratos por especialidad, estado, fecha o contratista."
     },
     {
-      icon: Filter,
+      icon: <Filter className="w-4 h-4" />,
       title: "Filtros Inteligentes",
       description: "Filtra subcontratos por estado, especialidad, prioridad o fechas de ejecución."
     },
     {
-      icon: Plus,
+      icon: <Plus className="w-4 h-4" />,
       title: "Control de Estados",
       description: "Gestiona el ciclo completo desde pedido inicial hasta finalización y facturación."
     }
@@ -50,27 +50,20 @@ export default function ConstructionSubcontracts() {
         {/* ActionBar */}
         <ActionBarDesktop
           title="Gestión de Subcontratos"
-          icon={Package}
+          icon={<Package className="w-6 h-6" />}
           features={features}
-          searchQuery={searchQuery}
+          searchValue={searchQuery}
           onSearchChange={setSearchQuery}
           primaryActionLabel="Crear Pedido de Subcontrato"
           onPrimaryActionClick={handleCreateSubcontract}
           showProjectSelector={true}
         />
 
-        {/* Mobile FeatureIntroduction - solo se muestra en móvil */}
-        <div className="md:hidden">
-          <FeatureIntroduction
-            title="Gestión de Subcontratos"
-            subtitle="Administra los trabajos subcontratados de tu obra"
-            features={features}
-          />
-        </div>
+
 
         {/* EmptyState - se mostrará hasta que se implemente la funcionalidad */}
         <EmptyState
-          icon={Package}
+          icon={<Package className="w-12 h-12 text-muted-foreground" />}
           title="Aún no tienes subcontratos creados"
           description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
         />
