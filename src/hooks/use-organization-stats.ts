@@ -50,9 +50,8 @@ export function useOrganizationStats() {
 
       // Count generated tasks
       const { count: tasksCount } = await supabase
-        .from('task_generated')
+        .from('task_parametric')
         .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId)
 
       // Sum financial movements in last 30 days
       const { data: movements } = await supabase
@@ -111,9 +110,8 @@ export function useOrganizationActivity() {
 
         // Count tasks created this day
         const { count: tareasCount } = await supabase
-          .from('task_generated')
+          .from('task_parametric')
           .select('*', { count: 'exact', head: true })
-          .eq('organization_id', organizationId)
           .gte('created_at', date.toISOString())
           .lt('created_at', nextDay.toISOString())
 
