@@ -1,9 +1,10 @@
-import { Layout } from '@/components/layout/desktop/Layout'
+import React, { useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Building } from 'lucide-react'
+import { Layout } from '@/components/layout/desktop/Layout'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { useEffect } from 'react'
 
 export default function ConstructionDashboard() {
   const { setSidebarContext } = useNavigationStore()
@@ -11,51 +12,59 @@ export default function ConstructionDashboard() {
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
-  }, [])
+  }, [setSidebarContext])
+
+  // ActionBar features
+  const features = [
+    {
+      icon: <Building className="h-4 w-4" />,
+      title: "Dashboard Integral",
+      description: "Panel de control con métricas principales del estado de construcción del proyecto."
+    }
+  ]
 
   return (
-    <Layout>
+    <Layout wide>
       <div className="space-y-6">
-        {/* FeatureIntroduction - Mobile Only */}
-        <FeatureIntroduction
-          title="Resumen de Construcción"
-          icon={<Building className="w-5 h-5" />}
-          className="md:hidden"
-          features={[
-            {
-              icon: <Building className="w-5 h-5" />,
-              title: "Dashboard Integral",
-              description: "Panel de control con métricas principales del estado de construcción del proyecto."
-            }
-          ]}
-        />
-
-        {/* Action Bar Desktop */}
+        {/* ActionBar */}
         <ActionBarDesktop
           title="Resumen de Construcción"
-          icon={<Building className="w-6 h-6" />}
-          features={[
-            {
-              icon: <Building className="w-4 h-4" />,
-              title: "Dashboard Integral",
-              description: "Panel de control con métricas principales del estado de construcción del proyecto."
-            }
-          ]}
+          icon={<Building className="h-5 w-5" />}
+          features={features}
         />
 
-        {/* Mensaje de Próximamente */}
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Building className="h-16 w-16 text-muted-foreground/50 mb-6" />
-          <h2 className="text-2xl font-semibold text-foreground mb-3">
-            Dashboard en Desarrollo
-          </h2>
-          <p className="text-lg text-muted-foreground mb-2 max-w-md">
-            Estamos trabajando en el panel de resumen de construcción con métricas avanzadas y visualizaciones en tiempo real.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Próximamente disponible con gráficos de progreso, estados de tareas y análisis de productividad.
-          </p>
-        </div>
+        {/* Feature Introduction - Mobile only */}
+        <FeatureIntroduction
+          title="Resumen de Construcción"
+          icon={<Building className="h-6 w-6" />}
+          features={features}
+          className="md:hidden"
+        />
+
+        {/* Coming Soon Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-8"
+        >
+          <div 
+            className="rounded-lg p-8 text-center border"
+            style={{ 
+              backgroundColor: 'var(--card-bg)', 
+              borderColor: 'var(--card-border)',
+              color: 'var(--card-text)'
+            }}
+          >
+            <div className="max-w-md mx-auto">
+              <h3 className="text-lg font-semibold mb-2">Próximamente</h3>
+              <p className="text-sm text-muted-foreground">
+                Estamos trabajando en nuevas funcionalidades para el dashboard de construcción. 
+                Próximamente tendrás acceso a análisis avanzados, reportes detallados y herramientas de gestión adicionales.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </Layout>
   )
