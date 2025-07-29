@@ -248,7 +248,6 @@ export const ParametricTaskBuilder = forwardRef<
     if (initialParameters && typeof initialParameters === 'string' && parameters.length > 0 && allOptions.length > 0 && selections.length === 0) {
       try {
         const parsedParams = JSON.parse(initialParameters);
-
         
         // Convert parsedParams to ParameterSelection format
         const initialSelections: ParameterSelection[] = [];
@@ -312,7 +311,6 @@ export const ParametricTaskBuilder = forwardRef<
               optionLabel: option.label
             });
             initialAvailableParams.push(parameter.id);
-          }
           }
         }
         
