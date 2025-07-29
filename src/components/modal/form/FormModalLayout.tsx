@@ -20,6 +20,8 @@ interface FormModalLayoutProps {
   isEditing?: boolean;
   // Función para manejar el submit con ENTER
   onSubmit?: () => void;
+  // Prop para controlar el ancho del modal (similar al Layout)
+  wide?: boolean;
 }
 
 export function FormModalLayout({
@@ -34,6 +36,7 @@ export function FormModalLayout({
   stepContent,
   isEditing = false,
   onSubmit,
+  wide = false,
 }: FormModalLayoutProps) {
   const { currentPanel, setPanel } = useModalPanelStore();
 
@@ -106,7 +109,10 @@ export function FormModalLayout({
         className={cn(
           "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl",
           "w-full h-full rounded-none", // Mobile: full viewport
-          "md:w-auto md:h-auto md:min-w-[600px] md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // Desktop: centered, width controlled by className prop
+          // Desktop width control based on wide prop
+          wide 
+            ? "md:w-auto md:h-auto md:min-w-[900px] md:max-w-[1200px] md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12" // WIDE: 900px min, 1200px max
+            : "md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // DEFAULT: fixed 600px
           "flex flex-col overflow-auto",
           className,
         )}

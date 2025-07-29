@@ -97,6 +97,7 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
   return (
     <FormModalLayout
       columns={1}
+      wide={true}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
