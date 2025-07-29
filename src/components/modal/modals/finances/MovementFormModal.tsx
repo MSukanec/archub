@@ -35,6 +35,7 @@ import { useProjectClients } from '@/hooks/use-project-clients'
 import { useProjects } from '@/hooks/use-projects'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
+import DatePicker from '@/components/ui-custom/DatePicker'
 import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
 import { useConstructionTasks } from '@/hooks/use-construction-tasks'
 import { TaskMultiSelector } from '@/components/ui-custom/TaskMultiSelector'
@@ -2289,21 +2290,22 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Fecha *
           </label>
-          <Input
-            type="date"
-            value={form.watch('movement_date') ? form.watch('movement_date').toISOString().split('T')[0] : ''}
-            onChange={(e) => {
-              const localDate = new Date(e.target.value + 'T00:00:00');
-              // Actualizar todos los formularios
-              form.setValue('movement_date', localDate)
-              conversionForm.setValue('movement_date', localDate)
-              transferForm.setValue('movement_date', localDate)
-              aportesForm.setValue('movement_date', localDate)
-              aportesPropriosForm.setValue('movement_date', localDate)
-              retirosPropriosForm.setValue('movement_date', localDate)
-              materialesForm.setValue('movement_date', localDate)
-              manoDeObraForm.setValue('movement_date', localDate)
+          <DatePicker
+            value={form.watch('movement_date')}
+            onChange={(date) => {
+              if (date) {
+                // Actualizar todos los formularios
+                form.setValue('movement_date', date)
+                conversionForm.setValue('movement_date', date)
+                transferForm.setValue('movement_date', date)
+                aportesForm.setValue('movement_date', date)
+                aportesPropriosForm.setValue('movement_date', date)
+                retirosPropriosForm.setValue('movement_date', date)
+                materialesForm.setValue('movement_date', date)
+                manoDeObraForm.setValue('movement_date', date)
+              }
             }}
+            placeholder="Seleccionar fecha"
           />
         </div>
       </div>

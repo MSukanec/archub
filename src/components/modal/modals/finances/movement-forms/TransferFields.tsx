@@ -1,10 +1,10 @@
 import { UseFormReturn } from 'react-hook-form'
-import { ArrowLeftRight } from 'lucide-react'
+
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+
 import UserSelector from '@/components/ui-custom/UserSelector'
 
 // Tipo importado del componente principal
@@ -30,19 +30,6 @@ interface Props {
 export function TransferFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
     <div className="space-y-4">
-        {/* Separador y título de sección de transferencia */}
-        <div className="col-span-2">
-          <Separator className="mb-4" />
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <ArrowLeftRight className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Información de la Transferencia</h3>
-              <p className="text-xs text-muted-foreground">Datos específicos del movimiento entre billeteras</p>
-            </div>
-          </div>
-        </div>
 
         {/* Moneda */}
         <FormField

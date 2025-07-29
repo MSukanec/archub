@@ -1,10 +1,10 @@
 import { UseFormReturn } from 'react-hook-form'
-import { ArrowRightLeft } from 'lucide-react'
+
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+
 import UserSelector from '@/components/ui-custom/UserSelector'
 
 // Definir el tipo para el formulario de conversión basado en el schema del archivo principal
@@ -34,19 +34,6 @@ interface Props {
 export function ConversionFields({ form, currencies, wallets, members, concepts, movement }: Props) {
   return (
     <div className="space-y-4">
-        {/* Separador y título de sección de conversión */}
-        <div className="col-span-2">
-          <Separator className="mb-4" />
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <ArrowRightLeft className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Información de la Conversión</h3>
-              <p className="text-xs text-muted-foreground">Detalles específicos del cambio de moneda</p>
-            </div>
-          </div>
-        </div>
 
         {/* Sección ORIGEN */}
         <div className="space-y-4">

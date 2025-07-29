@@ -118,10 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 29, 2025. FORM SIMPLIFICATION COMPLETED: Successfully removed all decorative elements (separators, icons, generic titles) from all movement forms while preserving specific section titles - COMPLETED
+- July 29, 2025. FORM SIMPLIFICATION AND DATEPICKER UPDATE COMPLETED: Successfully removed all decorative elements from movement forms and implemented custom DatePicker component - COMPLETED
+  • DECORATIVE SECTIONS ELIMINATED: Removed "Información de la Conversión" and "Información de la Transferencia" sections from ConversionFields and TransferFields components
   • GENERIC SECTIONS REMOVED: Eliminated all "Información Financiera" generic sections with icons and descriptions from MaterialesFields, ManoDeObraFields, and MovementFormModal
   • APORTES SECTION CLEANED: Removed "Información del Aporte de Terceros" decorative section from AportesFields while preserving the functional client selector
-  • IMPORT CLEANUP: Removed unused imports (DollarSign, Separator) from form components that no longer use decorative elements
+  • IMPORT CLEANUP: Removed unused imports (DollarSign, Separator, ArrowRightLeft, ArrowLeftRight) from form components that no longer use decorative elements
+  • DATEPICKER INTEGRATION: Updated movement_date field to use src/components/ui-custom/DatePicker.tsx instead of basic HTML date input
   • SPECIFIC TITLES PRESERVED: Maintained specific section titles like "Datos de Origen (Egreso)" and "Datos de Destino (Ingreso)" as requested
   • FIELD-FOCUSED INTERFACE: All forms now display only essential fields without visual clutter or unnecessary descriptive elements
 - July 29, 2025. PROJECT CREATION MODAL DEFAULT COLOR AND AUTO-ACTIVATION COMPLETED: Successfully configured project creation modal to default to green accent color and automatically set new projects as active - COMPLETED
