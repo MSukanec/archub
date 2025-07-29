@@ -17,6 +17,8 @@ export interface NewMaterialData {
   name: string
   unit_id: string
   category_id: string
+  organization_id?: string
+  is_system?: boolean
 }
 
 export function useMaterials() {
@@ -49,14 +51,22 @@ export function useMaterials() {
 
 export function useCreateMaterial() {
   const queryClient = useQueryClient()
+  const { data: userData } = useCurrentUser()
 
   return useMutation({
     mutationFn: async (data: NewMaterialData) => {
       if (!supabase) throw new Error('Supabase client not available')
 
+      // Prepare material data with organization context
+      const materialData = {
+        ...data,
+        organization_id: userData?.organization?.id || null,
+        is_system: false // Always false for organization-created materials
+      }
+
       const { data: result, error } = await supabase
         .from('materials')
-        .insert([data])
+        .insert([materialData])
         .select(`
           *,
           unit:units(name),

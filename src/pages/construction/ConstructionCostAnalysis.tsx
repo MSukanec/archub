@@ -252,8 +252,8 @@ export default function ConstructionCostAnalysis() {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           showProjectSelector={false}
-          primaryActionLabel="Crear Material"
-          onPrimaryActionClick={() => openModal('material-form', {})}
+          primaryActionLabel={activeTab === 'materiales' ? "Crear Material" : undefined}
+          onPrimaryActionClick={activeTab === 'materiales' ? () => openModal('material-form', {}) : undefined}
           customGhostButtons={[
             <div key="data-type-selector" className="flex items-center">
               <Selector

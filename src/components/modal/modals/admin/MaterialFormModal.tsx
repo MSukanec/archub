@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
+import { HelpPopover } from '@/components/ui-custom/HelpPopover'
 
 import { Package } from 'lucide-react'
 
@@ -153,11 +154,17 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           name="unit_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Unidad de Medida *</FormLabel>
+              <div className="flex items-center gap-2">
+                <FormLabel>Unidad de Cómputo *</FormLabel>
+                <HelpPopover
+                  title="¿Qué es la Unidad de Cómputo?"
+                  content="Esta no es la unidad de venta del material, sino la unidad con la que se calculan las cantidades en el proyecto. Por ejemplo: la cal se computa por kilogramos (KG) para los cálculos de obra, pero se vende por bolsas de 25kg. El cemento se computa por kilogramos pero se vende por bolsas de 50kg. Esta unidad te ayuda a hacer cálculos precisos de materiales."
+                />
+              </div>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar unidad" />
+                    <SelectValue placeholder="Seleccionar unidad de cómputo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
