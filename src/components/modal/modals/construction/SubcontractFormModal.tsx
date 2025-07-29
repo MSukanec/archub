@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
@@ -154,14 +155,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const editPanel = (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="title" className="text-sm font-medium">
+        <Label htmlFor="title" className="text-xs font-medium">
           Título *
         </Label>
         <Input
           id="title"
           placeholder="Ej: Trabajos de albañilería"
           {...form.register('title')}
-          className="h-10"
         />
         {form.formState.errors.title && (
           <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
@@ -170,14 +170,14 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="contact_id" className="text-sm font-medium">
+          <Label htmlFor="contact_id" className="text-xs font-medium">
             Proveedor *
           </Label>
           <Select
             value={form.watch('contact_id') || ''}
             onValueChange={(value) => form.setValue('contact_id', value)}
           >
-            <SelectTrigger className="h-10">
+            <SelectTrigger>
               <SelectValue placeholder="Seleccionar proveedor..." />
             </SelectTrigger>
             <SelectContent>
@@ -194,14 +194,14 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="status" className="text-sm font-medium">
+          <Label htmlFor="status" className="text-xs font-medium">
             Estado *
           </Label>
           <Select
             value={form.watch('status') || 'pendiente'}
             onValueChange={(value) => form.setValue('status', value)}
           >
-            <SelectTrigger className="h-10">
+            <SelectTrigger>
               <SelectValue placeholder="Seleccionar estado..." />
             </SelectTrigger>
             <SelectContent>
@@ -219,7 +219,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="amount_total" className="text-sm font-medium">
+        <Label htmlFor="amount_total" className="text-xs font-medium">
           Monto Total
         </Label>
         <Input
@@ -228,7 +228,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           step="0.01"
           placeholder="0"
           {...form.register('amount_total', { valueAsNumber: true })}
-          className="h-10"
         />
         {form.formState.errors.amount_total && (
           <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
@@ -236,7 +235,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes" className="text-sm font-medium">
+        <Label htmlFor="notes" className="text-xs font-medium">
           Notas
         </Label>
         <Textarea
