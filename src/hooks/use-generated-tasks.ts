@@ -161,6 +161,7 @@ export function useCreateGeneratedTask() {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
       queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
@@ -207,6 +208,7 @@ export function useDeleteGeneratedTask() {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
       queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
@@ -419,6 +421,7 @@ export function useUpdateGeneratedTask() {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
       queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
