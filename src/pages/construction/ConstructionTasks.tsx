@@ -369,7 +369,7 @@ export default function ConstructionTasks() {
 
   return (
     <Layout headerProps={{ title: "Listado de Tareas" }} wide={true}>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* FeatureIntroduction - Mobile Only */}
         <FeatureIntroduction
           title="Listado de Tareas"

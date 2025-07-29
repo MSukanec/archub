@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building, FileText, Users, Package, Calculator, Clock } from 'lucide-react'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { Building } from 'lucide-react'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
 
@@ -13,199 +13,49 @@ export default function ConstructionDashboard() {
     setSidebarContext('construction')
   }, [])
 
-  const headerProps = {
-    title: "Resumen de Construcción",
-    showSearch: false,
-    showFilters: false,
-  }
-
   return (
-    <Layout headerProps={headerProps}>
+    <Layout>
       <div className="space-y-6">
-        {/* Métricas Principales - Desktop */}
-        <div className="hidden md:grid grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Estado</CardTitle>
-              <Building className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Planificación</div>
-              <p className="text-xs text-muted-foreground">
-                fase actual
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Progreso</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0%</div>
-              <p className="text-xs text-muted-foreground">
-                avance general
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Equipos</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                trabajadores activos
-              </p>
-            </CardContent>
-          </Card>
+        {/* FeatureIntroduction - Mobile Only */}
+        <FeatureIntroduction
+          title="Resumen de Construcción"
+          icon={<Building className="w-5 h-5" />}
+          className="md:hidden"
+          features={[
+            {
+              icon: <Building className="w-5 h-5" />,
+              title: "Dashboard Integral",
+              description: "Panel de control con métricas principales del estado de construcción del proyecto."
+            }
+          ]}
+        />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Actividad</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                entradas de bitácora
-              </p>
-            </CardContent>
-          </Card>
+        {/* Action Bar Desktop */}
+        <ActionBarDesktop
+          title="Resumen de Construcción"
+          icon={<Building className="w-6 h-6" />}
+          features={[
+            {
+              icon: <Building className="w-4 h-4" />,
+              title: "Dashboard Integral",
+              description: "Panel de control con métricas principales del estado de construcción del proyecto."
+            }
+          ]}
+        />
+
+        {/* Mensaje de Próximamente */}
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Building className="h-16 w-16 text-muted-foreground/50 mb-6" />
+          <h2 className="text-2xl font-semibold text-foreground mb-3">
+            Dashboard en Desarrollo
+          </h2>
+          <p className="text-lg text-muted-foreground mb-2 max-w-md">
+            Estamos trabajando en el panel de resumen de construcción con métricas avanzadas y visualizaciones en tiempo real.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Próximamente disponible con gráficos de progreso, estados de tareas y análisis de productividad.
+          </p>
         </div>
-
-        {/* Métricas Principales - Mobile (Compactas) */}
-        <div className="md:hidden grid grid-cols-2 gap-3">
-          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <Building className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-foreground">
-                Planificación
-              </div>
-              <div className="text-xs text-muted-foreground font-medium leading-tight">
-                Estado
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-foreground">
-                0%
-              </div>
-              <div className="text-xs text-muted-foreground font-medium leading-tight">
-                Progreso
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-foreground">
-                0
-              </div>
-              <div className="text-xs text-muted-foreground font-medium leading-tight">
-                Equipos
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[var(--card-bg)] rounded-xl p-3 border border-[var(--card-border)] shadow-sm min-h-[80px]">
-            <div className="flex items-center justify-between mb-1">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="text-xl font-bold text-foreground">
-                0
-              </div>
-              <div className="text-xs text-muted-foreground font-medium leading-tight">
-                Actividad
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Estado de Construcción */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Actividad Reciente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EmptyState 
-                title="Sin actividad registrada"
-                description="Comienza registrando entradas en la bitácora de construcción para ver la actividad aquí."
-
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Presupuestos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EmptyState 
-                title="Sin presupuestos creados"
-                description="Crea presupuestos para organizar y controlar los costos de tu proyecto."
-
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Acciones Rápidas */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <button 
-                onClick={() => window.location.href = '/construction/budgets'}
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <Calculator className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Presupuestos</span>
-              </button>
-              
-              <button 
-                onClick={() => window.location.href = '/construction/materials'}
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <Package className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Materiales</span>
-              </button>
-              
-              <button 
-                onClick={() => window.location.href = '/construction/logs'}
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <FileText className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Bitácora</span>
-              </button>
-              
-              <button 
-                onClick={() => window.location.href = '/construction/personnel'}
-                className="flex flex-col items-center p-4 rounded-md border hover:bg-muted/50 transition-colors"
-              >
-                <Users className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium">Asistencia</span>
-              </button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   )
