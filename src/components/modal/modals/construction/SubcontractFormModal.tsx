@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
+import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 
 import { toast } from "@/hooks/use-toast";
@@ -29,6 +30,7 @@ const subcontractSchema = z.object({
   title: z.string().min(1, "El título es obligatorio"),
   contact_id: z.string().min(1, "Debe seleccionar un proveedor"),
   status: z.string().min(1, "Debe seleccionar un estado"),
+  currency_id: z.string().optional(),
   amount_total: z.number().min(0, "El monto debe ser mayor o igual a 0").optional(),
   notes: z.string().optional(),
 });
@@ -62,6 +64,9 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   
   // Obtener todas las tareas del proyecto
   const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId || '');
+  
+  // Obtener monedas de la organización (igual que en MovementFormModal)
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId || '');
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
@@ -69,6 +74,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       title: '',
       contact_id: '',
       status: 'pendiente',
+      currency_id: '',
       amount_total: 0,
       notes: '',
     }
@@ -119,6 +125,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         organization_id: modalData.organizationId,
         contact_id: data.contact_id,
         title: data.title,
+        currency_id: data.currency_id || null,
         amount_total: data.amount_total || 0,
         notes: data.notes || null,
         status: data.status,
@@ -218,20 +225,43 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="amount_total" className="text-xs font-medium">
-          Monto Total
-        </Label>
-        <Input
-          id="amount_total"
-          type="number"
-          step="0.01"
-          placeholder="0"
-          {...form.register('amount_total', { valueAsNumber: true })}
-        />
-        {form.formState.errors.amount_total && (
-          <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
-        )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="currency_id" className="text-xs font-medium">
+            Moneda
+          </Label>
+          <Select
+            value={form.watch('currency_id') || ''}
+            onValueChange={(value) => form.setValue('currency_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar moneda..." />
+            </SelectTrigger>
+            <SelectContent>
+              {organizationCurrencies.map((orgCurrency: any) => (
+                <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                  {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="amount_total" className="text-xs font-medium">
+            Monto Total
+          </Label>
+          <Input
+            id="amount_total"
+            type="number"
+            step="0.01"
+            placeholder="0"
+            {...form.register('amount_total', { valueAsNumber: true })}
+          />
+          {form.formState.errors.amount_total && (
+            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-1">
