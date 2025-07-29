@@ -134,36 +134,26 @@ function ProjectSelectorComponent() {
     updateProjectMutation.mutate(actualProjectId)
   }
 
-  // Prepare options for Selector
+  // Prepare options for Selector with icons
   const options = [
-    { value: 'general', label: 'General' },
+    { value: 'general', label: 'General', icon: <Building2 className="w-4 h-4" /> },
     ...projects.map(project => ({
       value: project.id,
-      label: project.name
+      label: project.name,
+      icon: <Folder className="w-4 h-4" />
     }))
   ]
 
   const currentValue = selectedProjectId || 'general'
-  const currentProject = projects.find(p => p.id === selectedProjectId)
-  const displayName = selectedProjectId === null ? "General" : currentProject?.name || "General"
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="text-muted-foreground">
-        {selectedProjectId === null ? (
-          <Building2 className="w-4 h-4" />
-        ) : (
-          <Folder className="w-4 h-4" />
-        )}
-      </div>
-      <Selector
-        options={options}
-        value={currentValue}
-        onValueChange={handleProjectSelect}
-        placeholder="Seleccionar proyecto"
-        className="min-w-fit whitespace-nowrap"
-      />
-    </div>
+    <Selector
+      options={options}
+      value={currentValue}
+      onValueChange={handleProjectSelect}
+      placeholder="Seleccionar proyecto"
+      className="min-w-fit whitespace-nowrap"
+    />
   )
 }
 

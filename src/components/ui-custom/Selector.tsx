@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 interface SelectorOption {
   value: string
   label: string
+  icon?: React.ReactNode
 }
 
 interface SelectorProps {
@@ -80,7 +81,14 @@ export function Selector({
           className
         )}
       >
-        <span className="text-left flex-1 whitespace-nowrap">{displayText}</span>
+        <div className="flex items-center gap-2 flex-1">
+          {selectedOption?.icon && (
+            <div className="text-muted-foreground">
+              {selectedOption.icon}
+            </div>
+          )}
+          <span className="text-left whitespace-nowrap">{displayText}</span>
+        </div>
         <ChevronDown className={cn(
           "w-4 h-4 ml-2 shrink-0 transition-transform duration-200",
           open && "rotate-180"
@@ -116,10 +124,15 @@ export function Selector({
                     "w-full text-left px-2 py-2 text-sm font-medium transition-colors",
                     "text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)]",
                     value === option.value && "bg-[var(--button-ghost-hover-bg)]",
-                    "whitespace-nowrap" // Prevenir wrap de texto
+                    "whitespace-nowrap flex items-center gap-2" // Prevenir wrap de texto y flex layout
                   )}
                 >
-                  {option.label}
+                  {option.icon && (
+                    <div className="text-muted-foreground">
+                      {option.icon}
+                    </div>
+                  )}
+                  <span>{option.label}</span>
                 </button>
               ))}
               
