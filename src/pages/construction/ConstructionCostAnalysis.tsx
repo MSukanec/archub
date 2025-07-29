@@ -291,8 +291,16 @@ export default function ConstructionCostAnalysis() {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           showProjectSelector={false}
-          primaryActionLabel={activeTab === 'materiales' ? "Crear Material" : undefined}
-          onPrimaryActionClick={activeTab === 'materiales' ? () => openModal('material-form', {}) : undefined}
+          primaryActionLabel={
+            activeTab === 'materiales' ? "Crear Material" : 
+            activeTab === 'tareas' ? "Crear Tarea Personalizada" : 
+            undefined
+          }
+          onPrimaryActionClick={
+            activeTab === 'materiales' ? () => openModal('material-form', {}) :
+            activeTab === 'tareas' ? () => openModal('parametric-task', {}) :
+            undefined
+          }
           customGhostButtons={[
             <div key="data-type-selector" className="flex items-center">
               <Selector
