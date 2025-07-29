@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useCreateMaterial, useUpdateMaterial, useCreateMaterialPrice, Material, NewMaterialData } from '@/hooks/use-materials'
+import { useCreateMaterial, useUpdateMaterial, useCreateMaterialPrice, useMaterialPrice, useUpdateMaterialPrice, Material, NewMaterialData } from '@/hooks/use-materials'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -126,7 +126,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           console.log('💰 Creating price with data:', {
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
-            price: parseFloat(values.price),
+            unit_price: parseFloat(values.price),
             currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
           })
           
@@ -138,7 +138,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           const priceData = {
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
-            price: parseFloat(values.price),
+            unit_price: parseFloat(values.price),
             currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
           }
           

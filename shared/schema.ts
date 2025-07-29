@@ -250,7 +250,7 @@ export const organization_material_prices = pgTable("organization_material_price
   id: uuid("id").primaryKey().defaultRandom(),
   organization_id: uuid("organization_id").notNull(),
   material_id: uuid("material_id").notNull(),
-  price: real("price").notNull(),
+  unit_price: real("unit_price").notNull(),
   currency_id: uuid("currency_id"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),

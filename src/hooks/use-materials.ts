@@ -219,3 +219,68 @@ export function useCreateMaterialPrice() {
     },
   })
 }
+
+// Hook para obtener precio de un material específico
+export function useMaterialPrice(materialId: string, organizationId: string) {
+  return useQuery({
+    queryKey: ['material-price', materialId, organizationId],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not available')
+
+      const { data, error } = await supabase
+        .from('organization_material_prices')
+        .select(`
+          *,
+          currency:currencies(*)
+        `)
+        .eq('material_id', materialId)
+        .eq('organization_id', organizationId)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        throw error
+      }
+
+      return data
+    },
+    enabled: !!materialId && !!organizationId && !!supabase,
+  })
+}
+
+// Hook para actualizar precio de material
+export function useUpdateMaterialPrice() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<InsertOrganizationMaterialPrice> }) => {
+      if (!supabase) throw new Error('Supabase client not available')
+      
+      const { data: result, error } = await supabase
+        .from('organization_material_prices')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error updating material price:', error)
+        throw error
+      }
+
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['material-price'] })
+    },
+    onError: (error) => {
+      console.error('Error updating material price:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el precio del material.",
+        variant: "destructive",
+      })
+    },
+  })
+}
