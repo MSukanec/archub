@@ -150,7 +150,7 @@ export default function AdminMovementConcepts() {
 
     const allConcepts = getAllConcepts(concepts);
     const replacementOptions = allConcepts
-      .filter(c => c.id !== conceptId && !c.is_system) // Exclude current concept and system concepts
+      .filter(c => c.id !== conceptId) // Exclude only the current concept being deleted
       .map(c => ({
         label: c.name,
         value: c.id
