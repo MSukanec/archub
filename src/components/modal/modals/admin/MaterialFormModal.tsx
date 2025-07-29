@@ -11,9 +11,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
+import { useCreateMaterial, useUpdateMaterial, useCreateMaterialPrice, Material, NewMaterialData } from '@/hooks/use-materials'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { HelpPopover } from '@/components/ui-custom/HelpPopover'
 
 import { Package } from 'lucide-react'
@@ -22,6 +23,9 @@ const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
   category_id: z.string().min(1, 'La categoría es requerida'),
+  price: z.string().optional().refine((val) => !val || !isNaN(Number(val)), {
+    message: 'El precio debe ser un número válido',
+  }),
 })
 
 interface MaterialFormModalProps {
@@ -40,6 +44,8 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // Hooks
   const createMutation = useCreateMaterial()
   const updateMutation = useUpdateMaterial()
+  const createPriceMutation = useCreateMaterialPrice()
+  const { data: userData } = useCurrentUser()
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
   const { setPanel } = useModalPanelStore()
@@ -56,6 +62,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       name: '',
       unit_id: '',
       category_id: '',
+      price: '',
     },
   })
 
@@ -66,12 +73,14 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         name: editingMaterial.name,
         unit_id: editingMaterial.unit_id,
         category_id: editingMaterial.category_id,
+        price: '', // Precio se cargará por separado desde organization_material_prices
       })
     } else {
       form.reset({
         name: '',
         unit_id: '',
         category_id: '',
+        price: '',
       })
     }
   }, [editingMaterial, isEditing, form])
@@ -82,12 +91,38 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
     try {
       if (isEditing && editingMaterial) {
+        // Solo actualizar material (no precio por ahora en edición)
         await updateMutation.mutateAsync({
           id: editingMaterial.id,
-          data: values,
+          data: {
+            name: values.name,
+            unit_id: values.unit_id,
+            category_id: values.category_id,
+          },
         })
       } else {
-        await createMutation.mutateAsync(values)
+        // Crear material
+        const materialData: NewMaterialData = {
+          name: values.name,
+          unit_id: values.unit_id,
+          category_id: values.category_id,
+          organization_id: userData?.organization?.id,
+          is_system: false,
+        }
+        
+        const newMaterial = await createMutation.mutateAsync(materialData)
+        
+        // Si se especificó un precio, crear el registro de precio
+        if (values.price && values.price.trim() !== '' && userData?.organization?.id && newMaterial) {
+          const priceData = {
+            organization_id: userData.organization.id,
+            material_id: newMaterial.id,
+            price: parseFloat(values.price),
+            currency_id: undefined, // Por ahora sin moneda específica
+          }
+          
+          await createPriceMutation.mutateAsync(priceData)
+        }
       }
       onClose()
     } catch (error) {
@@ -175,6 +210,26 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Price */}
+        <FormField
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Costo por Unidad (Opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="Ej: 1250.00"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

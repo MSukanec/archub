@@ -21,6 +21,13 @@ export interface NewMaterialData {
   is_system?: boolean
 }
 
+export interface MaterialPriceData {
+  organization_id: string
+  material_id: string
+  price: number
+  currency_id?: string
+}
+
 export function useMaterials() {
   return useQuery({
     queryKey: ['materials'],
@@ -176,6 +183,41 @@ export function useDeleteMaterial() {
       toast({
         title: "Error",
         description: "No se pudo eliminar el material.",
+        variant: "destructive",
+      })
+    },
+  })
+}
+
+export function useCreateMaterialPrice() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: MaterialPriceData) => {
+      if (!supabase) throw new Error('Supabase client not available')
+
+      const { data: result, error } = await supabase
+        .from('organization_material_prices')
+        .insert([data])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating material price:', error)
+        throw error
+      }
+
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['material-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+    },
+    onError: (error) => {
+      console.error('Error creating material price:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo guardar el precio del material.",
         variant: "destructive",
       })
     },

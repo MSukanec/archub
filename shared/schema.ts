@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -246,6 +246,16 @@ export const task_parametric = pgTable("task_parametric", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+export const organization_material_prices = pgTable("organization_material_prices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  material_id: uuid("material_id").notNull(),
+  price: real("price").notNull(),
+  currency_id: uuid("currency_id"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
   created_at: true,
@@ -253,6 +263,12 @@ export const insertTaskParameterPositionSchema = createInsertSchema(task_paramet
 });
 
 export const insertTaskParametricSchema = createInsertSchema(task_parametric).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertOrganizationMaterialPriceSchema = createInsertSchema(organization_material_prices).omit({
   id: true,
   created_at: true,
   updated_at: true,
@@ -279,3 +295,5 @@ export type TaskParameterPosition = typeof task_parameter_positions.$inferSelect
 export type InsertTaskParameterPosition = z.infer<typeof insertTaskParameterPositionSchema>;
 export type TaskParametric = typeof task_parametric.$inferSelect;
 export type InsertTaskParametric = z.infer<typeof insertTaskParametricSchema>;
+export type OrganizationMaterialPrice = typeof organization_material_prices.$inferSelect;
+export type InsertOrganizationMaterialPrice = z.infer<typeof insertOrganizationMaterialPriceSchema>;
