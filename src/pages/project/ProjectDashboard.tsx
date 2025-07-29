@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FolderOpen } from 'lucide-react'
+import { FolderOpen, BarChart3, TrendingUp, Users, Calendar } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useProjectStats, useProjectActivity } from '@/hooks/use-project-stats'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -11,6 +11,8 @@ import { ProjectActivityChart } from '@/components/charts/ProjectActivityChart'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Button } from '@/components/ui/button'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 export default function ProjectDashboard() {
   const { data: userData } = useCurrentUser()
@@ -32,29 +34,69 @@ export default function ProjectDashboard() {
     setSidebarContext("project")
   }, [setSidebarContext])
 
-  const headerProps = {
-    title: "Resumen del Proyecto",
-    showSearch: false,
-    showFilters: false,
-  }
+  // ActionBar features
+  const features = [
+    {
+      icon: <BarChart3 className="h-4 w-4" />,
+      title: "Estadísticas Integrales del Proyecto",
+      description: "Visualiza métricas clave incluyendo progreso de construcción, estado financiero, documentos y actividad del equipo en tiempo real."
+    },
+    {
+      icon: <TrendingUp className="h-4 w-4" />,
+      title: "Análisis de Tendencias y Progreso",
+      description: "Monitorea el avance temporal del proyecto con gráficos de actividad y análisis de productividad por período."
+    },
+    {
+      icon: <Users className="h-4 w-4" />,
+      title: "Gestión Centralizada del Equipo",
+      description: "Controla la participación de miembros, clientes y roles dentro del proyecto desde una vista unificada."
+    },
+    {
+      icon: <Calendar className="h-4 w-4" />,
+      title: "Panel de Control Ejecutivo",
+      description: "Accede rápidamente a todas las secciones del proyecto y toma decisiones informadas basadas en datos actualizados."
+    }
+  ]
 
   // Find current project
   const currentProject = stats?.project
 
   if (!currentProject && !statsLoading) {
     return (
-      <Layout headerProps={headerProps} wide>
-        <EmptyState
-          title="No hay proyecto seleccionado"
-          description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
-        />
+      <Layout wide>
+        <div className="space-y-6">
+          <ActionBarDesktop
+            title="Resumen del Proyecto"
+            icon={<FolderOpen className="h-5 w-5" />}
+            features={features}
+          />
+          <EmptyState
+            title="No hay proyecto seleccionado"
+            description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
+          />
+        </div>
       </Layout>
     )
   }
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout wide>
       <div className="space-y-6">
+        {/* ActionBar */}
+        <ActionBarDesktop
+          title="Resumen del Proyecto"
+          icon={<FolderOpen className="h-5 w-5" />}
+          features={features}
+        />
+
+        {/* Feature Introduction - Mobile only */}
+        <FeatureIntroduction
+          title="Resumen del Proyecto"
+          icon={<FolderOpen className="h-6 w-6" />}
+          features={features}
+          className="md:hidden"
+        />
+
         {/* Hero Card with Project Background - Only render if we have a project */}
         {currentProject && organizationId && (
           <ProjectHeroCard 
