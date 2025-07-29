@@ -101,6 +101,7 @@ export function ConstructionTaskFormModal({
   const [customTaskName, setCustomTaskName] = useState<string>('');
   const [customTaskRubro, setCustomTaskRubro] = useState<string>('');
   const [customTaskUnit, setCustomTaskUnit] = useState<string>('');
+  const [isCreatingCustomTask, setIsCreatingCustomTask] = useState(false);
   
   // Query para obtener la membresía actual del usuario en la organización
   const { data: organizationMember } = useQuery({
@@ -391,6 +392,82 @@ export function ConstructionTaskFormModal({
       });
     } finally {
       setIsCreatingParametricTask(false);
+    }
+  };
+
+  // Función para crear tarea personalizada
+  const handleCreateCustomTask = async () => {
+    if (!customTaskName.trim() || !customTaskRubro || !customTaskUnit) {
+      toast({
+        title: "Error",
+        description: "Todos los campos son obligatorios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!userData?.organization?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo identificar la organización",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsCreatingCustomTask(true);
+
+    try {
+      console.log('🚀 Creando tarea personalizada con datos:', {
+        custom_name: customTaskName,
+        unit_id: customTaskUnit,
+        category_id: customTaskRubro,
+        organization_id: userData.organization.id
+      });
+
+      // Llamar a la función SQL create_parametric_task con parámetros para tarea personalizada
+      const result = await createGeneratedTask.mutateAsync({
+        param_values: {}, // JSON vacío para tarea personalizada
+        param_order: [], // Array vacío para tarea personalizada
+        unit_id: customTaskUnit,
+        category_id: customTaskRubro,
+        organization_id: userData.organization.id,
+        custom_name: customTaskName
+      });
+
+      console.log('✅ Tarea personalizada creada:', result);
+
+      // Agregar la nueva tarea a la lista de tareas seleccionadas
+      const newTask = result.new_task;
+      if (newTask) {
+        setSelectedTasks(prev => [...prev, {
+          task_id: newTask.id,
+          quantity: 1,
+          project_phase_id: '' // Sin fase por defecto
+        }]);
+      }
+
+      // Limpiar formulario y volver al panel principal
+      setCustomTaskName('');
+      setCustomTaskRubro('');
+      setCustomTaskUnit('');
+      setPanel('edit');
+      setActiveTab('parametric');
+
+      toast({
+        title: "Tarea creada",
+        description: "La tarea personalizada se creó y agregó correctamente",
+      });
+
+    } catch (error) {
+      console.error('❌ Error creando tarea personalizada:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la tarea personalizada",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingCustomTask(false);
     }
   };
 
@@ -876,7 +953,6 @@ export function ConstructionTaskFormModal({
                         </Label>
                         <ComboBox
                           placeholder="Selecciona un rubro..."
-                          emptyText="No se encontraron rubros"
                           options={rubros.map(rubro => ({
                             value: rubro.id,
                             label: rubro.name
@@ -919,6 +995,36 @@ export function ConstructionTaskFormModal({
                         rows={3}
                         className="resize-none"
                       />
+                    </div>
+                  </div>
+
+                  {/* Botones para tarea personalizada */}
+                  <div className="px-6 pt-4 border-t">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          // Reset campos
+                          setCustomTaskName('');  
+                          setCustomTaskRubro('');
+                          setCustomTaskUnit('');
+                          // Volver al panel principal
+                          setPanel('edit');
+                          setActiveTab('parametric');
+                        }}
+                        className="flex-1"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleCreateCustomTask}
+                        disabled={!customTaskName.trim() || !customTaskRubro || !customTaskUnit || isCreatingCustomTask}
+                        className="flex-1"
+                      >
+                        {isCreatingCustomTask ? "Creando..." : "Crear Nueva Tarea"}
+                      </Button>
                     </div>
                   </div>
                 </div>

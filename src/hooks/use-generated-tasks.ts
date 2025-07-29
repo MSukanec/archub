@@ -60,17 +60,31 @@ export function useCreateGeneratedTask() {
     mutationFn: async (payload: {
       param_values: Record<string, any>;
       param_order?: string[];
+      unit_id?: string;
+      category_id?: string;
+      organization_id?: string;
+      custom_name?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       console.log('🚀 Creating task with parameters:', payload.param_values);
       console.log('🎯 Parameter order:', payload.param_order);
+      console.log('🔧 Additional fields:', {
+        unit_id: payload.unit_id,
+        category_id: payload.category_id,
+        organization_id: payload.organization_id,
+        custom_name: payload.custom_name
+      });
       
       try {
-        // Use the RPC function with CORRECT parameter order
+        // Use the RPC function with ALL parameters
         const { data, error } = await supabase.rpc('create_parametric_task', {
-          input_param_values: payload.param_values,  // FIRST parameter (jsonb)
-          input_param_order: payload.param_order || [] // SECOND parameter (text[])
+          input_param_values: payload.param_values,  // JSONB
+          input_param_order: payload.param_order || [], // text[]
+          input_unit_id: payload.unit_id || null, // UUID
+          input_category_id: payload.category_id || null, // UUID
+          input_organization_id: payload.organization_id || null, // UUID
+          input_custom_name: payload.custom_name || null // text
         });
         
         if (error) {
