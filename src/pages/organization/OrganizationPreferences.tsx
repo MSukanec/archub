@@ -26,6 +26,7 @@ import { useOrganizationMovementConcepts, MovementConceptOrganization } from '@/
 import { useDeleteMovementConcept, useMoveConceptToParent } from '@/hooks/use-movement-concepts-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
+import { insertInitialWallets } from '@/utils/insertInitialWallets';
 
 export default function OrganizationPreferences() {
   const { data: userData } = useCurrentUser();
@@ -250,6 +251,25 @@ export default function OrganizationPreferences() {
   const handleSecondaryWalletsChange = (walletIds: string[]) => {
     setSecondaryWallets(walletIds);
     updateSecondaryWalletsMutation.mutate(walletIds);
+  };
+
+  // Function to insert initial wallets
+  const handleInsertInitialWallets = async () => {
+    const success = await insertInitialWallets();
+    if (success) {
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      toast({ 
+        title: "Billeteras creadas", 
+        description: "Se han agregado las billeteras básicas al sistema." 
+      });
+    } else {
+      toast({ 
+        title: "Error", 
+        description: "No se pudieron crear las billeteras básicas.", 
+        variant: "destructive" 
+      });
+    }
   };
 
   // Get available currencies and wallets (excluding defaults from secondary options)
@@ -479,18 +499,37 @@ export default function OrganizationPreferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="default-wallet">Billetera por Defecto</Label>
-                <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
-                  <SelectTrigger id="default-wallet">
-                    <SelectValue placeholder="Selecciona una billetera" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allWallets?.map((wallet) => (
-                      <SelectItem key={wallet.id} value={wallet.id}>
-                        {wallet.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {!allWallets || allWallets.length === 0 ? (
+                  <div className="space-y-2">
+                    <Select disabled>
+                      <SelectTrigger id="default-wallet">
+                        <SelectValue placeholder="No hay billeteras disponibles" />
+                      </SelectTrigger>
+                    </Select>
+                    <Button 
+                      onClick={handleInsertInitialWallets}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Crear Billeteras Básicas del Sistema
+                    </Button>
+                  </div>
+                ) : (
+                  <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
+                    <SelectTrigger id="default-wallet">
+                      <SelectValue placeholder="Selecciona una billetera" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allWallets?.map((wallet) => (
+                        <SelectItem key={wallet.id} value={wallet.id}>
+                          {wallet.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               <div className="space-y-2">
