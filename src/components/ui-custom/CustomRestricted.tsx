@@ -192,15 +192,13 @@ export function CustomRestricted({
     subtextColor;
 
   if (isGeneralMode) {
-    badgeStyle = {
-      backgroundColor: "var(--accent)",
-      borderColor: "var(--accent)",
-    };
-    popoverBgColor = "var(--accent)";
-    popoverBorderColor = "var(--accent)";
-    iconColor = "white";
-    textColor = "white";
-    subtextColor = "rgba(255, 255, 255, 0.8)";
+    // Para general_mode, usar colores de toast
+    badgeStyle = null; // No mostrar badge
+    popoverBgColor = "var(--toast-bg)";
+    popoverBorderColor = "var(--toast-border)";
+    iconColor = "var(--toast-fg)";
+    textColor = "var(--toast-title)";
+    subtextColor = "var(--toast-description)";
   } else if (dynamicRestriction.planType === "teams") {
     // Estilo específico para plan Teams (morado)
     badgeStyle = {
@@ -236,38 +234,46 @@ export function CustomRestricted({
   return (
     <div className="relative w-full">
       {/* Contenido bloqueado - sin efectos hover */}
-      <div className="relative opacity-50 pointer-events-none [&_*]:hover:bg-transparent [&_*]:hover:text-inherit [&_*]:hover:scale-100 [&_*]:hover:shadow-none">
+      <div className={`relative pointer-events-none [&_*]:hover:bg-transparent [&_*]:hover:text-inherit [&_*]:hover:scale-100 [&_*]:hover:shadow-none ${
+        isGeneralMode ? 'opacity-60' : 'opacity-50'
+      }`}>
         {children}
       </div>
 
-      {/* Overlay con badge que activa hover */}
+      {/* Overlay que activa hover */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <div
-            className="absolute inset-0 flex items-center justify-center bg-black/5 cursor-pointer group"
+            className={`absolute inset-0 flex items-center justify-center cursor-pointer group ${
+              isGeneralMode ? 'cursor-not-allowed' : 'bg-black/5'
+            }`}
             onMouseEnter={() => setIsPopoverOpen(true)}
             onMouseLeave={() => setIsPopoverOpen(false)}
           >
-            <div
-              className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
-              style={{
-                ...badgeStyle,
-                // Forzar que el badge siempre tenga fondo circular visible
-                border: `1px solid ${badgeStyle.borderColor}`,
-                backgroundColor: badgeStyle.backgroundColor,
-              }}
-            >
-              <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
-            </div>
+            {/* Solo mostrar badge si NO es general_mode */}
+            {!isGeneralMode && badgeStyle && (
+              <div
+                className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
+                style={{
+                  ...badgeStyle,
+                  // Forzar que el badge siempre tenga fondo circular visible
+                  border: `1px solid ${badgeStyle.borderColor}`,
+                  backgroundColor: badgeStyle.backgroundColor,
+                }}
+              >
+                <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
+              </div>
+            )}
           </div>
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-64 p-3 shadow-xl rounded-2xl"
+          className={`w-64 p-3 shadow-xl ${
+            isGeneralMode ? 'rounded-[var(--radius-lg)]' : 'rounded-2xl'
+          }`}
           style={{
             backgroundColor: popoverBgColor,
             border: `1px solid ${popoverBorderColor}`,
-            borderRadius: "16px",
           }}
           side="top"
           sideOffset={-2}
@@ -279,7 +285,7 @@ export function CustomRestricted({
               className="rounded-full p-1 flex-shrink-0"
               style={{
                 backgroundColor: isGeneralMode
-                  ? "rgba(255, 255, 255, 0.2)"
+                  ? "var(--accent-bg)"
                   : dynamicRestriction.planType === "teams"
                     ? "rgba(255, 255, 255, 0.2)"
                     : "hsl(var(--accent), 0.2)",
@@ -289,7 +295,7 @@ export function CustomRestricted({
                 className="h-3 w-3"
                 style={{
                   color: isGeneralMode
-                    ? "white"
+                    ? iconColor
                     : dynamicRestriction.planType === "teams"
                       ? "white"
                       : "hsl(var(--accent))",
