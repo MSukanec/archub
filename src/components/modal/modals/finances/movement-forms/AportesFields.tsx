@@ -126,7 +126,7 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
               <FormItem>
                 <FormLabel>Cliente</FormLabel>
                 <FormControl>
-                  <div className="flex items-center justify-center p-4 border border-dashed rounded-lg bg-muted/50">
+                  <div className="flex items-center justify-center p-4 border-accent border-dashed border-2 rounded-lg bg-muted/50">
                     <div className="text-center">
                       <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground mb-2">
