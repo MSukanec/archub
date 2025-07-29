@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial } from '@/hooks/use-generated-tasks'
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -23,6 +23,7 @@ interface ParametricTaskFormModalProps {
     isEditing?: boolean
     task?: any
     taskData?: any
+    taskId?: string
   } | null
   onClose: () => void
 }
@@ -37,11 +38,27 @@ interface ParameterSelection {
 }
 
 export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFormModalProps) {
-  const { task, isEditing, taskData } = modalData || {}
-  const actualTask = task || taskData
+  const { task, isEditing, taskData, taskId } = modalData || {}
+  
+  // Load tasks data to find the task by ID if taskId is provided
+  const { data: tasksData } = useGeneratedTasks()
+  
+  // Determine the actual task data
+  const actualTask = React.useMemo(() => {
+    if (task || taskData) {
+      return task || taskData
+    }
+    if (taskId && tasksData) {
+      return tasksData.find(t => t.id === taskId)
+    }
+    return null
+  }, [task, taskData, taskId, tasksData])
+  
+  // Determine if we're editing (either explicit flag or taskId provided)
+  const isEditingMode = isEditing || (taskId && actualTask)
   
   // If editing existing task, start at step 2 (materials), otherwise step 1 (parameters)
-  const [currentStep, setCurrentStep] = useState(isEditing && actualTask ? 2 : 1)
+  const [currentStep, setCurrentStep] = useState(isEditingMode ? 2 : 1)
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
@@ -53,7 +70,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   
   console.log('🔍 Modal data received:', modalData);
   console.log('📝 Task data:', actualTask);
-  console.log('✏️ Is editing:', isEditing);
+  console.log('✏️ Is editing mode:', isEditingMode);
   console.log('📊 param_order from task:', actualTask?.param_order);
   console.log('📊 param_values from task:', actualTask?.param_values);
   
@@ -94,6 +111,36 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
   console.log('📊 Processed param_values:', existingParamValues);
   console.log('📊 Processed param_order:', existingParamOrder);
+
+  // Effect to load existing task data when editing
+  useEffect(() => {
+    if (isEditingMode && actualTask && existingParamValues) {
+      // Load existing selections for display as chips
+      const loadedSelections: ParameterSelection[] = []
+      
+      if (existingParamValues && typeof existingParamValues === 'object') {
+        Object.entries(existingParamValues).forEach(([parameterSlug, optionSlug]) => {
+          if (typeof optionSlug === 'string') {
+            loadedSelections.push({
+              parameterId: '', // Will be filled when parameters load
+              optionId: '', // Will be filled when options load
+              parameterSlug,
+              parameterLabel: parameterSlug, // Will be updated when parameters load
+              optionName: optionSlug,
+              optionLabel: optionSlug // Will be updated when options load
+            })
+          }
+        })
+      }
+      
+      setSelections(loadedSelections)
+      
+      // Set saved task ID for materials loading
+      setSavedTaskId(actualTask.id)
+      
+      console.log('📊 Loaded existing selections:', loadedSelections)
+    }
+  }, [isEditingMode, actualTask, existingParamValues])
 
   // Use the new hooks for creating and updating tasks
   const createTaskMutation = useCreateGeneratedTask()
@@ -344,6 +391,32 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       case 2:
         return (
           <div className="space-y-6">
+            {/* Show completed parameters when editing */}
+            {isEditingMode && selections.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Parámetros Configurados</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selections.map((selection, index) => (
+                    <Badge key={index} variant="secondary" className="px-3 py-1">
+                      {selection.parameterLabel}: {selection.optionLabel}
+                    </Badge>
+                  ))}
+                </div>
+                <Separator />
+              </div>
+            )}
+            
+            {/* Task name preview when editing */}
+            {isEditingMode && actualTask?.name_rendered && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Nombre de la Tarea</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm">{actualTask.name_rendered}</p>
+                </div>
+                <Separator />
+              </div>
+            )}
+            
             {/* Agregar material */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -448,7 +521,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   // Header content
   const headerContent = (
     <FormModalStepHeader 
-      title="Editar Tarea para Métrica"
+      title={isEditingMode ? "Editar Tarea" : "Crear Tarea Personalizada"}
       icon={Zap}
       stepConfig={stepConfig}
     />
