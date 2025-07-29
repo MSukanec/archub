@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { DollarSign, Package } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { useConstructionTasksView } from "@/hooks/use-construction-tasks"
-import { ComboBox } from "@/components/ui-custom/ComboBoxWrite"
+
 
 // Tipo específico para el formulario de materiales
 type MaterialesFormType = {
@@ -113,14 +113,7 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts 
     }
   }, [categories, form])
 
-  // Convertir tareas de construcción para ComboBoxWrite
-  const taskOptions = React.useMemo(() => {
-    if (!constructionTasks) return []
-    return constructionTasks.map(task => ({
-      value: task.id,
-      label: `${task.name_rendered} (${task.unit_name})`
-    }))
-  }, [constructionTasks])
+
 
   return (
     <>
@@ -266,15 +259,20 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tareas</FormLabel>
-              <FormControl>
-                <ComboBox
-                  options={taskOptions}
-                  value={field.value || ''}
-                  onValueChange={field.onChange}
-                  placeholder="Seleccionar tarea de construcción..."
-                  emptyMessage="No se encontraron tareas"
-                />
-              </FormControl>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tarea de construcción..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {constructionTasks?.map((task) => (
+                    <SelectItem key={task.id} value={task.id}>
+                      {task.name_rendered} ({task.unit_name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
