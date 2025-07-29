@@ -14,6 +14,15 @@ export interface Material {
   created_at: string
   unit?: { name: string }
   category?: { name: string }
+  organization_material_prices?: Array<{
+    id: string
+    unit_price: number
+    currency_id: string
+    currency: {
+      symbol: string
+      name: string
+    }
+  }>
 }
 
 export interface NewMaterialData {
@@ -27,21 +36,37 @@ export interface NewMaterialData {
 // MaterialPriceData interface eliminada - usar InsertOrganizationMaterialPrice del schema
 
 export function useMaterials() {
+  const { data: userData } = useCurrentUser()
+  
   return useQuery({
-    queryKey: ['materials'],
+    queryKey: ['materials', userData?.organization?.id],
     queryFn: async () => {
       if (!supabase) {
         return []
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('materials')
         .select(`
           *,
           unit:units(name),
-          category:material_categories(name)
+          category:material_categories(name),
+          organization_material_prices!inner(
+            id,
+            unit_price,
+            currency_id,
+            organization_id,
+            currency:currencies(symbol, name)
+          )
         `)
         .order('name')
+
+      // Solo filtrar por organización si existe
+      if (userData?.organization?.id) {
+        query = query.eq('organization_material_prices.organization_id', userData.organization.id)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         console.error('Error fetching materials:', error)

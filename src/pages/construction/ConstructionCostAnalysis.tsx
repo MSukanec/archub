@@ -192,12 +192,43 @@ export default function ConstructionCostAnalysis() {
     {
       key: 'unit',
       label: 'Unidad',
-      width: '15%',
+      width: '12%',
       render: (material: any) => (
         <Badge variant="secondary" className="text-xs">
           {material.unit?.name || 'N/A'}
         </Badge>
       )
+    },
+    {
+      key: 'archub_average_cost',
+      label: 'Costo Promedio de Archub',
+      width: '18%',
+      render: (material: any) => (
+        <div className="text-xs text-muted-foreground italic">
+          Próximamente
+        </div>
+      )
+    },
+    {
+      key: 'own_cost',
+      label: 'Costo Propio',
+      width: '15%',
+      render: (material: any) => {
+        // Buscar el precio del material en organization_material_prices
+        const materialPrice = material.organization_material_prices?.[0]
+        if (materialPrice?.unit_price && materialPrice?.currency) {
+          return (
+            <div className="text-sm font-medium">
+              {materialPrice.currency.symbol}{Number(materialPrice.unit_price).toLocaleString()}
+            </div>
+          )
+        }
+        return (
+          <div className="text-xs text-muted-foreground">
+            Sin precio
+          </div>
+        )
+      }
     },
     {
       key: 'actions',
