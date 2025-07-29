@@ -4,6 +4,7 @@ import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
+import { useMaterials } from '@/hooks/use-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { BarChart3, Search, Layers, Grid, TableIcon, Users, Package, DollarSign, Edit, Trash2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
@@ -22,6 +23,7 @@ export default function ConstructionCostAnalysis() {
 
   
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
+  const { data: materials = [], isLoading: materialsLoading } = useMaterials()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -150,6 +152,80 @@ export default function ConstructionCostAnalysis() {
     }
   ]
 
+  // Materials table columns configuration
+  const materialsColumns = [
+    {
+      key: 'name',
+      label: 'Material',
+      render: (material: any) => (
+        <span className="text-sm font-medium">{material.name}</span>
+      )
+    },
+    {
+      key: 'category',
+      label: 'Categoría',
+      width: '20%',
+      render: (material: any) => (
+        <Badge variant="outline" className="text-xs">
+          {material.category?.name || 'Sin categoría'}
+        </Badge>
+      )
+    },
+    {
+      key: 'unit',
+      label: 'Unidad',
+      width: '15%',
+      render: (material: any) => (
+        <Badge variant="secondary" className="text-xs">
+          {material.unit?.name || 'N/A'}
+        </Badge>
+      )
+    },
+    {
+      key: 'created_at',
+      label: 'Fecha Creación',
+      width: '15%',
+      render: (material: any) => (
+        <span className="text-xs text-muted-foreground">
+          {new Date(material.created_at).toLocaleDateString('es-ES')}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      width: '10%',
+      render: (material: any) => (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => openModal('material-form', { editingMaterial: material })}
+            className="h-8 w-8 p-0"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              showDeleteConfirmation({
+                itemName: material.name || 'este material',
+                onConfirm: () => {
+                  // TODO: Implementar eliminación de material
+                  console.log('Eliminar material:', material.id)
+                }
+              })
+            }}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )
+    }
+  ]
+
   // Custom filters for ActionBar (similar to AdminGeneratedTasks)
   const customFilters = (
     <div className="space-y-4">
@@ -244,16 +320,19 @@ export default function ConstructionCostAnalysis() {
 
         {activeTab === 'materiales' && (
           <div className="space-y-6">
-            <CustomRestricted
-              reason="coming_soon"
-              className="min-h-[400px] flex items-center justify-center"
-            >
+            {materials.length === 0 ? (
               <EmptyState
                 icon={<Package className="h-16 w-16" />}
-                title="Análisis de Materiales"
-                description="Funcionalidad coming soon"
+                title="No hay materiales registrados"
+                description="Los materiales de la base de datos aparecerán aquí para análisis de costos."
               />
-            </CustomRestricted>
+            ) : (
+              <Table
+                data={materials}
+                columns={materialsColumns}
+                isLoading={materialsLoading}
+              />
+            )}
           </div>
         )}
 
