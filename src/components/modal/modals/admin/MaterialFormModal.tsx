@@ -93,6 +93,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
+    console.log('🚀 Form submitted with values:', values)
     setIsLoading(true)
 
     try {
@@ -116,7 +117,9 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           is_system: false,
         }
         
+        console.log('📦 Creating material with data:', materialData)
         const newMaterial = await createMutation.mutateAsync(materialData)
+        console.log('✅ Material created:', newMaterial)
         
         // Si se especificó un precio, crear el registro de precio
         if (values.price && values.price.trim() !== '' && userData?.organization?.id && newMaterial) {
@@ -124,7 +127,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
             price: parseFloat(values.price),
-            currency_id: values.currency_id || undefined,
+            currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
           })
           
           console.log('🔍 userData:', userData)
@@ -136,7 +139,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
             price: parseFloat(values.price),
-            currency_id: values.currency_id || undefined,
+            currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
           }
           
           try {
