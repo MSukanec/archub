@@ -320,7 +320,6 @@ export const subcontracts = pgTable("subcontracts", {
   organization_id: uuid("organization_id").notNull(),
   contact_id: uuid("contact_id").notNull(),
   title: text("title").notNull(),
-  currency_id: uuid("currency_id"),
   amount_total: real("amount_total").default(0),
   status: text("status").default("pendiente"),
   notes: text("notes"),
