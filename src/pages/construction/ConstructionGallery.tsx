@@ -63,7 +63,7 @@ interface GalleryFile {
 
 export default function ConstructionGallery() {
   const { data: userData } = useCurrentUser();
-  const projectId = userData?.preferences?.last_project_id;
+  const storedProjectId = userData?.preferences?.last_project_id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setActions, setShowActionBar } = useMobileActionBar();
@@ -88,6 +88,34 @@ export default function ConstructionGallery() {
       setSidebarContext('construction');
     }
   }, [location, setSidebarContext]);
+
+  // Query to check if stored project belongs to current organization
+  const { data: currentProject } = useQuery({
+    queryKey: ['currentProject', storedProjectId, userData?.preferences?.last_organization_id],
+    queryFn: async () => {
+      if (!storedProjectId || !userData?.preferences?.last_organization_id || !supabase) {
+        return null;
+      }
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name, organization_id')
+        .eq('id', storedProjectId)
+        .eq('organization_id', userData.preferences.last_organization_id)
+        .single();
+      
+      if (error) {
+        console.log('Project not found in current organization:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!storedProjectId && !!userData?.preferences?.last_organization_id
+  });
+
+  // Use project ID only if the project belongs to current organization
+  const projectId = currentProject?.id || null;
 
   // Gallery files query
   const { data: galleryFiles = [], isLoading, error } = useQuery({
