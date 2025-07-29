@@ -86,7 +86,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
       project_type_id: editingProject?.project_data?.project_type_id || "",
       modality_id: editingProject?.project_data?.modality_id || "",
       status: editingProject?.status || "active",
-      color: editingProject?.color || "#ffffff",
+      color: editingProject?.color || "#84cc16",
     }
   });
 
@@ -100,7 +100,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         project_type_id: editingProject.project_data?.project_type_id || "",
         modality_id: editingProject.project_data?.modality_id || "",
         status: editingProject.status,
-        color: editingProject.color || "#ffffff",
+        color: editingProject.color || "#84cc16",
       });
       setPanel('edit');
     } else if (currentUserMember) {
@@ -111,7 +111,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         project_type_id: "",
         modality_id: "",
         status: "active",
-        color: "#ffffff",
+        color: "#84cc16",
       });
       setPanel('edit');
     }
@@ -131,7 +131,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             name: data.name,
             status: data.status,
             created_by: data.created_by,
-            color: data.color || "#ffffff",
+            color: data.color || "#84cc16",
           })
           .eq('id', editingProject.id);
 
@@ -180,7 +180,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             created_by: data.created_by,
             created_at: new Date(data.created_at).toISOString(),
             is_active: true,
-            color: data.color || "#ffffff",
+            color: data.color || "#84cc16",
           }, {
             onConflict: 'id'
           })
@@ -207,14 +207,31 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
         return newProject;
       }
     },
-    onSuccess: () => {
+    onSuccess: async (newProject) => {
+      // Si estamos creando un nuevo proyecto (no editando), establecerlo como activo
+      if (!isEditing && newProject && userData?.preferences?.id) {
+        try {
+          const { error: preferencesError } = await supabase
+            .from('user_preferences')
+            .update({ last_project_id: newProject.id })
+            .eq('id', userData.preferences.id);
+          
+          if (preferencesError) {
+            console.error('Error setting project as active:', preferencesError);
+          }
+        } catch (error) {
+          console.error('Error updating user preferences:', error);
+        }
+      }
+
       // Only invalidate necessary queries to prevent unnecessary requests
       queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
         description: isEditing 
           ? "El proyecto ha sido actualizado exitosamente" 
-          : "El nuevo proyecto ha sido creado exitosamente",
+          : "El nuevo proyecto ha sido creado y establecido como activo",
       });
       handleClose();
     },
@@ -239,7 +256,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
       ...data,
       project_type_id: data.project_type_id || null,
       modality_id: data.modality_id || null,
-      color: data.color || "#ffffff"
+      color: data.color || "#84cc16"
     };
     
     createProjectMutation.mutate(cleanedData);

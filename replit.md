@@ -118,6 +118,12 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 29, 2025. PROJECT CREATION MODAL DEFAULT COLOR AND AUTO-ACTIVATION COMPLETED: Successfully configured project creation modal to default to green accent color and automatically set new projects as active - COMPLETED
+  • DEFAULT COLOR UPDATED: Modal now defaults to #84cc16 (green accent) instead of white (#ffffff) in all color references
+  • AUTOMATIC PROJECT ACTIVATION: New projects automatically become active through user_preferences.last_project_id update after creation
+  • COLOR CONSISTENCY: All form reset operations and submission handling use green default color consistently
+  • USER EXPERIENCE ENHANCED: Success message updated to indicate project was "created and established as active"
+  • CACHE INVALIDATION: Added user-data query invalidation to reflect preference changes immediately in UI
 - July 29, 2025. ORGANIZATION PREFERENCES FINANCE CONCEPTS SECTION HIDDEN: Successfully hidden "CONCEPTOS DE FINANZAS" section from organization preferences page as requested - COMPLETED
   • SECTION TEMPORARILY HIDDEN: Commented out entire "Conceptos de Finanzas" section including divider, headers, and DraggableConceptTree component
   • CODE PRESERVED: All functionality preserved in comments for easy restoration when needed
