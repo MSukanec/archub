@@ -22,6 +22,7 @@ interface DeleteConfirmationModalProps {
   title: string
   description: string
   itemName?: string
+  itemType?: string // Tipo de elemento (ej: "concepto", "material", "categoría", etc.)
   destructiveActionText?: string
   onConfirm?: () => void
   onDelete?: () => void
@@ -36,6 +37,7 @@ export default function DeleteConfirmationModal({
   title,
   description,
   itemName,
+  itemType = "elemento",
   destructiveActionText = "Eliminar",
   onConfirm,
   onDelete,
@@ -100,7 +102,7 @@ export default function DeleteConfirmationModal({
     }
     
     if (mode === 'replace') {
-      return actionType === 'delete' ? 'Eliminar material' : 'Reemplazar material'
+      return actionType === 'delete' ? `Eliminar ${itemType}` : `Reemplazar ${itemType}`
     }
     
     return destructiveActionText
@@ -183,14 +185,14 @@ export default function DeleteConfirmationModal({
 
           {actionType === 'replace' && (
             <div className="space-y-2">
-              <Label htmlFor="replacement-category">¿Por cuál material querés reemplazarlo?</Label>
+              <Label htmlFor="replacement-category">¿Por cuál {itemType} querés reemplazarlo?</Label>
               <ComboBox
                 value={selectedReplacementId}
                 onValueChange={setSelectedReplacementId}
                 options={filteredReplacementOptions}
-                placeholder="Seleccionar material de reemplazo"
-                searchPlaceholder="Buscar material..."
-                emptyMessage="No se encontraron materiales."
+                placeholder={`Seleccionar ${itemType} de reemplazo`}
+                searchPlaceholder={`Buscar ${itemType}...`}
+                emptyMessage={`No se encontraron ${itemType}s.`}
               />
             </div>
           )}
@@ -216,7 +218,7 @@ export default function DeleteConfirmationModal({
             <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
             <p className="text-sm text-destructive font-medium">
               {actionType === 'replace' 
-                ? 'Esta acción reemplazará todos los usos del material actual'
+                ? `Esta acción reemplazará todos los usos del ${itemType} actual`
                 : 'Esta acción no se puede deshacer'
               }
             </p>

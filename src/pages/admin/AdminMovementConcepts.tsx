@@ -161,6 +161,7 @@ export default function AdminMovementConcepts() {
       title: 'Eliminar Concepto de Movimiento',
       description: `¿Qué querés hacer con el concepto "${concept.name}"? Podés eliminarlo completamente o reemplazarlo por otro concepto existente.`,
       itemName: concept.name,
+      itemType: "concepto",
       destructiveActionText: "Eliminar concepto",
       onDelete: async () => {
         try {
