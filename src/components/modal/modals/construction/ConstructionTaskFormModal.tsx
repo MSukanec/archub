@@ -867,22 +867,44 @@ export function ConstructionTaskFormModal({
                   
                   {/* Formulario de tarea personalizada */}
                   <div className="px-6 space-y-6">
-                    {/* 1. ComboBox para Rubros */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium text-foreground">
-                        Rubro *
-                      </Label>
-                      <ComboBox
-                        placeholder="Selecciona un rubro..."
-                        emptyText="No se encontraron rubros"
-                        options={rubros.map(rubro => ({
-                          value: rubro.id,
-                          label: rubro.name
-                        }))}
-                        value={customTaskRubro}
-                        onValueChange={setCustomTaskRubro}
-                        disabled={rubrosLoading}
-                      />
+                    {/* 1. Rubro y Unidad en la misma fila */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* ComboBox para Rubros */}
+                      <div className="space-y-2">
+                        <Label className="text-xs font-medium text-foreground">
+                          Rubro *
+                        </Label>
+                        <ComboBox
+                          placeholder="Selecciona un rubro..."
+                          emptyText="No se encontraron rubros"
+                          options={rubros.map(rubro => ({
+                            value: rubro.id,
+                            label: rubro.name
+                          }))}
+                          value={customTaskRubro}
+                          onValueChange={setCustomTaskRubro}
+                          disabled={rubrosLoading}
+                        />
+                      </div>
+
+                      {/* Select para Unidades */}
+                      <div className="space-y-2">
+                        <Label className="text-xs font-medium text-foreground">
+                          Unidad *
+                        </Label>
+                        <Select value={customTaskUnit} onValueChange={setCustomTaskUnit} disabled={unitsLoading}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una unidad..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {units.map((unit: any) => (
+                              <SelectItem key={unit.id} value={unit.id}>
+                                {unit.name} ({unit.symbol})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {/* 2. Textarea para Nombre de la Tarea */}
@@ -897,25 +919,6 @@ export function ConstructionTaskFormModal({
                         rows={3}
                         className="resize-none"
                       />
-                    </div>
-
-                    {/* 3. Select para Unidades */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium text-foreground">
-                        Unidad *
-                      </Label>
-                      <Select value={customTaskUnit} onValueChange={setCustomTaskUnit} disabled={unitsLoading}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una unidad..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {units.map((unit: any) => (
-                            <SelectItem key={unit.id} value={unit.id}>
-                              {unit.name} ({unit.symbol})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
                 </div>
