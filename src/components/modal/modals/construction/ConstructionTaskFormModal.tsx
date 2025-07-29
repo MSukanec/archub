@@ -945,7 +945,7 @@ export function ConstructionTaskFormModal({
                     </div>
                   </div>
                   
-                  <div className="px-6">
+                  <div>
                     <ParametricTaskBuilder
                       ref={parametricTaskBuilderRef}
                       onSelectionChange={setParametricSelections}
@@ -976,7 +976,7 @@ export function ConstructionTaskFormModal({
                   </div>
                   
                   {/* Formulario de tarea personalizada */}
-                  <div className="px-6 space-y-6">
+                  <div className="space-y-6">
                     {/* 1. Rubro y Unidad en la misma fila */}
                     <div className="grid grid-cols-2 gap-4">
                       {/* ComboBox para Rubros */}
@@ -1030,36 +1030,6 @@ export function ConstructionTaskFormModal({
                       />
                     </div>
                   </div>
-
-                  {/* Botones para tarea personalizada */}
-                  <div className="px-6 pt-4 border-t">
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          // Reset campos
-                          setTaskNameText('');  
-                          setSelectedCategoryId('');
-                          setSelectedUnitId('');
-                          // Volver al panel principal
-                          setPanel('edit');
-                          setActiveTab('parametric');
-                        }}
-                        className="flex-1"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={handleCreateCustomTask}
-                        disabled={!taskNameText.trim() || !selectedCategoryId || !selectedUnitId || isCreatingCustomTask}
-                        className="flex-1"
-                      >
-                        {isCreatingCustomTask ? "Creando..." : "Crear Nueva Tarea"}
-                      </Button>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
@@ -1094,35 +1064,54 @@ export function ConstructionTaskFormModal({
   );
 
   const footerContent = currentPanel === 'subform' ? (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={() => setPanel('edit')}
-      rightLabel="Crear Nueva Tarea"
-      onRightClick={() => {
-        // Llamar al callback del ParametricTaskBuilder para que pase los datos completos
-        if (parametricTaskBuilderRef.current?.executeCreateTaskCallback) {
-          parametricTaskBuilderRef.current.executeCreateTaskCallback();
-        } else {
-          // Fallback: crear los datos manualmente desde los estados actuales
-          const taskData = {
-            selections: parametricSelections,
-            preview: parametricTaskPreview,
-            paramValues: (() => {
-              const values: Record<string, string> = {};
-              parametricSelections.forEach(sel => {
-                values[sel.parameterSlug] = sel.optionId;
-              });
-              return values;
-            })(),
-            paramOrder: parametricParameterOrder,
-            availableParameters: [] // No disponible en fallback
-          };
-          handleCreateParametricTask(taskData);
-        }
-      }}
-      showLoadingSpinner={isCreatingParametricTask}
-      submitDisabled={parametricSelections.length === 0 || isCreatingParametricTask}
-    />
+    activeTab === 'parametric' ? (
+      <FormModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={() => setPanel('edit')}
+        rightLabel="Crear Nueva Tarea"
+        onRightClick={() => {
+          // Llamar al callback del ParametricTaskBuilder para que pase los datos completos
+          if (parametricTaskBuilderRef.current?.executeCreateTaskCallback) {
+            parametricTaskBuilderRef.current.executeCreateTaskCallback();
+          } else {
+            // Fallback: crear los datos manualmente desde los estados actuales
+            const taskData = {
+              selections: parametricSelections,
+              preview: parametricTaskPreview,
+              paramValues: (() => {
+                const values: Record<string, string> = {};
+                parametricSelections.forEach(sel => {
+                  values[sel.parameterSlug] = sel.optionId;
+                });
+                return values;
+              })(),
+              paramOrder: parametricParameterOrder,
+              availableParameters: [] // No disponible en fallback
+            };
+            handleCreateParametricTask(taskData);
+          }
+        }}
+        showLoadingSpinner={isCreatingParametricTask}
+        submitDisabled={parametricSelections.length === 0 || isCreatingParametricTask}
+      />
+    ) : (
+      <FormModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={() => {
+          // Reset campos
+          setTaskNameText('');  
+          setSelectedCategoryId('');
+          setSelectedUnitId('');
+          // Volver al panel principal
+          setPanel('edit');
+          setActiveTab('parametric');
+        }}
+        rightLabel={isCreatingCustomTask ? "Creando..." : "Crear Nueva Tarea"}
+        onRightClick={handleCreateCustomTask}
+        showLoadingSpinner={isCreatingCustomTask}
+        submitDisabled={!taskNameText.trim() || !selectedCategoryId || !selectedUnitId || isCreatingCustomTask}
+      />
+    )
   ) : (
     <FormModalFooter
       leftLabel="Cancelar"
