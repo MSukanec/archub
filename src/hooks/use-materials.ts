@@ -45,13 +45,13 @@ export function useMaterials() {
         return []
       }
 
-      let query = supabase
+      const { data, error } = await supabase
         .from('materials')
         .select(`
           *,
           unit:units(name),
           category:material_categories(name),
-          organization_material_prices!inner(
+          organization_material_prices(
             id,
             unit_price,
             currency_id,
@@ -61,19 +61,20 @@ export function useMaterials() {
         `)
         .order('name')
 
-      // Solo filtrar por organización si existe
-      if (userData?.organization?.id) {
-        query = query.eq('organization_material_prices.organization_id', userData.organization.id)
-      }
-
-      const { data, error } = await query
-
       if (error) {
         console.error('Error fetching materials:', error)
         throw error
       }
 
-      return data || []
+      // Filtrar precios solo de la organización actual
+      const materialsWithFilteredPrices = data?.map(material => ({
+        ...material,
+        organization_material_prices: material.organization_material_prices?.filter(
+          (price: any) => price.organization_id === userData?.organization?.id
+        ) || []
+      })) || []
+
+      return materialsWithFilteredPrices
     },
     enabled: !!supabase
   })

@@ -218,8 +218,9 @@ export default function ConstructionCostAnalysis() {
         const materialPrice = material.organization_material_prices?.[0]
         if (materialPrice?.unit_price && materialPrice?.currency) {
           return (
-            <div className="text-sm font-medium">
-              {materialPrice.currency.symbol}{Number(materialPrice.unit_price).toLocaleString()}
+            <div className="text-sm">
+              <div className="font-medium">{Number(materialPrice.unit_price).toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground">{materialPrice.currency.symbol}</div>
             </div>
           )
         }
