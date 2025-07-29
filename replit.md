@@ -118,6 +118,11 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 29, 2025. ORGANIZATION PREFERENCES FINANCE CONCEPTS SECTION HIDDEN: Successfully hidden "CONCEPTOS DE FINANZAS" section from organization preferences page as requested - COMPLETED
+  • SECTION TEMPORARILY HIDDEN: Commented out entire "Conceptos de Finanzas" section including divider, headers, and DraggableConceptTree component
+  • CODE PRESERVED: All functionality preserved in comments for easy restoration when needed
+  • CLEAN INTERFACE: Page now shows only "Monedas y Billeteras" configuration section
+  • NO FUNCTIONALITY LOST: All hooks and logic remain intact, only UI visibility changed
 - July 29, 2025. MODAL SUBFORM UI REFINEMENT COMPLETED: Successfully optimized subform interface by eliminating extra padding and redundant buttons for cleaner UX - COMPLETED
   • PADDING OPTIMIZATION: Removed excessive px-6 padding from form content areas and pt-6 from tabs container for proper alignment
   • BUTTON DUPLICATION ELIMINATED: Removed duplicate action buttons from tab content, consolidating all controls to footer area

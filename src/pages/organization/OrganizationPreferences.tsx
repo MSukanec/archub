@@ -361,8 +361,7 @@ export default function OrganizationPreferences() {
       showSidebar 
       wide={false}
       headerProps={{
-        title: "Preferencias",
-        description: "Configuración de preferencias de la organización"
+        title: "Preferencias"
       }}
     >
       <div className="space-y-8">
@@ -512,12 +511,12 @@ export default function OrganizationPreferences() {
         </div>
 
         {/* Section Divider */}
-        <div className="border-t border-[var(--section-divider)] my-8" />
+        {/* <div className="border-t border-[var(--section-divider)] my-8" /> */}
 
-        {/* Conceptos de Finanzas Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Conceptos de Finanzas Section - TEMPORARILY HIDDEN */}
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Description */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Package2 className="h-5 w-5 text-[var(--accent)]" />
@@ -531,10 +530,10 @@ export default function OrganizationPreferences() {
                 Gestiona los conceptos disponibles para categorizar movimientos financieros. Los conceptos del sistema no pueden ser modificados, pero puedes crear conceptos personalizados para tu organización.
               </p>
             </div>
-          </div>
+          </div> */}
 
           {/* Right Column - Concepts Tree */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             {conceptsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
@@ -565,7 +564,7 @@ export default function OrganizationPreferences() {
               />
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </Layout>
   );
