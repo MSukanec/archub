@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 
 const subcontractSchema = z.object({
   title: z.string().min(1, "El título es obligatorio"),
@@ -47,6 +49,7 @@ interface SubcontractFormModalProps {
 export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
+  const { currentSubform, setCurrentSubform } = useModalPanelStore();
 
   const { data: userData } = useCurrentUser();
   const createSubcontract = useCreateSubcontract();
@@ -145,24 +148,23 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   // Panel principal para edición
   const editPanel = (
-    <div className="grid grid-cols-2 gap-8 h-[600px]">
-      {/* Columna Izquierda - Información del Subcontrato */}
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="title" className="text-sm font-medium">
-            Título *
-          </Label>
-          <Input
-            id="title"
-            placeholder="Ej: Trabajos de albañilería"
-            {...form.register('title')}
-            className="h-10"
-          />
-          {form.formState.errors.title && (
-            <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
-          )}
-        </div>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="title" className="text-sm font-medium">
+          Título *
+        </Label>
+        <Input
+          id="title"
+          placeholder="Ej: Trabajos de albañilería"
+          {...form.register('title')}
+          className="h-10"
+        />
+        {form.formState.errors.title && (
+          <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+        )}
+      </div>
 
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="contact_id" className="text-sm font-medium">
             Proveedor *
@@ -210,118 +212,44 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <p className="text-xs text-destructive">{form.formState.errors.status.message}</p>
           )}
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="amount_total" className="text-sm font-medium">
-            Monto Total
-          </Label>
-          <Input
-            id="amount_total"
-            type="number"
-            step="0.01"
-            placeholder="0"
-            {...form.register('amount_total', { valueAsNumber: true })}
-            className="h-10"
-          />
-          {form.formState.errors.amount_total && (
-            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="notes" className="text-sm font-medium">
-            Notas
-          </Label>
-          <Textarea
-            id="notes"
-            placeholder="Notas adicionales del subcontrato..."
-            {...form.register('notes')}
-            className="min-h-[120px] resize-none"
-          />
-        </div>
       </div>
 
-      {/* Columna Derecha - Selección de Tareas */}
-      <div className="border rounded-lg">
-        <div className="p-4 border-b bg-muted">
-          <h3 className="text-sm font-medium">Seleccionar Tareas del Proyecto</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Elige las tareas que incluirá este subcontrato
-          </p>
-        </div>
-        
-        {/* Header de la tabla */}
-        <div className="grid grid-cols-12 gap-2 py-3 px-4 bg-muted/50 font-medium text-xs border-b">
-          <div className="col-span-1 text-xs font-medium"></div>
-          <div className="col-span-8 text-xs font-medium">Tarea</div>
-          <div className="col-span-3 text-xs font-medium">Cantidad</div>
-        </div>
-
-        {/* Lista de tareas */}
-        <ScrollArea className="h-[480px]">
-          <div className="divide-y">
-            {projectTasks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No hay tareas disponibles en este proyecto
-              </div>
-            ) : (
-              projectTasks.map((task) => {
-                const isSelected = isTaskSelected(task.task_id || '');
-                const selectedQuantity = getSelectedQuantity(task.task_id || '');
-                
-                return (
-                  <div key={task.id} className="grid grid-cols-12 gap-2 py-3 px-4 hover:bg-muted/30">
-                    {/* Checkbox */}
-                    <div className="col-span-1 flex items-center">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) => 
-                          handleTaskSelection(task.task_id || '', checked === true)
-                        }
-                      />
-                    </div>
-
-                    {/* Información de la tarea */}
-                    <div className="col-span-8">
-                      <div className="text-sm leading-tight line-clamp-2">
-                        {task.name_rendered || 'Tarea sin nombre'}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                        <span className="font-bold">{task.category_name || 'Sin rubro'}</span>
-                        <span>•</span>
-                        <span>{task.unit_name || 'UN'}</span>
-                        <span>•</span>
-                        <span className="text-accent font-medium">
-                          Total: {task.quantity || 0}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Input de cantidad */}
-                    <div className="col-span-3">
-                      {isSelected && (
-                        <Input
-                          type="number"
-                          value={selectedQuantity}
-                          onChange={(e) => {
-                            const newQuantity = parseFloat(e.target.value) || 1;
-                            handleQuantityChange(task.task_id || '', newQuantity);
-                          }}
-                          className="h-8 text-xs"
-                          min="0.01"
-                          max={task.quantity || 999999}
-                          step="0.01"
-                          placeholder="Cantidad"
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </ScrollArea>
+      <div className="space-y-2">
+        <Label htmlFor="amount_total" className="text-sm font-medium">
+          Monto Total
+        </Label>
+        <Input
+          id="amount_total"
+          type="number"
+          step="0.01"
+          placeholder="0"
+          {...form.register('amount_total', { valueAsNumber: true })}
+          className="h-10"
+        />
+        {form.formState.errors.amount_total && (
+          <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
+        )}
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="notes" className="text-sm font-medium">
+          Notas
+        </Label>
+        <Textarea
+          id="notes"
+          placeholder="Notas adicionales del subcontrato..."
+          {...form.register('notes')}
+          className="min-h-[120px] resize-none"
+        />
+      </div>
+
+      {/* Sección de Tareas del Subcontrato */}
+      <FormSubsectionButton
+        icon={<Package />}
+        title="Tareas del Subcontrato"
+        description={selectedTasks.length > 0 ? `${selectedTasks.length} tarea${selectedTasks.length !== 1 ? 's' : ''} seleccionada${selectedTasks.length !== 1 ? 's' : ''}` : "Selecciona las tareas que incluirá este subcontrato"}
+        onClick={() => setCurrentSubform('tasks')}
+      />
     </div>
   );
 
@@ -333,7 +261,16 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
     />
   );
 
-  const footerContent = (
+  const footerContent = currentSubform === 'tasks' ? (
+    <FormModalFooter
+      leftLabel="Volver"
+      onLeftClick={() => setCurrentSubform(null)}
+      rightLabel={`Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
+      onRightClick={() => setCurrentSubform(null)}
+      showLoadingSpinner={false}
+      submitDisabled={selectedTasks.length === 0}
+    />
+  ) : (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={() => {}} // Se maneja automáticamente por el modal
@@ -344,12 +281,107 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
     />
   );
 
+  // Subform para selección de tareas
+  const getSubform = () => {
+    if (currentSubform === 'tasks') {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Package className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Seleccionar Tareas del Proyecto</h3>
+              <p className="text-xs text-muted-foreground">Elige las tareas que incluirá este subcontrato</p>
+            </div>
+          </div>
+
+          {/* Header de la tabla */}
+          <div className="grid grid-cols-12 gap-2 py-3 px-4 bg-muted/50 font-medium text-xs border-b rounded-t-lg border">
+            <div className="col-span-1 text-xs font-medium"></div>
+            <div className="col-span-8 text-xs font-medium">Tarea</div>
+            <div className="col-span-3 text-xs font-medium">Cantidad</div>
+          </div>
+
+          {/* Lista de tareas */}
+          <div className="border border-t-0 rounded-b-lg">
+            <ScrollArea className="h-[400px]">
+              <div className="divide-y">
+                {projectTasks.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay tareas disponibles en este proyecto
+                  </div>
+                ) : (
+                  projectTasks.map((task) => {
+                    const isSelected = isTaskSelected(task.task_id || '');
+                    const selectedQuantity = getSelectedQuantity(task.task_id || '');
+                    
+                    return (
+                      <div key={task.id} className="grid grid-cols-12 gap-2 py-3 px-4 hover:bg-muted/30">
+                        {/* Checkbox */}
+                        <div className="col-span-1 flex items-center">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => 
+                              handleTaskSelection(task.task_id || '', checked === true)
+                            }
+                          />
+                        </div>
+
+                        {/* Información de la tarea */}
+                        <div className="col-span-8">
+                          <div className="text-sm leading-tight line-clamp-2">
+                            {task.name_rendered || 'Tarea sin nombre'}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                            <span className="font-bold">{task.category_name || 'Sin rubro'}</span>
+                            <span>•</span>
+                            <span>{task.unit_name || 'UN'}</span>
+                            <span>•</span>
+                            <span className="text-accent font-medium">
+                              Total: {task.quantity || 0}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Input de cantidad */}
+                        <div className="col-span-3">
+                          {isSelected && (
+                            <Input
+                              type="number"
+                              value={selectedQuantity}
+                              onChange={(e) => {
+                                const newQuantity = parseFloat(e.target.value) || 1;
+                                handleQuantityChange(task.task_id || '', newQuantity);
+                              }}
+                              className="h-8 text-xs"
+                              min="0.01"
+                              max={task.quantity || 999999}
+                              step="0.01"
+                              placeholder="Cantidad"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <FormModalLayout
       columns={1}
       wide={true}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={getSubform()}
       headerContent={headerContent}
       footerContent={footerContent}
       isEditing={true}
