@@ -425,32 +425,11 @@ export default function ConstructionTasks() {
         {activeTab === "tasks" ? (
           // Tab Tareas - Contenido actual
           tasks.length === 0 ? (
-            <div className="space-y-4">
-              {/* Show phase headers even when empty */}
-              {projectPhases.length > 0 ? (
-                <div className="space-y-4">
-                  {projectPhases.map(phase => (
-                    <div key={phase.id} className="border rounded-lg">
-                      <div className="bg-muted/50 px-4 py-3 border-b">
-                        <h3 className="font-medium text-sm text-muted-foreground">
-                          {phase.name}
-                        </h3>
-                      </div>
-                      <div className="p-8 text-center text-muted-foreground">
-                        <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No hay tareas en esta fase</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={<CheckSquare className="h-8 w-8" />}
-                  title="No hay tareas en el proyecto"
-                  description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
-                />
-              )}
-            </div>
+            <EmptyState
+              icon={<CheckSquare className="h-8 w-8" />}
+              title="No hay tareas en el proyecto"
+              description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
+            />
           ) : (
             <Table
               columns={columns}
