@@ -118,14 +118,16 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
-- July 29, 2025. FORM SIMPLIFICATION AND DATEPICKER UPDATE COMPLETED: Successfully removed all decorative elements from movement forms and implemented custom DatePicker component - COMPLETED
-  • DECORATIVE SECTIONS ELIMINATED: Removed "Información de la Conversión" and "Información de la Transferencia" sections from ConversionFields and TransferFields components
-  • GENERIC SECTIONS REMOVED: Eliminated all "Información Financiera" generic sections with icons and descriptions from MaterialesFields, ManoDeObraFields, and MovementFormModal
-  • APORTES SECTION CLEANED: Removed "Información del Aporte de Terceros" decorative section from AportesFields while preserving the functional client selector
-  • IMPORT CLEANUP: Removed unused imports (DollarSign, Separator, ArrowRightLeft, ArrowLeftRight) from form components that no longer use decorative elements
-  • DATEPICKER INTEGRATION: Updated movement_date field to use src/components/ui-custom/DatePicker.tsx instead of basic HTML date input
-  • SPECIFIC TITLES PRESERVED: Maintained specific section titles like "Datos de Origen (Egreso)" and "Datos de Destino (Ingreso)" as requested
-  • FIELD-FOCUSED INTERFACE: All forms now display only essential fields without visual clutter or unnecessary descriptive elements
+- July 29, 2025. COMPLETE FORM SIMPLIFICATION AND LAYOUT OPTIMIZATION FINALIZED: Successfully eliminated ALL decorative elements from ALL movement forms including final APORTES PROPIOS and RETIROS PROPIOS cleanup - COMPLETED
+  • ALL DECORATIVE SECTIONS ELIMINATED: Removed decorative sections from ALL movement forms including ConversionFields, TransferFields, MaterialesFields, ManoDeObraFields, AportesFields, AportesPropiosFields, and RetirosPropiosFields
+  • APORTES PROPIOS CLEANED: Eliminated "Información del Aporte Propio" decorative section with DollarSign icon and description from AportesPropiosFields
+  • RETIROS PROPIOS CLEANED: Eliminated "Información del Retiro Propio" decorative section with DollarSign icon and description from RetirosPropiosFields  
+  • TRANSFERENCIA INTERNA LAYOUT: Reorganized MONEDA and CANTIDAD fields to appear inline using grid-cols-2 layout as requested
+  • COMPLETE IMPORT CLEANUP: Removed all unused imports (DollarSign, Separator, ArrowRightLeft, ArrowLeftRight) from ALL form components
+  • DATEPICKER INTEGRATION: Updated movement_date field to use src/components/ui-custom/DatePicker.tsx instead of basic HTML date input across all forms
+  • SPECIFIC TITLES PRESERVED: Maintained only essential operational section titles like "Datos de Origen (Egreso)" and "Datos de Destino (Ingreso)"
+  • FIELD-FOCUSED INTERFACE: ALL movement forms now display ONLY essential fields without ANY visual clutter or unnecessary descriptive elements
+  • SYNTAX ERRORS RESOLVED: Fixed JSX syntax issues after form modifications and ensured all forms compile correctly
 - July 29, 2025. PROJECT CREATION MODAL DEFAULT COLOR AND AUTO-ACTIVATION COMPLETED: Successfully configured project creation modal to default to green accent color and automatically set new projects as active - COMPLETED
   • DEFAULT COLOR UPDATED: Modal now defaults to #84cc16 (green accent) instead of white (#ffffff) in all color references
   • AUTOMATIC PROJECT ACTIVATION: New projects automatically become active through user_preferences.last_project_id update after creation

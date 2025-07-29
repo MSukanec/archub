@@ -4,8 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { DollarSign, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { Button } from '@/components/ui/button'
 
@@ -35,20 +34,7 @@ export function RetirosPropiosFields({ form, currencies, wallets, members, conce
   const categories = concepts?.filter((concept: any) => concept.parent_id && concept.view_mode?.trim() === "retiros_propios")
 
   return (
-    <>
-      {/* Separador y título de sección de retiros propios */}
-      <div className="col-span-2">
-        <Separator className="mb-4" />
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-            <DollarSign className="w-4 h-4 text-accent" />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-foreground">Información del Retiro Propio</h3>
-            <p className="text-xs text-muted-foreground">Datos específicos del retiro de socio</p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-4">
 
       {/* Socio */}
       <FormField
@@ -212,6 +198,6 @@ export function RetirosPropiosFields({ form, currencies, wallets, members, conce
           </FormItem>
         )}
       />
-    </>
+    </div>
   )
 }
