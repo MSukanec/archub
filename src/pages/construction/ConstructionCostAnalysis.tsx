@@ -182,16 +182,6 @@ export default function ConstructionCostAnalysis() {
       )
     },
     {
-      key: 'created_at',
-      label: 'Fecha Creación',
-      width: '15%',
-      render: (material: any) => (
-        <span className="text-xs text-muted-foreground">
-          {new Date(material.created_at).toLocaleDateString('es-ES')}
-        </span>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
       width: '10%',
