@@ -120,6 +120,13 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         
         // Si se especificó un precio, crear el registro de precio
         if (values.price && values.price.trim() !== '' && userData?.organization?.id && newMaterial) {
+          console.log('💰 Creating price with data:', {
+            organization_id: userData.organization.id,
+            material_id: newMaterial.id,
+            price: parseFloat(values.price),
+            currency_id: values.currency_id || undefined,
+          })
+          
           const priceData = {
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
@@ -127,7 +134,20 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             currency_id: values.currency_id || undefined,
           }
           
-          await createPriceMutation.mutateAsync(priceData)
+          try {
+            await createPriceMutation.mutateAsync(priceData)
+            console.log('✅ Price created successfully')
+          } catch (priceError) {
+            console.error('❌ Error creating price:', priceError)
+            throw priceError
+          }
+        } else {
+          console.log('⚠️ No price data to save:', {
+            hasPrice: !!values.price,
+            priceValue: values.price,
+            hasOrganization: !!userData?.organization?.id,
+            hasMaterial: !!newMaterial
+          })
         }
       }
       onClose()

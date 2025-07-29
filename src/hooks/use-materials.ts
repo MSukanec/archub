@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
+import { InsertOrganizationMaterialPrice } from '@/shared/schema'
 
 export interface Material {
   id: string
@@ -21,12 +22,7 @@ export interface NewMaterialData {
   is_system?: boolean
 }
 
-export interface MaterialPriceData {
-  organization_id: string
-  material_id: string
-  price: number
-  currency_id?: string
-}
+// MaterialPriceData interface eliminada - usar InsertOrganizationMaterialPrice del schema
 
 export function useMaterials() {
   return useQuery({
@@ -193,7 +189,7 @@ export function useCreateMaterialPrice() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: MaterialPriceData) => {
+    mutationFn: async (data: InsertOrganizationMaterialPrice) => {
       if (!supabase) throw new Error('Supabase client not available')
 
       const { data: result, error } = await supabase
