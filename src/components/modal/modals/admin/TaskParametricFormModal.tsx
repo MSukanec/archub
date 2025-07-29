@@ -391,32 +391,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       case 2:
         return (
           <div className="space-y-6">
-            {/* Show completed parameters when editing */}
-            {isEditingMode && selections.length > 0 && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Parámetros Configurados</Label>
-                <div className="flex flex-wrap gap-2">
-                  {selections.map((selection, index) => (
-                    <Badge key={index} variant="secondary" className="px-3 py-1">
-                      {selection.parameterLabel}: {selection.optionLabel}
-                    </Badge>
-                  ))}
-                </div>
-                <Separator />
-              </div>
-            )}
-            
-            {/* Task name preview when editing */}
-            {isEditingMode && actualTask?.name_rendered && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Nombre de la Tarea</Label>
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm">{actualTask.name_rendered}</p>
-                </div>
-                <Separator />
-              </div>
-            )}
-            
             {/* Agregar material */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
