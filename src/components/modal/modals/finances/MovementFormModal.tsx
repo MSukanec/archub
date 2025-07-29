@@ -266,6 +266,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Hook para cargar tareas existentes en modo edición
   const { data: existingMovementTasks } = useMovementTasks(editingMovement?.id)
   
+  // Debug log for existing movement tasks
+  React.useEffect(() => {
+    console.log('existingMovementTasks updated:', {
+      editingMovementId: editingMovement?.id,
+      existingMovementTasks,
+      tasksLength: existingMovementTasks?.length || 0
+    })
+  }, [existingMovementTasks, editingMovement?.id])
+  
   // Hook para cargar las tareas de construcción disponibles
   const { data: rawConstructionTasks, isLoading: isTasksLoading } = useConstructionTasks(
     userData?.preferences?.last_project_id || '',
