@@ -252,6 +252,8 @@ export default function ConstructionCostAnalysis() {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           showProjectSelector={false}
+          primaryActionLabel="Crear Material"
+          onPrimaryActionClick={() => openModal('material-form', {})}
           customGhostButtons={[
             <div key="data-type-selector" className="flex items-center">
               <Selector
