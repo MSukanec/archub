@@ -38,7 +38,7 @@ import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButt
 import DatePicker from '@/components/ui-custom/DatePicker'
 import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
 import { useConstructionTasks } from '@/hooks/use-construction-tasks'
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
 
 const movementFormSchema = z.object({
@@ -287,13 +287,30 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Cargar tarea existente en el estado cuando estamos editando
   React.useEffect(() => {
     if (existingMovementTasks && existingMovementTasks.length > 0) {
-      const firstTaskId = existingMovementTasks[0]?.task_id
-      console.log('Loading existing movement task:', firstTaskId)
-      if (firstTaskId) {
-        setSelectedTaskId(firstTaskId)
+      const firstTask = existingMovementTasks[0]
+      console.log('Loading existing movement task:', {
+        task_id: firstTask?.task_id,
+        construction_task_id: firstTask?.construction_task_id,
+        availableOptions: constructionTaskOptions.map(opt => opt.value)
+      })
+      
+      // Buscar en las opciones disponibles por task_id (el ID de la tarea paramétrica)
+      const matchingOption = constructionTaskOptions.find(option => {
+        // Las opciones usan task_instance_id como value
+        // Necesitamos encontrar la tarea que corresponde al task_id del movement_task
+        return rawConstructionTasks?.find(ct => 
+          ct.task_instance_id === option.value && ct.task_id === firstTask?.task_id
+        )
+      })
+      
+      if (matchingOption) {
+        console.log('Found matching task option:', matchingOption)
+        setSelectedTaskId(matchingOption.value)
+      } else {
+        console.log('No matching task found in available options')
       }
     }
-  }, [existingMovementTasks])
+  }, [existingMovementTasks, constructionTaskOptions, rawConstructionTasks])
   
 
 
@@ -2802,7 +2819,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             <label className="text-sm font-medium text-foreground">
               Tarea de Construcción
             </label>
-            <ComboBox
+            <ComboBoxWrite
               value={selectedTaskId}
               onValueChange={setSelectedTaskId}
               options={constructionTaskOptions}
