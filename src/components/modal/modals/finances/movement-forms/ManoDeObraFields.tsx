@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Users, Package } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { FormSubsectionButton } from "@/components/modal/form/FormSubsectionButton"
+import { ComboBox } from "@/components/ui-custom/ComboBoxWrite"
+import { useSubcontracts } from "@/hooks/use-subcontracts"
 
 
 // Tipo específico para el formulario de mano de obra
@@ -19,6 +21,7 @@ type ManoDeObraFormType = {
   category_id: string
   subcategory_id?: string
   construction_task_id: string
+  subcontrato?: string
   currency_id: string
   wallet_id: string
   amount: number
@@ -34,14 +37,18 @@ interface Props {
   selectedTaskId: string
   setSelectedTaskId: (taskId: string) => void
   onOpenTasksSubform: () => void
+  projectId?: string
 }
 
-export function ManoDeObraFields({ form, currencies, wallets, members, concepts, selectedTaskId, setSelectedTaskId, onOpenTasksSubform }: Props) {
+export function ManoDeObraFields({ form, currencies, wallets, members, concepts, selectedTaskId, setSelectedTaskId, onOpenTasksSubform, projectId }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(form.watch('category_id') || '')
   const [initialized, setInitialized] = React.useState(false)
+  
+  // Hook para obtener subcontratos del proyecto
+  const { data: subcontracts = [] } = useSubcontracts(projectId || null)
   
   // Ya no necesitamos cargar las tareas aquí, se manejan en el subform
   
@@ -240,11 +247,38 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts,
         />
       </div>
 
+      {/* Selección de Subcontrato */}
+      <div className="col-span-2">
+        <FormField
+          control={form.control}
+          name="subcontrato"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subcontrato (opcional)</FormLabel>
+              <FormControl>
+                <ComboBox
+                  options={subcontracts.map(subcontract => ({
+                    value: subcontract.id,
+                    label: subcontract.title
+                  }))}
+                  value={field.value || ''}
+                  onValueChange={(value: string) => field.onChange(value)}
+                  placeholder="Seleccionar subcontrato..."
+                  emptyMessage="No se encontraron subcontratos"
+                  searchPlaceholder="Buscar subcontrato..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
       {/* Botón para Selección de Tareas */}
       <div className="col-span-2">
         <FormSubsectionButton
           icon={<Package />}
-          title="Seleccionar Tarea de Construcción"
+          title="Detalle de Mano de Obra"
           description={selectedTaskId ? "Tarea seleccionada" : "Selecciona la tarea relacionada con este pago"}
           onClick={onOpenTasksSubform}
         />

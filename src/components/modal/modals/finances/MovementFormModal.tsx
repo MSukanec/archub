@@ -160,6 +160,7 @@ const manoDeObraFormSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
+  subcontrato: z.string().optional(),
   // construction_task_id se maneja ahora a través de selectedTaskIds estado
 })
 
@@ -500,6 +501,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       category_id: '',
       subcategory_id: '',
       construction_task_id: '',
+      subcontrato: '',
       currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
       wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -810,6 +812,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           manoDeObraForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
           manoDeObraForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) manoDeObraForm.setValue('exchange_rate', currentValues.exchange_rate)
+          
+          // Cargar datos desde extra_fields si estamos editando
+          if (preserveValues && editingMovement?.extra_fields) {
+            const extraFields = editingMovement.extra_fields as any
+            if (extraFields?.subcontrato) {
+              manoDeObraForm.setValue('subcontrato', extraFields.subcontrato)
+            }
+          }
           
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
@@ -1903,7 +1913,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         type_id: data.type_id,
         category_id: data.category_id,
         // construction_task_id se maneja ahora por movement_tasks
-        exchange_rate: data.exchange_rate || null
+        exchange_rate: data.exchange_rate || null,
+        // Campo JSON para manejar datos específicos de mano de obra
+        extra_fields: data.subcontrato ? { subcontrato: data.subcontrato } : null
       }
 
       // Si estamos editando, actualizar el movimiento existente
@@ -2633,6 +2645,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               selectedTaskId={selectedTaskId}
               setSelectedTaskId={setSelectedTaskId}
               onOpenTasksSubform={openTasksSubform}
+              projectId={form.watch('project_id')}
             />
           </form>
         </Form>
