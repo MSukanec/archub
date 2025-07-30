@@ -57,8 +57,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   // Determine if we're editing (either explicit flag or taskId provided)
   const isEditingMode = isEditing || (taskId && actualTask)
   
-  // If editing existing task, start at step 2 (materials), otherwise step 1 (parameters)
-  const [currentStep, setCurrentStep] = useState(isEditingMode ? 2 : 1)
+  // Start at step 1 for both creating and editing tasks
+  const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
@@ -468,7 +468,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
   // Step configuration
   const stepConfig: StepModalConfig = {
-    currentStep: isEditingMode ? 2 : currentStep,
+    currentStep: currentStep,
     totalSteps: 2,
     stepTitle: currentStep === 1 ? 'Configurar Parámetros' : 'Agregar Materiales'
   }
@@ -490,7 +490,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
           label: "Cancelar",
           onClick: onClose
         },
-        previousAction: (currentStep > 1 && !isEditingMode) ? {
+        previousAction: currentStep > 1 ? {
           label: "Atrás",
           onClick: () => setCurrentStep(1)
         } : undefined,
