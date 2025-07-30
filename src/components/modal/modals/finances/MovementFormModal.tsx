@@ -564,7 +564,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const isTransferType = viewMode === "transfer"
     const isAportesType = viewMode === "aportes"
     const isMaterialesType = typeName?.includes('material')
-    const isManoDeObraType = typeName?.includes('mano de obra') || typeName?.includes('labor')
+    const isSubcontratosType = typeName?.includes('subcontrato') || typeName?.includes('labor')
     
     
     // Cambiar formulario
@@ -576,8 +576,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       setMovementType('aportes')
     } else if (isMaterialesType) {
       setMovementType('materiales')
-    } else if (isManoDeObraType) {
-      setMovementType('mano_de_obra')
+    } else if (isSubcontratosType) {
+      setMovementType('subcontratos')
     } else {
       setMovementType('normal')
     }
@@ -600,7 +600,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
     
 
-  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, manoDeObraForm])
+  }, [selectedTypeId, concepts, editingMovement, form, conversionForm, transferForm, aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm])
   
   // Escuchar cambios en el tipo de TODOS los formularios
   const typeId = form.watch('type_id')
@@ -610,7 +610,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const aportesPropriosTypeId = aportesPropriosForm.watch('type_id')
   const retirosPropriosTypeId = retirosPropriosForm.watch('type_id')
   const materialesTypeId = materialesForm.watch('type_id')
-  const manoDeObraTypeId = manoDeObraForm.watch('type_id')
+  const subcontratosTypeId = subcontratosForm.watch('type_id')
 
   // Solo escuchar cambios del formulario principal para simplificar
   React.useEffect(() => {
@@ -637,7 +637,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!aportesPropriosForm.watch('created_by')) aportesPropriosForm.setValue('created_by', currentMember.id)
       if (!retirosPropriosForm.watch('created_by')) retirosPropriosForm.setValue('created_by', currentMember.id)
       if (!materialesForm.watch('created_by')) materialesForm.setValue('created_by', currentMember.id)
-      if (!manoDeObraForm.watch('created_by')) manoDeObraForm.setValue('created_by', currentMember.id)
+      if (!subcontratosForm.watch('created_by')) subcontratosForm.setValue('created_by', currentMember.id)
     }
     
     // Inicializar PROYECTO (solo si no está editando)
@@ -659,7 +659,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!aportesPropriosForm.watch('currency_id')) aportesPropriosForm.setValue('currency_id', defaultCurrency)
       if (!retirosPropriosForm.watch('currency_id')) retirosPropriosForm.setValue('currency_id', defaultCurrency)
       if (!materialesForm.watch('currency_id')) materialesForm.setValue('currency_id', defaultCurrency)
-      if (!manoDeObraForm.watch('currency_id')) manoDeObraForm.setValue('currency_id', defaultCurrency)
+      if (!subcontratosForm.watch('currency_id')) subcontratosForm.setValue('currency_id', defaultCurrency)
     }
     
     if (defaultWallet) {
@@ -683,8 +683,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!materialesForm.watch('wallet_id')) {
         materialesForm.setValue('wallet_id', defaultWallet)
       }
-      if (!manoDeObraForm.watch('wallet_id')) {
-        manoDeObraForm.setValue('wallet_id', defaultWallet)
+      if (!subcontratosForm.watch('wallet_id')) {
+        subcontratosForm.setValue('wallet_id', defaultWallet)
       }
     }
     
@@ -696,7 +696,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   React.useEffect(() => {
     // Ejecutar tanto en creación como en edición, pero con diferente lógica
     
-    const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id') || materialesForm.watch('category_id') || manoDeObraForm.watch('category_id')
+    const categoryId = form.watch('category_id') || aportesForm.watch('category_id') || aportesPropriosForm.watch('category_id') || retirosPropriosForm.watch('category_id') || materialesForm.watch('category_id') || subcontratosForm.watch('category_id')
     if (categoryId && categories) {
       const selectedCategory = categories.find((cat: any) => cat.id === categoryId)
       const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
@@ -2201,7 +2201,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               aportesPropriosForm.setValue('created_by', value)
               retirosPropriosForm.setValue('created_by', value)
               materialesForm.setValue('created_by', value)
-              manoDeObraForm.setValue('created_by', value)
+              subcontratosForm.setValue('created_by', value)
             }}
             placeholder="Seleccionar creador"
           />
@@ -2223,7 +2223,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 aportesPropriosForm.setValue('movement_date', date)
                 retirosPropriosForm.setValue('movement_date', date)
                 materialesForm.setValue('movement_date', date)
-                manoDeObraForm.setValue('movement_date', date)
+                subcontratosForm.setValue('movement_date', date)
               }
             }}
             placeholder="Seleccionar fecha"
@@ -2745,7 +2745,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           isAportesPropios ? "Registrar Aporte Propio" :
           isRetirosPropios ? "Registrar Retiro Propio" :
           isMateriales ? "Registrar Compra de Materiales" :
-          isManoDeObra ? "Registrar Pago de Mano de Obra" :
+          isSubcontratos ? "Registrar Pago de Subcontrato" :
           "Guardar"
         )
       }
@@ -2756,7 +2756,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           handleConfirm()
         }
       }}
-      showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createManoDeObraMutation.isPending}
+      showLoadingSpinner={createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createSubcontratosMutation.isPending}
     />
   )
 
