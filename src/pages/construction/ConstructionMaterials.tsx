@@ -18,7 +18,7 @@ export default function ConstructionMaterials() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [groupBy, setGroupBy] = useState("none")
+  const [groupingType, setGroupingType] = useState('categories')
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: materials = [], isLoading: materialsLoading } = useConstructionMaterials(
@@ -34,7 +34,7 @@ export default function ConstructionMaterials() {
   // Get unique categories for filter
   const uniqueCategories = Array.from(new Set(materials.map(m => m.category_name))).sort()
 
-  // Filter and sort materials
+  // Filter and sort materials with groupKey
   const filteredMaterials = materials
     .filter((material) => {
       const matchesSearch = material.name.toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -48,6 +48,23 @@ export default function ConstructionMaterials() {
       if (sortBy === 'quantity') return b.computed_quantity - a.computed_quantity
       return a.category_name.localeCompare(b.category_name)
     })
+    .map(material => {
+      // Agregar groupKey según el tipo de agrupación
+      let groupKey = 'Sin grupo';
+      
+      switch (groupingType) {
+        case 'categories':
+          groupKey = material.category_name || 'Sin categoría';
+          break;
+        case 'materials':
+          groupKey = material.name || 'Sin nombre';
+          break;
+        default:
+          groupKey = 'Sin grupo';
+      }
+      
+      return { ...material, groupKey };
+    })
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -55,6 +72,9 @@ export default function ConstructionMaterials() {
     setSortBy("category")
     setSelectedCategory("")
   }
+
+  // Detect active filters
+  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== ""
 
   // Custom filters for ActionBar (like in movements page)
   const customFilters = (
@@ -79,11 +99,6 @@ export default function ConstructionMaterials() {
       </div>
     </div>
   )
-
-  // Detect active filters
-  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== ""
-
-
 
   const headerProps = {
     title: "Materiales"
@@ -181,8 +196,13 @@ export default function ConstructionMaterials() {
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
         showGrouping={true}
-        groupingType={groupBy}
-        onGroupingChange={setGroupBy}
+        groupingType={groupingType}
+        onGroupingChange={setGroupingType}
+        groupingOptions={[
+          { value: 'categories', label: 'Agrupar por Categorías' },
+          { value: 'materials', label: 'Agrupar por Materiales' },
+          { value: 'none', label: 'Sin Agrupación' }
+        ]}
         customActions={[]}
       />
 
@@ -197,6 +217,13 @@ export default function ConstructionMaterials() {
           data={filteredMaterials}
           columns={columns}
           isLoading={materialsLoading}
+          groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+          renderGroupHeader={(groupKey, groupRows) => (
+            <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 text-sm font-medium">
+              <span>{groupKey}</span>
+              <span className="text-muted-foreground">({groupRows.length} {groupRows.length === 1 ? 'material' : 'materiales'})</span>
+            </div>
+          )}
         />
       )}
     </Layout>
