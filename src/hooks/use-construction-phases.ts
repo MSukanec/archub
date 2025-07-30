@@ -194,14 +194,23 @@ export function useUpdatePhasePositions() {
         position: phase.position
       }))
 
-      const { error } = await supabase
+      console.log('🔧 UPDATING PHASE POSITIONS:')
+      console.log('ProjectId:', projectId)
+      console.log('Phases data:', phases)
+      console.log('Updates payload:', updates)
+
+      const { error, data } = await supabase
         .from('construction_project_phases')
         .upsert(updates, { onConflict: 'id' })
 
+      console.log('Supabase response:', { error, data })
+
       if (error) {
-        console.error('Error updating phase positions:', error)
+        console.error('❌ Error updating phase positions:', error)
         throw error
       }
+
+      console.log('✅ Phase positions updated successfully')
 
       return { success: true }
     },

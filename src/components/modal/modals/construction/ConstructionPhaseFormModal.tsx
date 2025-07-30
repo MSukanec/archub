@@ -219,7 +219,7 @@ export function ConstructionPhaseFormModal({
       onLeftClick={onClose}
       rightLabel={modalData.isEditing ? "Guardar Cambios" : "Crear Fase"}
       onRightClick={handleSubmit(onSubmit)}
-      rightLoading={isSubmitting}
+      isRightLoading={isSubmitting}
     />
   );
 
