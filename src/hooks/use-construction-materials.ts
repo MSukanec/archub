@@ -40,6 +40,13 @@ export function useConstructionMaterials(projectId: string) {
         return [];
       }
 
+      // DEBUG: Log construction tasks data to understand quantities
+      console.log("🔧 Construction Tasks Data:", constructionTasksData.map(ct => ({
+        id: ct.id,
+        task_id: ct.task_id,
+        quantity: ct.quantity
+      })));
+
       // Extract task IDs from construction tasks
       const taskIds = constructionTasksData.map(ct => ct.task_id);
 
@@ -83,7 +90,12 @@ export function useConstructionMaterials(projectId: string) {
           const constructionTaskQuantity = constructionTask?.quantity || 1;
           const totalQuantity = (item.amount || 0) * constructionTaskQuantity;
           
-          console.log(`Material: ${material.name}, amount: ${item.amount}, construction qty: ${constructionTaskQuantity}, total: ${totalQuantity}`);
+          console.log(`📦 Material: ${material.name}`)
+          console.log(`   - Task ID: ${item.task_id}`)
+          console.log(`   - Material amount (per unit): ${item.amount}`)
+          console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
+          console.log(`   - Total quantity: ${totalQuantity}`)
+          console.log(`   - Construction task found:`, constructionTask);
           
           if (existingMaterial) {
             existingMaterial.computed_quantity += totalQuantity;
