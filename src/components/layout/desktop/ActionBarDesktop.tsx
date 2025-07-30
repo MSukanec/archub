@@ -356,6 +356,49 @@ export function ActionBarDesktop({
         {/* 1. SEARCH - REMOVED */}
 
         {/* 2. GHOST BUTTONS */}
+
+
+
+        {/* Custom Filters Popover */}
+        {customFilters && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost-icon"
+                className={cn(
+                  hasActiveFilters && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
+                )}
+              >
+                <Filter className="w-4 h-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              align="start" 
+              className="w-48 p-0 rounded-lg shadow-button-normal border"
+              style={{ 
+                backgroundColor: 'var(--card-bg)',
+                borderColor: 'var(--card-border)'
+              }}
+            >
+              <div className="p-3">
+                {customFilters}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Clear Filters Button */}
+        {onClearFilters && (
+          <Button
+            variant="ghost-icon"
+            onClick={onClearFilters}
+            title="Limpiar filtros"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
+
+        {/* Grouping Button - MOVED TO END */}
         {showGrouping && onGroupingChange && (
           <Popover>
             <PopoverTrigger asChild>
@@ -434,47 +477,6 @@ export function ActionBarDesktop({
               </div>
             </PopoverContent>
           </Popover>
-        )}
-
-
-
-        {/* Custom Filters Popover */}
-        {customFilters && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost-icon"
-                className={cn(
-                  hasActiveFilters && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
-                )}
-              >
-                <Filter className="w-4 h-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent 
-              align="start" 
-              className="w-48 p-0 rounded-lg shadow-button-normal border"
-              style={{ 
-                backgroundColor: 'var(--card-bg)',
-                borderColor: 'var(--card-border)'
-              }}
-            >
-              <div className="p-3">
-                {customFilters}
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
-
-        {/* Clear Filters Button */}
-        {onClearFilters && (
-          <Button
-            variant="ghost-icon"
-            onClick={onClearFilters}
-            title="Limpiar filtros"
-          >
-            <X className="w-4 h-4" />
-          </Button>
         )}
 
         {/* 3. SECONDARY BUTTONS (Custom actions) */}
