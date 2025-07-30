@@ -23,7 +23,16 @@ export default function UserSelector({
   placeholder = "Seleccionar usuario",
   className = ""
 }: UserSelectorProps) {
-  const selectedUser = users.find(user => user.id === value);
+  // Ordenar usuarios alfabéticamente por nombre
+  const sortedUsers = React.useMemo(() => {
+    return [...users].sort((a, b) => {
+      const nameA = (a.full_name || '').toLowerCase();
+      const nameB = (b.full_name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  }, [users]);
+
+  const selectedUser = sortedUsers.find(user => user.id === value);
 
   return (
     <Select value={value} onValueChange={onChange}>
@@ -43,7 +52,7 @@ export default function UserSelector({
         </div>
       </SelectTrigger>
       <SelectContent>
-        {users.map((user) => (
+        {sortedUsers.map((user) => (
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground" />
