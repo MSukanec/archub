@@ -19,7 +19,7 @@ export function useConstructionMaterials(projectId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      // Get all construction tasks for this project with phase information
+      // Get all construction tasks for this project
       const { data: constructionTasksData, error: constructionTasksError } = await supabase
         .from("construction_tasks")
         .select(`
@@ -27,12 +27,7 @@ export function useConstructionMaterials(projectId: string) {
           task_id,
           quantity,
           project_id,
-          organization_id,
-          project_phase_id,
-          project_phases:project_phase_id (
-            id,
-            name
-          )
+          organization_id
         `)
         .eq("project_id", projectId);
 
@@ -45,12 +40,11 @@ export function useConstructionMaterials(projectId: string) {
         return [];
       }
 
-      // DEBUG: Log construction tasks data to understand quantities and phases
+      // DEBUG: Log construction tasks data to understand quantities
       console.log("🔧 Construction Tasks Data:", constructionTasksData.map(ct => ({
         id: ct.id,
         task_id: ct.task_id,
-        quantity: ct.quantity,
-        phase: ct.project_phases?.name || 'Sin fase'
+        quantity: ct.quantity
       })));
 
       // Extract task IDs from construction tasks
@@ -103,7 +97,7 @@ export function useConstructionMaterials(projectId: string) {
             console.log(`   - Task ID: ${item.task_id}`)
             console.log(`   - Material amount (per unit): ${item.amount}`)
             console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
-            console.log(`   - Phase: ${constructionTask?.project_phases?.name || 'Sin fase'}`)
+            console.log(`   - Phase ID: ${constructionTask?.project_phase_id || 'Sin fase'}`)
             console.log(`   - Total quantity: ${totalQuantity}`)
             console.log(`   - Construction task:`, constructionTask)
             console.log(`   - Existing material in map:`, existingMaterial)
