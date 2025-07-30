@@ -8,33 +8,28 @@ export function useSubcontracts(projectId: string | null) {
   return useQuery({
     queryKey: ['subcontracts', projectId],
     queryFn: async () => {
-      if (!projectId || !supabase) {
-        console.log('🚫 SUBCONTRACTS QUERY DISABLED:', { projectId, hasSupabase: !!supabase });
-        return [];
-      }
-      
-      console.log('🔍 FETCHING SUBCONTRACTS FOR PROJECT:', projectId);
+      if (!projectId || !supabase) return [];
       
       const { data, error } = await supabase
         .from('subcontracts')
         .select(`
           *,
-          contact:contacts(id, full_name, email)
+          contact:contacts(id, name, email),
+          subcontract_tasks:subcontract_tasks(
+            id,
+            task_id,
+            amount,
+            notes,
+            task:task_parametric(id, name_rendered, code)
+          )
         `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ SUBCONTRACTS QUERY ERROR:', error);
-        throw error;
-      }
-      
-      console.log('✅ SUBCONTRACTS FETCHED:', data);
+      if (error) throw error;
       return data || [];
     },
     enabled: !!projectId,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
