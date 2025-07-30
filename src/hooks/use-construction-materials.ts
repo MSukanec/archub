@@ -90,15 +90,30 @@ export function useConstructionMaterials(projectId: string) {
           const constructionTaskQuantity = constructionTask?.quantity || 1;
           const totalQuantity = (item.amount || 0) * constructionTaskQuantity;
           
-          console.log(`📦 Material: ${material.name}`)
-          console.log(`   - Task ID: ${item.task_id}`)
-          console.log(`   - Material amount (per unit): ${item.amount}`)
-          console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
-          console.log(`   - Total quantity: ${totalQuantity}`)
-          console.log(`   - Construction task found:`, constructionTask);
+          // Enhanced logging for porcelanato specifically
+          if (material.name.toLowerCase().includes('porcelanato 60x60')) {
+            console.log(`🎯 PORCELANATO DEBUG:`)
+            console.log(`   - Material: ${material.name}`)
+            console.log(`   - Task ID: ${item.task_id}`)
+            console.log(`   - Material amount (per unit): ${item.amount}`)
+            console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
+            console.log(`   - Total quantity: ${totalQuantity}`)
+            console.log(`   - Construction task:`, constructionTask)
+            console.log(`   - Existing material in map:`, existingMaterial)
+          }
           
           if (existingMaterial) {
+            const previousQty = existingMaterial.computed_quantity;
             existingMaterial.computed_quantity += totalQuantity;
+            
+            // Enhanced logging for porcelanato accumulation
+            if (material.name.toLowerCase().includes('porcelanato 60x60')) {
+              console.log(`🔄 PORCELANATO ACCUMULATION:`)
+              console.log(`   - Previous total: ${previousQty}`)
+              console.log(`   - Adding: ${totalQuantity}`)
+              console.log(`   - New total: ${existingMaterial.computed_quantity}`)
+            }
+            
             // Recalcular la cantidad a comprar
             existingMaterial.to_purchase_quantity = Math.max(0, existingMaterial.computed_quantity - existingMaterial.purchased_quantity);
           } else {
@@ -113,6 +128,12 @@ export function useConstructionMaterials(projectId: string) {
               purchased_quantity: purchasedQty,
               to_purchase_quantity: Math.max(0, computedQty - purchasedQty)
             });
+            
+            // Enhanced logging for porcelanato first time
+            if (material.name.toLowerCase().includes('porcelanato 60x60')) {
+              console.log(`🆕 PORCELANATO FIRST TIME:`)
+              console.log(`   - Initial quantity: ${computedQty}`)
+            }
           }
         }
       });
