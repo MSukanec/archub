@@ -38,17 +38,17 @@ export default function ConstructionCostAnalysis() {
 
   // Filter tasks
   const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = task.name_rendered.toLowerCase().includes(searchValue.toLowerCase()) ||
-      task.code.toLowerCase().includes(searchValue.toLowerCase()) ||
-      (task.category_name && task.category_name.toLowerCase().includes(searchValue.toLowerCase()))
+    const matchesSearch = (task.name_rendered?.toLowerCase() || '').includes(searchValue.toLowerCase()) ||
+      (task.code?.toLowerCase() || '').includes(searchValue.toLowerCase()) ||
+      (task.category_name?.toLowerCase() || '').includes(searchValue.toLowerCase())
     
     return matchesSearch
   })
 
   // Filter materials by type and search
   const filteredMaterials = materials.filter((material) => {
-    const matchesSearch = material.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      (material.category?.name && material.category.name.toLowerCase().includes(searchValue.toLowerCase()))
+    const matchesSearch = (material.name?.toLowerCase() || '').includes(searchValue.toLowerCase()) ||
+      (material.category?.name?.toLowerCase() || '').includes(searchValue.toLowerCase())
     
     let matchesType = true
     if (dataType === "sistema") {
@@ -153,6 +153,8 @@ export default function ConstructionCostAnalysis() {
               size="sm"
               onClick={() => {
                 showDeleteConfirmation({
+                  title: "Eliminar tarea",
+                  description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
                   itemName: task.name_rendered || 'esta tarea',
                   onConfirm: () => {
                     // TODO: Implementar eliminación de tarea
@@ -252,6 +254,8 @@ export default function ConstructionCostAnalysis() {
               size="sm"
               onClick={() => {
                 showDeleteConfirmation({
+                  title: "Eliminar material",
+                  description: `¿Estás seguro de que quieres eliminar "${material.name || 'este material'}"?`,
                   itemName: material.name || 'este material',
                   onConfirm: () => {
                     deleteMaterialMutation.mutate(material.id)
@@ -342,16 +346,15 @@ export default function ConstructionCostAnalysis() {
 
         {activeTab === 'mano-obra' && (
           <div className="space-y-6">
-            <CustomRestricted
-              reason="coming_soon"
-              className="min-h-[400px] flex items-center justify-center"
-            >
-              <EmptyState
-                icon={<Users className="h-16 w-16" />}
-                title="Análisis de Mano de Obra"
-                description="Funcionalidad coming soon"
-              />
-            </CustomRestricted>
+            <div className="min-h-[400px] flex items-center justify-center">
+              <CustomRestricted reason="coming_soon">
+                <EmptyState
+                  icon={<Users className="h-16 w-16" />}
+                  title="Análisis de Mano de Obra"
+                  description="Funcionalidad coming soon"
+                />
+              </CustomRestricted>
+            </div>
           </div>
         )}
 
@@ -375,16 +378,15 @@ export default function ConstructionCostAnalysis() {
 
         {activeTab === 'indirectos' && (
           <div className="space-y-6">
-            <CustomRestricted
-              reason="coming_soon"
-              className="min-h-[400px] flex items-center justify-center"
-            >
-              <EmptyState
-                icon={<DollarSign className="h-16 w-16" />}
-                title="Análisis de Costos Indirectos"
-                description="Funcionalidad coming soon"
-              />
-            </CustomRestricted>
+            <div className="min-h-[400px] flex items-center justify-center">
+              <CustomRestricted reason="coming_soon">
+                <EmptyState
+                  icon={<DollarSign className="h-16 w-16" />}
+                  title="Análisis de Costos Indirectos"
+                  description="Funcionalidad coming soon"
+                />
+              </CustomRestricted>
+            </div>
           </div>
         )}
       </div>
