@@ -465,7 +465,7 @@ export default function ConstructionTasks() {
                   return (
                     <>
                       <div className="col-span-full text-sm font-medium">
-                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'instancia' : 'instancias'})
+                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
                       </div>
                     </>
                   );
