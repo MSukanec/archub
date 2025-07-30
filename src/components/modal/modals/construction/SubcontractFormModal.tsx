@@ -200,12 +200,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <SelectContent>
               {contacts.map((contact) => (
                 <SelectItem key={contact.id} value={contact.id}>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{contact.name}</span>
-                    {contact.email && (
-                      <span className="text-xs text-muted-foreground">({contact.email})</span>
-                    )}
-                  </div>
+                  {contact.full_name}
                 </SelectItem>
               ))}
             </SelectContent>
