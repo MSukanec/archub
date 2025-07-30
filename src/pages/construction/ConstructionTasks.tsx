@@ -188,13 +188,17 @@ export default function ConstructionTasks() {
     const phase = projectPhases.find(p => p.project_phase_id === phaseId)
     const phaseName = phase?.name || 'Fase'
     
-    showDeleteConfirmation({
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
       title: "Eliminar fase",
-      description: "¿Estás seguro de que deseas eliminar esta fase del proyecto?",
-      itemName: phaseName, 
+      description: "¿Estás seguro de que deseas eliminar esta fase del proyecto? Esta acción no se puede deshacer.",
+      itemName: phaseName,
+      itemType: "fase",
+      destructiveActionText: "Eliminar Fase",
       onConfirm: async () => {
         // TODO: Implementar eliminación de fase
         console.log('Delete phase:', phaseId)
+        // Aquí iría la lógica de eliminación cuando se implemente
       }
     })
   }
