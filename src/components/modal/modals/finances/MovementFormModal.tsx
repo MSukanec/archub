@@ -202,7 +202,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Inicializar panel correcto según el modo
   React.useEffect(() => {
     setPanel('edit') // Siempre empezar en modo edición
-  }, [setPanel])
+    
+    // Reset selections when opening new movement
+    if (!editingMovement) {
+      setSelectedSubcontractId('')
+      setSelectedTaskId('')
+    }
+  }, [setPanel, editingMovement])
   const { data: userData, isLoading: isUserDataLoading } = useCurrentUser()
   const { data: members, isLoading: isMembersLoading } = useOrganizationMembers(userData?.organization?.id)
   const { data: currencies, isLoading: isCurrenciesLoading } = useOrganizationCurrencies(userData?.organization?.id)
@@ -297,10 +303,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const subcontractOptions = React.useMemo(() => {
     if (!subcontracts) return []
     
-    return subcontracts.map((subcontract: any) => ({
-      value: subcontract.id,
-      label: subcontract.title
-    }))
+    return subcontracts
+      .map((subcontract: any) => ({
+        value: subcontract.id,
+        label: subcontract.title
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)) // Ordenamiento alfabético
   }, [subcontracts])
   
   // Cargar tarea y subcontrato existentes cuando estamos editando
@@ -325,8 +333,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     if (existingMovementSubcontracts && existingMovementSubcontracts.length > 0) {
       const firstSubcontract = existingMovementSubcontracts[0]
       setSelectedSubcontractId(firstSubcontract.subcontract_id)
+    } else if (!editingMovement) {
+      // Solo limpiar cuando no estamos editando
+      setSelectedSubcontractId('')
     }
-  }, [existingMovementSubcontracts])
+  }, [existingMovementSubcontracts, editingMovement])
   
 
 
@@ -2720,7 +2731,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               Subcontrato
             </label>
             <ComboBoxWrite
-              value={selectedSubcontractId}
+              value={selectedSubcontractId || ""}
               onValueChange={setSelectedSubcontractId}
               options={subcontractOptions}
               placeholder="Seleccionar subcontrato..."
