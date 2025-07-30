@@ -124,6 +124,11 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   };
 
   const onSubmit = async (data: SubcontractFormData) => {
+    console.log('Form submission attempt:', data);
+    console.log('Form errors:', form.formState.errors);
+    console.log('Form is valid:', form.formState.isValid);
+    console.log('Selected tasks:', selectedTasks);
+    
     // Las tareas son opcionales, no obligatorias
     setIsSubmitting(true);
 
@@ -332,7 +337,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       rightLabel="Crear Subcontrato"
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isSubmitting}
-      submitDisabled={!form.formState.isValid || selectedTasks.length === 0 || isSubmitting}
+      submitDisabled={!form.formState.isValid || isSubmitting}
     />
   );
 
