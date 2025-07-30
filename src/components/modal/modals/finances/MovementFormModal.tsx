@@ -311,30 +311,47 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       .sort((a, b) => a.label.localeCompare(b.label)) // Ordenamiento alfabético
   }, [subcontracts])
   
-  // Cargar tarea y subcontrato existentes cuando estamos editando
+  // Cargar tarea existente cuando estamos editando
   React.useEffect(() => {
-    if (existingMovementTasks && existingMovementTasks.length > 0 && rawConstructionTasks && rawConstructionTasks.length > 0) {
-      const firstTask = existingMovementTasks[0]
-      
-      // The movement_tasks.task_id should match construction_tasks.task_instance_id
-      // (the task_id in movement_tasks refers to the instance ID of the construction task)
-      const matchingTask = rawConstructionTasks.find(ct => 
-        ct.task_instance_id === firstTask?.task_id
-      )
-      
-      if (matchingTask) {
-        setSelectedTaskId(matchingTask.task_instance_id)
+    if (editingMovement) {
+      // Si estamos editando, usar la tarea existente o vacío
+      if (existingMovementTasks && existingMovementTasks.length > 0 && rawConstructionTasks && rawConstructionTasks.length > 0) {
+        const firstTask = existingMovementTasks[0]
+        
+        // The movement_tasks.task_id should match construction_tasks.task_instance_id
+        // (the task_id in movement_tasks refers to the instance ID of the construction task)
+        const matchingTask = rawConstructionTasks.find(ct => 
+          ct.task_instance_id === firstTask?.task_id
+        )
+        
+        if (matchingTask) {
+          setSelectedTaskId(matchingTask.task_instance_id)
+        } else {
+          setSelectedTaskId('')
+        }
+      } else {
+        // Si no hay tarea existente, dejar vacío
+        setSelectedTaskId('')
       }
+    } else {
+      // Si es nuevo movimiento, siempre empezar vacío
+      setSelectedTaskId('')
     }
-  }, [existingMovementTasks, rawConstructionTasks])
+  }, [existingMovementTasks, rawConstructionTasks, editingMovement])
 
   // Cargar subcontrato existente cuando estamos editando
   React.useEffect(() => {
-    if (existingMovementSubcontracts && existingMovementSubcontracts.length > 0) {
-      const firstSubcontract = existingMovementSubcontracts[0]
-      setSelectedSubcontractId(firstSubcontract.subcontract_id)
-    } else if (!editingMovement) {
-      // Solo limpiar cuando no estamos editando
+    if (editingMovement) {
+      // Si estamos editando, usar el subcontrato existente o vacío
+      if (existingMovementSubcontracts && existingMovementSubcontracts.length > 0) {
+        const firstSubcontract = existingMovementSubcontracts[0]
+        setSelectedSubcontractId(firstSubcontract.subcontract_id)
+      } else {
+        // Si no hay subcontrato existente, dejar vacío
+        setSelectedSubcontractId('')
+      }
+    } else {
+      // Si es nuevo movimiento, siempre empezar vacío
       setSelectedSubcontractId('')
     }
   }, [existingMovementSubcontracts, editingMovement])
