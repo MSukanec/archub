@@ -26,7 +26,7 @@ import { supabase } from '@/lib/supabase';
 const documentUploadSchema = z.object({
   created_by: z.string().min(1, 'El creador es obligatorio'),
   folder_id: z.string().min(1, 'Debe seleccionar una carpeta'),
-  group_id: z.string().min(1, 'Debe seleccionar un grupo'),
+  group_id: z.string().optional(),
   status: z.string().min(1, 'El estado es obligatorio'),
   visibility: z.string().min(1, 'La visibilidad es obligatoria'),
   group_description: z.string().optional(),
@@ -184,9 +184,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         throw new Error('Debe seleccionar al menos un archivo');
       }
 
-      if (!data.group_id) {
-        throw new Error('Debe seleccionar un grupo para subir documentos');
-      }
+      // group_id is optional, documents can be uploaded directly to folders
 
       setIsUploading(true);
       setUploadProgress(0);
@@ -195,9 +193,10 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       const uploads = selectedFiles.map(async (file, index) => {
         const fileName = fileNames[index] || file.name.replace(/\.[^/.]+$/, '');
         
-        // Generate file path: organization_id/project_id/documents/group_id/filename
+        // Generate file path: organization_id/project_id/documents/[group_id|folder_id]/filename
         const extension = file.name.split('.').pop() || '';
-        const filePath = `${userData.preferences.last_organization_id}/${userData.preferences.last_project_id}/documents/${data.group_id}/${Date.now()}-${file.name}`;
+        const folderPath = data.group_id || data.folder_id;
+        const filePath = `${userData.preferences.last_organization_id}/${userData.preferences.last_project_id}/documents/${folderPath}/${Date.now()}-${file.name}`;
         
         // First upload file to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -225,7 +224,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           file_url: urlData.publicUrl,
           file_type: file.type,
           file_size: file.size,
-          group_id: data.group_id,
+          group_id: data.group_id || null,
           status: data.status,
           visibility: data.visibility,
         });

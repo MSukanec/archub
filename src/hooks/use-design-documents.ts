@@ -92,7 +92,7 @@ export function useCreateDesignDocument() {
       file_url: string;
       file_type: string;
       file_size?: number;
-      group_id: string;
+      group_id: string | null;
       status: string;
       visibility?: string;
     }): Promise<DesignDocument> => {
