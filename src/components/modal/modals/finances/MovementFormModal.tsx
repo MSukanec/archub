@@ -1786,8 +1786,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         category_id: data.category_id,
         // construction_task_id se maneja ahora por movement_tasks
         exchange_rate: data.exchange_rate || null,
-        // Ya no usamos extra_fields para subcontratos - se guarda en tabla separada
-        extra_fields: null
+        // Subcontratos se manejan en tabla separada movement_subcontracts
       }
 
       // Si estamos editando, actualizar el movimiento existente
