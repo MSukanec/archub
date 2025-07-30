@@ -47,7 +47,7 @@ export default function UserSelector({
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">{user.full_name || 'Sin nombre'}</span>
+              <span>{user.full_name || 'Sin nombre'}</span>
             </div>
           </SelectItem>
         ))}
