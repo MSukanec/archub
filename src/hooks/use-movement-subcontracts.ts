@@ -7,11 +7,19 @@ export function useCreateMovementSubcontract() {
 
   return useMutation({
     mutationFn: async (data: InsertMovementSubcontract) => {
-      return apiRequest(`/api/movement-subcontracts`, {
+      const response = await fetch('/api/movement-subcontracts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(data),
       })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
@@ -46,9 +54,18 @@ export function useDeleteMovementSubcontractsByMovement() {
 
   return useMutation({
     mutationFn: async (movementId: string) => {
-      return apiRequest(`/api/movement-subcontracts/by-movement/${movementId}`, {
+      const response = await fetch(`/api/movement-subcontracts/by-movement/${movementId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
