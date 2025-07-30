@@ -10,7 +10,7 @@ import { Package } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract, useUpdateSubcontract, useSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
-// import UserSelector from "@/components/ui-custom/UserSelector";
+import UserSelector from "@/components/ui-custom/UserSelector";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
 import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { toast } from "@/hooks/use-toast";
@@ -271,21 +271,17 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           <Label htmlFor="contact_id" className="text-xs font-medium">
             Proveedor *
           </Label>
-          <Select
+          <UserSelector
+            users={contacts.map(contact => ({
+              id: contact.id,
+              full_name: contact.full_name || `${contact.first_name} ${contact.last_name}`.trim() || 'Sin nombre',
+              avatar_url: undefined
+            }))}
             value={form.watch('contact_id') || ''}
-            onValueChange={(value) => form.setValue('contact_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar proveedor..." />
-            </SelectTrigger>
-            <SelectContent>
-              {contacts.map((contact) => (
-                <SelectItem key={contact.id} value={contact.id}>
-                  {contact.full_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(value) => form.setValue('contact_id', value)}
+            placeholder="Seleccionar proveedor..."
+            className="w-full"
+          />
           {form.formState.errors.contact_id && (
             <p className="text-xs text-destructive">{form.formState.errors.contact_id.message}</p>
           )}
