@@ -59,6 +59,7 @@ export function useSiteLogActivity(organizationId: string | undefined, projectId
           .order('created_at', { ascending: true })
 
         if (error) {
+          console.error('Error fetching site log activity:', error)
           throw error
         }
 
@@ -125,6 +126,7 @@ export function useSiteLogActivity(organizationId: string | undefined, projectId
 
         return activityData
       } catch (error) {
+        console.error('Error fetching site log activity:', error)
         return []
       }
     },

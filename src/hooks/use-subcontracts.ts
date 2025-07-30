@@ -98,6 +98,7 @@ export function useCreateSubcontract() {
       });
     },
     onError: (error) => {
+      console.error('Error creating subcontract:', error);
       toast({
         title: "Error",
         description: "No se pudo crear el subcontrato",
@@ -166,6 +167,7 @@ export function useUpdateSubcontract() {
       });
     },
     onError: (error) => {
+      console.error('Error updating subcontract:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el subcontrato",
@@ -198,6 +200,7 @@ export function useDeleteSubcontract() {
       });
     },
     onError: (error) => {
+      console.error('Error deleting subcontract:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el subcontrato",

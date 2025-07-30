@@ -35,6 +35,7 @@ export function useContacts() {
         .order('first_name', { ascending: true })
 
       if (error) {
+        console.error('Error fetching contacts:', error)
         throw error
       }
       

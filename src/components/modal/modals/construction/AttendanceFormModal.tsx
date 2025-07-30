@@ -116,6 +116,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       onClose()
     },
     onError: (error) => {
+      console.error('Error creating attendance:', error)
       toast({
         title: 'Error',
         description: 'No se pudo registrar la asistencia',
@@ -151,6 +152,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       onClose()
     },
     onError: (error) => {
+      console.error('Error updating attendance:', error)
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la asistencia',

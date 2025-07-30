@@ -66,6 +66,7 @@ export function ConstructionSingleTaskModal({
         .single();
         
       if (error) {
+        console.error('❌ Error obteniendo membresía de organización:', error);
         return null;
       }
       
@@ -86,6 +87,7 @@ export function ConstructionSingleTaskModal({
         .order('name_rendered', { ascending: true });
       
       if (error) {
+        console.error('❌ Error cargando librería de tareas:', error);
         throw error;
       }
       
@@ -110,6 +112,7 @@ export function ConstructionSingleTaskModal({
   // Si estamos editando, configurar los valores iniciales
   useEffect(() => {
     if (isEditing && modalData.editingTask) {
+      console.log('Loading task for editing:', modalData.editingTask);
       
       setSelectedTaskId(modalData.editingTask.task_id || '');
       
@@ -201,6 +204,7 @@ export function ConstructionSingleTaskModal({
       
       onClose();
     } catch (error) {
+      console.error('❌ Error al procesar tarea:', error);
     } finally {
       setIsSubmitting(false);
     }

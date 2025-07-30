@@ -68,15 +68,20 @@ export function useWalletCurrencyBalances(
 
         if (error) throw error
         if (!movements || movements.length === 0) {
+          console.log('No movements found for wallet-currency balances')
           return []
         }
 
+        console.log('Movements found for wallet-currency analysis:', movements.length)
 
         // Get unique IDs to fetch related data
         const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
         const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
 
+        console.log('Wallet IDs from movements:', walletIds)
+        console.log('Currency IDs from movements:', currencyIds)
+        console.log('Type IDs from movements:', typeIds)
 
         // Fetch related data in parallel - usar organization_wallets para obtener los nombres de billeteras
         const [walletsResult, currenciesResult, conceptsResult] = await Promise.all([
@@ -88,6 +93,9 @@ export function useWalletCurrencyBalances(
           supabase.from('movement_concepts').select('id, name').in('id', typeIds)
         ])
 
+        console.log('Wallets fetched from organization_wallets:', walletsResult.data)
+        console.log('Currencies fetched:', currenciesResult.data)
+        console.log('Concepts fetched:', conceptsResult.data)
 
         // Create lookup maps
         const walletsMap = new Map()
@@ -156,9 +164,11 @@ export function useWalletCurrencyBalances(
             return a.currency.localeCompare(b.currency)
           })
 
+        console.log('Final wallet-currency balance data:', result)
         return result
 
       } catch (error) {
+        console.error('Error in useWalletCurrencyBalances:', error)
         return []
       }
     },

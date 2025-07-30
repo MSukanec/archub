@@ -58,6 +58,7 @@ export default function AdminMaterialCategories() {
             description: `La categoría "${category.name}" ha sido eliminada exitosamente.`,
           });
         } catch (error) {
+          console.error('Error deleting category:', error);
           toast({
             title: "Error",
             description: "No se pudo eliminar la categoría de material.",

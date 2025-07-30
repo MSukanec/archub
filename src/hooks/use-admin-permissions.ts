@@ -20,6 +20,7 @@ export function useAdminPermissions() {
         .single()
 
       if (error) {
+        console.error('Error checking admin permissions:', error)
         return { isAdmin: false, loading: false }
       }
 

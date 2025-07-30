@@ -74,6 +74,7 @@ export function ConstructionTaskScheduleModal({
         .maybeSingle();
 
       if (error) {
+        console.error('Error fetching current phase task:', error);
         return null;
       }
 
@@ -99,6 +100,7 @@ export function ConstructionTaskScheduleModal({
   // Cargar datos cuando el modal se abre o cambian los datos
   useEffect(() => {
     if (modalData.editingTask && !isLoadingPhase) {
+      console.log('Loading schedule data for task:', modalData.editingTask);
       
       // Resetear el formulario con los datos de la tarea
       const taskData = {
@@ -109,6 +111,7 @@ export function ConstructionTaskScheduleModal({
         notes: modalData.editingTask.notes || ""
       };
       
+      console.log('Setting form data:', taskData);
       reset(taskData);
     }
   }, [modalData.editingTask, currentPhaseTask, isLoadingPhase, reset]);
@@ -154,6 +157,7 @@ export function ConstructionTaskScheduleModal({
 
       onClose();
     } catch (error) {
+      console.error('Error updating task schedule:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el cronograma de la tarea",

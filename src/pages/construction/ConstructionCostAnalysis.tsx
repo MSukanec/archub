@@ -156,6 +156,7 @@ export default function ConstructionCostAnalysis() {
                   itemName: task.name_rendered || 'esta tarea',
                   onConfirm: () => {
                     // TODO: Implementar eliminación de tarea
+                    console.log('Eliminar tarea:', task.id)
                   }
                 })
               }}

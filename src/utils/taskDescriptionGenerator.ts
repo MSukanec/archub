@@ -28,6 +28,7 @@ export async function generateTaskDescription(
     .in('name', paramNames);
 
   if (error) {
+    console.error('Error fetching parameters:', error);
     return nameTemplate;
   }
 

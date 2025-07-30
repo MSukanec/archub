@@ -61,6 +61,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
     queryFn: async () => {
       if (!organizationId) return []
 
+      console.log('Fetching movements for organization:', organizationId, 'project:', projectId)
+      console.log('Project filter active:', !!projectId)
 
       if (!supabase) {
         throw new Error('Supabase client not initialized')
@@ -99,25 +101,33 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       // If project is specified, filter by project
       // Only filter by project if projectId is explicitly provided and not null
       if (projectId && projectId !== 'null') {
+        console.log('Filtering by project_id:', projectId);
         query = query.eq('project_id', projectId);
       } else {
+        console.log('Not filtering by project - showing all movements for organization');
       }
 
       const { data, error } = await query;
 
       if (error) {
+        console.error('Error fetching movements:', error)
         return []
       }
 
       if (!data || data.length === 0) {
+        console.log('No movements found for organization:', organizationId)
         return []
       }
 
+      console.log('Found movements:', data.length)
       if (data.length > 0) {
+        console.log('Sample movement data:', {
           project_id: data[0]?.project_id,
           organization_id: data[0]?.organization_id,
           description: data[0]?.description
         })
+        console.log('Expected organization_id:', organizationId)
+        console.log('Expected project_id:', projectId)
       }
 
       // Get related data in parallel
@@ -235,6 +245,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         }
       });
 
+      console.log('Transformed movements:', transformedData.length);
       return transformedData as Movement[];
     },
     enabled: !!organizationId

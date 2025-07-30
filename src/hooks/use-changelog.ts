@@ -64,6 +64,7 @@ export function useCreateChangelogEntry() {
       })
     },
     onError: (error) => {
+      console.error('Error creating changelog entry:', error)
       toast({
         title: 'Error',
         description: 'No se pudo crear la entrada del changelog.',
@@ -102,6 +103,7 @@ export function useUpdateChangelogEntry() {
       })
     },
     onError: (error) => {
+      console.error('Error updating changelog entry:', error)
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la entrada del changelog.',
@@ -134,6 +136,7 @@ export function useDeleteChangelogEntry() {
       })
     },
     onError: (error) => {
+      console.error('Error deleting changelog entry:', error)
       toast({
         title: 'Error',
         description: 'No se pudo eliminar la entrada del changelog.',

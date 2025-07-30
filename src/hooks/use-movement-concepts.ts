@@ -36,6 +36,7 @@ export function useMovementConcepts(type: 'types' | 'categories' | 'parent', par
       const { data, error } = await query
 
       if (error) {
+        console.error('Error fetching movement concepts:', error)
         throw error
       }
 

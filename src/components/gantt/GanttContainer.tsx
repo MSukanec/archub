@@ -24,6 +24,7 @@ export function GanttContainer({
   
   const { openModal } = useGlobalModalStore();
   
+  console.log('GanttContainer received dependencies:', dependencies);
   // Estado para manejar conexiones drag & drop entre tareas
   const [dragConnectionData, setDragConnectionData] = useState<{
     fromTaskId: string;
@@ -213,6 +214,7 @@ export function GanttContainer({
     const finalTimelineStart = new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate());
     const finalTimelineEnd = new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate());
     
+    console.log('Timeline calculation:', {
       minDateOriginal: minDate.toDateString(),
       timelineStartCalculated: finalTimelineStart.toDateString(),
       timelineEndCalculated: finalTimelineEnd.toDateString()
@@ -267,6 +269,7 @@ export function GanttContainer({
     const totalDays = allDays.length;
     
     // Calendar structure generated correctly
+    // console.log('Calendar:', totalDays, 'days from', timelineStart.toDateString(), 'to', timelineEnd.toDateString());
     
     return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
@@ -296,6 +299,7 @@ export function GanttContainer({
 
   // Función para manejar el inicio de conexión con posición inicial
   const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start' | 'end' } | null, initialPosition?: { x: number; y: number }) => {
+    console.log('GanttContainer handleConnectionDrag:', data, initialPosition);
     setDragConnectionData(data);
     
     if (data && initialPosition) {
@@ -306,9 +310,11 @@ export function GanttContainer({
         mouseX: initialPosition.x,
         mouseY: initialPosition.y
       });
+      console.log('Línea punteada creada:', initialPosition);
     } else {
       // Limpiar la línea cuando se cancela el drag
       setConnectionLineData(null);
+      console.log('Línea punteada limpiada');
     }
   }, []);
 
@@ -381,6 +387,7 @@ export function GanttContainer({
         setAutoScrolled(true);
         
         // Auto-scroll to show current week
+        // console.log('Auto-scroll to day', targetDayIndex);
       }
     };
 
@@ -891,6 +898,7 @@ export function GanttContainer({
                         const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
                         
                         // Today line positioned correctly
+                        // console.log('Today line at day', todayDayIndex, 'position', todayPosition);
                         
                         return (
                           <div 

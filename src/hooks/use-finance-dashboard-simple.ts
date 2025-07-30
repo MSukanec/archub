@@ -159,6 +159,7 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
           thisMonthBalance: thisMonthIncome - thisMonthExpenses
         }
       } catch (error) {
+        console.error('Error in useFinancialSummary:', error)
         return {
           totalIncome: 0,
           totalExpenses: 0,
@@ -262,6 +263,7 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
 
         return monthlyData
       } catch (error) {
+        console.error('Error in useMonthlyFlowData:', error)
         return []
       }
     },
@@ -298,14 +300,17 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
 
         if (error) throw error
         if (!movements || movements.length === 0) {
+          console.log('No movements found for wallet balances')
           return []
         }
 
+        console.log('Movements found for wallets:', movements.length)
 
         // Get unique IDs
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
         const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
         
+        console.log('Wallet IDs found:', walletIds)
         
         // Get concepts and wallets separately
         const [conceptsResult, walletsResult] = await Promise.all([
@@ -352,6 +357,7 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           'hsl(0, 87%, 67%)'
         ]
 
+        console.log('Wallet balances calculated:', walletBalances)
 
         // Convert to array - show absolute values for all balances
         const result: WalletBalance[] = Object.entries(walletBalances)
@@ -362,8 +368,10 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           }))
           .filter(item => item.balance > 0.01) // Filter only very small amounts
 
+        console.log('Final wallet chart data:', result)
         return result
       } catch (error) {
+        console.error('Error in useWalletBalances:', error)
         return []
       }
     },
@@ -428,6 +436,7 @@ export function useRecentMovements(organizationId: string | undefined, projectId
 
         return enrichedMovements
       } catch (error) {
+        console.error('Error in useRecentMovements:', error)
         return []
       }
     },
@@ -550,6 +559,7 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
 
         return result
       } catch (error) {
+        console.error('Error in useExpensesByCategory:', error)
         return []
       }
     },

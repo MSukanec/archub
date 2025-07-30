@@ -17,6 +17,7 @@ interface ExpensesTreemapChartProps {
 
 export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartProps) {
   
+  console.log('Treemap data received:', data)
   
   if (isLoading) {
     return (
@@ -27,6 +28,7 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
   }
 
   if (!data || data.length === 0) {
+    console.log('No treemap data available')
     return (
       <div className="h-80 flex items-center justify-center">
         <div className="text-sm text-muted-foreground">No hay datos de subcategorías</div>
@@ -51,6 +53,7 @@ export function ExpensesTreemapChart({ data, isLoading }: ExpensesTreemapChartPr
     fill: item.color
   }))
 
+  console.log('Processed treemap data:', treemapData)
 
   return (
     <div className="space-y-4">

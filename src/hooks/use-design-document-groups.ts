@@ -57,6 +57,7 @@ export function useDesignDocumentGroups(folderId?: string) {
       const { data, error } = await query.order('name', { ascending: true });
 
       if (error) {
+        console.error('Error fetching design document groups:', error);
         return [];
       }
 

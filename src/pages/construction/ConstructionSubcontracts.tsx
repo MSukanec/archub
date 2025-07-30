@@ -53,6 +53,7 @@ export default function ConstructionSubcontracts() {
 
   const handleCreateSubcontract = () => {
     if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
+      console.log('Missing organization or project data');
       return;
     }
 

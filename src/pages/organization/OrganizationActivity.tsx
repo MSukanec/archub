@@ -78,6 +78,7 @@ export default function OrganizationActivity() {
 
   // Handle activity click
   const handleActivityClick = (activity: any) => {
+    console.log('Activity clicked:', activity);
     // Navigate to related sections based on activity type
     switch (activity.target_table) {
       case 'movements':
@@ -93,6 +94,7 @@ export default function OrganizationActivity() {
         navigate('/organization/contacts');
         break;
       default:
+        console.log('Activity details:', activity);
     }
   };
 

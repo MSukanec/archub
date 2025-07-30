@@ -24,11 +24,13 @@ export async function renderTaskNameFromParams(
     });
 
     if (error) {
+      console.error('Error calling render_task_name_from_param_values:', error);
       throw error;
     }
 
     return data as string;
   } catch (error) {
+    console.error('Failed to render task name from params:', error);
     throw error;
   }
 }
@@ -48,6 +50,7 @@ export async function renderTaskNameWithFallback(
   try {
     return await renderTaskNameFromParams(paramValues, paramOrder);
   } catch (error) {
+    console.warn('RPC function failed, using fallback:', error);
     
     if (fallbackGenerator) {
       return fallbackGenerator();

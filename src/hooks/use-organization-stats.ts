@@ -69,6 +69,7 @@ export function useOrganizationStats() {
         financialMovementsLast30Days: Math.abs(totalMovements)
       }
       } catch (error) {
+        console.error('Error fetching organization stats:', error)
         throw new Error('Error al cargar estadísticas. Inténtalo nuevamente.')
       }
     },
@@ -148,6 +149,7 @@ export function useOrganizationActivity() {
 
         return activityData
       } catch (error) {
+        console.error('Error fetching organization activity:', error)
         throw new Error('Error al cargar actividad. Inténtalo nuevamente.')
       }
     },

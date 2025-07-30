@@ -270,6 +270,7 @@ export default function OrganizationProjects() {
         
         if (error) {
           // Fallback: eliminar manualmente pero con más cuidado
+          console.log('RPC failed, using manual deletion:', error)
           
           // Primero eliminar project_data específico
           const { error: projectDataError } = await supabase
@@ -279,6 +280,7 @@ export default function OrganizationProjects() {
             .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
           
           if (projectDataError) {
+            console.error('Error deleting project_data:', projectDataError)
           }
           
           // Luego eliminar el proyecto principal

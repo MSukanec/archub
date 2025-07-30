@@ -44,6 +44,7 @@ export function useSearchUsers(query: string) {
         .limit(10)
 
       if (error) {
+        console.error('Error searching users:', error)
         throw error
       }
 

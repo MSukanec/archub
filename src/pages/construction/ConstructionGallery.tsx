@@ -102,6 +102,7 @@ export default function ConstructionGallery() {
         .single();
       
       if (error) {
+        console.log('Project not found in current organization:', error);
         return null;
       }
       
@@ -117,6 +118,8 @@ export default function ConstructionGallery() {
   const { data: galleryFiles = [], isLoading, error } = useQuery({
     queryKey: ['galleryFiles', projectId, userData?.preferences?.last_organization_id],
     queryFn: async () => {
+      console.log('Fetching gallery files for project:', projectId);
+      console.log('Organization ID:', userData?.preferences?.last_organization_id);
       
       if (!supabase || !userData?.preferences?.last_organization_id) {
         throw new Error('Missing required data');
@@ -158,6 +161,7 @@ export default function ConstructionGallery() {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching gallery files:', error);
         throw error;
       }
 
@@ -286,6 +290,7 @@ export default function ConstructionGallery() {
       closeLightbox();
     },
     onError: (error) => {
+      console.error('Error deleting file:', error);
       toast({
         title: 'Error',
         description: 'No se pudo eliminar el archivo',

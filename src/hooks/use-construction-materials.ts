@@ -32,6 +32,7 @@ export function useConstructionMaterials(projectId: string) {
         .eq("project_id", projectId);
 
       if (constructionTasksError) {
+        console.error("Error fetching construction tasks:", constructionTasksError);
         throw constructionTasksError;
       }
 
@@ -63,6 +64,7 @@ export function useConstructionMaterials(projectId: string) {
         .in("task_id", taskIds);
 
       if (error) {
+        console.error("Error fetching task materials:", error);
         throw error;
       }
 
@@ -81,6 +83,7 @@ export function useConstructionMaterials(projectId: string) {
           const constructionTaskQuantity = constructionTask?.quantity || 1;
           const totalQuantity = (item.amount || 0) * constructionTaskQuantity;
           
+          console.log(`Material: ${material.name}, amount: ${item.amount}, construction qty: ${constructionTaskQuantity}, total: ${totalQuantity}`);
           
           if (existingMaterial) {
             existingMaterial.computed_quantity += totalQuantity;
@@ -106,6 +109,7 @@ export function useConstructionMaterials(projectId: string) {
         a.category_name.localeCompare(b.category_name) || a.name.localeCompare(b.name)
       );
       
+      console.log("Final materials result:", result.length, "unique materials");
       return result;
     },
     enabled: !!projectId && !!supabase

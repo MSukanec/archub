@@ -104,6 +104,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         .eq('organization_id', organizationId)
         .order('name')
       
+      console.log('System children of Aportes de Terceros:', systemChildren)
+      console.log('Organization children of Aportes de Terceros:', orgChildren)
       
       // Combinar conceptos de sistema y organización
       const allChildren = [...(systemChildren || []), ...(orgChildren || [])]
@@ -117,9 +119,11 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           .is('organization_id', null)
           .single()
         
+        console.log('No children found, using system parent concept:', parentConcept)
         return parentConcept ? [parentConcept] : []
       }
       
+      console.log('Found subcategories:', allChildren)
       return allChildren
     },
     enabled: !!organizationId && !!supabase
@@ -127,6 +131,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   
   // Debug logs
   React.useEffect(() => {
+    console.log('Currencies data:', currencies)
+    console.log('Subcategories data:', subcategories)
   }, [currencies, subcategories])
   
   // Loading state for all necessary data
@@ -144,6 +150,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   // Cargar datos del movimiento en edición
   React.useEffect(() => {
     if (editingInstallment && currencies) {
+      console.log('Loading editing installment:', editingInstallment)
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
       form.reset({
@@ -158,6 +165,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         description: editingInstallment.description || '',
       })
       
+      console.log('Form reset with values:', {
         movement_date: installmentDate,
         contact_id: editingInstallment.contact_id,
         subcategory_id: editingInstallment.subcategory_id,

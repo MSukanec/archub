@@ -19,6 +19,7 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
     setIsRecovering(true)
     
     try {
+      console.log('Attempting to recover user preferences for user:', userId)
       
       // Create new user_preferences record with default values
       const { data, error } = await supabase
@@ -37,6 +38,7 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
         .single()
 
       if (error) {
+        console.error('Error creating user preferences:', error)
         
         // If record already exists, try to update it
         if (error.code === '23505') { // unique_violation
@@ -58,10 +60,12 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
             throw updateError
           }
           
+          console.log('User preferences updated:', updateData)
         } else {
           throw error
         }
       } else {
+        console.log('User preferences created:', data)
       }
 
       toast({
@@ -75,6 +79,7 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
       }, 1000)
 
     } catch (error) {
+      console.error('Failed to recover user preferences:', error)
       toast({
         title: "Error al restaurar",
         description: "No se pudieron restaurar las preferencias. Contacta al soporte.",

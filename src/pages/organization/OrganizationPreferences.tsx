@@ -342,6 +342,7 @@ export default function OrganizationPreferences() {
         try {
           await deleteConceptMutation.mutateAsync(conceptId);
         } catch (error) {
+          console.error('Error deleting concept:', error);
         }
       }
     });
@@ -351,6 +352,7 @@ export default function OrganizationPreferences() {
     try {
       await moveConceptMutation.mutateAsync({ conceptId, newParentId });
     } catch (error) {
+      console.error('Error moving concept:', error);
     }
   };
 

@@ -126,6 +126,7 @@ export function useCurrentUser() {
         .single()
 
       if (discoveryError && discoveryError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error fetching discovery data:', discoveryError)
       }
 
       // Merge the discovery data into the main user_data object

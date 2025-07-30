@@ -33,7 +33,9 @@ export function useDebouncedAutoSave<T>({
     try {
       await saveFn(dataToSave);
       setLastSavedAt(new Date());
+      console.log('Auto-save completed successfully');
     } catch (error) {
+      console.error('Auto-save error:', error);
     } finally {
       setIsSaving(false);
     }

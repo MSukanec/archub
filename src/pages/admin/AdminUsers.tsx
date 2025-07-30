@@ -102,6 +102,7 @@ export default function AdminUsers() {
         })
       )
       
+      console.log('Users with counts:', usersWithCounts)
       return usersWithCounts
     }
   })
@@ -150,6 +151,7 @@ export default function AdminUsers() {
       setDeletingUser(null)
     },
     onError: (error) => {
+      console.error('Error deleting user:', error)
       toast({
         title: 'Error',
         description: 'No se pudo desactivar el usuario.',

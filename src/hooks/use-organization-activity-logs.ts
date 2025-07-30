@@ -25,6 +25,7 @@ export function useOrganizationActivityLogs(organizationId: string | undefined) 
     queryFn: async (): Promise<ActivityLog[]> => {
       if (!organizationId) return [];
 
+      console.log('Fetching organization activity logs for:', organizationId);
 
       const { data, error } = await supabase
         .from('organization_activity_logs')
@@ -49,9 +50,11 @@ export function useOrganizationActivityLogs(organizationId: string | undefined) 
         .limit(50);
 
       if (error) {
+        console.error('Error fetching activity logs:', error);
         return [];
       }
 
+      console.log('Activity logs fetched:', data?.length || 0);
       
       return data?.map(log => ({
         ...log,

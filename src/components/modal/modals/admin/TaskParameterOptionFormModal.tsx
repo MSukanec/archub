@@ -164,6 +164,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       
       closeModal();
     } catch (error: any) {
+      console.error('Error:', error);
       toast({
         variant: 'destructive',
         title: 'Error',

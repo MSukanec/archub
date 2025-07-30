@@ -30,6 +30,7 @@ export function useConstructionProjectPhases(projectId: string) {
         .order('position', { ascending: true })
 
       if (error) {
+        console.error('Error fetching construction project phases:', error)
         throw error
       }
 
@@ -71,6 +72,7 @@ export function useConstructionPhases(organizationId: string) {
         .order('name', { ascending: true })
 
       if (error) {
+        console.error('Error fetching construction phases:', error)
         throw error
       }
 
@@ -110,6 +112,7 @@ export function useCreateConstructionPhase() {
           .single()
 
         if (phaseError) {
+          console.error('Error creating phase:', phaseError)
           throw phaseError
         }
 
@@ -137,6 +140,7 @@ export function useCreateConstructionPhase() {
         .single()
 
       if (projectPhaseError) {
+        console.error('Error creating project phase:', projectPhaseError)
         throw projectPhaseError
       }
 
@@ -156,6 +160,7 @@ export function useCreateConstructionPhase() {
       })
     },
     onError: (error) => {
+      console.error('Error creating phase:', error)
       toast({
         title: "Error al crear fase",
         description: "No se pudo crear la fase. Inténtalo de nuevo.",
@@ -189,6 +194,7 @@ export function useUpdatePhasePositions() {
         .upsert(updates, { onConflict: 'id' })
 
       if (error) {
+        console.error('Error updating phase positions:', error)
         throw error
       }
 
@@ -208,6 +214,7 @@ export function useUpdatePhasePositions() {
       })
     },
     onError: (error) => {
+      console.error('Error updating phase positions:', error)
       toast({
         title: "Error al actualizar",
         description: "No se pudo actualizar el orden de las fases. Inténtalo de nuevo.",

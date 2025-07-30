@@ -30,6 +30,9 @@ export default function AdminMovementConcepts() {
   
   // Debug logging
   React.useEffect(() => {
+    console.log('📋 System movement concepts data:', concepts);
+    console.log('⚠️ Movement concepts error:', error);
+    console.log('🔄 Is loading:', isLoading);
   }, [concepts, error, isLoading]);
   
   const deleteConceptMutation = useDeleteMovementConcept();
@@ -164,6 +167,7 @@ export default function AdminMovementConcepts() {
         try {
           await deleteConceptMutation.mutateAsync(conceptId);
         } catch (error) {
+          console.error('Error deleting concept:', error);
         }
       },
       onReplace: async (newConceptId: string) => {
@@ -172,6 +176,7 @@ export default function AdminMovementConcepts() {
         try {
           await deleteConceptMutation.mutateAsync(conceptId);
         } catch (error) {
+          console.error('Error replacing concept:', error);
         }
       },
       replacementOptions,
@@ -191,6 +196,7 @@ export default function AdminMovementConcepts() {
     try {
       await moveConceptMutation.mutateAsync({ conceptId, newParentId });
     } catch (error) {
+      console.error('Error moving concept:', error);
     }
   };
 
@@ -233,6 +239,7 @@ export default function AdminMovementConcepts() {
   };
 
   if (isError) {
+    console.error('❌ AdminMovementConcepts error:', error);
   }
 
   return (

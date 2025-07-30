@@ -23,6 +23,7 @@ export function useDesignPhases(organizationId?: string) {
         .order('name', { ascending: true });
 
       if (error) {
+        console.error('Error fetching design phases:', error);
         throw error;
       }
 
@@ -53,6 +54,7 @@ export function useDesignProjectPhases(projectId: string) {
         .order('position', { ascending: true });
 
       if (error) {
+        console.error('Error fetching design project phases:', error);
         throw error;
       }
 
@@ -83,6 +85,7 @@ export function useCreateDesignProjectPhase() {
         .single();
 
       if (error) {
+        console.error('Error creating design project phase:', error);
         throw error;
       }
 

@@ -47,6 +47,9 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const isEditing = !!editingGroup;
   
   // Debug logging
+  console.log('DocumentUploadFormModal - modalData:', modalData);
+  console.log('DocumentUploadFormModal - editingGroup:', editingGroup);
+  console.log('DocumentUploadFormModal - isEditing:', isEditing);
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -85,6 +88,8 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   // Load existing group data when editing (delay until groups are loaded)
   useEffect(() => {
     if (isEditing && editingGroup && userData?.preferences && groups.length > 0) {
+      console.log('Setting form with editingGroup:', editingGroup);
+      console.log('Available groups:', groups);
       setSelectedFolderId(editingGroup.folder_id || '');
       
       form.reset({

@@ -77,6 +77,7 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     .in('name', paramValueIds);
   
   if (error) {
+    console.error("Error fetching parameter values:", error);
     return displayName;
   }
   
@@ -182,6 +183,7 @@ export default function ConstructionBudgets() {
         .order("name", { ascending: true });
 
       if (error) {
+        console.error("Error fetching units:", error);
         throw error;
       }
 
@@ -222,6 +224,7 @@ export default function ConstructionBudgets() {
       const safetyCheck = validateUserDataForDatabaseOperation(userData);
       
       if (!safetyCheck.isValid) {
+        console.error('🚨 DATABASE OPERATION BLOCKED:', safetyCheck.error);
         logDatabaseOperation('UPDATE_BLOCKED', 'user_preferences', userData?.user?.id, {
           reason: safetyCheck.error,
           attemptedBudgetId: budgetId,
@@ -237,6 +240,7 @@ export default function ConstructionBudgets() {
         preferencesId: userData.preferences.id
       });
       
+      console.log('✅ Safely updating budget preference for user:', userData.user.id, 'with preferences ID:', userData.preferences.id);
       
       const { error } = await supabase
         .from('user_preferences')
@@ -245,6 +249,7 @@ export default function ConstructionBudgets() {
         .eq('user_id', userData.user.id); // DOUBLE SAFETY: Also check user_id
       
       if (error) {
+        console.error('❌ Database error updating budget preference:', error);
         logDatabaseOperation('UPDATE_ERROR', 'user_preferences', userData.user.id, {
           error: error.message,
           budgetId,
@@ -253,13 +258,16 @@ export default function ConstructionBudgets() {
         throw error;
       }
       
+      console.log('✅ Budget preference update successful');
       return budgetId;
     },
     onSuccess: (budgetId) => {
       // Invalidar el caché del usuario para reflejar el cambio
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      console.log('Budget preference updated successfully:', budgetId);
     },
     onError: (error) => {
+      console.error('Error updating budget preference:', error);
       toast({
         title: "Error",
         description: "No se pudo guardar la selección del presupuesto",
@@ -277,20 +285,24 @@ export default function ConstructionBudgets() {
           // Solo cambiar si es diferente al actual
           if (selectedBudgetId !== userData.preferences.last_budget_id) {
             setSelectedBudgetId(userData.preferences.last_budget_id);
+            console.log('Budget selector initialized with last_budget_id:', userData.preferences.last_budget_id);
           }
         } else {
           // Si el último presupuesto no existe, seleccionar el primero
           setSelectedBudgetId(budgets[0].id);
           updateBudgetPreferenceMutation.mutate(budgets[0].id);
+          console.log('Last budget not found, selecting first budget:', budgets[0].id);
         }
       } else {
         // Si no hay last_budget_id, seleccionar el primero
         setSelectedBudgetId(budgets[0].id);
         updateBudgetPreferenceMutation.mutate(budgets[0].id);
+        console.log('No last budget ID, selecting first budget:', budgets[0].id);
       }
     } else if (budgets.length === 0 && selectedBudgetId) {
       // Si no hay presupuestos, limpiar la selección
       setSelectedBudgetId('');
+      console.log('No budgets available, clearing selection');
     }
   }, [budgets, userData?.preferences?.last_budget_id, userData?.preferences?.id]);
 
@@ -337,6 +349,7 @@ export default function ConstructionBudgets() {
       setDeletingBudget(null)
     },
     onError: (error) => {
+      console.error('Error deleting budget:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar el presupuesto",
@@ -374,6 +387,7 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
+    console.log('Abrir modal de agregar tareas');
     openModal('budget-task-bulk-add', { 
       budgetId,
       onSuccess: () => {
@@ -402,6 +416,7 @@ export default function ConstructionBudgets() {
       })
     },
     onError: (error) => {
+      console.error('Error deleting task:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar la tarea",
@@ -542,6 +557,7 @@ export default function ConstructionBudgets() {
           organization_id: task.organization_id,
         });
       } catch (error) {
+        console.error('Error updating task quantity:', error);
         toast({
           title: "Error",
           description: "No se pudo actualizar la cantidad",
@@ -568,6 +584,7 @@ export default function ConstructionBudgets() {
           description: "La tarea se eliminó del presupuesto correctamente",
         });
       } catch (error) {
+        console.error('Error deleting task:', error);
         toast({
           title: "Error",
           description: "No se pudo eliminar la tarea",
@@ -578,6 +595,7 @@ export default function ConstructionBudgets() {
 
     const handleAddTask = (budgetId: string) => {
       // TODO: Abrir modal de agregar tareas
+      console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
     };
 
     const getUnitName = (unitId: string | null): string => {

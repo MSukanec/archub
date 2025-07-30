@@ -217,8 +217,10 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             .eq('id', userData.preferences.id);
           
           if (preferencesError) {
+            console.error('Error setting project as active:', preferencesError);
           }
         } catch (error) {
+          console.error('Error updating user preferences:', error);
         }
       }
 

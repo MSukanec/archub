@@ -43,6 +43,10 @@ export default function ConstructionTasks() {
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
 
   // Debug: verificar datos de tareas
+  console.log('ConstructionTasks - projectId:', projectId)
+  console.log('ConstructionTasks - organizationId:', organizationId)
+  console.log('ConstructionTasks - tasks data:', tasks)
+  console.log('ConstructionTasks - tasks length:', tasks.length)
 
   // Filtrar tareas según búsqueda y agregar groupKey
   const filteredTasks = useMemo(() => {
@@ -95,6 +99,7 @@ export default function ConstructionTasks() {
 
   const handleAddTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for task creation')
       return
     }
 
@@ -108,6 +113,7 @@ export default function ConstructionTasks() {
 
   const handleAddSingleTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for single task creation')
       return
     }
 
@@ -121,6 +127,7 @@ export default function ConstructionTasks() {
 
   const handleAddPhase = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for phase creation')
       return
     }
 
@@ -182,6 +189,7 @@ export default function ConstructionTasks() {
       itemName: phaseName, 
       onConfirm: async () => {
         // TODO: Implementar eliminación de fase
+        console.log('Delete phase:', phaseId)
       }
     })
   }

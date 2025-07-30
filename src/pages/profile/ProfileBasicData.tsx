@@ -64,6 +64,7 @@ export default function ProfileBasicData() {
   // Auto-save mutation for profile data
   const saveProfileMutation = useMutation({
     mutationFn: async (data: typeof profileData) => {
+      console.log('Saving profile data:', data)
       
       const updates: any = {}
       
@@ -100,9 +101,11 @@ export default function ProfileBasicData() {
       return data
     },
     onSuccess: () => {
+      console.log('Auto-save completed successfully')
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
     onError: (error) => {
+      console.error('Auto-save error:', error)
       toast({
         title: "Error",
         description: "No se pudieron guardar los cambios automáticamente.",
@@ -158,6 +161,7 @@ export default function ProfileBasicData() {
       window.location.href = '/'
     },
     onError: (error) => {
+      console.error('Sign out error:', error)
       toast({
         title: "Error",
         description: "No se pudo cerrar la sesión. Inténtalo de nuevo.",

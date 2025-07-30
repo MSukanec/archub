@@ -60,6 +60,7 @@ export function AddParameterToCanvasModal() {
       const centerX = Math.round(modalData?.viewportCenter?.x || 0);
       const centerY = Math.round(modalData?.viewportCenter?.y || 0);
       
+      console.log('🎯 Agregando parámetro en posición:', { centerX, centerY });
       
       // Crear una nueva posición para el parámetro en el canvas
       // Posición: centro del viewport actual (redondeado a enteros)
@@ -91,6 +92,7 @@ export function AddParameterToCanvasModal() {
 
       closeModal();
     } catch (error) {
+      console.error('Error adding parameter to canvas:', error);
       toast({
         title: "Error",
         description: "No se pudo agregar el parámetro al canvas",
