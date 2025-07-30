@@ -50,9 +50,7 @@ function cleanTaskDisplayName(name: string): string {
 
 export default function ConstructionSchedule() {
   const [searchValue, setSearchValue] = useState("")
-  const [activeTab, setActiveTab] = useState("gantt")
-  const [groupingType, setGroupingType] = useState('rubros')
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState("list") // Cambiar a list por defecto
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -63,16 +61,16 @@ export default function ConstructionSchedule() {
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSidebarContext])
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
 
   const { data: tasks = [], isLoading } = useConstructionTasksView(projectId || '')
 
-  // Obtener las fases del proyecto y dependencias
-  const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
-  const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
+  // Comentar temporalmente las dependencias para debugging
+  // const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
+  // const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
 
   // Filtrar tareas por búsqueda
   const filteredTasks = useMemo(() => {
@@ -86,77 +84,22 @@ export default function ConstructionSchedule() {
     )
   }, [tasks, searchValue])
 
-  // Funciones memoizadas para evitar re-renderizados
-  const getRubroName = useMemo(() => (taskId: string) => {
-    const task = filteredTasks.find(t => t.id === taskId)
-    return task?.category_name || 'Sin rubro'
-  }, [filteredTasks])
+  // Eliminar funciones innecesarias para simplificar
 
-  const getUnitName = useMemo(() => (unitId: string | null) => {
-    if (!unitId) return 'Sin unidad'
-    const taskWithUnit = filteredTasks.find(t => t.unit_name)
-    return taskWithUnit?.unit_name || 'Sin unidad'
-  }, [filteredTasks])
-
-  // Crear estructura Gantt simplificada con las tareas de la vista
-  const ganttData = useMemo(() => {
-    const ganttRows: any[] = [];
-
-    // Agrupar tareas por phase_name usando los datos de la vista
-    const tasksByPhase = filteredTasks.reduce((acc, task) => {
-      const phaseName = task.phase_name || 'TAREAS SIN FASE ASIGNADA';
-      if (!acc[phaseName]) {
-        acc[phaseName] = [];
-      }
-      acc[phaseName].push(task);
-      return acc;
-    }, {} as Record<string, typeof filteredTasks>);
-
-    // Procesar cada fase
-    Object.entries(tasksByPhase).forEach(([phaseName, tasksInPhase]) => {
-      // Agregar encabezado de fase
-      ganttRows.push({
-        id: `phase-${phaseName.replace(/\s+/g, '-')}`,
-        name: phaseName,
-        type: 'phase',
-        level: 0,
-        isHeader: true,
-        startDate: undefined,
-        endDate: undefined,
-        durationInDays: undefined
-      });
-
-      // Agregar las tareas de esta fase
-      tasksInPhase.forEach((task) => {
-        let validStartDate = task.start_date;
-        let validEndDate = task.end_date;
-        let validDuration = task.duration_in_days;
-
-        // Si no hay start_date, usar fecha de hoy
-        if (!validStartDate) {
-          validStartDate = new Date().toISOString().split('T')[0];
-        }
-
-        // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
-        if (validStartDate && !validEndDate && !validDuration) {
-          validDuration = 1;
-        }
-
-        ganttRows.push({
-          id: task.id,
-          name: cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre'),
-          type: 'task',
-          level: 1,
-          startDate: validStartDate,
-          endDate: validEndDate,
-          durationInDays: validDuration,
-          taskData: task
-        });
-      });
-    });
-
-    return ganttRows;
-  }, [filteredTasks]);
+  // Comentar ganttData temporalmente para debugging
+  // const ganttData = useMemo(() => {
+  //   if (filteredTasks.length === 0) return [];
+  //   return filteredTasks.map(task => ({
+  //     id: task.id,
+  //     name: cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre'),
+  //     type: 'task',
+  //     level: 0,
+  //     startDate: task.start_date || new Date().toISOString().split('T')[0],
+  //     endDate: task.end_date,
+  //     durationInDays: task.duration_in_days || 1,
+  //     taskData: task
+  //   }));
+  // }, [filteredTasks]);
 
   // Mostrar loading state sin Layout complejo para evitar renderizados costosos
   if (isLoading) {
@@ -240,31 +183,14 @@ export default function ConstructionSchedule() {
       {/* Tab Content */}
       {activeTab === 'gantt' && (
         <div className="space-y-6">
-          {filteredTasks.length === 0 ? (
-            <EmptyState
-              icon={<Calendar className="h-16 w-16" />}
-              title="No hay tareas en el cronograma"
-              description="Comienza agregando tareas de construcción para visualizar el cronograma del proyecto."
-            />
-          ) : (
-            <GanttContainer
-              data={ganttData}
-              dependencies={dependencies}
-              onItemEdit={(item) => openModal('construction-task-schedule', { taskId: item.id })}
-              onItemDelete={(item) => {
-                const task = filteredTasks.find(t => t.id === item.id)
-                showDeleteConfirmation({
-                  title: 'Eliminar Tarea',
-                  description: `¿Estás seguro de que quieres eliminar "${task?.name_rendered || 'esta tarea'}"?`,
-                  onConfirm: () => deleteTask.mutate({
-                    id: item.id,
-                    project_id: task?.project_id || '',
-                    organization_id: organizationId || ''
-                  })
-                })
-              }}
-            />
-          )}
+          <div className="bg-card border rounded-lg p-6">
+            <div className="text-center text-muted-foreground">
+              <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium mb-2">Vista Gantt en Debugging</h3>
+              <p className="text-sm">Temporalmente deshabilitada para identificar problemas</p>
+              <p className="text-xs mt-2">Tareas encontradas: {filteredTasks.length}</p>
+            </div>
+          </div>
         </div>
       )}
 
