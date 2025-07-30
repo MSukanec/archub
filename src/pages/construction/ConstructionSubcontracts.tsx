@@ -35,22 +35,7 @@ export default function ConstructionSubcontracts() {
   const { data: subcontracts = [], isLoading } = useSubcontracts(projectId);
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
 
-  // Debug logging
-  console.log('🔍 SUBCONTRACTS DEBUG:', {
-    projectId,
-    organizationId,
-    subcontractsCount: subcontracts.length,
-    isLoading,
-    subcontracts: subcontracts
-  });
 
-  // Efecto para invalidar y refrescar queries cuando se accede a la página
-  useEffect(() => {
-    if (projectId) {
-      console.log('🔄 INVALIDATING SUBCONTRACTS QUERIES...');
-      queryClient.invalidateQueries({ queryKey: ['subcontracts', projectId] });
-    }
-  }, [projectId, queryClient]);
 
   const features = [
     {
@@ -123,54 +108,82 @@ export default function ConstructionSubcontracts() {
     (subcontract.contact?.full_name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Configuración de columnas de la tabla
-  const columns = [
+  // Configuración de columnas de la tabla usando el componente Table personalizado
+  const tableColumns = [
     {
-      key: 'date',
-      header: 'Fecha',
-      width: '120px',
-      render: (value: string) => format(new Date(value), 'dd/MM/yyyy', { locale: es })
+      key: "date",
+      header: "Fecha",
+      width: "120px",
+      render: (value: string) => {
+        if (!value) return <div className="text-xs text-muted-foreground">Sin fecha</div>;
+        try {
+          return (
+            <div className="text-xs">
+              {format(new Date(value), "dd/MM/yyyy", { locale: es })}
+            </div>
+          );
+        } catch (error) {
+          return <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+        }
+      },
     },
     {
-      key: 'title',
-      header: 'Título',
-      width: '1fr',
+      key: "title",
+      header: "Título",
+      width: "1fr",
+      render: (value: string) => (
+        <div className="text-sm font-medium">{value || 'Sin título'}</div>
+      ),
     },
     {
-      key: 'contact',
-      header: 'Proveedor',
-      width: '180px',
-      render: (value: any) => value?.full_name || 'Sin asignar'
+      key: "contact",
+      header: "Proveedor",
+      width: "180px",
+      render: (value: any) => (
+        <div className="text-sm">{value?.full_name || 'Sin asignar'}</div>
+      ),
     },
     {
-      key: 'currency_id',
-      header: 'Moneda',
-      width: '80px',
-      align: 'center' as const,
-      render: (value: string) => getCurrencyDisplay(value)
+      key: "currency_id",
+      header: "Moneda",
+      width: "80px",
+      align: "center" as const,
+      render: (value: string) => (
+        <div className="text-xs">
+          {getCurrencyDisplay(value)}
+        </div>
+      ),
     },
     {
-      key: 'amount_total',
-      header: 'Monto Total',
-      width: '120px',
-      align: 'right' as const,
+      key: "amount_total",
+      header: "Monto Total",
+      width: "120px",
+      align: "right" as const,
       render: (value: number, row: any) => {
         const currency = getCurrencyDisplay(row.currency_id);
-        return `${currency} ${value?.toLocaleString() || '0'}`;
-      }
+        return (
+          <div className="text-sm font-medium">
+            {currency} {value?.toLocaleString() || '0'}
+          </div>
+        );
+      },
     },
     {
-      key: 'exchange_rate',
-      header: 'Cotización',
-      width: '100px',
-      align: 'right' as const,
-      render: (value: number) => value?.toFixed(2) || '1.00'
+      key: "exchange_rate",
+      header: "Cotización",
+      width: "100px",
+      align: "right" as const,
+      render: (value: number) => (
+        <div className="text-sm">
+          {value?.toFixed(2) || '1.00'}
+        </div>
+      ),
     },
     {
-      key: 'status',
-      header: 'Estado',
-      width: '120px',
-      align: 'center' as const,
+      key: "status",
+      header: "Estado",
+      width: "120px",
+      align: "center" as const,
       render: (value: string) => {
         const variants: { [key: string]: any } = {
           'pendiente': 'secondary',
@@ -179,19 +192,19 @@ export default function ConstructionSubcontracts() {
           'cancelado': 'destructive',
         };
         return (
-          <Badge variant={variants[value] || 'secondary'}>
-            {value.replace('_', ' ')}
+          <Badge variant={variants[value] || 'secondary'} className="text-xs">
+            {value?.replace('_', ' ') || 'Sin estado'}
           </Badge>
         );
-      }
+      },
     },
     {
-      key: 'actions',
-      header: 'Acciones',
-      width: '120px',
-      align: 'center' as const,
+      key: "actions",
+      header: "Acciones",
+      width: "120px",
+      align: "center" as const,
       render: (value: any, row: any) => (
-        <div className="flex gap-1">
+        <div className="flex gap-1 justify-center">
           <Button
             variant="ghost"
             size="sm"
@@ -213,7 +226,7 @@ export default function ConstructionSubcontracts() {
             <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
         </div>
-      )
+      ),
     },
   ];
 
@@ -242,16 +255,20 @@ export default function ConstructionSubcontracts() {
         />
 
         {/* Contenido principal */}
-        <Table
-          columns={columns}
-          data={filteredSubcontracts}
-          loading={isLoading}
-          emptyMessage={filteredSubcontracts.length === 0 && !isLoading ? 
-            "Aún no tienes subcontratos creados. Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos." : 
-            "No se encontraron subcontratos que coincidan con la búsqueda"
-          }
-          onRowClick={handleEditSubcontract}
-        />
+        {filteredSubcontracts.length > 0 ? (
+          <Table 
+            columns={tableColumns}
+            data={filteredSubcontracts}
+            loading={isLoading}
+            onRowClick={handleEditSubcontract}
+          />
+        ) : !isLoading ? (
+          <EmptyState
+            icon={<Package className="w-12 h-12 text-muted-foreground" />}
+            title="Aún no tienes subcontratos creados"
+            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
+          />
+        ) : null}
       </div>
     </Layout>
   );
