@@ -46,11 +46,7 @@ export default function ConstructionTasks() {
 
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
 
-  // Debug: verificar datos de tareas
-  console.log('ConstructionTasks - projectId:', projectId)
-  console.log('ConstructionTasks - organizationId:', organizationId)
-  console.log('ConstructionTasks - tasks data:', tasks)
-  console.log('ConstructionTasks - tasks length:', tasks.length)
+  // Debug logs removed to clean console
 
   // Filtrar tareas según búsqueda y agregar groupKey
   const filteredTasks = useMemo(() => {

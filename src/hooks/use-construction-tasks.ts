@@ -28,7 +28,7 @@ export function useConstructionTasksView(projectId: string) {
     queryFn: async (): Promise<ConstructionTaskView[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 FETCHING CONSTRUCTION TASKS_VIEW FOR PROJECT:', projectId);
+      // Debug logs removed
       
       const { data, error } = await supabase
         .from('construction_tasks_view')
@@ -42,11 +42,7 @@ export function useConstructionTasksView(projectId: string) {
         throw error;
       }
 
-      console.log('✅ CONSTRUCTION TASKS_VIEW DATA:', {
-        projectId,
-        tasksCount: data?.length || 0,
-        sampleTask: data?.[0] || null
-      });
+      // Debug logs removed
 
       return data || [];
     },
@@ -106,11 +102,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 FETCHING CONSTRUCTION TASKS FOR PROJECT:', {
-        projectId,
-        organizationId,
-        enabled: !!projectId && !!organizationId
-      });
+      // Debug logs removed
       
       // Obtener las tareas de construcción básicas primero
       const { data: constructionTasks, error: constructionError } = await supabase
@@ -130,7 +122,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         return [];
       }
 
-      console.log('🔍 DEBUG: Found construction tasks:', constructionTasks.length);
+      // Debug logs removed
 
       // Obtener los IDs de las tareas para buscar en task_parametric_view
       const taskIds = constructionTasks.map(ct => ct.task_id);
@@ -164,16 +156,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         console.error('Error fetching phase relations:', phaseError);
       }
 
-      console.log('🔍 DEBUG: Phase relations found:', phaseRelations?.length || 0);
-      console.log('🔍 DEBUG: Phase relations data:', JSON.stringify(phaseRelations, null, 2));
-        
-      console.log('📊 CONSTRUCTION TASKS QUERY RESULT:', {
-        projectId,
-        organizationId,
-        dataLength: constructionTasks?.length || 0,
-        error: error?.message,
-        firstRecord: constructionTasks?.[0]
-      });
+      // Debug logs removed
 
       if (error) {
         console.error('Error fetching construction tasks:', error);
@@ -185,8 +168,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         return [];
       }
 
-      // Debug: ver qué campos están llegando exactamente
-      console.log('RAW CONSTRUCTION TASKS DATA SAMPLE:', JSON.stringify(constructionTasks?.[0], null, 2));
+      // Debug logs removed
 
       // Crear un mapa de los detalles de tareas por ID para fácil acceso
       const taskDetailsMap = new Map();
@@ -213,13 +195,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         const projectPhase = phaseRelation?.construction_project_phases;
         const phase = projectPhase?.construction_phases;
         
-        console.log(`🔍 DEBUG Task ${item.id}:`, {
-          hasPhaseRelation: !!phaseRelation,
-          hasProjectPhase: !!projectPhase,
-          hasPhase: !!phase,
-          phaseName: phase?.name,
-          phaseRelationData: phaseRelation
-        });
+        // Debug logs removed
         
         return {
           // Campos principales de construction_tasks
@@ -262,21 +238,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         };
       });
 
-      console.log('CONSTRUCTION TASKS DATA FOR PROJECT:', {
-        projectId,
-        organizationId,
-        totalTasks: mappedTasks.length,
-        phases: mappedTasks.map(t => t.phase_name).filter((v, i, a) => a.indexOf(v) === i),
-        sample: {
-          task_instance_id: mappedTasks[0]?.task_instance_id,
-          task_id: mappedTasks[0]?.task_id,
-          display_name: mappedTasks[0]?.task?.display_name,
-          rubro_name: mappedTasks[0]?.task?.rubro_name,
-          category_name: mappedTasks[0]?.task?.category_name,
-          unit_name: mappedTasks[0]?.task?.unit_name,
-          quantity: mappedTasks[0]?.quantity
-        }
-      });
+      // Debug logs removed
 
       return mappedTasks;
     },
