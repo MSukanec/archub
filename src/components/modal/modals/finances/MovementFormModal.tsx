@@ -710,14 +710,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
       // Detectar subcontratos por subcategoría UUID específica
       const subcategoryId = form.watch('subcategory_id')
-      const isSubcontratosCategory = subcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
+      const isSubcontratosCategory = subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
       
-      // DEBUG: Log detection - Mejores logs para depuración
-      console.log('🔍 SUBCATEGORY DEBUG:', { 
+      // DEBUG: Log detection
+      console.log('🎯 SubcontratosFields Detection:', { 
         subcategoryId, 
         isSubcontratosCategory, 
-        UUID_TARGET: '40a8fd4-69a6-4e81-bcb4-464359cd8498',
-        allSubcategories: subcategories?.map(s => ({ id: s.id, name: s.name, slug: s.slug }))
+        UUID_CORRECTO: 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
       })
       
       if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory) {
@@ -891,7 +890,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesPropriosMovement = categoryViewMode === "aportes" && selectedCategory?.name === "Aportes Propios"
       const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || selectedCategory?.name?.includes('Retiro')
       // Detectar subcontratos por subcategoría UUID específica en modo edición
-      const isSubcontratosMovement = editingMovement.subcategory_id === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
+      const isSubcontratosMovement = editingMovement.subcategory_id === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
       
       // Establecer el tipo de formulario correcto
       if (isConversionMovement) {
@@ -2187,7 +2186,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isEditingAportes = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes"
   const isEditingAportesPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes_propios"
   const isEditingRetirosPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "retiros_propios"
-  const isEditingSubcontratos = editingMovement && editingMovement.subcategory_id === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
+  const isEditingSubcontratos = editingMovement && editingMovement.subcategory_id === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
 
   const editPanel = (
     <div className="space-y-4">
@@ -2339,7 +2338,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
                   // Detectar subcontratos por subcategoría UUID específica
                   const subcategoryId = form.watch('subcategory_id')
-                  const isSubcontratosCategory = subcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
+                  const isSubcontratosCategory = subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
                   
                   // CRITICAL: Sincronizar type_id del formulario principal a todos los formularios especiales
                   const currentTypeId = form.watch('type_id')
@@ -2527,23 +2526,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
-      ) : isSubcontratos ? (
-        // FORMULARIO DE SUBCONTRATOS
-        <Form {...subcontratosForm}>
-          <form onSubmit={subcontratosForm.handleSubmit(onSubmitSubcontratos)} className="space-y-4">
-            <SubcontratosFields
-              form={subcontratosForm}
-              currencies={currencies || []}
-              wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
-              selectedTaskId={selectedTaskId}
-              setSelectedTaskId={setSelectedTaskId}
-              onOpenTasksSubform={openTasksSubform}
-              projectId={form.watch('project_id')}
-            />
-          </form>
-        </Form>
+
       ) : (
         // FORMULARIO NORMAL
         <Form {...form}>
