@@ -14,6 +14,9 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
 import ConstructionTaskCard from '@/components/cards/ConstructionTaskCard'
+import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -26,6 +29,7 @@ export default function ConstructionTasks() {
   const updatePhasePositions = useUpdatePhasePositions()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
+  const { toast } = useToast()
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -189,16 +193,47 @@ export default function ConstructionTasks() {
     const phaseName = phase?.name || 'Fase'
     
     openModal('delete-confirmation', {
-      mode: 'dangerous',
+      mode: 'simple',
       title: "Eliminar fase",
-      description: "¿Estás seguro de que deseas eliminar esta fase del proyecto? Esta acción no se puede deshacer.",
+      description: "¿Estás seguro de que deseas eliminar esta fase del proyecto?",
       itemName: phaseName,
       itemType: "fase",
-      destructiveActionText: "Eliminar Fase",
+      destructiveActionText: "Eliminar",
       onConfirm: async () => {
-        // TODO: Implementar eliminación de fase
-        console.log('Delete phase:', phaseId)
-        // Aquí iría la lógica de eliminación cuando se implemente
+        try {
+          if (!supabase) throw new Error('Supabase not initialized')
+          
+          // Eliminar la fase del proyecto (construction_project_phases)
+          const { error } = await supabase
+            .from('construction_project_phases')
+            .delete()
+            .eq('id', phaseId)
+          
+          if (error) {
+            console.error('Error eliminando fase:', error)
+            throw error
+          }
+          
+          // Invalidar cache para actualizar la vista
+          queryClient.invalidateQueries({ 
+            queryKey: ['construction-project-phases', projectId] 
+          })
+          queryClient.invalidateQueries({ 
+            queryKey: ['construction-tasks', projectId] 
+          })
+          
+          toast({
+            title: "Fase eliminada",
+            description: "La fase ha sido eliminada correctamente."
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          toast({
+            title: "Error al eliminar",
+            description: "No se pudo eliminar la fase. Inténtalo de nuevo.",
+            variant: "destructive"
+          })
+        }
       }
     })
   }
