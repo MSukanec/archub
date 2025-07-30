@@ -514,6 +514,11 @@ export default function Movements() {
     ),
   );
 
+  // Debug: Log available categories and sample movement data
+  console.log('Available categories:', availableCategories);
+  console.log('Sample movement data:', movements[0]);
+  console.log('Category structure in first movement:', movements[0]?.movement_data?.category);
+
   const availableSubcategories = Array.from(
     new Set(
       movements.map((m) => m.movement_data?.subcategory?.name).filter(Boolean),
