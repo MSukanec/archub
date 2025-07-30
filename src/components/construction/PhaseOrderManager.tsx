@@ -32,6 +32,11 @@ export function PhaseOrderManager({
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
     
+    console.log('🎯 DRAG END TRIGGERED:')
+    console.log('Source index:', result.source.index)
+    console.log('Destination index:', result.destination.index)
+    console.log('Original phases:', phases)
+    
     const items = Array.from(phases)
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
@@ -41,6 +46,9 @@ export function PhaseOrderManager({
       ...phase,
       position: index + 1
     }))
+    
+    console.log('📊 UPDATED PHASES:', updatedPhases)
+    console.log('🔄 CALLING onReorder with:', updatedPhases)
     
     onReorder(updatedPhases)
   }
