@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useSubcontracts } from '@/hooks/use-subcontracts'
+import { useSubcontractAnalysis } from '@/hooks/use-subcontract-analysis'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
@@ -32,6 +34,9 @@ export default function FinancesAnalysis() {
     organizationId || '',
     projectId || ''
   )
+
+  // Get subcontracts analysis data
+  const { data: subcontractAnalysisData = [], isLoading: isLoadingSubcontracts } = useSubcontractAnalysis(projectId)
 
   // Filter only expense movements (EGRESOS) by UUID and specific categories
   const allowedCategoryIds = [
@@ -498,6 +503,11 @@ export default function FinancesAnalysis() {
               icon: <FileText className="h-4 w-4" />
             },
             {
+              value: "subcontracts",
+              label: "Análisis de Subcontratos",
+              icon: <Calculator className="h-4 w-4" />
+            },
+            {
               value: "charts",
               label: "Gráficos",
               icon: <BarChart3 className="h-4 w-4" />
@@ -580,6 +590,86 @@ export default function FinancesAnalysis() {
               icon={<BarChart3 className="h-8 w-8" />}
               title="No hay datos que coincidan"
               description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
+            />
+          )
+        ) : activeTab === "subcontracts" ? (
+          // Tab Análisis de Subcontratos - Nueva funcionalidad
+          subcontractAnalysisData.length > 0 ? (
+            <Table
+              columns={[
+                {
+                  key: 'subcontrato',
+                  label: 'Subcontrato',
+                  width: '25%',
+                  render: (item: any) => (
+                    <div className="font-medium text-sm">
+                      {item.subcontrato}
+                    </div>
+                  )
+                },
+                {
+                  key: 'proveedor',
+                  label: 'Proveedor',
+                  width: '25%',
+                  render: (item: any) => (
+                    <Badge variant="outline" className="text-xs">
+                      {item.proveedor}
+                    </Badge>
+                  )
+                },
+                {
+                  key: 'montoTotal',
+                  label: 'Monto Total',
+                  width: '20%',
+                  render: (item: any) => (
+                    <div className="font-medium text-sm text-blue-600 dark:text-blue-400">
+                      ${item.montoTotal.toLocaleString('es-AR')}
+                    </div>
+                  )
+                },
+                {
+                  key: 'pagoALaFecha',
+                  label: 'Pago a la Fecha',
+                  width: '20%',
+                  render: (item: any) => (
+                    <div className="font-medium text-sm text-green-600 dark:text-green-400">
+                      ${item.pagoALaFecha.toLocaleString('es-AR')}
+                    </div>
+                  )
+                },
+                {
+                  key: 'saldo',
+                  label: 'Saldo',
+                  width: '10%',
+                  render: (item: any) => (
+                    <div className={`font-medium text-sm ${
+                      item.saldo > 0 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : item.saldo < 0 
+                          ? 'text-orange-600 dark:text-orange-400' 
+                          : 'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      ${item.saldo.toLocaleString('es-AR')}
+                    </div>
+                  )
+                }
+              ]}
+              data={subcontractAnalysisData}
+              isLoading={isLoadingSubcontracts}
+              mode="construction"
+              emptyState={
+                <EmptyState
+                  icon={<Calculator className="h-8 w-8" />}
+                  title="No hay subcontratos registrados"
+                  description="Comienza creando subcontratos en la sección de Construcción para ver el análisis de pagos."
+                />
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={<Calculator className="h-8 w-8" />}
+              title="No hay subcontratos registrados"
+              description="Comienza creando subcontratos en la sección de Construcción para ver el análisis de pagos."
             />
           )
         ) : (
