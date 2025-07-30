@@ -228,8 +228,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="pendiente">Pendiente</SelectItem>
-              <SelectItem value="aprobado">Aprobado</SelectItem>
-              <SelectItem value="en_proceso">En Proceso</SelectItem>
+              <SelectItem value="en_progreso">En Progreso</SelectItem>
               <SelectItem value="completado">Completado</SelectItem>
               <SelectItem value="cancelado">Cancelado</SelectItem>
             </SelectContent>
