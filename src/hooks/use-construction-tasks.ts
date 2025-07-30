@@ -98,7 +98,13 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Debug logs removed
+      console.log('Fetching construction tasks for project:', projectId, 'in organization:', organizationId);
+      
+      // Validar que tenemos los parámetros necesarios
+      if (!projectId || !organizationId) {
+        console.log('Missing projectId or organizationId, returning empty array');
+        return [];
+      }
       
       // Obtener las tareas de construcción básicas primero
       const { data: constructionTasks, error: constructionError } = await supabase
