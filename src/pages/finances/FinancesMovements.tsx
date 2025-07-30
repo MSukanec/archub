@@ -247,7 +247,6 @@ export default function Movements() {
       
       // Load file counts for each movement
       for (const item of movements) {
-        if (!item) continue; // Skip undefined/null items
         let movementId: string;
         
         if ('is_conversion_group' in item) {
@@ -836,7 +835,7 @@ export default function Movements() {
         // Para grupos de conversión y transferencia, usar el project_id del primer movimiento
         let itemProjectId: string | null = null;
         
-        if (item && ('is_conversion_group' in item || 'is_transfer_group' in item)) {
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) {
           const group = item as any;
           itemProjectId = group.movements?.[0]?.project_id || null;
         } else {
