@@ -19,15 +19,16 @@ export function useConstructionMaterials(projectId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      // Get all construction tasks for this project
+      // Get all construction tasks for this project using the view with phase information
       const { data: constructionTasksData, error: constructionTasksError } = await supabase
-        .from("construction_tasks")
+        .from("construction_tasks_view")
         .select(`
           id,
           task_id,
           quantity,
           project_id,
-          organization_id
+          phase_name,
+          phase_position
         `)
         .eq("project_id", projectId);
 
@@ -40,11 +41,13 @@ export function useConstructionMaterials(projectId: string) {
         return [];
       }
 
-      // DEBUG: Log construction tasks data to understand quantities
+      // DEBUG: Log construction tasks data to understand quantities and phases
       console.log("🔧 Construction Tasks Data:", constructionTasksData.map(ct => ({
         id: ct.id,
         task_id: ct.task_id,
-        quantity: ct.quantity
+        quantity: ct.quantity,
+        phase_name: ct.phase_name,
+        phase_position: ct.phase_position
       })));
 
       // Extract task IDs from construction tasks
@@ -97,7 +100,7 @@ export function useConstructionMaterials(projectId: string) {
             console.log(`   - Task ID: ${item.task_id}`)
             console.log(`   - Material amount (per unit): ${item.amount}`)
             console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
-            console.log(`   - Phase ID: ${constructionTask?.project_phase_id || 'Sin fase'}`)
+            console.log(`   - Phase: ${constructionTask?.phase_name || 'Sin fase'} (pos: ${constructionTask?.phase_position || 'N/A'})`)
             console.log(`   - Total quantity: ${totalQuantity}`)
             console.log(`   - Construction task:`, constructionTask)
             console.log(`   - Existing material in map:`, existingMaterial)
