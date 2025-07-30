@@ -887,7 +887,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             .order('amount', { ascending: false })
           
           if (groupError) {
-            console.error('Error loading conversion group:', groupError)
+            // Error loading conversion group
             return
           }
           
@@ -956,7 +956,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             .order('amount', { ascending: false })
           
           if (groupError) {
-            console.error('Error loading transfer group:', groupError)
+            // Error loading transfer group
             return
           }
           
@@ -1669,7 +1669,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     try {
       await createAportesMutation.mutateAsync(data)
     } catch (error) {
-      console.error('Error in aportes mutation:', error)
+      // Error in aportes mutation
       throw error
     }
   }
@@ -1735,7 +1735,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             taskIds: [selectedTaskId]
           })
         } catch (error) {
-          console.error('Error creating movement task:', error)
+          // Error creating movement task
           toast({
             variant: 'destructive',
             title: 'Error',
@@ -1822,7 +1822,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             taskIds: [selectedTaskId]
           })
         } catch (error) {
-          console.error('Error creating movement task:', error)
+          // Error creating movement task
           toast({
             variant: 'destructive',
             title: 'Error',
@@ -1846,7 +1846,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             amount: createdMovement.amount
           })
         } catch (error) {
-          console.error('Error creating movement subcontract:', error)
+          // Error creating movement subcontract
           toast({
             variant: 'destructive',
             title: 'Error',

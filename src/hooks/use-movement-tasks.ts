@@ -8,8 +8,6 @@ export function useMovementTasks(movementId?: string) {
     queryFn: async () => {
       if (!movementId || !supabase) return [];
       
-      console.log('Fetching movement tasks for movement ID:', movementId);
-      
       const { data, error } = await supabase
         .from('movement_tasks')
         .select(`
@@ -18,9 +16,6 @@ export function useMovementTasks(movementId?: string) {
           task_id
         `)
         .eq('movement_id', movementId);
-      
-      console.log('Movement tasks raw data:', data);
-      console.log('Movement tasks error:', error);
       
       if (error) throw error;
       return data || [];
