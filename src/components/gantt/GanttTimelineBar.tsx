@@ -174,7 +174,7 @@ export function GanttTimelineBar({
     e.stopPropagation();
     e.preventDefault();
     
-    console.log('Starting connection from:', item.name, point);
+    // Debug logs removed
     
     // Obtener posición del punto de conexión
     const rect = barRef.current?.getBoundingClientRect();
@@ -204,7 +204,7 @@ export function GanttTimelineBar({
     };
     
     const handleMouseUp = (upEvent: MouseEvent) => {
-      console.log('Mouse up detected, cleaning connection line');
+      // Debug logs removed
       setIsConnecting(false);
       setConnectionStart(null);
       onConnectionDrag?.(null);
@@ -255,7 +255,7 @@ export function GanttTimelineBar({
     setConnectionStart(null);
     onConnectionDrag?.(null);
     
-    console.log('Created dependency:', fromTaskId, '->', toTaskId, 'type:', dependencyType);
+    // Debug logs removed
   };
 
   // Solo mostrar puntos de conexión en tareas (no fases)
@@ -399,15 +399,7 @@ export function GanttTimelineBar({
         );
       }
       
-      console.log('DRAG UPDATE:', {
-        taskId: item.taskData?.id,
-        taskName: item.name,
-        originalStartDate: format(startDate, 'yyyy-MM-dd'),
-        newStartDate: format(newStartDate, 'yyyy-MM-dd'),
-        newEndDate: format(newEndDate, 'yyyy-MM-dd'),
-        originalDuration,
-        newDay
-      });
+      // Debug logs removed
       
       if (item.taskData?.id) {
         // PROPAGACIÓN DE DEPENDENCIAS: Calcular tareas que deben moverse
@@ -534,15 +526,7 @@ export function GanttTimelineBar({
       const newDay = Math.round(adjustedX / dayWidth);
       const newDate = addDays(timelineStart, newDay);
       
-      console.log('Resize calculation:', {
-        clientX: e.clientX,
-        containerLeft: containerRect.left,
-        scrollLeft,
-        adjustedX,
-        dayWidth,
-        newDay,
-        newDate: format(newDate, 'yyyy-MM-dd')
-      });
+      // Debug logs removed
       
       // OPTIMISTIC UPDATE: Actualizar caché inmediatamente
       if (type === 'start') {

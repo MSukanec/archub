@@ -68,11 +68,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('')
   const [materialAmount, setMaterialAmount] = useState<string>('')
   
-  console.log('🔍 Modal data received:', modalData);
-  console.log('📝 Task data:', actualTask);
-  console.log('✏️ Is editing mode:', isEditingMode);
-  console.log('📊 param_order from task:', actualTask?.param_order);
-  console.log('📊 param_values from task:', actualTask?.param_values);
+  // Debug logs removed
   
   // Parse existing param_values if editing
   const existingParamValues = React.useMemo(() => {
@@ -82,10 +78,10 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       // Si param_values es string, parsearlo como JSON
       if (typeof actualTask.param_values === 'string') {
         const parsed = JSON.parse(actualTask.param_values);
-        console.log('🔄 Parsed param_values from string:', parsed);
+        // Debug logs removed
         return parsed;
       } else {
-        console.log('🔄 Using param_values as object:', actualTask.param_values);
+        // Debug logs removed
         return actualTask.param_values;
       }
     } catch (e) {
@@ -109,8 +105,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     return actualTask.param_order;
   }, [actualTask?.param_order]);
 
-  console.log('📊 Processed param_values:', existingParamValues);
-  console.log('📊 Processed param_order:', existingParamOrder);
+  // Debug logs removed
 
   // Effect to load existing task data when editing
   useEffect(() => {
@@ -138,7 +133,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       // Set saved task ID for materials loading
       setSavedTaskId(actualTask.id)
       
-      console.log('📊 Loaded existing selections:', loadedSelections)
+      // Debug logs removed
     }
   }, [isEditingMode, actualTask, existingParamValues])
 
@@ -191,7 +186,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       // Si estamos editando una tarea existente, empezar con los valores existentes
       if (isEditing && actualTask && existingParamValues) {
         Object.assign(paramValues, existingParamValues)
-        console.log('🔄 Starting with existing param values:', existingParamValues)
+        // Debug logs removed
       }
       
       // Aplicar las nuevas selecciones (esto sobrescribe los valores existentes si hay cambios)
@@ -199,14 +194,13 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         paramValues[selection.parameterSlug] = selection.optionId
       })
       
-      console.log('💾 Saving param values:', paramValues);
-      console.log('📊 Parameter order:', parameterOrder);
-      console.log('🔧 Creating parametric task:', {
+      // Debug logs removed
+      const taskData = {
         selections,
         preview: taskPreview,
         paramValues,
         paramOrder: parameterOrder
-      })
+      }
       
       if (isEditing && actualTask) {
         // Update existing task
@@ -228,7 +222,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
           param_order: parameterOrder
         })
         
-        console.log('✅ Task created with code:', result.generated_code);
+        // Debug logs removed
         setSavedTaskId(result.new_task?.id)
         
         toast({
@@ -293,17 +287,10 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       setIsLoading(true)
       
       // Save all materials to database
-      console.log('🔍 STARTING MATERIAL SAVE PROCESS');
-      console.log('🔍 taskMaterials.length:', taskMaterials.length);
-      console.log('🔍 savedTaskId:', savedTaskId);
-      console.log('🔍 userData:', userData);
-      console.log('🔍 userData.organization:', userData?.organization);
-      console.log('🔍 userData.organization.id:', userData?.organization?.id);
+      // Debug logs removed
       
       if (taskMaterials.length > 0) {
-        console.log('💾 Saving materials to database:', taskMaterials);
-        console.log('💾 Using task_id:', savedTaskId);
-        console.log('💾 Using organization_id:', userData.organization.id);
+        // Debug logs removed
         
         for (const material of taskMaterials) {
           // Skip materials that already have an ID (already saved)
@@ -314,17 +301,11 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
               amount: material.amount,
               organization_id: userData.organization.id
             };
-            console.log('💾 Attempting to save material:', materialData);
-            console.log('💾 Material data types:', {
-              task_id: typeof materialData.task_id,
-              material_id: typeof materialData.material_id,
-              amount: typeof materialData.amount,
-              organization_id: typeof materialData.organization_id
-            });
+            // Debug logs removed
             
             try {
               const result = await createTaskMaterialMutation.mutateAsync(materialData);
-              console.log('✅ Material saved successfully:', result);
+              // Debug logs removed
             } catch (materialError: any) {
               console.error('❌ Error saving individual material:', materialError);
               console.error('❌ Error details:', {
@@ -336,11 +317,11 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
               throw materialError;
             }
           } else {
-            console.log('⏭️ Skipping material (already has ID):', material.id);
+            // Debug logs removed
           }
         }
       } else {
-        console.log('⚠️ No materials to save');
+        // Debug logs removed
       }
       
       toast({
@@ -457,9 +438,9 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
                             // If material has ID, delete from database
                             if (material.id) {
                               try {
-                                console.log('🗑️ Deleting material from database:', material.id);
+                                // Debug logs removed
                                 await deleteTaskMaterialMutation.mutateAsync(material.id);
-                                console.log('✅ Material deleted from database');
+                                // Debug logs removed
                               } catch (error) {
                                 console.error('❌ Error deleting material from database:', error);
                                 return; // Don't remove from local state if database deletion fails

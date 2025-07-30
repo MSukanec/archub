@@ -24,7 +24,7 @@ export function GanttContainer({
   
   const { openModal } = useGlobalModalStore();
   
-  console.log('GanttContainer received dependencies:', dependencies);
+  // Debug logs removed
   // Estado para manejar conexiones drag & drop entre tareas
   const [dragConnectionData, setDragConnectionData] = useState<{
     fromTaskId: string;
@@ -214,11 +214,7 @@ export function GanttContainer({
     const finalTimelineStart = new Date(timelineStartRaw.getFullYear(), timelineStartRaw.getMonth(), timelineStartRaw.getDate());
     const finalTimelineEnd = new Date(timelineEndRaw.getFullYear(), timelineEndRaw.getMonth(), timelineEndRaw.getDate());
     
-    console.log('Timeline calculation:', {
-      minDateOriginal: minDate.toDateString(),
-      timelineStartCalculated: finalTimelineStart.toDateString(),
-      timelineEndCalculated: finalTimelineEnd.toDateString()
-    });
+    // Debug logs removed
     
     const result = {
       timelineStart: finalTimelineStart,
@@ -299,7 +295,7 @@ export function GanttContainer({
 
   // Función para manejar el inicio de conexión con posición inicial
   const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start' | 'end' } | null, initialPosition?: { x: number; y: number }) => {
-    console.log('GanttContainer handleConnectionDrag:', data, initialPosition);
+    // Debug logs removed
     setDragConnectionData(data);
     
     if (data && initialPosition) {
@@ -310,11 +306,11 @@ export function GanttContainer({
         mouseX: initialPosition.x,
         mouseY: initialPosition.y
       });
-      console.log('Línea punteada creada:', initialPosition);
+      // Debug logs removed
     } else {
       // Limpiar la línea cuando se cancela el drag
       setConnectionLineData(null);
-      console.log('Línea punteada limpiada');
+      // Debug logs removed
     }
   }, []);
 
@@ -846,7 +842,7 @@ export function GanttContainer({
           className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
-            scrollbarWidth: 'thick',
+            scrollbarWidth: 'auto',
             scrollbarColor: 'var(--accent) var(--table-header-bg)'
           }}
           onScroll={(e) => {
@@ -1053,7 +1049,7 @@ export function GanttContainer({
                         }}
                         onDragUpdate={refreshArrows}
                         allTasks={allTasks}
-                        dependencies={dependencies}
+                        dependencies={dependencies as any}
                         projectId={projectId}
                       />
                     </div>

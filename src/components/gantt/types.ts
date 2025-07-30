@@ -124,7 +124,7 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
   // Validate dates - if start > end, use same day
   const isValid = startDate.getTime() <= resolvedEndDate.getTime();
   if (!isValid) {
-    console.warn(`Invalid date range for item ${item.id}: startDate > endDate`);
+    // Debug logs removed
     resolvedEndDate = new Date(startDate.getTime());
     wasCalculated = false;
   }
