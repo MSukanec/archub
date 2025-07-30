@@ -42,6 +42,7 @@ import { useSubcontracts } from '@/hooks/use-subcontracts'
 import { useCreateMovementSubcontract, useDeleteMovementSubcontractsByMovement, useMovementSubcontractsByMovement } from '@/hooks/use-movement-subcontracts'
 import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
+import { Info } from 'lucide-react'
 
 const movementFormSchema = z.object({
   movement_date: z.date(),
@@ -2610,6 +2611,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     </div>
   )
 
+  // Variable para determinar si mostrar el botón de información
+  const showInfoButton = selectedSubcontractId || selectedTaskId
+
   const headerContent = currentPanel === 'subform' ? (
     <FormModalHeader
       title={currentSubform === 'tasks' ? "Selección de Tareas" : "Subformulario"}
@@ -2639,6 +2643,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           >
             ← Volver
           </button>
+        ) : undefined
+      }
+      rightActions={
+        showInfoButton ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              // Aquí puedes agregar la lógica del modal de información
+              toast({
+                title: "Información",
+                description: `Subcontrato: ${selectedSubcontractId ? 'Seleccionado' : 'No seleccionado'}\nTarea: ${selectedTaskId ? 'Seleccionada' : 'No seleccionada'}`
+              })
+            }}
+            className="flex items-center gap-2"
+          >
+            <Info className="h-4 w-4" />
+          </Button>
         ) : undefined
       }
     />

@@ -514,10 +514,14 @@ export default function Movements() {
     ),
   );
 
-  // Debug: Log available categories and sample movement data
+  // Debug: Log filtering process
+  console.log('Filter by category selected:', filterByCategory);
   console.log('Available categories:', availableCategories);
-  console.log('Sample movement data:', movements[0]);
-  console.log('Category structure in first movement:', movements[0]?.movement_data?.category);
+  if (filterByCategory !== 'all') {
+    const matchingMovements = movements.filter(m => m.movement_data?.category?.name === filterByCategory);
+    console.log(`Movements matching category "${filterByCategory}":`, matchingMovements.length);
+    console.log('Sample matching movement:', matchingMovements[0]?.movement_data?.category);
+  }
 
   const availableSubcategories = Array.from(
     new Set(
