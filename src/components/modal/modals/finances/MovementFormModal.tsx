@@ -852,13 +852,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           manoDeObraForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) manoDeObraForm.setValue('exchange_rate', currentValues.exchange_rate)
           
-          // Cargar datos desde extra_fields si estamos editando
-          if (preserveValues && editingMovement?.extra_fields) {
-            const extraFields = editingMovement.extra_fields as any
-            if (extraFields?.subcontrato) {
-              manoDeObraForm.setValue('subcontrato', extraFields.subcontrato)
-            }
-          }
+          // Los datos del subcontrato ahora se cargan desde la tabla movement_subcontracts
           
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
@@ -939,19 +933,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isConversionMovement = !!editingMovement.conversion_group_id
       const isTransferMovement = !!editingMovement.transfer_group_id
       
-      // Detectar los 3 tipos de aportes basándose en los extra_fields de la categoría
-      const extraFields = selectedCategory?.extra_fields || []
-      console.log('Category detection details:', {
-        categoryName: selectedCategory?.name,
-        categoryViewMode,
-        extraFields,
-        selectedCategoryId: selectedCategory?.id,
-        editingCategoryId: editingMovement.category_id
-      })
-      
-      const isAportesMovement = categoryViewMode === "aportes" && extraFields.includes('cliente_id') // Aportes de Terceros
-      const isAportesPropriosMovement = categoryViewMode === "aportes" && extraFields.includes('socio_id') && selectedCategory?.name === "Aportes Propios"
-      const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || (extraFields.includes('socio_id') && selectedCategory?.name?.includes('Retiro'))
+      // Detectar los tipos de movimientos especiales basándose en view_mode y nombres de categorías
+      const isAportesMovement = categoryViewMode === "aportes" && selectedCategory?.name === "Aportes de Terceros"
+      const isAportesPropriosMovement = categoryViewMode === "aportes" && selectedCategory?.name === "Aportes Propios"
+      const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || selectedCategory?.name?.includes('Retiro')
       
       // Establecer el tipo de formulario correcto
       if (isConversionMovement) {
@@ -968,26 +953,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         setMovementType('normal')
       }
       
-      console.log('Edit mode - detected movement type:', { 
-        categoryId: editingMovement.category_id,
-        categoryName: selectedCategory?.name,
-        viewMode, 
-        categoryViewMode,
-        extraFields,
-        isConversionMovement, 
-        isTransferMovement, 
-        isAportesMovement,
-        isAportesPropriosMovement,
-        isRetirosPropriosMovement
-      })
+
       
-      console.log('Form states after setting:', {
-        isConversion: isConversionMovement,
-        isTransfer: isTransferMovement,
-        isAportes: isAportesMovement,
-        isAportesPropios: isAportesPropriosMovement,
-        isRetirosPropios: isRetirosPropriosMovement
-      })
+
       
       // Cargar datos en el formulario correcto según el tipo de movimiento
       if (isConversionMovement) {
@@ -2090,12 +2058,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const currentCategoryId = form.watch('category_id')
     const currentCategory = categories?.find((cat: any) => cat.id === currentCategoryId)
     const currentCategoryViewMode = (currentCategory?.view_mode ?? "normal").trim()
-    const currentExtraFields = currentCategory?.extra_fields || []
-    
     // Detectar tipo actual basándose en la categoría seleccionada
-    const isCurrentAportes = currentCategoryViewMode === "aportes" && currentExtraFields.includes('cliente_id')
-    const isCurrentAportesPropios = currentCategoryViewMode === "aportes" && currentExtraFields.includes('socio_id') && currentCategory?.name === "Aportes Propios"
-    const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || (currentExtraFields.includes('socio_id') && currentCategory?.name?.includes('Retiro'))
+    const isCurrentAportes = currentCategoryViewMode === "aportes" && currentCategory?.name === "Aportes de Terceros"
+    const isCurrentAportesPropios = currentCategoryViewMode === "aportes" && currentCategory?.name === "Aportes Propios"
+    const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || currentCategory?.name?.includes('Retiro')
     const isCurrentMateriales = currentCategory?.name?.toLowerCase().includes('material')
     const isCurrentManoDeObra = currentCategory?.name?.toLowerCase().includes('mano de obra') || currentCategory?.name?.toLowerCase().includes('labor')
     
@@ -2103,7 +2069,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       currentCategoryId,
       currentCategoryName: currentCategory?.name,
       currentCategoryViewMode,
-      currentExtraFields,
+
       isCurrentAportes,
       isCurrentAportesPropios,
       isCurrentRetirosPropios,
@@ -2934,9 +2900,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             <label className="text-xs font-medium text-foreground">
               Subcontrato
             </label>
-            <p className="text-xs text-muted-foreground">
-              Selecciona el subcontrato asociado a este pago de mano de obra
-            </p>
             <ComboBoxWrite
               value={selectedSubcontractId}
               onValueChange={setSelectedSubcontractId}
@@ -2952,9 +2915,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             <label className="text-xs font-medium text-foreground">
               Tarea de Construcción
             </label>
-            <p className="text-xs text-muted-foreground">
-              Vincula este pago con una tarea específica del proyecto (opcional)
-            </p>
             <ComboBoxWrite
               value={selectedTaskId}
               onValueChange={setSelectedTaskId}

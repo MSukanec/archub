@@ -50,14 +50,7 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts,
   // Hook para obtener subcontratos del proyecto
   const { data: subcontracts = [] } = useSubcontracts(projectId || null)
   
-  // Debug log para subcontratos
-  React.useEffect(() => {
-    console.log('🏗️ ManoDeObraFields - Subcontratos cargados:', {
-      projectId,
-      subcontractsCount: subcontracts.length,
-      subcontracts: subcontracts.map(s => ({ id: s.id, title: s.title }))
-    })
-  }, [projectId, subcontracts])
+
   
   // Ya no necesitamos cargar las tareas aquí, se manejan en el subform
   

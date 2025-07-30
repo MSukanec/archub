@@ -9,7 +9,7 @@ export interface MovementConceptOrganization {
   organization_id: string | null;
   is_system: boolean;
   view_mode: string;
-  extra_fields: any;
+
   created_at: string;
   updated_at: string;
   children?: MovementConceptOrganization[];
@@ -31,7 +31,7 @@ export function useOrganizationMovementConcepts(organizationId: string | undefin
       // Get both system concepts (is_system = true) AND organization's own concepts
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
-        .select('id, name, description, parent_id, organization_id, is_system, view_mode, extra_fields, created_at, updated_at')
+        .select('id, name, description, parent_id, organization_id, is_system, view_mode, created_at, updated_at')
         .or(`and(is_system.eq.true,organization_id.is.null),organization_id.eq.${organizationId}`)
         .order('name');
 
