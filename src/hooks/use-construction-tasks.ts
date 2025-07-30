@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
-// Nueva interfaz para la vista CONSTRUCTION_TASK_VIEW
+// Interfaz actualizada para la vista CONSTRUCTION_TASKS_VIEW
 export interface ConstructionTaskView {
   id: string;
   project_id: string;
@@ -10,15 +10,15 @@ export interface ConstructionTaskView {
   name_rendered: string;
   unit_name: string;
   category_name: string;
-  quantity: number;
-  start_date: string | null;
-  end_date: string | null;
-  duration_in_days: number | null;
-  progress_percent: number;
+  quantity: number; // real en DB, number en TS
+  start_date: string | null; // date en DB, string en TS
+  end_date: string | null; // date en DB, string en TS
+  duration_in_days: number | null; // integer en DB, number en TS
+  progress_percent: number; // integer en DB, number en TS
   phase_name: string | null;
-  phase_position: number | null;
-  created_at: string;
-  updated_at: string;
+  phase_position: number | null; // integer en DB, number en TS
+  created_at: string; // timestamp with time zone en DB, string en TS
+  updated_at: string; // timestamp with time zone en DB, string en TS
 }
 
 // Hook específico para la vista CONSTRUCTION_TASKS_VIEW optimizada para cronograma
@@ -28,21 +28,17 @@ export function useConstructionTasksView(projectId: string) {
     queryFn: async (): Promise<ConstructionTaskView[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Debug logs removed
-      
       const { data, error } = await supabase
         .from('construction_tasks_view')
         .select('*')
         .eq('project_id', projectId)
-        .order('phase_position', { ascending: true })
+        .order('phase_position', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true });
 
       if (error) {
         console.error('Error fetching construction tasks view:', error);
         throw error;
       }
-
-      // Debug logs removed
 
       return data || [];
     },

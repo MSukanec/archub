@@ -247,13 +247,23 @@ export default function ConstructionSchedule() {
               description="Comienza agregando tareas de construcción para visualizar el cronograma del proyecto."
             />
           ) : (
-            <div className="bg-card border rounded-lg p-6">
-              <div className="text-center text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Vista Gantt Temporalmente Deshabilitada</h3>
-                <p className="text-sm">Utiliza la vista de "Listado de Tareas" para gestionar el cronograma</p>
-              </div>
-            </div>
+            <GanttContainer
+              data={ganttData}
+              dependencies={dependencies}
+              onItemEdit={(item) => openModal('construction-task-schedule', { taskId: item.id })}
+              onItemDelete={(item) => {
+                const task = filteredTasks.find(t => t.id === item.id)
+                showDeleteConfirmation({
+                  title: 'Eliminar Tarea',
+                  description: `¿Estás seguro de que quieres eliminar "${task?.name_rendered || 'esta tarea'}"?`,
+                  onConfirm: () => deleteTask.mutate({
+                    id: item.id,
+                    project_id: task?.project_id || '',
+                    organization_id: organizationId || ''
+                  })
+                })
+              }}
+            />
           )}
         </div>
       )}
