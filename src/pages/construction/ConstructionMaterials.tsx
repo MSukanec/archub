@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -209,7 +209,6 @@ export default function ConstructionMaterials() {
         onGroupingChange={setGroupingType}
         groupingOptions={[
           { value: 'categories', label: 'Agrupar por Categorías' },
-          { value: 'materials', label: 'Agrupar por Materiales' },
           { value: 'none', label: 'Sin Agrupación' }
         ]}
         customActions={[]}
