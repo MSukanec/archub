@@ -1972,20 +1972,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
 
   const onSubmitMateriales = async (data: MaterialesForm) => {
-    // Validar que hay tareas seleccionadas
-    if (!selectedTaskId) {
-      toast({
-        variant: 'destructive',
-        title: 'Error de validación',
-        description: 'Debes seleccionar al menos una tarea de construcción para este movimiento de materiales',
-      })
-      return
-    }
-
+    // La selección de tareas es opcional
     console.log('Saving materiales data:', {
       created_by: data.created_by,
       wallet_id: data.wallet_id,
-      selectedTaskId,
+      selectedTaskId: selectedTaskId || null, // Opcional
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
@@ -1996,20 +1987,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   }
 
   const onSubmitManoDeObra = async (data: ManoDeObraForm) => {
-    // Validar que hay tareas seleccionadas
-    if (!selectedTaskId) {
-      toast({
-        variant: 'destructive',
-        title: 'Error de validación',
-        description: 'Debes seleccionar al menos una tarea de construcción para este movimiento de mano de obra',
-      })
-      return
-    }
-
+    // La selección de tareas es opcional
     console.log('Saving mano de obra data:', {
       created_by: data.created_by,
       wallet_id: data.wallet_id,
-      selectedTaskId,
+      selectedTaskId: selectedTaskId || null, // Opcional
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
