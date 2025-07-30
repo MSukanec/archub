@@ -113,36 +113,7 @@ export default function ProjectDocumentation() {
     );
   }, [documents, searchTerm]);
 
-  useEffect(() => {
-    if (setNavigationContext) {
-      setNavigationContext('project');
-    }
-  }, [setNavigationContext]);
 
-  // Mobile action bar
-  useEffect(() => {
-    if (isMobile) {
-      let actions = [];
-      
-      if (viewMode === 'folders') {
-        actions.push({
-          icon: FolderPlus,
-          label: 'Nueva Carpeta',
-          onClick: () => openModal('document-folder', {})
-        });
-      }
-      
-      if (selectedFolderId) {
-        actions.push({
-          icon: Upload,
-          label: 'Subir Documentos',
-          onClick: () => openModal('document-upload', { defaultFolderId: selectedFolderId })
-        });
-      }
-      
-      setActionBarActions(actions);
-    }
-  }, [isMobile, viewMode, selectedFolderId, openModal, setActionBarActions]);
 
   const handleFolderClick = (folderId: string, folderName: string) => {
     setSelectedFolderId(folderId);
@@ -192,8 +163,6 @@ export default function ProjectDocumentation() {
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
     await showDeleteConfirmation(
       `¿Está seguro que desea eliminar la carpeta "${folderName}"?`,
-      'Esta acción no se puede deshacer.',
-      folderName,
       async () => {
         await deleteFolderMutation.mutateAsync(folderId);
         toast({
@@ -207,8 +176,6 @@ export default function ProjectDocumentation() {
   const handleDeleteGroup = async (groupId: string, groupName: string) => {
     await showDeleteConfirmation(
       `¿Está seguro que desea eliminar el grupo "${groupName}"?`,
-      'Esta acción no se puede deshacer y eliminará todos los documentos del grupo.',
-      groupName,
       async () => {
         await deleteGroupMutation.mutateAsync(groupId);
         toast({
@@ -280,7 +247,7 @@ export default function ProjectDocumentation() {
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-lg truncate">{folder.name}</CardTitle>
                     <CardDescription className="text-sm text-muted-foreground">
-                      {folder.description || 'Sin descripción'}
+                      {folder.name}
                     </CardDescription>
                   </div>
                 </div>
@@ -394,53 +361,53 @@ export default function ProjectDocumentation() {
 
     const tableData = filteredDocuments.map((doc) => ({
       id: doc.id,
-      name: doc.name,
+      name: doc.file_name || doc.name,
       type: doc.file_type,
       size: doc.file_size,
       creator: doc.creator,
       created_at: doc.created_at,
       status: doc.status,
-      version: doc.version,
-      original_name: doc.original_name
+      version: doc.version_number || 1,
+      original_name: doc.file_name || doc.name
     }));
 
     const columns = [
       {
-        header: 'Documento',
-        accessorKey: 'name',
-        cell: ({ row }: any) => (
+        key: 'name',
+        label: 'Documento',
+        render: (item: any) => (
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{row.original.name}</div>
-              <div className="text-sm text-muted-foreground truncate">{row.original.original_name}</div>
+              <div className="font-medium truncate">{item.name}</div>
+              <div className="text-sm text-muted-foreground truncate">{item.original_name}</div>
             </div>
           </div>
         )
       },
       {
-        header: 'Tipo',
-        accessorKey: 'type',
-        cell: ({ row }: any) => (
+        key: 'type',
+        label: 'Tipo',
+        render: (item: any) => (
           <Badge variant="outline" className="text-xs">
-            {row.original.type || 'N/A'}
+            {item.type || 'N/A'}
           </Badge>
         )
       },
       {
-        header: 'Tamaño',
-        accessorKey: 'size',
-        cell: ({ row }: any) => (
+        key: 'size',
+        label: 'Tamaño',
+        render: (item: any) => (
           <span className="text-sm text-muted-foreground">
-            {row.original.size ? `${(row.original.size / 1024).toFixed(1)} KB` : 'N/A'}
+            {item.size ? `${(item.size / 1024).toFixed(1)} KB` : 'N/A'}
           </span>
         )
       },
       {
-        header: 'Creador',
-        accessorKey: 'creator',
-        cell: ({ row }: any) => {
-          const creator = row.original.creator;
+        key: 'creator',
+        label: 'Creador',
+        render: (item: any) => {
+          const creator = item.creator;
           if (!creator) return <span className="text-muted-foreground">N/A</span>;
           
           return (
@@ -457,32 +424,32 @@ export default function ProjectDocumentation() {
         }
       },
       {
-        header: 'Fecha',
-        accessorKey: 'created_at',
-        cell: ({ row }: any) => (
+        key: 'created_at',
+        label: 'Fecha',
+        render: (item: any) => (
           <span className="text-sm text-muted-foreground">
-            {format(new Date(row.original.created_at), 'dd/MM/yyyy', { locale: es })}
+            {format(new Date(item.created_at), 'dd/MM/yyyy', { locale: es })}
           </span>
         )
       },
       {
-        header: 'Estado',
-        accessorKey: 'status',
-        cell: ({ row }: any) => (
+        key: 'status',
+        label: 'Estado',
+        render: (item: any) => (
           <Badge variant={
-            row.original.status === 'active' ? 'default' : 
-            row.original.status === 'archived' ? 'secondary' : 'outline'
+            item.status === 'active' ? 'default' : 
+            item.status === 'archived' ? 'secondary' : 'outline'
           }>
-            {row.original.status === 'active' ? 'Activo' : 
-             row.original.status === 'archived' ? 'Archivado' : 'Borrador'}
+            {item.status === 'active' ? 'Activo' : 
+             item.status === 'archived' ? 'Archivado' : 'Borrador'}
           </Badge>
         )
       },
       {
-        header: 'Versión',
-        accessorKey: 'version',
-        cell: ({ row }: any) => (
-          <span className="text-sm font-mono">v{row.original.version}</span>
+        key: 'version',
+        label: 'Versión',
+        render: (item: any) => (
+          <span className="text-sm font-mono">v{item.version}</span>
         )
       }
     ];
@@ -496,17 +463,17 @@ export default function ProjectDocumentation() {
           {
             icon: Eye,
             label: 'Ver',
-            onClick: (row) => {
+            onClick: (item) => {
               // Implementar vista de documento
-              console.log('Ver documento:', row.original);
+              console.log('Ver documento:', item);
             }
           },
           {
             icon: Download,
             label: 'Descargar',
-            onClick: (row) => {
+            onClick: (item) => {
               // Implementar descarga de documento
-              console.log('Descargar documento:', row.original);
+              console.log('Descargar documento:', item);
             }
           }
         ]}
