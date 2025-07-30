@@ -14,12 +14,13 @@ import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useSubcontracts } from "@/hooks/use-subcontracts";
+import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 
 export default function ConstructionSubcontracts() {
   const { data: userData } = useCurrentUser();
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
+  const deleteSubcontract = useDeleteSubcontract();
   
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
@@ -145,10 +146,11 @@ export default function ConstructionSubcontracts() {
       width: '10%',
       sortable: false,
       render: (subcontract: any) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            className="h-8 w-8"
             onClick={() => {
               openModal('subcontract', {
                 projectId: userData?.preferences?.last_project_id,
@@ -163,13 +165,21 @@ export default function ConstructionSubcontracts() {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            className="h-8 w-8"
             onClick={() => {
-              // TODO: Implementar eliminación
-              console.log('Delete subcontract:', subcontract.id);
+              openModal('delete-confirmation', {
+                title: 'Eliminar Subcontrato',
+                description: `¿Estás seguro de que deseas eliminar el subcontrato "${subcontract.title}"?`,
+                confirmText: 'Eliminar',
+                mode: 'dangerous',
+                onConfirm: () => {
+                  deleteSubcontract.mutate(subcontract.id);
+                }
+              });
             }}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
         </div>
       )
