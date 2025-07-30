@@ -223,7 +223,7 @@ export default function ConstructionSubcontracts() {
               data={filteredSubcontracts}
               isLoading={isLoading}
               className="bg-card"
-              defaultSort={{ key: 'date', direction: 'desc' }}
+              defaultSort={{ key: 'title', direction: 'asc' }}
             />
           </div>
         )}
