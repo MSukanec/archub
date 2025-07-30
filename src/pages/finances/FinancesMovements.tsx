@@ -953,46 +953,33 @@ export default function Movements() {
     {
       key: "category",
       label: "Categoría",
-      width: "10%",
+      width: "15%", // Aumentado de 10% a 15% (1.5x)
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <div>
-              <div className="text-xs font-medium">
-                Conversión
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {item.from_currency} → {item.to_currency}
-              </div>
+            <div className="text-xs">
+              <span className="font-bold">Conversión</span> - {item.from_currency} → {item.to_currency}
             </div>
           );
         }
         
         if ('is_transfer_group' in item) {
           return (
-            <div>
-              <div className="text-xs font-medium">
-                Transferencia
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {item.from_wallet} → {item.to_wallet}
-              </div>
+            <div className="text-xs">
+              <span className="font-bold">Transferencia</span> - {item.from_wallet} → {item.to_wallet}
             </div>
           );
         }
         
+        const categoryName = item.movement_data?.category?.name || "Sin categoría";
+        const subcategoryName = item.movement_data?.subcategory?.name;
+        
         return (
-          <div>
-            <div className="text-xs font-medium">
-              {item.movement_data?.category?.name || "Sin categoría"}
-            </div>
-            {item.movement_data?.subcategory?.name && (
-              <div className="text-xs text-muted-foreground">
-                {item.movement_data.subcategory.name}
-              </div>
-            )}
+          <div className="text-xs">
+            <span className="font-bold">{categoryName}</span>
+            {subcategoryName && <span> - {subcategoryName}</span>}
           </div>
         );
       },
