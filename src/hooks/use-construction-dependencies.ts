@@ -16,7 +16,7 @@ export interface ConstructionDependencyWithTasks extends ConstructionDependency 
     id: string;
     task: {
       code: string;
-      display_name: string;
+      name_rendered: string;
       processed_display_name?: string;
     };
   };
@@ -24,7 +24,7 @@ export interface ConstructionDependencyWithTasks extends ConstructionDependency 
     id: string;
     task: {
       code: string;
-      display_name: string;
+      name_rendered: string;
       processed_display_name?: string;
     };
   };
@@ -42,16 +42,16 @@ export function useConstructionDependencies(projectId: string) {
           *,
           predecessor_task:construction_tasks!predecessor_task_id (
             id,
-            task:task_parametric_view!inner (
+            task:task_parametric_view_2!inner (
               code,
-              display_name
+              name_rendered
             )
           ),
           successor_task:construction_tasks!successor_task_id (
             id,
-            task:task_parametric_view!inner (
+            task:task_parametric_view_2!inner (
               code,
-              display_name
+              name_rendered
             )
           )
         `)

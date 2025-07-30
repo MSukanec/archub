@@ -52,7 +52,7 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
         .order('is_default', { ascending: false })
       
       if (error) throw error
-      return data as OrganizationCurrency[]
+      return (data || []) as unknown as OrganizationCurrency[]
     },
     enabled: !!organizationId,
   })
@@ -73,7 +73,7 @@ export const useOrganizationDefaultCurrency = (organizationId?: string) => {
         .single()
       
       if (error) throw error
-      return data?.default_currency as Currency | null
+      return (data?.default_currency || null) as unknown as Currency | null
     },
     enabled: !!organizationId,
   })

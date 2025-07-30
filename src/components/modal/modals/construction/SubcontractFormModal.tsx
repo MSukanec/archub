@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
-import { useOrganizationCurrencies } from "@/hooks/use-organization-currencies";
+import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
 
 const subcontractSchema = z.object({
   title: z.string().min(1, "El título es obligatorio"),
@@ -58,13 +59,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const createSubcontract = useCreateSubcontract();
   
   // Obtener contactos/proveedores
-  const { data: contacts = [] } = useContacts(modalData.organizationId || '');
+  const { data: contacts = [] } = useContacts();
   
   // Obtener todas las tareas del proyecto
-  const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId || '');
+  const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
   
   // Obtener monedas de la organización
-  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId || '');
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId);
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
@@ -119,14 +120,16 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
     try {
       await createSubcontract.mutateAsync({
-        project_id: modalData.projectId,
-        organization_id: modalData.organizationId,
-        contact_id: data.contact_id,
-        title: data.title,
-        amount_total: data.amount_total || 0,
-        notes: data.notes || null,
-        status: data.status,
-        task_ids: selectedTasks.map(t => t.task_id)
+        subcontract: {
+          project_id: modalData.projectId,
+          organization_id: modalData.organizationId,
+          contact_id: data.contact_id,
+          title: data.title,
+          amount_total: data.amount_total || 0,
+          notes: data.notes || null,
+          status: data.status
+        },
+        taskIds: selectedTasks.map(t => t.task_id)
       });
 
       toast({
@@ -266,7 +269,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const headerContent = (
     <FormModalHeader 
       title="Crear Pedido de Subcontrato"
-      subtitle="Vincula tareas del proyecto con un subcontratista"
+      description="Vincula tareas del proyecto con un subcontratista"
       icon={Package}
     />
   );
@@ -347,12 +350,12 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
                         {/* Información de la tarea */}
                         <div className="col-span-8">
                           <div className="text-sm leading-tight line-clamp-2">
-                            {task.name_rendered || 'Tarea sin nombre'}
+                            {task.task?.display_name || 'Tarea sin nombre'}
                           </div>
                           <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                            <span className="font-bold">{task.category_name || 'Sin rubro'}</span>
+                            <span className="font-bold">{task.task?.category_name || 'Sin rubro'}</span>
                             <span>•</span>
-                            <span>{task.unit_name || 'UN'}</span>
+                            <span>{task.task?.unit_name || 'UN'}</span>
                             <span>•</span>
                             <span className="text-accent font-medium">
                               Total: {task.quantity || 0}
@@ -400,6 +403,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       isEditing={true}
+      onClose={closeModal}
     />
   );
 }

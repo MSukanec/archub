@@ -362,7 +362,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const subcategories = React.useMemo(() => {
     if (!selectedCategoryId || !categories) return []
     
-    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId)
+    const selectedCategory = categories.find((cat: any) => cat.id === selectedCategoryId)
     return selectedCategory?.children || []
   }, [categories, selectedCategoryId])
 
@@ -743,9 +743,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           aportesForm.setValue('type_id', form.watch('type_id'))
           aportesForm.setValue('category_id', categoryId)
           aportesForm.setValue('description', preserveValues ? currentValues.description : '')
-          aportesForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
-          aportesForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
-          aportesForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          aportesForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          aportesForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '')
+          aportesForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
           aportesForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) aportesForm.setValue('exchange_rate', currentValues.exchange_rate)
           
@@ -758,8 +758,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           aportesPropriosForm.setValue('type_id', form.watch('type_id'))
           aportesPropriosForm.setValue('category_id', categoryId)
           aportesPropriosForm.setValue('description', preserveValues ? currentValues.description : '')
-          aportesPropriosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
-          aportesPropriosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
+          aportesPropriosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          aportesPropriosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '')
           aportesPropriosForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
           aportesPropriosForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) aportesPropriosForm.setValue('exchange_rate', currentValues.exchange_rate)
@@ -1973,7 +1973,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const onSubmitMateriales = async (data: MaterialesForm) => {
     // Validar que hay tareas seleccionadas
-    if (!selectedTaskIds || selectedTaskIds.length === 0) {
+    if (!selectedTaskId) {
       toast({
         variant: 'destructive',
         title: 'Error de validación',
@@ -1985,7 +1985,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     console.log('Saving materiales data:', {
       created_by: data.created_by,
       wallet_id: data.wallet_id,
-      selectedTaskIds,
+      selectedTaskId,
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
@@ -1997,7 +1997,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const onSubmitManoDeObra = async (data: ManoDeObraForm) => {
     // Validar que hay tareas seleccionadas
-    if (!selectedTaskIds || selectedTaskIds.length === 0) {
+    if (!selectedTaskId) {
       toast({
         variant: 'destructive',
         title: 'Error de validación',
@@ -2009,7 +2009,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     console.log('Saving mano de obra data:', {
       created_by: data.created_by,
       wallet_id: data.wallet_id,
-      selectedTaskIds,
+      selectedTaskId,
       category_id: data.category_id,
       type_id: data.type_id,
       amount: data.amount,
@@ -2241,7 +2241,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       <div>
         <h4 className="font-medium">Creador</h4>
         <p className="text-muted-foreground mt-1">
-          {selectedCreator ? `${selectedCreator.first_name} ${selectedCreator.last_name || ''}`.trim() : 'Sin creador'}
+          {selectedCreator ? selectedCreator.user?.full_name || 'Sin nombre' : 'Sin creador'}
         </p>
       </div>
       
@@ -2527,9 +2527,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         <Form {...conversionForm}>
           <ConversionFields 
             form={conversionForm} 
-            currencies={currencies} 
-            wallets={wallets} 
-            members={members}
+            currencies={currencies || []} 
+            wallets={wallets || []} 
+            members={members || []}
             concepts={concepts}
             movement={editingMovement}
           />
@@ -2538,9 +2538,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         <Form {...transferForm}>
           <TransferFields
             form={transferForm}
-            currencies={currencies}
-            wallets={wallets}
-            members={members}
+            currencies={currencies || []}
+            wallets={wallets || []}
+            members={members || []}
             concepts={concepts}
           />
         </Form>
@@ -2549,9 +2549,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
             <AportesFields
               form={aportesForm}
-              currencies={currencies}
-              wallets={wallets}
-              members={members}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
               concepts={concepts}
               projectClients={projectClients}
             />
@@ -2563,9 +2563,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <form onSubmit={aportesPropriosForm.handleSubmit(onSubmitAportesPropios)} className="space-y-4">
             <AportesPropiosFields
               form={aportesPropriosForm}
-              currencies={currencies}
-              wallets={wallets}
-              members={members}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
               concepts={concepts}
             />
           </form>
@@ -2576,9 +2576,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
             <RetirosPropiosFields
               form={retirosPropriosForm}
-              currencies={currencies}
-              wallets={wallets}
-              members={members}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
               concepts={concepts}
             />
           </form>
@@ -2589,9 +2589,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <form onSubmit={materialesForm.handleSubmit(onSubmitMateriales)} className="space-y-4">
             <MaterialesFields
               form={materialesForm}
-              currencies={currencies}
-              wallets={wallets}
-              members={members}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
               concepts={concepts}
               selectedTaskId={selectedTaskId}
               setSelectedTaskId={setSelectedTaskId}
@@ -2605,9 +2605,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <form onSubmit={manoDeObraForm.handleSubmit(onSubmitManoDeObra)} className="space-y-4">
             <ManoDeObraFields
               form={manoDeObraForm}
-              currencies={currencies}
-              wallets={wallets}
-              members={members}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
               concepts={concepts}
               selectedTaskId={selectedTaskId}
               setSelectedTaskId={setSelectedTaskId}
