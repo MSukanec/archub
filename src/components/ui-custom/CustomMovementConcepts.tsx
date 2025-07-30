@@ -69,7 +69,6 @@ export function CustomMovementConcepts({
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (error) => {
-      console.error('Error creating concept:', error);
       toast({
         title: "Error al crear concepto",
         description: "No se pudo crear el concepto. Inténtalo de nuevo.",
@@ -100,7 +99,6 @@ export function CustomMovementConcepts({
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (error) => {
-      console.error('Error deleting concept:', error);
       toast({
         title: "Error al eliminar concepto",
         description: "No se pudo eliminar el concepto. Inténtalo de nuevo.",

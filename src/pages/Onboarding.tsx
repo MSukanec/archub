@@ -83,7 +83,6 @@ export default function Onboarding() {
   }, [userData, userLoading, updateFormData, setCurrentStep]);
 
   const handleFinishOnboarding = () => {
-    console.log('handleFinishOnboarding called - completing 3-step onboarding');
     saveOnboardingMutation.mutate();
   };
 
@@ -127,10 +126,8 @@ export default function Onboarding() {
         .eq('user_id', userId);
 
       if (preferencesError) {
-        console.error('Error updating user preferences:', preferencesError);
         throw preferencesError;
       } else {
-        console.log('Successfully updated user preferences with onboarding_completed: true');
       }
 
       // Update organization name if provided
@@ -245,7 +242,6 @@ export default function Onboarding() {
       resetOnboarding();
     },
     onError: (error) => {
-      console.error('Error saving onboarding data:', error);
       toast({
         variant: "destructive",
         title: "Error",

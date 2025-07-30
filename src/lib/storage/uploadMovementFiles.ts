@@ -19,7 +19,6 @@ export async function uploadMovementFiles(
     try {
       // Validate file first
       if (!file || file.size === 0) {
-        console.error('Archivo vacío o inválido')
         continue
       }
 
@@ -27,7 +26,6 @@ export async function uploadMovementFiles(
       const extension = file.name.split('.').pop()
       const filePath = `${crypto.randomUUID()}.${extension}`
 
-      console.log('Subiendo archivo de movimiento:', filePath, file)
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
@@ -48,7 +46,6 @@ export async function uploadMovementFiles(
         })
 
       if (dbError) {
-        console.error('Error insertando registro de archivo en base de datos:', dbError)
         continue
       }
 
@@ -61,7 +58,6 @@ export async function uploadMovementFiles(
         })
 
       if (error) {
-        console.error('Error subiendo archivo a Storage:', error)
         
         // Clean up database record if Storage upload fails
         await supabase
@@ -72,7 +68,6 @@ export async function uploadMovementFiles(
         continue
       }
 
-      console.log('Archivo subido exitosamente:', data)
 
       uploadedFiles.push({
         file_url: urlData.publicUrl,
@@ -81,7 +76,6 @@ export async function uploadMovementFiles(
         file_path: filePath
       })
     } catch (error) {
-      console.error('Error procesando archivo:', error)
     }
   }
 
@@ -98,7 +92,6 @@ export async function getMovementFiles(movementId: string) {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error obteniendo archivos de movimiento:', error)
     return []
   }
 
@@ -115,7 +108,6 @@ export async function deleteMovementFile(fileId: string, filePath: string) {
       .remove([filePath])
 
     if (storageError) {
-      console.error('Error eliminando archivo de Storage:', storageError)
     }
 
     // Delete from database
@@ -125,13 +117,11 @@ export async function deleteMovementFile(fileId: string, filePath: string) {
       .eq('id', fileId)
 
     if (dbError) {
-      console.error('Error eliminando registro de archivo:', dbError)
       return false
     }
 
     return true
   } catch (error) {
-    console.error('Error eliminando archivo:', error)
     return false
   }
 }

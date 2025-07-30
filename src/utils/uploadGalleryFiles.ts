@@ -20,7 +20,6 @@ export async function uploadGalleryFiles(
     try {
       // Validate file first
       if (!file || file.size === 0) {
-        console.error('Archivo vacío o inválido');
         continue;
       }
 
@@ -50,14 +49,12 @@ export async function uploadGalleryFiles(
         visibility: 'organization'
       };
 
-      console.log('Insertando en DB:', insertData);
 
       const { error: dbError } = await supabase
         .from('site_log_files')
         .insert(insertData);
 
       if (dbError) {
-        console.error('Error creating file record:', dbError);
         throw dbError;
       }
 
@@ -70,7 +67,6 @@ export async function uploadGalleryFiles(
         });
 
       if (uploadError) {
-        console.error('Error uploading file:', uploadError);
         // Clean up database record if upload fails
         await supabase
           .from('site_log_files')
@@ -79,9 +75,7 @@ export async function uploadGalleryFiles(
         throw uploadError;
       }
 
-      console.log('Archivo subido exitosamente:', filePath);
     } catch (error) {
-      console.error('Error processing file:', file.name, error);
       throw error;
     }
   }

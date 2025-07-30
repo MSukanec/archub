@@ -35,7 +35,6 @@ export function useAllTaskCategories() {
         .order('name');
 
       if (error) {
-        console.error('Error fetching all categories:', error);
         throw error;
       }
 
@@ -56,7 +55,6 @@ export function useSubcategoriesOnly() {
         .order('name');
 
       if (error) {
-        console.error('Error fetching categories:', error);
         throw error;
       }
 
@@ -153,7 +151,6 @@ export function useCreateTaskCategory() {
         .single();
 
       if (error) {
-        console.error('Error creating category:', error);
         throw error;
       }
 
@@ -167,7 +164,6 @@ export function useCreateTaskCategory() {
       });
     },
     onError: (error: any) => {
-      console.error('Create category error:', error);
       toast({
         title: "Error",
         description: "No se pudo crear la categoría. Inténtalo de nuevo.",
@@ -192,7 +188,6 @@ export function useUpdateTaskCategory() {
         .single();
 
       if (error) {
-        console.error('Error updating category:', error);
         throw error;
       }
 
@@ -206,7 +201,6 @@ export function useUpdateTaskCategory() {
       });
     },
     onError: (error: any) => {
-      console.error('Update category error:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar la categoría. Inténtalo de nuevo.",
@@ -229,7 +223,6 @@ export function useDeleteTaskCategory() {
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting category:', error);
         throw error;
       }
     },
@@ -241,7 +234,6 @@ export function useDeleteTaskCategory() {
       });
     },
     onError: (error: any) => {
-      console.error('Delete category error:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la categoría. Inténtalo de nuevo.",

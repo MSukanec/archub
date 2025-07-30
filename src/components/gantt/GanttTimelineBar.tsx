@@ -141,7 +141,6 @@ export function GanttTimelineBar({
   const widthPixels = calculatedDuration * dayWidth;
   
   // Clean up debug logs - alignment is now working perfectly
-  // console.log('BAR ALIGNED:', item.name.substring(0, 20), startPixels);
 
 
 
@@ -174,7 +173,6 @@ export function GanttTimelineBar({
     e.stopPropagation();
     e.preventDefault();
     
-    console.log('Starting connection from:', item.name, point);
     
     // Obtener posición del punto de conexión
     const rect = barRef.current?.getBoundingClientRect();
@@ -204,7 +202,6 @@ export function GanttTimelineBar({
     };
     
     const handleMouseUp = (upEvent: MouseEvent) => {
-      console.log('Mouse up detected, cleaning connection line');
       setIsConnecting(false);
       setConnectionStart(null);
       onConnectionDrag?.(null);
@@ -255,7 +252,6 @@ export function GanttTimelineBar({
     setConnectionStart(null);
     onConnectionDrag?.(null);
     
-    console.log('Created dependency:', fromTaskId, '->', toTaskId, 'type:', dependencyType);
   };
 
   // Solo mostrar puntos de conexión en tareas (no fases)
@@ -399,7 +395,6 @@ export function GanttTimelineBar({
         );
       }
       
-      console.log('DRAG UPDATE:', {
         taskId: item.taskData?.id,
         taskName: item.name,
         originalStartDate: format(startDate, 'yyyy-MM-dd'),
@@ -455,7 +450,6 @@ export function GanttTimelineBar({
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
         }).catch((error) => {
-          console.error('DRAG UPDATE ERROR - Keeping optimistic update:', error);
           
           // NO invalidar queries para evitar refresh - mantener cambio optimista
           // El usuario ve el cambio instantáneo, el background sync se intentará de nuevo
@@ -534,7 +528,6 @@ export function GanttTimelineBar({
       const newDay = Math.round(adjustedX / dayWidth);
       const newDate = addDays(timelineStart, newDay);
       
-      console.log('Resize calculation:', {
         clientX: e.clientX,
         containerLeft: containerRect.left,
         scrollLeft,
@@ -573,7 +566,6 @@ export function GanttTimelineBar({
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
         }).catch((error) => {
-          console.error('RESIZE START ERROR - Keeping optimistic update:', error);
         });
       } else {
         const startDate = new Date(item.taskData.start_date!);
@@ -621,7 +613,6 @@ export function GanttTimelineBar({
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
         }).catch((error) => {
-          console.error('RESIZE END ERROR - Keeping optimistic update:', error);
         });
       }
       

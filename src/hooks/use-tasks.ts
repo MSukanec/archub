@@ -43,7 +43,6 @@ export function useTasks() {
         return []
       }
 
-      console.log('Fetching tasks for organization:', userData.organization.id)
       
       const { data, error } = await supabase
         .from('tasks')
@@ -51,11 +50,9 @@ export function useTasks() {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching tasks:', error)
         throw error
       }
 
-      console.log('Tasks data received:', data)
       return data as Task[]
     },
     enabled: !!userData?.organization?.id && !!supabase
@@ -79,7 +76,6 @@ export function useCreateTask() {
         .single()
 
       if (error) {
-        console.error('Error creating task:', error)
         throw error
       }
 
@@ -119,7 +115,6 @@ export function useUpdateTask() {
         .single()
 
       if (error) {
-        console.error('Error updating task:', error)
         throw error
       }
 
@@ -157,7 +152,6 @@ export function useDeleteTask() {
         .eq('id', id)
 
       if (error) {
-        console.error('Error deleting task:', error)
         throw error
       }
     },

@@ -67,7 +67,6 @@ export function useDesignDocuments(groupId?: string) {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching design documents:', error);
         return [];
       }
 

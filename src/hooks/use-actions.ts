@@ -21,7 +21,6 @@ export function useActions() {
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Error fetching actions:', error);
         throw error;
       }
 

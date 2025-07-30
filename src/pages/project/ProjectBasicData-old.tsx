@@ -34,7 +34,6 @@ export default function ProjectBasicData() {
         .single();
         
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('Error fetching project data:', error);
         throw error;
       }
       
@@ -56,7 +55,6 @@ export default function ProjectBasicData() {
         .single();
         
       if (error) {
-        console.error('Error fetching project info:', error);
         throw error;
       }
       

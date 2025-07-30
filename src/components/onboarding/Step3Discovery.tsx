@@ -93,7 +93,6 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
         main_use_other: mainUseOther
       });
       
-      console.log('Step3Discovery - Finishing onboarding, calling finish function from parent');
       // Call the finish function passed from parent instead of goNextStep
       if (onFinish) {
         // Use setTimeout to ensure the state update happens before the mutation

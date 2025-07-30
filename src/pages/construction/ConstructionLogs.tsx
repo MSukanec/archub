@@ -67,7 +67,6 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         return [];
       }
 
-      console.log('Fetching site logs for project:', projectId, 'in organization:', organizationId);
 
       // First get the site logs
       const { data: logsData, error } = await supabase
@@ -87,7 +86,6 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching site logs:', error);
         throw error;
       }
 
@@ -130,7 +128,6 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .in('site_log_id', logIds);
 
       if (attendeesError) {
-        console.error('Error fetching attendees:', attendeesError);
       }
 
       // Fetch equipment separately
@@ -165,10 +162,8 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         files: filesData?.filter(file => file.site_log_id === log.id) || []
       }));
 
-      console.log('Site logs with related data:', data);
 
       if (error) {
-        console.error('Error fetching site logs:', error);
         throw error;
       }
 
@@ -316,7 +311,6 @@ export default function ConstructionLogs() {
       setSiteLogToDelete(null);
     },
     onError: (error) => {
-      console.error('Error deleting site log:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la entrada de bitácora",
@@ -345,7 +339,6 @@ export default function ConstructionLogs() {
       queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
     },
     onError: (error) => {
-      console.error('Error toggling favorite:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el favorito",

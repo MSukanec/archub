@@ -51,7 +51,6 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
       });
       onClose();
     } catch (error) {
-      console.error('Error deleting dependency:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la conexión. Inténtalo de nuevo.",

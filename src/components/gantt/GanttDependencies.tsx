@@ -46,7 +46,6 @@ export function GanttDependencies({
   }>>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // console.log('GanttDependencies rendering with:', {
   //   dependenciesCount: dependencies.length,
   //   dataCount: data.length,
   //   timelineWidth,

@@ -70,7 +70,6 @@ export function propagateDependencyChanges(
   // Iniciar la propagación desde la tarea que cambió
   propagateRecursive(changedTaskId, newEndDate);
   
-  console.log('DEPENDENCY PROPAGATION:', {
     changedTaskId,
     newEndDate,
     propagatedUpdates: updates.length,

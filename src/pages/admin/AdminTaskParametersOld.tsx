@@ -110,7 +110,6 @@ export default function AdminTaskParameters() {
       await deleteParameterMutation.mutateAsync(parameterId);
       setDeleteParameterId(null);
     } catch (error) {
-      console.error('Error deleting parameter:', error);
     }
   };
 
@@ -120,7 +119,6 @@ export default function AdminTaskParameters() {
       await deleteOptionMutation.mutateAsync(optionId);
       setDeleteOptionId(null);
     } catch (error) {
-      console.error('Error deleting option:', error);
     }
   };
 

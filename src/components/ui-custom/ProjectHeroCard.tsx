@@ -71,7 +71,6 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
         description: "No se pudo actualizar la imagen del proyecto.",
         variant: "destructive",
       });
-      console.error('Error uploading image:', error);
     },
   });
 
@@ -162,7 +161,6 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
               objectPosition: `center ${imagePosition}%`
             }}
             onError={(e) => {
-              console.error('Error loading project image:', e);
               e.currentTarget.style.display = 'none';
             }}
           />

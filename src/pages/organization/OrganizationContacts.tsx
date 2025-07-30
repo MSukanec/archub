@@ -73,7 +73,6 @@ export default function OrganizationContacts() {
           icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
-            console.log('Toggle filtros')
           }
         },
         slot5: {

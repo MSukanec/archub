@@ -481,7 +481,6 @@ export default function ProjectDocumentation() {
             label: 'Ver',
             onClick: (row) => {
               // Implementar vista de documento
-              console.log('Ver documento:', row.original);
             }
           },
           {
@@ -489,7 +488,6 @@ export default function ProjectDocumentation() {
             label: 'Descargar',
             onClick: (row) => {
               // Implementar descarga de documento
-              console.log('Descargar documento:', row.original);
             }
           }
         ]}

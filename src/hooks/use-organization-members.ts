@@ -33,7 +33,6 @@ export function useOrganizationMembers(organizationId?: string) {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching organization members:', error);
         throw error;
       }
 

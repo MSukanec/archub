@@ -114,9 +114,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
             .update({ last_organization_id: result })
             .eq('user_id', userData?.user.id)
           
-          if (error) console.error('Error selecting new organization:', error)
         } catch (err) {
-          console.error('Error updating organization selection:', err)
         }
       }
       

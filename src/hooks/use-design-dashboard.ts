@@ -17,7 +17,6 @@ export function useDesignSummary(organizationId?: string, projectId?: string) {
         .eq('project_id', projectId)
 
       if (docsError) {
-        console.error('Error fetching design documents:', docsError)
         throw docsError
       }
 
@@ -28,7 +27,6 @@ export function useDesignSummary(organizationId?: string, projectId?: string) {
         .or(`organization_id.eq.${organizationId},organization_id.is.null`)
 
       if (phasesError) {
-        console.error('Error fetching design phases:', phasesError)
         // Don't throw error, just continue without phases
       }
 
@@ -81,7 +79,6 @@ export function useRecentDesignDocuments(organizationId?: string, projectId?: st
         .limit(limit)
 
       if (error) {
-        console.error('Error fetching recent design documents:', error)
         throw error
       }
 
@@ -107,7 +104,6 @@ export function useDesignPhasesWithTasks(organizationId?: string, projectId?: st
         .order('name', { ascending: true })
 
       if (phasesError) {
-        console.error('Error fetching design phases:', phasesError)
         return []
       }
 

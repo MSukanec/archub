@@ -175,7 +175,6 @@ export default function Movements() {
           icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
-            console.log("Filter clicked");
           },
         },
         slot5: {
@@ -265,7 +264,6 @@ export default function Movements() {
             const files = await getMovementFiles(movementId);
             counts[movementId] = files.length;
           } catch (error) {
-            console.error(`Error loading files for movement ${movementId}:`, error);
             counts[movementId] = 0;
           }
         }
@@ -475,7 +473,6 @@ export default function Movements() {
         description: "El movimiento se ha actualizado correctamente.",
       });
     } catch (error) {
-      console.error("Error toggling favorite:", error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado de favorito.",

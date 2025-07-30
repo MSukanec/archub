@@ -108,11 +108,9 @@ export default function OrganizationMembers() {
 
   // Mock guests data (empty for now)
   const guests: any[] = [];
-  console.log('No guest accounts table found, using empty array');
 
   // Mock pending invites data (empty for now)
   const pendingInvites: any[] = [];
-  console.log('No invites table found, using empty array');
 
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {

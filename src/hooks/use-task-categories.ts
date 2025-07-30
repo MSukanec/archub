@@ -15,22 +15,18 @@ export function useTaskCategories() {
     queryKey: ['task-categories'],
     queryFn: async () => {
       if (!supabase) {
-        console.error('Supabase client not initialized')
         throw new Error('Supabase client not initialized')
       }
 
-      console.log('Fetching task categories...')
       const { data, error } = await supabase
         .from('task_categories')
         .select('*')
         .order('name')
 
       if (error) {
-        console.error('Error fetching task categories:', error)
         throw error
       }
 
-      console.log('Task categories data:', data)
       return data as TaskCategory[]
     }
   })
@@ -42,7 +38,6 @@ export function useTopLevelCategories() {
   
   const topLevelCategories = allCategories.filter(category => category.parent_id === null)
   
-  console.log('Top level categories:', topLevelCategories)
   
   return {
     data: topLevelCategories,
@@ -93,7 +88,6 @@ export function useUnits() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching units:', error)
         throw error
       }
 
@@ -117,7 +111,6 @@ export function useActions() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching actions:', error)
         throw error
       }
 
@@ -141,7 +134,6 @@ export function useElements() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching task elements:', error)
         throw error
       }
 

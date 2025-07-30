@@ -28,7 +28,6 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
     queryFn: async () => {
       if (!supabase || !projectId || !organizationId) return []
 
-      console.log('Fetching attendance data for project:', projectId, 'in organization:', organizationId)
 
       // Query the new attendees table structure
       const { data: attendanceData, error } = await supabase
@@ -50,7 +49,6 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
         .eq('project_id', projectId)
 
       if (error) {
-        console.error('Error fetching attendance data:', error)
         return []
       }
 
@@ -59,7 +57,6 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
         item.contact?.organization_id === organizationId
       )
 
-      console.log('Filtered attendance data:', filteredData.length, 'records')
       
       return filteredData
     },
@@ -80,7 +77,6 @@ function useContactTypes() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching contact types:', error)
         return []
       }
 
@@ -206,7 +202,6 @@ export default function ConstructionAttendance() {
     const worker = filteredWorkers.find(w => w.id === workerId);
     if (!worker) return;
 
-    console.log('🔄 Opening attendance modal for editing:', {
       workerId,
       workerName: worker.name,
       date,

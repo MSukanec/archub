@@ -26,7 +26,6 @@ export function useOrganizationMovementConcepts(organizationId: string | undefin
         throw new Error('Supabase client not initialized or organization ID missing');
       }
 
-      console.log('🔍 Fetching organization movement concepts for:', organizationId);
 
       // Get both system concepts (is_system = true) AND organization's own concepts
       const { data: concepts, error } = await supabase
@@ -35,7 +34,6 @@ export function useOrganizationMovementConcepts(organizationId: string | undefin
         .or(`and(is_system.eq.true,organization_id.is.null),organization_id.eq.${organizationId}`)
         .order('name');
 
-      console.log('📊 Organization movement concepts query result:', { 
         concepts, 
         error, 
         count: concepts?.length,
@@ -84,7 +82,6 @@ export function useOrganizationMovementConcepts(organizationId: string | undefin
 
       sortConcepts(rootConcepts);
 
-      console.log('🌳 Organization movement concepts tree built:', rootConcepts);
 
       return rootConcepts;
     },

@@ -43,7 +43,6 @@ export default function AdminGeneratedTasks() {
     })
 
   const handleEdit = (generatedTask: GeneratedTask) => {
-    console.log('📝 Editando tarea:', generatedTask);
     const modalData = { task: generatedTask, isEditing: true };
     openModal('parametric-task', modalData)
   }

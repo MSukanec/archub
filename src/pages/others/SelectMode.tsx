@@ -96,7 +96,6 @@ export default function SelectMode() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      console.log('User type updated successfully, navigating to dashboard');
       toast({
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
@@ -107,7 +106,6 @@ export default function SelectMode() {
       navigate('/organization/dashboard');
     },
     onError: (error) => {
-      console.error('Error updating user type:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -119,11 +117,9 @@ export default function SelectMode() {
   const handleModeSelect = (modeType: string) => {
     // Prevenir múltiples clics
     if (hasFinished || updateUserTypeMutation.isPending) {
-      console.log('SelectMode - Preventing duplicate click', { hasFinished, isLoading: updateUserTypeMutation.isPending });
       return;
     }
     
-    console.log('SelectMode - Processing mode selection:', modeType);
     setHasFinished(true);
     setSelectedMode(modeType);
     

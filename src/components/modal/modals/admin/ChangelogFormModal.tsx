@@ -118,7 +118,6 @@ export function ChangelogFormModal({ modalData, onClose }: ChangelogFormModalPro
       handleClose();
     },
     onError: (error) => {
-      console.error('Error creating changelog entry:', error);
       toast({
         title: 'Error',
         description: 'No se pudo crear la entrada. Inténtalo de nuevo.',
@@ -153,7 +152,6 @@ export function ChangelogFormModal({ modalData, onClose }: ChangelogFormModalPro
       handleClose();
     },
     onError: (error) => {
-      console.error('Error updating changelog entry:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la entrada. Inténtalo de nuevo.',

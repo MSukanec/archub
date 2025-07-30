@@ -281,7 +281,6 @@ const useCreateDependency = () => {
       });
     },
     onError: (error) => {
-      console.error('Error creating dependency:', error);
       toast({
         title: "Error",
         description: "No se pudo crear la dependencia. Inténtalo de nuevo.",
@@ -343,7 +342,6 @@ const useParameterPositions = () => {
         .select('*');
 
       if (error) {
-        console.error('❌ Error cargando posiciones:', error);
         throw error;
       }
 
@@ -374,7 +372,6 @@ const useSaveParameterPosition = () => {
           .select();
 
         if (error) {
-          console.error('❌ Error actualizando posición por ID:', error);
           throw error;
         }
 
@@ -403,7 +400,6 @@ const useSaveParameterPosition = () => {
           .select();
 
         if (error) {
-          console.error('❌ Error actualizando posición:', error);
           throw error;
         }
 
@@ -423,7 +419,6 @@ const useSaveParameterPosition = () => {
           .select();
 
         if (error) {
-          console.error('❌ Error insertando posición:', error);
           throw error;
         }
 
@@ -441,7 +436,6 @@ const useSaveParameterPosition = () => {
       queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
     },
     onError: (error) => {
-      console.error('❌ Error en mutación:', error);
     },
   });
 };
@@ -571,7 +565,6 @@ function AddParameterButton() {
         .single();
 
       if (error) {
-        console.error('❌ Error creando nodo duplicado:', error);
         toast({ title: "Error", description: "No se pudo duplicar el parámetro" });
         return;
       }
@@ -620,14 +613,12 @@ function AddParameterButton() {
       toast({ title: "Parámetro duplicado", description: "Nueva visualización creada exitosamente" });
       
     } catch (error) {
-      console.error('❌ Error duplicando nodo:', error);
       toast({ title: "Error", description: "No se pudo duplicar el parámetro" });
     }
   }, [parametersData, nodes, nodeVisibleOptions, toast, savePositionMutation, supabase]);
 
   // Función para editar un parámetro (abrir modal)
   const handleEditNode = useCallback((parameterId: string) => {
-    console.log('✏️ Editando parámetro:', parameterId);
     // Buscar el parámetro en los datos cargados
     const parameterData = parametersData.find(item => item.parameter.id === parameterId);
     if (parameterData) {
@@ -639,7 +630,6 @@ function AddParameterButton() {
 
   // Función para configurar visibilidad de opciones por parámetro padre
   const handleConfigureVisibility = useCallback((parameterId: string) => {
-    console.log('⚙️ Configurando visibilidad para parámetro:', parameterId);
     const { openModal } = useGlobalModalStore.getState();
     openModal('parameter-visibility-config', { parameterId });
   }, []);
@@ -654,7 +644,6 @@ function AddParameterButton() {
 
   // Función para borrar un nodo del canvas (COMPLETAMENTE MEJORADA)
   const handleDeleteNode = useCallback(async (nodeId: string) => {
-    console.log('🗑️ Borrando nodo permanentemente:', nodeId);
     
     // Marcar el nodo como eliminado INMEDIATAMENTE para evitar recreación
     setDeletedNodeIds(prev => new Set(prev).add(nodeId));
@@ -662,14 +651,12 @@ function AddParameterButton() {
     
     try {
       // Eliminar el nodo de la base de datos por ID
-      console.log('🗑️ Eliminando nodo de BD:', nodeId);
       const { error } = await supabase!
         .from('task_parameter_positions')
         .delete()
         .eq('id', nodeId);
         
       if (error) {
-        console.error('❌ Error eliminando nodo:', error);
         toast({ title: "Error", description: "No se pudo eliminar el nodo" });
         // Si falla, remover de la lista de eliminados
         setDeletedNodeIds(prev => {
@@ -685,7 +672,6 @@ function AddParameterButton() {
         return;
       }
       
-      console.log('✅ Nodo eliminado PERMANENTEMENTE de BD');
       toast({ title: "Nodo eliminado", description: "Visualización removida permanentemente" });
       
       // Actualizar la interfaz - remover del canvas
@@ -702,7 +688,6 @@ function AddParameterButton() {
       queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
       
     } catch (error) {
-      console.error('❌ Error eliminando nodo:', error);
       toast({ title: "Error", description: "No se pudo eliminar el nodo" });
       // Revertir marcado como eliminado si hay error
       setDeletedNodeIds(prev => {
@@ -780,7 +765,6 @@ function AddParameterButton() {
   // Inicializar opciones visibles por primera vez desde posiciones guardadas (CORREGIDO PARA USAR NODE IDs)
   useEffect(() => {
     if (parametersData.length > 0 && savedPositions.length > 0 && Object.keys(nodeVisibleOptions).length === 0) {
-      console.log('🔍 Inicializando opciones visibles POR NODO INDIVIDUAL. Posiciones guardadas:', savedPositions.length);
       const newVisibleOptions: Record<string, string[]> = {};
       
       // Procesar CADA posición guardada como un nodo individual
@@ -789,12 +773,10 @@ function AddParameterButton() {
         if (parameterData) {
           if (position.visible_options && position.visible_options.length > 0) {
             // Usar opciones guardadas para ESTE nodo específico
-            console.log('✅ Usando opciones guardadas para nodo:', position.id, 'parámetro:', parameterData.parameter.slug, position.visible_options);
             newVisibleOptions[position.id] = position.visible_options;
           } else {
             // Por defecto mostrar las primeras 5 opciones para ESTE nodo
             const defaultOptions = parameterData.options.slice(0, 5).map(opt => opt.id);
-            console.log('🔧 Usando opciones por defecto para nodo:', position.id, 'parámetro:', parameterData.parameter.slug, defaultOptions);
             newVisibleOptions[position.id] = defaultOptions;
           }
         }
@@ -807,7 +789,6 @@ function AddParameterButton() {
   // Configurar nodos desde posiciones guardadas SOLAMENTE (filtrar eliminados)
   useEffect(() => {
     if (parametersData.length > 0 && Object.keys(nodeVisibleOptions).length > 0) {
-      console.log('🎯 Configurando nodos ÚNICAMENTE desde posiciones guardadas. Posiciones:', savedPositions.length, 'Eliminados:', deletedNodeIds.size);
       
       // 1. Crear nodos SOLO desde posiciones guardadas (FILTRAR ELIMINADOS)
       const nodesFromPositions: Node[] = savedPositions
@@ -816,12 +797,10 @@ function AddParameterButton() {
           // Buscar el parámetro correspondiente
           const parameterData = parametersData.find(item => item.parameter.id === pos.parameter_id);
           if (!parameterData) {
-            console.log(`⚠️ Parámetro ${pos.parameter_id} no encontrado para posición ${pos.id}`);
             return null;
           }
           
           const isOriginal = pos.id === pos.parameter_id;
-          console.log(`📌 Nodo ${isOriginal ? 'original' : 'duplicado'} ${parameterData.parameter.slug}:`, 'desde posición guardada', { x: pos.x, y: pos.y });
           
           return {
             id: pos.id,
@@ -859,14 +838,12 @@ function AddParameterButton() {
       // Solo usar nodos desde posiciones guardadas (eliminada lógica de dependencias)
       setNodes(nodesFromPositions);
       
-      console.log(`✅ Nodos configurados: ${nodesFromPositions.length} únicamente desde posiciones guardadas`);
     }
   }, [parametersData.length, nodeVisibleOptions, savedPositions.length, deletedNodeIds]);
 
   // Configurar edges desde dependencias (OPTIMIZADO para evitar múltiples conexiones)
   useEffect(() => {
     if (dependencies.length > 0 && nodes.length > 0) {
-      console.log('🔗 Configurando edges optimizados desde dependencias:', dependencies.length);
       
       const initialEdges: Edge[] = dependencies.map((dep) => {
         // Buscar UN SOLO nodo representativo para cada parámetro (preferir nodos originales)
@@ -882,7 +859,6 @@ function AddParameterButton() {
         const childNode = childNodes[0];
         
         if (!parentNode || !childNode) {
-          console.log(`⚠️ No se puede crear edge para dependencia ${dep.parent_parameter_id} -> ${dep.child_parameter_id}:`, {
             parentNode: !!parentNode,
             childNode: !!childNode,
             parentOptionVisible: parentNode ? parentNode.data.visibleOptions.includes(dep.parent_option_id) : false
@@ -911,11 +887,9 @@ function AddParameterButton() {
           }
         };
         
-        console.log(`✅ Edge optimizado: ${edge.source} (${edge.sourceHandle}) -> ${edge.target} (${edge.targetHandle})`);
         return edge;
       }).filter(edge => edge !== null) as Edge[];
 
-      console.log(`🔗 Total edges optimizados: ${initialEdges.length}`);
       setEdges(initialEdges);
     } else {
       setEdges([]);
@@ -934,14 +908,12 @@ function AddParameterButton() {
       const sourceNode = nodes.find(n => n.id === params.source);
       if (sourceNode && sourceNode.id !== sourceNode.data.parameter.id) {
         sourceParamId = sourceNode.data.parameter.id;
-        console.log('🔗 Nodo source es duplicado, usando parameter_id:', sourceParamId);
       }
       
       // Verificar si el target es un nodo duplicado (id !== parameter_id)
       const targetNode = nodes.find(n => n.id === params.target);
       if (targetNode && targetNode.id !== targetNode.data.parameter.id) {
         targetParamId = targetNode.data.parameter.id;
-        console.log('🔗 Nodo target es duplicado, usando parameter_id:', targetParamId);
       }
 
       // Extraer correctamente el option ID del sourceHandle
@@ -951,11 +923,9 @@ function AddParameterButton() {
 
       // Verificar que no sea una auto-conexión
       if (sourceParamId === targetParamId) {
-        console.log('❌ Auto-conexión detectada, cancelando');
         return;
       }
 
-      console.log('🔗 Creando conexión:', {
         parentParameterId: sourceParamId,
         parentOptionId: sourceOptionId,
         childParameterId: targetParamId
@@ -998,7 +968,6 @@ function AddParameterButton() {
     );
   }
 
-  console.log('DEBUG - Parameters:', parametersData.length, 'Dependencies:', dependencies.length, 'Nodes:', nodes.length, 'Edges:', edges.length);
 
   return (
     <div className="space-y-4">
@@ -1023,11 +992,9 @@ function AddParameterButton() {
           edges={edges}
           onNodesChange={onNodesChange}
           onNodeDragStop={(event, node) => {
-            console.log('🎯 Nodo arrastrado y soltado:', node.id, 'nueva posición:', node.position);
             
             // Si el nodo se está eliminando, no guardar la posición
             if (deletingNodes.has(node.id)) {
-              console.log('🚫 Nodo en proceso de eliminación, no guardando posición:', node.id);
               return;
             }
             
@@ -1035,7 +1002,6 @@ function AddParameterButton() {
             const isDuplicateNode = node.id !== node.data.parameter.id;
             
             if (isDuplicateNode) {
-              console.log('📍 Guardando posición de nodo DUPLICADO:', {
                 id: node.id,
                 parameter_id: node.data.parameter.id,
                 x: Math.round(node.position.x),
@@ -1052,7 +1018,6 @@ function AddParameterButton() {
                 visible_options: nodeVisibleOptions[node.id] || []
               });
             } else {
-              console.log('📍 Guardando posición de nodo ORIGINAL:', {
                 parameter_id: node.id,
                 x: Math.round(node.position.x),
                 y: Math.round(node.position.y),

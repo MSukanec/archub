@@ -15,26 +15,22 @@ export interface SafetyCheckResult {
  * Verifica que los datos del usuario sean válidos antes de cualquier operación de base de datos
  */
 export function validateUserDataForDatabaseOperation(userData: any): SafetyCheckResult {
-  console.log('🔍 Running database safety check for user data...');
   
   // Check 1: User exists
   if (!userData) {
     const error = 'SAFETY VIOLATION: No user data provided for database operation';
-    console.error('🚨', error);
     return { isValid: false, error };
   }
 
   // Check 2: User has valid ID
   if (!userData.user?.id) {
     const error = 'SAFETY VIOLATION: No user ID available for database operation';
-    console.error('🚨', error, { userData });
     return { isValid: false, error, details: { hasUser: !!userData.user } };
   }
 
   // Check 3: Preferences exist (for preference-related operations)
   if (!userData.preferences) {
     const error = 'SAFETY WARNING: User preferences are null - may need recovery';
-    console.warn('⚠️', error);
     return { 
       isValid: false, 
       error, 
@@ -49,7 +45,6 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
   // Check 4: Preferences have valid ID
   if (!userData.preferences.id) {
     const error = 'SAFETY VIOLATION: User preferences exist but have no ID';
-    console.error('🚨', error);
     return { 
       isValid: false, 
       error, 
@@ -61,7 +56,6 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
     };
   }
 
-  console.log('✅ Database safety check passed for user:', userData.user.id);
   return { 
     isValid: true, 
     details: { 
@@ -110,7 +104,6 @@ export function logDatabaseOperation(operation: string, table: string, userId?: 
     additionalData: additionalData || {}
   };
   
-  console.log('📊 Database Operation Log:', logEntry);
   
   // En producción, esto debería enviarse a un sistema de logging externo
   if (typeof window !== 'undefined') {

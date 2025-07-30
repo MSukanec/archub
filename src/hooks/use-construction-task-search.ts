@@ -44,7 +44,6 @@ export function useConstructionTaskSearch(
   return useQuery({
     queryKey: ["construction-task-search", organizationId, projectId, searchTerm, filters],
     queryFn: async (): Promise<ConstructionTaskSearchResult[]> => {
-      console.log("Searching construction tasks:", { organizationId, projectId, searchTerm, filters });
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
@@ -74,7 +73,6 @@ export function useConstructionTaskSearch(
       const { data: allTasks, error } = await query;
 
       if (error) {
-        console.error("Error searching construction tasks:", error);
         throw error;
       }
       
@@ -84,7 +82,6 @@ export function useConstructionTaskSearch(
         task.task_code?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       
-      console.log("Construction tasks search results:", filteredData.length);
       return filteredData;
     },
     enabled: enabled && !!supabase && !!projectId && searchTerm.length >= 3
@@ -106,7 +103,6 @@ export function useConstructionTaskSearchFilterOptions(organizationId: string, p
         .eq("project_id", projectId);
 
       if (error) {
-        console.error("Error fetching filter options:", error);
         throw error;
       }
 

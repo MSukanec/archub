@@ -16,7 +16,6 @@ export const useThemeStore = create<ThemeState>()(
         const currentState = get()
         const newIsDark = !currentState.isDark
         
-        console.log('Toggling theme:', { from: currentState.isDark, to: newIsDark })
         
         // Actualizar estado y DOM de forma forzada
         set({ isDark: newIsDark })
@@ -38,12 +37,9 @@ export const useThemeStore = create<ThemeState>()(
               .eq('id', preferencesId)
             
             if (error) {
-              console.error('Error updating theme in database:', error)
             } else {
-              console.log('Theme updated in database:', themeValue)
             }
           } catch (error) {
-            console.error('Failed to sync theme with database:', error)
           }
         }
       },

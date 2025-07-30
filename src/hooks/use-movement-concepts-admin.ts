@@ -41,7 +41,6 @@ export function useMovementConceptsAdmin() {
         throw new Error('Supabase client not initialized');
       }
 
-      console.log('🔍 Fetching system movement concepts...');
 
       const { data: concepts, error } = await supabase
         .from('movement_concepts')
@@ -49,7 +48,6 @@ export function useMovementConceptsAdmin() {
         .eq('is_system', true)
         .order('name');
 
-      console.log('📊 Movement concepts query result:', { concepts, error, count: concepts?.length });
 
       if (error) {
         throw error;
@@ -107,7 +105,6 @@ export function useCreateMovementConcept() {
         .single();
 
       if (error) {
-        console.error('Error creating movement concept:', error);
         throw error;
       }
 
@@ -121,7 +118,6 @@ export function useCreateMovementConcept() {
       });
     },
     onError: (error: any) => {
-      console.error('Create movement concept error:', error);
       toast({
         title: "Error",
         description: "No se pudo crear el concepto. Inténtalo de nuevo.",
@@ -147,7 +143,6 @@ export function useUpdateMovementConcept() {
         .single();
 
       if (error) {
-        console.error('Error updating movement concept:', error);
         throw error;
       }
 
@@ -161,7 +156,6 @@ export function useUpdateMovementConcept() {
       });
     },
     onError: (error: any) => {
-      console.error('Update movement concept error:', error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el concepto. Inténtalo de nuevo.",
@@ -184,7 +178,6 @@ export function useDeleteMovementConcept() {
         .eq('id', conceptId);
 
       if (error) {
-        console.error('Error deleting movement concept:', error);
         throw error;
       }
 
@@ -200,7 +193,6 @@ export function useDeleteMovementConcept() {
       });
     },
     onError: (error: any) => {
-      console.error('Delete movement concept error:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar el concepto. Inténtalo de nuevo.",

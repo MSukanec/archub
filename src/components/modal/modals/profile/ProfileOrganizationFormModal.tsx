@@ -97,7 +97,6 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
       handleClose();
     },
     onError: (error) => {
-      console.error('Error updating organization:', error);
       toast({
         title: 'Error',
         description: 'No se pudo actualizar la organización. Inténtalo de nuevo.',

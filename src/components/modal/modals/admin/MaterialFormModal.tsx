@@ -100,7 +100,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
-    console.log('🚀 Form submitted with values:', values)
     setIsLoading(true)
 
     try {
@@ -145,23 +144,16 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           is_system: false,
         }
         
-        console.log('📦 Creating material with data:', materialData)
         const newMaterial = await createMutation.mutateAsync(materialData)
-        console.log('✅ Material created:', newMaterial)
         
         // Si se especificó un precio, crear el registro de precio
         if (values.price && values.price.trim() !== '' && userData?.organization?.id && newMaterial) {
-          console.log('💰 Creating price with data:', {
             organization_id: userData.organization.id,
             material_id: newMaterial.id,
             unit_price: parseFloat(values.price),
             currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
           })
           
-          console.log('🔍 userData:', userData)
-          console.log('🔍 newMaterial:', newMaterial)
-          console.log('🔍 values.currency_id:', values.currency_id)
-          console.log('🔍 values.price:', values.price)
           
           const priceData = {
             organization_id: userData.organization.id,
@@ -172,13 +164,10 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           
           try {
             await createPriceMutation.mutateAsync(priceData)
-            console.log('✅ Price created successfully')
           } catch (priceError) {
-            console.error('❌ Error creating price:', priceError)
             throw priceError
           }
         } else {
-          console.log('⚠️ No price data to save:', {
             hasPrice: !!values.price,
             priceValue: values.price,
             hasOrganization: !!userData?.organization?.id,
@@ -188,7 +177,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       }
       onClose()
     } catch (error) {
-      console.error('Error saving material:', error)
     } finally {
       setIsLoading(false)
     }

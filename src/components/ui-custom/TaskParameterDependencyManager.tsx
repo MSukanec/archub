@@ -144,7 +144,6 @@ export function TaskParameterDependencyManager() {
         description: "No se pudo crear la dependencia. Intenta nuevamente.",
         variant: "destructive",
       });
-      console.error('Error creating dependency:', error);
     }
   });
 
@@ -198,7 +197,6 @@ export function TaskParameterDependencyManager() {
         description: "No se pudo eliminar la dependencia.",
         variant: "destructive",
       });
-      console.error('Error deleting dependency:', error);
     }
   });
 
@@ -236,7 +234,6 @@ export function TaskParameterDependencyManager() {
       });
       setIsCreating(false);
     } catch (error) {
-      console.error('Error creating dependency:', error);
     }
   };
 

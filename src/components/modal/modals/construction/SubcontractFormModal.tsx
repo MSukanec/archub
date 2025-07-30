@@ -73,8 +73,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   
   // Debug logging para contactos
   React.useEffect(() => {
-    console.log('Subcontract Modal - Contacts data:', contacts);
-    console.log('Subcontract Modal - Contacts length:', contacts.length);
   }, [contacts]);
   
   // Obtener todas las tareas del proyecto
@@ -85,17 +83,12 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   // Debug logging para monedas
   React.useEffect(() => {
-    console.log('Organization currencies available:', organizationCurrencies);
-    console.log('Organization currencies count:', organizationCurrencies.length);
     if (organizationCurrencies.length > 0) {
-      console.log('First currency:', organizationCurrencies[0]);
-      console.log('Default currency found:', organizationCurrencies.find(oc => oc.is_default));
     }
   }, [organizationCurrencies]);
 
   // Determinar moneda por defecto - usar el ID de organization_currencies, no currency.id
   const defaultCurrency = organizationCurrencies.find(oc => oc.is_default)?.id || organizationCurrencies[0]?.id || '';
-  console.log('Default currency selected:', defaultCurrency);
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
@@ -162,11 +155,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   };
 
   const onSubmit = async (data: SubcontractFormData) => {
-    console.log('Form submission attempt:', data);
-    console.log('Form errors:', form.formState.errors);
-    console.log('Form is valid:', form.formState.isValid);
-    console.log('Selected tasks:', selectedTasks);
-    console.log('Is editing mode:', modalData.isEditing);
     
     setIsSubmitting(true);
 
@@ -211,7 +199,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       closeModal();
 
     } catch (error) {
-      console.error('Error creando subcontrato:', error);
       toast({
         title: "Error",
         description: "No se pudo crear el subcontrato",
