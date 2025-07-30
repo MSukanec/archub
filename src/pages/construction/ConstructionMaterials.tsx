@@ -217,12 +217,14 @@ export default function ConstructionMaterials() {
           data={filteredMaterials}
           columns={columns}
           isLoading={materialsLoading}
+          mode="construction"
           groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-          renderGroupHeader={(groupKey, groupRows) => (
-            <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 text-sm font-medium">
-              <span>{groupKey}</span>
-              <span className="text-muted-foreground">({groupRows.length} {groupRows.length === 1 ? 'material' : 'materiales'})</span>
-            </div>
+          renderGroupHeader={(groupKey: string, groupRows: any[]) => (
+            <>
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
+              </div>
+            </>
           )}
         />
       )}
