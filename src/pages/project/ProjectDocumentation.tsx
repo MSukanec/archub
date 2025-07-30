@@ -23,7 +23,7 @@ import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarCo
 import { useMobile } from '@/hooks/use-mobile';
 import { useDesignDocumentFolders, useCreateDesignDocumentFolder, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups, useDeleteDesignDocumentGroup } from '@/hooks/use-design-document-groups';
-import { useDesignDocuments } from '@/hooks/use-design-documents';
+import { useDesignDocuments, useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -84,6 +84,7 @@ export default function ProjectDocumentation() {
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
   const { data: groups, isLoading: groupsLoading, refetch: refetchGroups } = useDesignDocumentGroups(selectedFolderId);
   const { data: documents, isLoading: documentsLoading, refetch: refetchDocuments } = useDesignDocuments(selectedGroupId);
+  const { data: folderDocuments, isLoading: folderDocumentsLoading } = useDesignDocumentsByFolder(selectedFolderId);
 
   const { showDeleteConfirmation } = useDeleteConfirmation();
 

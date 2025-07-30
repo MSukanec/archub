@@ -14,7 +14,8 @@ export interface DesignDocument {
   version_number: number;
   project_id: string;
   organization_id: string;
-  group_id: string;
+  group_id: string | null;
+  folder_id?: string;
   status: string;
   visibility?: string;
   created_by: string;
@@ -77,6 +78,48 @@ export function useDesignDocuments(groupId?: string) {
   });
 }
 
+// New hook for fetching documents by folder (including those without groups)
+export function useDesignDocumentsByFolder(folderId?: string) {
+  const { data: userData } = useCurrentUser();
+  const projectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.preferences?.last_organization_id;
+
+  return useQuery({
+    queryKey: ['design-documents-folder', projectId, organizationId, folderId],
+    queryFn: async (): Promise<DesignDocument[]> => {
+      if (!projectId || !organizationId || !folderId) return [];
+
+      const { data, error } = await supabase
+        .from('design_documents')
+        .select(`
+          *,
+          creator:users!design_documents_created_by_fkey (
+            id,
+            full_name,
+            avatar_url
+          ),
+          group:design_document_groups!design_documents_group_id_fkey (
+            id,
+            name,
+            folder_id
+          )
+        `)
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+        .eq('folder_id', folderId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching folder documents:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!projectId && !!organizationId && !!folderId
+  });
+}
+
 export function useCreateDesignDocument() {
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -93,6 +136,7 @@ export function useCreateDesignDocument() {
       file_type: string;
       file_size?: number;
       group_id: string | null;
+      folder_id: string;
       status: string;
       visibility?: string;
     }): Promise<DesignDocument> => {
@@ -120,7 +164,9 @@ export function useCreateDesignDocument() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
     }
   });
 }

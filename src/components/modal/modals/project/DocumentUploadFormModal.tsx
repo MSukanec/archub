@@ -225,6 +225,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           file_type: file.type,
           file_size: file.size,
           group_id: data.group_id || null,
+          folder_id: data.folder_id, // Always set folder_id for documents
           status: data.status,
           visibility: data.visibility,
         });
@@ -237,8 +238,11 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         title: 'Éxito',
         description: `${selectedFiles.length > 1 ? 'Documentos subidos' : 'Documento subido'} correctamente`,
       });
+      // Invalidate all document-related queries
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
+      queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
       handleClose();
     },
     onError: (error) => {
