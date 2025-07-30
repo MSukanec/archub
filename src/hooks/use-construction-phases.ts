@@ -183,9 +183,10 @@ export function useUpdatePhasePositions() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized')
 
-      // Actualizar posiciones en lote
+      // Actualizar posiciones en lote incluyendo project_id
       const updates = phases.map(phase => ({
         id: phase.project_phase_id,
+        project_id: projectId, // Incluir project_id requerido
         position: phase.position
       }))
 
