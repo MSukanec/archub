@@ -1831,8 +1831,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
 
       // Crear relación con subcontrato después de crear/actualizar el movimiento
+      console.log('Subcontract ID before saving:', selectedSubcontractId)
       if (selectedSubcontractId) {
         try {
+          console.log('Creating subcontract relation with:', {
+            movement_id: createdMovement.id,
+            subcontract_id: selectedSubcontractId,
+            amount: createdMovement.amount
+          })
+          
           // Si estamos editando, primero eliminar las relaciones existentes
           if (editingMovement?.id) {
             await deleteMovementSubcontractsByMovementMutation.mutateAsync(editingMovement.id)
@@ -1845,13 +1852,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             amount: createdMovement.amount
           })
         } catch (error) {
-          // Error creating movement subcontract
+          console.error('Error creating movement subcontract:', error)
           toast({
             variant: 'destructive',
             title: 'Error',
             description: 'Movimiento creado pero hubo un error al vincular el subcontrato',
           })
         }
+      } else {
+        console.log('No subcontract ID selected')
       }
 
       queryClient.invalidateQueries({ queryKey: ['movements'] })
