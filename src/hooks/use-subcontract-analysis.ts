@@ -15,6 +15,7 @@ export function useSubcontractAnalysis(projectId: string | null) {
           title,
           amount_total,
           currency_id,
+          exchange_rate,
           contact:contacts(id, first_name, last_name, full_name),
           movement_subcontracts(
             id,
@@ -36,8 +37,8 @@ export function useSubcontractAnalysis(projectId: string | null) {
       // Procesar los datos para calcular pagos y saldos
       const processedData = data?.map(subcontract => {
         // Calcular total pagado sumando todos los movimientos asociados
-        const totalPaid = subcontract.movement_subcontracts?.reduce((sum, ms) => {
-          if (ms.movement?.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
+        const totalPaid = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
+          if (ms.movement && ms.movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
             const movementAmount = ms.movement.amount || 0
             const exchangeRate = ms.movement.exchange_rate || 1
             
@@ -49,23 +50,41 @@ export function useSubcontractAnalysis(projectId: string | null) {
             return sum + convertedAmount
           }
           return sum
-        }, 0) || 0
+        }, 0)
 
-        // Convertir monto total del subcontrato a pesos si es necesario
-        const totalAmount = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
-          ? subcontract.amount_total * 1000 // Asumir tasa de cambio de 1000 para USD (ajustar según sea necesario)
-          : subcontract.amount_total
+        // Calcular monto total en moneda original y USD
+        const totalAmountOriginal = subcontract.amount_total
+        const totalAmountUSD = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
+          ? totalAmountOriginal
+          : totalAmountOriginal / (subcontract.exchange_rate || 1)
 
-        const balance = totalAmount - totalPaid
+        // Calcular pago total en USD
+        const totalPaidUSD = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
+          if (ms.movement && ms.movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
+            const movementAmount = ms.movement.amount || 0
+            const movementAmountUSD = ms.movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
+              ? movementAmount
+              : movementAmount / (ms.movement.exchange_rate || 1)
+            return sum + movementAmountUSD
+          }
+          return sum
+        }, 0)
+
+        const balanceOriginal = totalAmountOriginal - totalPaid
+        const balanceUSD = totalAmountUSD - totalPaidUSD
 
         return {
           id: subcontract.id,
           subcontrato: subcontract.title,
           proveedor: subcontract.contact?.full_name || `${subcontract.contact?.first_name || ''} ${subcontract.contact?.last_name || ''}`.trim() || 'Sin proveedor',
-          montoTotal: totalAmount,
+          montoTotal: totalAmountOriginal,
+          montoTotalUSD: totalAmountUSD,
           pagoALaFecha: totalPaid,
-          saldo: balance,
-          currencyId: subcontract.currency_id
+          pagoALaFechaUSD: totalPaidUSD,
+          saldo: balanceOriginal,
+          saldoUSD: balanceUSD,
+          currencySymbol: subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS',
+          exchangeRate: subcontract.exchange_rate || 1
         }
       }) || []
 

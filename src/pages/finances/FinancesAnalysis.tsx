@@ -600,7 +600,7 @@ export default function FinancesAnalysis() {
                 {
                   key: 'subcontrato',
                   label: 'Subcontrato',
-                  width: '25%',
+                  width: '20%',
                   render: (item: any) => (
                     <div className="font-medium text-sm">
                       {item.subcontrato}
@@ -610,11 +610,11 @@ export default function FinancesAnalysis() {
                 {
                   key: 'proveedor',
                   label: 'Proveedor',
-                  width: '25%',
+                  width: '20%',
                   render: (item: any) => (
-                    <Badge variant="outline" className="text-xs">
+                    <div className="text-sm">
                       {item.proveedor}
-                    </Badge>
+                    </div>
                   )
                 },
                 {
@@ -622,8 +622,13 @@ export default function FinancesAnalysis() {
                   label: 'Monto Total',
                   width: '20%',
                   render: (item: any) => (
-                    <div className="font-medium text-sm text-blue-600 dark:text-blue-400">
-                      ${item.montoTotal.toLocaleString('es-AR')}
+                    <div>
+                      <div className="font-medium text-sm">
+                        {item.currencySymbol} {(item.montoTotal || 0).toLocaleString('es-AR')}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        USD {(item.montoTotalUSD || 0).toLocaleString('es-AR')}
+                      </div>
                     </div>
                   )
                 },
@@ -632,29 +637,33 @@ export default function FinancesAnalysis() {
                   label: 'Pago a la Fecha',
                   width: '20%',
                   render: (item: any) => (
-                    <div className="font-medium text-sm text-green-600 dark:text-green-400">
-                      ${item.pagoALaFecha.toLocaleString('es-AR')}
+                    <div>
+                      <div className="font-medium text-sm">
+                        {item.currencySymbol} {(item.pagoALaFecha || 0).toLocaleString('es-AR')}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        USD {(item.pagoALaFechaUSD || 0).toLocaleString('es-AR')}
+                      </div>
                     </div>
                   )
                 },
                 {
                   key: 'saldo',
                   label: 'Saldo',
-                  width: '10%',
+                  width: '20%',
                   render: (item: any) => (
-                    <div className={`font-medium text-sm ${
-                      item.saldo > 0 
-                        ? 'text-red-600 dark:text-red-400' 
-                        : item.saldo < 0 
-                          ? 'text-orange-600 dark:text-orange-400' 
-                          : 'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      ${item.saldo.toLocaleString('es-AR')}
+                    <div>
+                      <div className="font-medium text-sm">
+                        {item.currencySymbol} {(item.saldo || 0).toLocaleString('es-AR')}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        USD {(item.saldoUSD || 0).toLocaleString('es-AR')}
+                      </div>
                     </div>
                   )
                 }
               ]}
-              data={subcontractAnalysisData}
+              data={[...subcontractAnalysisData].sort((a, b) => a.subcontrato.localeCompare(b.subcontrato))}
               isLoading={isLoadingSubcontracts}
               mode="construction"
               emptyState={
