@@ -14,14 +14,7 @@ export function useSubcontracts(projectId: string | null) {
         .from('subcontracts')
         .select(`
           *,
-          contact:contacts(id, name, email),
-          subcontract_tasks:subcontract_tasks(
-            id,
-            task_id,
-            amount,
-            notes,
-            task:task_parametric(id, name_rendered, code)
-          )
+          contact:contacts(id, first_name, last_name, full_name, email)
         `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
