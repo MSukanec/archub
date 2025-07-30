@@ -104,53 +104,62 @@ export default function ConstructionMaterials() {
     title: "Materiales"
   }
 
-  // Table columns configuration
-  const columns = [
-    {
-      key: 'category_name',
-      label: 'Categoría',
-      width: '20%',
-      render: (material: any) => (
-        <span className="text-sm font-medium">{material.category_name}</span>
-      )
-    },
-    {
-      key: 'name',
-      label: 'Nombre',
-      width: '35%',
-      render: (material: any) => (
-        <span className="text-sm">{material.name}</span>
-      )
-    },
-    {
-      key: 'computed_quantity',
-      label: 'Cantidad Computada',
-      width: '15%',
-      render: (material: any) => (
-        <span className="text-sm font-medium">{material.computed_quantity.toFixed(2)}</span>
-      )
-    },
-    {
-      key: 'purchased_quantity',
-      label: 'Cantidad Comprada',
-      width: '15%',
-      render: (material: any) => (
-        <span className="text-sm text-muted-foreground">
-          {material.purchased_quantity.toFixed(2)}
-        </span>
-      )
-    },
-    {
-      key: 'to_purchase_quantity',
-      label: 'Cantidad A Comprar',
-      width: '15%',
-      render: (material: any) => (
-        <span className="text-sm text-muted-foreground">
-          {material.to_purchase_quantity.toFixed(2)}
-        </span>
-      )
+  // Columnas dinámicas - ocultar categoría cuando se agrupa por categorías
+  const columns = useMemo(() => {
+    const baseColumns = [
+      {
+        key: 'category_name',
+        label: 'Categoría',
+        width: '20%',
+        render: (material: any) => (
+          <span className="text-sm font-medium">{material.category_name}</span>
+        )
+      },
+      {
+        key: 'name',
+        label: 'Nombre',
+        width: '35%',
+        render: (material: any) => (
+          <span className="text-sm">{material.name}</span>
+        )
+      },
+      {
+        key: 'computed_quantity',
+        label: 'Cantidad Computada',
+        width: '15%',
+        render: (material: any) => (
+          <span className="text-sm font-medium">{material.computed_quantity.toFixed(2)}</span>
+        )
+      },
+      {
+        key: 'purchased_quantity',
+        label: 'Cantidad Comprada',
+        width: '15%',
+        render: (material: any) => (
+          <span className="text-sm text-muted-foreground">
+            {material.purchased_quantity.toFixed(2)}
+          </span>
+        )
+      },
+      {
+        key: 'to_purchase_quantity',
+        label: 'Cantidad A Comprar',
+        width: '15%',
+        render: (material: any) => (
+          <span className="text-sm text-muted-foreground">
+            {material.to_purchase_quantity.toFixed(2)}
+          </span>
+        )
+      }
+    ];
+
+    // Ocultar columna de categoría cuando se agrupa por categorías
+    if (groupingType === 'categories') {
+      return baseColumns.filter(col => col.key !== 'category_name');
     }
-  ]
+
+    return baseColumns;
+  }, [groupingType])
 
   if (isLoading || materialsLoading) {
     return (
