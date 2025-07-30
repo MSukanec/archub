@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Package, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -16,12 +16,14 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 import { useOrganizationCurrencies } from "@/hooks/use-currencies";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ConstructionSubcontracts() {
   const { data: userData } = useCurrentUser();
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
+  const queryClient = useQueryClient();
   
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +34,23 @@ export default function ConstructionSubcontracts() {
   
   const { data: subcontracts = [], isLoading } = useSubcontracts(projectId);
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
+
+  // Debug logging
+  console.log('🔍 SUBCONTRACTS DEBUG:', {
+    projectId,
+    organizationId,
+    subcontractsCount: subcontracts.length,
+    isLoading,
+    subcontracts: subcontracts
+  });
+
+  // Efecto para invalidar y refrescar queries cuando se accede a la página
+  useEffect(() => {
+    if (projectId) {
+      console.log('🔄 INVALIDATING SUBCONTRACTS QUERIES...');
+      queryClient.invalidateQueries({ queryKey: ['subcontracts', projectId] });
+    }
+  }, [projectId, queryClient]);
 
   const features = [
     {
@@ -223,21 +242,16 @@ export default function ConstructionSubcontracts() {
         />
 
         {/* Contenido principal */}
-        {filteredSubcontracts.length > 0 ? (
-          <Table
-            columns={columns}
-            data={filteredSubcontracts}
-            loading={isLoading}
-            emptyMessage="No se encontraron subcontratos que coincidan con la búsqueda"
-            onRowClick={handleEditSubcontract}
-          />
-        ) : (
-          <EmptyState
-            icon={<Package className="w-12 h-12 text-muted-foreground" />}
-            title="Aún no tienes subcontratos creados"
-            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
-          />
-        )}
+        <Table
+          columns={columns}
+          data={filteredSubcontracts}
+          loading={isLoading}
+          emptyMessage={filteredSubcontracts.length === 0 && !isLoading ? 
+            "Aún no tienes subcontratos creados. Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos." : 
+            "No se encontraron subcontratos que coincidan con la búsqueda"
+          }
+          onRowClick={handleEditSubcontract}
+        />
       </div>
     </Layout>
   );
