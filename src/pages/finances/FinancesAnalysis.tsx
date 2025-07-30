@@ -627,7 +627,7 @@ export default function FinancesAnalysis() {
                         {item.currencySymbol} {(item.montoTotal || 0).toLocaleString('es-AR')}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        USD {(item.montoTotalUSD || 0).toLocaleString('es-AR')}
+                        USD {Math.round(item.montoTotalUSD || 0).toLocaleString('es-AR')}
                       </div>
                     </div>
                   )
@@ -642,7 +642,7 @@ export default function FinancesAnalysis() {
                         {item.currencySymbol} {(item.pagoALaFecha || 0).toLocaleString('es-AR')}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        USD {(item.pagoALaFechaUSD || 0).toLocaleString('es-AR')}
+                        USD {Math.round(item.pagoALaFechaUSD || 0).toLocaleString('es-AR')}
                       </div>
                     </div>
                   )
@@ -657,7 +657,7 @@ export default function FinancesAnalysis() {
                         {item.currencySymbol} {(item.saldo || 0).toLocaleString('es-AR')}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        USD {(item.saldoUSD || 0).toLocaleString('es-AR')}
+                        USD {Math.round(item.saldoUSD || 0).toLocaleString('es-AR')}
                       </div>
                     </div>
                   )
