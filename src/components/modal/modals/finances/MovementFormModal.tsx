@@ -2931,9 +2931,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         <div className="space-y-4">
           {/* Campo de Subcontrato */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Subcontrato (opcional)
+            <label className="text-xs font-medium text-foreground">
+              Subcontrato
             </label>
+            <p className="text-xs text-muted-foreground">
+              Selecciona el subcontrato asociado a este pago de mano de obra
+            </p>
             <ComboBoxWrite
               value={selectedSubcontractId}
               onValueChange={setSelectedSubcontractId}
@@ -2946,9 +2949,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           
           {/* Campo de Tarea de Construcción */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
+            <label className="text-xs font-medium text-foreground">
               Tarea de Construcción
             </label>
+            <p className="text-xs text-muted-foreground">
+              Vincula este pago con una tarea específica del proyecto (opcional)
+            </p>
             <ComboBoxWrite
               value={selectedTaskId}
               onValueChange={setSelectedTaskId}
