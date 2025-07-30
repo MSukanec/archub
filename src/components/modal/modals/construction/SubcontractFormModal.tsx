@@ -25,13 +25,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
+import DatePicker from '@/components/ui-custom/DatePicker';
 
 const subcontractSchema = z.object({
+  date: z.string().min(1, "La fecha es obligatoria"),
   title: z.string().min(1, "El título es obligatorio"),
   contact_id: z.string().min(1, "Debe seleccionar un proveedor"),
-  status: z.string().min(1, "Debe seleccionar un estado"),
-  currency_id: z.string().min(1, "Debe seleccionar una moneda"),
+  organization_currency_id: z.string().min(1, "Debe seleccionar una moneda"),
   amount_total: z.number().min(0, "El monto debe ser mayor o igual a 0").optional(),
+  exchange_rate: z.number().min(0, "La cotización debe ser mayor a 0"),
+  status: z.string().min(1, "Debe seleccionar un estado"),
   notes: z.string().optional(),
 });
 
@@ -74,25 +77,38 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   // Obtener monedas de la organización
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId);
 
-  // Determinar moneda por defecto
-  const defaultCurrency = organizationCurrencies.find(oc => oc.is_default)?.currency?.id || organizationCurrencies[0]?.currency?.id || '';
+  // Debug logging para monedas
+  React.useEffect(() => {
+    console.log('Organization currencies available:', organizationCurrencies);
+    console.log('Organization currencies count:', organizationCurrencies.length);
+    if (organizationCurrencies.length > 0) {
+      console.log('First currency:', organizationCurrencies[0]);
+      console.log('Default currency found:', organizationCurrencies.find(oc => oc.is_default));
+    }
+  }, [organizationCurrencies]);
+
+  // Determinar moneda por defecto - usar el ID de organization_currencies, no currency.id
+  const defaultCurrency = organizationCurrencies.find(oc => oc.is_default)?.id || organizationCurrencies[0]?.id || '';
+  console.log('Default currency selected:', defaultCurrency);
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
     defaultValues: {
+      date: new Date().toISOString().split('T')[0],
       title: '',
       contact_id: '',
-      status: 'pendiente',
-      currency_id: defaultCurrency,
+      organization_currency_id: defaultCurrency,
       amount_total: 0,
+      exchange_rate: 1,
+      status: 'pendiente',
       notes: '',
     }
   });
 
   // Actualizar la moneda por defecto cuando se carga
   React.useEffect(() => {
-    if (defaultCurrency && !form.watch('currency_id')) {
-      form.setValue('currency_id', defaultCurrency);
+    if (defaultCurrency && !form.watch('organization_currency_id')) {
+      form.setValue('organization_currency_id', defaultCurrency);
     }
   }, [defaultCurrency, form]);
 
@@ -137,12 +153,14 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         subcontract: {
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
+          date: data.date,
           contact_id: data.contact_id,
           title: data.title,
+          organization_currency_id: data.organization_currency_id,
           amount_total: data.amount_total || 0,
-          currency_id: data.currency_id,
-          notes: data.notes || null,
-          status: data.status
+          exchange_rate: data.exchange_rate,
+          status: data.status,
+          notes: data.notes || null
         },
         taskIds: selectedTasks.map(t => t.task_id)
       });
@@ -176,21 +194,41 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   // Panel principal para edición
   const editPanel = (
     <div className="space-y-4">
+      {/* Fecha - Campo individual arriba */}
       <div className="space-y-1">
-        <Label htmlFor="title" className="text-xs font-medium">
-          Título *
+        <Label htmlFor="date" className="text-xs font-medium">
+          Fecha *
         </Label>
-        <Input
-          id="title"
-          placeholder="Ej: Trabajos de albañilería"
-          {...form.register('title')}
+        <DatePicker
+          value={form.watch('date') ? new Date(form.watch('date')) : undefined}
+          onChange={(date) => {
+            if (date) {
+              form.setValue('date', date.toISOString().split('T')[0]);
+            }
+          }}
+          placeholder="Seleccionar fecha..."
         />
-        {form.formState.errors.title && (
-          <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+        {form.formState.errors.date && (
+          <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
         )}
       </div>
 
+      {/* Título - Proveedor */}
       <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="title" className="text-xs font-medium">
+            Título *
+          </Label>
+          <Input
+            id="title"
+            placeholder="Ej: Trabajos de albañilería"
+            {...form.register('title')}
+          />
+          {form.formState.errors.title && (
+            <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+          )}
+        </div>
+
         <div className="space-y-1">
           <Label htmlFor="contact_id" className="text-xs font-medium">
             Proveedor *
@@ -214,6 +252,68 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <p className="text-xs text-destructive">{form.formState.errors.contact_id.message}</p>
           )}
         </div>
+      </div>
+
+      {/* Moneda - Monto Total */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="organization_currency_id" className="text-xs font-medium">
+            Moneda *
+          </Label>
+          <Select
+            value={form.watch('organization_currency_id') || ''}
+            onValueChange={(value) => form.setValue('organization_currency_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar moneda..." />
+            </SelectTrigger>
+            <SelectContent>
+              {organizationCurrencies.map((orgCurrency) => (
+                <SelectItem key={orgCurrency.id} value={orgCurrency.id}>
+                  {orgCurrency.currency.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {form.formState.errors.organization_currency_id && (
+            <p className="text-xs text-destructive">{form.formState.errors.organization_currency_id.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="amount_total" className="text-xs font-medium">
+            Monto Total
+          </Label>
+          <Input
+            id="amount_total"
+            type="number"
+            step="0.01"
+            placeholder="0"
+            {...form.register('amount_total', { valueAsNumber: true })}
+          />
+          {form.formState.errors.amount_total && (
+            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Cotización - Estado */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="exchange_rate" className="text-xs font-medium">
+            Cotización *
+          </Label>
+          <Input
+            id="exchange_rate"
+            type="number"
+            step="0.0001"
+            placeholder="1.0000"
+            {...form.register('exchange_rate', { valueAsNumber: true })}
+          />
+          {form.formState.errors.exchange_rate && (
+            <p className="text-xs text-destructive">{form.formState.errors.exchange_rate.message}</p>
+          )}
+        </div>
 
         <div className="space-y-1">
           <Label htmlFor="status" className="text-xs font-medium">
@@ -235,48 +335,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           </Select>
           {form.formState.errors.status && (
             <p className="text-xs text-destructive">{form.formState.errors.status.message}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="currency_id" className="text-xs font-medium">
-            Moneda *
-          </Label>
-          <Select
-            value={form.watch('currency_id') || ''}
-            onValueChange={(value) => form.setValue('currency_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar moneda..." />
-            </SelectTrigger>
-            <SelectContent>
-              {organizationCurrencies.map((orgCurrency) => (
-                <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.id}>
-                  {orgCurrency.currency.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {form.formState.errors.currency_id && (
-            <p className="text-xs text-destructive">{form.formState.errors.currency_id.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="amount_total" className="text-xs font-medium">
-            Monto Total
-          </Label>
-          <Input
-            id="amount_total"
-            type="number"
-            step="0.01"
-            placeholder="0"
-            {...form.register('amount_total', { valueAsNumber: true })}
-          />
-          {form.formState.errors.amount_total && (
-            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
           )}
         </div>
       </div>
