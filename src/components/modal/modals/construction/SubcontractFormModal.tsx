@@ -10,6 +10,7 @@ import { Package } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
+// import UserSelector from "@/components/ui-custom/UserSelector";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
 import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { toast } from "@/hooks/use-toast";
@@ -107,15 +108,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   };
 
   const onSubmit = async (data: SubcontractFormData) => {
-    if (selectedTasks.length === 0) {
-      toast({
-        title: "Error",
-        description: "Debe seleccionar al menos una tarea",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    // Las tareas son opcionales, no obligatorias
     setIsSubmitting(true);
 
     try {
@@ -190,7 +183,12 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <SelectContent>
               {contacts.map((contact) => (
                 <SelectItem key={contact.id} value={contact.id}>
-                  {contact.name}
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{contact.name}</span>
+                    {contact.email && (
+                      <span className="text-xs text-muted-foreground">({contact.email})</span>
+                    )}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
