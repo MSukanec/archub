@@ -90,7 +90,7 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
   
   // Validate that startDate is a valid date
   if (isNaN(startDate.getTime())) {
-    console.warn(`Invalid start date for item ${item.id}: ${item.startDate}`);
+    // Debug logs removed
     const today = new Date();
     return {
       startDate: today,

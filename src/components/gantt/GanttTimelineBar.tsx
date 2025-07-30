@@ -447,7 +447,7 @@ export function GanttTimelineBar({
           end_date: format(newEndDate, 'yyyy-MM-dd'),
           duration_in_days: originalDuration
         }).catch((error) => {
-          console.error('DRAG UPDATE ERROR - Keeping optimistic update:', error);
+          // Debug logs removed
           
           // NO invalidar queries para evitar refresh - mantener cambio optimista
           // El usuario ve el cambio instantáneo, el background sync se intentará de nuevo
@@ -557,7 +557,7 @@ export function GanttTimelineBar({
           start_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
         }).catch((error) => {
-          console.error('RESIZE START ERROR - Keeping optimistic update:', error);
+          // Debug logs removed
         });
       } else {
         const startDate = new Date(item.taskData.start_date!);
@@ -605,7 +605,7 @@ export function GanttTimelineBar({
           end_date: format(newDate, 'yyyy-MM-dd'),
           duration_in_days: newDuration
         }).catch((error) => {
-          console.error('RESIZE END ERROR - Keeping optimistic update:', error);
+          // Debug logs removed
         });
       }
       

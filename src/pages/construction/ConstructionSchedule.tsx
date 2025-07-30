@@ -175,7 +175,6 @@ export default function ConstructionSchedule() {
       <FeatureIntroduction
         icon={<Calendar className="h-6 w-6" />}
         title="Cronograma de Construcción"
-        description="Planifica, visualiza y controla el cronograma de construcción de tu proyecto con herramientas avanzadas de gestión temporal."
         className="md:hidden"
         features={[
           {
@@ -255,8 +254,13 @@ export default function ConstructionSchedule() {
               onItemDelete={(item) => {
                 const task = filteredTasks.find(t => t.id === item.id)
                 showDeleteConfirmation({
-                  itemName: task?.name_rendered || 'esta tarea',
-                  onConfirm: () => deleteTask.mutate(item.id)
+                  title: 'Eliminar Tarea',
+                  description: `¿Estás seguro de que quieres eliminar "${task?.name_rendered || 'esta tarea'}"?`,
+                  onConfirm: () => deleteTask.mutate({
+                    id: item.id,
+                    project_id: task?.project_id || '',
+                    organization_id: task?.organization_id || ''
+                  })
                 })
               }}
             />
@@ -346,8 +350,13 @@ export default function ConstructionSchedule() {
                         size="sm"
                         onClick={() => {
                           showDeleteConfirmation({
-                            itemName: task.name_rendered || 'esta tarea',
-                            onConfirm: () => deleteTask.mutate(task.id)
+                            title: 'Eliminar Tarea',
+                            description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
+                            onConfirm: () => deleteTask.mutate({
+                              id: task.id,
+                              project_id: task.project_id,
+                              organization_id: task.organization_id
+                            })
                           })
                         }}
                         className="h-6 w-6 p-0 text-destructive hover:text-destructive"
@@ -373,15 +382,15 @@ export default function ConstructionSchedule() {
             />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ProgressCurve tasks={filteredTasks} />
-              <BurndownChart tasks={filteredTasks} />
-              <WorkloadOverTime tasks={filteredTasks} />
-              <TasksByPhase tasks={filteredTasks} />
-              <DurationByRubro tasks={filteredTasks} />
-              <StatusBreakdown tasks={filteredTasks} />
-              <CriticalPathDistribution tasks={filteredTasks} dependencies={dependencies} />
-              <WeeklyProgressHeatmap tasks={filteredTasks} />
-              <DependencyNetwork tasks={filteredTasks} dependencies={dependencies} />
+              <ProgressCurve data={filteredTasks} />
+              <BurndownChart data={filteredTasks} />
+              <WorkloadOverTime data={filteredTasks} />
+              <TasksByPhase data={filteredTasks} />
+              <DurationByRubro data={filteredTasks} />
+              <StatusBreakdown data={filteredTasks} />
+              <CriticalPathDistribution data={filteredTasks} dependencies={dependencies} />
+              <WeeklyProgressHeatmap data={filteredTasks} />
+              <DependencyNetwork data={filteredTasks} dependencies={dependencies} />
             </div>
           )}
         </div>
