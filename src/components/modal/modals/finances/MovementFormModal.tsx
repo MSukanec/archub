@@ -712,14 +712,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const subcategoryId = form.watch('subcategory_id')
       const isSubcontratosCategory = subcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
       
-      // DEBUG: Log detection
-      if (subcategoryId) {
-        console.log('🎯 SubcontratosFields Detection:', { 
-          subcategoryId, 
-          isSubcontratosCategory, 
-          UUID_TARGET: '40a8fd4-69a6-4e81-bcb4-464359cd8498' 
-        })
-      }
+      // DEBUG: Log detection - Mejores logs para depuración
+      console.log('🔍 SUBCATEGORY DEBUG:', { 
+        subcategoryId, 
+        isSubcontratosCategory, 
+        UUID_TARGET: '40a8fd4-69a6-4e81-bcb4-464359cd8498',
+        allSubcategories: subcategories?.map(s => ({ id: s.id, name: s.name, slug: s.slug }))
+      })
       
       if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory) {
         // Establecer el estado correcto
