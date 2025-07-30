@@ -7,6 +7,7 @@ export interface ConstructionPhase {
   name: string
   position: number
   project_phase_id: string
+  phase_id?: string
   taskCount?: number
 }
 
@@ -21,6 +22,7 @@ export function useConstructionProjectPhases(projectId: string) {
         .select(`
           id,
           position,
+          phase_id,
           construction_phases (
             id,
             name
@@ -48,6 +50,7 @@ export function useConstructionProjectPhases(projectId: string) {
             name: item.construction_phases?.name || 'Sin nombre',
             position: item.position,
             project_phase_id: item.id,
+            phase_id: item.phase_id, // Agregar phase_id para el upsert
             taskCount: count || 0
           }
         })
@@ -183,10 +186,11 @@ export function useUpdatePhasePositions() {
     }) => {
       if (!supabase) throw new Error('Supabase not initialized')
 
-      // Actualizar posiciones en lote incluyendo project_id
+      // Actualizar posiciones en lote incluyendo project_id y phase_id
       const updates = phases.map(phase => ({
         id: phase.project_phase_id,
         project_id: projectId, // Incluir project_id requerido
+        phase_id: phase.phase_id, // Incluir phase_id requerido
         position: phase.position
       }))
 
