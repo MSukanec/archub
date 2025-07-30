@@ -74,12 +74,7 @@ export default function ProjectDocumentation() {
   const { openModal } = useGlobalModalStore();
 
 
-  const navigationStore = useNavigationStore();
-  const setNavigationContext = navigationStore?.setNavigationContext;
   const isMobile = useMobile();
-
-  // Hooks for mobile action bar
-  const { setActionBarActions } = useMobileActionBar();
 
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
   const { data: groups, isLoading: groupsLoading, refetch: refetchGroups } = useDesignDocumentGroups(selectedFolderId);
