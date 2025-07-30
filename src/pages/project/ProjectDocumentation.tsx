@@ -161,29 +161,33 @@ export default function ProjectDocumentation() {
   };
 
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
-    await showDeleteConfirmation(
-      `¿Está seguro que desea eliminar la carpeta "${folderName}"?`,
-      async () => {
+    const confirmed = confirm(`¿Está seguro que desea eliminar la carpeta "${folderName}"?`);
+    if (confirmed) {
+      try {
         await deleteFolderMutation.mutateAsync(folderId);
         toast({
           title: 'Carpeta eliminada',
           description: 'La carpeta ha sido eliminada exitosamente.',
         });
+      } catch (error) {
+        console.error('Error deleting folder:', error);
       }
-    );
+    }
   };
 
   const handleDeleteGroup = async (groupId: string, groupName: string) => {
-    await showDeleteConfirmation(
-      `¿Está seguro que desea eliminar el grupo "${groupName}"?`,
-      async () => {
+    const confirmed = confirm(`¿Está seguro que desea eliminar el grupo "${groupName}"?`);
+    if (confirmed) {
+      try {
         await deleteGroupMutation.mutateAsync(groupId);
         toast({
           title: 'Grupo eliminado',
           description: 'El grupo ha sido eliminado exitosamente.',
         });
+      } catch (error) {
+        console.error('Error deleting group:', error);
       }
-    );
+    }
   };
 
   const renderBreadcrumbs = () => {
@@ -349,135 +353,16 @@ export default function ProjectDocumentation() {
       );
     }
 
-    if (isMobile) {
-      return (
-        <div className="grid gap-4">
-          {filteredDocuments.map((doc) => (
-            <DocumentCard key={doc.id} document={doc} />
-          ))}
-        </div>
-      );
-    }
 
-    const tableData = filteredDocuments.map((doc) => ({
-      id: doc.id,
-      name: doc.file_name || doc.name,
-      type: doc.file_type,
-      size: doc.file_size,
-      creator: doc.creator,
-      created_at: doc.created_at,
-      status: doc.status,
-      version: doc.version_number || 1,
-      original_name: doc.file_name || doc.name
-    }));
 
-    const columns = [
-      {
-        key: 'name',
-        label: 'Documento',
-        render: (item: any) => (
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{item.name}</div>
-              <div className="text-sm text-muted-foreground truncate">{item.original_name}</div>
-            </div>
-          </div>
-        )
-      },
-      {
-        key: 'type',
-        label: 'Tipo',
-        render: (item: any) => (
-          <Badge variant="outline" className="text-xs">
-            {item.type || 'N/A'}
-          </Badge>
-        )
-      },
-      {
-        key: 'size',
-        label: 'Tamaño',
-        render: (item: any) => (
-          <span className="text-sm text-muted-foreground">
-            {item.size ? `${(item.size / 1024).toFixed(1)} KB` : 'N/A'}
-          </span>
-        )
-      },
-      {
-        key: 'creator',
-        label: 'Creador',
-        render: (item: any) => {
-          const creator = item.creator;
-          if (!creator) return <span className="text-muted-foreground">N/A</span>;
-          
-          return (
-            <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={creator.avatar_url} />
-                <AvatarFallback className="text-xs">
-                  {creator.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm">{creator.full_name || 'Usuario'}</span>
-            </div>
-          );
-        }
-      },
-      {
-        key: 'created_at',
-        label: 'Fecha',
-        render: (item: any) => (
-          <span className="text-sm text-muted-foreground">
-            {format(new Date(item.created_at), 'dd/MM/yyyy', { locale: es })}
-          </span>
-        )
-      },
-      {
-        key: 'status',
-        label: 'Estado',
-        render: (item: any) => (
-          <Badge variant={
-            item.status === 'active' ? 'default' : 
-            item.status === 'archived' ? 'secondary' : 'outline'
-          }>
-            {item.status === 'active' ? 'Activo' : 
-             item.status === 'archived' ? 'Archivado' : 'Borrador'}
-          </Badge>
-        )
-      },
-      {
-        key: 'version',
-        label: 'Versión',
-        render: (item: any) => (
-          <span className="text-sm font-mono">v{item.version}</span>
-        )
-      }
-    ];
+
 
     return (
-      <Table
-        data={tableData}
-        columns={columns}
-        searchable={false}
-        actionButtons={[
-          {
-            icon: Eye,
-            label: 'Ver',
-            onClick: (item) => {
-              // Implementar vista de documento
-              console.log('Ver documento:', item);
-            }
-          },
-          {
-            icon: Download,
-            label: 'Descargar',
-            onClick: (item) => {
-              // Implementar descarga de documento
-              console.log('Descargar documento:', item);
-            }
-          }
-        ]}
-      />
+      <div className="grid gap-4">
+        {filteredDocuments.map((doc) => (
+          <DocumentCard key={doc.id} document={doc} />
+        ))}
+      </div>
     );
   };
 
