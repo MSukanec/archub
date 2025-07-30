@@ -360,9 +360,16 @@ export function ActionBarDesktop({
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                variant="ghost-icon"
+                variant="ghost"
+                className="text-sm"
               >
-                <LayoutGrid className="w-4 h-4" />
+                <LayoutGrid className="w-4 h-4 mr-2" />
+                {groupingOptions ? 
+                  groupingOptions.find(opt => opt.value === groupingType)?.label || 'Sin Agrupación' :
+                  (groupingType === 'phases' ? 'Agrupar por Fases' : 
+                   groupingType === 'phases-rubros' ? 'Agrupar por Fases y Rubros' : 
+                   groupingType === 'tasks' ? 'Agrupar por Rubros y Tareas' : 'Sin Agrupación')
+                }
               </Button>
             </PopoverTrigger>
             <PopoverContent 
