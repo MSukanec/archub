@@ -163,8 +163,8 @@ const subcontratosFormSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
-  subcontrato: z.string().optional(),
-  // construction_task_id se maneja ahora a través de selectedTaskIds estado
+  construction_task_id: z.string().min(1, 'Tarea de construcción es requerida'),
+  subcontrato: z.string().optional()
 })
 
 export type MovementForm = z.infer<typeof movementFormSchema>
@@ -711,6 +711,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       // Detectar subcontratos por subcategoría UUID específica
       const subcategoryId = form.watch('subcategory_id')
       const isSubcontratosCategory = subcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
+      
+      // DEBUG: Log detection
+      if (subcategoryId) {
+        console.log('🎯 SubcontratosFields Detection:', { 
+          subcategoryId, 
+          isSubcontratosCategory, 
+          UUID_TARGET: '40a8fd4-69a6-4e81-bcb4-464359cd8498' 
+        })
+      }
       
       if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory) {
         // Establecer el estado correcto
