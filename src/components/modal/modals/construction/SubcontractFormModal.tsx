@@ -31,7 +31,7 @@ const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   title: z.string().min(1, "El título es obligatorio"),
   contact_id: z.string().min(1, "Debe seleccionar un proveedor"),
-  organization_currency_id: z.string().min(1, "Debe seleccionar una moneda"),
+  currency_id: z.string().min(1, "Debe seleccionar una moneda"),
   amount_total: z.number().min(0, "El monto debe ser mayor o igual a 0").optional(),
   exchange_rate: z.number().min(0, "La cotización debe ser mayor a 0"),
   status: z.string().min(1, "Debe seleccionar un estado"),
@@ -97,7 +97,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       date: new Date().toISOString().split('T')[0],
       title: '',
       contact_id: '',
-      organization_currency_id: defaultCurrency,
+      currency_id: defaultCurrency,
       amount_total: 0,
       exchange_rate: 1,
       status: 'pendiente',
@@ -107,8 +107,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   // Actualizar la moneda por defecto cuando se carga
   React.useEffect(() => {
-    if (defaultCurrency && !form.watch('organization_currency_id')) {
-      form.setValue('organization_currency_id', defaultCurrency);
+    if (defaultCurrency && !form.watch('currency_id')) {
+      form.setValue('currency_id', defaultCurrency);
     }
   }, [defaultCurrency, form]);
 
@@ -156,7 +156,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           date: data.date,
           contact_id: data.contact_id,
           title: data.title,
-          organization_currency_id: data.organization_currency_id,
+          currency_id: data.currency_id,
           amount_total: data.amount_total || 0,
           exchange_rate: data.exchange_rate,
           status: data.status,
@@ -257,12 +257,12 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       {/* Moneda - Monto Total */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label htmlFor="organization_currency_id" className="text-xs font-medium">
+          <Label htmlFor="currency_id" className="text-xs font-medium">
             Moneda *
           </Label>
           <Select
-            value={form.watch('organization_currency_id') || ''}
-            onValueChange={(value) => form.setValue('organization_currency_id', value)}
+            value={form.watch('currency_id') || ''}
+            onValueChange={(value) => form.setValue('currency_id', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar moneda..." />
@@ -275,8 +275,8 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
               ))}
             </SelectContent>
           </Select>
-          {form.formState.errors.organization_currency_id && (
-            <p className="text-xs text-destructive">{form.formState.errors.organization_currency_id.message}</p>
+          {form.formState.errors.currency_id && (
+            <p className="text-xs text-destructive">{form.formState.errors.currency_id.message}</p>
           )}
         </div>
 

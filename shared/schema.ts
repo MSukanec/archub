@@ -321,7 +321,7 @@ export const subcontracts = pgTable("subcontracts", {
   contact_id: uuid("contact_id").notNull(),
   title: text("title").notNull(),
   date: text("date").notNull(),
-  organization_currency_id: uuid("organization_currency_id").notNull(),
+  currency_id: uuid("currency_id").notNull(),
   amount_total: real("amount_total").default(0),
   exchange_rate: real("exchange_rate").default(1),
   status: text("status").default("pendiente"),
