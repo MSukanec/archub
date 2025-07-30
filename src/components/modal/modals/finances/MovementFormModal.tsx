@@ -163,7 +163,6 @@ const subcontratosFormSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
-  construction_task_id: z.string().min(1, 'Tarea de construcción es requerida'),
   subcontrato: z.string().optional()
 })
 
@@ -344,8 +343,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     if (editingMovement) {
       // Si estamos editando, usar el subcontrato existente o vacío
       if (existingMovementSubcontracts && existingMovementSubcontracts.length > 0) {
-        const firstSubcontract = existingMovementSubcontracts[0]
-        setSelectedSubcontractId(firstSubcontract.subcontract_id)
+        // CRÍTICO: Filtrar solo los subcontratos del movimiento específico que estamos editando
+        const movementSpecificSubcontracts = existingMovementSubcontracts.filter(
+          sub => sub.movement_id === editingMovement.id
+        )
+        
+        if (movementSpecificSubcontracts.length > 0) {
+          const firstSubcontract = movementSpecificSubcontracts[0]
+          setSelectedSubcontractId(firstSubcontract.subcontract_id)
+        } else {
+          setSelectedSubcontractId('')
+        }
+      } else if (editingMovement.subcontract_id) {
+        // También intentar cargar desde subcontract_id directo
+        setSelectedSubcontractId(editingMovement.subcontract_id)
       } else {
         // Si no hay subcontrato existente, dejar vacío
         setSelectedSubcontractId('')
@@ -907,15 +918,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         setMovementType('subcontratos')
         
         // Cargar datos en formulario de subcontratos
+        // NOTA: El selectedSubcontractId se sincronizará después via useEffect en SubcontratosFields
         subcontratosForm.reset({
           movement_date: new Date(editingMovement.movement_date),
-          created_by: editingMovement.created_by || userData?.member?.id || '',
+          created_by: editingMovement.created_by || userData?.user?.id || '',
           description: editingMovement.description || '',
           type_id: editingMovement.type_id,
           category_id: editingMovement.category_id,
           subcategory_id: editingMovement.subcategory_id || '',
-
-          subcontrato: editingMovement.subcontract_id || '', // Campo específico de subcontrato
+          subcontrato: editingMovement.subcontract_id || '', // Se sincronizará después con selectedSubcontractId
           currency_id: matchingCurrency?.id || editingMovement.currency_id,
           wallet_id: matchingWallet?.wallets.id || editingMovement.wallet_id,
           amount: Math.abs(editingMovement.amount),
@@ -2499,6 +2510,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               concepts={concepts}
               onOpenTasksSubform={openTasksSubform}
               projectId={form.watch('project_id')}
+              selectedSubcontractId={selectedSubcontractId}
+              setSelectedSubcontractId={setSelectedSubcontractId}
             />
           </form>
         </Form>
@@ -2657,8 +2670,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const headerContent = currentPanel === 'subform' ? (
     <FormModalHeader
-      title={currentSubform === 'tasks' ? "Selección de Tareas" : "Subformulario"}
-      description={currentSubform === 'tasks' ? "Selecciona las tareas relacionadas con este movimiento" : "Subformulario"}
+      title={currentSubform === 'tasks' ? "Configuración de Subcontrato" : "Subformulario"}
+      description={currentSubform === 'tasks' ? "Configura el subcontrato relacionado con este pago" : "Subformulario"}
       icon={Package}
       leftActions={
         <Button

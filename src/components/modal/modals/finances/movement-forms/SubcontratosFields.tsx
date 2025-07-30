@@ -35,9 +35,11 @@ interface Props {
   concepts: any[]
   onOpenTasksSubform: () => void
   projectId?: string
+  selectedSubcontractId?: string
+  setSelectedSubcontractId?: (id: string) => void
 }
 
-export function SubcontratosFields({ form, currencies, wallets, members, concepts, onOpenTasksSubform, projectId }: Props) {
+export function SubcontratosFields({ form, currencies, wallets, members, concepts, onOpenTasksSubform, projectId, selectedSubcontractId, setSelectedSubcontractId }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica
@@ -47,7 +49,12 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
   // Hook para obtener subcontratos del proyecto
   const { data: subcontracts = [] } = useSubcontracts(projectId || null)
   
-
+  // Sincronizar el campo del formulario con selectedSubcontractId
+  React.useEffect(() => {
+    if (selectedSubcontractId && selectedSubcontractId !== form.getValues().subcontrato) {
+      form.setValue('subcontrato', selectedSubcontractId)
+    }
+  }, [selectedSubcontractId, form])
   
   // Ya no necesitamos cargar las tareas aquí, se manejan en el subform
   
@@ -246,12 +253,44 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
         />
       </div>
 
-      {/* Botón para Selección de Tareas */}
+      {/* Campo para Selección de Subcontrato */}
+      <div className="col-span-2">
+        <FormField
+          control={form.control}
+          name="subcontrato"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subcontrato</FormLabel>
+              <FormControl>
+                <ComboBox
+                  options={subcontracts.map(subcontract => ({
+                    value: subcontract.id,
+                    label: subcontract.title
+                  }))}
+                  value={field.value || selectedSubcontractId || ''}
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                    if (setSelectedSubcontractId) {
+                      setSelectedSubcontractId(value)
+                    }
+                  }}
+                  placeholder="Seleccionar subcontrato..."
+                  emptyMessage="No se encontraron subcontratos"
+                  searchPlaceholder="Buscar subcontrato..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Botón para Configuración Adicional */}
       <div className="col-span-2">
         <FormSubsectionButton
           icon={<Package />}
-          title="Detalle de Subcontratos"
-          description="Configura el subcontrato y selecciona las tareas relacionadas con este pago"
+          title="Configuración de Subcontrato"
+          description="Configura el subcontrato relacionado con este pago"
           onClick={onOpenTasksSubform}
         />
       </div>
