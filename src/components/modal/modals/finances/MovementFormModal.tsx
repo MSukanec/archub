@@ -220,25 +220,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Debug: Log loading state
   React.useEffect(() => {
-    console.log('Modal loading state:', {
-      isUserDataLoading,
-      isMembersLoading,
-      isCurrenciesLoading,
-      isWalletsLoading,
-      isOrganizationConceptsLoading,
-      hasUserData: !!userData,
-      hasMembers: !!members,
-      hasCurrencies: !!currencies,
-      hasWallets: !!wallets,
-      hasOrganizationConcepts: !!organizationConcepts,
-      isDataLoading
-    })
+    // Loading state tracking for debugging
   }, [isDataLoading, userData, members, currencies, wallets, organizationConcepts])
 
   // LOG: Categorías de aportes ya configuradas - NO modificar base de datos
   React.useEffect(() => {
     if (organizationConcepts && userData?.organization?.id) {
-      console.log('Categorías de aportes configuradas correctamente')
+      // Categories already configured
     }
   }, [organizationConcepts, userData?.organization?.id])
 
@@ -279,11 +267,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Debug log for existing movement tasks
   React.useEffect(() => {
-    console.log('existingMovementTasks updated:', {
-      editingMovementId: editingMovement?.id,
-      existingMovementTasks,
-      tasksLength: existingMovementTasks?.length || 0
-    })
+    // Track existing movement tasks for debugging
   }, [existingMovementTasks, editingMovement?.id])
   
   // Hook para cargar las tareas de construcción disponibles
@@ -294,15 +278,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Hook para cargar los subcontratos del proyecto
   const { data: subcontracts } = useSubcontracts(
-    userData?.preferences?.last_project_id || '',
-    userData?.organization?.id || ''
+    userData?.preferences?.last_project_id,
+    userData?.organization?.id
   )
   
   // Transform construction tasks to match ComboBox interface
   const constructionTaskOptions = React.useMemo(() => {
     if (!rawConstructionTasks) return []
-    
-    console.log('MovementFormModal - Raw construction tasks:', rawConstructionTasks)
     
     return rawConstructionTasks.map((task: any) => ({
       value: task.task_instance_id,
@@ -324,15 +306,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   React.useEffect(() => {
     if (existingMovementTasks && existingMovementTasks.length > 0 && rawConstructionTasks && rawConstructionTasks.length > 0) {
       const firstTask = existingMovementTasks[0]
-      console.log('Loading existing movement task:', {
-        movement_task_id: firstTask?.task_id,
-        movement_task_object: firstTask,
-        availableConstructionTasks: rawConstructionTasks.map(ct => ({
-          task_instance_id: ct.task_instance_id,
-          task_id: ct.task_id,
-          task_code: ct.task_code
-        }))
-      })
       
       // The movement_tasks.task_id should match construction_tasks.task_instance_id
       // (the task_id in movement_tasks refers to the instance ID of the construction task)
@@ -341,15 +314,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       )
       
       if (matchingTask) {
-        console.log('Found matching construction task:', {
-          matched_task_instance_id: matchingTask.task_instance_id,
-          matched_task_code: matchingTask.task_code,
-          setting_selectedTaskId: matchingTask.task_instance_id
-        })
         setSelectedTaskId(matchingTask.task_instance_id)
-      } else {
-        console.log('No matching construction task found for movement task ID:', firstTask?.task_id)
-        console.log('Available construction task instance IDs:', rawConstructionTasks.map(ct => ct.task_instance_id))
       }
     }
   }, [existingMovementTasks, rawConstructionTasks])
@@ -358,11 +323,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   React.useEffect(() => {
     if (existingMovementSubcontracts && existingMovementSubcontracts.length > 0) {
       const firstSubcontract = existingMovementSubcontracts[0]
-      console.log('Loading existing movement subcontract:', {
-        movement_subcontract_id: firstSubcontract?.subcontract_id,
-        movement_subcontract_object: firstSubcontract,
-        setting_selectedSubcontractId: firstSubcontract?.subcontract_id
-      })
       setSelectedSubcontractId(firstSubcontract.subcontract_id)
     }
   }, [existingMovementSubcontracts])
@@ -522,7 +482,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       subcategory_id: '',
-      construction_task_id: '',
       currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
       wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -539,8 +498,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       subcategory_id: '',
-      construction_task_id: '',
-      subcontrato: '',
+      subcontrato: '',  
       currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
       wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -562,7 +520,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const handleTypeChange = React.useCallback((newTypeId: string) => {
     if (!newTypeId || !concepts) return
     
-    console.log('Handling type change:', { newTypeId, selectedTypeId })
     
 
     
@@ -580,7 +537,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const isMaterialesType = typeName?.includes('material')
     const isManoDeObraType = typeName?.includes('mano de obra') || typeName?.includes('labor')
     
-    console.log('Type detected:', { viewMode, typeName, isConversionType, isTransferType, isAportesType, isMaterialesType, isManoDeObraType })
     
     // Cambiar formulario
     if (isConversionType) {
@@ -641,14 +597,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const currentMember = members.find(m => m.user_id === userData.user.id)
     const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
     const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
-    
-    console.log('Initializing default values:', {
-      currentMember: currentMember?.id,
-      defaultCurrency,
-      defaultWallet,
-      walletsAvailable: wallets?.length,
-      hasOrgPreferences: !!userData?.organization?.preferences
-    })
+    // Initialize default values
     
     if (currentMember) {
       // Inicializar CREADOR en todos los formularios
@@ -685,40 +634,28 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
     
     if (defaultWallet) {
-      console.log('Setting wallet values:', {
-        defaultWallet,
-        currentFormWallet: form.watch('wallet_id'),
-        currentTransferWallet: transferForm.watch('wallet_id_from'),
-        currentAportesWallet: aportesForm.watch('wallet_id')
-      })
+      // Set default wallet for all forms
       
       if (!form.watch('wallet_id')) {
         form.setValue('wallet_id', defaultWallet)
-        console.log('Set form wallet_id to:', defaultWallet)
       }
       if (!transferForm.watch('wallet_id_from')) {
         transferForm.setValue('wallet_id_from', defaultWallet)
-        console.log('Set transfer wallet_id_from to:', defaultWallet)
       }
       if (!aportesForm.watch('wallet_id')) {
         aportesForm.setValue('wallet_id', defaultWallet)
-        console.log('Set aportes wallet_id to:', defaultWallet)
       }
       if (!aportesPropriosForm.watch('wallet_id')) {
         aportesPropriosForm.setValue('wallet_id', defaultWallet)
-        console.log('Set aportes propios wallet_id to:', defaultWallet)
       }
       if (!retirosPropriosForm.watch('wallet_id')) {
         retirosPropriosForm.setValue('wallet_id', defaultWallet)
-        console.log('Set retiros propios wallet_id to:', defaultWallet)
       }
       if (!materialesForm.watch('wallet_id')) {
         materialesForm.setValue('wallet_id', defaultWallet)
-        console.log('Set materiales wallet_id to:', defaultWallet)
       }
       if (!manoDeObraForm.watch('wallet_id')) {
         manoDeObraForm.setValue('wallet_id', defaultWallet)
-        console.log('Set mano de obra wallet_id to:', defaultWallet)
       }
     }
     
@@ -779,7 +716,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         
         if (isAportesCategory) {
           // APORTES: Cliente + Cotización
-          console.log('Setting aportes form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
           aportesForm.setValue('type_id', form.watch('type_id'))
           aportesForm.setValue('category_id', categoryId)
@@ -794,7 +730,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           form.setValue('category_id', categoryId)
         } else if (isAportesPropiosCategory) {
           // APORTES PROPIOS: Socio + Cotización
-          console.log('Setting aportes propios form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
           aportesPropriosForm.setValue('type_id', form.watch('type_id'))
           aportesPropriosForm.setValue('category_id', categoryId)
@@ -810,14 +745,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           form.setValue('category_id', categoryId)
         } else if (isRetirosPropiosCategory) {
           // RETIROS PROPIOS: Socio + Cotización
-          console.log('Setting retiros propios form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
           retirosPropriosForm.setValue('type_id', form.watch('type_id'))
           retirosPropriosForm.setValue('category_id', categoryId)
           retirosPropriosForm.setValue('description', preserveValues ? currentValues.description : '')
-          retirosPropriosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
-          retirosPropriosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
-          retirosPropriosForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          retirosPropriosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          retirosPropriosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '')
+          retirosPropriosForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
           retirosPropriosForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) retirosPropriosForm.setValue('exchange_rate', currentValues.exchange_rate)
           retirosPropriosForm.setValue('member_id', currentMember || '') // Auto-inicializar con usuario actual
@@ -826,14 +760,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           form.setValue('category_id', categoryId)
         } else if (isMaterialesCategory) {
           // MATERIALES: Tareas de construcción + Información financiera
-          console.log('Setting materiales form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
           materialesForm.setValue('type_id', form.watch('type_id'))
           materialesForm.setValue('category_id', categoryId)
           materialesForm.setValue('description', preserveValues ? currentValues.description : '')
-          materialesForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
-          materialesForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
-          materialesForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          materialesForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          materialesForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '')
+          materialesForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
           materialesForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) materialesForm.setValue('exchange_rate', currentValues.exchange_rate)
           
@@ -841,14 +774,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           form.setValue('category_id', categoryId)
         } else if (isManoDeObraCategory) {
           // MANO DE OBRA: Tareas de construcción + Información financiera
-          console.log('Setting mano de obra form with preserved values:', preserveValues ? currentValues : 'using defaults')
           
           manoDeObraForm.setValue('type_id', form.watch('type_id'))
           manoDeObraForm.setValue('category_id', categoryId)
           manoDeObraForm.setValue('description', preserveValues ? currentValues.description : '')
-          manoDeObraForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember)
-          manoDeObraForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency)
-          manoDeObraForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet)
+          manoDeObraForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          manoDeObraForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '') 
+          manoDeObraForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
           manoDeObraForm.setValue('amount', preserveValues ? currentValues.amount : 0)
           if (currentValues.exchange_rate) manoDeObraForm.setValue('exchange_rate', currentValues.exchange_rate)
           
@@ -882,20 +814,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   React.useEffect(() => {
     if (!editingMovement) return
     
-    console.log('Loading editing movement - ONE TIME ONLY')
     
     if (editingMovement) {
       // Wait for all data to be loaded
       if (!members || !currencies || !wallets || !concepts || !categories) {
-        console.log('Waiting for data to load...')
         return
       }
       
       // Set hierarchical states for editing - CRITICAL for field loading
-      console.log('Setting hierarchical states:', {
-        type_id: editingMovement.type_id,
-        category_id: editingMovement.category_id
-      })
       setSelectedTypeId(editingMovement.type_id || '')
       setSelectedCategoryId(editingMovement.category_id || '')
       
@@ -914,20 +840,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const matchingWallet = wallets?.find(w => 
         w.id === editingMovement.wallet_id
       )
-      
-      console.log('Loading editing movement:', {
-        editingMovement: editingMovement.id,
-        viewMode,
-        categoryViewMode,
-        type_id: editingMovement.type_id,
-        category_id: editingMovement.category_id,
-        subcategory_id: editingMovement.subcategory_id,
-        amount: editingMovement.amount,
-        currency_id: editingMovement.currency_id,
-        wallet_id: editingMovement.wallet_id,
-        conversion_group_id: editingMovement.conversion_group_id,
-        transfer_group_id: editingMovement.transfer_group_id
-      })
       
       // Detectar el tipo de movimiento por los campos del movimiento
       const isConversionMovement = !!editingMovement.conversion_group_id
@@ -960,7 +872,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       // Cargar datos en el formulario correcto según el tipo de movimiento
       if (isConversionMovement) {
         // Para conversiones, cargar el grupo completo
-        console.log('Loading conversion group for editing:', editingMovement.conversion_group_id)
         
         // Buscar el concepto "Conversión" para asignar el type_id correcto
         const conversionConcept = concepts?.find((concept: any) => 
@@ -983,9 +894,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           // Identificar movimientos de egreso e ingreso
           const egressMovement = groupMovements?.[0]
           const ingressMovement = groupMovements?.[1]
-          
-          console.log('Conversion group movements:', { egressMovement, ingressMovement })
-          
           // Buscar las billeteras correspondientes en la relación organizacion_wallets
           const egressWallet = wallets?.find(w => w.id === egressMovement?.wallet_id)
           const ingressWallet = wallets?.find(w => w.id === ingressMovement?.wallet_id)
@@ -1005,7 +913,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             exchange_rate: editingMovement.exchange_rate || undefined
           }
           
-          console.log('Loading conversion form data:', conversionData)
           if (!loadingReady) return
           conversionForm.reset(conversionData)
         }
@@ -1224,11 +1131,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       } else {
         // Formulario normal
-        console.log('Loading form with categories:', {
-          category_id: editingMovement.category_id,
-          subcategory_id: editingMovement.subcategory_id,
-          type_id: editingMovement.type_id
-        })
         
         if (!loadingReady) return
         form.reset({
@@ -1569,7 +1471,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         exchange_rate: data.exchange_rate || null // Agregar cotización opcional
       }
 
-      console.log('Movement data to be saved:', movementData)
 
       // Si estamos editando, actualizar el movimiento existente
       if (editingMovement?.id) {
@@ -1618,17 +1519,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
 
   const onSubmit = async (data: MovementForm) => {
-    console.log('Saving wallet_id:', data.wallet_id)
     await createMovementMutation.mutateAsync(data)
   }
 
   const onSubmitConversion = async (data: ConversionForm) => {
-    console.log('Saving conversion wallet_id_from:', data.wallet_id_from, 'wallet_id_to:', data.wallet_id_to)
     await createConversionMutation.mutateAsync(data)
   }
 
   const onSubmitTransfer = async (data: TransferForm) => {
-    console.log('Saving transfer wallet_id_from:', data.wallet_id_from, 'wallet_id_to:', data.wallet_id_to)
     await createTransferMutation.mutateAsync(data)
   }
 
@@ -1767,23 +1665,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
 
   const onSubmitAportes = async (data: AportesForm) => {
-    console.log('onSubmitAportes called with data:', data)
-    console.log('Saving aportes data:', {
-      wallet_id: data.wallet_id,
-      contact_id: data.contact_id,
-      category_id: data.category_id,
-      type_id: data.type_id,
-      amount: data.amount,
-      currency_id: data.currency_id,
-      created_by: data.created_by,
-      movement_date: data.movement_date,
-      description: data.description,
-      exchange_rate: data.exchange_rate
-    })
     
     try {
       await createAportesMutation.mutateAsync(data)
-      console.log('Aportes mutation completed successfully')
     } catch (error) {
       console.error('Error in aportes mutation:', error)
       throw error
@@ -1791,28 +1675,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   }
 
   const onSubmitAportesPropios = async (data: AportesPropriosForm) => {
-    console.log('Saving aportes propios data:', {
-      wallet_id: data.wallet_id,
-      member_id: data.member_id,
-      category_id: data.category_id,
-      type_id: data.type_id,
-      amount: data.amount,
-      currency_id: data.currency_id
-    })
     await createAportesPropriosMutation.mutateAsync(data)
   }
 
   const onSubmitRetirosPropios = async (data: RetirosPropriosForm) => {
-    console.log('Saving retiros propios data:', {
-      created_by: data.created_by,
-      wallet_id: data.wallet_id,
-      member_id: data.member_id,
-      category_id: data.category_id,
-      type_id: data.type_id,
-      amount: data.amount,
-      currency_id: data.currency_id
-    })
-    console.log('Full form data for retiros propios:', data)
     await createRetirosPropriosMutation.mutateAsync(data)
   }
 
@@ -1868,7 +1734,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             movementId: createdMovement.id,
             taskIds: [selectedTaskId]
           })
-          console.log('Movement task created successfully for materials')
         } catch (error) {
           console.error('Error creating movement task:', error)
           toast({
@@ -1956,7 +1821,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             movementId: createdMovement.id,
             taskIds: [selectedTaskId]
           })
-          console.log('Movement task created successfully for mano de obra')
         } catch (error) {
           console.error('Error creating movement task:', error)
           toast({
@@ -1981,7 +1845,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             subcontract_id: selectedSubcontractId,
             amount: createdMovement.amount
           })
-          console.log('Movement subcontract created successfully for mano de obra')
         } catch (error) {
           console.error('Error creating movement subcontract:', error)
           toast({
@@ -2018,31 +1881,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const onSubmitMateriales = async (data: MaterialesForm) => {
     // La selección de tareas es opcional
-    console.log('Saving materiales data:', {
-      created_by: data.created_by,
-      wallet_id: data.wallet_id,
-      selectedTaskId: selectedTaskId || null, // Opcional
-      category_id: data.category_id,
-      type_id: data.type_id,
-      amount: data.amount,
-      currency_id: data.currency_id
-    })
-    console.log('Full form data for materiales:', data)
     await createMaterialesMutation.mutateAsync(data)
   }
 
   const onSubmitManoDeObra = async (data: ManoDeObraForm) => {
     // La selección de tareas es opcional
-    console.log('Saving mano de obra data:', {
-      created_by: data.created_by,
-      wallet_id: data.wallet_id,
-      selectedTaskId: selectedTaskId || null, // Opcional
-      category_id: data.category_id,
-      type_id: data.type_id,
-      amount: data.amount,
-      currency_id: data.currency_id
-    })
-    console.log('Full form data for mano de obra:', data)
     await createManoDeObraMutation.mutateAsync(data)
   }
 
@@ -2064,23 +1907,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || currentCategory?.name?.includes('Retiro')
     const isCurrentMateriales = currentCategory?.name?.toLowerCase().includes('material')
     const isCurrentManoDeObra = currentCategory?.name?.toLowerCase().includes('mano de obra') || currentCategory?.name?.toLowerCase().includes('labor')
-    
-    console.log('handleConfirm - detecting current movement type:', {
-      currentCategoryId,
-      currentCategoryName: currentCategory?.name,
-      currentCategoryViewMode,
-
-      isCurrentAportes,
-      isCurrentAportesPropios,
-      isCurrentRetirosPropios,
-      isCurrentMateriales,
-      isCurrentManoDeObra,
-      originalMovementType: movementType
-    })
+    // Detect current movement type based on category
     
     // Usar el tipo detectado basándose en la categoría actual
     if (isCurrentAportes) {
-      console.log('Submitting as aportes form')
       
       // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
@@ -2089,34 +1919,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormSubcategoryId = form.watch('subcategory_id')
       
       if (mainFormTypeId) {
-        console.log('Synchronizing type_id before submit:', mainFormTypeId)
         aportesForm.setValue('type_id', mainFormTypeId)
       }
       
       if (mainFormCreatedBy) {
-        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
         aportesForm.setValue('created_by', mainFormCreatedBy)
       }
       
       if (mainFormMovementDate) {
-        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
         aportesForm.setValue('movement_date', mainFormMovementDate)
       }
       
       if (mainFormSubcategoryId) {
-        console.log('Synchronizing subcategory_id before submit:', mainFormSubcategoryId)
         aportesForm.setValue('subcategory_id', mainFormSubcategoryId)
       }
-      
-      console.log('AportesFields - Currency data structure:', {
-        currencies: currencies?.[0], 
-        formData: aportesForm.getValues(),
-        formErrors: aportesForm.formState.errors,
-        isValid: aportesForm.formState.isValid
-      })
+      // Submit aportes form
       aportesForm.handleSubmit(onSubmitAportes)()
     } else if (isCurrentAportesPropios) {
-      console.log('Submitting as aportes propios form')
       
       // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
@@ -2125,28 +1944,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormDescription = form.watch('description')
       
       if (mainFormTypeId) {
-        console.log('Synchronizing type_id before submit:', mainFormTypeId)
         aportesPropriosForm.setValue('type_id', mainFormTypeId)
       }
       
       if (mainFormCreatedBy) {
-        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
         aportesPropriosForm.setValue('created_by', mainFormCreatedBy)
       }
       
       if (mainFormMovementDate) {
-        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
         aportesPropriosForm.setValue('movement_date', mainFormMovementDate)
       }
       
       if (mainFormDescription) {
-        console.log('Synchronizing description before submit:', mainFormDescription)
         aportesPropriosForm.setValue('description', mainFormDescription)
       }
       
       aportesPropriosForm.handleSubmit(onSubmitAportesPropios)()
     } else if (isCurrentRetirosPropios) {
-      console.log('Submitting as retiros propios form')
       
       // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
@@ -2155,28 +1969,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormDescription = form.watch('description')
       
       if (mainFormTypeId) {
-        console.log('Synchronizing type_id before submit:', mainFormTypeId)
         retirosPropriosForm.setValue('type_id', mainFormTypeId)
       }
       
       if (mainFormCreatedBy) {
-        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
         retirosPropriosForm.setValue('created_by', mainFormCreatedBy)
       }
       
       if (mainFormMovementDate) {
-        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
         retirosPropriosForm.setValue('movement_date', mainFormMovementDate)
       }
       
       if (mainFormDescription) {
-        console.log('Synchronizing description before submit:', mainFormDescription)
         retirosPropriosForm.setValue('description', mainFormDescription)
       }
       
       retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)()
     } else if (isCurrentMateriales) {
-      console.log('Submitting as materiales form')
       
       // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
@@ -2185,28 +1994,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormDescription = form.watch('description')
       
       if (mainFormTypeId) {
-        console.log('Synchronizing type_id before submit:', mainFormTypeId)
         materialesForm.setValue('type_id', mainFormTypeId)
       }
       
       if (mainFormCreatedBy) {
-        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
         materialesForm.setValue('created_by', mainFormCreatedBy)
       }
       
       if (mainFormMovementDate) {
-        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
         materialesForm.setValue('movement_date', mainFormMovementDate)
       }
       
       if (mainFormDescription) {
-        console.log('Synchronizing description before submit:', mainFormDescription)
         materialesForm.setValue('description', mainFormDescription)
       }
       
       materialesForm.handleSubmit(onSubmitMateriales)()
     } else if (isCurrentManoDeObra) {
-      console.log('Submitting as mano de obra form')
       
       // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
@@ -2215,22 +2019,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormDescription = form.watch('description')
       
       if (mainFormTypeId) {
-        console.log('Synchronizing type_id before submit:', mainFormTypeId)
         manoDeObraForm.setValue('type_id', mainFormTypeId)
       }
       
       if (mainFormCreatedBy) {
-        console.log('Synchronizing created_by before submit:', mainFormCreatedBy)
         manoDeObraForm.setValue('created_by', mainFormCreatedBy)
       }
       
       if (mainFormMovementDate) {
-        console.log('Synchronizing movement_date before submit:', mainFormMovementDate)
         manoDeObraForm.setValue('movement_date', mainFormMovementDate)
       }
       
       if (mainFormDescription) {
-        console.log('Synchronizing description before submit:', mainFormDescription)
         manoDeObraForm.setValue('description', mainFormDescription)
       }
       
@@ -2239,15 +2039,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       // Usar el movementType original para casos como conversión/transferencia
       switch (movementType) {
         case 'conversion':
-          console.log('Submitting as conversion form')
           conversionForm.handleSubmit(onSubmitConversion)()
           break
         case 'transfer':
-          console.log('Submitting as transfer form')
           transferForm.handleSubmit(onSubmitTransfer)()
           break
         default:
-          console.log('Submitting as normal form')
           form.handleSubmit(onSubmit)()
       }
     }
@@ -2476,7 +2273,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   const selectedCategory = categories.find((cat: any) => cat.id === value)
                   const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
                   
-                  console.log('Detecting category type in edit mode:', { value, categoryName: selectedCategory?.name, viewMode })
                   
                   // Detectar el tipo específico de formulario especial
                   const isAportesCategory = viewMode === "aportes"
@@ -2489,34 +2285,25 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   const currentTypeId = form.watch('type_id')
                   if (currentTypeId) {
                     if (isAportesCategory) {
-                      console.log('Synchronizing type_id to aportes form in edit mode:', currentTypeId)
                       aportesForm.setValue('type_id', currentTypeId)
                     } else if (isMaterialesCategory) {
-                      console.log('Synchronizing type_id to materiales form in edit mode:', currentTypeId)
                       materialesForm.setValue('type_id', currentTypeId)
                     } else if (isManoDeObraCategory) {
-                      console.log('Synchronizing type_id to mano de obra form in edit mode:', currentTypeId)
                       manoDeObraForm.setValue('type_id', currentTypeId)
                     }
                   }
                   
                   if (isAportesCategory) {
-                    console.log('Switching to APORTES form in edit mode')
                     setMovementType('aportes')
                   } else if (isAportesPropiosCategory) {
-                    console.log('Switching to APORTES PROPIOS form in edit mode')
                     setMovementType('aportes_propios')
                   } else if (isRetirosPropiosCategory) {
-                    console.log('Switching to RETIROS PROPIOS form in edit mode')
                     setMovementType('retiros_propios')
                   } else if (isMaterialesCategory) {
-                    console.log('Switching to MATERIALES form in edit mode')
                     setMovementType('materiales')
                   } else if (isManoDeObraCategory) {
-                    console.log('Switching to MANO DE OBRA form in edit mode')
                     setMovementType('mano_de_obra')
                   } else {
-                    console.log('Switching to NORMAL form in edit mode')
                     setMovementType('normal')
                   }
                 }
