@@ -26,6 +26,29 @@ export function useSubcontracts(projectId: string | null) {
   });
 }
 
+// Hook para obtener un subcontrato individual
+export function useSubcontract(subcontractId: string | null) {
+  return useQuery({
+    queryKey: ['subcontract', subcontractId],
+    queryFn: async () => {
+      if (!subcontractId || !supabase) return null;
+      
+      const { data, error } = await supabase
+        .from('subcontracts')
+        .select(`
+          *,
+          contact:contacts(id, first_name, last_name, full_name, email)
+        `)
+        .eq('id', subcontractId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!subcontractId,
+  });
+}
+
 // Hook para crear un subcontrato con tareas
 export function useCreateSubcontract() {
   const queryClient = useQueryClient();

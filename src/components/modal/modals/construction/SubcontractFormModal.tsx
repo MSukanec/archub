@@ -8,7 +8,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
 import { Package } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateSubcontract } from "@/hooks/use-subcontracts";
+import { useCreateSubcontract, useSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
 // import UserSelector from "@/components/ui-custom/UserSelector";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
@@ -50,6 +50,8 @@ interface SubcontractFormModalProps {
     projectId: string;
     organizationId: string;
     userId?: string;
+    subcontractId?: string;
+    isEditing?: boolean;
   };
 }
 
@@ -61,6 +63,9 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   const { data: userData } = useCurrentUser();
   const createSubcontract = useCreateSubcontract();
+  
+  // Datos del subcontrato existente si se está editando
+  const { data: existingSubcontract } = useSubcontract(modalData.subcontractId || null);
   
   // Obtener contactos/proveedores
   const { data: contacts = [] } = useContacts();
@@ -111,6 +116,22 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       form.setValue('currency_id', defaultCurrency);
     }
   }, [defaultCurrency, form]);
+
+  // Cargar datos del subcontrato existente si se está editando
+  React.useEffect(() => {
+    if (existingSubcontract && modalData.isEditing) {
+      form.reset({
+        date: existingSubcontract.date,
+        title: existingSubcontract.title,
+        contact_id: existingSubcontract.contact_id,
+        currency_id: existingSubcontract.currency_id,
+        amount_total: existingSubcontract.amount_total || 0,
+        exchange_rate: existingSubcontract.exchange_rate || 1,
+        status: existingSubcontract.status,
+        notes: existingSubcontract.notes || '',
+      });
+    }
+  }, [existingSubcontract, modalData.isEditing, form]);
 
   // Función para manejar selección/deselección de tareas
   const handleTaskSelection = (taskId: string, isSelected: boolean) => {
@@ -366,7 +387,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   const headerContent = (
     <FormModalHeader 
-      title="Crear Pedido de Subcontrato"
+      title={modalData.isEditing ? "Editar Subcontrato" : "Crear Pedido de Subcontrato"}
       description="Vincula tareas del proyecto con un subcontratista"
       icon={Package}
     />
@@ -391,7 +412,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={closeModal}
-      rightLabel="Crear Subcontrato"
+      rightLabel={modalData.isEditing ? "Actualizar Subcontrato" : "Crear Subcontrato"}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isSubmitting}
       submitDisabled={!form.formState.isValid || isSubmitting}

@@ -150,8 +150,13 @@ export default function ConstructionSubcontracts() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              // TODO: Implementar edición
-              console.log('Edit subcontract:', subcontract.id);
+              openModal('subcontract', {
+                projectId: userData?.preferences?.last_project_id,
+                organizationId: userData?.organization?.id,
+                userId: userData?.user?.id,
+                subcontractId: subcontract.id,
+                isEditing: true
+              });
             }}
           >
             <Edit className="w-4 h-4" />
