@@ -84,7 +84,7 @@ export default function ConstructionSubcontracts() {
 
   const formatDualCurrency = (amountARS: number, amountUSD: number) => {
     return (
-      <div className="text-right">
+      <div className="text-left">
         <div className="font-medium">
           ARS {amountARS.toLocaleString('es-AR')}
         </div>
