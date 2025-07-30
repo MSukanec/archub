@@ -20,7 +20,6 @@ type SubcontratosFormType = {
   type_id: string
   category_id: string
   subcategory_id?: string
-  construction_task_id: string
   subcontrato?: string
   currency_id: string
   wallet_id: string
@@ -34,13 +33,11 @@ interface Props {
   wallets: any[]
   members: any[]
   concepts: any[]
-  selectedTaskId: string
-  setSelectedTaskId: (taskId: string) => void
   onOpenTasksSubform: () => void
   projectId?: string
 }
 
-export function SubcontratosFields({ form, currencies, wallets, members, concepts, selectedTaskId, setSelectedTaskId, onOpenTasksSubform, projectId }: Props) {
+export function SubcontratosFields({ form, currencies, wallets, members, concepts, onOpenTasksSubform, projectId }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica

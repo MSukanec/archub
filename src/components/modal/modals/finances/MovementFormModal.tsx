@@ -903,8 +903,24 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         setMovementType('aportes_propios')
       } else if (isRetirosPropriosMovement) {
         setMovementType('retiros_propios')
-      } else if (isSubcontratosMovement) {
+      } else if (isSubcontratosMovement) {  
         setMovementType('subcontratos')
+        
+        // Cargar datos en formulario de subcontratos
+        subcontratosForm.reset({
+          movement_date: new Date(editingMovement.movement_date),
+          created_by: editingMovement.created_by || userData?.member?.id || '',
+          description: editingMovement.description || '',
+          type_id: editingMovement.type_id,
+          category_id: editingMovement.category_id,
+          subcategory_id: editingMovement.subcategory_id || '',
+
+          subcontrato: editingMovement.subcontract_id || '', // Campo específico de subcontrato
+          currency_id: matchingCurrency?.id || editingMovement.currency_id,
+          wallet_id: matchingWallet?.wallets.id || editingMovement.wallet_id,
+          amount: Math.abs(editingMovement.amount),
+          exchange_rate: editingMovement.exchange_rate || undefined
+        })
       } else {
         setMovementType('normal')
       }
@@ -1771,22 +1787,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     },
     onSuccess: async (createdMovement) => {
-      // Crear relación con tarea después de crear el movimiento
-      if (selectedTaskId) {
-        try {
-          await createMovementTasksMutation.mutateAsync({
-            movementId: createdMovement.id,
-            taskIds: [selectedTaskId]
-          })
-        } catch (error) {
-          // Error creating movement task
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Movimiento creado pero hubo un error al vincular las tareas',
-          })
-        }
-      }
+      // El movimiento de materiales no requiere vinculación específica con tareas
 
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movement-view'] })
@@ -1857,22 +1858,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     },
     onSuccess: async (createdMovement) => {
-      // Crear relación con tarea después de crear el movimiento
-      if (selectedTaskId) {
-        try {
-          await createMovementTasksMutation.mutateAsync({
-            movementId: createdMovement.id,
-            taskIds: [selectedTaskId]
-          })
-        } catch (error) {
-          // Error creating movement task
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Movimiento creado pero hubo un error al vincular las tareas',
-          })
-        }
-      }
+      // Ya no vinculamos tareas específicas para subcontratos
 
       // Crear relación con subcontrato después de crear/actualizar el movimiento
       console.log('Subcontract ID before saving:', selectedSubcontractId)
@@ -2511,8 +2497,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               wallets={wallets || []}
               members={members || []}
               concepts={concepts}
-              selectedTaskId={selectedTaskId}
-              setSelectedTaskId={setSelectedTaskId}
               onOpenTasksSubform={openTasksSubform}
               projectId={form.watch('project_id')}
             />
@@ -2669,7 +2653,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   )
 
   // Variable para determinar si mostrar el botón de información
-  const showInfoButton = selectedSubcontractId || selectedTaskId
+  const showInfoButton = selectedSubcontractId
 
   const headerContent = currentPanel === 'subform' ? (
     <FormModalHeader
@@ -2711,7 +2695,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               // Aquí puedes agregar la lógica del modal de información
               toast({
                 title: "Información",
-                description: `Subcontrato: ${selectedSubcontractId ? 'Seleccionado' : 'No seleccionado'}\nTarea: ${selectedTaskId ? 'Seleccionada' : 'No seleccionada'}`
+                description: `Subcontrato: ${selectedSubcontractId ? 'Seleccionado' : 'No seleccionado'}`
               })
             }}
             className="flex items-center gap-2"
@@ -2786,22 +2770,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </div>
           
-          {/* Campo de Tarea de Construcción */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-foreground">
-              Tarea de Construcción
-            </label>
-            <ComboBoxWrite
-              value={selectedTaskId}
-              onValueChange={setSelectedTaskId}
-              options={constructionTaskOptions}
-              placeholder="Seleccionar tareas..."
-              searchPlaceholder="Buscar tarea..."
-              emptyMessage="No se encontraron tareas."
-            />
-          </div>
           <p className="text-xs text-muted-foreground">
-            Configura el subcontrato y selecciona la tarea de construcción relacionada con este pago
+            Configura el subcontrato relacionado con este pago
           </p>
         </div>
       )}
