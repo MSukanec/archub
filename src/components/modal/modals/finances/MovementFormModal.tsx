@@ -38,6 +38,7 @@ import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButt
 import DatePicker from '@/components/ui-custom/DatePicker'
 import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
 import { useConstructionTasks } from '@/hooks/use-construction-tasks'
+import { useSubcontracts } from '@/hooks/use-subcontracts'
 import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
 
@@ -257,6 +258,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   
   // Estado para la tarea seleccionada (usado para Materiales y Mano de Obra)
   const [selectedTaskId, setSelectedTaskId] = React.useState<string>('')
+  const [selectedSubcontractId, setSelectedSubcontractId] = React.useState<string>('')
   
   // Estado para el subform actual
   const [currentSubform, setCurrentSubform] = React.useState<'tasks' | null>(null)
@@ -282,6 +284,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     userData?.organization?.id || ''
   )
   
+  // Hook para cargar los subcontratos del proyecto
+  const { data: subcontracts } = useSubcontracts(
+    userData?.preferences?.last_project_id || '',
+    userData?.organization?.id || ''
+  )
+  
   // Transform construction tasks to match ComboBox interface
   const constructionTaskOptions = React.useMemo(() => {
     if (!rawConstructionTasks) return []
@@ -294,7 +302,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }))
   }, [rawConstructionTasks])
   
-  // Cargar tarea existente en el estado cuando estamos editando
+  // Transform subcontracts to match ComboBox interface
+  const subcontractOptions = React.useMemo(() => {
+    if (!subcontracts) return []
+    
+    return subcontracts.map((subcontract: any) => ({
+      value: subcontract.id,
+      label: subcontract.title
+    }))
+  }, [subcontracts])
+  
+  // Cargar tarea y subcontrato existentes cuando estamos editando
   React.useEffect(() => {
     if (existingMovementTasks && existingMovementTasks.length > 0 && rawConstructionTasks && rawConstructionTasks.length > 0) {
       const firstTask = existingMovementTasks[0]
@@ -327,6 +345,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
     }
   }, [existingMovementTasks, rawConstructionTasks])
+
+  // Cargar subcontrato existente cuando estamos editando
+  React.useEffect(() => {
+    if (editingMovement?.extra_fields && typeof editingMovement.extra_fields === 'object') {
+      const extraFields = editingMovement.extra_fields as any
+      if (extraFields.subcontrato) {
+        console.log('Loading existing subcontract:', extraFields.subcontrato)
+        setSelectedSubcontractId(extraFields.subcontrato)
+      }
+    }
+  }, [editingMovement?.extra_fields])
   
 
 
@@ -1915,7 +1944,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // construction_task_id se maneja ahora por movement_tasks
         exchange_rate: data.exchange_rate || null,
         // Campo JSON para manejar datos específicos de mano de obra
-        extra_fields: data.subcontrato ? { subcontrato: data.subcontrato } : null
+        extra_fields: selectedSubcontractId ? { subcontrato: selectedSubcontractId } : null
       }
 
       // Si estamos editando, actualizar el movimiento existente
@@ -2859,11 +2888,27 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         <div className="flex items-center justify-center h-48">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            <p className="text-sm text-muted-foreground">Cargando tareas...</p>
+            <p className="text-sm text-muted-foreground">Cargando datos...</p>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Campo de Subcontrato */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              Subcontrato (opcional)
+            </label>
+            <ComboBoxWrite
+              value={selectedSubcontractId}
+              onValueChange={setSelectedSubcontractId}
+              options={subcontractOptions}
+              placeholder="Seleccionar subcontrato..."
+              searchPlaceholder="Buscar subcontrato..."
+              emptyMessage="No se encontraron subcontratos."
+            />
+          </div>
+          
+          {/* Campo de Tarea de Construcción */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
               Tarea de Construcción
@@ -2878,7 +2923,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Selecciona la tarea de construcción relacionada con este movimiento
+            Configura el subcontrato y selecciona la tarea de construcción relacionada con este pago
           </p>
         </div>
       )}

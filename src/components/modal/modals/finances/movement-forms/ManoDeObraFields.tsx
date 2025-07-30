@@ -256,45 +256,12 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts,
         />
       </div>
 
-      {/* Selección de Subcontrato */}
-      <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name="subcontrato"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subcontrato (opcional)</FormLabel>
-              <FormControl>
-                {subcontracts.length > 0 ? (
-                  <ComboBox
-                    options={subcontracts.map(subcontract => ({
-                      value: subcontract.id,
-                      label: subcontract.title
-                    }))}
-                    value={field.value || ''}
-                    onValueChange={(value: string) => field.onChange(value)}
-                    placeholder="Seleccionar subcontrato..."
-                    emptyMessage="No se encontraron subcontratos"
-                    searchPlaceholder="Buscar subcontrato..."
-                  />
-                ) : (
-                  <div className="p-3 border rounded-md bg-muted/10 text-sm text-muted-foreground">
-                    No tienes subcontratos creados para este proyecto. Puedes crear uno desde la sección de Construcción → Subcontratos.
-                  </div>
-                )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
       {/* Botón para Selección de Tareas */}
       <div className="col-span-2">
         <FormSubsectionButton
           icon={<Package />}
           title="Detalle de Mano de Obra"
-          description={selectedTaskId ? "Tarea seleccionada" : "Selecciona la tarea relacionada con este pago"}
+          description="Configura el subcontrato y selecciona las tareas relacionadas con este pago"
           onClick={onOpenTasksSubform}
         />
       </div>
