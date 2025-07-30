@@ -259,7 +259,7 @@ export default function ConstructionSchedule() {
                   onConfirm: () => deleteTask.mutate({
                     id: item.id,
                     project_id: task?.project_id || '',
-                    organization_id: task?.organization_id || ''
+                    organization_id: organizationId || ''
                   })
                 })
               }}
@@ -355,7 +355,7 @@ export default function ConstructionSchedule() {
                             onConfirm: () => deleteTask.mutate({
                               id: task.id,
                               project_id: task.project_id,
-                              organization_id: task.organization_id
+                              organization_id: organizationId || ''
                             })
                           })
                         }}
