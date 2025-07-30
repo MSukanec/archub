@@ -1852,10 +1852,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             amount: createdMovement.amount
           })
           
-          // Por ahora saltamos el delete en edición hasta que funcione el create
-          // if (editingMovement?.id) {
-          //   await deleteMovementSubcontractsByMovementMutation.mutateAsync(editingMovement.id)
-          // }
+          // Eliminar relaciones existentes si estamos editando
+          if (editingMovement?.id) {
+            await deleteMovementSubcontractsByMovementMutation.mutateAsync(editingMovement.id)
+          }
           
           // Crear nueva relación
           const result = await createMovementSubcontractMutation.mutateAsync({
