@@ -24,7 +24,7 @@ import { AportesFields } from './movement-forms/AportesFields'
 import { AportesPropiosFields } from './movement-forms/AportesPropiosFields'
 import { RetirosPropiosFields } from './movement-forms/RetirosPropiosFields'
 import { MaterialesFields } from './movement-forms/MaterialesFields'
-import { ManoDeObraFields } from './movement-forms/ManoDeObraFields'
+import { SubcontratosFields } from './movement-forms/SubcontratosFields'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -152,7 +152,7 @@ const materialesFormSchema = z.object({
   // construction_task_id se maneja ahora a través de selectedTaskIds estado
 })
 
-const manoDeObraFormSchema = z.object({
+const subcontratosFormSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
@@ -174,7 +174,7 @@ type AportesForm = z.infer<typeof aportesFormSchema>
 type AportesPropriosForm = z.infer<typeof aportesPropriosFormSchema>
 type RetirosPropriosForm = z.infer<typeof retirosPropriosFormSchema>
 type MaterialesForm = z.infer<typeof materialesFormSchema>
-type ManoDeObraForm = z.infer<typeof manoDeObraFormSchema>
+type SubcontratosForm = z.infer<typeof subcontratosFormSchema>
 
 interface MovementFormModalProps {
   modalData?: {
@@ -250,7 +250,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
   
   // Estado centralizado para el tipo de movimiento
-  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'mano_de_obra'>('normal')
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'subcontratos'>('normal')
   
   // Estado para la tarea seleccionada (usado para Materiales y Mano de Obra)
   const [selectedTaskId, setSelectedTaskId] = React.useState<string>('')
@@ -365,7 +365,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isAportesPropios = movementType === 'aportes_propios'
   const isRetirosPropios = movementType === 'retiros_propios'
   const isMateriales = movementType === 'materiales'
-  const isManoDeObra = movementType === 'mano_de_obra'
+  const isSubcontratos = movementType === 'subcontratos'
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
@@ -518,8 +518,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   })
 
-  const manoDeObraForm = useForm<ManoDeObraForm>({
-    resolver: zodResolver(manoDeObraFormSchema),
+  const subcontratosForm = useForm<SubcontratosForm>({
+    resolver: zodResolver(subcontratosFormSchema),
     defaultValues: {
       movement_date: new Date(),
       created_by: userData?.user?.id || '',
@@ -590,7 +590,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     aportesPropriosForm.setValue('type_id', newTypeId)
     retirosPropriosForm.setValue('type_id', newTypeId)
     materialesForm.setValue('type_id', newTypeId)
-    manoDeObraForm.setValue('type_id', newTypeId)
+    subcontratosForm.setValue('type_id', newTypeId)
     
     // Reset de categorías solo en nuevo movimiento
     if (!editingMovement) {
@@ -708,9 +708,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesPropiosCategory = viewMode === "aportes_propios"
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
       const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
-      const isManoDeObraCategory = viewMode === "mano_de_obra" || selectedCategory?.name?.toLowerCase().includes('mano de obra')
+      // Detectar subcontratos por subcategoría UUID específica
+      const subcategoryId = form.watch('subcategory_id')
+      const isSubcontratosCategory = subcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
       
-      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isManoDeObraCategory) {
+      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory) {
         // Establecer el estado correcto
         if (isAportesCategory) {
           setMovementType('aportes')
@@ -720,8 +722,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setMovementType('retiros_propios')
         } else if (isMaterialesCategory) {
           setMovementType('materiales')
-        } else if (isManoDeObraCategory) {
-          setMovementType('mano_de_obra')
+        } else if (isSubcontratosCategory) {
+          setMovementType('subcontratos')
         }
         
         // Sincronizar valores tanto en modo nuevo como en edición
@@ -801,31 +803,33 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
-        } else if (isManoDeObraCategory) {
-          // MANO DE OBRA: Tareas de construcción + Información financiera
+        } else if (isSubcontratosCategory) {
+          // SUBCONTRATOS: Tareas de construcción + Información financiera
           
-          manoDeObraForm.setValue('type_id', form.watch('type_id'))
-          manoDeObraForm.setValue('category_id', categoryId)
-          manoDeObraForm.setValue('description', preserveValues ? currentValues.description : '')
-          manoDeObraForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
-          manoDeObraForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '') 
-          manoDeObraForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
-          manoDeObraForm.setValue('amount', preserveValues ? currentValues.amount : 0)
-          if (currentValues.exchange_rate) manoDeObraForm.setValue('exchange_rate', currentValues.exchange_rate)
+          subcontratosForm.setValue('type_id', form.watch('type_id'))
+          subcontratosForm.setValue('category_id', categoryId)
+          subcontratosForm.setValue('subcategory_id', subcategoryId)
+          subcontratosForm.setValue('description', preserveValues ? currentValues.description : '')
+          subcontratosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          subcontratosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '') 
+          subcontratosForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
+          subcontratosForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) subcontratosForm.setValue('exchange_rate', currentValues.exchange_rate)
           
           // Los datos del subcontrato ahora se cargan desde la tabla movement_subcontracts
           
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
+          form.setValue('subcategory_id', subcategoryId)
         }
       } else {
         // Si no es una categoría especial, permitir regresar al formulario normal
-        if (isAportes || isAportesPropios || isRetirosPropios || isMateriales || isManoDeObra) {
+        if (isAportes || isAportesPropios || isRetirosPropios || isMateriales || isSubcontratos) {
           setMovementType('normal')
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), manoDeObraForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isManoDeObra, editingMovement, currencies, wallets])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), subcontratosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isSubcontratos, editingMovement, currencies, wallets])
 
 
 
@@ -878,6 +882,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesMovement = categoryViewMode === "aportes" && selectedCategory?.name === "Aportes de Terceros"
       const isAportesPropriosMovement = categoryViewMode === "aportes" && selectedCategory?.name === "Aportes Propios"
       const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || selectedCategory?.name?.includes('Retiro')
+      // Detectar subcontratos por subcategoría UUID específica en modo edición
+      const isSubcontratosMovement = editingMovement.subcategory_id === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
       
       // Establecer el tipo de formulario correcto
       if (isConversionMovement) {
@@ -890,6 +896,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         setMovementType('aportes_propios')
       } else if (isRetirosPropriosMovement) {
         setMovementType('retiros_propios')
+      } else if (isSubcontratosMovement) {
+        setMovementType('subcontratos')
       } else {
         setMovementType('normal')
       }
@@ -1796,8 +1804,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   })
 
-  const createManoDeObraMutation = useMutation({
-    mutationFn: async (data: ManoDeObraForm) => {
+  const createSubcontratosMutation = useMutation({
+    mutationFn: async (data: SubcontratosForm) => {
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
@@ -1902,10 +1910,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
       toast({
-        title: editingMovement ? 'Pago de Mano de Obra actualizado' : 'Pago de Mano de Obra registrado',
+        title: editingMovement ? 'Pago de Subcontrato actualizado' : 'Pago de Subcontrato registrado',
         description: editingMovement 
-          ? 'El pago de mano de obra ha sido actualizado correctamente'
-          : 'El pago de mano de obra ha sido registrado correctamente',
+          ? 'El pago de subcontrato ha sido actualizado correctamente'
+          : 'El pago de subcontrato ha sido registrado correctamente',
       })
       onClose()
     },
@@ -1913,7 +1921,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el pago de mano de obra: ${error.message}`,
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el pago de subcontrato: ${error.message}`,
       })
     }
   })
@@ -1923,9 +1931,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     await createMaterialesMutation.mutateAsync(data)
   }
 
-  const onSubmitManoDeObra = async (data: ManoDeObraForm) => {
+  const onSubmitSubcontratos = async (data: SubcontratosForm) => {
     // La selección de tareas es opcional
-    await createManoDeObraMutation.mutateAsync(data)
+    await createSubcontratosMutation.mutateAsync(data)
   }
 
 
@@ -1945,7 +1953,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const isCurrentAportesPropios = currentCategoryViewMode === "aportes" && currentCategory?.name === "Aportes Propios"
     const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || currentCategory?.name?.includes('Retiro')
     const isCurrentMateriales = currentCategory?.name?.toLowerCase().includes('material')
-    const isCurrentManoDeObra = currentCategory?.name?.toLowerCase().includes('mano de obra') || currentCategory?.name?.toLowerCase().includes('labor')
+    // Detectar subcontratos por subcategoría UUID específica  
+    const currentSubcategoryId = form.watch('subcategory_id')
+    const isCurrentSubcontratos = currentSubcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
     // Detect current movement type based on category
     
     // Usar el tipo detectado basándose en la categoría actual
@@ -2049,7 +2059,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
       
       materialesForm.handleSubmit(onSubmitMateriales)()
-    } else if (isCurrentManoDeObra) {
+    } else if (isCurrentSubcontratos) {
       
       // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
       const mainFormTypeId = form.watch('type_id')
@@ -2058,22 +2068,22 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const mainFormDescription = form.watch('description')
       
       if (mainFormTypeId) {
-        manoDeObraForm.setValue('type_id', mainFormTypeId)
+        subcontratosForm.setValue('type_id', mainFormTypeId)
       }
       
       if (mainFormCreatedBy) {
-        manoDeObraForm.setValue('created_by', mainFormCreatedBy)
+        subcontratosForm.setValue('created_by', mainFormCreatedBy)
       }
       
       if (mainFormMovementDate) {
-        manoDeObraForm.setValue('movement_date', mainFormMovementDate)
+        subcontratosForm.setValue('movement_date', mainFormMovementDate)
       }
       
       if (mainFormDescription) {
-        manoDeObraForm.setValue('description', mainFormDescription)
+        subcontratosForm.setValue('description', mainFormDescription)
       }
       
-      manoDeObraForm.handleSubmit(onSubmitManoDeObra)()
+      subcontratosForm.handleSubmit(onSubmitSubcontratos)()
     } else {
       // Usar el movementType original para casos como conversión/transferencia
       switch (movementType) {
@@ -2089,7 +2099,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   }
 
-  const isLoading = createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending
+  const isLoading = createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createSubcontratosMutation.isPending
 
   // Encontrar datos para display
   const selectedCurrency = currencies?.find(c => c.currency?.id === form.watch('currency_id'))?.currency
@@ -2169,6 +2179,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isEditingAportes = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes"
   const isEditingAportesPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes_propios"
   const isEditingRetirosPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "retiros_propios"
+  const isEditingSubcontratos = editingMovement && editingMovement.subcategory_id === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
 
   const editPanel = (
     <div className="space-y-4">
@@ -2304,7 +2315,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 aportesPropriosForm.setValue('category_id', value) 
                 retirosPropriosForm.setValue('category_id', value)
                 materialesForm.setValue('category_id', value)
-                manoDeObraForm.setValue('category_id', value)
+                subcontratosForm.setValue('category_id', value)
                 setSelectedCategoryId(value)
                 
                 // CRITICAL: Detectar tipo de aportes en modo edición también
@@ -2318,7 +2329,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   const isAportesPropiosCategory = viewMode === "aportes_propios"
                   const isRetirosPropiosCategory = viewMode === "retiros_propios"
                   const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
-                  const isManoDeObraCategory = viewMode === "mano_de_obra" || selectedCategory?.name?.toLowerCase().includes('mano de obra')
+                  // Detectar subcontratos por subcategoría UUID específica
+                  const subcategoryId = form.watch('subcategory_id')
+                  const isSubcontratosCategory = subcategoryId === '40a8fd4-69a6-4e81-bcb4-464359cd8498' // UUID de Subcontratos
                   
                   // CRITICAL: Sincronizar type_id del formulario principal a todos los formularios especiales
                   const currentTypeId = form.watch('type_id')
@@ -2327,8 +2340,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                       aportesForm.setValue('type_id', currentTypeId)
                     } else if (isMaterialesCategory) {
                       materialesForm.setValue('type_id', currentTypeId)
-                    } else if (isManoDeObraCategory) {
-                      manoDeObraForm.setValue('type_id', currentTypeId)
+                    } else if (isSubcontratosCategory) {
+                      subcontratosForm.setValue('type_id', currentTypeId)
                     }
                   }
                   
@@ -2340,8 +2353,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                     setMovementType('retiros_propios')
                   } else if (isMaterialesCategory) {
                     setMovementType('materiales')
-                  } else if (isManoDeObraCategory) {
-                    setMovementType('mano_de_obra')
+                  } else if (isSubcontratosCategory) {
+                    setMovementType('subcontratos')
                   } else {
                     setMovementType('normal')
                   }
@@ -2384,7 +2397,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   aportesPropriosForm.setValue('subcategory_id', value) 
                   retirosPropriosForm.setValue('subcategory_id', value)
                   materialesForm.setValue('subcategory_id', value)
-                  manoDeObraForm.setValue('subcategory_id', value)
+                  subcontratosForm.setValue('subcategory_id', value)
                 }} 
                 value={form.watch('subcategory_id')}
                 disabled={!form.watch('category_id')}
@@ -2473,6 +2486,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
+      ) : (isSubcontratos || isEditingSubcontratos) ? (
+        // FORMULARIO DE SUBCONTRATOS
+        <Form {...subcontratosForm}>
+          <form onSubmit={subcontratosForm.handleSubmit(onSubmitSubcontratos)} className="space-y-4">
+            <SubcontratosFields
+              form={subcontratosForm}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
+              concepts={concepts}
+              selectedTaskId={selectedTaskId}
+              setSelectedTaskId={setSelectedTaskId}
+              onOpenTasksSubform={openTasksSubform}
+              projectId={form.watch('project_id')}
+            />
+          </form>
+        </Form>
       ) : isMateriales ? (
         // FORMULARIO DE MATERIALES
         <Form {...materialesForm}>
@@ -2489,12 +2519,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
-      ) : isManoDeObra ? (
-        // FORMULARIO DE MANO DE OBRA
-        <Form {...manoDeObraForm}>
-          <form onSubmit={manoDeObraForm.handleSubmit(onSubmitManoDeObra)} className="space-y-4">
-            <ManoDeObraFields
-              form={manoDeObraForm}
+      ) : isSubcontratos ? (
+        // FORMULARIO DE SUBCONTRATOS
+        <Form {...subcontratosForm}>
+          <form onSubmit={subcontratosForm.handleSubmit(onSubmitSubcontratos)} className="space-y-4">
+            <SubcontratosFields
+              form={subcontratosForm}
               currencies={currencies || []}
               wallets={wallets || []}
               members={members || []}

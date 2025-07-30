@@ -12,8 +12,8 @@ import { ComboBox } from "@/components/ui-custom/ComboBoxWrite"
 import { useSubcontracts } from "@/hooks/use-subcontracts"
 
 
-// Tipo específico para el formulario de mano de obra
-type ManoDeObraFormType = {
+// Tipo específico para el formulario de subcontratos
+type SubcontratosFormType = {
   movement_date: Date
   created_by: string
   description?: string
@@ -29,7 +29,7 @@ type ManoDeObraFormType = {
 }
 
 interface Props {
-  form: UseFormReturn<ManoDeObraFormType>
+  form: UseFormReturn<SubcontratosFormType>
   currencies: any[]
   wallets: any[]
   members: any[]
@@ -40,7 +40,7 @@ interface Props {
   projectId?: string
 }
 
-export function ManoDeObraFields({ form, currencies, wallets, members, concepts, selectedTaskId, setSelectedTaskId, onOpenTasksSubform, projectId }: Props) {
+export function SubcontratosFields({ form, currencies, wallets, members, concepts, selectedTaskId, setSelectedTaskId, onOpenTasksSubform, projectId }: Props) {
   const { data: userData } = useCurrentUser()
   
   // Estados para la lógica jerárquica
@@ -253,7 +253,7 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts,
       <div className="col-span-2">
         <FormSubsectionButton
           icon={<Package />}
-          title="Detalle de Mano de Obra"
+          title="Detalle de Subcontratos"
           description="Configura el subcontrato y selecciona las tareas relacionadas con este pago"
           onClick={onOpenTasksSubform}
         />
