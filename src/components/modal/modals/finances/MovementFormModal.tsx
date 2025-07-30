@@ -39,6 +39,7 @@ import DatePicker from '@/components/ui-custom/DatePicker'
 import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-tasks'
 import { useConstructionTasks } from '@/hooks/use-construction-tasks'
 import { useSubcontracts } from '@/hooks/use-subcontracts'
+import { useCreateMovementSubcontract, useDeleteMovementSubcontractsByMovement, useMovementSubcontractsByMovement } from '@/hooks/use-movement-subcontracts'
 import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
 
@@ -269,6 +270,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Hook para cargar tareas existentes en modo edición
   const { data: existingMovementTasks } = useMovementTasks(editingMovement?.id)
   
+  // Hooks para crear/manejar relaciones de subcontratos con movimientos
+  const createMovementSubcontractMutation = useCreateMovementSubcontract()
+  const deleteMovementSubcontractsByMovementMutation = useDeleteMovementSubcontractsByMovement()
+  
+  // Hook para cargar subcontratos existentes en modo edición
+  const { data: existingMovementSubcontracts } = useMovementSubcontractsByMovement(editingMovement?.id)
+  
   // Debug log for existing movement tasks
   React.useEffect(() => {
     console.log('existingMovementTasks updated:', {
@@ -348,14 +356,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Cargar subcontrato existente cuando estamos editando
   React.useEffect(() => {
-    if (editingMovement?.extra_fields && typeof editingMovement.extra_fields === 'object') {
-      const extraFields = editingMovement.extra_fields as any
-      if (extraFields.subcontrato) {
-        console.log('Loading existing subcontract:', extraFields.subcontrato)
-        setSelectedSubcontractId(extraFields.subcontrato)
-      }
+    if (existingMovementSubcontracts && existingMovementSubcontracts.length > 0) {
+      const firstSubcontract = existingMovementSubcontracts[0]
+      console.log('Loading existing movement subcontract:', {
+        movement_subcontract_id: firstSubcontract?.subcontract_id,
+        movement_subcontract_object: firstSubcontract,
+        setting_selectedSubcontractId: firstSubcontract?.subcontract_id
+      })
+      setSelectedSubcontractId(firstSubcontract.subcontract_id)
     }
-  }, [editingMovement?.extra_fields])
+  }, [existingMovementSubcontracts])
   
 
 
@@ -1943,8 +1953,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         category_id: data.category_id,
         // construction_task_id se maneja ahora por movement_tasks
         exchange_rate: data.exchange_rate || null,
-        // Campo JSON para manejar datos específicos de mano de obra
-        extra_fields: selectedSubcontractId ? { subcontrato: selectedSubcontractId } : null
+        // Ya no usamos extra_fields para subcontratos - se guarda en tabla separada
+        extra_fields: null
       }
 
       // Si estamos editando, actualizar el movimiento existente
@@ -1989,12 +1999,38 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       }
 
+      // Crear relación con subcontrato después de crear/actualizar el movimiento
+      if (selectedSubcontractId) {
+        try {
+          // Si estamos editando, primero eliminar las relaciones existentes
+          if (editingMovement?.id) {
+            await deleteMovementSubcontractsByMovementMutation.mutateAsync(editingMovement.id)
+          }
+          
+          // Crear nueva relación
+          await createMovementSubcontractMutation.mutateAsync({
+            movement_id: createdMovement.id,
+            subcontract_id: selectedSubcontractId,
+            amount: createdMovement.amount
+          })
+          console.log('Movement subcontract created successfully for mano de obra')
+        } catch (error) {
+          console.error('Error creating movement subcontract:', error)
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Movimiento creado pero hubo un error al vincular el subcontrato',
+          })
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
       toast({
         title: editingMovement ? 'Pago de Mano de Obra actualizado' : 'Pago de Mano de Obra registrado',
         description: editingMovement 

@@ -320,6 +320,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Movement Subcontracts routes
+  app.post("/api/movement-subcontracts", async (req, res) => {
+    try {
+      const { movement_id, subcontract_id, amount } = req.body;
+
+      if (!movement_id || !subcontract_id) {
+        return res.status(400).json({ error: "Movement ID and subcontract ID are required" });
+      }
+
+      const { data, error } = await supabase
+        .from('movement_subcontracts')
+        .insert({ movement_id, subcontract_id, amount })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating movement subcontract:", error);
+        return res.status(500).json({ error: "Failed to create movement subcontract" });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error("Error in movement subcontracts endpoint:", error);
+      res.status(500).json({ error: "Failed to process movement subcontract" });
+    }
+  });
+
+  app.get("/api/movement-subcontracts", async (req, res) => {
+    try {
+      const { movement_id } = req.query;
+
+      let query = supabase.from('movement_subcontracts').select('*');
+      
+      if (movement_id) {
+        query = query.eq('movement_id', movement_id);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching movement subcontracts:", error);
+        return res.status(500).json({ error: "Failed to fetch movement subcontracts" });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error("Error fetching movement subcontracts:", error);
+      res.status(500).json({ error: "Failed to fetch movement subcontracts" });
+    }
+  });
+
+  app.delete("/api/movement-subcontracts/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const { error } = await supabase
+        .from('movement_subcontracts')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting movement subcontract:", error);
+        return res.status(500).json({ error: "Failed to delete movement subcontract" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting movement subcontract:", error);
+      res.status(500).json({ error: "Failed to delete movement subcontract" });
+    }
+  });
+
+  app.delete("/api/movement-subcontracts/by-movement/:movementId", async (req, res) => {
+    try {
+      const { movementId } = req.params;
+
+      const { error } = await supabase
+        .from('movement_subcontracts')
+        .delete()
+        .eq('movement_id', movementId);
+
+      if (error) {
+        console.error("Error deleting movement subcontracts:", error);
+        return res.status(500).json({ error: "Failed to delete movement subcontracts" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting movement subcontracts:", error);
+      res.status(500).json({ error: "Failed to delete movement subcontracts" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

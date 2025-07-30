@@ -264,6 +264,15 @@ export const movement_tasks = pgTable("movement_tasks", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
+// Movement Subcontracts Junction Table
+export const movement_subcontracts = pgTable("movement_subcontracts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  movement_id: uuid("movement_id").notNull(),
+  subcontract_id: uuid("subcontract_id").notNull(),
+  amount: real("amount"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
   created_at: true,
@@ -283,6 +292,11 @@ export const insertOrganizationMaterialPriceSchema = createInsertSchema(organiza
 });
 
 export const insertMovementTaskSchema = createInsertSchema(movement_tasks).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertMovementSubcontractSchema = createInsertSchema(movement_subcontracts).omit({
   id: true,
   created_at: true,
 });
@@ -312,6 +326,8 @@ export type OrganizationMaterialPrice = typeof organization_material_prices.$inf
 export type InsertOrganizationMaterialPrice = z.infer<typeof insertOrganizationMaterialPriceSchema>;
 export type MovementTask = typeof movement_tasks.$inferSelect;
 export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
+export type MovementSubcontract = typeof movement_subcontracts.$inferSelect;
+export type InsertMovementSubcontract = z.infer<typeof insertMovementSubcontractSchema>;
 
 // Subcontracts tables
 export const subcontracts = pgTable("subcontracts", {
