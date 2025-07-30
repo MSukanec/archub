@@ -21,11 +21,12 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File, FileText, FolderOpen } from 'lucide-react';
 import UserSelector from '@/components/ui-custom/UserSelector';
+import { supabase } from '@/lib/supabase';
 
 const documentUploadSchema = z.object({
   created_by: z.string().min(1, 'El creador es obligatorio'),
   folder_id: z.string().min(1, 'Debe seleccionar una carpeta'),
-  group_id: z.string().optional(),
+  group_id: z.string().min(1, 'Debe seleccionar un grupo'),
   status: z.string().min(1, 'El estado es obligatorio'),
   visibility: z.string().min(1, 'La visibilidad es obligatoria'),
   group_description: z.string().optional(),
@@ -183,6 +184,10 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         throw new Error('Debe seleccionar al menos un archivo');
       }
 
+      if (!data.group_id) {
+        throw new Error('Debe seleccionar un grupo para subir documentos');
+      }
+
       setIsUploading(true);
       setUploadProgress(0);
 
@@ -190,18 +195,39 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       const uploads = selectedFiles.map(async (file, index) => {
         const fileName = fileNames[index] || file.name.replace(/\.[^/.]+$/, '');
         
-        // Upload file using the createDocumentMutation
+        // Generate file path: organization_id/project_id/documents/group_id/filename
+        const extension = file.name.split('.').pop() || '';
+        const filePath = `${userData.preferences.last_organization_id}/${userData.preferences.last_project_id}/documents/${data.group_id}/${Date.now()}-${file.name}`;
+        
+        // First upload file to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('design-documents')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          throw new Error(`Error subiendo archivo ${file.name}: ${uploadError.message}`);
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('design-documents')
+          .getPublicUrl(filePath);
+
+        // Create document record in database
         return createDocumentMutation.mutateAsync({
-          file,
-          file_name: fileName,
+          name: fileName,
+          file_name: file.name,
           description: data.group_description || '',
-          folder_id: data.folder_id,
-          group_id: data.group_id || undefined,
+          file_path: filePath,
+          file_url: urlData.publicUrl,
+          file_type: file.type,
+          file_size: file.size,
+          group_id: data.group_id,
           status: data.status,
           visibility: data.visibility,
-          created_by: data.created_by,
-          organization_id: userData.preferences.last_organization_id,
-          project_id: userData.preferences.last_project_id,
         });
       });
 
