@@ -2501,6 +2501,45 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </Select>
           </div>
 
+          {/* Subcategoría - Mostrar solo cuando hay subcategorías disponibles */}
+          {shouldShowSubcategoryFields && (
+            <div className="space-y-2">
+              <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Subcategoría
+              </label>
+              <Select 
+                onValueChange={(value) => {
+                  // Actualizar todos los formularios
+                  form.setValue('subcategory_id', value)
+                  aportesForm.setValue('subcategory_id', value)
+                  aportesPropriosForm.setValue('subcategory_id', value) 
+                  retirosPropriosForm.setValue('subcategory_id', value)
+                  materialesForm.setValue('subcategory_id', value)
+                  manoDeObraForm.setValue('subcategory_id', value)
+                }} 
+                value={form.watch('subcategory_id')}
+                disabled={!form.watch('category_id')}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={!form.watch('category_id') ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {subcategories?.map((subcategory: any) => (
+                    <SelectItem key={subcategory.id} value={subcategory.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{subcategory.name}</span>
+                        {subcategory.is_system && (
+                          <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
+                            Sistema
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
         </div>
       )}
