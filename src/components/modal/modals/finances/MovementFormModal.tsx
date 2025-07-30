@@ -2398,6 +2398,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               </label>
               <Select 
                 onValueChange={(value) => {
+                  console.log('🔄 SUBCATEGORY SELECTED:', value)
+                  
                   // Actualizar todos los formularios
                   form.setValue('subcategory_id', value)
                   aportesForm.setValue('subcategory_id', value)
@@ -2405,6 +2407,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   retirosPropriosForm.setValue('subcategory_id', value)
                   materialesForm.setValue('subcategory_id', value)
                   subcontratosForm.setValue('subcategory_id', value)
+                  
+                  // CRITICAL: Detectar subcontratos inmediatamente y cambiar tipo de formulario
+                  if (value === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
+                    console.log('✅ SUBCONTRATOS DETECTED - Changing to subcontratos form')
+                    setMovementType('subcontratos')
+                  }
                 }} 
                 value={form.watch('subcategory_id')}
                 disabled={!form.watch('category_id')}
