@@ -50,6 +50,15 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts,
   // Hook para obtener subcontratos del proyecto
   const { data: subcontracts = [] } = useSubcontracts(projectId || null)
   
+  // Debug log para subcontratos
+  React.useEffect(() => {
+    console.log('🏗️ ManoDeObraFields - Subcontratos cargados:', {
+      projectId,
+      subcontractsCount: subcontracts.length,
+      subcontracts: subcontracts.map(s => ({ id: s.id, title: s.title }))
+    })
+  }, [projectId, subcontracts])
+  
   // Ya no necesitamos cargar las tareas aquí, se manejan en el subform
   
   // Obtener categorías basadas en el tipo seleccionado
@@ -256,17 +265,23 @@ export function ManoDeObraFields({ form, currencies, wallets, members, concepts,
             <FormItem>
               <FormLabel>Subcontrato (opcional)</FormLabel>
               <FormControl>
-                <ComboBox
-                  options={subcontracts.map(subcontract => ({
-                    value: subcontract.id,
-                    label: subcontract.title
-                  }))}
-                  value={field.value || ''}
-                  onValueChange={(value: string) => field.onChange(value)}
-                  placeholder="Seleccionar subcontrato..."
-                  emptyMessage="No se encontraron subcontratos"
-                  searchPlaceholder="Buscar subcontrato..."
-                />
+                {subcontracts.length > 0 ? (
+                  <ComboBox
+                    options={subcontracts.map(subcontract => ({
+                      value: subcontract.id,
+                      label: subcontract.title
+                    }))}
+                    value={field.value || ''}
+                    onValueChange={(value: string) => field.onChange(value)}
+                    placeholder="Seleccionar subcontrato..."
+                    emptyMessage="No se encontraron subcontratos"
+                    searchPlaceholder="Buscar subcontrato..."
+                  />
+                ) : (
+                  <div className="p-3 border rounded-md bg-muted/10 text-sm text-muted-foreground">
+                    No tienes subcontratos creados para este proyecto. Puedes crear uno desde la sección de Construcción → Subcontratos.
+                  </div>
+                )}
               </FormControl>
               <FormMessage />
             </FormItem>
