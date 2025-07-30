@@ -8,7 +8,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
 import { Package } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateSubcontract, useSubcontract } from "@/hooks/use-subcontracts";
+import { useCreateSubcontract, useUpdateSubcontract, useSubcontract } from "@/hooks/use-subcontracts";
 import { useContacts } from "@/hooks/use-contacts";
 // import UserSelector from "@/components/ui-custom/UserSelector";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
@@ -63,6 +63,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   const { data: userData } = useCurrentUser();
   const createSubcontract = useCreateSubcontract();
+  const updateSubcontract = useUpdateSubcontract();
   
   // Datos del subcontrato existente si se está editando
   const { data: existingSubcontract } = useSubcontract(modalData.subcontractId || null);
@@ -165,31 +166,47 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
     console.log('Form errors:', form.formState.errors);
     console.log('Form is valid:', form.formState.isValid);
     console.log('Selected tasks:', selectedTasks);
+    console.log('Is editing mode:', modalData.isEditing);
     
-    // Las tareas son opcionales, no obligatorias
     setIsSubmitting(true);
 
     try {
-      await createSubcontract.mutateAsync({
-        subcontract: {
-          project_id: modalData.projectId,
-          organization_id: modalData.organizationId,
-          date: data.date,
-          contact_id: data.contact_id,
-          title: data.title,
-          currency_id: data.currency_id,
-          amount_total: data.amount_total || 0,
-          exchange_rate: data.exchange_rate,
-          status: data.status,
-          notes: data.notes || null
-        },
-        taskIds: selectedTasks.map(t => t.task_id)
-      });
-
-      toast({
-        title: "Subcontrato creado",
-        description: "El pedido de subcontrato se creó correctamente",
-      });
+      const taskIds = selectedTasks.map(t => t.task_id);
+      
+      if (modalData.isEditing && modalData.subcontractId) {
+        // Modo edición - actualizar subcontrato existente
+        await updateSubcontract.mutateAsync({
+          subcontractId: modalData.subcontractId,
+          subcontract: {
+            date: data.date,
+            contact_id: data.contact_id,
+            title: data.title,
+            currency_id: data.currency_id,
+            amount_total: data.amount_total || 0,
+            exchange_rate: data.exchange_rate,
+            status: data.status,
+            notes: data.notes || null
+          },
+          taskIds
+        });
+      } else {
+        // Modo creación - crear nuevo subcontrato
+        await createSubcontract.mutateAsync({
+          subcontract: {
+            project_id: modalData.projectId,
+            organization_id: modalData.organizationId,
+            date: data.date,
+            contact_id: data.contact_id,
+            title: data.title,
+            currency_id: data.currency_id,
+            amount_total: data.amount_total || 0,
+            exchange_rate: data.exchange_rate,
+            status: data.status,
+            notes: data.notes || null
+          },
+          taskIds
+        });
+      }
       
       closeModal();
 

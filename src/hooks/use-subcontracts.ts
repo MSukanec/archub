@@ -108,6 +108,75 @@ export function useCreateSubcontract() {
   });
 }
 
+// Hook para actualizar un subcontrato
+export function useUpdateSubcontract() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      subcontractId,
+      subcontract, 
+      taskIds 
+    }: { 
+      subcontractId: string;
+      subcontract: Partial<InsertSubcontract>; 
+      taskIds: string[] 
+    }) => {
+      if (!supabase) throw new Error('Supabase not available');
+
+      // Actualizar el subcontrato
+      const { data: updatedSubcontract, error: subcontractError } = await supabase
+        .from('subcontracts')
+        .update(subcontract)
+        .eq('id', subcontractId)
+        .select()
+        .single();
+
+      if (subcontractError) throw subcontractError;
+
+      // TODO: Actualizar las tareas del subcontrato cuando la tabla esté lista
+      // Primero eliminar todas las tareas existentes, luego insertar las nuevas
+      // if (taskIds.length > 0) {
+      //   await supabase
+      //     .from('subcontract_tasks')
+      //     .delete()
+      //     .eq('subcontract_id', subcontractId);
+
+      //   const subcontractTasks: InsertSubcontractTask[] = taskIds.map(taskId => ({
+      //     subcontract_id: subcontractId,
+      //     task_id: taskId,
+      //     amount: 0,
+      //     notes: null,
+      //   }));
+
+      //   const { error: tasksError } = await supabase
+      //     .from('subcontract_tasks')
+      //     .insert(subcontractTasks);
+
+      //   if (tasksError) throw tasksError;
+      // }
+
+      return updatedSubcontract;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['subcontracts', data.project_id] });
+      queryClient.invalidateQueries({ queryKey: ['subcontract', data.id] });
+      toast({
+        title: "Subcontrato actualizado",
+        description: "El subcontrato ha sido actualizado exitosamente",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating subcontract:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el subcontrato",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
 // Hook para eliminar un subcontrato
 export function useDeleteSubcontract() {
   const queryClient = useQueryClient();
