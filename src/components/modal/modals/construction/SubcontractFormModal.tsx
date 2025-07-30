@@ -62,11 +62,20 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   // Obtener contactos/proveedores
   const { data: contacts = [] } = useContacts();
   
+  // Debug logging para contactos
+  React.useEffect(() => {
+    console.log('Subcontract Modal - Contacts data:', contacts);
+    console.log('Subcontract Modal - Contacts length:', contacts.length);
+  }, [contacts]);
+  
   // Obtener todas las tareas del proyecto
   const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
   
   // Obtener monedas de la organización
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId);
+
+  // Determinar moneda por defecto
+  const defaultCurrency = organizationCurrencies.find(oc => oc.is_default)?.currency?.id || organizationCurrencies[0]?.currency?.id || '';
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
@@ -74,11 +83,18 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       title: '',
       contact_id: '',
       status: 'pendiente',
-      currency_id: '',
+      currency_id: defaultCurrency,
       amount_total: 0,
       notes: '',
     }
   });
+
+  // Actualizar la moneda por defecto cuando se carga
+  React.useEffect(() => {
+    if (defaultCurrency && !form.watch('currency_id')) {
+      form.setValue('currency_id', defaultCurrency);
+    }
+  }, [defaultCurrency, form]);
 
   // Función para manejar selección/deselección de tareas
   const handleTaskSelection = (taskId: string, isSelected: boolean) => {
@@ -119,6 +135,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           contact_id: data.contact_id,
           title: data.title,
           amount_total: data.amount_total || 0,
+          currency_id: data.currency_id,
           notes: data.notes || null,
           status: data.status
         },
@@ -223,20 +240,46 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         </div>
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="amount_total" className="text-xs font-medium">
-          Monto Total
-        </Label>
-        <Input
-          id="amount_total"
-          type="number"
-          step="0.01"
-          placeholder="0"
-          {...form.register('amount_total', { valueAsNumber: true })}
-        />
-        {form.formState.errors.amount_total && (
-          <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
-        )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="currency_id" className="text-xs font-medium">
+            Moneda *
+          </Label>
+          <Select
+            value={form.watch('currency_id') || ''}
+            onValueChange={(value) => form.setValue('currency_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar moneda..." />
+            </SelectTrigger>
+            <SelectContent>
+              {organizationCurrencies.map((orgCurrency) => (
+                <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.id}>
+                  {orgCurrency.currency.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {form.formState.errors.currency_id && (
+            <p className="text-xs text-destructive">{form.formState.errors.currency_id.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="amount_total" className="text-xs font-medium">
+            Monto Total
+          </Label>
+          <Input
+            id="amount_total"
+            type="number"
+            step="0.01"
+            placeholder="0"
+            {...form.register('amount_total', { valueAsNumber: true })}
+          />
+          {form.formState.errors.amount_total && (
+            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-1">
