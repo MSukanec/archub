@@ -116,30 +116,24 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         localStorage.setItem(`last-project-${currentOrgId}`, selectedProjectId);
       }
 
-      // Obtener el último proyecto de la nueva organización
-      const savedProjectId = localStorage.getItem(`last-project-${organizationId}`);
-
+      // Al cambiar de organización, siempre ir a modo General (sin proyecto seleccionado)
       const { error } = await supabase
         .from('user_preferences')
         .update({ 
           last_organization_id: organizationId,
-          last_project_id: savedProjectId || null  // Restaurar último proyecto o null si no existe
+          last_project_id: null  // Siempre null al cambiar organización
         })
         .eq('id', userData.preferences.id);
 
       if (error) throw error;
-      return { organizationId, savedProjectId };
+      return { organizationId };
     },
-    onSuccess: ({ organizationId, savedProjectId }) => {
-      // Restaurar el contexto del proyecto de la nueva organización
-      setSelectedProject(savedProjectId || null);
+    onSuccess: ({ organizationId }) => {
+      // Siempre ir a modo General al cambiar organización
+      setSelectedProject(null);
       
-      // Solo marcar modo general si realmente no hay proyecto guardado
-      if (!savedProjectId) {
-        localStorage.setItem('explicit-general-mode', 'true');
-      } else {
-        localStorage.removeItem('explicit-general-mode');
-      }
+      // Marcar modo general explícito
+      localStorage.setItem('explicit-general-mode', 'true');
       
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       setExpandedProjectSelector(false);

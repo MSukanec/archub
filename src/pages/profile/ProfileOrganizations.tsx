@@ -22,6 +22,7 @@ import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
+import { useProjectContext } from '@/stores/projectContext'
 
 // Componente para una sola tarjeta de organización
 
@@ -227,10 +228,13 @@ export default function OrganizationManagement() {
         .single()
       
       if (existingPrefs) {
-        // Actualizar preferencias existentes
+        // Actualizar preferencias existentes - siempre limpiar proyecto al cambiar organización
         const { error } = await supabase
           .from('user_preferences')
-          .update({ last_organization_id: organizationId })
+          .update({ 
+            last_organization_id: organizationId,
+            last_project_id: null // Limpiar proyecto al cambiar organización
+          })
           .eq('user_id', userData?.user.id)
         
         if (error) throw error
@@ -241,6 +245,7 @@ export default function OrganizationManagement() {
           .insert({
             user_id: userData?.user.id,
             last_organization_id: organizationId,
+            last_project_id: null, // Sin proyecto al cambiar organización
             theme: 'light',
             sidebar_docked: false,
             onboarding_completed: false
@@ -250,6 +255,10 @@ export default function OrganizationManagement() {
       }
     },
     onSuccess: () => {
+      // Limpiar project context al cambiar organización
+      const { setSelectedProject } = useProjectContext.getState()
+      setSelectedProject(null)
+      
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
       setSidebarContext('organization')
       navigate('/organization/dashboard')
