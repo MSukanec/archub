@@ -86,18 +86,17 @@ export default function ConstructionSchedule() {
     )
   }, [tasks, searchValue])
 
-  // Función para obtener el rubro de una tarea
-  function getRubroName(taskId: string) {
+  // Funciones memoizadas para evitar re-renderizados
+  const getRubroName = useMemo(() => (taskId: string) => {
     const task = filteredTasks.find(t => t.id === taskId)
     return task?.category_name || 'Sin rubro'
-  }
+  }, [filteredTasks])
 
-  // Función para obtener nombre de unidad
-  const getUnitName = (unitId: string | null) => {
+  const getUnitName = useMemo(() => (unitId: string | null) => {
     if (!unitId) return 'Sin unidad'
     const taskWithUnit = filteredTasks.find(t => t.unit_name)
     return taskWithUnit?.unit_name || 'Sin unidad'
-  }
+  }, [filteredTasks])
 
   // Crear estructura Gantt simplificada con las tareas de la vista
   const ganttData = useMemo(() => {
@@ -159,11 +158,12 @@ export default function ConstructionSchedule() {
     return ganttRows;
   }, [filteredTasks]);
 
+  // Mostrar loading state sin Layout complejo para evitar renderizados costosos
   if (isLoading) {
     return (
       <Layout wide={true}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando cronograma...</div>
+        <div className="flex items-center justify-center h-32">
+          <div className="text-sm text-muted-foreground">Cargando...</div>
         </div>
       </Layout>
     )
@@ -247,23 +247,13 @@ export default function ConstructionSchedule() {
               description="Comienza agregando tareas de construcción para visualizar el cronograma del proyecto."
             />
           ) : (
-            <GanttContainer
-              data={ganttData}
-              dependencies={dependencies}
-              onItemEdit={(item) => openModal('construction-task-schedule', { taskId: item.id })}
-              onItemDelete={(item) => {
-                const task = filteredTasks.find(t => t.id === item.id)
-                showDeleteConfirmation({
-                  title: 'Eliminar Tarea',
-                  description: `¿Estás seguro de que quieres eliminar "${task?.name_rendered || 'esta tarea'}"?`,
-                  onConfirm: () => deleteTask.mutate({
-                    id: item.id,
-                    project_id: task?.project_id || '',
-                    organization_id: organizationId || ''
-                  })
-                })
-              }}
-            />
+            <div className="bg-card border rounded-lg p-6">
+              <div className="text-center text-muted-foreground">
+                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Vista Gantt Temporalmente Deshabilitada</h3>
+                <p className="text-sm">Utiliza la vista de "Listado de Tareas" para gestionar el cronograma</p>
+              </div>
+            </div>
           )}
         </div>
       )}
