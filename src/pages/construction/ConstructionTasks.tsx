@@ -169,12 +169,17 @@ export default function ConstructionTasks() {
 
   const handleEditPhase = (phase: any) => {
     openModal('construction-phase', {
-      data: {
-        id: phase.project_phase_id,
-        phase_id: phase.id,
-        position: phase.position
-      },
       projectId,
+      organizationId,
+      editingPhase: {
+        project_phase_id: phase.project_phase_id,
+        phase_id: phase.id,
+        position: phase.position,
+        phase: {
+          name: phase.name,
+          description: '' // Por ahora vacío, se podría obtener de la base de datos si es necesario
+        }
+      },
       isEditing: true
     })
   }
