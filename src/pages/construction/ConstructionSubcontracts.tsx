@@ -10,6 +10,7 @@ import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction"
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Selector } from "@/components/ui-custom/Selector";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
@@ -25,6 +26,17 @@ export default function ConstructionSubcontracts() {
   
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+
+  // Función para crear subcontrato
+  const handleCreateSubcontract = () => {
+    openModal('subcontract', {
+      projectId: userData?.preferences?.last_project_id,
+      organizationId: userData?.organization?.id,
+      userId: userData?.user?.id,
+      isEditing: false
+    });
+  };
   
   // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
@@ -53,19 +65,6 @@ export default function ConstructionSubcontracts() {
     }
   ];
 
-  const handleCreateSubcontract = () => {
-    if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
-      console.log('Missing organization or project data');
-      return;
-    }
-
-    openModal('subcontract', {
-      projectId: userData.preferences.last_project_id,
-      organizationId: userData.organization.id,
-      userId: userData.user?.id
-    });
-  };
-
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'pendiente': { variant: 'secondary' as const, label: 'Pendiente' },
@@ -82,17 +81,47 @@ export default function ConstructionSubcontracts() {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
   };
 
-  const formatDualCurrency = (amountARS: number, amountUSD: number) => {
-    return (
-      <div className="text-left">
-        <div className="font-medium">
-          ARS {amountARS.toLocaleString('es-AR')}
+  // Función para convertir montos según la vista de moneda
+  const convertAmount = (amountARS: number, amountUSD: number, currencyCode: string) => {
+    if (currencyView === 'discriminado') {
+      return currencyCode === 'USD' ? amountUSD : amountARS;
+    } else if (currencyView === 'pesificado') {
+      return amountARS; // Siempre mostrar en ARS
+    } else if (currencyView === 'dolarizado') {
+      return amountUSD; // Siempre mostrar en USD
+    }
+    return amountARS;
+  };
+
+  const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
+    const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
+    
+    if (currencyView === 'discriminado') {
+      const symbol = originalCurrency === 'USD' ? 'USD' : 'ARS';
+      return (
+        <div className="text-left">
+          <div className="font-medium">
+            {symbol} {convertedAmount.toLocaleString('es-AR')}
+          </div>
         </div>
-        <div className="text-xs text-muted-foreground">
-          USD {Math.round(amountUSD || 0).toLocaleString('es-AR')}
+      );
+    } else if (currencyView === 'pesificado') {
+      return (
+        <div className="text-left">
+          <div className="font-medium">
+            ARS {convertedAmount.toLocaleString('es-AR')}
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else { // dolarizado
+      return (
+        <div className="text-left">
+          <div className="font-medium">
+            USD {Math.round(convertedAmount).toLocaleString('es-AR')}
+          </div>
+        </div>
+      );
+    }
   };
 
   // Combinar datos de subcontratos con análisis de pagos
@@ -160,7 +189,9 @@ export default function ConstructionSubcontracts() {
       render: (subcontract: any) => {
         const amountARS = subcontract.amount_total || 0;
         const amountUSD = amountARS / (subcontract.exchange_rate || 1);
-        return formatDualCurrency(amountARS, amountUSD);
+        // Determinar la moneda original del subcontrato
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
+        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
       }
     },
     {
@@ -170,7 +201,7 @@ export default function ConstructionSubcontracts() {
       render: (subcontract: any) => {
         const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
         const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
-        return formatDualCurrency(pagoARS, pagoUSD);
+        return formatSingleCurrency(pagoARS, pagoUSD, 'ARS'); // Los pagos siempre en moneda mixta
       }
     },
     {
@@ -180,7 +211,7 @@ export default function ConstructionSubcontracts() {
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
         const saldoUSD = subcontract.analysis?.saldoUSD || 0;
-        return formatDualCurrency(saldoARS, saldoUSD);
+        return formatSingleCurrency(saldoARS, saldoUSD, 'ARS'); // Los saldos siempre en moneda mixta
       }
     },
     {
@@ -262,6 +293,19 @@ export default function ConstructionSubcontracts() {
           primaryActionLabel="Crear Pedido de Subcontrato"
           onPrimaryActionClick={handleCreateSubcontract}
           showProjectSelector={true}
+          customActions={
+            <Selector
+              options={[
+                { value: 'discriminado', label: 'Discriminado' },
+                { value: 'pesificado', label: 'Pesificado' },
+                { value: 'dolarizado', label: 'Dolarizado' }
+              ]}
+              value={currencyView}
+              onValueChange={(value) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
+              placeholder="Seleccionar vista"
+              className="w-auto min-w-[140px]"
+            />
+          }
         />
 
 
