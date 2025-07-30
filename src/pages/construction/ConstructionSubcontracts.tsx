@@ -15,6 +15,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
+import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 
 export default function ConstructionSubcontracts() {
   const { data: userData } = useCurrentUser();
@@ -25,8 +26,9 @@ export default function ConstructionSubcontracts() {
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Datos de subcontratos
+  // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
+  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
 
   const features = [
     {
@@ -80,19 +82,58 @@ export default function ConstructionSubcontracts() {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
   };
 
+  const formatDualCurrency = (amountARS: number, amountUSD: number) => {
+    return (
+      <div className="text-right">
+        <div className="font-medium">
+          ARS {amountARS.toLocaleString('es-AR')}
+        </div>
+        <div className="text-xs text-muted-foreground">
+          USD {Math.round(amountUSD || 0).toLocaleString('es-AR')}
+        </div>
+      </div>
+    );
+  };
+
+  // Combinar datos de subcontratos con análisis de pagos
+  const enrichedSubcontracts = subcontracts.map(subcontract => {
+    const analysis = subcontractAnalysis.find(a => a.id === subcontract.id);
+    return {
+      ...subcontract,
+      analysis: analysis || {
+        pagoALaFecha: 0,
+        pagoALaFechaUSD: 0,
+        saldo: subcontract.amount_total || 0,
+        saldoUSD: (subcontract.amount_total || 0) / (subcontract.exchange_rate || 1)
+      }
+    };
+  });
+
   const columns = [
     {
       key: 'title',
       label: 'Título',
-      width: '25%',
+      width: '15%',
       render: (subcontract: any) => (
         <div className="font-medium">{subcontract.title}</div>
       )
     },
     {
+      key: 'date',
+      label: 'Fecha',
+      width: '10%',
+      render: (subcontract: any) => {
+        try {
+          return format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es });
+        } catch {
+          return subcontract.date;
+        }
+      }
+    },
+    {
       key: 'contact',
       label: 'Proveedor',
-      width: '20%',
+      width: '15%',
       render: (subcontract: any) => {
         const contact = subcontract.contact;
         if (!contact) {
@@ -115,19 +156,32 @@ export default function ConstructionSubcontracts() {
     {
       key: 'amount_total',
       label: 'Monto Total',
-      width: '15%',
-      render: (subcontract: any) => (
-        <div className="text-right">
-          <div className="font-medium">
-            {formatCurrency(subcontract.amount_total || 0)}
-          </div>
-          {subcontract.exchange_rate && subcontract.exchange_rate !== 1 && (
-            <div className="text-xs text-muted-foreground">
-              Cotización: {subcontract.exchange_rate}
-            </div>
-          )}
-        </div>
-      )
+      width: '12%',
+      render: (subcontract: any) => {
+        const amountARS = subcontract.amount_total || 0;
+        const amountUSD = amountARS / (subcontract.exchange_rate || 1);
+        return formatDualCurrency(amountARS, amountUSD);
+      }
+    },
+    {
+      key: 'pago_fecha',
+      label: 'Pago a la Fecha',
+      width: '12%',
+      render: (subcontract: any) => {
+        const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
+        const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
+        return formatDualCurrency(pagoARS, pagoUSD);
+      }
+    },
+    {
+      key: 'saldo',
+      label: 'Saldo',
+      width: '12%',
+      render: (subcontract: any) => {
+        const saldoARS = subcontract.analysis?.saldo || 0;
+        const saldoUSD = subcontract.analysis?.saldoUSD || 0;
+        return formatDualCurrency(saldoARS, saldoUSD);
+      }
     },
     {
       key: 'status',
@@ -136,21 +190,9 @@ export default function ConstructionSubcontracts() {
       render: (subcontract: any) => getStatusBadge(subcontract.status)
     },
     {
-      key: 'date',
-      label: 'Fecha',
-      width: '10%',
-      render: (subcontract: any) => {
-        try {
-          return format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es });
-        } catch {
-          return subcontract.date;
-        }
-      }
-    },
-    {
       key: 'actions',
       label: 'Acciones',
-      width: '10%',
+      width: '14%',
       sortable: false,
       render: (subcontract: any) => (
         <div className="flex items-center gap-2">
@@ -194,7 +236,7 @@ export default function ConstructionSubcontracts() {
   ];
 
   // Filtrar subcontratos por búsqueda
-  const filteredSubcontracts = subcontracts.filter(subcontract => {
+  const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
     const searchLower = searchQuery.toLowerCase();
     const titleMatch = subcontract.title?.toLowerCase().includes(searchLower);
     
@@ -225,7 +267,7 @@ export default function ConstructionSubcontracts() {
 
 
         {/* Contenido principal */}
-        {filteredSubcontracts.length === 0 && !isLoading ? (
+        {filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
           <EmptyState
             icon={<Package className="w-12 h-12 text-muted-foreground" />}
             title="Aún no tienes subcontratos creados"
@@ -236,7 +278,7 @@ export default function ConstructionSubcontracts() {
             <Table
               columns={columns}
               data={filteredSubcontracts}
-              isLoading={isLoading}
+              isLoading={isLoading || isLoadingAnalysis}
               className="bg-card"
               defaultSort={{ key: 'title', direction: 'asc' }}
             />
