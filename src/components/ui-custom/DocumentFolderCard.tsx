@@ -107,14 +107,14 @@ export function DocumentFolderCard({
   const latestDocument = sortedDocuments[0];
   const hasVersions = sortedDocuments.length > 1;
 
-  const handleDownload = (document: DesignDocument) => {
-    const link = document.createElement('a');
-    link.href = document.file_url;
-    link.download = `${document.file_name}_v${document.version_number}`;
+  const handleDownload = (doc: DesignDocument) => {
+    const link = window.document.createElement('a');
+    link.href = doc.file_url;
+    link.download = `${doc.file_name}_v${doc.version_number}`;
     link.target = '_blank';
-    document.body.appendChild(link);
+    window.document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    window.document.body.removeChild(link);
   };
 
   return (
@@ -183,7 +183,7 @@ export function DocumentFolderCard({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setShowUpdateModal(true)}
+                onClick={() => onEdit?.(latestDocument)}
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />

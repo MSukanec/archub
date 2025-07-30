@@ -225,7 +225,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           file_type: file.type,
           file_size: file.size,
           group_id: data.group_id || null,
-          folder_id: data.folder_id, // Always set folder_id for documents
+          // folder_id: data.folder_id, // Will be set by trigger based on group
           status: data.status,
           visibility: data.visibility,
         });

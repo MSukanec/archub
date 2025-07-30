@@ -322,31 +322,52 @@ export default function ProjectDocumentation() {
   };
 
   const renderGroupsView = () => {
-    if (groupsLoading) {
-      return <div className="text-center py-8">Cargando grupos...</div>;
+    if (groupsLoading || folderDocumentsLoading) {
+      return <div className="text-center py-8">Cargando...</div>;
     }
 
-    if (filteredGroups.length === 0) {
-      return (
-        <EmptyState
-          icon={<Package className="w-12 h-12" />}
-          title="No hay grupos de documentos"
-          description="Sube documentos para crear grupos organizados dentro de esta carpeta."
-        />
-      );
-    }
+    // Filter folder documents that don't have a group (group_id is null)
+    const documentsWithoutGroup = folderDocuments?.filter(doc => !doc.group_id) || [];
 
     return (
-      <div className="grid gap-4">
-        {filteredGroups.map((group) => (
-          <DocumentGroupCard
-            key={group.id}
-            group={group}
-            onViewDocuments={() => handleGroupClick(group.id, group.name)}
-            onEdit={() => openModal('document-upload', { defaultFolderId: selectedFolderId, defaultGroupId: group.id, editingGroup: group })}
-            onDelete={() => handleDeleteGroup(group.id, group.name)}
+      <div className="space-y-6">
+        {/* Documents without group */}
+        {documentsWithoutGroup.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Documentos de la Carpeta</h3>
+            <div className="grid gap-4">
+              {documentsWithoutGroup.map((doc) => (
+                <DocumentCard key={doc.id} document={doc} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Document groups */}
+        {filteredGroups.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Grupos de Documentos</h3>
+            <div className="grid gap-4">
+              {filteredGroups.map((group) => (
+                <DocumentGroupCard
+                  key={group.id}
+                  group={group}
+                  onEdit={() => handleGroupClick(group.id, group.name)}
+                  onDelete={() => handleDeleteGroup(group.id, group.name)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state when no documents or groups */}
+        {documentsWithoutGroup.length === 0 && filteredGroups.length === 0 && (
+          <EmptyState
+            icon={<Package className="w-12 h-12" />}
+            title="No hay documentos en esta carpeta"
+            description="Sube documentos para comenzar a organizar el contenido de esta carpeta."
           />
-        ))}
+        )}
       </div>
     );
   };
