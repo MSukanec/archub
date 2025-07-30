@@ -293,8 +293,9 @@ export default function ConstructionSubcontracts() {
           primaryActionLabel="Crear Pedido de Subcontrato"
           onPrimaryActionClick={handleCreateSubcontract}
           showProjectSelector={true}
-          customActions={
+          customActions={[
             <Selector
+              key="currency-selector"
               options={[
                 { value: 'discriminado', label: 'Discriminado' },
                 { value: 'pesificado', label: 'Pesificado' },
@@ -305,7 +306,7 @@ export default function ConstructionSubcontracts() {
               placeholder="Seleccionar vista"
               className="w-auto min-w-[140px]"
             />
-          }
+          ]}
         />
 
 
