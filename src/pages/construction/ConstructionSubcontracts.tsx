@@ -95,13 +95,20 @@ export default function ConstructionSubcontracts() {
       width: '20%',
       render: (subcontract: any) => {
         const contact = subcontract.contact;
-        return contact ? (
+        if (!contact) {
+          return <span className="text-muted-foreground">Sin proveedor</span>;
+        }
+        
+        // Usar full_name si existe, sino construir con first_name y last_name
+        const contactName = contact.full_name || 
+          `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
+          'Nombre no disponible';
+        
+        return (
           <div>
-            <div className="font-medium">{contact.full_name}</div>
+            <div className="font-medium">{contactName}</div>
             {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
           </div>
-        ) : (
-          <span className="text-muted-foreground">Sin proveedor</span>
         );
       }
     },
@@ -187,10 +194,18 @@ export default function ConstructionSubcontracts() {
   ];
 
   // Filtrar subcontratos por búsqueda
-  const filteredSubcontracts = subcontracts.filter(subcontract =>
-    subcontract.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    subcontract.contact?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSubcontracts = subcontracts.filter(subcontract => {
+    const searchLower = searchQuery.toLowerCase();
+    const titleMatch = subcontract.title?.toLowerCase().includes(searchLower);
+    
+    // Buscar en el nombre del contacto usando la misma lógica de renderizado
+    const contact = subcontract.contact;
+    const contactName = contact?.full_name || 
+      `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
+    const contactMatch = contactName?.toLowerCase().includes(searchLower);
+    
+    return titleMatch || contactMatch;
+  });
 
   return (
     <Layout wide={false}>

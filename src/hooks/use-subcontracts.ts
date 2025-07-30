@@ -19,7 +19,11 @@ export function useSubcontracts(projectId: string | null) {
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching subcontracts:', error);
+        throw error;
+      }
+      
       return data || [];
     },
     enabled: !!projectId,
