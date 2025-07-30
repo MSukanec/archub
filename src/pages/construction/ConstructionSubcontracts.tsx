@@ -82,18 +82,6 @@ export default function ConstructionSubcontracts() {
 
   const columns = [
     {
-      key: 'date',
-      label: 'Fecha',
-      width: '10%',
-      render: (subcontract: any) => {
-        try {
-          return format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es });
-        } catch {
-          return subcontract.date;
-        }
-      }
-    },
-    {
       key: 'title',
       label: 'Título',
       width: '25%',
@@ -139,6 +127,18 @@ export default function ConstructionSubcontracts() {
       label: 'Estado',
       width: '10%',
       render: (subcontract: any) => getStatusBadge(subcontract.status)
+    },
+    {
+      key: 'date',
+      label: 'Fecha',
+      width: '10%',
+      render: (subcontract: any) => {
+        try {
+          return format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es });
+        } catch {
+          return subcontract.date;
+        }
+      }
     },
     {
       key: 'actions',
