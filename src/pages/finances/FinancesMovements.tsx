@@ -133,6 +133,16 @@ interface ConversionGroup {
 }
 
 export default function Movements() {
+  // Función para formatear moneda
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   const [searchValue, setSearchValue] = useState("");
 
   const { openModal } = useGlobalModalStore();
