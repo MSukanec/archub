@@ -84,7 +84,7 @@ export function HeaderDesktop({
     },
     onSuccess: (projectId) => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      setSelectedProject(projectId);
+      setSelectedProject(projectId || null);
     }
   });
 
@@ -104,6 +104,49 @@ export function HeaderDesktop({
     if (location.startsWith("/admin")) return "Administración";
     if (location.startsWith("/organization")) return "Organización";
     return "Archub";
+  };
+
+  const getPageBreadcrumb = () => {
+    const section = getCurrentSectionLabel();
+    
+    // Mapeo de páginas específicas
+    const pageMap: { [key: string]: string } = {
+      // Finanzas
+      "/finances/movements": "Movimientos",
+      "/finances/installments": "Aportes de Terceros", 
+      "/finances/analysis": "Análisis de Obra",
+      "/finances": "Resumen Financiero",
+      
+      // Construcción  
+      "/construction/tasks": "Tareas",
+      "/construction/budgets": "Presupuestos",
+      "/construction/materials": "Materiales",
+      "/construction/schedule": "Cronograma",
+      "/construction/logs": "Bitácoras",
+      "/construction/attendance": "Asistencia",
+      "/construction/gallery": "Galería",
+      "/construction/subcontracts": "Subcontratos",
+      "/construction": "Resumen de Construcción",
+      
+      // Diseño
+      "/design/dashboard": "Resumen de Diseño",
+      "/design/documentation": "Documentación",
+      
+      // Organización
+      "/organization/projects": "Proyectos",
+      "/organization/contacts": "Contactos",
+      "/organization/preferences": "Preferencias",
+      "/organization/activity": "Actividad",
+      "/organization/tasks": "Tareas para Hacer"
+    };
+
+    const pageName = pageMap[location];
+    
+    if (pageName && section !== pageName) {
+      return `${section} > ${pageName}`;
+    }
+    
+    return title || section;
   };
 
   const getBreadcrumbIcon = () => {
@@ -133,34 +176,60 @@ export function HeaderDesktop({
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Left: Page Title */}
+      {/* Left: Page Title with Breadcrumb */}
       <div className="flex items-center">
-        {title && (
-          <h1 className="text-sm text-[var(--layout-text)]">{title}</h1>
-        )}
+        <h1 className="text-sm font-medium text-[var(--layout-text)]">{getPageBreadcrumb()}</h1>
       </div>
 
       {/* Right: Project Selector (only if project-based section) */}
       <div className="flex items-center">
         {isProjectBasedSection && (
           <CustomRestricted feature="project_management">
-            <ProjectSelector
-              projects={projects}
-              selectedProjectId={localSelectedProject || ''}
-              onProjectChange={handleProjectChange}
-              isLoading={updateProjectMutation.isPending}
-              trigger={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost-flat"
                   size="sm"
-                  className="p-1 h-auto text-[var(--layout-text)]"
+                  className="p-1 h-auto text-sm font-medium text-[var(--layout-text)]"
                 >
                   <Folder className="w-4 h-4 mr-1" />
                   {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
-              }
-            />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem 
+                  onClick={() => handleProjectChange('')}
+                  className={`${!localSelectedProject ? 'bg-[var(--accent)] text-white' : ''}`}
+                >
+                  <div className="flex items-center w-full">
+                    <Building2 className="w-4 h-4 mr-2" />
+                    <span className="truncate">General</span>
+                  </div>
+                  {!localSelectedProject && (
+                    <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                  )}
+                </DropdownMenuItem>
+                
+                {projects.length > 0 && <DropdownMenuSeparator />}
+                
+                {projects.map((project) => (
+                  <DropdownMenuItem
+                    key={project.id}
+                    onClick={() => handleProjectChange(project.id)}
+                    className={`${localSelectedProject === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                  >
+                    <div className="flex items-center w-full">
+                      <Folder className="w-4 h-4 mr-2" />
+                      <span className="truncate">{project.name}</span>
+                    </div>
+                    {localSelectedProject === project.id && (
+                      <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CustomRestricted>
         )}
       </div>

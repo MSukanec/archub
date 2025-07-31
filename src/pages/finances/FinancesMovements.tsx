@@ -1366,7 +1366,12 @@ export default function Movements() {
                           filterByWallet !== "all";
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout
+      headerProps={{
+        title: "Movimientos",
+      }}
+      wide={true}
+    >
       {/* ActionBar Desktop - SIEMPRE VISIBLE */}
       <ActionBarDesktop
         title="Gestión de Movimientos Financieros"
