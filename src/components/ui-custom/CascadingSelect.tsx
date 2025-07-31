@@ -44,6 +44,15 @@ export function CascadingSelect({
       return
     }
 
+    // Solo actualizar si el valor externo es diferente del path actual
+    const currentValues = selectedPath.map(item => item.value)
+    const valuesEqual = value.length === currentValues.length && 
+                       value.every((val, index) => val === currentValues[index])
+    
+    if (valuesEqual) {
+      return // No hay cambios, evitar actualizaciones innecesarias
+    }
+
     // Reconstruir el path basado en el valor externo
     const buildPath = (opts: CascadingOption[], vals: string[], path: CascadingOption[] = []): CascadingOption[] | null => {
       if (vals.length === 0) return path
@@ -65,7 +74,7 @@ export function CascadingSelect({
     if (path) {
       setSelectedPath(path)
     }
-  }, [value, options])
+  }, [value, options, selectedPath])
 
   const getDisplayText = () => {
     if (selectedPath.length === 0) return placeholder
