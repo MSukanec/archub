@@ -2406,9 +2406,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 }
               }
               
-              // Llamar handleTypeChange al final para no interferir
+              // SOLO actualizar movementType específico sin llamar handleTypeChange que resetea todo
               if (values.length >= 1) {
-                handleTypeChange(values[0])
+                const typeId = values[0]
+                // Buscar el concepto en la estructura para determinar el tipo base
+                const selectedConcept = organizationConcepts?.find(concept => concept.id === typeId)
+                if (selectedConcept?.view_mode === 'conversion') {
+                  setMovementType('conversion')
+                } else if (selectedConcept?.view_mode === 'transfer') {
+                  setMovementType('transfer')
+                } else {
+                  // No llamar handleTypeChange para no resetear los campos
+                  // Solo establecer el tipo base sin interferir con las categorías
+                  setMovementType('normal')
+                }
               }
             }, 0)
           }}
