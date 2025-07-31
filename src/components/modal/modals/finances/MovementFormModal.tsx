@@ -248,6 +248,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Estados para la lógica jerárquica
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(editingMovement?.category_id || '')
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState(editingMovement?.subcategory_id || '')
+  
+  // Estado directo para el CascadingSelect (evita problemas de sincronización)
+  const [cascadingValues, setCascadingValues] = React.useState<string[]>(() => {
+    const values = []
+    if (editingMovement?.type_id) values.push(editingMovement.type_id)
+    if (editingMovement?.category_id) values.push(editingMovement.category_id)
+    if (editingMovement?.subcategory_id) values.push(editingMovement.subcategory_id)
+    return values
+  })
   
   // Estado centralizado para el tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'subcontratos'>('normal')
@@ -2293,19 +2303,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               })) || []
             })) || []
           }))}
-          value={(() => {
-            // Construir el valor actual basado en los campos del formulario
-            const values = []
-            const typeId = selectedTypeId
-            const categoryId = selectedCategoryId
-            const subcategoryId = form.getValues('subcategory_id')
-            
-            if (typeId) values.push(typeId)
-            if (categoryId) values.push(categoryId)
-            if (subcategoryId) values.push(subcategoryId)
-            
-            return values
-          })()}
+          value={cascadingValues}
           onValueChange={(values) => {
             console.log('🎯 NestedSelector selection:', values)
             
@@ -2315,9 +2313,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             
             console.log('🔄 Batch updating all values:', { typeId, categoryId, subcategoryId })
             
-            // Actualizar estados locales primero
+            // Actualizar estado del cascading primero
+            setCascadingValues(values)
+            
+            // Actualizar estados locales
             setSelectedTypeId(typeId)
             setSelectedCategoryId(categoryId)
+            setSelectedSubcategoryId(subcategoryId)
             
             // Actualizar formulario principal
             form.setValue('type_id', typeId)
