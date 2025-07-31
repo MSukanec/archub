@@ -35,6 +35,38 @@ export function CascadingSelect({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
+  // Sincronizar con el valor externo
+  React.useEffect(() => {
+    if (value.length === 0) {
+      setSelectedPath([])
+      setCurrentLevel(0)
+      setCurrentOptions(options)
+      return
+    }
+
+    // Reconstruir el path basado en el valor externo
+    const buildPath = (opts: CascadingOption[], vals: string[], path: CascadingOption[] = []): CascadingOption[] | null => {
+      if (vals.length === 0) return path
+
+      for (const option of opts) {
+        if (option.value === vals[0]) {
+          const newPath = [...path, option]
+          if (vals.length === 1) return newPath
+          if (option.children) {
+            const result = buildPath(option.children, vals.slice(1), newPath)
+            if (result) return result
+          }
+        }
+      }
+      return null
+    }
+
+    const path = buildPath(options, value)
+    if (path) {
+      setSelectedPath(path)
+    }
+  }, [value, options])
+
   const getDisplayText = () => {
     if (selectedPath.length === 0) return placeholder
     return selectedPath.map(item => item.label).join(" > ")
@@ -43,10 +75,30 @@ export function CascadingSelect({
   const handleTriggerClick = () => {
     if (disabled) return
     if (!isOpen) {
-      // Al abrir, resetear a nivel inicial
-      setCurrentLevel(0)
-      setCurrentOptions(options)
-      setSelectedPath([])
+      // Al abrir, establecer el nivel correcto basado en la selección actual
+      if (selectedPath.length > 0) {
+        const lastSelected = selectedPath[selectedPath.length - 1]
+        if (lastSelected.children && lastSelected.children.length > 0) {
+          // Si el último elemento tiene hijos, mostrar esos hijos
+          setCurrentOptions(lastSelected.children)
+          setCurrentLevel(selectedPath.length)
+        } else {
+          // Si no tiene hijos, mostrar el nivel padre
+          if (selectedPath.length > 1) {
+            const parent = selectedPath[selectedPath.length - 2]
+            if (parent.children) {
+              setCurrentOptions(parent.children)
+              setCurrentLevel(selectedPath.length - 1)
+            }
+          } else {
+            setCurrentLevel(0)
+            setCurrentOptions(options)
+          }
+        }
+      } else {
+        setCurrentLevel(0)
+        setCurrentOptions(options)
+      }
     }
     setIsOpen(!isOpen)
   }
@@ -121,16 +173,15 @@ export function CascadingSelect({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Botón de volver - solo visible si no estamos en el nivel raíz */}
           {currentLevel > 0 && isOpen && (
-            <button
-              type="button"
+            <div
               onClick={(e) => {
                 e.stopPropagation()
                 handleBack()
               }}
-              className="flex-shrink-0 p-1 hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] rounded transition-colors"
+              className="flex-shrink-0 p-1 hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] rounded transition-colors cursor-pointer"
             >
               <ArrowLeft className="h-3 w-3" />
-            </button>
+            </div>
           )}
           
           {/* Texto del valor seleccionado */}

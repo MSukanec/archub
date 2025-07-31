@@ -2293,6 +2293,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               })) || []
             })) || []
           })) || []}
+          value={React.useMemo(() => {
+            // Construir el valor actual basado en los campos del formulario
+            const values = []
+            const typeId = form.watch('type_id')
+            const categoryId = form.watch('category_id')
+            const subcategoryId = form.watch('subcategory_id')
+            
+            if (typeId) values.push(typeId)
+            if (categoryId) values.push(categoryId)
+            if (subcategoryId) values.push(subcategoryId)
+            
+            return values
+          }, [form.watch('type_id'), form.watch('category_id'), form.watch('subcategory_id')])}
           onValueChange={(values) => {
             console.log('🎯 CascadingSelect selection:', values)
             // Actualizar los campos del formulario según la selección
