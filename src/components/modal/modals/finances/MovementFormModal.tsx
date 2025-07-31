@@ -2309,119 +2309,73 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           onValueChange={(values) => {
             console.log('🎯 CascadingSelect selection:', values)
             
-            // Usar setTimeout para evitar conflictos de re-render
-            setTimeout(() => {
-              console.log('🎯 CascadingSelect processing:', { values, organizationConcepts })
+            // Crear un batch de actualizaciones para evitar re-renders múltiples
+            React.startTransition(() => {
+              const typeId = values[0] || ''
+              const categoryId = values[1] || ''
+              const subcategoryId = values[2] || ''
               
-              // Actualizar todos los valores de forma síncrona
-              if (values.length >= 1) {
-                console.log('🔄 Setting type_id:', values[0])
-                form.setValue('type_id', values[0])
-                setSelectedTypeId(values[0])
-              } else {
-                form.setValue('type_id', '')
-                setSelectedTypeId('')
-              }
+              console.log('🔄 Batch updating all values:', { typeId, categoryId, subcategoryId })
               
-              if (values.length >= 2) {
-                console.log('🔄 Setting category_id:', values[1])
-                form.setValue('category_id', values[1])
-                setSelectedCategoryId(values[1])
-                
-                // Actualizar todos los formularios especiales
-                aportesForm.setValue('category_id', values[1])
-                aportesPropriosForm.setValue('category_id', values[1])
-                retirosPropriosForm.setValue('category_id', values[1])
-                materialesForm.setValue('category_id', values[1])
-                subcontratosForm.setValue('category_id', values[1])
-              } else {
-                form.setValue('category_id', '')
-                setSelectedCategoryId('')
-              }
+              // Actualizar formulario principal
+              form.setValue('type_id', typeId)
+              form.setValue('category_id', categoryId)
+              form.setValue('subcategory_id', subcategoryId)
               
-              if (values.length >= 3) {
-                console.log('🔄 Setting subcategory_id:', values[2])
-                form.setValue('subcategory_id', values[2])
-                
-                // Actualizar todos los formularios especiales
-                aportesForm.setValue('subcategory_id', values[2])
-                aportesPropriosForm.setValue('subcategory_id', values[2])
-                retirosPropriosForm.setValue('subcategory_id', values[2])
-                materialesForm.setValue('subcategory_id', values[2])
-                subcontratosForm.setValue('subcategory_id', values[2])
-              } else {
-                form.setValue('subcategory_id', '')
-              }
+              // Actualizar formularios especiales
+              const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm]
+              allForms.forEach(specialForm => {
+                specialForm.setValue('type_id', typeId)
+                specialForm.setValue('category_id', categoryId)
+                specialForm.setValue('subcategory_id', subcategoryId)
+              })
               
-              // Detectar formularios especiales basado en la selección
-              if (values.length >= 2) {
-                const categoryId = values[1]
-                const subcategoryId = values.length >= 3 ? values[2] : null
-                
-                // Buscar la categoría en la estructura jerárquica
-                let selectedCategory = null
-                for (const concept of organizationConcepts || []) {
-                  const foundCategory = concept.children?.find((cat: any) => cat.id === categoryId)
-                  if (foundCategory) {
-                    selectedCategory = foundCategory
-                    break
-                  }
-                }
-                
-                if (selectedCategory) {
-                  const viewMode = (selectedCategory.view_mode ?? "normal").trim()
-                  console.log('🔍 Category view_mode detected:', viewMode)
-                  
-                  // Detectar tipos especiales de formulario
-                  const isAportesCategory = viewMode === "aportes"
-                  const isAportesPropiosCategory = viewMode === "aportes_propios"
-                  const isRetirosPropiosCategory = viewMode === "retiros_propios"
-                  const isMaterialesCategory = viewMode === "materiales" || selectedCategory.name?.toLowerCase().includes('material')
-                  const isSubcontratosCategory = subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
-                  
-                  console.log('🎯 Form type detection:', { 
-                    isAportesCategory, 
-                    isAportesPropiosCategory, 
-                    isRetirosPropiosCategory, 
-                    isMaterialesCategory, 
-                    isSubcontratosCategory,
-                    subcategoryId
-                  })
-                  
-                  // Cambiar tipo de formulario
-                  if (isSubcontratosCategory) {
-                    console.log('✅ SUBCONTRATOS DETECTED - Changing to subcontratos form')
-                    setMovementType('subcontratos')
-                  } else if (isAportesCategory) {
-                    setMovementType('aportes')
-                  } else if (isAportesPropiosCategory) {
-                    setMovementType('aportes_propios')
-                  } else if (isRetirosPropiosCategory) {
-                    setMovementType('retiros_propios')
-                  } else if (isMaterialesCategory) {
-                    setMovementType('materiales')
-                  } else {
-                    setMovementType('normal')
-                  }
-                }
-              }
+              // Actualizar estados locales
+              setSelectedTypeId(typeId)
+              setSelectedCategoryId(categoryId)
               
-              // SOLO actualizar movementType específico sin llamar handleTypeChange que resetea todo
-              if (values.length >= 1) {
-                const typeId = values[0]
-                // Buscar el concepto en la estructura para determinar el tipo base
-                const selectedConcept = organizationConcepts?.find(concept => concept.id === typeId)
+              // Detectar tipo de formulario especial
+              let detectedFormType = 'normal'
+              
+              if (typeId && organizationConcepts) {
+                const selectedConcept = organizationConcepts.find(concept => concept.id === typeId)
                 if (selectedConcept?.view_mode === 'conversion') {
-                  setMovementType('conversion')
+                  detectedFormType = 'conversion'
                 } else if (selectedConcept?.view_mode === 'transfer') {
-                  setMovementType('transfer')
-                } else {
-                  // No llamar handleTypeChange para no resetear los campos
-                  // Solo establecer el tipo base sin interferir con las categorías
-                  setMovementType('normal')
+                  detectedFormType = 'transfer'
+                } else if (categoryId) {
+                  // Buscar la categoría para tipos especiales
+                  let selectedCategory = null
+                  for (const concept of organizationConcepts) {
+                    const foundCategory = concept.children?.find((cat: any) => cat.id === categoryId)
+                    if (foundCategory) {
+                      selectedCategory = foundCategory
+                      break
+                    }
+                  }
+                  
+                  if (selectedCategory) {
+                    const viewMode = (selectedCategory.view_mode ?? "normal").trim()
+                    
+                    // Detectar subcontratos por UUID específico
+                    if (subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
+                      detectedFormType = 'subcontratos'
+                    } else if (viewMode === "aportes") {
+                      detectedFormType = 'aportes'
+                    } else if (viewMode === "aportes_propios") {
+                      detectedFormType = 'aportes_propios'
+                    } else if (viewMode === "retiros_propios") {
+                      detectedFormType = 'retiros_propios'
+                    } else if (viewMode === "materiales" || selectedCategory.name?.toLowerCase().includes('material')) {
+                      detectedFormType = 'materiales'
+                    }
+                  }
                 }
               }
-            }, 0)
+              
+              console.log('🎯 Final form type detected:', detectedFormType)
+              setMovementType(detectedFormType)
+            })
           }}
           placeholder="Tipo > Categoría > Subcategoría..."
           className="w-full"
