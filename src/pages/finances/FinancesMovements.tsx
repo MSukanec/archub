@@ -1530,7 +1530,7 @@ export default function Movements() {
 
                 return (
                   <div key={wallet} className="space-y-1">
-                    <h4 className="text-xs font-medium text-[var(--text-subtle)]">{wallet}</h4>
+                    <h4 className="text-xs font-medium text-[var(--secondary-card-fg)]">{wallet}</h4>
                     <div className="space-y-1 pl-2">
                       {walletCurrencies.map((currency) => {
                         const walletCurrencyMovements = filteredMovements.filter(
@@ -1546,7 +1546,7 @@ export default function Movements() {
 
                         return (
                           <div key={`${wallet}-${currency}`} className="flex items-center justify-between">
-                            <span className="text-xs text-[var(--text-subtle)]">{currency}</span>
+                            <span className="text-xs text-[var(--secondary-card-fg)]">{currency}</span>
                             <span className={`text-xs font-semibold ${balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                               {formatCurrency(balance)}
                             </span>
