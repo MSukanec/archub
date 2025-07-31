@@ -78,8 +78,8 @@
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
-  --button-ghost-text: hsl(0, 0%, 85%);
-  --button-ghost-border: hsl(0, 0%, 85%);
+  --button-ghost-text: var(--text-subtle);
+  --button-ghost-border: var(--text-subtle);
   --button-ghost-hover-bg: transparent;
   --button-ghost-hover-text: hsl(0, 0%, 20%);
   --button-ghost-hover-border: transparent;
@@ -143,7 +143,7 @@
   /* Text */
   --text-default: hsl(240, 10%, 4%);
   --text-muted: hsl(240, 5%, 45%);
-  --text-subtle: hsl(240, 5%, 65%);
+  --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(0, 0%, 100%);
 
   /* Tables */
@@ -293,8 +293,8 @@
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
-  --button-ghost-text: hsl(0, 0%, 50%);
-  --button-ghost-border: hsl(0, 0%, 50%);
+  --button-ghost-text: var(--text-subtle);
+  --button-ghost-border: var(--text-subtle);
   --button-ghost-hover-bg: transparent;
   --button-ghost-hover-text: hsl(0, 0%, 90%);
   --button-ghost-hover-border: transparent;
@@ -374,7 +374,7 @@
   /* Text */
   --text-default: hsl(0, 0%, 98%);
   --text-muted: hsl(240, 5%, 65%);
-  --text-subtle: hsl(240, 5%, 45%);
+  --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(240, 10%, 4%);
 
   /* Borders and Rings */

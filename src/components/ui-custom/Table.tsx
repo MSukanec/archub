@@ -346,7 +346,7 @@ export function Table<T = any>({
           style={{ 
             gridTemplateColumns: getGridTemplateColumns(),
             backgroundColor: "var(--card-bg)", 
-            color: "var(--button-ghost-text)" 
+            color: "var(--text-subtle)" 
           }}
         >
           {selectable && (
