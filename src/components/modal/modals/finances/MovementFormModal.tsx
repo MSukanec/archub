@@ -2311,6 +2311,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             
             // Usar setTimeout para evitar conflictos de re-render
             setTimeout(() => {
+              console.log('🎯 CascadingSelect processing:', { values, organizationConcepts })
+              
               // Actualizar todos los valores de forma síncrona
               if (values.length >= 1) {
                 console.log('🔄 Setting type_id:', values[0])
@@ -2325,6 +2327,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 console.log('🔄 Setting category_id:', values[1])
                 form.setValue('category_id', values[1])
                 setSelectedCategoryId(values[1])
+                
+                // Actualizar todos los formularios especiales
+                aportesForm.setValue('category_id', values[1])
+                aportesPropriosForm.setValue('category_id', values[1])
+                retirosPropriosForm.setValue('category_id', values[1])
+                materialesForm.setValue('category_id', values[1])
+                subcontratosForm.setValue('category_id', values[1])
               } else {
                 form.setValue('category_id', '')
                 setSelectedCategoryId('')
@@ -2333,8 +2342,68 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               if (values.length >= 3) {
                 console.log('🔄 Setting subcategory_id:', values[2])
                 form.setValue('subcategory_id', values[2])
+                
+                // Actualizar todos los formularios especiales
+                aportesForm.setValue('subcategory_id', values[2])
+                aportesPropriosForm.setValue('subcategory_id', values[2])
+                retirosPropriosForm.setValue('subcategory_id', values[2])
+                materialesForm.setValue('subcategory_id', values[2])
+                subcontratosForm.setValue('subcategory_id', values[2])
               } else {
                 form.setValue('subcategory_id', '')
+              }
+              
+              // Detectar formularios especiales basado en la selección
+              if (values.length >= 2) {
+                const categoryId = values[1]
+                const subcategoryId = values.length >= 3 ? values[2] : null
+                
+                // Buscar la categoría en la estructura jerárquica
+                let selectedCategory = null
+                for (const concept of organizationConcepts || []) {
+                  const foundCategory = concept.children?.find((cat: any) => cat.id === categoryId)
+                  if (foundCategory) {
+                    selectedCategory = foundCategory
+                    break
+                  }
+                }
+                
+                if (selectedCategory) {
+                  const viewMode = (selectedCategory.view_mode ?? "normal").trim()
+                  console.log('🔍 Category view_mode detected:', viewMode)
+                  
+                  // Detectar tipos especiales de formulario
+                  const isAportesCategory = viewMode === "aportes"
+                  const isAportesPropiosCategory = viewMode === "aportes_propios"
+                  const isRetirosPropiosCategory = viewMode === "retiros_propios"
+                  const isMaterialesCategory = viewMode === "materiales" || selectedCategory.name?.toLowerCase().includes('material')
+                  const isSubcontratosCategory = subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
+                  
+                  console.log('🎯 Form type detection:', { 
+                    isAportesCategory, 
+                    isAportesPropiosCategory, 
+                    isRetirosPropiosCategory, 
+                    isMaterialesCategory, 
+                    isSubcontratosCategory,
+                    subcategoryId
+                  })
+                  
+                  // Cambiar tipo de formulario
+                  if (isSubcontratosCategory) {
+                    console.log('✅ SUBCONTRATOS DETECTED - Changing to subcontratos form')
+                    setMovementType('subcontratos')
+                  } else if (isAportesCategory) {
+                    setMovementType('aportes')
+                  } else if (isAportesPropiosCategory) {
+                    setMovementType('aportes_propios')
+                  } else if (isRetirosPropiosCategory) {
+                    setMovementType('retiros_propios')
+                  } else if (isMaterialesCategory) {
+                    setMovementType('materiales')
+                  } else {
+                    setMovementType('normal')
+                  }
+                }
               }
               
               // Llamar handleTypeChange al final para no interferir
@@ -2348,169 +2417,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         />
       </div>
 
-      {/* Selector de tipo de movimiento - CENTRALIZADO */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Tipo de movimiento *
-        </label>
-        <Select onValueChange={(value) => {
-          setSelectedTypeId(value)
-          handleTypeChange(value)
-        }} value={form.watch('type_id')}>
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar tipo..." />
-          </SelectTrigger>
-          <SelectContent>
-            {concepts?.map((concept) => (
-              <SelectItem key={concept.id} value={concept.id}>
-                <div className="flex items-center justify-between w-full">
-                  <span>{concept.name}</span>
-                  {concept.is_system && (
-                    <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                      Sistema
-                    </span>
-                  )}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
-      {/* Campos de Categoría y Subcategoría - Mostrar solo cuando hay categorías disponibles */}
-      {shouldShowCategoryFields && (
-        <div className="grid grid-cols-1 gap-4">
-          {/* Categoría */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Categoría *
-            </label>
-            <Select 
-              onValueChange={(value) => {
-                // Actualizar todos los formularios
-                form.setValue('category_id', value)
-                aportesForm.setValue('category_id', value)
-                aportesPropriosForm.setValue('category_id', value) 
-                retirosPropriosForm.setValue('category_id', value)
-                materialesForm.setValue('category_id', value)
-                subcontratosForm.setValue('category_id', value)
-                setSelectedCategoryId(value)
-                
-                // CRITICAL: Detectar tipo de aportes en modo edición también
-                if (editingMovement && categories) {
-                  const selectedCategory = categories.find((cat: any) => cat.id === value)
-                  const viewMode = (selectedCategory?.view_mode ?? "normal").trim()
-                  
-                  
-                  // Detectar el tipo específico de formulario especial
-                  const isAportesCategory = viewMode === "aportes"
-                  const isAportesPropiosCategory = viewMode === "aportes_propios"
-                  const isRetirosPropiosCategory = viewMode === "retiros_propios"
-                  const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
-                  // Detectar subcontratos por subcategoría UUID específica
-                  const subcategoryId = form.watch('subcategory_id')
-                  const isSubcontratosCategory = subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
-                  
-                  // CRITICAL: Sincronizar type_id del formulario principal a todos los formularios especiales
-                  const currentTypeId = form.watch('type_id')
-                  if (currentTypeId) {
-                    if (isAportesCategory) {
-                      aportesForm.setValue('type_id', currentTypeId)
-                    } else if (isMaterialesCategory) {
-                      materialesForm.setValue('type_id', currentTypeId)
-                    } else if (isSubcontratosCategory) {
-                      subcontratosForm.setValue('type_id', currentTypeId)
-                    }
-                  }
-                  
-                  if (isAportesCategory) {
-                    setMovementType('aportes')
-                  } else if (isAportesPropiosCategory) {
-                    setMovementType('aportes_propios')
-                  } else if (isRetirosPropiosCategory) {
-                    setMovementType('retiros_propios')
-                  } else if (isMaterialesCategory) {
-                    setMovementType('materiales')
-                  } else if (isSubcontratosCategory) {
-                    setMovementType('subcontratos')
-                  } else {
-                    setMovementType('normal')
-                  }
-                }
-              }} 
-              value={form.watch('category_id')}
-              disabled={!form.watch('type_id')}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={!form.watch('type_id') ? "Seleccione primero un tipo" : "Seleccionar categoría..."} />
-              </SelectTrigger>
-              <SelectContent>
-                {categories?.map((category: any) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{category.name}</span>
-                      {category.is_system && (
-                        <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                          Sistema
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Subcategoría - Mostrar solo cuando hay subcategorías disponibles */}
-          {shouldShowSubcategoryFields && (
-            <div className="space-y-2">
-              <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Subcategoría
-              </label>
-              <Select 
-                onValueChange={(value) => {
-                  console.log('🔄 SUBCATEGORY SELECTED:', value)
-                  
-                  // Actualizar todos los formularios
-                  form.setValue('subcategory_id', value)
-                  aportesForm.setValue('subcategory_id', value)
-                  aportesPropriosForm.setValue('subcategory_id', value) 
-                  retirosPropriosForm.setValue('subcategory_id', value)
-                  materialesForm.setValue('subcategory_id', value)
-                  subcontratosForm.setValue('subcategory_id', value)
-                  
-                  // CRITICAL: Detectar subcontratos inmediatamente y cambiar tipo de formulario
-                  if (value === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
-                    console.log('✅ SUBCONTRATOS DETECTED - Changing to subcontratos form')
-                    setMovementType('subcontratos')
-                  }
-                }} 
-                value={form.watch('subcategory_id')}
-                disabled={!form.watch('category_id')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={!form.watch('category_id') ? "Seleccione primero una categoría" : "Seleccionar subcategoría..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {subcategories?.map((subcategory: any) => (
-                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{subcategory.name}</span>
-                        {subcategory.is_system && (
-                          <span className="text-xs border rounded px-1 ml-2 text-muted-foreground border-muted-foreground/30">
-                            Sistema
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-        </div>
-      )}
       
       {(isConversion || isEditingConversion) ? (
         <Form {...conversionForm}>
