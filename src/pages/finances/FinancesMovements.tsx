@@ -702,6 +702,22 @@ export default function Movements() {
   console.log("Available wallets:", availableWallets);
   console.log("Filtered movements count:", filteredMovements.length);
   console.log("Sample filtered movement:", filteredMovements[0]);
+  
+  // Debug balance calculations
+  const ingresos = filteredMovements
+    .filter(m => m.movement_data?.type?.name === 'Ingreso')
+    .reduce((sum, m) => sum + (m.amount || 0), 0);
+  const egresos = filteredMovements
+    .filter(m => m.movement_data?.type?.name === 'Egreso')
+    .reduce((sum, m) => sum + (m.amount || 0), 0);
+  
+  console.log("Calculated ingresos:", ingresos);
+  console.log("Calculated egresos:", egresos);
+  console.log("Balance:", ingresos - egresos);
+  
+  // Debug movement type names
+  const uniqueTypes = [...new Set(filteredMovements.map(m => m.movement_data?.type?.name))];
+  console.log("Unique movement types:", uniqueTypes);
 
   // Group conversions - let CustomTable handle sorting
   const processedMovements = groupConversions(filteredMovements);
