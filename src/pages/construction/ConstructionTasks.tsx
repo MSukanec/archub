@@ -389,6 +389,11 @@ export default function ConstructionTasks() {
 
   // Seleccionar columnas según el tipo de agrupación  
   const columns = useMemo(() => {
+    // Para sin agrupar, usar todas las columnas base
+    if (groupingType === 'none') {
+      return baseColumns;
+    }
+    
     // Para agrupación por tareas, usar columnas específicas sin acciones y reordenadas
     if (groupingType === 'tasks') {
       return taskGroupingColumns;
@@ -442,17 +447,6 @@ export default function ConstructionTasks() {
           <div className="flex items-center justify-between px-4 py-3">
             {/* Filtros de la izquierda */}
             <div className="flex items-center gap-2">
-              {/* Campo de búsqueda */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Buscar tareas..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="pl-9 h-8 w-64 text-xs"
-                />
-              </div>
-
               {/* Botón de agrupación - Solo en tab de tareas */}
               {activeTab === "tasks" && (
                 <DropdownMenu>
@@ -467,6 +461,9 @@ export default function ConstructionTasks() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem onClick={() => setGroupingType("none")}>
+                      Sin Agrupar
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setGroupingType("phases")}>
                       Agrupar por Fases
                     </DropdownMenuItem>
@@ -540,7 +537,7 @@ export default function ConstructionTasks() {
               data={finalTasks}
               isLoading={isLoading}
               mode="construction"
-              groupBy={'groupKey'}
+              groupBy={groupingType === 'none' ? undefined : 'groupKey'}
               renderCard={(task: any) => (
                 <ConstructionTaskCard
                   key={task.id}
@@ -549,7 +546,7 @@ export default function ConstructionTasks() {
                   onDelete={(taskToDelete) => handleDeleteTask(taskToDelete.id)}
                 />
               )}
-              renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+              renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
                 if (groupingType === 'tasks') {
                   // Para agrupación por rubros y tareas, calcular suma de cantidades
                   const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
