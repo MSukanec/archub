@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings } from 'lucide-react'
+import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
@@ -397,9 +398,29 @@ export default function ConstructionTasks() {
     });
   }, [groupingType]);
 
+  // Crear tabs para el header
+  const headerTabs = [
+    {
+      id: "tasks",
+      label: "Tareas",
+      isActive: activeTab === "tasks"
+    },
+    {
+      id: "phases", 
+      label: "Fases",
+      isActive: activeTab === "phases"
+    }
+  ]
+
+  const headerProps = {
+    title: "Listado de Tareas",
+    tabs: headerTabs,
+    onTabChange: setActiveTab
+  }
+
   if (isLoading) {
     return (
-      <Layout wide={true}>
+      <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando tareas...</div>
         </div>
@@ -408,58 +429,81 @@ export default function ConstructionTasks() {
   }
 
   return (
-    <Layout wide={true}>
+    <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* Action Bar Desktop */}
-        <ActionBarDesktop
-          title="Listado de Tareas"
-          icon={<CheckSquare className="w-6 h-6" />}
-          features={[
-            {
-              icon: <CheckSquare className="w-4 h-4" />,
-              title: "Vista de Tabla Completa",
-              description: "Listado detallado con todas las tareas organizadas por rubro, unidad, cantidad y fase asignada."
-            },
-            {
-              icon: <Calendar className="w-4 h-4" />,
-              title: "Gestión de Fechas",
-              description: "Control de fechas de inicio, fin y progreso de cada tarea con vista temporal."
-            },
-            {
-              icon: <MapPin className="w-4 h-4" />,
-              title: "Organización por Fases",
-              description: "Agrupación automática por fases del proyecto con opciones de agrupamiento flexible."
-            },
-            {
-              icon: <User className="w-4 h-4" />,
-              title: "Control de Recursos",
-              description: "Gestión de cantidades, unidades y asignación de recursos para cada tarea."
-            }
-          ]}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          showGrouping
-          groupingType={groupingType}
-          onGroupingChange={setGroupingType}
-          primaryActionLabel={activeTab === "tasks" ? "Agregar Tarea" : "Crear Fase"}
-          onPrimaryActionClick={activeTab === "tasks" ? handleAddSingleTask : handleAddPhase}
-          secondaryActionLabel={activeTab === "tasks" ? "Agregar Tareas en Masa" : undefined}
-          onSecondaryActionClick={activeTab === "tasks" ? handleAddTask : undefined}
-          tabs={[
-            {
-              value: "tasks",
-              label: "Tareas",
-              icon: <TableIcon className="h-4 w-4" />
-            },
-            {
-              value: "phases",
-              label: "Fases",
-              icon: <Settings className="h-4 w-4" />
-            }
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        {/* Action Bar Row Simplificado */}
+        <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg bg-[var(--card-bg)]">
+          <div className="flex items-center justify-between px-4 py-3">
+            {/* Filtros de la izquierda */}
+            <div className="flex items-center gap-2">
+              {/* Campo de búsqueda */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Buscar tareas..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="pl-9 h-8 w-64 text-xs"
+                />
+              </div>
+
+              {/* Selector de agrupación - Solo en tab de tareas */}
+              {activeTab === "tasks" && (
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select value={groupingType} onValueChange={setGroupingType}>
+                    <SelectTrigger className="h-8 w-40 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="phases">Por fases</SelectItem>
+                      <SelectItem value="rubros">Por rubros</SelectItem>
+                      <SelectItem value="tasks">Por tareas</SelectItem>
+                      <SelectItem value="rubros-phases">Rubros → Fases</SelectItem>
+                      <SelectItem value="phases-rubros">Fases → Rubros</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Acciones de la derecha */}
+            <div className="flex items-center gap-2">
+              {activeTab === "tasks" ? (
+                <>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={handleAddTask}
+                    className="h-8 text-xs"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Agregar en Masa
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={handleAddSingleTask}
+                    className="h-8 text-xs"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Agregar Tarea
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={handleAddPhase}
+                  className="h-8 text-xs"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Crear Fase
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Tab Content */}
         {activeTab === "tasks" ? (
