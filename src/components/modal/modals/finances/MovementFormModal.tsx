@@ -2309,35 +2309,39 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           onValueChange={(values) => {
             console.log('🎯 CascadingSelect selection:', values)
             
-            // Actualizar directamente sin limpiar primero
-            if (values.length >= 1) {
-              console.log('🔄 Setting type_id:', values[0])
-              form.setValue('type_id', values[0], { shouldValidate: true, shouldDirty: true })
-              setSelectedTypeId(values[0])
-              handleTypeChange(values[0])
-            } else {
-              form.setValue('type_id', '', { shouldValidate: true, shouldDirty: true })
-              setSelectedTypeId('')
-            }
-            
-            if (values.length >= 2) {
-              console.log('🔄 Setting category_id:', values[1])
-              form.setValue('category_id', values[1], { shouldValidate: true, shouldDirty: true })
-              setSelectedCategoryId(values[1])
-            } else {
-              form.setValue('category_id', '', { shouldValidate: true, shouldDirty: true })
-              setSelectedCategoryId('')
-            }
-            
-            if (values.length >= 3) {
-              console.log('🔄 Setting subcategory_id:', values[2])
-              form.setValue('subcategory_id', values[2], { shouldValidate: true, shouldDirty: true })
-            } else {
-              form.setValue('subcategory_id', '', { shouldValidate: true, shouldDirty: true })
-            }
-            
-            // Forzar re-render del formulario
-            form.trigger(['type_id', 'category_id', 'subcategory_id'])
+            // Usar setTimeout para evitar conflictos de re-render
+            setTimeout(() => {
+              // Actualizar todos los valores de forma síncrona
+              if (values.length >= 1) {
+                console.log('🔄 Setting type_id:', values[0])
+                form.setValue('type_id', values[0])
+                setSelectedTypeId(values[0])
+              } else {
+                form.setValue('type_id', '')
+                setSelectedTypeId('')
+              }
+              
+              if (values.length >= 2) {
+                console.log('🔄 Setting category_id:', values[1])
+                form.setValue('category_id', values[1])
+                setSelectedCategoryId(values[1])
+              } else {
+                form.setValue('category_id', '')
+                setSelectedCategoryId('')
+              }
+              
+              if (values.length >= 3) {
+                console.log('🔄 Setting subcategory_id:', values[2])
+                form.setValue('subcategory_id', values[2])
+              } else {
+                form.setValue('subcategory_id', '')
+              }
+              
+              // Llamar handleTypeChange al final para no interferir
+              if (values.length >= 1) {
+                handleTypeChange(values[0])
+              }
+            }, 0)
           }}
           placeholder="Tipo > Categoría > Subcategoría..."
           className="w-full"
