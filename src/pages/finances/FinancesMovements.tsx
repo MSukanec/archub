@@ -987,9 +987,11 @@ export default function Movements() {
         const subcategoryName = item.movement_data?.subcategory?.name;
         
         return (
-          <div className="text-xs">
-            <span className="font-bold">{categoryName}</span>
-            {subcategoryName && <span> - {subcategoryName}</span>}
+          <div className="space-y-1">
+            <div className="text-xs font-bold">{categoryName}</div>
+            {subcategoryName && (
+              <div className="text-xs text-muted-foreground">{subcategoryName}</div>
+            )}
           </div>
         );
       },
