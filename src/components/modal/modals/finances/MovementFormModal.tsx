@@ -2309,33 +2309,29 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           onValueChange={(values) => {
             console.log('🎯 CascadingSelect selection:', values)
             
-            // Usar startTransition para agrupar todas las actualizaciones
-            React.startTransition(() => {
-              // Limpiar campos primero
+            // Actualizar directamente sin limpiar primero
+            if (values.length >= 1) {
+              form.setValue('type_id', values[0])
+              setSelectedTypeId(values[0])
+              handleTypeChange(values[0])
+            } else {
               form.setValue('type_id', '')
-              form.setValue('category_id', '')
-              form.setValue('subcategory_id', '')
               setSelectedTypeId('')
+            }
+            
+            if (values.length >= 2) {
+              form.setValue('category_id', values[1])
+              setSelectedCategoryId(values[1])
+            } else {
+              form.setValue('category_id', '')
               setSelectedCategoryId('')
-              
-              // Luego establecer los nuevos valores
-              if (values.length >= 1) {
-                form.setValue('type_id', values[0])
-                setSelectedTypeId(values[0])
-              }
-              if (values.length >= 2) {
-                form.setValue('category_id', values[1])
-                setSelectedCategoryId(values[1])
-              }
-              if (values.length >= 3) {
-                form.setValue('subcategory_id', values[2])
-              }
-              
-              // Llamar handleTypeChange al final con el nuevo valor
-              if (values.length >= 1) {
-                handleTypeChange(values[0])
-              }
-            })
+            }
+            
+            if (values.length >= 3) {
+              form.setValue('subcategory_id', values[2])
+            } else {
+              form.setValue('subcategory_id', '')
+            }
           }}
           placeholder="Tipo > Categoría > Subcategoría..."
           className="w-full"
