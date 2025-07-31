@@ -118,6 +118,14 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 31, 2025. FINANCES MOVEMENTS ACTIONBAR AND FINANCIAL CARDS CALCULATION FIX COMPLETED: Successfully implemented ActionBarDesktop integration and corrected movement type filtering for accurate financial calculations - COMPLETED
+  • MOVEMENT TYPE FILTERING CORRECTED: Fixed movement type filtering from singular ("Ingreso/Egreso") to plural ("Ingresos/Egresos") matching actual database values
+  • ACTIONBAR INTEGRATION: Replaced custom action bar with proper ActionBarDesktop component including search, custom filters, and primary action
+  • FINANCIAL CARDS WORKING: All three summary cards now display correct calculations - Resumen General, Por Moneda, and Por Billetera with proper currency filtering
+  • FEATURE INTRODUCTION REMOVED: Eliminated FeatureIntroduction component as ActionBar now handles expandable features functionality
+  • DEBUG LOGGING CLEANED: Removed comprehensive debug console logs after confirming data flow accuracy
+  • CALCULATION ACCURACY: Financial cards now show real data - Ingresos: $61,405,506, Egresos: $52,477,154, Balance: $8,928,352
+  • IMPORT DEPENDENCIES: Added ActionBarDesktop import and maintained all existing table functionality with headerActions
 - July 31, 2025. DOUBLE-ROW TABLE HEADER SYSTEM IMPLEMENTED: Successfully enhanced Table.tsx component with double-row header architecture and ActionBar styling consistency - COMPLETED
   • DOUBLE HEADER ARCHITECTURE: Table component now supports headerActions prop with leftActions and rightActions for button placement in superior row
   • ACTIONBAR STYLING INTEGRATION: Both header rows use ActionBar background colors (--accent-bg) and text colors (--accent-text) for visual consistency

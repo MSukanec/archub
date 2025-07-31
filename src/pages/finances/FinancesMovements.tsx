@@ -39,6 +39,7 @@ import { Table } from "@/components/ui-custom/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import MovementCard from "@/components/cards/MovementCard";
@@ -697,27 +698,7 @@ export default function Movements() {
       );
     });
 
-  // Debug logging
-  console.log("Available currencies:", availableCurrencies);
-  console.log("Available wallets:", availableWallets);
-  console.log("Filtered movements count:", filteredMovements.length);
-  console.log("Sample filtered movement:", filteredMovements[0]);
-  
-  // Debug balance calculations
-  const ingresos = filteredMovements
-    .filter(m => m.movement_data?.type?.name === 'Ingresos')
-    .reduce((sum, m) => sum + (m.amount || 0), 0);
-  const egresos = filteredMovements
-    .filter(m => m.movement_data?.type?.name === 'Egresos')
-    .reduce((sum, m) => sum + (m.amount || 0), 0);
-  
-  console.log("Calculated ingresos:", ingresos);
-  console.log("Calculated egresos:", egresos);
-  console.log("Balance:", ingresos - egresos);
-  
-  // Debug movement type names
-  const uniqueTypes = [...new Set(filteredMovements.map(m => m.movement_data?.type?.name))];
-  console.log("Unique movement types:", uniqueTypes);
+
 
   // Group conversions - let CustomTable handle sorting
   const processedMovements = groupConversions(filteredMovements);
@@ -1422,10 +1403,15 @@ export default function Movements() {
     >
 
 
-      {/* Feature Introduction */}
-      <FeatureIntroduction
+
+
+      {/* ActionBarDesktop */}
+      <ActionBarDesktop
         title="Gestión de Movimientos Financieros"
-        icon={<DollarSign className="h-6 w-6" />}
+        icon={DollarSign}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        showProjectSelector={true}
         features={[
           {
             icon: <TrendingUp className="h-5 w-5" />,
@@ -1448,41 +1434,11 @@ export default function Movements() {
             description: "Filtra por tipo, categoría, favoritos y busca por descripción para encontrar movimientos específicos"
           }
         ]}
+        customFilters={customFilters}
+        customActions={customActions}
+        primaryActionLabel="Nuevo movimiento"
+        onPrimaryActionClick={() => openModal('movement')}
       />
-
-      {/* Action Bar con contenido de la primera fila de la tabla */}
-      <div className="bg-[var(--accent-bg)] text-[var(--accent-text)] px-4 py-2 rounded-lg mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Filtros
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-            className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Importar
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => openModal('movement')}
-            className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo movimiento
-          </Button>
-        </div>
-      </div>
       
       {/* Cards de resumen financiero */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
