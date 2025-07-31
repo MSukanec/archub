@@ -2275,78 +2275,40 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         </div>
       )}
 
-      {/* DEMO: CascadingSelect - Sistema de cascada tipo > categoría > subcategoría */}
+      {/* CascadingSelect - Sistema de cascada tipo > categoría > subcategoría */}
       <div className="space-y-2">
         <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Selector en Cascada (Demo) *
+          Selector en Cascada *
         </label>
         <CascadingSelect
-          options={[
-            {
-              value: "ingresos",
-              label: "Ingresos",
-              children: [
-                {
-                  value: "aportes_terceros",
-                  label: "Aportes de Terceros",
-                  children: [
-                    { value: "aporte_inicial", label: "Aporte Inicial" },
-                    { value: "aporte_adicional", label: "Aporte Adicional" },
-                    { value: "interes_ganado", label: "Interés Ganado" }
-                  ]
-                },
-                {
-                  value: "aportes_propios",
-                  label: "Aportes Propios",
-                  children: [
-                    { value: "capital_propio", label: "Capital Propio" },
-                    { value: "reinversion", label: "Reinversión" }
-                  ]
-                },
-                {
-                  value: "ventas",
-                  label: "Ventas",
-                  children: [
-                    { value: "venta_producto", label: "Venta de Producto" },
-                    { value: "venta_servicio", label: "Venta de Servicio" }
-                  ]
-                }
-              ]
-            },
-            {
-              value: "egresos",
-              label: "Egresos",
-              children: [
-                {
-                  value: "materiales",
-                  label: "Materiales",
-                  children: [
-                    { value: "cemento", label: "Cemento" },
-                    { value: "arena", label: "Arena" },
-                    { value: "hierro", label: "Hierro" }
-                  ]
-                },
-                {
-                  value: "mano_obra",
-                  label: "Mano de Obra",
-                  children: [
-                    { value: "albañil", label: "Albañil" },
-                    { value: "electricista", label: "Electricista" },
-                    { value: "plomero", label: "Plomero" }
-                  ]
-                },
-                {
-                  value: "subcontratos",
-                  label: "Subcontratos",
-                  children: [
-                    { value: "pintura", label: "Pintura" },
-                    { value: "plomeria", label: "Plomería" },
-                    { value: "electricidad", label: "Electricidad" }
-                  ]
-                }
-              ]
+          options={organizationConcepts?.map(concept => ({
+            value: concept.id,
+            label: concept.name,
+            children: concept.children?.map(category => ({
+              value: category.id,
+              label: category.name,
+              children: category.children?.map(subcategory => ({
+                value: subcategory.id,
+                label: subcategory.name
+              })) || []
+            })) || []
+          })) || []}
+          onValueChange={(values) => {
+            console.log('🎯 CascadingSelect selection:', values)
+            // Actualizar los campos del formulario según la selección
+            if (values.length >= 1) {
+              form.setValue('type_id', values[0])
+              setSelectedTypeId(values[0])
+              handleTypeChange(values[0])
             }
-          ]}
+            if (values.length >= 2) {
+              form.setValue('category_id', values[1])
+              setSelectedCategoryId(values[1])
+            }
+            if (values.length >= 3) {
+              form.setValue('subcategory_id', values[2])
+            }
+          }}
           placeholder="Tipo > Categoría > Subcategoría..."
           className="w-full"
         />
