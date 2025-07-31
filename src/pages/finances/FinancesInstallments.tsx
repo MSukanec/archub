@@ -1018,8 +1018,29 @@ export default function FinancesInstallments() {
 
   ]
 
+  // Crear tabs para el header como en FinancesAnalysis
+  const headerTabs = [
+    {
+      id: "clients",
+      label: "Resumen por Cliente",
+      isActive: activeTab === "clients"
+    },
+    {
+      id: "currencies",
+      label: "Detalle por Moneda", 
+      isActive: activeTab === "currencies"
+    },
+    {
+      id: "details",
+      label: "Detalle de Compromisos",
+      isActive: activeTab === "details"
+    }
+  ]
+
   const headerProps = {
-    title: "Aportes de Terceros"
+    title: "Aportes de Terceros",
+    tabs: headerTabs,
+    onTabChange: setActiveTab
   }
 
   if (isLoading) {
@@ -1046,7 +1067,7 @@ export default function FinancesInstallments() {
           ]}
         />
 
-      {/* Action Bar Desktop - SIEMPRE VISIBLE */}
+      {/* Action Bar Desktop con funcionalidad normal */}
       <ActionBarDesktop
         title="Gestión de Aportes de Terceros"
         icon={<Receipt className="w-6 h-6" />}
@@ -1079,25 +1100,6 @@ export default function FinancesInstallments() {
         customFilters={customFilters}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
-        tabs={[
-          {
-            value: "clients",
-            label: "Resumen por Cliente",
-            icon: <Users className="h-4 w-4" />
-          },
-          {
-            value: "currencies",
-            label: "Detalle por Moneda",
-            icon: <Coins className="h-4 w-4" />
-          },
-          {
-            value: "details",
-            label: "Detalle de Compromisos",
-            icon: <FileText className="h-4 w-4" />
-          }
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
       />
 
       {/* Conditional Content - EmptyState o Tabs */}

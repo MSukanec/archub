@@ -277,7 +277,7 @@ export function HeaderDesktop({
 
       {/* Segunda fila: Tabs (solo si hay tabs) */}
       {hasTabs && (
-        <div className="w-full h-10 px-4 flex items-center border-t border-[var(--menues-border)]">
+        <div className="w-full h-10 px-4 flex items-center">
           <div className="flex items-center space-x-6">
             {tabs.map((tab) => (
               <button
