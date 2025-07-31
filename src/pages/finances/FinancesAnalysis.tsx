@@ -132,13 +132,11 @@ export default function FinancesAnalysis() {
         width: '40%',
         render: (item: any) => (
           <div className="space-y-1">
-            <Badge variant="outline" className="text-xs">
+            <div className="font-medium text-sm">
               {item.category}
-            </Badge>
-            <div>
-              <Badge variant="secondary" className="text-xs">
-                {item.subcategory}
-              </Badge>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {item.subcategory}
             </div>
           </div>
         )
