@@ -2293,34 +2293,49 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               })) || []
             })) || []
           })) || []}
-          value={React.useMemo(() => {
+          value={(() => {
             // Construir el valor actual basado en los campos del formulario
             const values = []
-            const typeId = form.watch('type_id')
-            const categoryId = form.watch('category_id')
-            const subcategoryId = form.watch('subcategory_id')
+            const typeId = selectedTypeId
+            const categoryId = selectedCategoryId
+            const subcategoryId = form.getValues('subcategory_id')
             
             if (typeId) values.push(typeId)
             if (categoryId) values.push(categoryId)
             if (subcategoryId) values.push(subcategoryId)
             
             return values
-          }, [form.watch('type_id'), form.watch('category_id'), form.watch('subcategory_id')])}
+          })()}
           onValueChange={(values) => {
             console.log('🎯 CascadingSelect selection:', values)
-            // Actualizar los campos del formulario según la selección
-            if (values.length >= 1) {
-              form.setValue('type_id', values[0])
-              setSelectedTypeId(values[0])
-              handleTypeChange(values[0])
-            }
-            if (values.length >= 2) {
-              form.setValue('category_id', values[1])
-              setSelectedCategoryId(values[1])
-            }
-            if (values.length >= 3) {
-              form.setValue('subcategory_id', values[2])
-            }
+            
+            // Usar startTransition para agrupar todas las actualizaciones
+            React.startTransition(() => {
+              // Limpiar campos primero
+              form.setValue('type_id', '')
+              form.setValue('category_id', '')
+              form.setValue('subcategory_id', '')
+              setSelectedTypeId('')
+              setSelectedCategoryId('')
+              
+              // Luego establecer los nuevos valores
+              if (values.length >= 1) {
+                form.setValue('type_id', values[0])
+                setSelectedTypeId(values[0])
+              }
+              if (values.length >= 2) {
+                form.setValue('category_id', values[1])
+                setSelectedCategoryId(values[1])
+              }
+              if (values.length >= 3) {
+                form.setValue('subcategory_id', values[2])
+              }
+              
+              // Llamar handleTypeChange al final con el nuevo valor
+              if (values.length >= 1) {
+                handleTypeChange(values[0])
+              }
+            })
           }}
           placeholder="Tipo > Categoría > Subcategoría..."
           className="w-full"
