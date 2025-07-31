@@ -178,7 +178,7 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
         <div className="flex items-center gap-2">
           {customRestricted || (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={onImportClick}
               className="h-8 px-3 text-xs"

@@ -1430,10 +1430,10 @@ export default function Movements() {
             reason="general_mode"
           >
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-              className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
+              className="h-8 px-3 text-xs"
             >
               <Upload className="mr-1 h-3 w-3" />
               Importar
@@ -1571,151 +1571,7 @@ export default function Movements() {
           key: "movement_date",
           direction: "desc",
         }}
-        headerActions={{
-          leftActions: (
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    <Tag className="w-4 h-4 mr-1" />
-                    Tipo
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => setFilterByType("all")}>
-                    Todos los tipos
-                  </DropdownMenuItem>
-                  {availableTypes.map((type) => (
-                    <DropdownMenuItem key={type} onClick={() => setFilterByType(type!)}>
-                      {type}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    <FolderTree className="w-4 h-4 mr-1" />
-                    Categoría
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => setFilterByCategory("all")}>
-                    Todas las categorías
-                  </DropdownMenuItem>
-                  {availableCategories.map((category) => (
-                    <DropdownMenuItem key={category} onClick={() => setFilterByCategory(category!)}>
-                      {category}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    <Star className="w-4 h-4 mr-1" />
-                    Favoritos
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => setFilterByFavorites("all")}>
-                    Todos los movimientos
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterByFavorites("favorites")}>
-                    Solo favoritos
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    <Coins className="w-4 h-4 mr-1" />
-                    Moneda
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => setFilterByCurrency("all")}>
-                    Todas las monedas
-                  </DropdownMenuItem>
-                  {availableCurrencies.map((currency) => (
-                    <DropdownMenuItem key={currency} onClick={() => setFilterByCurrency(currency!)}>
-                      {currency}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    <Wallet className="w-4 h-4 mr-1" />
-                    Billetera
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem onClick={() => setFilterByWallet("all")}>
-                    Todas las billeteras
-                  </DropdownMenuItem>
-                  {availableWallets.map((wallet) => (
-                    <DropdownMenuItem key={wallet} onClick={() => setFilterByWallet(wallet!)}>
-                      {wallet}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ),
-          rightActions: (
-            <div className="flex items-center gap-2">
-              <CustomRestricted 
-                functionName="Importación de Excel"
-                reason="general_mode"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-                  className="h-8 px-3 text-xs"
-                >
-                  <Upload className="mr-1 h-3 w-3" />
-                  Importar
-                </Button>
-              </CustomRestricted>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => openModal('movement')}
-                className="h-8 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
-              >
-                <Plus className="mr-1 h-3 w-3" />
-                Nuevo movimiento
-              </Button>
-            </div>
-          )
-        }}
+
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
           if ('is_conversion_group' in item) {
             return "movement-row-conversion";
