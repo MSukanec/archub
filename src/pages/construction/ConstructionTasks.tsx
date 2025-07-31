@@ -1,12 +1,18 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter } from 'lucide-react'
+import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter, FolderTree } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
@@ -447,23 +453,37 @@ export default function ConstructionTasks() {
                 />
               </div>
 
-              {/* Selector de agrupación - Solo en tab de tareas */}
+              {/* Botón de agrupación - Solo en tab de tareas */}
               {activeTab === "tasks" && (
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
-                  <Select value={groupingType} onValueChange={setGroupingType}>
-                    <SelectTrigger className="h-8 w-40 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="phases">Por fases</SelectItem>
-                      <SelectItem value="rubros">Por rubros</SelectItem>
-                      <SelectItem value="tasks">Por tareas</SelectItem>
-                      <SelectItem value="rubros-phases">Rubros → Fases</SelectItem>
-                      <SelectItem value="phases-rubros">Fases → Rubros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-3 text-xs"
+                    >
+                      <FolderTree className="w-4 h-4 mr-1" />
+                      Agrupación
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem onClick={() => setGroupingType("phases")}>
+                      Agrupar por Fases
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setGroupingType("rubros")}>
+                      Agrupar por Rubros
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setGroupingType("tasks")}>
+                      Agrupar por Tareas
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setGroupingType("rubros-phases")}>
+                      Agrupar por Fases y Rubros
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setGroupingType("phases-rubros")}>
+                      Agrupar por Rubros y Tareas
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
 
