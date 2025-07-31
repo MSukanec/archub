@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Plus, Filter, X, Search, Building, Building2, Folder, Menu } from "lucide-react";
+import { ChevronDown, Plus, Filter, X, Search, Building, Building2, Folder, Menu, DollarSign, Users, Calendar, BarChart3, FileText, Settings, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -117,40 +117,39 @@ export function HeaderDesktop({
     return "Archub";
   };
 
+  // Mapeo de páginas específicas - definido fuera de funciones para reutilizar
+  const pageMap: { [key: string]: string } = {
+    // Finanzas
+    "/finances/movements": "Movimientos",
+    "/finances/installments": "Aportes de Terceros", 
+    "/finances/analysis": "Análisis de Obra",
+    "/finances": "Resumen Financiero",
+    
+    // Construcción  
+    "/construction/tasks": "Tareas",
+    "/construction/budgets": "Presupuestos",
+    "/construction/materials": "Materiales",
+    "/construction/schedule": "Cronograma",
+    "/construction/logs": "Bitácoras",
+    "/construction/attendance": "Asistencia",
+    "/construction/gallery": "Galería",
+    "/construction/subcontracts": "Subcontratos",
+    "/construction": "Resumen de Construcción",
+    
+    // Diseño
+    "/design/dashboard": "Resumen de Diseño",
+    "/design/documentation": "Documentación",
+    
+    // Organización
+    "/organization/projects": "Proyectos",
+    "/organization/contacts": "Contactos",
+    "/organization/preferences": "Preferencias",
+    "/organization/activity": "Actividad",
+    "/organization/tasks": "Tareas para Hacer"
+  };
+
   const getPageBreadcrumb = () => {
     const section = getCurrentSectionLabel();
-    
-    // Mapeo de páginas específicas
-    const pageMap: { [key: string]: string } = {
-      // Finanzas
-      "/finances/movements": "Movimientos",
-      "/finances/installments": "Aportes de Terceros", 
-      "/finances/analysis": "Análisis de Obra",
-      "/finances": "Resumen Financiero",
-      
-      // Construcción  
-      "/construction/tasks": "Tareas",
-      "/construction/budgets": "Presupuestos",
-      "/construction/materials": "Materiales",
-      "/construction/schedule": "Cronograma",
-      "/construction/logs": "Bitácoras",
-      "/construction/attendance": "Asistencia",
-      "/construction/gallery": "Galería",
-      "/construction/subcontracts": "Subcontratos",
-      "/construction": "Resumen de Construcción",
-      
-      // Diseño
-      "/design/dashboard": "Resumen de Diseño",
-      "/design/documentation": "Documentación",
-      
-      // Organización
-      "/organization/projects": "Proyectos",
-      "/organization/contacts": "Contactos",
-      "/organization/preferences": "Preferencias",
-      "/organization/activity": "Actividad",
-      "/organization/tasks": "Tareas para Hacer"
-    };
-
     const pageName = pageMap[location];
     
     if (pageName && section !== pageName) {
@@ -161,13 +160,37 @@ export function HeaderDesktop({
   };
 
   const getBreadcrumbIcon = () => {
-    if (location === "/") return <Building className="w-4 h-4" />;
-    if (location.startsWith("/design")) return <Building2 className="w-4 h-4" />;
-    if (location.startsWith("/construction")) return <Building2 className="w-4 h-4" />;
-    if (location.startsWith("/finances")) return <Building2 className="w-4 h-4" />;
-    if (location.startsWith("/teams")) return <Building2 className="w-4 h-4" />;
-    if (location.startsWith("/organization")) return <Building className="w-4 h-4" />;
-    return <Folder className="w-4 h-4" />;
+    // Mapeo específico de páginas a iconos
+    const iconMap: { [key: string]: React.ReactNode } = {
+      // Finanzas
+      "/finances/movements": <DollarSign className="w-4 h-4 text-[var(--accent)]" />,
+      "/finances/installments": <FileText className="w-4 h-4 text-[var(--accent)]" />, 
+      "/finances/analysis": <BarChart3 className="w-4 h-4 text-[var(--accent)]" />,
+      "/finances": <DollarSign className="w-4 h-4 text-[var(--accent)]" />,
+      
+      // Construcción  
+      "/construction/tasks": <BarChart3 className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction/budgets": <DollarSign className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction/materials": <Building2 className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction/schedule": <Calendar className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction/logs": <FileText className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction/attendance": <Users className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction/gallery": <FileText className="w-4 h-4 text-[var(--accent)]" />,
+      "/construction": <Building2 className="w-4 h-4 text-[var(--accent)]" />,
+      
+      // Diseño
+      "/design/dashboard": <Building2 className="w-4 h-4 text-[var(--accent)]" />,
+      "/design/documentation": <FileText className="w-4 h-4 text-[var(--accent)]" />,
+      
+      // Organización
+      "/organization/projects": <Folder className="w-4 h-4 text-[var(--accent)]" />,
+      "/organization/contacts": <Users className="w-4 h-4 text-[var(--accent)]" />,
+      "/organization/preferences": <Settings className="w-4 h-4 text-[var(--accent)]" />,
+      "/organization/activity": <BarChart3 className="w-4 h-4 text-[var(--accent)]" />,
+      "/organization/tasks": <FileText className="w-4 h-4 text-[var(--accent)]" />
+    };
+
+    return iconMap[location] || <Folder className="w-4 h-4 text-[var(--accent)]" />;
   };
 
   const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances");
@@ -190,9 +213,12 @@ export function HeaderDesktop({
     >
       {/* Primera fila: Breadcrumb y Selector de Proyecto */}
       <div className="w-full h-10 px-4 flex items-center justify-between">
-        {/* Left: Page Title with Breadcrumb */}
-        <div className="flex items-center">
-          <h1 className="text-sm font-medium text-[var(--layout-text)]">{getPageBreadcrumb()}</h1>
+        {/* Left: Page Title with Icon */}
+        <div className="flex items-center gap-2">
+          {getBreadcrumbIcon()}
+          <h1 className="text-sm font-medium text-[var(--layout-text)]">
+            {pageMap[location] || title || getCurrentSectionLabel()}
+          </h1>
         </div>
 
         {/* Right: Project Selector (only if project-based section) */}
@@ -202,9 +228,9 @@ export function HeaderDesktop({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost-flat"
+                    variant="ghost"
                     size="sm"
-                    className="p-1 h-auto text-sm font-medium text-[var(--layout-text)] border border-[var(--menues-border)]"
+                    className="h-8 px-3 text-xs"
                   >
                     <Folder className="w-4 h-4 mr-1" />
                     {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
