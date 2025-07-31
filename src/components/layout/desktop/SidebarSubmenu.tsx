@@ -201,8 +201,6 @@ export function SidebarSubmenu() {
         isSecondarySidebarExpanded ? "w-64" : "w-[40px]"
       )}
       style={{
-        borderTopRightRadius: '12px',
-        borderBottomRightRadius: '12px',
         overflow: 'hidden'
       }}
       onMouseEnter={() => setSecondaryHovered(true)}
