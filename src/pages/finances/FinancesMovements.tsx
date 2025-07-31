@@ -1447,6 +1447,45 @@ export default function Movements() {
           key: "movement_date",
           direction: "desc",
         }}
+        headerActions={{
+          leftActions: (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-3 text-xs"
+            >
+              <Filter className="w-4 h-4 mr-1" />
+              Filtros
+            </Button>
+          ),
+          rightActions: (
+            <div className="flex items-center gap-2">
+              <CustomRestricted 
+                functionName="Importación de Excel"
+                reason="general_mode"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Upload className="mr-1 h-3 w-3" />
+                  Importar
+                </Button>
+              </CustomRestricted>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => openModal('movement')}
+                className="h-8 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                Nuevo movimiento
+              </Button>
+            </div>
+          )
+        }}
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
           if ('is_conversion_group' in item) {
             return "movement-row-conversion";

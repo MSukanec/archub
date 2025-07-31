@@ -51,6 +51,11 @@ interface TableProps<T = any> {
   renderGroupHeader?: (groupKey: string, groupRows: T[]) => React.ReactNode;
   // Modos de visualización
   mode?: "default" | "budget" | "construction";
+  // 🆕 DOBLE ENCABEZADO - Fila superior con botones
+  headerActions?: {
+    leftActions?: React.ReactNode;
+    rightActions?: React.ReactNode;
+  };
 }
 
 export function Table<T = any>({
@@ -73,6 +78,8 @@ export function Table<T = any>({
   groupBy,
   renderGroupHeader,
   mode = "default",
+  // 🆕 DOBLE ENCABEZADO
+  headerActions,
 }: TableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(
     defaultSort?.key || null,
@@ -316,9 +323,25 @@ export function Table<T = any>({
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
-        {/* Column Headers */}
+        {/* Header Actions Row - Fila superior con botones */}
+        {headerActions && (
+          <div className="flex items-center justify-between px-4 py-3 bg-[var(--accent-bg)] text-[var(--accent-text)] border-b border-[var(--menues-border)]">
+            <div className="flex items-center gap-2">
+              {headerActions.leftActions}
+            </div>
+            <div className="flex items-center gap-2">
+              {headerActions.rightActions}
+            </div>
+          </div>
+        )}
+        
+        {/* Column Headers - Fila inferior con títulos de columnas */}
         <div
-          className="grid gap-4 px-4 py-3 bg-[var(--table-header-bg)] text-xs font-medium text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]"
+          className={cn(
+            "grid gap-4 px-4 py-3 text-xs font-medium border-b",
+            // Usar colores del ActionBar para consistencia
+            "bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--menues-border)]"
+          )}
           style={{ gridTemplateColumns: getGridTemplateColumns() }}
         >
           {selectable && (

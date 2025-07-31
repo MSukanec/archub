@@ -118,6 +118,13 @@ Archub is a modern construction management platform built with a React frontend 
 ## Changelog
 
 ```
+- July 31, 2025. DOUBLE-ROW TABLE HEADER SYSTEM IMPLEMENTED: Successfully enhanced Table.tsx component with double-row header architecture and ActionBar styling consistency - COMPLETED
+  • DOUBLE HEADER ARCHITECTURE: Table component now supports headerActions prop with leftActions and rightActions for button placement in superior row
+  • ACTIONBAR STYLING INTEGRATION: Both header rows use ActionBar background colors (--accent-bg) and text colors (--accent-text) for visual consistency
+  • TWO-ROW STRUCTURE: Superior row contains action buttons (filters, import, new movement), inferior row maintains column titles with sorting
+  • FINANCES MOVEMENTS IMPLEMENTATION: Applied double header to FinancesMovements page with Filtros button left, Importar/Nuevo movimiento buttons right
+  • VISUAL HIERARCHY: Headers now match ActionBar appearance throughout application for unified design language
+  • RESPONSIVE BUTTON SIZING: Header buttons use size="sm" and h-8 classes for proper proportion within table header context
 - July 29, 2025. COMPLETE FORM SIMPLIFICATION AND LAYOUT OPTIMIZATION FINALIZED: Successfully eliminated ALL decorative elements from ALL movement forms including final APORTES PROPIOS and RETIROS PROPIOS cleanup - COMPLETED
   • ALL DECORATIVE SECTIONS ELIMINATED: Removed decorative sections from ALL movement forms including ConversionFields, TransferFields, MaterialesFields, ManoDeObraFields, AportesFields, AportesPropiosFields, and RetirosPropiosFields
   • APORTES PROPIOS CLEANED: Eliminated "Información del Aporte Propio" decorative section with DollarSign icon and description from AportesPropiosFields
