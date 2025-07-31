@@ -41,7 +41,7 @@ import { useConstructionTasks } from '@/hooks/use-construction-tasks'
 import { useSubcontracts } from '@/hooks/use-subcontracts'
 import { useCreateMovementSubcontract, useDeleteMovementSubcontractsByMovement, useMovementSubcontractsByMovement } from '@/hooks/use-movement-subcontracts'
 import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
-import { NestedSelector } from '@/components/ui-custom/NestedSelector'
+import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 import { Button } from '@/components/ui/button'
 import { Info } from 'lucide-react'
 
@@ -2280,8 +2280,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Selector en Cascada *
         </label>
-        <NestedSelector
-          data={organizationConcepts || []}
+        <CascadingSelect
+          options={(organizationConcepts || []).map(concept => ({
+            value: concept.id,
+            label: concept.name,
+            children: concept.children?.map((category: any) => ({
+              value: category.id,
+              label: category.name,
+              children: category.children?.map((subcategory: any) => ({
+                value: subcategory.id,
+                label: subcategory.name
+              })) || []
+            })) || []
+          }))}
           value={(() => {
             // Construir el valor actual basado en los campos del formulario
             const values = []
