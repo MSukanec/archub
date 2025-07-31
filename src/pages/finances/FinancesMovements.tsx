@@ -37,7 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table } from "@/components/ui-custom/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
-import { FinancialCards } from "@/components/ui-custom/FinancialCards";
+
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
@@ -186,8 +186,9 @@ export default function Movements() {
             setSearchValue("");
             setFilterByType("all");
             setFilterByCategory("all");
-            setFilterByFavorites("all");
+            setFilterBySubcategory("all");
             setFilterByScope("all");
+            setFilterByFavorites("all");
             setFilterByCurrency("all");
             setFilterByWallet("all");
           },
@@ -207,8 +208,9 @@ export default function Movements() {
   // Filter states
   const [filterByType, setFilterByType] = useState("all");
   const [filterByCategory, setFilterByCategory] = useState("all");
-  const [filterByFavorites, setFilterByFavorites] = useState("all");
+  const [filterBySubcategory, setFilterBySubcategory] = useState("all");
   const [filterByScope, setFilterByScope] = useState("all");
+  const [filterByFavorites, setFilterByFavorites] = useState("all");
   const [filterByCurrency, setFilterByCurrency] = useState("all");
   const [filterByWallet, setFilterByWallet] = useState("all");
 
@@ -645,6 +647,10 @@ export default function Movements() {
       const matchesCategory =
         filterByCategory === "all" ||
         movement.movement_data?.category?.name === filterByCategory;
+      
+      const matchesSubcategory =
+        filterBySubcategory === "all" ||
+        movement.movement_data?.subcategory?.name === filterBySubcategory;
       const matchesFavorites =
         filterByFavorites === "all" ||
         (filterByFavorites === "favorites" && movement.is_favorite);
@@ -663,7 +669,7 @@ export default function Movements() {
         movement.movement_data?.wallet?.name === filterByWallet;
 
       return (
-        matchesSearch && matchesType && matchesCategory && matchesFavorites && matchesScope && matchesCurrency && matchesWallet
+        matchesSearch && matchesType && matchesCategory && matchesSubcategory && matchesFavorites && matchesScope && matchesCurrency && matchesWallet
       );
     });
 
@@ -709,6 +715,36 @@ export default function Movements() {
                 {category}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Filtrar por subcategoría
+        </Label>
+        <Select value={filterBySubcategory} onValueChange={setFilterBySubcategory}>
+          <SelectTrigger className="mt-1">
+            <SelectValue placeholder="Todas las subcategorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las subcategorías</SelectItem>
+            {availableSubcategories
+              .filter(subcategory => {
+                if (filterByCategory === "all") return true;
+                // Filter subcategories based on selected category
+                const relevantMovements = movements.filter(m => 
+                  m.movement_data?.category?.name === filterByCategory
+                );
+                return relevantMovements.some(m => 
+                  m.movement_data?.subcategory?.name === subcategory
+                );
+              })
+              .map((subcategory) => (
+                <SelectItem key={subcategory} value={subcategory!}>
+                  {subcategory}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>
@@ -787,41 +823,15 @@ export default function Movements() {
   const handleClearFilters = () => {
     setFilterByType("all");
     setFilterByCategory("all");
-    setFilterByFavorites("all");
+    setFilterBySubcategory("all");
     setFilterByScope("all");
+    setFilterByFavorites("all");
     setFilterByCurrency("all");
     setFilterByWallet("all");
     setSearchValue("");
   };
 
-  // Calculate balance by currency
-  const calculateBalanceByCurrency = () => {
-    const balanceMap = new Map<string, { income: number; expense: number; balance: number; currency: string }>();
-    
-    filteredMovements.forEach((movement) => {
-      const currency = movement.movement_data?.currency?.name || 'Unknown';
-      const amount = movement.amount || 0;
-      const typeName = movement.movement_data?.type?.name || "";
-      
-      if (!balanceMap.has(currency)) {
-        balanceMap.set(currency, { income: 0, expense: 0, balance: 0, currency });
-      }
-      
-      const balance = balanceMap.get(currency)!;
-      
-      if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
-        balance.income += amount;
-      } else if (typeName === "Egresos" || typeName.toLowerCase().includes("egreso")) {
-        balance.expense += amount;
-      }
-      
-      balance.balance = balance.income - balance.expense;
-    });
-    
-    return Array.from(balanceMap.values());
-  };
 
-  const currencyBalances = calculateBalanceByCurrency();
 
 
 
@@ -1349,8 +1359,9 @@ export default function Movements() {
   const hasActiveFilters = searchValue.trim() !== "" || 
                           filterByType !== "all" || 
                           filterByCategory !== "all" || 
-                          filterByFavorites !== "all" || 
+                          filterBySubcategory !== "all" ||
                           filterByScope !== "all" ||
+                          filterByFavorites !== "all" || 
                           filterByCurrency !== "all" ||
                           filterByWallet !== "all";
 
@@ -1420,11 +1431,7 @@ export default function Movements() {
         ]}
       />
       
-      {/* Financial Cards - Responsive */}
-      <FinancialCards 
-        balances={currencyBalances} 
-        defaultCurrency={defaultCurrency?.name}
-      />
+
       
       <Table
         columns={tableColumns}
