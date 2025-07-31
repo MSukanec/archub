@@ -2382,28 +2382,35 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       </div>
 
       {/* Campo de Descripción - COMÚN para todos los formularios */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Descripción (opcional)
-        </label>
-        <Textarea
-          placeholder="Descripción del movimiento..."
-          rows={3}
-          value={form.watch('description') || ''}
-          onChange={(e) => {
-            const value = e.target.value
-            // Actualizar en todos los formularios para mantener sincronización
-            form.setValue('description', value)
-            aportesForm.setValue('description', value)
-            aportesPropriosForm.setValue('description', value)
-            retirosPropriosForm.setValue('description', value)
-            materialesForm.setValue('description', value)
-            subcontratosForm.setValue('description', value)
-            conversionForm.setValue('description', value)
-            transferForm.setValue('description', value)
-          }}
-        />
-      </div>
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descripción (opcional)</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Descripción del movimiento..."
+                rows={3}
+                {...field}
+                onChange={(e) => {
+                  const value = e.target.value
+                  // Actualizar en todos los formularios para mantener sincronización
+                  field.onChange(e) // Importante: llamar al onChange original del field
+                  aportesForm.setValue('description', value)
+                  aportesPropriosForm.setValue('description', value)
+                  retirosPropriosForm.setValue('description', value)
+                  materialesForm.setValue('description', value)
+                  subcontratosForm.setValue('description', value)
+                  conversionForm.setValue('description', value)
+                  transferForm.setValue('description', value)
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       
       {(isConversion || isEditingConversion) ? (
