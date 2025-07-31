@@ -48,11 +48,6 @@
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 90%);
   --card-hover-bg: hsl(60, 8%, 95%);
-  
-  /* ActionBar system */
-  --actionbar-bg: hsl(90, 50%, 92%);
-  --actionbar-border: hsl(90, 30%, 85%);
-  --actionbar-text: hsl(0, 0%, 35%);
 
   /* Secondary Cards */
   --secondary-card-bg: hsl(0, 0%, 95%);

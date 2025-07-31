@@ -140,10 +140,10 @@ export function ActionBarDesktop({
   return (
     <div 
       className={cn(
-        "hidden md:flex flex-col rounded-lg border border-[var(--actionbar-border)] mb-6 shadow-lg",
+        "hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg",
         className
       )}
-      style={{ backgroundColor: "var(--actionbar-bg)", color: "var(--actionbar-text)" }}
+      style={{ backgroundColor: "var(--card-bg)" }}
     >
       {/* Bottom Row - ActionBar Content */}
       <div className="flex items-center justify-between px-4 py-3">
