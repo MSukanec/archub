@@ -524,6 +524,18 @@ export default function Movements() {
     ),
   );
 
+  const availableCurrencies = Array.from(
+    new Set(
+      movements.map((m) => m.movement_data?.currency?.name).filter(Boolean),
+    ),
+  );
+
+  const availableWallets = Array.from(
+    new Set(
+      movements.map((m) => m.movement_data?.wallet?.name).filter(Boolean),
+    ),
+  );
+
   // Group movements by conversion_group_id
   const groupConversions = (movements: Movement[]): (Movement | ConversionGroup | TransferGroup)[] => {
     const conversionGroups = new Map<string, Movement[]>();
@@ -1418,46 +1430,118 @@ export default function Movements() {
         headerActions={{
           leftActions: (
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Tag className="w-4 h-4 mr-1" />
-                Tipo
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <FolderTree className="w-4 h-4 mr-1" />
-                Categoría
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Star className="w-4 h-4 mr-1" />
-                Favoritos
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Coins className="w-4 h-4 mr-1" />
-                Moneda
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Wallet className="w-4 h-4 mr-1" />
-                Billetera
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Tag className="w-4 h-4 mr-1" />
+                    Tipo
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={() => setFilterByType("all")}>
+                    Todos los tipos
+                  </DropdownMenuItem>
+                  {availableTypes.map((type) => (
+                    <DropdownMenuItem key={type} onClick={() => setFilterByType(type!)}>
+                      {type}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    <FolderTree className="w-4 h-4 mr-1" />
+                    Categoría
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={() => setFilterByCategory("all")}>
+                    Todas las categorías
+                  </DropdownMenuItem>
+                  {availableCategories.map((category) => (
+                    <DropdownMenuItem key={category} onClick={() => setFilterByCategory(category!)}>
+                      {category}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Star className="w-4 h-4 mr-1" />
+                    Favoritos
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={() => setFilterByFavorites("all")}>
+                    Todos los movimientos
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterByFavorites("favorites")}>
+                    Solo favoritos
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Coins className="w-4 h-4 mr-1" />
+                    Moneda
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={() => setFilterByCurrency("all")}>
+                    Todas las monedas
+                  </DropdownMenuItem>
+                  {availableCurrencies.map((currency) => (
+                    <DropdownMenuItem key={currency} onClick={() => setFilterByCurrency(currency!)}>
+                      {currency}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Wallet className="w-4 h-4 mr-1" />
+                    Billetera
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem onClick={() => setFilterByWallet("all")}>
+                    Todas las billeteras
+                  </DropdownMenuItem>
+                  {availableWallets.map((wallet) => (
+                    <DropdownMenuItem key={wallet} onClick={() => setFilterByWallet(wallet!)}>
+                      {wallet}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ),
           rightActions: (
