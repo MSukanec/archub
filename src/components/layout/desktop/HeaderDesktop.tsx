@@ -126,7 +126,7 @@ export function HeaderDesktop({
 
   return (
     <div 
-      className={`fixed top-0 right-0 z-50 h-14 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)] flex items-center justify-between transition-all duration-300 ${
+      className={`fixed top-0 right-0 z-50 h-10 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)] flex items-center justify-between transition-all duration-300 ${
         // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
         isSecondaryExpanded
           ? "left-[304px]" // 40px main + 264px secondary  
