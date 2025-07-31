@@ -2397,6 +2397,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             conversionForm.setValue('description', value)
             transferForm.setValue('description', value)
           }}
+          className="text-sm placeholder:text-sm"
         />
       </div>
 
