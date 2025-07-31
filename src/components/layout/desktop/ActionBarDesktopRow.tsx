@@ -6,50 +6,41 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tag, FolderTree, Star, Coins, Wallet, Upload, Plus } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
+
+interface FilterConfig {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  value: string;
+  setValue: (value: string) => void;
+  options: (string | null)[];
+  defaultLabel: string;
+  enabled?: boolean;
+}
+
+interface ActionConfig {
+  label: string;
+  icon: LucideIcon;
+  onClick: () => void;
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost';
+  enabled?: boolean;
+}
 
 interface ActionBarDesktopRowProps {
-  // Filtros de la izquierda (copiados exactamente de la tabla)
-  filterByType: string;
-  setFilterByType: (value: string) => void;
-  availableTypes: (string | null)[];
-  filterByCategory: string;
-  setFilterByCategory: (value: string) => void;
-  availableCategories: (string | null)[];
-  filterByFavorites: string;
-  setFilterByFavorites: (value: string) => void;
-  filterByCurrency: string;
-  setFilterByCurrency: (value: string) => void;
-  availableCurrencies: string[];
-  filterByWallet: string;
-  setFilterByWallet: (value: string) => void;
-  availableWallets: string[];
+  // Configuración de filtros - completamente flexible
+  filters: FilterConfig[];
   
-  // Acciones de la derecha
-  onImportClick: () => void;
-  onNewMovementClick: () => void;
+  // Configuración de acciones - completamente flexible  
+  actions: ActionConfig[];
   
-  // Opcional: restricciones
+  // Opcional: restricciones personalizadas
   customRestricted?: ReactNode;
 }
 
 export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
-  filterByType,
-  setFilterByType,
-  availableTypes,
-  filterByCategory,
-  setFilterByCategory,
-  availableCategories,
-  filterByFavorites,
-  setFilterByFavorites,
-  filterByCurrency,
-  setFilterByCurrency,
-  availableCurrencies,
-  filterByWallet,
-  setFilterByWallet,
-  availableWallets,
-  onImportClick,
-  onNewMovementClick,
+  filters = [],
+  actions = [],
   customRestricted
 }) => {
   return (
@@ -58,144 +49,49 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
       style={{ backgroundColor: "var(--card-bg)" }}
     >
       <div className="flex items-center justify-between px-4 py-3">
-        {/* Filtros a la izquierda - EXACTO como en la tabla */}
+        {/* Filtros a la izquierda - Completamente dinámicos */}
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Tag className="w-4 h-4 mr-1" />
-                Tipo
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setFilterByType("all")}>
-                Todos los tipos
-              </DropdownMenuItem>
-              {availableTypes.map((type) => (
-                <DropdownMenuItem key={type} onClick={() => setFilterByType(type!)}>
-                  {type}
+          {filters.filter(filter => filter.enabled !== false).map((filter) => (
+            <DropdownMenu key={filter.key}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                >
+                  <filter.icon className="w-4 h-4 mr-1" />
+                  {filter.label}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => filter.setValue("all")}>
+                  {filter.defaultLabel}
                 </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <FolderTree className="w-4 h-4 mr-1" />
-                Categoría
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setFilterByCategory("all")}>
-                Todas las categorías
-              </DropdownMenuItem>
-              {availableCategories.map((category) => (
-                <DropdownMenuItem key={category} onClick={() => setFilterByCategory(category!)}>
-                  {category}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Star className="w-4 h-4 mr-1" />
-                Favoritos
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setFilterByFavorites("all")}>
-                Todos los movimientos
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterByFavorites("favorites")}>
-                Solo favoritos
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Coins className="w-4 h-4 mr-1" />
-                Moneda
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setFilterByCurrency("all")}>
-                Todas las monedas
-              </DropdownMenuItem>
-              {availableCurrencies.map((currency) => (
-                <DropdownMenuItem key={currency} onClick={() => setFilterByCurrency(currency!)}>
-                  {currency}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs"
-              >
-                <Wallet className="w-4 h-4 mr-1" />
-                Billetera
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setFilterByWallet("all")}>
-                Todas las billeteras
-              </DropdownMenuItem>
-              {availableWallets.map((wallet) => (
-                <DropdownMenuItem key={wallet} onClick={() => setFilterByWallet(wallet!)}>
-                  {wallet}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {filter.options.filter(Boolean).map((option) => (
+                  <DropdownMenuItem key={option} onClick={() => filter.setValue(option!)}>
+                    {option}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ))}
         </div>
 
-        {/* Acciones a la derecha - EXACTO como en la tabla */}
+        {/* Acciones a la derecha - Completamente dinámicas */}
         <div className="flex items-center gap-2">
-          {customRestricted || (
+          {customRestricted}
+          {actions.filter(action => action.enabled !== false).map((action, index) => (
             <Button
-              variant="secondary"
+              key={index}
+              variant={action.variant || 'default'}
               size="sm"
-              onClick={onImportClick}
+              onClick={action.onClick}
               className="h-8 px-3 text-xs"
             >
-              <Upload className="mr-1 h-3 w-3" />
-              Importar
+              <action.icon className="mr-1 h-3 w-3" />
+              {action.label}
             </Button>
-          )}
-          <Button
-            variant="default"
-            size="sm"
-            onClick={onNewMovementClick}
-            className="h-8 px-3 text-xs"
-          >
-            <Plus className="mr-1 h-3 w-3" />
-            Nuevo movimiento
-          </Button>
+          ))}
         </div>
       </div>
     </div>

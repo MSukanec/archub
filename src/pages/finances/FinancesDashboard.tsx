@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet } from 'lucide-react'
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet, Coins, Star, Upload, Plus } from 'lucide-react'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { TimePeriodSelector } from '@/components/ui-custom/TimePeriodSelector'
@@ -196,61 +196,74 @@ export default function FinancesDashboard() {
       
       <div className="space-y-6">
         <ActionBarDesktopRow
-          // Use Type filter for currency view
-          filterByType={currencyOptions.find(opt => opt.value === currencyView)?.label || 'Peso Argentino'}
-          setFilterByType={(label) => {
-            const option = currencyOptions.find(opt => opt.label === label)
-            if (option) {
-              setCurrencyView(option.value)
+          filters={[
+            {
+              key: 'currency',
+              label: 'Moneda',
+              icon: Coins,
+              value: currencyOptions.find(opt => opt.value === currencyView)?.label || 'Peso Argentino',
+              setValue: (label) => {
+                const option = currencyOptions.find(opt => opt.label === label)
+                if (option) {
+                  setCurrencyView(option.value)
+                }
+              },
+              options: currencyOptions.map(opt => opt.label),
+              defaultLabel: 'Todas las monedas'
+            },
+            {
+              key: 'period',
+              label: 'Período',
+              icon: Calendar,
+              value: timePeriod === 'desde-siempre' ? 'Desde Siempre' : 
+                     timePeriod === 'este-mes' ? 'Este Mes' :
+                     timePeriod === 'ultimos-30-dias' ? 'Últimos 30 Días' :
+                     timePeriod === 'ultimos-90-dias' ? 'Últimos 90 Días' : 'Desde Siempre',
+              setValue: (label) => {
+                const mapping: { [key: string]: string } = {
+                  'Desde Siempre': 'desde-siempre',
+                  'Este Mes': 'este-mes',
+                  'Últimos 30 Días': 'ultimos-30-dias',
+                  'Últimos 90 Días': 'ultimos-90-dias'
+                }
+                setTimePeriod(mapping[label] || 'desde-siempre')
+              },
+              options: ['Desde Siempre', 'Este Mes', 'Últimos 30 Días', 'Últimos 90 Días'],
+              defaultLabel: 'Todos los períodos'
+            },
+            {
+              key: 'project',
+              label: 'Proyecto',
+              icon: Star,
+              value: selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos'),
+              setValue: (projectName) => {
+                if (projectName === 'Todos los Proyectos') {
+                  setSelectedProjectId('all')
+                } else {
+                  const project = projects.find(p => p.name === projectName)
+                  if (project) {
+                    setSelectedProjectId(project.id)
+                  }
+                }
+              },
+              options: availableProjects,
+              defaultLabel: 'Todos los proyectos'
             }
-          }}
-          availableTypes={currencyOptions.map(opt => opt.label)}
-          
-          // Use Category filter for time period
-          filterByCategory={timePeriod === 'desde-siempre' ? 'Desde Siempre' : 
-                           timePeriod === 'este-mes' ? 'Este Mes' :
-                           timePeriod === 'ultimos-30-dias' ? 'Últimos 30 Días' :
-                           timePeriod === 'ultimos-90-dias' ? 'Últimos 90 Días' : 'Desde Siempre'}
-          setFilterByCategory={(label) => {
-            const mapping: { [key: string]: string } = {
-              'Desde Siempre': 'desde-siempre',
-              'Este Mes': 'este-mes',
-              'Últimos 30 Días': 'ultimos-30-dias',
-              'Últimos 90 Días': 'ultimos-90-dias'
+          ]}
+          actions={[
+            {
+              label: 'Importar',
+              icon: Upload,
+              onClick: () => console.log('Import action for dashboard'),
+              variant: 'secondary'
+            },
+            {
+              label: 'Nuevo Movimiento',
+              icon: Plus,
+              onClick: () => console.log('Navigate to new movement'),
+              variant: 'default'
             }
-            setTimePeriod(mapping[label] || 'desde-siempre')
-          }}
-          availableCategories={['Desde Siempre', 'Este Mes', 'Últimos 30 Días', 'Últimos 90 Días']}
-          
-          // Use Favorites filter for project selection
-          filterByFavorites={selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos')}
-          setFilterByFavorites={(projectName) => {
-            if (projectName === 'Todos los Proyectos') {
-              setSelectedProjectId('all')
-            } else {
-              const project = projects.find(p => p.name === projectName)
-              if (project) {
-                setSelectedProjectId(project.id)
-              }
-            }
-          }}
-          availableFavorites={availableProjects}
-          
-          // Dummy props to satisfy the interface
-          filterByCurrency="all"
-          setFilterByCurrency={() => {}}
-          availableCurrencies={[]}
-          filterByWallet="all"
-          setFilterByWallet={() => {}}
-          availableWallets={[]}
-          
-          // Action buttons
-          onImportClick={() => {
-            console.log('Import action for dashboard')
-          }}
-          onNewMovementClick={() => {
-            console.log('Navigate to new movement')
-          }}
+          ]}
         />
 
         {/* Show empty state if no movements exist */}

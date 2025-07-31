@@ -1324,22 +1324,61 @@ export default function Movements() {
 
       {/* ActionBarDesktopRow */}
       <ActionBarDesktopRow
-        filterByType={filterByType}
-        setFilterByType={setFilterByType}
-        availableTypes={availableTypes}
-        filterByCategory={filterByCategory}
-        setFilterByCategory={setFilterByCategory}
-        availableCategories={availableCategories}
-        filterByFavorites={filterByFavorites}
-        setFilterByFavorites={setFilterByFavorites}
-        filterByCurrency={filterByCurrency}
-        setFilterByCurrency={setFilterByCurrency}
-        availableCurrencies={availableCurrencies}
-        filterByWallet={filterByWallet}
-        setFilterByWallet={setFilterByWallet}
-        availableWallets={availableWallets}
-        onImportClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-        onNewMovementClick={() => openModal('movement')}
+        filters={[
+          {
+            key: 'type',
+            label: 'Tipo',
+            icon: Tag,
+            value: filterByType,
+            setValue: setFilterByType,
+            options: availableTypes,
+            defaultLabel: 'Todos los tipos'
+          },
+          {
+            key: 'category',
+            label: 'Categoría',
+            icon: FolderTree,
+            value: filterByCategory,
+            setValue: setFilterByCategory,
+            options: availableCategories,
+            defaultLabel: 'Todas las categorías'
+          },
+          {
+            key: 'favorites',
+            label: 'Favoritos',
+            icon: Star,
+            value: filterByFavorites,
+            setValue: setFilterByFavorites,
+            options: ['favorites'],
+            defaultLabel: 'Todos los movimientos'
+          },
+          {
+            key: 'currency',
+            label: 'Moneda',
+            icon: Coins,
+            value: filterByCurrency,
+            setValue: setFilterByCurrency,
+            options: availableCurrencies,
+            defaultLabel: 'Todas las monedas'
+          },
+          {
+            key: 'wallet',
+            label: 'Billetera',
+            icon: Wallet,
+            value: filterByWallet,
+            setValue: setFilterByWallet,
+            options: availableWallets,
+            defaultLabel: 'Todas las billeteras'
+          }
+        ]}
+        actions={[
+          {
+            label: 'Nuevo Movimiento',
+            icon: Plus,
+            onClick: () => openModal('movement'),
+            variant: 'default'
+          }
+        ]}
         customRestricted={
           <CustomRestricted 
             functionName="Importación de Excel"

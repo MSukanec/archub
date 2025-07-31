@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText, TrendingUp, Plus } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText, TrendingUp, Plus, Star, Tag, FolderTree } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -40,6 +40,12 @@ export default function FinancesAnalysis() {
 
   // Get projects for filter
   const { data: projects = [] } = useProjects(organizationId)
+  
+  // Prepare data for filters
+  const availableProjects = useMemo(() => {
+    const projectOptions = projects.map(project => project.name)
+    return ['Todos los Proyectos', ...projectOptions]
+  }, [projects])
 
   // Get movements data - use selectedProjectId for filtering, empty string for all projects
   const { data: movements = [], isLoading } = useMovements(
@@ -122,12 +128,6 @@ export default function FinancesAnalysis() {
 
   // Sort alphabetically by subcategory
   const sortedAnalysis = analysisWithPercentage.sort((a, b) => a.subcategory.localeCompare(b.subcategory))
-
-  // Prepare data for filters
-  const availableProjects = useMemo(() => {
-    const projectOptions = projects.map(project => project.name)
-    return ['Todos los Proyectos', ...projectOptions]
-  }, [projects])
 
   // Filter by search
   const filteredData = sortedAnalysis.filter(item =>
@@ -500,52 +500,59 @@ export default function FinancesAnalysis() {
     >
       <div className="space-y-4">
         <ActionBarDesktopRow
-          // Map the filters to the expected props - use Type filter for grouping
-          filterByType={groupByCategory ? 'Por Subcategoría' : 'Sin Agrupar'}
-          setFilterByType={(value) => setGroupByCategory(value === 'Por Subcategoría')}
-          availableTypes={['Sin Agrupar', 'Por Subcategoría']}
-          
-          // Map Category filter for currency view
-          filterByCategory={currencyView === 'discriminado' ? 'Discriminado' : currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
-          setFilterByCategory={(value) => {
-            if (value === 'Discriminado') setCurrencyView('discriminado')
-            else if (value === 'Pesificado') setCurrencyView('pesificado')
-            else if (value === 'Dolarizado') setCurrencyView('dolarizado')
-          }}
-          availableCategories={
-            activeTab === "charts" 
-              ? ['Pesificado', 'Dolarizado'] 
-              : ['Discriminado', 'Pesificado', 'Dolarizado']
-          }
-          
-          // Use Favorites filter for project selection
-          filterByFavorites={selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos')}
-          setFilterByFavorites={(projectName) => {
-            if (projectName === 'Todos los Proyectos') {
-              setSelectedProjectId('all')
-            } else {
-              const project = projects.find(p => p.name === projectName)
-              if (project) {
-                setSelectedProjectId(project.id)
-              }
+          filters={[
+            {
+              key: 'grouping',
+              label: 'Agrupación',
+              icon: Tag,
+              value: groupByCategory ? 'Por Subcategoría' : 'Sin Agrupar',
+              setValue: (value) => setGroupByCategory(value === 'Por Subcategoría'),
+              options: ['Sin Agrupar', 'Por Subcategoría'],
+              defaultLabel: 'Todas las agrupaciones',
+              enabled: activeTab === "analysis"
+            },
+            {
+              key: 'currency',
+              label: 'Moneda',
+              icon: FolderTree,
+              value: currencyView === 'discriminado' ? 'Discriminado' : currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado',
+              setValue: (value) => {
+                if (value === 'Discriminado') setCurrencyView('discriminado')
+                else if (value === 'Pesificado') setCurrencyView('pesificado')
+                else if (value === 'Dolarizado') setCurrencyView('dolarizado')
+              },
+              options: activeTab === "charts" 
+                ? ['Pesificado', 'Dolarizado'] 
+                : ['Discriminado', 'Pesificado', 'Dolarizado'],
+              defaultLabel: 'Todas las monedas'
+            },
+            {
+              key: 'project',
+              label: 'Proyecto',
+              icon: Star,
+              value: selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos'),
+              setValue: (projectName) => {
+                if (projectName === 'Todos los Proyectos') {
+                  setSelectedProjectId('all')
+                } else {
+                  const project = projects.find(p => p.name === projectName)
+                  if (project) {
+                    setSelectedProjectId(project.id)
+                  }
+                }
+              },
+              options: availableProjects,
+              defaultLabel: 'Todos los proyectos'
             }
-          }}
-          
-          // Dummy props to satisfy the interface
-          filterByCurrency="all"
-          setFilterByCurrency={() => {}}
-          availableCurrencies={[]}
-          filterByWallet="all"
-          setFilterByWallet={() => {}}
-          availableWallets={[]}
-          
-          // Action buttons
-          onImportClick={() => {
-            console.log('Import action for analysis')
-          }}
-          onNewMovementClick={() => {
-            console.log('Navigate to new movement')
-          }}
+          ]}
+          actions={[
+            {
+              label: 'Nuevo Movimiento',
+              icon: Plus,
+              onClick: () => console.log('Navigate to new movement'),
+              variant: 'default'
+            }
+          ]}
         />
 
         {/* Tab Content */}
