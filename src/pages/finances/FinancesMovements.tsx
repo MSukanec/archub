@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Paperclip, TrendingUp, FileText, Users, BarChart3 } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Paperclip, TrendingUp, FileText, Users, BarChart3, Tag, FolderTree, Star, Coins, Wallet } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Layout } from "@/components/layout/desktop/Layout";
-import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1374,41 +1374,7 @@ export default function Movements() {
       }}
       wide={true}
     >
-      {/* ActionBar Desktop - SIEMPRE VISIBLE */}
-      <ActionBarDesktop
-        title="Gestión de Movimientos Financieros"
-        icon={<DollarSign className="w-6 h-6" />}
-        features={[
-          {
-            icon: <TrendingUp className="w-5 h-5" />,
-            title: "Seguimiento en Tiempo Real",
-            description: "Monitorea todos tus ingresos y egresos con actualizaciones instantáneas y balances por moneda para control total de tus finanzas."
-          },
-          {
-            icon: <FileText className="w-5 h-5" />,
-            title: "Importación de Excel",
-            description: "Importa movimientos masivos desde archivos Excel con mapeo automático de columnas para ahorrarte tiempo en cargas manuales."
-          },
-          {
-            icon: <Users className="w-5 h-5" />,
-            title: "Conversiones Multi-moneda",
-            description: "Gestiona conversiones entre diferentes monedas con tipos de cambio y seguimiento completo de operaciones cambiarias."
-          },
-          {
-            icon: <BarChart3 className="w-5 h-5" />,
-            title: "Filtros y Búsqueda Avanzada",
-            description: "Filtra por tipo, categoría, favoritos y busca por descripción para encontrar movimientos específicos rapidamente."
-          }
-        ]}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        hasActiveFilters={hasActiveFilters}
-        primaryActionLabel="Nuevo movimiento"
-        onPrimaryActionClick={() => openModal('movement')}
-        customActions={customActions}
-      />
+
 
       {/* Feature Introduction */}
       <FeatureIntroduction
@@ -1451,14 +1417,48 @@ export default function Movements() {
         }}
         headerActions={{
           leftActions: (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-3 text-xs"
-            >
-              <Filter className="w-4 h-4 mr-1" />
-              Filtros
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs"
+              >
+                <Tag className="w-4 h-4 mr-1" />
+                Tipo
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs"
+              >
+                <FolderTree className="w-4 h-4 mr-1" />
+                Categoría
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs"
+              >
+                <Star className="w-4 h-4 mr-1" />
+                Favoritos
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs"
+              >
+                <Coins className="w-4 h-4 mr-1" />
+                Moneda
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs"
+              >
+                <Wallet className="w-4 h-4 mr-1" />
+                Billetera
+              </Button>
+            </div>
           ),
           rightActions: (
             <div className="flex items-center gap-2">
