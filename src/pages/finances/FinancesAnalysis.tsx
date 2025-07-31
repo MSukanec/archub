@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText, TrendingUp } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText, TrendingUp, Plus } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
@@ -13,6 +13,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useSubcontracts } from '@/hooks/use-subcontracts'
 import { useSubcontractAnalysis } from '@/hooks/use-subcontract-analysis'
+import { useProjects } from '@/hooks/use-projects'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
@@ -23,20 +24,33 @@ export default function FinancesAnalysis() {
   const [groupByCategory, setGroupByCategory] = useState(true)
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('pesificado')
   const [activeTab, setActiveTab] = useState("analysis")
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("")
   
   const { data: userData } = useCurrentUser()
   
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
 
-  // Get movements data
+  // Initialize selected project with current project
+  useEffect(() => {
+    if (projectId && !selectedProjectId) {
+      setSelectedProjectId(projectId)
+    }
+  }, [projectId, selectedProjectId])
+
+  // Get projects for filter
+  const { data: projects = [] } = useProjects(organizationId)
+
+  // Get movements data - use selectedProjectId for filtering, empty string for all projects
   const { data: movements = [], isLoading } = useMovements(
     organizationId || '',
-    projectId || ''
+    selectedProjectId === 'all' ? '' : selectedProjectId || ''
   )
 
-  // Get subcontracts analysis data
-  const { data: subcontractAnalysisData = [], isLoading: isLoadingSubcontracts } = useSubcontractAnalysis(projectId)
+  // Get subcontracts analysis data - use selectedProjectId, but for subcontracts we need a specific project
+  const { data: subcontractAnalysisData = [], isLoading: isLoadingSubcontracts } = useSubcontractAnalysis(
+    selectedProjectId === 'all' ? projectId : selectedProjectId
+  )
 
   // Filter only expense movements (EGRESOS) by UUID and specific categories
   const allowedCategoryIds = [
@@ -108,6 +122,12 @@ export default function FinancesAnalysis() {
 
   // Sort alphabetically by subcategory
   const sortedAnalysis = analysisWithPercentage.sort((a, b) => a.subcategory.localeCompare(b.subcategory))
+
+  // Prepare data for filters
+  const availableProjects = useMemo(() => {
+    const projectOptions = projects.map(project => project.name)
+    return ['Todos los Proyectos', ...projectOptions]
+  }, [projects])
 
   // Filter by search
   const filteredData = sortedAnalysis.filter(item =>
@@ -479,42 +499,53 @@ export default function FinancesAnalysis() {
       }}
     >
       <div className="space-y-4">
-        <ActionBarDesktop
-          title="Análisis de Obra"
-          icon={<BarChart3 className="w-5 h-5" />}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          features={features}
-          showProjectSelector={true}
-          showGrouping={activeTab === "analysis"}
-          groupingType={groupByCategory ? 'subcategory' : 'none'}
-          onGroupingChange={(type) => setGroupByCategory(type === 'subcategory')}
-          groupingOptions={[
-            { value: 'none', label: 'No agrupar' },
-            { value: 'subcategory', label: 'Agrupar por Subcategoría' }
-          ]}
-          customGhostButtons={[
-            <Button
-              key="currency-view"
-              variant="ghost"
-              onClick={() => {
-                if (activeTab === "charts") {
-                  // En pestaña de gráficos: solo pesificado <-> dolarizado
-                  setCurrencyView(currencyView === 'pesificado' ? 'dolarizado' : 'pesificado')
-                } else {
-                  // En pestaña de análisis: ciclo completo con discriminado
-                  const nextView = currencyView === 'discriminado' ? 'pesificado' : 
-                                  currencyView === 'pesificado' ? 'dolarizado' : 'discriminado'
-                  setCurrencyView(nextView)
-                }
-              }}
-              className="flex items-center gap-2"
-            >
-              <DollarSign className="w-4 h-4" />
-              {currencyView === 'discriminado' ? 'Discriminado' : 
-               currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
-            </Button>
-          ]}
+        <ActionBarDesktopRow
+          // Map the filters to the expected props - use Type filter for grouping
+          filterByType={groupByCategory ? 'Por Subcategoría' : 'Sin Agrupar'}
+          setFilterByType={(value) => setGroupByCategory(value === 'Por Subcategoría')}
+          availableTypes={['Sin Agrupar', 'Por Subcategoría']}
+          
+          // Map Category filter for currency view
+          filterByCategory={currencyView === 'discriminado' ? 'Discriminado' : currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
+          setFilterByCategory={(value) => {
+            if (value === 'Discriminado') setCurrencyView('discriminado')
+            else if (value === 'Pesificado') setCurrencyView('pesificado')
+            else if (value === 'Dolarizado') setCurrencyView('dolarizado')
+          }}
+          availableCategories={
+            activeTab === "charts" 
+              ? ['Pesificado', 'Dolarizado'] 
+              : ['Discriminado', 'Pesificado', 'Dolarizado']
+          }
+          
+          // Use Favorites filter for project selection
+          filterByFavorites={selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos')}
+          setFilterByFavorites={(projectName) => {
+            if (projectName === 'Todos los Proyectos') {
+              setSelectedProjectId('all')
+            } else {
+              const project = projects.find(p => p.name === projectName)
+              if (project) {
+                setSelectedProjectId(project.id)
+              }
+            }
+          }}
+          
+          // Dummy props to satisfy the interface
+          filterByCurrency="all"
+          setFilterByCurrency={() => {}}
+          availableCurrencies={[]}
+          filterByWallet="all"
+          setFilterByWallet={() => {}}
+          availableWallets={[]}
+          
+          // Action buttons
+          onImportClick={() => {
+            console.log('Import action for analysis')
+          }}
+          onNewMovementClick={() => {
+            console.log('Navigate to new movement')
+          }}
         />
 
         {/* Tab Content */}
