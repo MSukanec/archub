@@ -50,7 +50,7 @@
   --card-hover-bg: hsl(60, 8%, 95%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 95%);
+  --secondary-card-bg: hsl(60, 8%, 92%);
   --secondary-card-fg: hsl(0, 0%, 90%);
   --secondary-card-border: hsl(0, 0%, 50%);
 
@@ -440,7 +440,7 @@
   .shadow-button-normal {
     box-shadow: var(--button-shadow-normal);
   }
-  
+
   .shadow-button-hover {
     box-shadow: var(--button-shadow-hover);
   }
@@ -611,6 +611,7 @@ input[type="number"] {
 
 /* Mobile modal zoom prevention */
 @media (max-width: 768px) {
+
   /* Prevent zoom on modal content */
   .modal-no-zoom {
     touch-action: manipulation !important;
@@ -619,31 +620,32 @@ input[type="number"] {
     -webkit-tap-highlight-color: transparent !important;
     user-select: none !important;
   }
-  
+
   /* Prevent zoom on input fields inside modals */
   .modal-no-zoom input,
   .modal-no-zoom textarea,
   .modal-no-zoom select,
   .modal-no-zoom button {
-    font-size: 16px !important; /* Prevents zoom on iOS when tapping inputs */
+    font-size: 16px !important;
+    /* Prevents zoom on iOS when tapping inputs */
     -webkit-transform: scale(1) !important;
     transform: scale(1) !important;
   }
-  
+
   /* Prevent pinch-to-zoom gestures */
   .modal-no-zoom * {
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
     touch-action: manipulation !important;
   }
-  
+
   /* Override any zoom behavior */
   html.modal-open {
     touch-action: manipulation !important;
     -webkit-text-size-adjust: 100% !important;
     -ms-text-size-adjust: 100% !important;
   }
-  
+
   body.modal-open {
     touch-action: manipulation !important;
     -webkit-text-size-adjust: 100% !important;
