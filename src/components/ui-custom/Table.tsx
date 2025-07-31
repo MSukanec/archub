@@ -325,7 +325,10 @@ export function Table<T = any>({
       <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
         {/* Header Actions Row - Fila superior con botones */}
         {headerActions && (
-          <div className="flex items-center justify-between px-4 py-3 bg-[var(--accent-bg)] text-[var(--accent-text)] border-b border-[var(--menues-border)]">
+          <div 
+            className="flex items-center justify-between px-4 py-3"
+            style={{ backgroundColor: "var(--card-bg)", color: "var(--card-fg)" }}
+          >
             <div className="flex items-center gap-2">
               {headerActions.leftActions}
             </div>
@@ -338,11 +341,13 @@ export function Table<T = any>({
         {/* Column Headers - Fila inferior con títulos de columnas */}
         <div
           className={cn(
-            "grid gap-4 px-4 py-3 text-xs font-medium border-b",
-            // Usar colores del ActionBar para consistencia
-            "bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--menues-border)]"
+            "grid gap-4 px-4 py-3 text-xs font-medium border-b border-[var(--table-row-border)]"
           )}
-          style={{ gridTemplateColumns: getGridTemplateColumns() }}
+          style={{ 
+            gridTemplateColumns: getGridTemplateColumns(),
+            backgroundColor: "var(--card-bg)", 
+            color: "var(--card-fg)" 
+          }}
         >
           {selectable && (
             <div className="flex items-center justify-center">
