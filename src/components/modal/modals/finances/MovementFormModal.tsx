@@ -45,39 +45,6 @@ import { NestedSelector } from '@/components/ui-custom/NestedSelector'
 import { Button } from '@/components/ui/button'
 import { Info } from 'lucide-react'
 
-// Componente común para el campo de descripción
-const DescriptionField = ({ form, allForms }: { form: any, allForms: any[] }) => (
-  <FormField
-    control={form.control}
-    name="description"
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Descripción (opcional)</FormLabel>
-        <FormControl>
-          <Textarea
-            placeholder="Descripción del movimiento..."
-            rows={3}
-            {...field}
-            value={field.value || ''}
-            onChange={(e) => {
-              const value = e.target.value
-              // Actualizar campo principal
-              field.onChange(value)
-              // Sincronizar con todos los formularios
-              allForms.forEach(otherForm => {
-                if (otherForm && otherForm !== form) {
-                  otherForm.setValue('description', value)
-                }
-              })
-            }}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-)
-
 const movementFormSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -2404,49 +2371,55 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         />
       </div>
 
-
+      {/* Campo de Descripción - COMÚN para todos los formularios */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Descripción (opcional)
+        </label>
+        <textarea
+          placeholder="Descripción del movimiento..."
+          value={form.watch('description') || ''}
+          onChange={(e) => {
+            const value = e.target.value
+            // Actualizar en todos los formularios
+            form.setValue('description', value)
+            aportesForm.setValue('description', value)
+            aportesPropriosForm.setValue('description', value)
+            retirosPropriosForm.setValue('description', value)
+            materialesForm.setValue('description', value)
+            subcontratosForm.setValue('description', value)
+            conversionForm.setValue('description', value)
+            transferForm.setValue('description', value)
+          }}
+          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
 
       
       {(isConversion || isEditingConversion) ? (
         <Form {...conversionForm}>
-          <div className="space-y-4">
-            <DescriptionField 
-              form={conversionForm} 
-              allForms={[form, aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, transferForm]}
-            />
-            <ConversionFields 
-              form={conversionForm} 
-              currencies={currencies || []} 
-              wallets={wallets || []} 
-              members={members || []}
-              concepts={concepts}
-              movement={editingMovement}
-            />
-          </div>
+          <ConversionFields 
+            form={conversionForm} 
+            currencies={currencies || []} 
+            wallets={wallets || []} 
+            members={members || []}
+            concepts={concepts}
+            movement={editingMovement}
+          />
         </Form>
       ) : (isTransfer || isEditingTransfer) ? (
         <Form {...transferForm}>
-          <div className="space-y-4">
-            <DescriptionField 
-              form={transferForm} 
-              allForms={[form, aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm]}
-            />
-            <TransferFields
-              form={transferForm}
-              currencies={currencies || []}
-              wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
-            />
-          </div>
+          <TransferFields
+            form={transferForm}
+            currencies={currencies || []}
+            wallets={wallets || []}
+            members={members || []}
+            concepts={concepts}
+          />
         </Form>
       ) : (isAportes || isEditingAportes) ? (
         <Form {...aportesForm}>
           <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
-            <DescriptionField 
-              form={aportesForm} 
-              allForms={[form, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]}
-            />
             <AportesFields
               form={aportesForm}
               currencies={currencies || []}
@@ -2461,10 +2434,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE APORTES PROPIOS
         <Form {...aportesPropriosForm}>
           <form onSubmit={aportesPropriosForm.handleSubmit(onSubmitAportesPropios)} className="space-y-4">
-            <DescriptionField 
-              form={aportesPropriosForm} 
-              allForms={[form, aportesForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]}
-            />
             <AportesPropiosFields
               form={aportesPropriosForm}
               currencies={currencies || []}
@@ -2478,10 +2447,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE RETIROS PROPIOS
         <Form {...retirosPropriosForm}>
           <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
-            <DescriptionField 
-              form={retirosPropriosForm} 
-              allForms={[form, aportesForm, aportesPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]}
-            />
             <RetirosPropiosFields
               form={retirosPropriosForm}
               currencies={currencies || []}
@@ -2495,10 +2460,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE SUBCONTRATOS
         <Form {...subcontratosForm}>
           <form onSubmit={subcontratosForm.handleSubmit(onSubmitSubcontratos)} className="space-y-4">
-            <DescriptionField 
-              form={subcontratosForm} 
-              allForms={[form, aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, conversionForm, transferForm]}
-            />
             <SubcontratosFields
               form={subcontratosForm}
               currencies={currencies || []}
@@ -2516,10 +2477,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE MATERIALES
         <Form {...materialesForm}>
           <form onSubmit={materialesForm.handleSubmit(onSubmitMateriales)} className="space-y-4">
-            <DescriptionField 
-              form={materialesForm} 
-              allForms={[form, aportesForm, aportesPropriosForm, retirosPropriosForm, subcontratosForm, conversionForm, transferForm]}
-            />
             <MaterialesFields
               form={materialesForm}
               currencies={currencies || []}
@@ -2537,10 +2494,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO NORMAL
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
-            <DescriptionField 
-              form={form} 
-              allForms={[aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]}
-            />
 
 
             {/* Fila: Moneda | Billetera */}
