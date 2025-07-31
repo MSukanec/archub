@@ -133,156 +133,36 @@ export function HeaderDesktop({
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Left: Breadcrumb */}
-      <div className="flex items-center space-x-2 text-sm text-[var(--layout-text)]">
-        {/* Organization */}
-        <Button
-          variant="ghost-flat"
-          size="sm"
-          className="p-1 h-auto text-[var(--layout-text)]"
-          onClick={() => navigate("/organization/dashboard")}
-        >
-          <Building className="w-4 h-4 mr-1" />
-          {userData?.organization?.name || "Organización"}
-        </Button>
-        
+      {/* Left: Page Title */}
+      <div className="flex items-center">
+        {title && (
+          <h1 className="text-sm text-[var(--layout-text)]">{title}</h1>
+        )}
+      </div>
+
+      {/* Right: Project Selector (only if project-based section) */}
+      <div className="flex items-center">
         {isProjectBasedSection && (
-          <>
-            <ChevronDown className="w-3 h-3 text-[var(--layout-text)] opacity-50" />
-            
-            {/* Project Selector */}
-            <CustomRestricted feature="project_management">
-              <ProjectSelector
-                projects={projects}
-                selectedProjectId={localSelectedProject || ''}
-                onProjectChange={handleProjectChange}
-                isLoading={updateProjectMutation.isPending}
-                trigger={
-                  <Button
-                    variant="ghost-flat"
-                    size="sm"
-                    className="p-1 h-auto text-[var(--layout-text)]"
-                  >
-                    <Folder className="w-4 h-4 mr-1" />
-                    {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
-                    <ChevronDown className="w-3 h-3 ml-1" />
-                  </Button>
-                }
-              />
-            </CustomRestricted>
-            
-            <ChevronDown className="w-3 h-3 text-[var(--layout-text)] opacity-50" />
-          </>
-        )}
-        
-        {/* Current Section */}
-        <Button
-          variant="ghost-flat"
-          size="sm"
-          className="p-1 h-auto text-[var(--layout-text)]"
-        >
-          {getBreadcrumbIcon()}
-          <span className="ml-1">{getCurrentSectionLabel()}</span>
-        </Button>
-      </div>
-
-      {/* Center: Title and Search */}
-      <div className="flex items-center space-x-4 flex-1 justify-center max-w-lg">
-        {title && !isSearchOpen && (
-          <div className="flex items-center space-x-2">
-            {icon && (
-              <div className="text-[var(--accent)]">
-                {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType)}
-              </div>
-            )}
-            <h1 className="text-lg font-semibold text-[var(--layout-text)]">{title}</h1>
-          </div>
-        )}
-        
-        {showSearch && (
-          <div className="relative flex-1 max-w-md">
-            {isSearchOpen ? (
-              <div className="flex items-center space-x-2">
-                <Input
-                  placeholder="Buscar..."
-                  value={searchValue}
-                  onChange={(e) => onSearchChange?.(e.target.value)}
-                  className="w-full"
-                  autoFocus
-                />
+          <CustomRestricted feature="project_management">
+            <ProjectSelector
+              projects={projects}
+              selectedProjectId={localSelectedProject || ''}
+              onProjectChange={handleProjectChange}
+              isLoading={updateProjectMutation.isPending}
+              trigger={
                 <Button
-                  variant="ghost"
+                  variant="ghost-flat"
                   size="sm"
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    onSearchChange?.("");
-                  }}
+                  className="p-1 h-auto text-[var(--layout-text)]"
                 >
-                  <X className="w-4 h-4" />
+                  <Folder className="w-4 h-4 mr-1" />
+                  {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
+                  <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
-              </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSearchOpen(true)}
-                className="w-full justify-start text-[var(--text-muted)]"
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Buscar...
-              </Button>
-            )}
-          </div>
+              }
+            />
+          </CustomRestricted>
         )}
-      </div>
-
-      {/* Right: Filters and Actions */}
-      <div className="flex items-center space-x-2">
-
-        {/* Filters */}
-        {showFilters && (filters.length > 0 || customFilters) && (
-          <div className="flex items-center space-x-2">
-            {filters.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtros
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {filters.map((filter, index) => (
-                    <DropdownMenuItem key={index} onClick={filter.onClick}>
-                      {filter.label}
-                    </DropdownMenuItem>
-                  ))}
-                  {onClearFilters && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={onClearFilters}>
-                        <X className="w-4 h-4 mr-2" />
-                        Limpiar filtros
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
-            {customFilters}
-            
-            {onClearFilters && (searchValue || filters.some(f => f.label.includes("activo"))) && (
-              <Button variant="ghost" size="sm" onClick={onClearFilters}>
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        )}
-
-        {/* Actions */}
-        {actions.map((action, index) => (
-          <div key={index}>{action}</div>
-        ))}
       </div>
     </div>
   );
