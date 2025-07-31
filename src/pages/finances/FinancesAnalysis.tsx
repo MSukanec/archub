@@ -399,9 +399,9 @@ export default function FinancesAnalysis() {
         label: 'Subcategoría',
         width: '40%',
         render: (item: any) => (
-          <Badge variant="secondary" className="text-xs">
+          <div className="text-sm">
             {item.subcategory}
-          </Badge>
+          </div>
         )
       },
       {
