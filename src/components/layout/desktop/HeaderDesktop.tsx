@@ -190,7 +190,7 @@ export function HeaderDesktop({
                 <Button
                   variant="ghost-flat"
                   size="sm"
-                  className="p-1 h-auto text-sm font-medium text-[var(--layout-text)]"
+                  className="p-1 h-auto text-sm font-medium text-[var(--layout-text)] border border-[var(--menues-border)]"
                 >
                   <Folder className="w-4 h-4 mr-1" />
                   {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
