@@ -250,20 +250,6 @@ export default function FinancesDashboard() {
               defaultLabel: 'Todos los proyectos'
             }
           ]}
-          actions={[
-            {
-              label: 'Importar',
-              icon: Upload,
-              onClick: () => console.log('Import action for dashboard'),
-              variant: 'secondary'
-            },
-            {
-              label: 'Nuevo Movimiento',
-              icon: Plus,
-              onClick: () => console.log('Navigate to new movement'),
-              variant: 'default'
-            }
-          ]}
         />
 
         {/* Show empty state if no movements exist */}
