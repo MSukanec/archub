@@ -546,6 +546,12 @@ export default function Movements() {
     ),
   );
 
+  // Debug logging
+  console.log("Available currencies:", availableCurrencies);
+  console.log("Available wallets:", availableWallets);
+  console.log("Filtered movements count:", filteredMovements.length);
+  console.log("Sample filtered movement:", filteredMovements[0]);
+
   // Group movements by conversion_group_id
   const groupConversions = (movements: Movement[]): (Movement | ConversionGroup | TransferGroup)[] => {
     const conversionGroups = new Map<string, Movement[]>();
@@ -1504,12 +1510,13 @@ export default function Movements() {
             <div className="space-y-3">
               {availableWallets.map((wallet) => {
                 // Obtener todas las monedas para esta billetera
-                const walletCurrencies = [...new Set(
+                const walletCurrenciesSet = new Set(
                   filteredMovements
                     .filter(m => m.movement_data?.wallet?.name === wallet)
                     .map(m => m.movement_data?.currency?.name)
                     .filter(Boolean)
-                )];
+                );
+                const walletCurrencies = Array.from(walletCurrenciesSet);
 
                 return (
                   <div key={wallet} className="space-y-1">
