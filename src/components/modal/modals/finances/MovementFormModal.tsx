@@ -730,13 +730,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesPropiosCategory = viewMode === "aportes_propios"
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
       const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
-      // Detectar subcontratos por subcategoría UUID específica
-      const subcategoryId = form.watch('subcategory_id')
-      const isSubcontratosCategory = subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
+      // Detectar subcontratos por subcategoría UUID específica - usar estado directo para evitar timing issues
+      const isSubcontratosCategory = selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
       
       // DEBUG: Log detection
       console.log('🎯 SubcontratosFields Detection:', { 
-        subcategoryId, 
+        selectedSubcategoryId, 
+        formSubcategoryId: form.watch('subcategory_id'),
         isSubcontratosCategory, 
         UUID_CORRECTO: 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
       })
@@ -837,7 +837,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           
           subcontratosForm.setValue('type_id', form.watch('type_id'))
           subcontratosForm.setValue('category_id', categoryId)
-          subcontratosForm.setValue('subcategory_id', subcategoryId)
+          subcontratosForm.setValue('subcategory_id', selectedSubcategoryId)
           subcontratosForm.setValue('description', preserveValues ? currentValues.description : '')
           subcontratosForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
           subcontratosForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '') 
@@ -849,7 +849,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
-          form.setValue('subcategory_id', subcategoryId)
+          form.setValue('subcategory_id', selectedSubcategoryId)
         }
       } else {
         // Si no es una categoría especial, permitir regresar al formulario normal
@@ -858,7 +858,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), subcontratosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isSubcontratos, editingMovement, currencies, wallets])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), subcontratosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isSubcontratos, editingMovement, currencies, wallets, selectedSubcategoryId])
 
 
 
