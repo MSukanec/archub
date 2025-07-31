@@ -2212,8 +2212,32 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const editPanel = (
     <div className="space-y-4">
-      {/* Campos centralizados: Tipo de Movimiento y Fecha */}
+      {/* Campos centralizados: Fecha y Tipo de Movimiento */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Fecha */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Fecha *
+          </label>
+          <DatePicker
+            value={form.watch('movement_date')}
+            onChange={(date) => {
+              if (date) {
+                // Actualizar todos los formularios
+                form.setValue('movement_date', date)
+                conversionForm.setValue('movement_date', date)
+                transferForm.setValue('movement_date', date)
+                aportesForm.setValue('movement_date', date)
+                aportesPropriosForm.setValue('movement_date', date)
+                retirosPropriosForm.setValue('movement_date', date)
+                materialesForm.setValue('movement_date', date)
+                subcontratosForm.setValue('movement_date', date)
+              }
+            }}
+            placeholder="Seleccionar fecha"
+          />
+        </div>
+
         {/* Tipo de Movimiento (Selector en Cascada) */}
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -2307,29 +2331,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             }}
             placeholder="Tipo > Categoría > Subcategoría..."
             className="w-full"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Fecha *
-          </label>
-          <DatePicker
-            value={form.watch('movement_date')}
-            onChange={(date) => {
-              if (date) {
-                // Actualizar todos los formularios
-                form.setValue('movement_date', date)
-                conversionForm.setValue('movement_date', date)
-                transferForm.setValue('movement_date', date)
-                aportesForm.setValue('movement_date', date)
-                aportesPropriosForm.setValue('movement_date', date)
-                retirosPropriosForm.setValue('movement_date', date)
-                materialesForm.setValue('movement_date', date)
-                subcontratosForm.setValue('movement_date', date)
-              }
-            }}
-            placeholder="Seleccionar fecha"
           />
         </div>
       </div>
