@@ -8,17 +8,17 @@ const formatCurrency = (amount: number, currency: string = '$', abbreviated: boo
   return `${currency} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 0 })}`;
 };
 
-interface WalletBalance {
-  wallet: string;
+interface CurrencyBalance {
+  currency: string;
   balance: number;
   color: string;
 }
 
-interface WalletBalanceChartProps {
-  data: WalletBalance[];
+interface CurrencyBalanceChartProps {
+  data: CurrencyBalance[];
 }
 
-export const WalletBalanceChart: React.FC<WalletBalanceChartProps> = ({ data }) => {
+export const CurrencyBalanceChart: React.FC<CurrencyBalanceChartProps> = ({ data }) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
@@ -41,10 +41,10 @@ export const WalletBalanceChart: React.FC<WalletBalanceChartProps> = ({ data }) 
     >
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-[var(--card-text)]">
-          Por Billetera
+          Por Moneda
         </h3>
         <p className="text-sm text-[var(--muted-text)]">
-          Balance por billetera
+          Balance por tipo de moneda
         </p>
       </div>
       
@@ -53,13 +53,10 @@ export const WalletBalanceChart: React.FC<WalletBalanceChartProps> = ({ data }) 
           <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis 
-              dataKey="wallet" 
+              dataKey="currency" 
               axisLine={false}
               tickLine={false}
               tick={{ fill: 'var(--card-text)', fontSize: 12 }}
-              angle={-45}
-              textAnchor="end"
-              height={60}
             />
             <YAxis 
               axisLine={false}
