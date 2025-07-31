@@ -44,6 +44,13 @@ export function CascadingSelect({
       return
     }
 
+    // Verificar si ya tenemos el path correcto para evitar actualizaciones innecesarias
+    const currentValues = selectedPath.map(item => item.value)
+    if (value.length === currentValues.length && 
+        value.every((val, index) => val === currentValues[index])) {
+      return // Ya tenemos el path correcto
+    }
+
     // Reconstruir el path basado en el valor externo
     const buildPath = (opts: CascadingOption[], vals: string[], path: CascadingOption[] = []): CascadingOption[] | null => {
       if (vals.length === 0) return path
@@ -62,8 +69,28 @@ export function CascadingSelect({
     }
 
     const path = buildPath(options, value)
-    if (path) {
+    if (path && path.length > 0) {
       setSelectedPath(path)
+      // Actualizar currentLevel y currentOptions según el path
+      if (path.length > 0) {
+        const lastItem = path[path.length - 1]
+        if (lastItem.children && lastItem.children.length > 0) {
+          setCurrentOptions(lastItem.children)
+          setCurrentLevel(path.length)
+        } else {
+          // Es un elemento final, mostrar el nivel padre
+          if (path.length > 1) {
+            const parent = path[path.length - 2]
+            if (parent.children) {
+              setCurrentOptions(parent.children)
+              setCurrentLevel(path.length - 1)
+            }
+          } else {
+            setCurrentOptions(options)
+            setCurrentLevel(0)
+          }
+        }
+      }
     }
   }, [value, options])
 
