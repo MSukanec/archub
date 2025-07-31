@@ -54,8 +54,8 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
 }) => {
   return (
     <div 
-      className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg"
-      style={{ backgroundColor: "var(--card-bg)" }}
+      className="hidden md:flex flex-col rounded-lg border border-[var(--actionbar-border)] mb-6 shadow-lg"
+      style={{ backgroundColor: "var(--actionbar-bg)", color: "var(--actionbar-text)" }}
     >
       <div className="flex items-center justify-between px-4 py-3">
         {/* Filtros a la izquierda - EXACTO como en la tabla */}
