@@ -6,7 +6,7 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(60, 8%, 92%);
+  --layout-bg: hsl(50, 50%, 50%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
 
@@ -50,9 +50,9 @@
   --card-hover-bg: hsl(60, 8%, 95%);
 
   /* Secondary Cards */
-  --secondary-card-bg: hsl(60, 8%, 92%);
-  --secondary-card-fg: hsl(0, 0%, 90%);
-  --secondary-card-border: hsl(0, 0%, 50%);
+  --secondary-card-bg: hsl(50, 50%, 50%);
+  --secondary-card-fg: hsl(0, 0%, 35%);
+  --secondary-card-border: hsl(60, 8%, 92%);
 
   /* Button Shadows */
   --button-shadow-normal: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
