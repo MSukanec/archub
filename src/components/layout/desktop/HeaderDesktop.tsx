@@ -22,6 +22,7 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { ProjectSelector } from "@/components/navigation/ProjectSelector";
 import { useProjectContext } from "@/stores/projectContext";
 import { useEffect } from "react";
+import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 
 
 interface HeaderDesktopProps {
@@ -117,8 +118,21 @@ export function HeaderDesktop({
 
   const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances");
 
+  // Hook para detectar el estado del sidebar
+  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
+  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
+  
+  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
+
   return (
-    <div className="hidden md:flex items-center justify-between h-14 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)]">
+    <div 
+      className={`fixed top-0 right-0 z-50 h-14 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)] flex items-center justify-between transition-all duration-300 ${
+        // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
+        isSecondaryExpanded
+          ? "left-[304px]" // 40px main + 264px secondary  
+          : "left-[80px]" // 40px main + 40px secondary
+      }`}
+    >
       {/* Left: Breadcrumb */}
       <div className="flex items-center space-x-2 text-sm text-[var(--layout-text)]">
         {/* Organization */}
