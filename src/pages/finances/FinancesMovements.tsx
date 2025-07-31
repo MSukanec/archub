@@ -546,11 +546,7 @@ export default function Movements() {
     ),
   );
 
-  // Debug logging
-  console.log("Available currencies:", availableCurrencies);
-  console.log("Available wallets:", availableWallets);
-  console.log("Filtered movements count:", filteredMovements.length);
-  console.log("Sample filtered movement:", filteredMovements[0]);
+
 
   // Group movements by conversion_group_id
   const groupConversions = (movements: Movement[]): (Movement | ConversionGroup | TransferGroup)[] => {
@@ -700,6 +696,12 @@ export default function Movements() {
         matchesSearch && matchesType && matchesCategory && matchesSubcategory && matchesFavorites && matchesScope && matchesCurrency && matchesWallet
       );
     });
+
+  // Debug logging
+  console.log("Available currencies:", availableCurrencies);
+  console.log("Available wallets:", availableWallets);
+  console.log("Filtered movements count:", filteredMovements.length);
+  console.log("Sample filtered movement:", filteredMovements[0]);
 
   // Group conversions - let CustomTable handle sorting
   const processedMovements = groupConversions(filteredMovements);
