@@ -2373,15 +2373,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       {/* Campo de Descripción - COMÚN para todos los formularios */}
       <div className="space-y-2">
-        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Descripción (opcional)
         </label>
-        <textarea
+        <Textarea
           placeholder="Descripción del movimiento..."
+          rows={3}
           value={form.watch('description') || ''}
           onChange={(e) => {
             const value = e.target.value
-            // Actualizar en todos los formularios
+            // Actualizar en todos los formularios para mantener sincronización
             form.setValue('description', value)
             aportesForm.setValue('description', value)
             aportesPropriosForm.setValue('description', value)
@@ -2391,7 +2392,6 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             conversionForm.setValue('description', value)
             transferForm.setValue('description', value)
           }}
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
 
