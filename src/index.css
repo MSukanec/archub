@@ -145,6 +145,7 @@
   --text-muted: hsl(240, 5%, 45%);
   --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(0, 0%, 100%);
+  --text-card-title: hsl(0, 0%, 100%);
 
   /* Tables */
   --table-header-bg: hsl(0, 0%, 35%);
@@ -375,6 +376,7 @@
   --text-default: hsl(0, 0%, 98%);
   --text-muted: hsl(240, 5%, 65%);
   --text-subtle: hsl(0, 0%, 60%);
+  --text-card-title: hsl(0, 0%, 85%);
   --text-inverted: hsl(240, 10%, 4%);
 
   /* Borders and Rings */

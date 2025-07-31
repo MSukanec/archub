@@ -1447,7 +1447,7 @@ export default function Movements() {
         {/* Card 1: Resumen General */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-3">Resumen</h3>
+            <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Resumen</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-green-600 dark:text-green-400">Ingresos</span>
@@ -1489,7 +1489,7 @@ export default function Movements() {
         {/* Card 2: Por Moneda */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-3">Por Moneda</h3>
+            <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Por Moneda</h3>
             <div className="space-y-2">
               {availableCurrencies.map((currency) => {
                 const currencyMovements = filteredMovements.filter(m => m.movement_data?.currency?.name === currency);
@@ -1516,7 +1516,7 @@ export default function Movements() {
         {/* Card 3: Por Billetera con Monedas */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-3">Por Billetera</h3>
+            <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Por Billetera</h3>
             <div className="space-y-3">
               {availableWallets.map((wallet) => {
                 // Obtener todas las monedas para esta billetera
