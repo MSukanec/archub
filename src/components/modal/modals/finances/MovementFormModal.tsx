@@ -41,6 +41,7 @@ import { useConstructionTasks } from '@/hooks/use-construction-tasks'
 import { useSubcontracts } from '@/hooks/use-subcontracts'
 import { useCreateMovementSubcontract, useDeleteMovementSubcontractsByMovement, useMovementSubcontractsByMovement } from '@/hooks/use-movement-subcontracts'
 import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
+import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 import { Button } from '@/components/ui/button'
 import { Info } from 'lucide-react'
 
@@ -2273,6 +2274,83 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           </Select>
         </div>
       )}
+
+      {/* DEMO: CascadingSelect - Sistema de cascada tipo > categoría > subcategoría */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Selector en Cascada (Demo) *
+        </label>
+        <CascadingSelect
+          options={[
+            {
+              value: "ingresos",
+              label: "Ingresos",
+              children: [
+                {
+                  value: "aportes_terceros",
+                  label: "Aportes de Terceros",
+                  children: [
+                    { value: "aporte_inicial", label: "Aporte Inicial" },
+                    { value: "aporte_adicional", label: "Aporte Adicional" },
+                    { value: "interes_ganado", label: "Interés Ganado" }
+                  ]
+                },
+                {
+                  value: "aportes_propios",
+                  label: "Aportes Propios",
+                  children: [
+                    { value: "capital_propio", label: "Capital Propio" },
+                    { value: "reinversion", label: "Reinversión" }
+                  ]
+                },
+                {
+                  value: "ventas",
+                  label: "Ventas",
+                  children: [
+                    { value: "venta_producto", label: "Venta de Producto" },
+                    { value: "venta_servicio", label: "Venta de Servicio" }
+                  ]
+                }
+              ]
+            },
+            {
+              value: "egresos",
+              label: "Egresos",
+              children: [
+                {
+                  value: "materiales",
+                  label: "Materiales",
+                  children: [
+                    { value: "cemento", label: "Cemento" },
+                    { value: "arena", label: "Arena" },
+                    { value: "hierro", label: "Hierro" }
+                  ]
+                },
+                {
+                  value: "mano_obra",
+                  label: "Mano de Obra",
+                  children: [
+                    { value: "albañil", label: "Albañil" },
+                    { value: "electricista", label: "Electricista" },
+                    { value: "plomero", label: "Plomero" }
+                  ]
+                },
+                {
+                  value: "subcontratos",
+                  label: "Subcontratos",
+                  children: [
+                    { value: "pintura", label: "Pintura" },
+                    { value: "plomeria", label: "Plomería" },
+                    { value: "electricidad", label: "Electricidad" }
+                  ]
+                }
+              ]
+            }
+          ]}
+          placeholder="Tipo > Categoría > Subcategoría..."
+          className="w-full"
+        />
+      </div>
 
       {/* Selector de tipo de movimiento - CENTRALIZADO */}
       <div className="space-y-2">
