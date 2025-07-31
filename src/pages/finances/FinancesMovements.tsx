@@ -44,9 +44,6 @@ import { ActionBarDesktopRow } from "@/components/layout/desktop/ActionBarDeskto
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import MovementCard from "@/components/cards/MovementCard";
-import { FinancialSummaryChart } from "@/components/charts/FinancialSummaryChart";
-import { CurrencyBalanceChart } from "@/components/charts/CurrencyBalanceChart";
-import { WalletBalanceChart } from "@/components/charts/WalletBalanceChart";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
@@ -1445,64 +1442,124 @@ export default function Movements() {
         }
       />
       
-      {/* Charts de resumen financiero */}
+      {/* Cards de resumen financiero */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* Chart 1: Resumen General */}
-        <FinancialSummaryChart 
-          data={{
-            totalIncome: filteredMovements
-              .filter(m => m.movement_data?.type?.name === 'Ingresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0),
-            totalExpenses: filteredMovements
-              .filter(m => m.movement_data?.type?.name === 'Egresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0),
-            balance: filteredMovements
-              .filter(m => m.movement_data?.type?.name === 'Ingresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0) -
-              filteredMovements
-              .filter(m => m.movement_data?.type?.name === 'Egresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0),
-            currency: '$'
-          }}
-        />
+        {/* Card 1: Resumen General */}
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-3">Resumen</h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-green-600 dark:text-green-400">Ingresos</span>
+                <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                  {formatCurrency(
+                    filteredMovements
+                      .filter(m => m.movement_data?.type?.name === 'Ingresos')
+                      .reduce((sum, m) => sum + (m.amount || 0), 0)
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-red-600 dark:text-red-400">Egresos</span>
+                <span className="text-xs font-semibold text-red-600 dark:text-red-400">
+                  {formatCurrency(
+                    filteredMovements
+                      .filter(m => m.movement_data?.type?.name === 'Egresos')
+                      .reduce((sum, m) => sum + (m.amount || 0), 0)
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-1 border-t border-[var(--menues-border)]">
+                <span className="text-xs font-medium">Balance</span>
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  {formatCurrency(
+                    filteredMovements
+                      .filter(m => m.movement_data?.type?.name === 'Ingresos')
+                      .reduce((sum, m) => sum + (m.amount || 0), 0) -
+                    filteredMovements
+                      .filter(m => m.movement_data?.type?.name === 'Egresos')
+                      .reduce((sum, m) => sum + (m.amount || 0), 0)
+                  )}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Chart 2: Por Moneda */}
-        <CurrencyBalanceChart 
-          data={availableCurrencies.map((currency) => {
-            const currencyMovements = filteredMovements.filter(m => m.movement_data?.currency?.name === currency);
-            const balance = currencyMovements
-              .filter(m => m.movement_data?.type?.name === 'Ingresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0) -
-              currencyMovements
-              .filter(m => m.movement_data?.type?.name === 'Egresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0);
-            
-            return {
-              currency: currency || 'Sin moneda',
-              balance,
-              color: 'var(--accent)'
-            };
-          })}
-        />
+        {/* Card 2: Por Moneda */}
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-3">Por Moneda</h3>
+            <div className="space-y-2">
+              {availableCurrencies.map((currency) => {
+                const currencyMovements = filteredMovements.filter(m => m.movement_data?.currency?.name === currency);
+                const currencyBalance = currencyMovements
+                  .filter(m => m.movement_data?.type?.name === 'Ingresos')
+                  .reduce((sum, m) => sum + (m.amount || 0), 0) -
+                  currencyMovements
+                  .filter(m => m.movement_data?.type?.name === 'Egresos')
+                  .reduce((sum, m) => sum + (m.amount || 0), 0);
+                
+                return (
+                  <div key={currency} className="flex items-center justify-between">
+                    <span className="text-xs font-medium">{currency}</span>
+                    <span className={`text-xs font-semibold ${currencyBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {formatCurrency(currencyBalance)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Chart 3: Por Billetera */}
-        <WalletBalanceChart 
-          data={availableWallets.map((wallet) => {
-            const walletMovements = filteredMovements.filter(m => m.movement_data?.wallet?.name === wallet);
-            const balance = walletMovements
-              .filter(m => m.movement_data?.type?.name === 'Ingresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0) -
-              walletMovements
-              .filter(m => m.movement_data?.type?.name === 'Egresos')
-              .reduce((sum, m) => sum + (m.amount || 0), 0);
-            
-            return {
-              wallet: wallet || 'Sin billetera',
-              balance,
-              color: 'var(--accent)'
-            };
-          })}
-        />
+        {/* Card 3: Por Billetera con Monedas */}
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-3">Por Billetera</h3>
+            <div className="space-y-3">
+              {availableWallets.map((wallet) => {
+                // Obtener todas las monedas para esta billetera
+                const walletCurrenciesSet = new Set(
+                  filteredMovements
+                    .filter(m => m.movement_data?.wallet?.name === wallet)
+                    .map(m => m.movement_data?.currency?.name)
+                    .filter(Boolean)
+                );
+                const walletCurrencies = Array.from(walletCurrenciesSet);
+
+                return (
+                  <div key={wallet} className="space-y-1">
+                    <h4 className="text-xs font-medium text-[var(--text-subtle)]">{wallet}</h4>
+                    <div className="space-y-1 pl-2">
+                      {walletCurrencies.map((currency) => {
+                        const walletCurrencyMovements = filteredMovements.filter(
+                          m => m.movement_data?.wallet?.name === wallet && 
+                               m.movement_data?.currency?.name === currency
+                        );
+                        const balance = walletCurrencyMovements
+                          .filter(m => m.movement_data?.type?.name === 'Ingresos')
+                          .reduce((sum, m) => sum + (m.amount || 0), 0) -
+                          walletCurrencyMovements
+                          .filter(m => m.movement_data?.type?.name === 'Egresos')
+                          .reduce((sum, m) => sum + (m.amount || 0), 0);
+
+                        return (
+                          <div key={`${wallet}-${currency}`} className="flex items-center justify-between">
+                            <span className="text-xs text-[var(--text-subtle)]">{currency}</span>
+                            <span className={`text-xs font-semibold ${balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              {formatCurrency(balance)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Table
