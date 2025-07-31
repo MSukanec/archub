@@ -705,10 +705,10 @@ export default function Movements() {
   
   // Debug balance calculations
   const ingresos = filteredMovements
-    .filter(m => m.movement_data?.type?.name === 'Ingreso')
+    .filter(m => m.movement_data?.type?.name === 'Ingresos')
     .reduce((sum, m) => sum + (m.amount || 0), 0);
   const egresos = filteredMovements
-    .filter(m => m.movement_data?.type?.name === 'Egreso')
+    .filter(m => m.movement_data?.type?.name === 'Egresos')
     .reduce((sum, m) => sum + (m.amount || 0), 0);
   
   console.log("Calculated ingresos:", ingresos);
@@ -1449,6 +1449,40 @@ export default function Movements() {
           }
         ]}
       />
+
+      {/* Action Bar con contenido de la primera fila de la tabla */}
+      <div className="bg-[var(--accent-bg)] text-[var(--accent-text)] px-4 py-2 rounded-lg mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            Filtros
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
+            className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Importar
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => openModal('movement')}
+            className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo movimiento
+          </Button>
+        </div>
+      </div>
       
       {/* Cards de resumen financiero */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -1462,7 +1496,7 @@ export default function Movements() {
                 <span className="text-xs font-semibold text-green-600 dark:text-green-400">
                   {formatCurrency(
                     filteredMovements
-                      .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                      .filter(m => m.movement_data?.type?.name === 'Ingresos')
                       .reduce((sum, m) => sum + (m.amount || 0), 0)
                   )}
                 </span>
@@ -1472,7 +1506,7 @@ export default function Movements() {
                 <span className="text-xs font-semibold text-red-600 dark:text-red-400">
                   {formatCurrency(
                     filteredMovements
-                      .filter(m => m.movement_data?.type?.name === 'Egreso')
+                      .filter(m => m.movement_data?.type?.name === 'Egresos')
                       .reduce((sum, m) => sum + (m.amount || 0), 0)
                   )}
                 </span>
@@ -1482,10 +1516,10 @@ export default function Movements() {
                 <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                   {formatCurrency(
                     filteredMovements
-                      .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                      .filter(m => m.movement_data?.type?.name === 'Ingresos')
                       .reduce((sum, m) => sum + (m.amount || 0), 0) -
                     filteredMovements
-                      .filter(m => m.movement_data?.type?.name === 'Egreso')
+                      .filter(m => m.movement_data?.type?.name === 'Egresos')
                       .reduce((sum, m) => sum + (m.amount || 0), 0)
                   )}
                 </span>
@@ -1502,10 +1536,10 @@ export default function Movements() {
               {availableCurrencies.map((currency) => {
                 const currencyMovements = filteredMovements.filter(m => m.movement_data?.currency?.name === currency);
                 const currencyBalance = currencyMovements
-                  .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                  .filter(m => m.movement_data?.type?.name === 'Ingresos')
                   .reduce((sum, m) => sum + (m.amount || 0), 0) -
                   currencyMovements
-                  .filter(m => m.movement_data?.type?.name === 'Egreso')
+                  .filter(m => m.movement_data?.type?.name === 'Egresos')
                   .reduce((sum, m) => sum + (m.amount || 0), 0);
                 
                 return (
@@ -1546,10 +1580,10 @@ export default function Movements() {
                                m.movement_data?.currency?.name === currency
                         );
                         const balance = walletCurrencyMovements
-                          .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                          .filter(m => m.movement_data?.type?.name === 'Ingresos')
                           .reduce((sum, m) => sum + (m.amount || 0), 0) -
                           walletCurrencyMovements
-                          .filter(m => m.movement_data?.type?.name === 'Egreso')
+                          .filter(m => m.movement_data?.type?.name === 'Egresos')
                           .reduce((sum, m) => sum + (m.amount || 0), 0);
 
                         return (
