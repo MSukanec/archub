@@ -2598,25 +2598,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               />
             </div>
 
-            {/* Descripción */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descripción del movimiento..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
           </form>
         </Form>
       )}
