@@ -68,13 +68,13 @@ export default function MovementFormModal({
   const { data: currentUser } = useCurrentUser()
   
   // Datos necesarios
-  const { data: members } = useOrganizationMembers()
-  const { data: currencies } = useOrganizationCurrencies()
-  const { data: wallets } = useOrganizationWallets()
-  const { data: organizationConcepts, isLoading: conceptsLoading } = useOrganizationMovementConcepts()
+  const { data: members } = useOrganizationMembers(currentUser?.organization?.id || '')
+  const { data: currencies } = useOrganizationCurrencies(currentUser?.organization?.id || '')
+  const { data: wallets } = useOrganizationWallets(currentUser?.organization?.id || '')
+  const { data: organizationConcepts, isLoading: conceptsLoading } = useOrganizationMovementConcepts(currentUser?.organization?.id || '')
   const { data: contacts } = useContacts(currentUser?.organization?.id || '')
-  const { data: projectClients } = useProjectClients(projectId || '', currentUser?.organization?.id || '')
-  const { data: constructionTasks } = useConstructionTasks(projectId || '', currentUser?.organization?.id || '')
+  const { data: projectClients } = useProjectClients(projectId || '', { enabled: !!projectId })
+  const { data: constructionTasks } = useConstructionTasks(projectId || '', { enabled: !!projectId })
   const { data: subcontracts } = useSubcontracts(currentUser?.organization?.id || '')
 
   // Estado del formulario usando reducer
@@ -271,8 +271,9 @@ export default function MovementFormModal({
                   <FormLabel>Creador *</FormLabel>
                   <FormControl>
                     <UserSelector
+                      users={members || []}
                       value={field.value}
-                      onValueChange={field.onChange}
+                      onChange={field.onChange}
                       placeholder="Seleccionar creador..."
                     />
                   </FormControl>
@@ -309,7 +310,7 @@ export default function MovementFormModal({
               <NestedSelector
                 data={organizationConcepts || []}
                 value={currentSelection}
-                onValueChange={handleNestedSelectorChange}
+                onValueChange={handleSelectionChange}
                 placeholder="Tipo > Categoría > Subcategoría..."
                 isLoading={conceptsLoading}
               />
@@ -320,10 +321,12 @@ export default function MovementFormModal({
           {renderSubform()}
 
           <FormModalFooter
-            onClose={onClose}
-            onSubmit={form.handleSubmit(onSubmit)}
-            isLoading={saveMutation.isPending}
+            cancelText="Cancelar"
             submitText={editingMovement ? 'Actualizar' : 'Guardar'}
+            onLeftClick={onClose}
+            onSubmit={form.handleSubmit(onSubmit)}
+            submitDisabled={saveMutation.isPending}
+            showLoadingSpinner={saveMutation.isPending}
           />
         </form>
       </Form>
