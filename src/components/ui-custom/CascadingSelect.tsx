@@ -69,7 +69,7 @@ export function CascadingSelect({
 
   const getDisplayText = () => {
     if (selectedPath.length === 0) return placeholder
-    return selectedPath.map(item => item.label).join(" > ")
+    return selectedPath.map(item => item.label).join(" / ")
   }
 
   const handleTriggerClick = () => {
