@@ -2281,18 +2281,27 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           Selector en Cascada *
         </label>
         <CascadingSelect
-          options={(organizationConcepts || []).map(concept => ({
-            value: concept.id,
-            label: concept.name,
-            children: concept.children?.map((category: any) => ({
-              value: category.id,
-              label: category.name,
-              children: category.children?.map((subcategory: any) => ({
-                value: subcategory.id,
-                label: subcategory.name
-              })) || []
-            })) || []
-          }))}
+          options={(organizationConcepts || []).map(concept => {
+            console.log('🔍 Mapping concept:', concept.name, 'with children:', concept.children?.length || 0)
+            return {
+              value: concept.id,
+              label: concept.name,
+              children: concept.children?.map((category: any) => {
+                console.log('  🔍 Mapping category:', category.name, 'with children:', category.children?.length || 0)
+                return {
+                  value: category.id,
+                  label: category.name,
+                  children: category.children?.map((subcategory: any) => {
+                    console.log('    🔍 Mapping subcategory:', subcategory.name)
+                    return {
+                      value: subcategory.id,
+                      label: subcategory.name
+                    }
+                  }) || []
+                }
+              }) || []
+            }
+          })}
           value={(() => {
             // Construir el valor actual basado en los campos del formulario
             const values = []
