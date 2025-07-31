@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { SidebarSubmenu } from "./SidebarSubmenu";
-// Header.tsx eliminado - HeaderMobile.tsx maneja mobile, HeaderDesktop se integra en páginas específicas
+import { HeaderDesktop } from "./HeaderDesktop";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -77,13 +77,18 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       {/* Header Mobile - Only visible on mobile */}
       <HeaderMobile {...headerProps} />
 
+      {/* Header Desktop - Hidden on mobile */}
+      <div className="hidden md:block">
+        <HeaderDesktop {...headerProps} />
+      </div>
+
       <main
-        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 pb-12 md:pt-6 ${
+        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 pb-12 md:pt-16 ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded
             ? "md:ml-[304px]" // 40px main + 264px secondary
             : "md:ml-[80px]" // 40px main + 40px secondary
-        } ml-0 pt-1 md:pt-6 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+        } ml-0 pt-1 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
       >
         <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>{children}</div>
       </main>
