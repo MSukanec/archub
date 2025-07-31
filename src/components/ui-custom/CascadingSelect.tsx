@@ -35,56 +35,6 @@ export function CascadingSelect({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
-  // Sincronizar con el valor externo
-  useEffect(() => {
-    if (value.length === 0) {
-      setSelectedPath([])
-      setCurrentLevel(0)
-      setCurrentOptions(options)
-      return
-    }
-
-    // Reconstruir el path basado en el valor
-    const buildPath = (opts: CascadingOption[], vals: string[], path: CascadingOption[] = []): CascadingOption[] | null => {
-      if (vals.length === 0) return path
-
-      for (const option of opts) {
-        if (option.value === vals[0]) {
-          const newPath = [...path, option]
-          if (vals.length === 1) return newPath
-          if (option.children) {
-            const result = buildPath(option.children, vals.slice(1), newPath)
-            if (result) return result
-          }
-        }
-      }
-      return null
-    }
-
-    const path = buildPath(options, value)
-    if (path) {
-      setSelectedPath(path)
-      setCurrentLevel(path.length - 1)
-      
-      // Establecer las opciones actuales
-      if (path.length > 0) {
-        const lastSelected = path[path.length - 1]
-        if (lastSelected.children && lastSelected.children.length > 0) {
-          setCurrentOptions(lastSelected.children)
-          setCurrentLevel(path.length)
-        } else {
-          // Si no hay más hijos, mantener el nivel actual
-          const parent = path[path.length - 2]
-          if (parent && parent.children) {
-            setCurrentOptions(parent.children)
-          } else {
-            setCurrentOptions(options)
-          }
-        }
-      }
-    }
-  }, [value, options])
-
   const getDisplayText = () => {
     if (selectedPath.length === 0) return placeholder
     return selectedPath.map(item => item.label).join(" > ")
@@ -92,6 +42,12 @@ export function CascadingSelect({
 
   const handleTriggerClick = () => {
     if (disabled) return
+    if (!isOpen) {
+      // Al abrir, resetear a nivel inicial
+      setCurrentLevel(0)
+      setCurrentOptions(options)
+      setSelectedPath([])
+    }
     setIsOpen(!isOpen)
   }
 
@@ -118,16 +74,14 @@ export function CascadingSelect({
       
       if (newLevel === 0) {
         setCurrentOptions(options)
+        setSelectedPath([])
       } else {
         const parentOption = selectedPath[newLevel - 1]
         if (parentOption && parentOption.children) {
           setCurrentOptions(parentOption.children)
         }
+        setSelectedPath(selectedPath.slice(0, newLevel))
       }
-      
-      // Actualizar el path seleccionado
-      const newPath = selectedPath.slice(0, newLevel)
-      setSelectedPath(newPath)
     }
   }
 
