@@ -2,10 +2,10 @@ import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2 } from 'lucide-react'
+import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2, Search, Filter } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { Table } from '@/components/ui-custom/Table'
 import ProgressCurve from '@/components/charts/gantt/ProgressCurve'
 import BurndownChart from '@/components/charts/gantt/BurndownChart'
@@ -169,8 +169,34 @@ export default function ConstructionSchedule() {
     )
   }
 
+  // Crear tabs para el header
+  const headerTabs = [
+    {
+      id: "gantt",
+      label: "Vista Gantt",
+      isActive: activeTab === "gantt"
+    },
+    {
+      id: "list", 
+      label: "Listado de Tareas",
+      isActive: activeTab === "list"
+    },
+    {
+      id: "analytics",
+      label: "Análisis Visual", 
+      isActive: activeTab === "analytics"
+    }
+  ]
+
   return (
-    <Layout wide={true}>
+    <Layout 
+      headerProps={{
+        title: "Cronograma de Construcción",
+        tabs: headerTabs,
+        onTabChange: setActiveTab
+      }}
+      wide={true}
+    >
       {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
         icon={<Calendar className="h-6 w-6" />}
@@ -200,41 +226,44 @@ export default function ConstructionSchedule() {
         ]}
       />
 
-      {/* ActionBar */}
-      <ActionBarDesktop
-        title="Cronograma de Construcción"
-        icon={<Calendar className="h-5 w-5" />}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        features={[
+      {/* ActionBarDesktopRow */}
+      <ActionBarDesktopRow
+        filters={[
           {
-            icon: <Clock className="h-4 w-4" />,
-            title: "Vista Gantt Avanzada",
-            description: "Visualiza el cronograma con barras temporales, dependencias y fases del proyecto organizadas jerárquicamente."
+            key: 'search',
+            label: 'Buscar',
+            icon: Search,
+            value: searchValue,
+            setValue: setSearchValue,
+            options: [],
+            defaultLabel: 'Buscar tareas...',
+            isSearch: true
           },
           {
-            icon: <Activity className="h-4 w-4" />,
-            title: "Análisis Visual",
-            description: "Gráficos de progreso, burndown charts y análisis de rutas críticas para optimizar el cronograma."
-          },
-          {
-            icon: <CheckSquare className="h-4 w-4" />,
-            title: "Gestión de Dependencias",
-            description: "Define y visualiza dependencias entre tareas para identificar bottlenecks y rutas críticas."
-          },
-          {
-            icon: <BarChart3 className="h-4 w-4" />,
-            title: "Reportes de Avance",
-            description: "Métricas de progreso temporal, distribución de carga de trabajo y análisis de desviaciones."
+            key: 'grouping',
+            label: 'Agrupación',
+            icon: Filter,
+            value: groupingType === 'rubros' ? 'Por Rubros' : groupingType === 'fases' ? 'Por Fases' : 'Sin Agrupar',
+            setValue: (value) => {
+              if (value === 'Por Rubros') setGroupingType('rubros')
+              else if (value === 'Por Fases') setGroupingType('fases')
+              else setGroupingType('none')
+            },
+            options: ['Sin Agrupar', 'Por Rubros', 'Por Fases'],
+            defaultLabel: 'Todas las agrupaciones'
           }
         ]}
-        tabs={[
-          { value: 'gantt', label: 'Vista Gantt', icon: <Calendar className="h-4 w-4" /> },
-          { value: 'list', label: 'Listado de Tareas', icon: <TableIcon className="h-4 w-4" /> },
-          { value: 'analytics', label: 'Análisis Visual', icon: <BarChart3 className="h-4 w-4" /> }
+        actions={[
+          {
+            label: 'Nueva Tarea',
+            icon: Plus,
+            onClick: () => openModal('construction-task', { 
+              projectId: projectId || '', 
+              organizationId: organizationId || '' 
+            }),
+            variant: 'default'
+          }
         ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
       />
 
       {/* Tab Content */}
