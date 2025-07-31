@@ -2,7 +2,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet } from 'lucide-react'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { TimePeriodSelector } from '@/components/ui-custom/TimePeriodSelector'
 import { Selector } from '@/components/ui-custom/Selector'
@@ -11,6 +11,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useProjects } from '@/hooks/use-projects'
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
 import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
@@ -20,7 +21,7 @@ import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
@@ -31,10 +32,22 @@ export default function FinancesDashboard() {
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
   const defaultCurrency = organizationCurrencies?.find(c => c.is_default)?.currency
   
+  // Get projects for filter
+  const { data: projects = [] } = useProjects(organizationId)
+  
   // Time period filter state
   const [timePeriod, setTimePeriod] = useState('desde-siempre')
   // Currency view state for ActionBar button - initialize with default currency
   const [currencyView, setCurrencyView] = useState<string>(defaultCurrency?.code || 'ARS')
+  // Project filter state
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("")
+  
+  // Initialize selected project with current project
+  useEffect(() => {
+    if (projectId && !selectedProjectId) {
+      setSelectedProjectId(projectId)
+    }
+  }, [projectId, selectedProjectId])
 
   // Currency options for Selector - dynamic based on organization's default currency
   const currencyOptions = [
@@ -53,18 +66,27 @@ export default function FinancesDashboard() {
     return amount
   }
 
-  const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, projectId, timePeriod)
-  const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, projectId, timePeriod)
-  const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, projectId, timePeriod)
-  const { data: walletCurrencyBalances, isLoading: walletCurrencyLoading } = useWalletCurrencyBalances(organizationId, projectId, timePeriod)
-  const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, projectId, 5, timePeriod)
-  const { data: expensesByCategory, isLoading: categoriesLoading } = useExpensesByCategory(organizationId, projectId, timePeriod)
+  // Use selected project for data queries, or empty string for all projects
+  const effectiveProjectId = selectedProjectId === 'all' ? '' : selectedProjectId || projectId
+  
+  const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, effectiveProjectId, timePeriod)
+  const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, effectiveProjectId, timePeriod)
+  const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, effectiveProjectId, timePeriod)
+  const { data: walletCurrencyBalances, isLoading: walletCurrencyLoading } = useWalletCurrencyBalances(organizationId, effectiveProjectId, timePeriod)
+  const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, effectiveProjectId, 5, timePeriod)
+  const { data: expensesByCategory, isLoading: categoriesLoading } = useExpensesByCategory(organizationId, effectiveProjectId, timePeriod)
   
   // Generate mini trend data from monthly flow for each metric (converted to selected currency)
   const incomeTrend = monthlyFlow?.map(month => ({ value: convertAmount(month.income || 0) })) || []
   const expensesTrend = monthlyFlow?.map(month => ({ value: convertAmount(Math.abs(month.expenses || 0)) })) || []
   const balanceTrend = monthlyFlow?.map(month => ({ value: convertAmount(month.net || 0) })) || []
   const movementsTrend = monthlyFlow?.map(month => ({ value: convertAmount((month.income || 0) + Math.abs(month.expenses || 0)) })) || []
+
+  // Prepare data for filters
+  const availableProjects = useMemo(() => {
+    const projectOptions = projects.map(project => project.name)
+    return ['Todos los Proyectos', ...projectOptions]
+  }, [projects])
 
   // Update currency view when default currency changes
   useEffect(() => {
@@ -173,28 +195,62 @@ export default function FinancesDashboard() {
       />
       
       <div className="space-y-6">
-        <ActionBarDesktop
-          title="Resumen Financiero"
-          icon={<DollarSign className="w-5 h-5" />}
-          features={features}
-          showProjectSelector={true}
-          customGhostButtons={[
-            <div key="currency-selector" className="flex items-center">
-              <Selector
-                options={currencyOptions}
-                value={currencyView}
-                onValueChange={(value) => setCurrencyView(value)}
-                className="h-8"
-              />
-            </div>,
-            <div key="time-period" className="flex items-center">
-              <TimePeriodSelector
-                value={timePeriod}
-                onValueChange={setTimePeriod}
-                className="h-8"
-              />
-            </div>
-          ]}
+        <ActionBarDesktopRow
+          // Use Type filter for currency view
+          filterByType={currencyOptions.find(opt => opt.value === currencyView)?.label || 'Peso Argentino'}
+          setFilterByType={(label) => {
+            const option = currencyOptions.find(opt => opt.label === label)
+            if (option) {
+              setCurrencyView(option.value)
+            }
+          }}
+          availableTypes={currencyOptions.map(opt => opt.label)}
+          
+          // Use Category filter for time period
+          filterByCategory={timePeriod === 'desde-siempre' ? 'Desde Siempre' : 
+                           timePeriod === 'este-mes' ? 'Este Mes' :
+                           timePeriod === 'ultimos-30-dias' ? 'Últimos 30 Días' :
+                           timePeriod === 'ultimos-90-dias' ? 'Últimos 90 Días' : 'Desde Siempre'}
+          setFilterByCategory={(label) => {
+            const mapping: { [key: string]: string } = {
+              'Desde Siempre': 'desde-siempre',
+              'Este Mes': 'este-mes',
+              'Últimos 30 Días': 'ultimos-30-dias',
+              'Últimos 90 Días': 'ultimos-90-dias'
+            }
+            setTimePeriod(mapping[label] || 'desde-siempre')
+          }}
+          availableCategories={['Desde Siempre', 'Este Mes', 'Últimos 30 Días', 'Últimos 90 Días']}
+          
+          // Use Favorites filter for project selection
+          filterByFavorites={selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos')}
+          setFilterByFavorites={(projectName) => {
+            if (projectName === 'Todos los Proyectos') {
+              setSelectedProjectId('all')
+            } else {
+              const project = projects.find(p => p.name === projectName)
+              if (project) {
+                setSelectedProjectId(project.id)
+              }
+            }
+          }}
+          availableFavorites={availableProjects}
+          
+          // Dummy props to satisfy the interface
+          filterByCurrency="all"
+          setFilterByCurrency={() => {}}
+          availableCurrencies={[]}
+          filterByWallet="all"
+          setFilterByWallet={() => {}}
+          availableWallets={[]}
+          
+          // Action buttons
+          onImportClick={() => {
+            console.log('Import action for dashboard')
+          }}
+          onNewMovementClick={() => {
+            console.log('Navigate to new movement')
+          }}
         />
 
         {/* Show empty state if no movements exist */}
