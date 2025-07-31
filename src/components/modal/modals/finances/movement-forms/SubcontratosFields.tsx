@@ -3,7 +3,6 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 
 import { Users, Package } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
@@ -231,27 +230,7 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
         />
       </div>
 
-      {/* Descripción */}
-      <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción (opcional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción del movimiento..."
-                  rows={3}
-                  {...field}
-                  value={field.value || ''} // Asegurar que inicie vacío
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+
 
       {/* Campo para Selección de Subcontrato */}
       <div className="col-span-2">

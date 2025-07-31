@@ -2,7 +2,6 @@ import { UseFormReturn } from 'react-hook-form'
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import UserSelector from '@/components/ui-custom/UserSelector'
@@ -226,23 +225,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
           />
         </div>
 
-        {/* Descripción al final (full width) */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción de la conversión..."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
     </div>
   )
 }

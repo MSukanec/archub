@@ -2371,6 +2371,29 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         />
       </div>
 
+      {/* Campo de Descripción - COMÚN para todos los formularios */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Descripción (opcional)
+        </label>
+        <textarea
+          placeholder="Descripción del movimiento..."
+          value={form.watch('description') || ''}
+          onChange={(e) => {
+            const value = e.target.value
+            // Actualizar en todos los formularios
+            form.setValue('description', value)
+            aportesForm.setValue('description', value)
+            aportesPropriosForm.setValue('description', value)
+            retirosPropriosForm.setValue('description', value)
+            materialesForm.setValue('description', value)
+            subcontratosForm.setValue('description', value)
+            conversionForm.setValue('description', value)
+            transferForm.setValue('description', value)
+          }}
+          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
 
       
       {(isConversion || isEditingConversion) ? (

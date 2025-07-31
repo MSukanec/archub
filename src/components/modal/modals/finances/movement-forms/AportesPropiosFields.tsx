@@ -2,7 +2,6 @@ import React from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Users } from 'lucide-react'
 import UserSelector from '@/components/ui-custom/UserSelector'
@@ -179,25 +178,7 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
         />
       </div>
 
-      {/* Descripción al final (full width) */}
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Descripción (opcional)</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Descripción del movimiento..."
-                rows={3}
-                {...field}
-                value={field.value || ''}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+
     </div>
   )
 }
