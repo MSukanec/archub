@@ -57,7 +57,7 @@ interface MovementFormModalProps {
   projectId?: string
 }
 
-export default function MovementFormModal({
+export function MovementFormModal({
   movement: editingMovement,
   onClose,
   onSave,
@@ -72,10 +72,10 @@ export default function MovementFormModal({
   const { data: currencies } = useOrganizationCurrencies()
   const { data: wallets } = useOrganizationWallets()
   const { data: organizationConcepts, isLoading: conceptsLoading } = useOrganizationMovementConcepts()
-  const { data: contacts } = useContacts(currentUser?.organization?.id || '')
-  const { data: projectClients } = useProjectClients(projectId || '', currentUser?.organization?.id || '')
-  const { data: constructionTasks } = useConstructionTasks(projectId || '', currentUser?.organization?.id || '')
-  const { data: subcontracts } = useSubcontracts(currentUser?.organization?.id || '')
+  const { data: contacts } = useContacts()
+  const { data: projectClients } = useProjectClients(projectId || '')
+  const { data: constructionTasks } = useConstructionTasks(projectId || '')
+  const { data: subcontracts } = useSubcontracts()
 
   // Estado del formulario usando reducer
   const { state, handleSelectionChange } = useMovementFormState(organizationConcepts || [])
@@ -85,7 +85,7 @@ export default function MovementFormModal({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
       movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
-      created_by: editingMovement?.created_by || currentUser?.user?.id || '',
+      created_by: editingMovement?.created_by || currentUser?.id || '',
       description: editingMovement?.description || '',
       amount: editingMovement?.amount || 0,
       exchange_rate: editingMovement?.exchange_rate || undefined,
@@ -100,7 +100,7 @@ export default function MovementFormModal({
 
   // Valor actual de la selección jerárquica
   const currentSelection = useMemo(() => {
-    const values: string[] = []
+    const values = []
     const typeId = form.watch('type_id')
     const categoryId = form.watch('category_id')
     const subcategoryId = form.watch('subcategory_id')
@@ -172,7 +172,7 @@ export default function MovementFormModal({
   const onSubmit = (data: any) => {
     const finalData = {
       ...data,
-      organization_id: currentUser?.organization?.id,
+      organization_id: currentUser?.organization_id,
       movement_date: format(data.movement_date, 'yyyy-MM-dd'),
     }
     
@@ -254,9 +254,10 @@ export default function MovementFormModal({
   }
 
   return (
-    <FormModalLayout onClose={onClose}>
+    <FormModalLayout>
       <FormModalHeader 
         title={editingMovement ? 'Editar Movimiento' : 'Nuevo Movimiento'}
+        onClose={onClose}
       />
 
       <Form {...form}>
@@ -271,6 +272,7 @@ export default function MovementFormModal({
                   <FormLabel>Creador *</FormLabel>
                   <FormControl>
                     <UserSelector
+                      members={members || []}
                       value={field.value}
                       onValueChange={field.onChange}
                       placeholder="Seleccionar creador..."
@@ -289,8 +291,8 @@ export default function MovementFormModal({
                   <FormLabel>Fecha *</FormLabel>
                   <FormControl>
                     <DatePicker
-                      value={field.value}
-                      onChange={field.onChange}
+                      date={field.value}
+                      onDateChange={field.onChange}
                       placeholder="Seleccionar fecha..."
                     />
                   </FormControl>
@@ -320,10 +322,10 @@ export default function MovementFormModal({
           {renderSubform()}
 
           <FormModalFooter
-            onClose={onClose}
-            onSubmit={form.handleSubmit(onSubmit)}
+            onCancel={onClose}
+            onSave={form.handleSubmit(onSubmit)}
             isLoading={saveMutation.isPending}
-            submitText={editingMovement ? 'Actualizar' : 'Guardar'}
+            saveText={editingMovement ? 'Actualizar' : 'Guardar'}
           />
         </form>
       </Form>
