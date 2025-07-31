@@ -2384,7 +2384,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       {/* Campo de Descripción - COMÚN para todos los formularios */}
       <div className="space-y-2">
-        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Descripción (opcional)
         </label>
         <Textarea
