@@ -355,9 +355,9 @@
   --movement-retiros-propios-border: hsl(210, 10%, 60%);
 
   /* Tables */
-  --table-header-bg: hsl(0, 0%, 14%);
+  --table-header-bg: hsl(0, 0%, 35%);
   --table-header-fg: hsl(0, 0%, 100%);
-  --table-header-border: hsl(0, 0%, 22%);
+  --table-header-border: hsl(0, 0%, 85%);
   --table-row-bg: hsl(0, 0%, 22%);
   --table-row-fg: hsl(0, 0%, 90%);
   --table-row-border: hsl(0, 0%, 22%);
