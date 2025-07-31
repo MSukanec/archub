@@ -457,8 +457,32 @@ export default function FinancesAnalysis() {
     }
   ]
 
+  // Crear tabs para el header
+  const headerTabs = [
+    {
+      id: "analysis",
+      label: "Análisis por Subcategorías",
+      isActive: activeTab === "analysis"
+    },
+    {
+      id: "subcontracts", 
+      label: "Análisis de Subcontratos",
+      isActive: activeTab === "subcontracts"
+    },
+    {
+      id: "charts",
+      label: "Gráficos", 
+      isActive: activeTab === "charts"
+    }
+  ]
+
   return (
-    <Layout>
+    <Layout 
+      headerProps={{
+        tabs: headerTabs,
+        onTabChange: setActiveTab
+      }}
+    >
       <div className="space-y-4">
         <ActionBarDesktop
           title="Análisis de Obra"
@@ -496,25 +520,6 @@ export default function FinancesAnalysis() {
                currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado'}
             </Button>
           ]}
-          tabs={[
-            {
-              value: "analysis",
-              label: "Análisis por Subcategorías",
-              icon: <FileText className="h-4 w-4" />
-            },
-            {
-              value: "subcontracts",
-              label: "Análisis de Subcontratos",
-              icon: <Calculator className="h-4 w-4" />
-            },
-            {
-              value: "charts",
-              label: "Gráficos",
-              icon: <BarChart3 className="h-4 w-4" />
-            }
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
         />
 
         {/* Tab Content */}

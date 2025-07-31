@@ -25,6 +25,12 @@ import { useEffect } from "react";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 
 
+interface Tab {
+  id: string;
+  label: string;
+  isActive: boolean;
+}
+
 interface HeaderDesktopProps {
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
@@ -36,6 +42,9 @@ interface HeaderDesktopProps {
   customFilters?: React.ReactNode;
   onClearFilters?: () => void;
   actions?: React.ReactNode[];
+  // Props para sistema de tabs
+  tabs?: Tab[];
+  onTabChange?: (tabId: string) => void;
 }
 
 export function HeaderDesktop({
@@ -49,6 +58,8 @@ export function HeaderDesktop({
   customFilters,
   onClearFilters,
   actions = [],
+  tabs = [],
+  onTabChange,
 }: HeaderDesktopProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
@@ -166,73 +177,104 @@ export function HeaderDesktop({
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
   
   const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
+  const hasTabs = tabs.length > 0;
 
   return (
     <div 
-      className={`fixed top-0 right-0 z-50 h-10 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)] flex items-center justify-between transition-all duration-300 ${
+      className={`fixed top-0 right-0 z-50 ${hasTabs ? 'h-20' : 'h-10'} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
         // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
         isSecondaryExpanded
           ? "left-[304px]" // 40px main + 264px secondary  
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Left: Page Title with Breadcrumb */}
-      <div className="flex items-center">
-        <h1 className="text-sm font-medium text-[var(--layout-text)]">{getPageBreadcrumb()}</h1>
-      </div>
+      {/* Primera fila: Breadcrumb y Selector de Proyecto */}
+      <div className="w-full h-10 px-4 flex items-center justify-between">
+        {/* Left: Page Title with Breadcrumb */}
+        <div className="flex items-center">
+          <h1 className="text-sm font-medium text-[var(--layout-text)]">{getPageBreadcrumb()}</h1>
+        </div>
 
-      {/* Right: Project Selector (only if project-based section) */}
-      <div className="flex items-center">
-        {isProjectBasedSection && (
-          <CustomRestricted feature="project_management">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost-flat"
-                  size="sm"
-                  className="p-1 h-auto text-sm font-medium text-[var(--layout-text)] border border-[var(--menues-border)]"
-                >
-                  <Folder className="w-4 h-4 mr-1" />
-                  {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem 
-                  onClick={() => handleProjectChange('')}
-                  className={`${!localSelectedProject ? 'bg-[var(--accent)] text-white' : ''}`}
-                >
-                  <div className="flex items-center w-full">
-                    <Building2 className="w-4 h-4 mr-2" />
-                    <span className="truncate">General</span>
-                  </div>
-                  {!localSelectedProject && (
-                    <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-                  )}
-                </DropdownMenuItem>
-                
-                {projects.length > 0 && <DropdownMenuSeparator />}
-                
-                {projects.map((project) => (
-                  <DropdownMenuItem
-                    key={project.id}
-                    onClick={() => handleProjectChange(project.id)}
-                    className={`${localSelectedProject === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+        {/* Right: Project Selector (only if project-based section) */}
+        <div className="flex items-center">
+          {isProjectBasedSection && (
+            <CustomRestricted feature="project_management">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost-flat"
+                    size="sm"
+                    className="p-1 h-auto text-sm font-medium text-[var(--layout-text)] border border-[var(--menues-border)]"
+                  >
+                    <Folder className="w-4 h-4 mr-1" />
+                    {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem 
+                    onClick={() => handleProjectChange('')}
+                    className={`${!localSelectedProject ? 'bg-[var(--accent)] text-white' : ''}`}
                   >
                     <div className="flex items-center w-full">
-                      <Folder className="w-4 h-4 mr-2" />
-                      <span className="truncate">{project.name}</span>
+                      <Building2 className="w-4 h-4 mr-2" />
+                      <span className="truncate">General</span>
                     </div>
-                    {localSelectedProject === project.id && (
+                    {!localSelectedProject && (
                       <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
                     )}
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CustomRestricted>
-        )}
+                  
+                  {projects.length > 0 && <DropdownMenuSeparator />}
+                  
+                  {projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() => handleProjectChange(project.id)}
+                      className={`${localSelectedProject === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                    >
+                      <div className="flex items-center w-full">
+                        <Folder className="w-4 h-4 mr-2" />
+                        <span className="truncate">{project.name}</span>
+                      </div>
+                      {localSelectedProject === project.id && (
+                        <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CustomRestricted>
+          )}
+        </div>
       </div>
+
+      {/* Segunda fila: Tabs (solo si hay tabs) */}
+      {hasTabs && (
+        <div className="w-full h-10 px-4 flex items-center border-t border-[var(--menues-border)]">
+          <div className="flex items-center space-x-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange?.(tab.id)}
+                className={`relative text-sm transition-colors duration-200 ${
+                  tab.isActive 
+                    ? 'text-[var(--layout-text)] font-medium' 
+                    : 'text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]'
+                }`}
+              >
+                {tab.label}
+                {tab.isActive && (
+                  <div 
+                    className="absolute -bottom-[9px] left-0 right-0 h-0.5"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
