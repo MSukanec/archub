@@ -1416,8 +1416,118 @@ export default function Movements() {
         ]}
       />
       
+      {/* Card de resumen financiero */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Columna izquierda: KPIs principales */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-4">Resumen General</h3>
+              <div className="space-y-3">
+                {/* Ingresos */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium">Ingresos</span>
+                  </div>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                    {formatCurrency(
+                      filteredMovements
+                        .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                        .reduce((sum, m) => sum + (m.amount || 0), 0)
+                    )}
+                  </span>
+                </div>
 
-      
+                {/* Egresos */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-sm font-medium">Egresos</span>
+                  </div>
+                  <span className="text-sm font-semibold text-red-600 dark:text-red-400">
+                    {formatCurrency(
+                      filteredMovements
+                        .filter(m => m.movement_data?.type?.name === 'Egreso')
+                        .reduce((sum, m) => sum + (m.amount || 0), 0)
+                    )}
+                  </span>
+                </div>
+
+                {/* Balance */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm font-medium">Balance</span>
+                  </div>
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    {formatCurrency(
+                      filteredMovements
+                        .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                        .reduce((sum, m) => sum + (m.amount || 0), 0) -
+                      filteredMovements
+                        .filter(m => m.movement_data?.type?.name === 'Egreso')
+                        .reduce((sum, m) => sum + (m.amount || 0), 0)
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna derecha: Desglose por moneda y billetera */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-[var(--text-subtle)] mb-4">Desglose Detallado</h3>
+              
+              {/* Por Moneda */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-medium text-[var(--text-subtle)]">Por Moneda</h4>
+                {availableCurrencies.map((currency) => {
+                  const currencyMovements = filteredMovements.filter(m => m.movement_data?.currency?.name === currency);
+                  const currencyBalance = currencyMovements
+                    .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                    .reduce((sum, m) => sum + (m.amount || 0), 0) -
+                    currencyMovements
+                    .filter(m => m.movement_data?.type?.name === 'Egreso')
+                    .reduce((sum, m) => sum + (m.amount || 0), 0);
+                  
+                  return (
+                    <div key={currency} className="flex items-center justify-between py-2 px-3 rounded bg-gray-50 dark:bg-gray-800/50">
+                      <span className="text-xs font-medium">{currency}</span>
+                      <span className={`text-xs font-semibold ${currencyBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {formatCurrency(currencyBalance)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Por Billetera */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-medium text-[var(--text-subtle)]">Por Billetera</h4>
+                {availableWallets.map((wallet) => {
+                  const walletMovements = filteredMovements.filter(m => m.movement_data?.wallet?.name === wallet);
+                  const walletBalance = walletMovements
+                    .filter(m => m.movement_data?.type?.name === 'Ingreso')
+                    .reduce((sum, m) => sum + (m.amount || 0), 0) -
+                    walletMovements
+                    .filter(m => m.movement_data?.type?.name === 'Egreso')
+                    .reduce((sum, m) => sum + (m.amount || 0), 0);
+                  
+                  return (
+                    <div key={wallet} className="flex items-center justify-between py-2 px-3 rounded bg-gray-50 dark:bg-gray-800/50">
+                      <span className="text-xs font-medium">{wallet}</span>
+                      <span className={`text-xs font-semibold ${walletBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {formatCurrency(walletBalance)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Table
         columns={tableColumns}
         data={processedMovements}
