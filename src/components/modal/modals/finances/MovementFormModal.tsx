@@ -2309,73 +2309,70 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           onValueChange={(values) => {
             console.log('🎯 NestedSelector selection:', values)
             
-            // Crear un batch de actualizaciones para evitar re-renders múltiples
-            React.startTransition(() => {
-              const typeId = values[0] || ''
-              const categoryId = values[1] || ''
-              const subcategoryId = values[2] || ''
-              
-              console.log('🔄 Batch updating all values:', { typeId, categoryId, subcategoryId })
-              
-              // Actualizar formulario principal
-              form.setValue('type_id', typeId)
-              form.setValue('category_id', categoryId)
-              form.setValue('subcategory_id', subcategoryId)
-              
-              // Actualizar formularios especiales
-              const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm]
-              allForms.forEach(specialForm => {
-                specialForm.setValue('type_id', typeId)
-                specialForm.setValue('category_id', categoryId)
-                specialForm.setValue('subcategory_id', subcategoryId)
-              })
-              
-              // Actualizar estados locales
-              setSelectedTypeId(typeId)
-              setSelectedCategoryId(categoryId)
-              
-              // Detectar tipo de formulario especial
-              let detectedFormType = 'normal'
-              
-              if (typeId && organizationConcepts) {
-                const selectedConcept = organizationConcepts.find(concept => concept.id === typeId)
-                if (selectedConcept?.view_mode === 'conversion') {
-                  detectedFormType = 'conversion'
-                } else if (selectedConcept?.view_mode === 'transfer') {
-                  detectedFormType = 'transfer'
-                } else if (categoryId) {
-                  // Buscar la categoría para tipos especiales
-                  let selectedCategory = null
-                  for (const concept of organizationConcepts) {
-                    const foundCategory = concept.children?.find((cat: any) => cat.id === categoryId)
-                    if (foundCategory) {
-                      selectedCategory = foundCategory
-                      break
-                    }
+            const typeId = values[0] || ''
+            const categoryId = values[1] || ''
+            const subcategoryId = values[2] || ''
+            
+            console.log('🔄 Batch updating all values:', { typeId, categoryId, subcategoryId })
+            
+            // Actualizar estados locales primero
+            setSelectedTypeId(typeId)
+            setSelectedCategoryId(categoryId)
+            
+            // Actualizar formulario principal
+            form.setValue('type_id', typeId)
+            form.setValue('category_id', categoryId)
+            form.setValue('subcategory_id', subcategoryId)
+            
+            // Actualizar formularios especiales
+            const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]
+            allForms.forEach(specialForm => {
+              specialForm.setValue('type_id', typeId)
+              specialForm.setValue('category_id', categoryId)
+              specialForm.setValue('subcategory_id', subcategoryId)
+            })
+            
+            // Detectar tipo de formulario especial
+            let detectedFormType = 'normal'
+            
+            if (typeId && organizationConcepts) {
+              const selectedConcept = organizationConcepts.find(concept => concept.id === typeId)
+              if (selectedConcept?.view_mode === 'conversion') {
+                detectedFormType = 'conversion'
+              } else if (selectedConcept?.view_mode === 'transfer') {
+                detectedFormType = 'transfer'
+              } else if (categoryId) {
+                // Buscar la categoría para tipos especiales
+                let selectedCategory = null
+                for (const concept of organizationConcepts) {
+                  const foundCategory = concept.children?.find((cat: any) => cat.id === categoryId)
+                  if (foundCategory) {
+                    selectedCategory = foundCategory
+                    break
                   }
+                }
+                
+                if (selectedCategory) {
+                  const viewMode = (selectedCategory.view_mode ?? "normal").trim()
                   
-                  if (selectedCategory) {
-                    const viewMode = (selectedCategory.view_mode ?? "normal").trim()
-                    
-                    // Detectar subcontratos por UUID específico
-                    if (subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
-                      detectedFormType = 'subcontratos'
-                    } else if (viewMode === "aportes") {
-                      detectedFormType = 'aportes'
-                    } else if (viewMode === "aportes_propios") {
-                      detectedFormType = 'aportes_propios'
-                    } else if (viewMode === "retiros_propios") {
-                      detectedFormType = 'retiros_propios'
-                    } else if (viewMode === "materiales" || selectedCategory.name?.toLowerCase().includes('material')) {
-                      detectedFormType = 'materiales'
-                    }
+                  // Detectar subcontratos por UUID específico
+                  if (subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
+                    detectedFormType = 'subcontratos'
+                  } else if (viewMode === "aportes") {
+                    detectedFormType = 'aportes'
+                  } else if (viewMode === "aportes_propios") {
+                    detectedFormType = 'aportes_propios'
+                  } else if (viewMode === "retiros_propios") {
+                    detectedFormType = 'retiros_propios'
+                  } else if (viewMode === "materiales" || selectedCategory.name?.toLowerCase().includes('material')) {
+                    detectedFormType = 'materiales'
                   }
                 }
               }
-              
-              console.log('🎯 Final form type detected:', detectedFormType)
-              setMovementType(detectedFormType)
-            })
+            }
+            
+            console.log('🎯 Final form type detected:', detectedFormType)
+            setMovementType(detectedFormType)
           }}
           placeholder="Tipo > Categoría > Subcategoría..."
           className="w-full"
