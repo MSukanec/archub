@@ -40,6 +40,7 @@ import { EmptyState } from "@/components/ui-custom/EmptyState";
 
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
+import { ActionBarDesktopRow } from "@/components/layout/desktop/ActionBarDesktopRow";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import MovementCard from "@/components/cards/MovementCard";
@@ -1405,39 +1406,40 @@ export default function Movements() {
 
 
 
-      {/* ActionBarDesktop */}
-      <ActionBarDesktop
-        title="Gestión de Movimientos Financieros"
-        icon={DollarSign}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        showProjectSelector={true}
-        features={[
-          {
-            icon: <TrendingUp className="h-5 w-5" />,
-            title: "Seguimiento en Tiempo Real",
-            description: "Monitorea todos tus ingresos y egresos con actualizaciones instantáneas y balances por moneda"
-          },
-          {
-            icon: <FileText className="h-5 w-5" />,
-            title: "Importación de Excel",
-            description: "Importa movimientos masivos desde archivos Excel con mapeo automático de columnas"
-          },
-          {
-            icon: <Users className="h-5 w-5" />,
-            title: "Conversiones Multi-moneda",
-            description: "Gestiona conversiones entre diferentes monedas con tipos de cambio y seguimiento completo"
-          },
-          {
-            icon: <BarChart3 className="h-5 w-5" />,
-            title: "Filtros y Búsqueda Avanzada",
-            description: "Filtra por tipo, categoría, favoritos y busca por descripción para encontrar movimientos específicos"
-          }
-        ]}
-        customFilters={customFilters}
-        customActions={customActions}
-        primaryActionLabel="Nuevo movimiento"
-        onPrimaryActionClick={() => openModal('movement')}
+      {/* ActionBarDesktopRow */}
+      <ActionBarDesktopRow
+        filterByType={filterByType}
+        setFilterByType={setFilterByType}
+        availableTypes={availableTypes}
+        filterByCategory={filterByCategory}
+        setFilterByCategory={setFilterByCategory}
+        availableCategories={availableCategories}
+        filterByFavorites={filterByFavorites}
+        setFilterByFavorites={setFilterByFavorites}
+        filterByCurrency={filterByCurrency}
+        setFilterByCurrency={setFilterByCurrency}
+        availableCurrencies={availableCurrencies}
+        filterByWallet={filterByWallet}
+        setFilterByWallet={setFilterByWallet}
+        availableWallets={availableWallets}
+        onImportClick={() => openModal('movement-import', { projectId: selectedProjectId })}
+        onNewMovementClick={() => openModal('movement')}
+        customRestricted={
+          <CustomRestricted 
+            functionName="Importación de Excel"
+            reason="general_mode"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
+              className="h-8 px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--accent-text)]/10"
+            >
+              <Upload className="mr-1 h-3 w-3" />
+              Importar
+            </Button>
+          </CustomRestricted>
+        }
       />
       
       {/* Cards de resumen financiero */}
