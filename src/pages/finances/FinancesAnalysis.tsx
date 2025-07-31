@@ -123,33 +123,30 @@ export default function FinancesAnalysis() {
     return `${currencySymbol} ${formattedNumber}`
   }
 
-  // Define table columns (always 4 columns, no currency column)
+  // Define table columns (3 columns - Category/Subcategory combined, Amount, Percentage)
   const getColumns = () => {
     return [
       {
         key: 'category',
         label: 'Categoría',
-        width: '25%',
+        width: '40%',
         render: (item: any) => (
-          <Badge variant="outline" className="text-xs">
-            {item.category}
-          </Badge>
-        )
-      },
-      {
-        key: 'subcategory',
-        label: 'Subcategoría',
-        width: '25%',
-        render: (item: any) => (
-          <Badge variant="secondary" className="text-xs">
-            {item.subcategory}
-          </Badge>
+          <div className="space-y-1">
+            <Badge variant="outline" className="text-xs">
+              {item.category}
+            </Badge>
+            <div>
+              <Badge variant="secondary" className="text-xs">
+                {item.subcategory}
+              </Badge>
+            </div>
+          </div>
         )
       },
       {
         key: 'amount',
         label: 'Monto',
-        width: '25%',
+        width: '30%',
         render: (item: any) => (
           <div className="font-medium text-sm text-red-600 dark:text-red-400">
             {formatAmount(item.amount, item.currency_symbol)}
@@ -159,7 +156,7 @@ export default function FinancesAnalysis() {
       {
         key: 'percentage',
         label: '% de Incidencia',
-        width: '25%',
+        width: '30%',
         render: (item: any) => (
           <div className="font-medium text-sm">
             {item.percentage}%
