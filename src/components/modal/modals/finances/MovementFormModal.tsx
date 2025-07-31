@@ -46,6 +46,7 @@ import { Info } from 'lucide-react'
 
 const movementFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
@@ -59,6 +60,7 @@ const movementFormSchema = z.object({
 
 const conversionFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   // Campos de origen (egreso)
@@ -78,6 +80,7 @@ const conversionFormSchema = z.object({
 
 const transferFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   // Campos para transferencia interna
@@ -92,6 +95,7 @@ const transferFormSchema = z.object({
 
 const aportesFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
@@ -106,6 +110,7 @@ const aportesFormSchema = z.object({
 
 const aportesPropriosFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
@@ -119,6 +124,7 @@ const aportesPropriosFormSchema = z.object({
 
 const retirosPropriosFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
@@ -134,6 +140,7 @@ const retirosPropriosFormSchema = z.object({
 // Esquemas para materiales y mano de obra (ahora las tareas se manejan por estado)
 const materialesFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
@@ -147,6 +154,7 @@ const materialesFormSchema = z.object({
 
 const subcontratosFormSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
