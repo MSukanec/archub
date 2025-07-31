@@ -18,13 +18,13 @@ const buttonVariants = cva(
         secondary:
           "bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] border border-[var(--button-secondary-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-secondary-hover-text)] hover:border-[var(--button-secondary-hover-border)] rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         ghost:
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
+          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 border border-[var(--menues-border)] gap-2 text-sm font-medium [&_svg]:size-4",
         "ghost-icon":
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg h-8 w-8 p-0 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 [&_svg]:size-4",
+          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg h-8 w-8 p-0 border border-[var(--menues-border)] [&_svg]:size-4",
         "ghost-flat":
           "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 [&_svg]:size-4",
         "ghost-search":
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 [&_svg]:size-4 transition-all duration-300 overflow-hidden",
+          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 border border-[var(--menues-border)] [&_svg]:size-4 transition-all duration-300 overflow-hidden",
         link: "text-accent underline-offset-4 hover:underline px-4 py-2",
       },
       size: {
