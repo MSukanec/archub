@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { Package, Plus, Search, Filter, Edit, Trash2, Calendar, DollarSign } from "lucide-react";
+import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
 import { EmptyState } from "@/components/ui-custom/EmptyState";
-import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Selector } from "@/components/ui-custom/Selector";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
@@ -41,29 +39,6 @@ export default function ConstructionSubcontracts() {
   // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
-
-  const features = [
-    {
-      icon: <Package className="w-4 h-4" />,
-      title: "Gestión de Subcontratos",
-      description: "Crea y administra pedidos de subcontrato para diferentes especialidades de la obra."
-    },
-    {
-      icon: <Search className="w-4 h-4" />,
-      title: "Búsqueda Avanzada",
-      description: "Encuentra rápidamente subcontratos por especialidad, estado, fecha o contratista."
-    },
-    {
-      icon: <Filter className="w-4 h-4" />,
-      title: "Filtros Inteligentes",
-      description: "Filtra subcontratos por estado, especialidad, prioridad o fechas de ejecución."
-    },
-    {
-      icon: <Plus className="w-4 h-4" />,
-      title: "Control de Estados",
-      description: "Gestiona el ciclo completo desde pedido inicial hasta finalización y facturación."
-    }
-  ];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -284,28 +259,53 @@ export default function ConstructionSubcontracts() {
     <Layout wide={false}>
       <div className="space-y-6">
         {/* ActionBar */}
-        <ActionBarDesktop
-          title="Gestión de Subcontratos"
-          icon={<Package className="w-6 h-6" />}
-          features={features}
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-          primaryActionLabel="Crear Pedido de Subcontrato"
-          onPrimaryActionClick={handleCreateSubcontract}
-          showProjectSelector={true}
-          customActions={[
-            <Selector
-              key="currency-selector"
-              options={[
-                { value: 'discriminado', label: 'Discriminado' },
-                { value: 'pesificado', label: 'Pesificado' },
-                { value: 'dolarizado', label: 'Dolarizado' }
-              ]}
-              value={currencyView}
-              onValueChange={(value) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
-              placeholder="Seleccionar vista"
-              className="w-auto min-w-[140px]"
-            />
+        <ActionBarDesktopRow
+          tabs={[]}
+          actions={[
+            {
+              type: 'search',
+              icon: Search,
+              placeholder: 'Buscar subcontratos...',
+              value: searchQuery,
+              onChange: setSearchQuery
+            },
+            {
+              type: 'dropdown',
+              icon: Filter,
+              label: currencyView === 'discriminado' ? 'Discriminado' :
+                     currencyView === 'pesificado' ? 'Pesificado' : 
+                     'Dolarizado',
+              items: [
+                {
+                  type: 'item',
+                  label: 'Discriminado',
+                  icon: DollarSign,
+                  onClick: () => setCurrencyView('discriminado'),
+                  active: currencyView === 'discriminado'
+                },
+                {
+                  type: 'item',
+                  label: 'Pesificado',
+                  icon: DollarSign,
+                  onClick: () => setCurrencyView('pesificado'),
+                  active: currencyView === 'pesificado'
+                },
+                {
+                  type: 'item',
+                  label: 'Dolarizado',
+                  icon: DollarSign,
+                  onClick: () => setCurrencyView('dolarizado'),
+                  active: currencyView === 'dolarizado'
+                }
+              ]
+            },
+            {
+              type: 'button',
+              variant: 'default',
+              icon: Plus,
+              label: 'Crear Subcontrato',
+              onClick: handleCreateSubcontract
+            }
           ]}
         />
 
