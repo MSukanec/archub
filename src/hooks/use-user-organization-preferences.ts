@@ -58,27 +58,47 @@ export function useUpdateUserOrganizationPreferences() {
         throw new Error('User not authenticated')
       }
 
-      // Realizar UPSERT
-      const { data, error } = await supabase
-        .from('user_organization_preferences')
-        .upsert(
-          {
-            user_id: userId,
-            organization_id: organizationId,
-            last_project_id: lastProjectId,
-            updated_at: new Date().toISOString()
-          },
-          {
-            onConflict: 'user_id,organization_id'
-          }
-        )
-        .select()
-        .single()
+      console.log("🔧 Updating user organization preferences", { userId, organizationId, lastProjectId });
 
-      if (error) throw error
-      return data
+      try {
+        // Intentar usar la nueva tabla user_organization_preferences
+        const { data, error } = await supabase
+          .from('user_organization_preferences')
+          .upsert(
+            {
+              user_id: userId,
+              organization_id: organizationId,
+              last_project_id: lastProjectId,
+              updated_at: new Date().toISOString()
+            },
+            {
+              onConflict: 'user_id,organization_id'
+            }
+          )
+          .select()
+          .single()
+
+        if (error) {
+          // Si la tabla no existe, usar fallback a localStorage por ahora
+          if (error.code === '42P01') { // Table doesn't exist
+            console.log("🔧 Table user_organization_preferences doesn't exist, using localStorage fallback");
+            localStorage.setItem(`last-project-${organizationId}`, lastProjectId || '');
+            return { organization_id: organizationId, last_project_id: lastProjectId };
+          }
+          throw error;
+        }
+        
+        console.log("🔧 Successfully updated user organization preferences", data);
+        return data
+      } catch (error) {
+        console.error("🔧 Error updating user organization preferences", error);
+        // Fallback to localStorage
+        localStorage.setItem(`last-project-${organizationId}`, lastProjectId || '');
+        return { organization_id: organizationId, last_project_id: lastProjectId };
+      }
     },
     onSuccess: (data) => {
+      console.log("🔧 Mutation onSuccess", data);
       // Invalidar cache para actualizar datos
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userId, data.organization_id] 

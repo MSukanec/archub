@@ -56,7 +56,8 @@ export function ProjectSelector() {
       from: selectedProjectId, 
       to: projectId,
       projectName: projects.find(p => p.id === projectId)?.name,
-      organizationId
+      organizationId,
+      userId: userData?.user?.id
     });
     
     // Don't change selection if clicking the same project
@@ -67,9 +68,17 @@ export function ProjectSelector() {
     // Update context and database using new organization preferences system
     setSelectedProject(projectId)
     if (organizationId) {
+      console.log("🎯 ProjectSelector: Calling mutation with", { organizationId, projectId });
       updateProjectMutation.mutate({
         organizationId,
         lastProjectId: projectId
+      }, {
+        onSuccess: (data) => {
+          console.log("🎯 ProjectSelector: Mutation successful", data);
+        },
+        onError: (error) => {
+          console.error("🎯 ProjectSelector: Mutation failed", error);
+        }
       })
     }
   }
