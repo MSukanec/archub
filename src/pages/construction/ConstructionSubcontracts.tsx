@@ -260,51 +260,29 @@ export default function ConstructionSubcontracts() {
       <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktopRow
-          tabs={[]}
-          actions={[
+          filters={[
             {
-              type: 'search',
-              icon: Search,
-              placeholder: 'Buscar subcontratos...',
-              value: searchQuery,
-              onChange: setSearchQuery
-            },
-            {
-              type: 'dropdown',
+              key: 'currency',
+              label: 'Vista de Moneda',
               icon: Filter,
-              label: currencyView === 'discriminado' ? 'Discriminado' :
+              value: currencyView === 'discriminado' ? 'Discriminado' :
                      currencyView === 'pesificado' ? 'Pesificado' : 
                      'Dolarizado',
-              items: [
-                {
-                  type: 'item',
-                  label: 'Discriminado',
-                  icon: DollarSign,
-                  onClick: () => setCurrencyView('discriminado'),
-                  active: currencyView === 'discriminado'
-                },
-                {
-                  type: 'item',
-                  label: 'Pesificado',
-                  icon: DollarSign,
-                  onClick: () => setCurrencyView('pesificado'),
-                  active: currencyView === 'pesificado'
-                },
-                {
-                  type: 'item',
-                  label: 'Dolarizado',
-                  icon: DollarSign,
-                  onClick: () => setCurrencyView('dolarizado'),
-                  active: currencyView === 'dolarizado'
-                }
-              ]
-            },
+              setValue: (value) => {
+                if (value === 'Discriminado') setCurrencyView('discriminado')
+                else if (value === 'Pesificado') setCurrencyView('pesificado')
+                else if (value === 'Dolarizado') setCurrencyView('dolarizado')
+              },
+              options: ['Discriminado', 'Pesificado', 'Dolarizado'],
+              defaultLabel: 'Todas las vistas'
+            }
+          ]}
+          actions={[
             {
-              type: 'button',
-              variant: 'default',
-              icon: Plus,
               label: 'Crear Subcontrato',
-              onClick: handleCreateSubcontract
+              icon: Plus,
+              onClick: handleCreateSubcontract,
+              variant: 'default'
             }
           ]}
         />
