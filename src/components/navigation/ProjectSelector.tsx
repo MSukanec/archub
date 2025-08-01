@@ -21,18 +21,22 @@ export function ProjectSelector() {
   const { data: projects = [] } = useProjects(userData?.organization?.id)
   const { selectedProjectId, setSelectedProject } = useProjectContext()
 
-  // Initialize project from user preferences, but default to General if no preference exists
+  // Initialize project from user preferences, always ensure a project is selected
   useEffect(() => {
-    if (userData?.organization?.id && userData?.preferences) {
-      const savedProjectId = userData.preferences.last_project_id
+    if (userData?.organization?.id && projects.length > 0) {
+      const savedProjectId = userData.preferences?.last_project_id
       
-      // Always initialize to user's saved preference or General mode
+      // Try to use saved project if it exists
       if (savedProjectId && projects.some(p => p.id === savedProjectId)) {
-        // Set to saved project if it exists in current organization
         setSelectedProject(savedProjectId)
       } else {
-        // Default to General mode if no valid saved project
-        setSelectedProject(null)
+        // If no valid saved project, select the first available project
+        const firstProject = projects[0]
+        if (firstProject) {
+          setSelectedProject(firstProject.id)
+          // Update user preferences to reflect this selection
+          updateProjectMutation.mutate(firstProject.id)
+        }
       }
     }
   }, [userData?.organization?.id, userData?.preferences?.last_project_id, projects])
@@ -44,7 +48,7 @@ export function ProjectSelector() {
 
   // Update user preferences when project changes
   const updateProjectMutation = useMutation({
-    mutationFn: async (projectId: string | null) => {
+    mutationFn: async (projectId: string) => {
       if (!userData?.preferences?.id || !supabase) return
       
       const { error } = await supabase
@@ -59,11 +63,11 @@ export function ProjectSelector() {
     }
   })
 
-  const handleProjectSelect = (projectId: string | null) => {
+  const handleProjectSelect = (projectId: string) => {
     console.log("🎯 ProjectSelector: Selecting project", { 
       from: selectedProjectId, 
       to: projectId,
-      projectName: projects.find(p => p.id === projectId)?.name || 'General'
+      projectName: projects.find(p => p.id === projectId)?.name
     });
     
     // Don't change selection if clicking the same project
@@ -76,13 +80,8 @@ export function ProjectSelector() {
     updateProjectMutation.mutate(projectId)
   }
 
-  const displayName = selectedProjectId === null 
-    ? "General"
-    : currentProject?.name || "General"
-
-  const displayIcon = selectedProjectId === null 
-    ? <Building2 className="w-4 h-4" />
-    : <Folder className="w-4 h-4" />
+  const displayName = currentProject?.name || "Seleccionar proyecto"
+  const displayIcon = <Folder className="w-4 h-4" />
 
   return (
     <DropdownMenu>
@@ -113,23 +112,6 @@ export function ProjectSelector() {
             )}
           </DropdownMenuItem>
         ))}
-        
-        {/* Separador */}
-        <DropdownMenuSeparator />
-        
-        {/* Opción General */}
-        <DropdownMenuItem
-          onClick={() => handleProjectSelect(null)}
-          className="flex items-center justify-between"
-        >
-          <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4" />
-            <span className="truncate">General</span>
-          </div>
-          {selectedProjectId === null && (
-            <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-          )}
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

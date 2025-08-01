@@ -238,20 +238,6 @@ export function HeaderDesktop({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem 
-                    onClick={() => handleProjectChange('')}
-                    className={`${!localSelectedProject ? 'bg-[var(--accent)] text-white' : ''}`}
-                  >
-                    <div className="flex items-center w-full">
-                      <Building2 className="w-4 h-4 mr-2" />
-                      <span className="truncate">General</span>
-                    </div>
-                    {!localSelectedProject && (
-                      <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-                    )}
-                  </DropdownMenuItem>
-                  
-                  {projects.length > 0 && <DropdownMenuSeparator />}
                   
                   {projects.map((project) => (
                     <DropdownMenuItem

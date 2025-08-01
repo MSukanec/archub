@@ -100,7 +100,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   
   // Obtener el proyecto actual para mostrar su nombre
   const currentProject = projectsData?.find((p: any) => p.id === selectedProjectId);
-  const currentProjectName = currentProject?.name || "General";
+  const currentProjectName = currentProject?.name || "Seleccionar proyecto";
   const isAdmin = useIsAdmin();
 
   // Organization selection mutation
@@ -116,26 +116,36 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         localStorage.setItem(`last-project-${currentOrgId}`, selectedProjectId);
       }
 
-      // Al cambiar de organización, siempre ir a modo General (sin proyecto seleccionado)
+      // Al cambiar de organización, necesitamos obtener los proyectos de la nueva organización
+      const { data: newOrgProjects } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .limit(1);
+
+      const firstProjectId = newOrgProjects?.[0]?.id || null;
+
       const { error } = await supabase
         .from('user_preferences')
         .update({ 
           last_organization_id: organizationId,
-          last_project_id: null  // Siempre null al cambiar organización
+          last_project_id: firstProjectId
         })
         .eq('id', userData.preferences.id);
 
       if (error) throw error;
-      return { organizationId };
+      return { organizationId, firstProjectId };
     },
-    onSuccess: ({ organizationId }) => {
-      // Siempre ir a modo General al cambiar organización
-      setSelectedProject(null);
-      
-      // Marcar modo general explícito
-      localStorage.setItem('explicit-general-mode', 'true');
+    onSuccess: ({ organizationId, firstProjectId }) => {
+      // Si hay un proyecto disponible, seleccionarlo; si no, mostrar selector
+      if (firstProjectId) {
+        setSelectedProject(firstProjectId);
+      } else {
+        setSelectedProject(null);
+      }
       
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       setExpandedProjectSelector(false);
       setSidebarContext('organization');
       setActiveSidebarSection('organizacion');
@@ -145,19 +155,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   // Project selection mutation
   const projectMutation = useMutation({
-    mutationFn: async (projectId: string | null) => {
+    mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
       }
 
       // Guardar en localStorage específico de la organización
       const currentOrgId = userData?.organization?.id;
-      if (currentOrgId) {
-        if (projectId) {
-          localStorage.setItem(`last-project-${currentOrgId}`, projectId);
-        } else {
-          localStorage.removeItem(`last-project-${currentOrgId}`);
-        }
+      if (currentOrgId && projectId) {
+        localStorage.setItem(`last-project-${currentOrgId}`, projectId);
       }
 
       const { error } = await supabase
@@ -230,6 +236,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   };
 
   const handleProjectSelect = (projectId: string) => {
+    setSelectedProject(projectId);
     projectMutation.mutate(projectId);
   };
 
@@ -542,17 +549,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
                   Proyecto
                 </div>
-                {/* Opción "General" */}
-                <button
-                  onClick={() => {
-                    projectMutation.mutate(null);
-                    setExpandedProjectSelector(false);
-                  }}
-                  className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-xl shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
-                  style={{ color: 'var(--menues-fg)' }}
-                >
-                  General
-                </button>
                 {projectsData?.map((project: any) => (
                   <button
                     key={project.id}
