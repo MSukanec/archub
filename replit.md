@@ -28,6 +28,7 @@ Preferred communication style: Simple, everyday language.
 ### Authentication
 - **Provider**: Supabase Auth (Email/password, Google OAuth)
 - **Session Handling**: Supabase sessions
+- **User Preferences**: Migrated from global `user_preferences.last_project_id` to organization-specific `user_organization_preferences` table for better scalability
 
 ### Key Architectural Decisions
 - **Shared Schema**: `shared/schema.ts` for frontend/backend consistency.
@@ -42,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Financial Management**: Comprehensive system for tracking movements, conversions, transfers, and budgets, with multi-currency support.
 - **Document Management**: Hierarchical document organization with versioning and file upload capabilities.
 - **Activity Logging**: Centralized activity tracking system for user actions across the platform.
+- **User Preferences Migration**: Replaced global `user_preferences.last_project_id` with organization-specific `user_organization_preferences` table. Each user now has a separate last project per organization, improving data accuracy and multi-organization support. Backend functions `archub_get_user()` and `archub_new_user()` updated accordingly.
 
 ## External Dependencies
 
