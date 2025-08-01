@@ -5,6 +5,7 @@ import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Set
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -449,38 +450,20 @@ export default function ConstructionTasks() {
             <div className="flex items-center gap-2">
               {/* Botón de agrupación - Solo en tab de tareas */}
               {activeTab === "tasks" && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-3 text-xs"
-                    >
-                      <FolderTree className="w-4 h-4 mr-1" />
-                      Agrupación
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem onClick={() => setGroupingType("none")}>
-                      Sin Agrupar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setGroupingType("phases")}>
-                      Agrupar por Fases
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setGroupingType("rubros")}>
-                      Agrupar por Rubros
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setGroupingType("tasks")}>
-                      Agrupar por Tareas
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setGroupingType("rubros-phases")}>
-                      Agrupar por Fases y Rubros
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setGroupingType("phases-rubros")}>
-                      Agrupar por Rubros y Tareas
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <SelectableGhostButton
+                  defaultLabel="Agrupación"
+                  selectedValue={groupingType}
+                  icon={<FolderTree className="w-4 h-4" />}
+                  options={[
+                    { value: "none", label: "Sin Agrupar" },
+                    { value: "phases", label: "Agrupar por Fases" },
+                    { value: "rubros", label: "Agrupar por Rubros" },
+                    { value: "tasks", label: "Agrupar por Tareas" },
+                    { value: "rubros-phases", label: "Agrupar por Fases y Rubros" },
+                    { value: "phases-rubros", label: "Agrupar por Rubros y Tareas" }
+                  ]}
+                  onSelect={(value) => setGroupingType(value)}
+                />
               )}
             </div>
 
