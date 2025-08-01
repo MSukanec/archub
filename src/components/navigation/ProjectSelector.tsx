@@ -1,73 +1,62 @@
 import React from 'react'
-import { ChevronDown, Folder, Building2 } from 'lucide-react'
+import { ChevronDown, Folder } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useProjectContext } from '@/stores/projectContext'
-import { useMutation } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { queryClient } from '@/lib/queryClient'
+import { useUpdateUserOrganizationPreferences, useGetLastProjectForOrganization } from '@/hooks/use-user-organization-preferences'
 import { useEffect } from 'react'
 
 export function ProjectSelector() {
   const { data: userData } = useCurrentUser()
   const { data: projects = [] } = useProjects(userData?.organization?.id)
   const { selectedProjectId, setSelectedProject } = useProjectContext()
+  const organizationId = userData?.organization?.id
+  
+  // Get last project for current organization using new system
+  const lastProjectId = useGetLastProjectForOrganization(organizationId)
+  
+  // Update user organization preferences when project changes
+  const updateProjectMutation = useUpdateUserOrganizationPreferences()
 
-  // Initialize project from user preferences, always ensure a project is selected
+  // Initialize project from organization preferences, always ensure a project is selected
   useEffect(() => {
-    if (userData?.organization?.id && projects.length > 0) {
-      const savedProjectId = userData.preferences?.last_project_id
-      
-      // Try to use saved project if it exists
-      if (savedProjectId && projects.some(p => p.id === savedProjectId)) {
-        setSelectedProject(savedProjectId)
+    if (organizationId && projects.length > 0) {
+      // Try to use saved project from organization preferences if it exists
+      if (lastProjectId && projects.some(p => p.id === lastProjectId)) {
+        setSelectedProject(lastProjectId)
       } else {
         // If no valid saved project, select the first available project
         const firstProject = projects[0]
         if (firstProject) {
           setSelectedProject(firstProject.id)
-          // Update user preferences to reflect this selection
-          updateProjectMutation.mutate(firstProject.id)
+          // Update organization preferences to reflect this selection
+          updateProjectMutation.mutate({
+            organizationId,
+            lastProjectId: firstProject.id
+          })
         }
       }
     }
-  }, [userData?.organization?.id, userData?.preferences?.last_project_id, projects])
+  }, [organizationId, lastProjectId, projects, setSelectedProject, updateProjectMutation])
   
-  // Find current project SOLO basado en selectedProjectId, SIN fallback a last_project_id
+  // Find current project based on selectedProjectId
   const currentProject = selectedProjectId 
     ? projects.find(p => p.id === selectedProjectId)
     : null
-
-  // Update user preferences when project changes
-  const updateProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!userData?.preferences?.id || !supabase) return
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('id', userData.preferences.id)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-    }
-  })
 
   const handleProjectSelect = (projectId: string) => {
     console.log("🎯 ProjectSelector: Selecting project", { 
       from: selectedProjectId, 
       to: projectId,
-      projectName: projects.find(p => p.id === projectId)?.name
+      projectName: projects.find(p => p.id === projectId)?.name,
+      organizationId
     });
     
     // Don't change selection if clicking the same project
@@ -75,9 +64,14 @@ export function ProjectSelector() {
       return
     }
     
-    // Update context and database
+    // Update context and database using new organization preferences system
     setSelectedProject(projectId)
-    updateProjectMutation.mutate(projectId)
+    if (organizationId) {
+      updateProjectMutation.mutate({
+        organizationId,
+        lastProjectId: projectId
+      })
+    }
   }
 
   const displayName = currentProject?.name || "Seleccionar proyecto"

@@ -103,20 +103,22 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
   const isAdmin = useIsAdmin();
 
-  // Organization selection mutation
+  // Organization selection mutation - Updated to use new system
   const organizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
       }
 
-      // Guardar el proyecto actual en localStorage antes de cambiar organización
-      const currentOrgId = userData.organization?.id;
-      if (currentOrgId && selectedProjectId) {
-        localStorage.setItem(`last-project-${currentOrgId}`, selectedProjectId);
-      }
+      // Update organization in user_preferences (this stays the same)
+      const { error: orgError } = await supabase
+        .from('user_preferences')
+        .update({ last_organization_id: organizationId })
+        .eq('id', userData.preferences.id);
 
-      // Al cambiar de organización, necesitamos obtener los proyectos de la nueva organización
+      if (orgError) throw orgError;
+
+      // Get projects for the new organization
       const { data: newOrgProjects } = await supabase
         .from('projects')
         .select('id')
@@ -125,16 +127,40 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
       const firstProjectId = newOrgProjects?.[0]?.id || null;
 
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ 
-          last_organization_id: organizationId,
-          last_project_id: firstProjectId
-        })
-        .eq('id', userData.preferences.id);
+      // Check if user already has preferences for this organization
+      const { data: existingOrgPrefs } = await supabase
+        .from('user_organization_preferences')
+        .select('last_project_id')
+        .eq('user_id', userData.user.id)
+        .eq('organization_id', organizationId)
+        .single();
 
-      if (error) throw error;
-      return { organizationId, firstProjectId };
+      let projectToSelect = firstProjectId;
+
+      if (existingOrgPrefs?.last_project_id) {
+        // Verify the saved project still exists
+        const projectExists = newOrgProjects?.some(p => p.id === existingOrgPrefs.last_project_id);
+        if (projectExists) {
+          projectToSelect = existingOrgPrefs.last_project_id;
+        }
+      }
+
+      // If we have a project to select, save it in organization preferences
+      if (projectToSelect) {
+        await supabase
+          .from('user_organization_preferences')
+          .upsert(
+            {
+              user_id: userData.user.id,
+              organization_id: organizationId,
+              last_project_id: projectToSelect,
+              updated_at: new Date().toISOString()
+            },
+            { onConflict: 'user_id,organization_id' }
+          );
+      }
+
+      return { organizationId, firstProjectId: projectToSelect };
     },
     onSuccess: ({ organizationId, firstProjectId }) => {
       // Si hay un proyecto disponible, seleccionarlo; si no, mostrar selector
@@ -146,6 +172,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
       setExpandedProjectSelector(false);
       setSidebarContext('organization');
       setActiveSidebarSection('organizacion');
@@ -153,31 +180,34 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
   });
 
-  // Project selection mutation
+  // Project selection mutation - Updated to use new system
   const projectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('No user preferences available');
+      if (!supabase || !userData?.user?.id || !userData?.organization?.id) {
+        throw new Error('No user or organization available');
       }
 
-      // Guardar en localStorage específico de la organización
-      const currentOrgId = userData?.organization?.id;
-      if (currentOrgId && projectId) {
-        localStorage.setItem(`last-project-${currentOrgId}`, projectId);
-      }
-
+      // Save project in organization preferences
       const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('id', userData.preferences.id);
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: userData.user.id,
+            organization_id: userData.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
 
       if (error) throw error;
       return projectId;
     },
     onSuccess: (projectId) => {
-      // Actualizar el project context Y las preferencias
+      // Actualizar el project context y las preferencias
       setSelectedProject(projectId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
       setExpandedProjectSelector(false);
     }
   });
