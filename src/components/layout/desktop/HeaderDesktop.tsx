@@ -80,21 +80,37 @@ export function HeaderDesktop({
     }
   }, [userData?.preferences?.last_project_id]);
 
-  // Mutation para actualizar proyecto seleccionado
+  // Mutation para actualizar proyecto seleccionado usando nuevo sistema
   const updateProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      if (!supabase || !userData?.preferences?.id) return;
+      if (!supabase || !userData?.user?.id || !userData?.organization?.id) return;
+      
+      console.log("🔧 HeaderDesktop: Updating project", { projectId, organizationId: userData.organization.id });
       
       const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('id', userData.preferences.id);
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: userData.user.id,
+            organization_id: userData.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
       
-      if (error) throw error;
+      if (error) {
+        console.error("🔧 HeaderDesktop: Error updating project", error);
+        // Fallback to localStorage
+        localStorage.setItem(`last-project-${userData.organization.id}`, projectId);
+      }
+      
       return projectId;
     },
     onSuccess: (projectId) => {
+      console.log("🔧 HeaderDesktop: Project updated successfully", projectId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
       setSelectedProject(projectId || null);
     }
   });
