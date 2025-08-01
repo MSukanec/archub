@@ -621,11 +621,30 @@ export function useDeleteConstructionTask() {
         description: "La tarea se eliminó correctamente del proyecto",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting construction task:', error);
+      
+      // Manejar diferentes tipos de errores con mensajes específicos
+      let title = "Error";
+      let description = "No se pudo eliminar la tarea";
+      
+      if (error?.code === '23503') {
+        // Foreign key constraint violation
+        if (error?.details?.includes('movement_tasks')) {
+          title = "No se puede eliminar la tarea";
+          description = "Esta tarea tiene movimientos financieros asociados. Elimina primero los movimientos para poder borrar la tarea.";
+        } else if (error?.details?.includes('construction_dependencies')) {
+          title = "No se puede eliminar la tarea";
+          description = "Esta tarea tiene dependencias con otras tareas. Elimina primero las dependencias para poder borrar la tarea.";
+        } else {
+          title = "No se puede eliminar la tarea";
+          description = "Esta tarea está siendo utilizada por otros elementos del sistema. Elimina primero las referencias para poder borrar la tarea.";
+        }
+      }
+      
       toast({
-        title: "Error",
-        description: "No se pudo eliminar la tarea",
+        title,
+        description,
         variant: "destructive",
       });
     },
