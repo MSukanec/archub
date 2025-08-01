@@ -40,15 +40,19 @@ export function SelectableGhostButton({
   
   // Determinar el estilo del botón (hover si hay selección)
   const isSelected = !!selectedOption;
-  const buttonVariant = isSelected ? "secondary" : "ghost";
+  
+  // Usar clases de hover cuando esté seleccionado para mantener el estilo ghost
+  const buttonClassName = isSelected 
+    ? "h-8 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-foreground)]"
+    : "h-8 px-3 text-xs";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant={buttonVariant}
+          variant="ghost"
           size="sm"
-          className="h-8 px-3 text-xs"
+          className={buttonClassName}
           disabled={disabled}
         >
           {icon && <span className="mr-1">{icon}</span>}
