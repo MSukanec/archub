@@ -2,17 +2,12 @@ import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
-import { Package, Search, Calculator, Boxes, BarChart3, Layers, Filter, X } from 'lucide-react'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Package, Search, Filter } from 'lucide-react'
 
 export default function ConstructionMaterials() {
   const [searchValue, setSearchValue] = useState("")
@@ -65,40 +60,6 @@ export default function ConstructionMaterials() {
       
       return { ...material, groupKey };
     })
-
-  // Clear all filters
-  const handleClearFilters = () => {
-    setSearchValue("")
-    setSortBy("category")
-    setSelectedCategory("")
-  }
-
-  // Detect active filters
-  const hasActiveFilters = searchValue.trim() !== "" || selectedCategory !== ""
-
-  // Custom filters for ActionBar (like in movements page)
-  const customFilters = (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Filtrar por categoría
-        </Label>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Todas las categorías" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todas las categorías</SelectItem>
-            {uniqueCategories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  )
 
   const headerProps = {
     title: "Materiales"
@@ -173,45 +134,35 @@ export default function ConstructionMaterials() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      {/* Action Bar Desktop - siempre visible */}
-      <ActionBarDesktop
-        title="Materiales de Construcción"
-        icon={<Package className="w-6 h-6" />}
-        features={[
+      {/* ActionBar */}
+      <ActionBarDesktopRow
+        filters={[
           {
-            icon: <Calculator className="w-4 h-4" />,
-            title: "Cálculo Automático",
-            description: "Las cantidades se calculan automáticamente basándose en las tareas de construcción del proyecto."
+            key: 'category',
+            label: 'Categoría',
+            icon: Filter,
+            value: selectedCategory || 'Todas las categorías',
+            setValue: (value) => {
+              if (value === 'Todas las categorías') setSelectedCategory('')
+              else setSelectedCategory(value)
+            },
+            options: ['Todas las categorías', ...uniqueCategories],
+            defaultLabel: 'Todas las categorías'
           },
           {
-            icon: <Boxes className="w-4 h-4" />,
-            title: "Organización por Categoría",
-            description: "Los materiales se organizan por categoría y rubro para una mejor gestión."
-          },
-          {
-            icon: <BarChart3 className="w-4 h-4" />,
-            title: "Control de Compras",
-            description: "Seguimiento de materiales por comprar versus materiales necesarios del proyecto."
-          },
-          {
-            icon: <Layers className="w-4 h-4" />,
-            title: "Filtros Flexibles",
-            description: "Sistema de filtros por categoría y agrupación para encontrar materiales específicos."
+            key: 'grouping',
+            label: 'Agrupación',
+            icon: Filter,
+            value: groupingType === 'categories' ? 'Agrupar por Categorías' : 'Sin Agrupación',
+            setValue: (value) => {
+              if (value === 'Agrupar por Categorías') setGroupingType('categories')
+              else setGroupingType('none')
+            },
+            options: ['Sin Agrupación', 'Agrupar por Categorías'],
+            defaultLabel: 'Todas las agrupaciones'
           }
         ]}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        hasActiveFilters={hasActiveFilters}
-        showGrouping={true}
-        groupingType={groupingType}
-        onGroupingChange={setGroupingType}
-        groupingOptions={[
-          { value: 'categories', label: 'Agrupar por Categorías' },
-          { value: 'none', label: 'Sin Agrupación' }
-        ]}
-        customActions={[]}
+        actions={[]}
       />
 
       {filteredMaterials.length === 0 ? (
