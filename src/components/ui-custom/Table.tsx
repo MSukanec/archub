@@ -395,7 +395,7 @@ export function Table<T = any>({
                     mode === "budget" && "border-b border-[var(--table-row-border)]",
                     mode === "construction" && "border-b border-[var(--table-row-border)]",
                     mode === "default" && "border-b border-[var(--table-header-border)]",
-                    "text-xs font-medium"
+                    "text-xs font-medium [&>*]:text-xs [&>*]:font-medium"
                   )}
                   style={{ 
                     gridTemplateColumns: getGridTemplateColumns(),
