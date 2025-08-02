@@ -222,7 +222,7 @@ export default function FinancesSubcontracts() {
           case 'completado':
           case 'completed':
             badgeStyle = { 
-              backgroundColor: 'hsl(var(--chart-1))', 
+              backgroundColor: '#22c55e', // Verde
               color: 'white',
               border: 'none'
             };
@@ -231,7 +231,7 @@ export default function FinancesSubcontracts() {
           case 'pendiente':
           case 'pending':
             badgeStyle = { 
-              backgroundColor: 'hsl(var(--chart-4))', 
+              backgroundColor: '#eab308', // Amarillo
               color: 'black',
               border: 'none'
             };
@@ -240,7 +240,7 @@ export default function FinancesSubcontracts() {
           case 'activo':
           case 'active':
             badgeStyle = { 
-              backgroundColor: 'hsl(var(--chart-2))', 
+              backgroundColor: '#3b82f6', // Azul
               color: 'white',
               border: 'none'
             };
@@ -249,7 +249,7 @@ export default function FinancesSubcontracts() {
           case 'cancelado':
           case 'cancelled':
             badgeStyle = { 
-              backgroundColor: 'hsl(var(--chart-5))', 
+              backgroundColor: '#ef4444', // Rojo
               color: 'white',
               border: 'none'
             };
