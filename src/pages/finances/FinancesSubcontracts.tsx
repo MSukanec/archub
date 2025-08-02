@@ -388,16 +388,22 @@ export default function FinancesSubcontracts() {
               variant: 'default'
             }
           ]}
+          tabs={{
+            activeTab,
+            onTabChange: (tab: string) => setActiveTab(tab),
+            tabs: [
+              { id: 'summary', label: 'Resumen de Subcontratos', icon: Package },
+              { id: 'payments', label: 'Detalle de Pagos', icon: DollarSign }
+            ]
+          }}
         />
 
-        {/* Tabs */}
+        {/* Contenido con tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="hidden">
             <TabsTrigger value="summary">Resumen de Subcontratos</TabsTrigger>
             <TabsTrigger value="payments">Detalle de Pagos</TabsTrigger>
           </TabsList>
-
-
 
           {/* Tab 1: Resumen de Subcontratos */}
           <TabsContent value="summary">
