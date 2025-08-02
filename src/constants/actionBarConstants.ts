@@ -52,19 +52,19 @@ export const FILTER_LABELS = {
   PHASE: 'Fase',
   TYPE: 'Tipo',
   
-  // Estados
-  ALL_CATEGORIES: 'Todas las categorías',
-  ALL_PHASES: 'Todas las Fases',
-  ALL_TYPES: 'Todos los tipos',
+  // Estados - versión corta sin "Todas las"
+  ALL_CATEGORIES: 'Categorías',
+  ALL_PHASES: 'Fases',
+  ALL_TYPES: 'Tipos',
   NO_GROUPING: 'Sin Agrupación',
   
   // Finanzas específicos
   FAVORITES: 'Favoritos',
   CURRENCY: 'Moneda',
   WALLET: 'Billetera',
-  ALL_MOVEMENTS: 'Todos los movimientos',
-  ALL_CURRENCIES: 'Todas las monedas',
-  ALL_WALLETS: 'Todas las billeteras',
+  ALL_MOVEMENTS: 'Movimientos',
+  ALL_CURRENCIES: 'Monedas',
+  ALL_WALLETS: 'Billeteras',
 } as const
 
 // Opciones estándar para agrupación

@@ -117,10 +117,10 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         if (material && category) {
           const existingMaterial = materialMap.get(material.id);
           
-          // For each task material, we need to multiply by the construction task quantity
-          const constructionTask = filteredConstructionTasks.find((ct: any) => ct.task_id === item.task_id);
-          const constructionTaskQuantity = constructionTask?.quantity || 1;
-          const totalQuantity = (item.amount || 0) * constructionTaskQuantity;
+          // For each task material, we need to multiply by ALL construction task quantities for this task_id
+          const relatedConstructionTasks = filteredConstructionTasks.filter((ct: any) => ct.task_id === item.task_id);
+          const totalConstructionQuantity = relatedConstructionTasks.reduce((sum, ct) => sum + (ct.quantity || 1), 0);
+          const totalQuantity = (item.amount || 0) * totalConstructionQuantity;
           
           // Enhanced logging for deck specifically
           if (material.name.toLowerCase().includes('deck')) {
@@ -128,8 +128,8 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
             console.log(`   - Material: ${material.name}`)
             console.log(`   - Task ID: ${item.task_id}`)
             console.log(`   - Material amount (per unit): ${item.amount}`)
-            console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
-            console.log(`   - Phase: ${constructionTask?.phase_name || 'Sin fase'} (pos: ${constructionTask?.phase_position || 'N/A'})`)
+            console.log(`   - Related construction tasks:`, relatedConstructionTasks.map(ct => `${ct.phase_name} (qty: ${ct.quantity})`))
+            console.log(`   - Total construction quantity: ${totalConstructionQuantity}`)
             console.log(`   - Total quantity: ${totalQuantity}`)
             console.log(`   - Existing material in map:`, existingMaterial ? `YES (current: ${existingMaterial.computed_quantity})` : 'NO')
           }
