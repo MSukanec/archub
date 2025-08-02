@@ -43,27 +43,9 @@ export function SubcontractKPICard({
     )
   }
 
-  // Generate simple trend data if not provided
-  const defaultTrend = trend || [
-    { value: value * 0.8 },
-    { value: value * 0.9 },
-    { value: value * 0.85 },
-    { value: value * 1.1 },
-    { value: value }
-  ];
-
   return (
     <Card className="h-full relative overflow-hidden">
       <CardContent className="p-4 h-full flex flex-col">
-        {/* Mini Chart */}
-        <div className="mb-4">
-          <MiniTrendChart 
-            data={defaultTrend} 
-            color={color}
-            isLoading={false}
-          />
-        </div>
-        
         {/* Spacer to push content down */}
         <div className="flex-1"></div>
         
