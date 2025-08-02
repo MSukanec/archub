@@ -51,10 +51,19 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
       // Get unique phases for filter
       const uniquePhases = Array.from(new Set(constructionTasksData.map(ct => ct.phase_name).filter(Boolean))).sort();
 
-      // Filter construction tasks by selected phase if provided
-      const filteredConstructionTasks = selectedPhase 
+      // Filter construction tasks by selected phase if provided (only if not empty string)
+      const shouldFilterByPhase = selectedPhase && selectedPhase.trim() !== '';
+      const filteredConstructionTasks = shouldFilterByPhase
         ? constructionTasksData.filter(ct => ct.phase_name === selectedPhase)
         : constructionTasksData;
+
+      console.log("🔍 Phase Filter Debug:", {
+        selectedPhase,
+        shouldFilterByPhase,
+        totalTasks: constructionTasksData.length,
+        filteredTasks: filteredConstructionTasks.length,
+        allPhases: uniquePhases
+      });
 
       // DEBUG: Log construction tasks data to understand quantities and phases
       console.log("🔧 Construction Tasks Data:", filteredConstructionTasks.map(ct => ({
