@@ -214,7 +214,7 @@ export default function FinancesSubcontracts() {
     },
     {
       key: 'saldo',
-      label: 'Saldo',
+      label: 'Diferencia',
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
         const saldoUSD = subcontract.analysis?.saldoUSD || 0;
@@ -469,41 +469,41 @@ export default function FinancesSubcontracts() {
           <SubcontractKPICard
             title="Total Subcontratos"
             value={totalSubcontracts}
-            subtitle={`${completedSubcontracts} completados, ${pendingSubcontracts} pendientes`}
             icon={<Building className="h-4 w-4" />}
-            color="hsl(var(--chart-1))"
+            color="var(--chart-1)"
             isLoading={isLoading}
             formatter={(val) => val.toString()}
+            currencyCode="QTY"
           />
           
           <SubcontractKPICard
             title="Valor Total Contratado"
             value={totalContractValue}
-            subtitle="Monto total de todos los subcontratos"
             icon={<DollarSign className="h-4 w-4" />}
-            color="hsl(var(--chart-1))"
+            color="var(--chart-positive)"
             isLoading={isLoading}
             formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+            currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
           />
           
           <SubcontractKPICard
             title="Total Pagado"
             value={totalPaid}
-            subtitle="Suma de todos los pagos realizados"
             icon={<CheckCircle className="h-4 w-4" />}
-            color="hsl(var(--chart-1))"
+            color="var(--chart-2)"
             isLoading={isLoading}
             formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+            currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
           />
           
           <SubcontractKPICard
-            title="Saldo Pendiente"
+            title="Diferencia Pendiente"
             value={totalPending}
-            subtitle="Monto total por pagar"
             icon={<AlertTriangle className="h-4 w-4" />}
-            color={totalPending > 0 ? "hsl(var(--chart-1))" : totalPending < 0 ? "hsl(var(--chart-5))" : "hsl(var(--chart-4))"}
+            color={totalPending > 0 ? "var(--chart-positive)" : totalPending < 0 ? "var(--chart-negative)" : "var(--chart-neutral)"}
             isLoading={isLoading}
             formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+            currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
           />
         </div>
 
