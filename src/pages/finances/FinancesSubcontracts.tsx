@@ -298,18 +298,23 @@ export default function FinancesSubcontracts() {
         // La diferencia es lo que falta por pagar: 100% - porcentaje_pagado
         const porcentajeDiferencia = 100 - porcentajePagado;
         
-        // Determinar color basado en el porcentaje
+        // Determinar color basado en el resultado financiero
         let colorClass = '';
-        if (porcentajeDiferencia > 50) {
-          colorClass = 'text-red-600'; // Mucho por pagar - rojo
-        } else if (porcentajeDiferencia > 25) {
-          colorClass = 'text-yellow-600'; // Algo por pagar - amarillo
-        } else if (porcentajeDiferencia > 0) {
-          colorClass = 'text-blue-600'; // Poco por pagar - azul
+        if (porcentajeDiferencia < 0) {
+          // Sobrepagado (se perdió dinero) - rojo
+          colorClass = 'text-red-600';
         } else if (porcentajeDiferencia === 0) {
-          colorClass = 'text-green-600'; // Completamente pagado - verde
+          // Pagado exacto - neutro
+          colorClass = 'text-gray-600';
+        } else if (porcentajeDiferencia > 0 && porcentajeDiferencia <= 25) {
+          // Poco pendiente (buena gestión) - verde claro
+          colorClass = 'text-green-600';
+        } else if (porcentajeDiferencia > 25 && porcentajeDiferencia <= 50) {
+          // Moderadamente pendiente - amarillo
+          colorClass = 'text-yellow-600';
         } else {
-          colorClass = 'text-purple-600'; // Sobrepagado - morado
+          // Mucho pendiente (se está "ganando" al no pagar) - verde intenso
+          colorClass = 'text-green-700';
         }
         
         return (
