@@ -29,6 +29,7 @@ import { es } from 'date-fns/locale'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {
@@ -170,12 +171,14 @@ export default function ConstructionSchedule() {
     {
       id: "list", 
       label: "Listado de Tareas",
-      isActive: activeTab === "list"
+      isActive: activeTab === "list",
+      disabled: true // Bloquear esta tab
     },
     {
       id: "analytics",
       label: "Análisis Visual", 
-      isActive: activeTab === "analytics"
+      isActive: activeTab === "analytics",
+      disabled: true // Bloquear esta tab
     }
   ]
 
@@ -219,21 +222,7 @@ export default function ConstructionSchedule() {
 
       {/* ActionBarDesktopRow */}
       <ActionBarDesktopRow
-        filters={[
-          {
-            key: 'grouping',
-            label: FILTER_LABELS.GROUPING,
-            icon: FILTER_ICONS.GROUPING,
-            value: groupingType === 'rubros' ? 'Por Rubros' : groupingType === 'fases' ? 'Por Fases' : 'Sin Agrupar',
-            setValue: (value) => {
-              if (value === 'Por Rubros') setGroupingType('rubros')
-              else if (value === 'Por Fases') setGroupingType('fases')
-              else setGroupingType('none')
-            },
-            options: ['Sin Agrupar', 'Por Rubros', 'Por Fases'],
-            defaultLabel: FILTER_LABELS.NO_GROUPING
-          }
-        ]}
+        filters={[]}
         actions={[
           {
             label: ACTION_LABELS.NEW_TASK,
@@ -278,131 +267,35 @@ export default function ConstructionSchedule() {
         </div>
       )}
 
+
+
       {activeTab === 'list' && (
         <div className="space-y-6">
-          {filteredTasks.length === 0 ? (
-            <EmptyState
-              icon={<TableIcon className="h-16 w-16" />}
-              title="No hay tareas para mostrar"
-              description="Las tareas que agregues aparecerán en esta lista con detalles completos."
-            />
-          ) : (
-            <Table
-              data={filteredTasks}
-              columns={[
-                {
-                  key: 'phase_name',
-                  label: 'Fase',
-                  width: '15%',
-                  render: (task) => (
-                    <Badge variant="secondary" className="text-xs">
-                      {task.phase_name || 'Sin fase'}
-                    </Badge>
-                  )
-                },
-                {
-                  key: 'category_name',
-                  label: 'Rubro',
-                  width: '15%',
-                  render: (task) => (
-                    <Badge variant="outline" className="text-xs">
-                      {task.category_name || 'Sin rubro'}
-                    </Badge>
-                  )
-                },
-                {
-                  key: 'name_rendered',
-                  label: 'Tarea',
-                  width: '35%',
-                  render: (task) => (
-                    <span className="text-sm">
-                      {cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre')}
-                    </span>
-                  )
-                },
-                {
-                  key: 'unit_name',
-                  label: 'Unidad',
-                  width: '10%',
-                  render: (task) => (
-                    <Badge variant="outline" className="text-xs">
-                      {task.unit_name || 'N/A'}
-                    </Badge>
-                  )
-                },
-                {
-                  key: 'quantity',
-                  label: 'Cantidad',
-                  width: '10%',
-                  render: (task) => (
-                    <span className="text-sm font-medium">
-                      {task.quantity || 0}
-                    </span>
-                  )
-                },
-                {
-                  key: 'actions',
-                  label: 'Acciones',
-                  width: '15%',
-                  sortable: false,
-                  render: (task) => (
-                    <div className="flex items-center space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openModal('construction-task-schedule', { taskId: task.id })}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          showDeleteConfirmation({
-                            title: 'Eliminar Tarea',
-                            description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
-                            onConfirm: () => deleteTask.mutate({
-                              id: task.id,
-                              project_id: task.project_id,
-                              organization_id: organizationId || ''
-                            })
-                          })
-                        }}
-                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )
-                }
-              ]}
-            />
-          )}
+          <CustomRestricted reason="coming_soon">
+            <div className="flex flex-col items-center justify-center py-16">
+              <CheckSquare className="w-16 h-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Listado de Tareas</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                Esta funcionalidad estará disponible próximamente. Aquí podrás ver y gestionar todas las tareas 
+                del proyecto en formato de tabla con filtros avanzados.
+              </p>
+            </div>
+          </CustomRestricted>
         </div>
       )}
 
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          {filteredTasks.length === 0 ? (
-            <EmptyState
-              icon={<BarChart3 className="h-16 w-16" />}
-              title="No hay datos para analizar"
-              description="Agrega tareas con fechas y duraciones para generar análisis visuales del cronograma."
-            />
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ProgressCurve data={filteredTasks} />
-              <BurndownChart data={filteredTasks} />
-              <WorkloadOverTime data={filteredTasks} />
-              <TasksByPhase data={filteredTasks} />
-              <DurationByRubro data={filteredTasks} />
-              <StatusBreakdown data={filteredTasks} />
-              <CriticalPathDistribution data={filteredTasks} dependencies={dependencies} />
-              <WeeklyProgressHeatmap data={filteredTasks} />
-              <DependencyNetwork data={filteredTasks} dependencies={dependencies} />
+          <CustomRestricted reason="coming_soon">
+            <div className="flex flex-col items-center justify-center py-16">
+              <BarChart3 className="w-16 h-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Análisis Visual</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                Esta funcionalidad estará disponible próximamente. Aquí podrás ver gráficos de progreso, 
+                burndown charts y análisis de rutas críticas del cronograma.
+              </p>
             </div>
-          )}
+          </CustomRestricted>
         </div>
       )}
     </Layout>
