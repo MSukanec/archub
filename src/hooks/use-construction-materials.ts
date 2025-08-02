@@ -10,12 +10,18 @@ export interface ConstructionMaterial {
   computed_quantity: number;
   purchased_quantity: number;
   to_purchase_quantity: number;
+  phases?: { phase_name: string; quantity: number }[];
 }
 
-export function useConstructionMaterials(projectId: string) {
+export interface ConstructionMaterialsResult {
+  materials: ConstructionMaterial[];
+  phases: string[];
+}
+
+export function useConstructionMaterials(projectId: string, selectedPhase?: string) {
   return useQuery({
-    queryKey: ["construction-materials", projectId],
-    queryFn: async (): Promise<ConstructionMaterial[]> => {
+    queryKey: ["construction-materials", projectId, selectedPhase],
+    queryFn: async (): Promise<ConstructionMaterialsResult> => {
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
@@ -39,11 +45,19 @@ export function useConstructionMaterials(projectId: string) {
       }
 
       if (!constructionTasksData || constructionTasksData.length === 0) {
-        return [];
+        return { materials: [], phases: [] };
       }
 
+      // Get unique phases for filter
+      const uniquePhases = Array.from(new Set(constructionTasksData.map(ct => ct.phase_name).filter(Boolean))).sort();
+
+      // Filter construction tasks by selected phase if provided
+      const filteredConstructionTasks = selectedPhase 
+        ? constructionTasksData.filter(ct => ct.phase_name === selectedPhase)
+        : constructionTasksData;
+
       // DEBUG: Log construction tasks data to understand quantities and phases
-      console.log("🔧 Construction Tasks Data:", constructionTasksData.map(ct => ({
+      console.log("🔧 Construction Tasks Data:", filteredConstructionTasks.map(ct => ({
         id: ct.id,
         task_id: ct.task_id,
         quantity: ct.quantity,
@@ -51,8 +65,8 @@ export function useConstructionMaterials(projectId: string) {
         phase_position: ct.phase_position
       })));
 
-      // Extract task IDs from construction tasks
-      const taskIds = constructionTasksData.map(ct => ct.task_id);
+      // Extract task IDs from filtered construction tasks
+      const taskIds = filteredConstructionTasks.map(ct => ct.task_id);
 
       // Now get task_materials for these tasks
       const { data, error } = await supabase
@@ -95,7 +109,7 @@ export function useConstructionMaterials(projectId: string) {
           const existingMaterial = materialMap.get(material.id);
           
           // For each task material, we need to multiply by the construction task quantity
-          const constructionTask = constructionTasksData.find((ct: any) => ct.task_id === item.task_id);
+          const constructionTask = filteredConstructionTasks.find((ct: any) => ct.task_id === item.task_id);
           const constructionTaskQuantity = constructionTask?.quantity || 1;
           const totalQuantity = (item.amount || 0) * constructionTaskQuantity;
           
@@ -149,12 +163,12 @@ export function useConstructionMaterials(projectId: string) {
         }
       });
 
-      const result = Array.from(materialMap.values()).sort((a, b) => 
+      const materials = Array.from(materialMap.values()).sort((a, b) => 
         a.category_name.localeCompare(b.category_name) || a.name.localeCompare(b.name)
       );
       
-      console.log("Final materials result:", result.length, "unique materials");
-      return result;
+      console.log("Final materials result:", materials.length, "unique materials");
+      return { materials, phases: uniquePhases };
     },
     enabled: !!projectId && !!supabase
   });

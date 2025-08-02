@@ -15,12 +15,17 @@ export default function ConstructionMaterials() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedPhase, setSelectedPhase] = useState("")
   const [groupingType, setGroupingType] = useState('none')
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { data: materials = [], isLoading: materialsLoading } = useConstructionMaterials(
-    userData?.preferences?.last_project_id || ''
+  const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
+    userData?.preferences?.last_project_id || '',
+    selectedPhase
   )
+  
+  const materials = materialsResult?.materials || []
+  const phases = materialsResult?.phases || []
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -169,6 +174,17 @@ export default function ConstructionMaterials() {
           {/* ActionBar */}
           <ActionBarDesktopRow
             filters={[
+              {
+                key: 'phase',
+                label: 'Fase',
+                icon: Filter,
+                value: selectedPhase,
+                setValue: (value) => {
+                  setSelectedPhase(value || '')
+                },
+                options: phases,
+                defaultLabel: 'Todas las Fases'
+              },
               {
                 key: 'category',
                 label: 'Categoría',
