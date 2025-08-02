@@ -89,7 +89,7 @@ export default function ConstructionMaterials() {
       {
         key: 'category_name',
         label: 'Categoría',
-        width: '15%',
+        width: '20%',
         render: (material: any) => (
           <span className="text-sm font-medium">{material.category_name}</span>
         )
@@ -97,46 +97,49 @@ export default function ConstructionMaterials() {
       {
         key: 'name',
         label: 'Nombre',
-        width: '30%',
+        width: '35%',
         render: (material: any) => (
           <span className="text-sm">{material.name}</span>
-        )
-      },
-      {
-        key: 'unit',
-        label: 'Unidad',
-        width: '10%',
-        render: (material: any) => (
-          <span className="text-sm text-muted-foreground">{material.unit || 'unidad'}</span>
         )
       },
       {
         key: 'computed_quantity',
         label: 'Cantidad Computada',
         width: '15%',
-        render: (material: any) => (
-          <span className="text-sm font-medium">{material.computed_quantity.toFixed(2)}</span>
-        )
+        render: (material: any) => {
+          const unit = material.unit_name || 'unidad'
+          return (
+            <span className="text-sm font-medium">
+              {material.computed_quantity.toFixed(2)} {unit}
+            </span>
+          )
+        }
       },
       {
         key: 'purchased_quantity',
         label: 'Cantidad Comprada',
         width: '15%',
-        render: (material: any) => (
-          <span className="text-sm text-muted-foreground">
-            {material.purchased_quantity.toFixed(2)}
-          </span>
-        )
+        render: (material: any) => {
+          const unit = material.unit_name || 'unidad'
+          return (
+            <span className="text-sm text-muted-foreground">
+              {material.purchased_quantity.toFixed(2)} {unit}
+            </span>
+          )
+        }
       },
       {
         key: 'to_purchase_quantity',
         label: 'Cantidad A Comprar',
         width: '15%',
-        render: (material: any) => (
-          <span className="text-sm text-muted-foreground">
-            {material.to_purchase_quantity.toFixed(2)}
-          </span>
-        )
+        render: (material: any) => {
+          const unit = material.unit_name || 'unidad'
+          return (
+            <span className="text-sm text-muted-foreground">
+              {material.to_purchase_quantity.toFixed(2)} {unit}
+            </span>
+          )
+        }
       }
     ];
 

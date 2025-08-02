@@ -6,6 +6,7 @@ export interface ConstructionMaterial {
   name: string;
   category_id: string;
   category_name: string;
+  unit_name?: string;
   computed_quantity: number;
   purchased_quantity: number;
   to_purchase_quantity: number;
@@ -65,7 +66,12 @@ export function useConstructionMaterials(projectId: string) {
             id,
             name,
             category_id,
+            unit_id,
             material_categories:category_id (
+              id,
+              name
+            ),
+            units:unit_id (
               id,
               name
             )
@@ -128,6 +134,7 @@ export function useConstructionMaterials(projectId: string) {
               name: material.name,
               category_id: category.id,
               category_name: category.name,
+              unit_name: material.units?.name,
               computed_quantity: computedQty,
               purchased_quantity: purchasedQty,
               to_purchase_quantity: Math.max(0, computedQty - purchasedQty)
