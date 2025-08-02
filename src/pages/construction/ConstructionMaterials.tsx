@@ -13,7 +13,7 @@ export default function ConstructionMaterials() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [groupingType, setGroupingType] = useState('categories')
+  const [groupingType, setGroupingType] = useState('none')
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: materials = [], isLoading: materialsLoading } = useConstructionMaterials(
@@ -152,12 +152,12 @@ export default function ConstructionMaterials() {
             key: 'grouping',
             label: 'Agrupación',
             icon: Filter,
-            value: groupingType === 'categories' ? 'Agrupar por Categorías' : 'Sin Agrupación',
+            value: groupingType === 'categories' ? 'Agrupar por Categorías' : '',
             setValue: (value) => {
               if (value === 'Agrupar por Categorías') setGroupingType('categories')
               else setGroupingType('none')
             },
-            options: ['Sin Agrupación', 'Agrupar por Categorías'],
+            options: ['Agrupar por Categorías'],
             defaultLabel: 'Sin Agrupación'
           }
         ]}
