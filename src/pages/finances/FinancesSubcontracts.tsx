@@ -232,7 +232,7 @@ export default function FinancesSubcontracts() {
           case 'pending':
             badgeStyle = { 
               backgroundColor: '#eab308', // Amarillo
-              color: 'black',
+              color: 'white',
               border: 'none'
             };
             displayText = 'Pendiente';
