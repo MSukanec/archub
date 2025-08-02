@@ -268,6 +268,76 @@ export default function FinancesSubcontracts() {
     }
   ];
 
+  // Columnas para la tabla de pagos
+  const paymentsColumns = [
+    {
+      key: 'subcontract_title',
+      label: 'Subcontrato',
+      width: '20%',
+      render: (payment: any) => (
+        <div className="font-medium">{payment.subcontract_title}</div>
+      )
+    },
+    {
+      key: 'movement_date',
+      label: 'Fecha',
+      width: '12%',
+      render: (payment: any) => {
+        return format(new Date(payment.movement_date), 'dd/MM/yyyy', { locale: es });
+      }
+    },
+    {
+      key: 'contact_name',
+      label: 'Proveedor',
+      width: '16%',
+      render: (payment: any) => (
+        <div className="font-medium">{payment.contact_name}</div>
+      )
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      width: '12%',
+      render: (payment: any) => {
+        const amountARS = payment.amount;
+        const amountUSD = payment.amount / payment.exchange_rate;
+        const originalCurrency = payment.currency_code === 'USD' ? 'USD' : 'ARS';
+        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
+      }
+    },
+    {
+      key: 'wallet_name',
+      label: 'Billetera',
+      width: '12%',
+      render: (payment: any) => (
+        <div className="flex items-center gap-2">
+          <Wallet className="w-4 h-4 text-muted-foreground" />
+          {payment.wallet_name}
+        </div>
+      )
+    },
+    {
+      key: 'currency',
+      label: 'Moneda',
+      width: '10%',
+      render: (payment: any) => (
+        <Badge variant="outline">
+          {payment.currency_symbol} {payment.currency_name}
+        </Badge>
+      )
+    },
+    {
+      key: 'exchange_rate',
+      label: 'T.C.',
+      width: '8%',
+      render: (payment: any) => (
+        <div className="text-sm text-muted-foreground">
+          {payment.exchange_rate.toFixed(2)}
+        </div>
+      )
+    }
+  ];
+
   // Filtrar subcontratos por búsqueda
   const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
     const searchLower = searchQuery.toLowerCase();
