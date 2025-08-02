@@ -89,7 +89,7 @@ export default function ConstructionMaterials() {
       {
         key: 'category_name',
         label: 'Categoría',
-        width: '20%',
+        width: '15%',
         render: (material: any) => (
           <span className="text-sm font-medium">{material.category_name}</span>
         )
@@ -97,9 +97,17 @@ export default function ConstructionMaterials() {
       {
         key: 'name',
         label: 'Nombre',
-        width: '35%',
+        width: '30%',
         render: (material: any) => (
           <span className="text-sm">{material.name}</span>
+        )
+      },
+      {
+        key: 'unit',
+        label: 'Unidad',
+        width: '10%',
+        render: (material: any) => (
+          <span className="text-sm text-muted-foreground">{material.unit || 'unidad'}</span>
         )
       },
       {
