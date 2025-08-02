@@ -26,8 +26,11 @@ export function SubcontractPaymentsChart({
   if (isLoading) {
     return (
       <Card className="col-span-4">
-        <CardContent className="p-0">
-          <div className="h-32 bg-muted/20 rounded animate-pulse" />
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 bg-muted/20 rounded animate-pulse" />
         </CardContent>
       </Card>
     )
@@ -36,8 +39,11 @@ export function SubcontractPaymentsChart({
   if (!data || data.length === 0) {
     return (
       <Card className="col-span-4">
-        <CardContent className="p-0">
-          <div className="h-32 flex items-center justify-center">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 flex items-center justify-center">
             <div className="text-sm text-muted-foreground">No hay datos de pagos disponibles</div>
           </div>
         </CardContent>
@@ -71,16 +77,19 @@ export function SubcontractPaymentsChart({
 
   return (
     <Card className="col-span-4">
-      <CardContent className="p-0">
-        <div className="h-32">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
               margin={{
-                top: 10,
-                right: 0,
-                left: 0,
-                bottom: 10,
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
               }}
             >
               <defs>
@@ -89,16 +98,16 @@ export function SubcontractPaymentsChart({
                   <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0.1}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis 
                 dataKey="formattedMonth" 
-                stroke="var(--chart-grid-text)"
+                stroke="var(--muted-foreground)"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis 
-                stroke="var(--chart-grid-text)"
+                stroke="var(--muted-foreground)"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
