@@ -1,11 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { SelectableGhostButton, SelectableGhostButtonOption } from '@/components/ui-custom/SelectableGhostButton';
 import { LucideIcon } from 'lucide-react';
 
 interface FilterConfig {
@@ -51,30 +46,30 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
       <div className="flex items-center justify-between px-4 py-3">
         {/* Filtros a la izquierda - Completamente dinámicos */}
         <div className="flex items-center gap-2">
-          {filters.filter(filter => filter.enabled !== false).map((filter) => (
-            <DropdownMenu key={filter.key}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 text-xs"
-                >
-                  <filter.icon className="w-4 h-4 mr-1" />
-                  {filter.label}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem onClick={() => filter.setValue("all")}>
-                  {filter.defaultLabel}
-                </DropdownMenuItem>
-                {filter.options.filter(Boolean).map((option) => (
-                  <DropdownMenuItem key={option} onClick={() => filter.setValue(option!)}>
-                    {option}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ))}
+          {filters.filter(filter => filter.enabled !== false).map((filter) => {
+            // Convertir las opciones al formato esperado por SelectableGhostButton
+            const selectableOptions: SelectableGhostButtonOption[] = filter.options
+              .filter(Boolean)
+              .map(option => ({
+                value: option!,
+                label: option!
+              }));
+
+            return (
+              <SelectableGhostButton
+                key={filter.key}
+                defaultLabel={filter.defaultLabel}
+                selectedValue={filter.value === "all" ? "" : filter.value}
+                options={selectableOptions}
+                onSelect={(value) => {
+                  // Si no hay valor seleccionado, usar "all"
+                  filter.setValue(value || "all");
+                }}
+                icon={<filter.icon className="w-4 h-4" />}
+                placeholder={filter.defaultLabel}
+              />
+            );
+          })}
         </div>
 
         {/* Acciones a la derecha - Completamente dinámicas */}
