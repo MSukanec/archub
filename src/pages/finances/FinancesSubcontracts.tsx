@@ -11,6 +11,7 @@ import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SubcontractKPICard } from '@/components/charts/SubcontractKPICard';
+import { SubcontractPaymentsChart } from '@/components/charts/SubcontractPaymentsChart';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
@@ -164,6 +165,40 @@ export default function FinancesSubcontracts() {
   }, 0);
   
   const averageContractValue = totalSubcontracts > 0 ? totalContractValue / totalSubcontracts : 0;
+
+  // Procesar datos para el gráfico de pagos por mes
+  const generatePaymentsChartData = () => {
+    if (!subcontractPayments || subcontractPayments.length === 0) return [];
+    
+    // Agrupar pagos por mes
+    const paymentsByMonth = subcontractPayments.reduce((acc, payment) => {
+      const date = new Date(payment.movement_date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const formattedMonth = format(date, 'MMM-yy', { locale: es });
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = {
+          month: monthKey,
+          formattedMonth,
+          amount: 0
+        };
+      }
+      
+      // Convertir a la moneda de vista seleccionada
+      const amount = currencyView === 'dolarizado' 
+        ? payment.amount / payment.exchange_rate
+        : payment.amount;
+        
+      acc[monthKey].amount += amount;
+      return acc;
+    }, {} as Record<string, { month: string; formattedMonth: string; amount: number }>);
+    
+    // Convertir a array y ordenar por fecha
+    return Object.values(paymentsByMonth)
+      .sort((a, b) => a.month.localeCompare(b.month));
+  };
+
+  const paymentsChartData = generatePaymentsChartData();
 
   // Columnas de la tabla
   const columns = [
@@ -464,6 +499,16 @@ export default function FinancesSubcontracts() {
       headerProps={headerProps}
     >
       <div className="space-y-6">
+        {/* Gráfico de Pagos por Mes */}
+        <div className="grid grid-cols-4 gap-4">
+          <SubcontractPaymentsChart
+            data={paymentsChartData}
+            isLoading={isLoading}
+            currencySymbol={currencyView === 'dolarizado' ? 'US$' : '$'}
+            title="Evolución de Pagos de Subcontratos"
+          />
+        </div>
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <SubcontractKPICard
