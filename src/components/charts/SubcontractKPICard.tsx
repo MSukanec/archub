@@ -2,6 +2,7 @@ import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { MiniTrendChart } from './MiniTrendChart'
 import { Badge } from '@/components/ui/badge'
+import { formatIntlCurrency } from '@/lib/currency-formatter'
 
 interface SubcontractKPICardProps {
   title: string
@@ -23,11 +24,7 @@ export function SubcontractKPICard({
   trend,
   color = 'var(--chart-1)',
   isLoading = false,
-  formatter = (val) => new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0
-  }).format(val),
+  formatter = (val) => formatIntlCurrency(val, currencyCode),
   currencyCode = 'ARS'
 }: SubcontractKPICardProps) {
   if (isLoading) {

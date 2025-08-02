@@ -20,6 +20,7 @@ import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts"
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { formatCurrency as globalFormatCurrency } from "@/lib/currency-formatter";
 
 export default function FinancesSubcontracts() {
   const { data: userData } = useCurrentUser();
@@ -101,7 +102,7 @@ export default function FinancesSubcontracts() {
 
 
   const formatCurrency = (amount: number, symbol: string = '$') => {
-    return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
+    return globalFormatCurrency(amount, symbol);
   };
 
   // Función para convertir montos según la vista de moneda
@@ -504,7 +505,6 @@ export default function FinancesSubcontracts() {
           filters={[
             {
               key: 'currency',
-              title: 'Moneda',
               label: FILTER_LABELS.CURRENCY,
               icon: FILTER_ICONS.CURRENCY,
               value: currencyView === 'pesificado' ? 'Peso Argentino' : 'Dólar Estadounidense',
@@ -513,7 +513,7 @@ export default function FinancesSubcontracts() {
                 else setCurrencyView('dolarizado')
               },
               options: ['Peso Argentino', 'Dólar Estadounidense'],
-              defaultLabel: 'Dólar Estadounidense'
+              defaultLabel: 'Seleccionar moneda'
             }
           ]}
           actions={[
@@ -559,7 +559,7 @@ export default function FinancesSubcontracts() {
           />
           
           <SubcontractKPICard
-            title="Diferencia Pendiente"
+            title="Diferencia"
             value={totalPending}
             icon={<AlertTriangle className="h-4 w-4" />}
             color={totalPending > 0 ? "var(--chart-positive)" : totalPending < 0 ? "var(--chart-negative)" : "var(--chart-neutral)"}
