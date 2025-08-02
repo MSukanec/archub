@@ -8,7 +8,8 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
-import { Package, Search, Filter, ShoppingCart } from 'lucide-react'
+import { Package, Search, ShoppingCart } from 'lucide-react'
+import { FILTER_ICONS, FILTER_LABELS, GROUPING_OPTIONS } from '@/constants/actionBarConstants'
 
 export default function ConstructionMaterials() {
   const [activeTab, setActiveTab] = useState('materials')
@@ -176,37 +177,37 @@ export default function ConstructionMaterials() {
             filters={[
               {
                 key: 'phase',
-                label: 'Fase',
-                icon: Filter,
+                label: FILTER_LABELS.PHASE,
+                icon: FILTER_ICONS.PHASE,
                 value: selectedPhase,
                 setValue: (value) => {
                   setSelectedPhase(value || '')
                 },
                 options: phases,
-                defaultLabel: 'Todas las Fases'
+                defaultLabel: FILTER_LABELS.ALL_PHASES
               },
               {
                 key: 'category',
-                label: 'Categoría',
-                icon: Filter,
+                label: FILTER_LABELS.CATEGORY,
+                icon: FILTER_ICONS.CATEGORY,
                 value: selectedCategory,
                 setValue: (value) => {
                   setSelectedCategory(value || '')
                 },
                 options: uniqueCategories,
-                defaultLabel: 'Todas las categorías'
+                defaultLabel: FILTER_LABELS.ALL_CATEGORIES
               },
               {
                 key: 'grouping',
-                label: 'Agrupación',
-                icon: Filter,
+                label: FILTER_LABELS.GROUPING,
+                icon: FILTER_ICONS.GROUPING,
                 value: groupingType === 'categories' ? 'Agrupar por Categorías' : '',
                 setValue: (value) => {
                   if (value === 'Agrupar por Categorías') setGroupingType('categories')
                   else setGroupingType('none')
                 },
-                options: ['Agrupar por Categorías'],
-                defaultLabel: 'Sin Agrupación'
+                options: GROUPING_OPTIONS.MATERIALS,
+                defaultLabel: FILTER_LABELS.NO_GROUPING
               }
             ]}
             actions={[]}

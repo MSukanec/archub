@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2, Filter } from 'lucide-react'
+import { Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2 } from 'lucide-react'
+import { FILTER_ICONS, FILTER_LABELS, GROUPING_OPTIONS, ACTION_ICONS, ACTION_LABELS, Plus } from '@/constants/actionBarConstants'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
@@ -221,22 +222,22 @@ export default function ConstructionSchedule() {
         filters={[
           {
             key: 'grouping',
-            label: 'Agrupación',
-            icon: Filter,
+            label: FILTER_LABELS.GROUPING,
+            icon: FILTER_ICONS.GROUPING,
             value: groupingType === 'rubros' ? 'Por Rubros' : groupingType === 'fases' ? 'Por Fases' : 'Sin Agrupar',
             setValue: (value) => {
               if (value === 'Por Rubros') setGroupingType('rubros')
               else if (value === 'Por Fases') setGroupingType('fases')
               else setGroupingType('none')
             },
-            options: ['Sin Agrupar', 'Por Rubros', 'Por Fases'],
+            options: GROUPING_OPTIONS.SCHEDULE,
             defaultLabel: 'Todas las agrupaciones'
           }
         ]}
         actions={[
           {
-            label: 'Nueva Tarea',
-            icon: Plus,
+            label: ACTION_LABELS.NEW_TASK,
+            icon: ACTION_ICONS.NEW,
             onClick: () => openModal('construction-task', { 
               projectId: projectId || '', 
               organizationId: organizationId || '' 
