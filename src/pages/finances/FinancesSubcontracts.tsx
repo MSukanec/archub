@@ -282,23 +282,39 @@ export default function FinancesSubcontracts() {
     return titleMatch || contactMatch;
   });
 
+  // Filtrar pagos por búsqueda
+  const filteredPayments = subcontractPayments.filter(payment => {
+    const searchLower = searchQuery.toLowerCase();
+    const titleMatch = payment.subcontract_title?.toLowerCase().includes(searchLower);
+    const contactMatch = payment.contact_name?.toLowerCase().includes(searchLower);
+    
+    return titleMatch || contactMatch;
+  });
+
+  // Configurar tabs para el header
+  const headerTabs = [
+    {
+      id: 'summary',
+      label: 'Resumen de Subcontratos',
+      isActive: activeTab === 'summary'
+    },
+    {
+      id: 'payments',
+      label: 'Detalle de Pagos',
+      isActive: activeTab === 'payments'
+    }
+  ];
+
+  const headerProps = {
+    title: "Subcontratos",
+    tabs: headerTabs,
+    onTabChange: setActiveTab
+  };
+
   return (
     <Layout 
       wide={false}
-      headerTabs={[
-        { 
-          id: 'summary', 
-          label: 'Resumen de Subcontratos', 
-          isActive: activeTab === 'summary',
-          onClick: () => setActiveTab('summary')
-        },
-        { 
-          id: 'payments', 
-          label: 'Detalle de Pagos', 
-          isActive: activeTab === 'payments',
-          onClick: () => setActiveTab('payments')
-        }
-      ]}
+      headerProps={headerProps}
     >
       <div className="space-y-6">
         {/* ActionBar */}
