@@ -267,16 +267,16 @@ export default function ConstructionSubcontracts() {
               title: 'Moneda',
               label: FILTER_LABELS.CURRENCY,
               icon: FILTER_ICONS.CURRENCY,
-              value: currencyView === 'discriminado' ? 'Discriminado' :
-                     currencyView === 'pesificado' ? 'Pesificado' : 
-                     'Dolarizado',
+              value: currencyView === 'pesificado' ? 'Pesificado' : 
+                     currencyView === 'dolarizado' ? 'Dolarizado' :
+                     'Discriminado',
               setValue: (value) => {
-                if (value === 'Discriminado') setCurrencyView('discriminado')
-                else if (value === 'Pesificado') setCurrencyView('pesificado')
+                if (value === 'Pesificado') setCurrencyView('pesificado')
                 else if (value === 'Dolarizado') setCurrencyView('dolarizado')
+                else setCurrencyView('discriminado')
               },
-              options: ['Discriminado', 'Pesificado', 'Dolarizado'],
-              defaultLabel: FILTER_LABELS.ALL_CURRENCIES
+              options: ['Pesificado', 'Dolarizado'],
+              defaultLabel: 'Discriminado'
             }
           ]}
           actions={[
