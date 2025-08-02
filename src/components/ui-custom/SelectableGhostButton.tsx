@@ -39,7 +39,8 @@ export function SelectableGhostButton({
   const displayText = selectedOption ? selectedOption.label : defaultLabel;
   
   // Determinar el estilo del botón (hover si hay selección)
-  const isSelected = !!selectedOption;
+  // Solo aplicar hover si hay una selección real (no "none" o vacío)
+  const isSelected = !!selectedOption && selectedValue !== "none" && selectedValue !== "";
   
   // Usar clases de hover cuando esté seleccionado para mantener el estilo ghost
   const buttonClassName = isSelected 
