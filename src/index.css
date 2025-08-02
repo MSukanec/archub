@@ -134,7 +134,7 @@
   --table-row-border: hsl(0, 0%, 85%);
   
   /* Table Dynamic Group Headers (filas de agrupación dinámicas) */
-  --table-group-header-bg: hsl(76, 100%, 40%);
+  --table-group-header-bg: hsl(280, 70%, 50%);
   --table-group-header-fg: hsl(0, 0%, 100%);
   --chart-negative: hsl(0, 50%, 50%);
   --chart-neutral: hsl(200, 30%, 40%);
