@@ -276,6 +276,50 @@ export default function FinancesSubcontracts() {
       }
     },
     {
+      key: 'porcentaje_diferencia',
+      label: '% Diferencia',
+      render: (subcontract: any) => {
+        const montoTotal = currencyView === 'dolarizado' 
+          ? (subcontract.amount_total || 0) / (subcontract.exchange_rate || 1)
+          : (subcontract.amount_total || 0);
+        
+        const pagoRealizado = currencyView === 'dolarizado'
+          ? (subcontract.analysis?.pagoALaFechaUSD || 0)
+          : (subcontract.analysis?.pagoALaFecha || 0);
+        
+        // Evitar división por cero
+        if (montoTotal === 0) {
+          return <span className="text-muted-foreground">-</span>;
+        }
+        
+        // Calcular porcentaje: (pago_realizado / monto_total) * 100
+        const porcentajePagado = (pagoRealizado / montoTotal) * 100;
+        
+        // La diferencia es lo que falta por pagar: 100% - porcentaje_pagado
+        const porcentajeDiferencia = 100 - porcentajePagado;
+        
+        // Determinar color basado en el porcentaje
+        let colorClass = '';
+        if (porcentajeDiferencia > 50) {
+          colorClass = 'text-red-600'; // Mucho por pagar - rojo
+        } else if (porcentajeDiferencia > 25) {
+          colorClass = 'text-yellow-600'; // Algo por pagar - amarillo
+        } else if (porcentajeDiferencia > 0) {
+          colorClass = 'text-blue-600'; // Poco por pagar - azul
+        } else if (porcentajeDiferencia === 0) {
+          colorClass = 'text-green-600'; // Completamente pagado - verde
+        } else {
+          colorClass = 'text-purple-600'; // Sobrepagado - morado
+        }
+        
+        return (
+          <span className={`font-medium ${colorClass}`}>
+            {porcentajeDiferencia.toFixed(1)}%
+          </span>
+        );
+      }
+    },
+    {
       key: 'status',
       label: 'Estado',
       render: (subcontract: any) => {
