@@ -20,8 +20,8 @@ type ConstructionTaskCardProps = {
 // Utility function to format quantity with thousands separators
 const formatQuantity = (quantity: number): string => {
   return new Intl.NumberFormat('es-AR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(quantity);
 };
 

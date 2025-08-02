@@ -27,8 +27,8 @@ type MovementCardProps = {
 // Utility function to format amount with thousands separators
 const formatAmount = (amount: number): string => {
   return new Intl.NumberFormat('es-AR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(Math.abs(amount));
 };
 
