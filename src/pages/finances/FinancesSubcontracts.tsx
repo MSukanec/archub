@@ -193,18 +193,18 @@ export default function FinancesSubcontracts() {
         
         // Determinar el color basado en el valor del saldo
         const saldoValue = currencyView === 'dolarizado' ? saldoUSD : saldoARS;
-        let colorClass = '';
+        let colorStyle = {};
         
         if (saldoValue > 0) {
-          colorClass = 'text-[hsl(var(--chart-1))]'; // Positivo - verde
+          colorStyle = { color: 'hsl(var(--chart-1))' }; // Positivo - verde
         } else if (saldoValue < 0) {
-          colorClass = 'text-[hsl(var(--chart-5))]'; // Negativo - rojo
+          colorStyle = { color: 'hsl(var(--chart-5))' }; // Negativo - rojo
         } else {
-          colorClass = 'text-[hsl(var(--chart-4))]'; // Neutro - amarillo
+          colorStyle = { color: 'hsl(var(--chart-4))' }; // Neutro - amarillo
         }
         
         return (
-          <span className={`font-medium ${colorClass}`}>
+          <span className="font-medium" style={colorStyle}>
             {formattedSaldo}
           </span>
         );
@@ -215,29 +215,41 @@ export default function FinancesSubcontracts() {
       label: 'Estado',
       render: (subcontract: any) => {
         const status = subcontract.status;
-        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default';
+        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'outline';
         let displayText = '';
         
+        // Debug: ver qué valor tiene status
+        console.log('Subcontract status:', status, 'Full subcontract:', subcontract);
+        
         switch (status) {
+          case 'activo':
           case 'active':
             variant = 'default';
             displayText = 'Activo';
             break;
+          case 'completado':
           case 'completed':
             variant = 'secondary';
             displayText = 'Completado';
             break;
+          case 'cancelado':
           case 'cancelled':
             variant = 'destructive';
             displayText = 'Cancelado';
             break;
+          case 'pendiente':
           case 'pending':
             variant = 'outline';
             displayText = 'Pendiente';
             break;
+          case 'en_proceso':
+          case 'in_progress':
+            variant = 'default';
+            displayText = 'En Proceso';
+            break;
           default:
             variant = 'outline';
-            displayText = 'Sin estado';
+            displayText = status || 'Sin estado';
         }
         
         return (
