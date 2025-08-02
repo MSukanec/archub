@@ -58,6 +58,7 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
             return (
               <SelectableGhostButton
                 key={filter.key}
+                title={filter.label}
                 defaultLabel={filter.defaultLabel}
                 selectedValue={filter.value}
                 options={selectableOptions}

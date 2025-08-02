@@ -21,6 +21,7 @@ interface SelectableGhostButtonProps {
   icon?: React.ReactNode;
   disabled?: boolean;
   placeholder?: string;
+  title: string; // El título principal que siempre aparece (ej: "Fases", "Categorías")
 }
 
 export function SelectableGhostButton({
@@ -31,12 +32,13 @@ export function SelectableGhostButton({
   icon,
   disabled = false,
   placeholder,
+  title,
 }: SelectableGhostButtonProps) {
   // Encontrar la opción seleccionada
   const selectedOption = options.find(option => option.value === selectedValue);
   
-  // Determinar el texto a mostrar
-  const displayText = selectedOption ? selectedOption.label : defaultLabel;
+  // Determinar la opción seleccionada a mostrar
+  const selectedLabel = selectedOption ? selectedOption.label : defaultLabel;
   
   // Determinar el estilo del botón (hover si hay selección)
   // Solo aplicar hover si hay una selección real (no "none" o vacío)
@@ -56,9 +58,10 @@ export function SelectableGhostButton({
           className={buttonClassName}
           disabled={disabled}
         >
-          {icon && <span className="mr-1">{icon}</span>}
-          <span>{displayText}</span>
-          <ChevronDown className="w-3 h-3 ml-1" />
+          {icon && <span className="mr-1.5">{icon}</span>}
+          <span className="font-medium">{title}:</span>
+          <span className="ml-1">{selectedLabel}</span>
+          <ChevronDown className="w-3 h-3 ml-1.5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
