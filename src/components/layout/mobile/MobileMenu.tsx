@@ -95,7 +95,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const { data: projectsData } = useProjects(currentOrganization?.id);
   
   // Usar project context en lugar de last_project_id directamente
-  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const { selectedProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const effectiveCurrentProject = selectedProjectId;
   
   // Obtener el proyecto actual para mostrar su nombre
@@ -163,12 +163,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       return { organizationId, firstProjectId: projectToSelect };
     },
     onSuccess: ({ organizationId, firstProjectId }) => {
-      // Si hay un proyecto disponible, seleccionarlo; si no, mostrar selector
-      if (firstProjectId) {
-        setSelectedProject(firstProjectId);
-      } else {
-        setSelectedProject(null);
-      }
+      // Usar el nuevo método setCurrentOrganization que automáticamente carga el último proyecto
+      setCurrentOrganization(organizationId);
       
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });

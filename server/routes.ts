@@ -219,6 +219,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user organization preferences endpoint
+  app.post("/api/user/update-organization-preferences", async (req, res) => {
+    try {
+      const { organization_id, last_project_id } = req.body;
+      const user_id = req.headers['x-user-id'];
+
+      if (!organization_id || !user_id) {
+        return res.status(400).json({ error: "Missing organization_id or user_id" });
+      }
+
+      console.log("🔧 Updating user organization preferences", { user_id, organization_id, last_project_id });
+
+      const { data, error } = await supabase
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id,
+            organization_id,
+            last_project_id,
+            updated_at: new Date().toISOString()
+          },
+          {
+            onConflict: 'user_id,organization_id'
+          }
+        )
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating user organization preferences:", error);
+        return res.status(500).json({ error: "Failed to update organization preferences" });
+      }
+
+      console.log("🔧 Successfully updated user organization preferences", data);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error updating organization preferences:", error);
+      res.status(500).json({ error: "Failed to update organization preferences" });
+    }
+  });
+
+  // Get user organization preferences endpoint
+  app.get("/api/user/organization-preferences/:organizationId", async (req, res) => {
+    try {
+      const { organizationId } = req.params;
+      const user_id = req.headers['x-user-id'];
+
+      if (!organizationId || !user_id) {
+        return res.status(400).json({ error: "Missing organizationId or user_id" });
+      }
+
+      console.log("🔧 Getting user organization preferences", { user_id, organizationId });
+
+      const { data, error } = await supabase
+        .from('user_organization_preferences')
+        .select('*')
+        .eq('user_id', user_id)
+        .eq('organization_id', organizationId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No preferences found, return null
+          return res.json({ last_project_id: null });
+        }
+        console.error("Error getting user organization preferences:", error);
+        return res.status(500).json({ error: "Failed to get organization preferences" });
+      }
+
+      console.log("🔧 Found user organization preferences", data);
+      res.json(data);
+    } catch (error) {
+      console.error("Error getting organization preferences:", error);
+      res.status(500).json({ error: "Failed to get organization preferences" });
+    }
+  });
+
   // Create design phase task endpoint
   app.post("/api/design-phase-tasks", async (req, res) => {
     try {

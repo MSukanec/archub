@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/authStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContextInit } from '@/hooks/use-project-context-init'
 import { AuthModal } from '@/components/auth/AuthModal'
 
 interface ProtectedRouteProps {
@@ -14,6 +15,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [location, navigate] = useLocation()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const lastNavigationRef = useRef<string | null>(null)
+  
+  // Inicializar contexto de proyecto cuando cambie la organización
+  useProjectContextInit()
 
   useEffect(() => {
     // Forzar inicialización si no se ha hecho
