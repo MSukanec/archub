@@ -234,7 +234,17 @@ export default function ConstructionSchedule() {
             defaultLabel: FILTER_LABELS.NO_GROUPING
           }
         ]}
-        actions={[]}
+        actions={[
+          {
+            label: ACTION_LABELS.NEW_TASK,
+            icon: ACTION_ICONS.NEW,
+            onClick: () => openModal('construction-task', { 
+              projectId: projectId || '', 
+              organizationId: organizationId || '' 
+            }),
+            variant: 'default'
+          }
+        ]}
       />
 
       {/* Tab Content */}
