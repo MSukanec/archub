@@ -77,7 +77,7 @@ export function SubcontractPaymentsChart({
 
   return (
     <Card className="col-span-4">
-      <CardContent className="pt-6">
+      <CardContent className="p-4">
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -85,7 +85,7 @@ export function SubcontractPaymentsChart({
               margin={{
                 top: 20,
                 right: 30,
-                left: 20,
+                left: 0,
                 bottom: 5,
               }}
             >
