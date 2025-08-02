@@ -96,17 +96,7 @@ export default function FinancesSubcontracts() {
     enabled: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
   });
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      'pendiente': { variant: 'secondary' as const, label: 'Pendiente' },
-      'en_proceso': { variant: 'default' as const, label: 'En Proceso' },
-      'completado': { variant: 'default' as const, label: 'Completado' },
-      'cancelado': { variant: 'destructive' as const, label: 'Cancelado' }
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendiente;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
+
 
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
@@ -199,13 +189,63 @@ export default function FinancesSubcontracts() {
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
         const saldoUSD = subcontract.analysis?.saldoUSD || 0;
-        return formatSingleCurrency(saldoARS, saldoUSD, 'ARS'); // Los saldos siempre en moneda mixta
+        const formattedSaldo = formatSingleCurrency(saldoARS, saldoUSD, 'ARS');
+        
+        // Determinar el color basado en el valor del saldo
+        const saldoValue = currencyView === 'dolarizado' ? saldoUSD : saldoARS;
+        let colorClass = '';
+        
+        if (saldoValue > 0) {
+          colorClass = 'text-[hsl(var(--chart-1))]'; // Positivo - verde
+        } else if (saldoValue < 0) {
+          colorClass = 'text-[hsl(var(--chart-5))]'; // Negativo - rojo
+        } else {
+          colorClass = 'text-[hsl(var(--chart-4))]'; // Neutro - amarillo
+        }
+        
+        return (
+          <span className={`font-medium ${colorClass}`}>
+            {formattedSaldo}
+          </span>
+        );
       }
     },
     {
       key: 'status',
       label: 'Estado',
-      render: (subcontract: any) => getStatusBadge(subcontract.status)
+      render: (subcontract: any) => {
+        const status = subcontract.status;
+        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default';
+        let displayText = '';
+        
+        switch (status) {
+          case 'active':
+            variant = 'default';
+            displayText = 'Activo';
+            break;
+          case 'completed':
+            variant = 'secondary';
+            displayText = 'Completado';
+            break;
+          case 'cancelled':
+            variant = 'destructive';
+            displayText = 'Cancelado';
+            break;
+          case 'pending':
+            variant = 'outline';
+            displayText = 'Pendiente';
+            break;
+          default:
+            variant = 'outline';
+            displayText = 'Sin estado';
+        }
+        
+        return (
+          <Badge variant={variant}>
+            {displayText}
+          </Badge>
+        );
+      }
     },
     {
       key: 'actions',
