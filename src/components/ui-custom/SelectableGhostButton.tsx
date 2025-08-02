@@ -43,7 +43,7 @@ export function SelectableGhostButton({
   
   // Usar clases de hover cuando esté seleccionado para mantener el estilo ghost
   const buttonClassName = isSelected 
-    ? "h-8 px-3 text-xs bg-[var(--accent)] hover:bg-[var(--accent)] text-[var(--accent-foreground)]"
+    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
     : "h-8 px-3 text-xs";
 
   return (
