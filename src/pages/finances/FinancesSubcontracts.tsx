@@ -27,7 +27,7 @@ export default function FinancesSubcontracts() {
   
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
-  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('dolarizado'); // Por defecto dolarizado
   const [activeTab, setActiveTab] = useState('summary');
 
   // Función para crear subcontrato
@@ -151,24 +151,13 @@ export default function FinancesSubcontracts() {
     {
       key: 'title',
       label: 'Título',
-      width: '20%',
       render: (subcontract: any) => (
         <div className="font-medium">{subcontract.title}</div>
       )
     },
     {
-      key: 'date',
-      label: 'Fecha',
-      width: '12%',
-      render: (subcontract: any) => {
-        if (!subcontract.start_date) return '-';
-        return format(new Date(subcontract.start_date), 'dd/MM/yyyy', { locale: es });
-      }
-    },
-    {
       key: 'contact',
       label: 'Proveedor',
-      width: '16%',
       render: (subcontract: any) => {
         const contact = subcontract.contact;
         if (!contact) return '-';
@@ -187,7 +176,6 @@ export default function FinancesSubcontracts() {
     {
       key: 'amount_total',
       label: 'Monto Total',
-      width: '12%',
       render: (subcontract: any) => {
         const amountARS = subcontract.amount_total || 0;
         const amountUSD = amountARS / (subcontract.exchange_rate || 1);
@@ -199,7 +187,6 @@ export default function FinancesSubcontracts() {
     {
       key: 'pago_fecha',
       label: 'Pago a la Fecha',
-      width: '12%',
       render: (subcontract: any) => {
         const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
         const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
@@ -209,7 +196,6 @@ export default function FinancesSubcontracts() {
     {
       key: 'saldo',
       label: 'Saldo',
-      width: '12%',
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
         const saldoUSD = subcontract.analysis?.saldoUSD || 0;
@@ -219,13 +205,11 @@ export default function FinancesSubcontracts() {
     {
       key: 'status',
       label: 'Estado',
-      width: '10%',
       render: (subcontract: any) => getStatusBadge(subcontract.status)
     },
     {
       key: 'actions',
       label: 'Acciones',
-      width: '14%',
       sortable: false,
       render: (subcontract: any) => (
         <div className="flex items-center gap-2">
@@ -395,16 +379,13 @@ export default function FinancesSubcontracts() {
               title: 'Moneda',
               label: FILTER_LABELS.CURRENCY,
               icon: FILTER_ICONS.CURRENCY,
-              value: currencyView === 'pesificado' ? 'Peso Argentino' : 
-                     currencyView === 'dolarizado' ? 'Dólar Estadounidense' :
-                     'Todo',
+              value: currencyView === 'pesificado' ? 'Peso Argentino' : 'Dólar Estadounidense',
               setValue: (value) => {
                 if (value === 'Peso Argentino') setCurrencyView('pesificado')
-                else if (value === 'Dólar Estadounidense') setCurrencyView('dolarizado')
-                else setCurrencyView('discriminado')
+                else setCurrencyView('dolarizado')
               },
               options: ['Peso Argentino', 'Dólar Estadounidense'],
-              defaultLabel: 'Todo'
+              defaultLabel: 'Dólar Estadounidense'
             }
           ]}
           actions={[
