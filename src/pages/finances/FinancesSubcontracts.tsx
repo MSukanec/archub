@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign, Calendar, Building, Wallet, Coins } from "lucide-react";
-import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { EmptyState } from "@/components/ui-custom/EmptyState";
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
@@ -19,6 +18,7 @@ import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts"
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useProjectContext } from "@/stores/projectContext";
 
 interface SubcontractPayment {
   id: string;
@@ -38,16 +38,18 @@ export default function FinancesSubcontracts() {
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
+  const { selectedProjectId } = useProjectContext();
   
-  // Estado para controles del ActionBar
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+  // Estado para controles
+  const [searchValue, setSearchValue] = useState('');
+  const [filterByContact, setFilterByContact] = useState("all");
+  const [filterByCurrency, setFilterByCurrency] = useState("all"); 
   const [activeTab, setActiveTab] = useState('summary');
 
   // Función para crear subcontrato
   const handleCreateSubcontract = () => {
     openModal('subcontract', {
-      projectId: userData?.preferences?.last_project_id,
+      projectId: selectedProjectId,
       organizationId: userData?.organization?.id,
       userId: userData?.user?.id,
       isEditing: false
@@ -55,14 +57,23 @@ export default function FinancesSubcontracts() {
   };
   
   // Datos de subcontratos con análisis de pagos
-  const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
-  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
+  const { data: subcontracts = [], isLoading } = useSubcontracts(selectedProjectId);
+  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(selectedProjectId);
+  
+  // Debug logs
+  console.log("🔍 FinancesSubcontracts Debug:", {
+    selectedProjectId,
+    subcontracts: subcontracts.length,
+    subcontractAnalysis: subcontractAnalysis.length,
+    isLoading,
+    isLoadingAnalysis
+  });
 
   // Query para obtener los pagos de subcontratos
   const { data: subcontractPayments = [], isLoading: isLoadingPayments } = useQuery({
-    queryKey: ['subcontract-payments', userData?.preferences?.last_project_id],
+    queryKey: ['subcontract-payments', selectedProjectId],
     queryFn: async () => {
-      if (!userData?.preferences?.last_project_id || !userData?.organization?.id) return [];
+      if (!selectedProjectId || !userData?.organization?.id) return [];
       
       const { data, error } = await supabase
         .from('movement_subcontracts')
@@ -84,7 +95,7 @@ export default function FinancesSubcontracts() {
             contact:contacts!inner(id, first_name, last_name, full_name)
           )
         `)
-        .eq('movement.project_id', userData.preferences.last_project_id)
+        .eq('movement.project_id', selectedProjectId)
         .eq('movement.organization_id', userData.organization.id)
         .order('movement(movement_date)', { ascending: false });
 
@@ -107,7 +118,7 @@ export default function FinancesSubcontracts() {
         currency_code: item.movement.currency.code
       }));
     },
-    enabled: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
+    enabled: !!selectedProjectId && !!userData?.organization?.id
   });
 
   const getStatusBadge = (status: string) => {
@@ -124,31 +135,6 @@ export default function FinancesSubcontracts() {
 
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
-  };
-
-  // Función para convertir montos según la vista de moneda
-  const convertAmount = (amountARS: number, amountUSD: number, currencyCode: string) => {
-    if (currencyView === 'discriminado') {
-      return currencyCode === 'USD' ? amountUSD : amountARS;
-    } else if (currencyView === 'pesificado') {
-      return amountARS; // Siempre mostrar en ARS
-    } else if (currencyView === 'dolarizado') {
-      return amountUSD; // Siempre mostrar en USD
-    }
-    return amountARS;
-  };
-
-  const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
-    const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
-    
-    if (currencyView === 'discriminado') {
-      return formatCurrency(convertedAmount, originalCurrency === 'USD' ? 'US$' : '$');
-    } else if (currencyView === 'pesificado') {
-      return formatCurrency(convertedAmount, '$');
-    } else if (currencyView === 'dolarizado') {
-      return formatCurrency(convertedAmount, 'US$');
-    }
-    return formatCurrency(convertedAmount, '$');
   };
 
   // Combinar subcontratos con su análisis financiero
@@ -206,8 +192,7 @@ export default function FinancesSubcontracts() {
       width: '12%',
       render: (subcontract: any) => {
         const totalARS = subcontract.analysis?.montoTotal || 0;
-        const totalUSD = subcontract.analysis?.montoTotalUSD || 0;
-        return formatSingleCurrency(totalARS, totalUSD, 'ARS'); // Los montos totales siempre en moneda mixta
+        return formatCurrency(totalARS, '$');
       }
     },
     {
@@ -216,8 +201,7 @@ export default function FinancesSubcontracts() {
       width: '12%',
       render: (subcontract: any) => {
         const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
-        const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
-        return formatSingleCurrency(pagoARS, pagoUSD, 'ARS'); // Los pagos siempre en moneda mixta
+        return formatCurrency(pagoARS, '$');
       }
     },
     {
@@ -226,8 +210,7 @@ export default function FinancesSubcontracts() {
       width: '12%',
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
-        const saldoUSD = subcontract.analysis?.saldoUSD || 0;
-        return formatSingleCurrency(saldoARS, saldoUSD, 'ARS'); // Los saldos siempre en moneda mixta
+        return formatCurrency(saldoARS, '$');
       }
     },
     {
@@ -337,12 +320,11 @@ export default function FinancesSubcontracts() {
     }
   ];
 
-  // Filtrar subcontratos por búsqueda (solo para el tab de resumen)
+  // Filtrar subcontratos
   const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
-    const searchLower = searchQuery.toLowerCase();
+    const searchLower = searchValue.toLowerCase();
     const titleMatch = subcontract.title?.toLowerCase().includes(searchLower);
     
-    // Buscar en el nombre del contacto usando la misma lógica de renderizado
     const contact = subcontract.contact;
     const contactName = contact?.full_name || 
       `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
@@ -351,103 +333,129 @@ export default function FinancesSubcontracts() {
     return titleMatch || contactMatch;
   });
 
-  // Filtrar pagos por búsqueda (solo para el tab de pagos)
+  // Filtrar pagos
   const filteredPayments = subcontractPayments.filter(payment => {
-    const searchLower = searchQuery.toLowerCase();
+    const searchLower = searchValue.toLowerCase();
     return payment.subcontract_title?.toLowerCase().includes(searchLower) ||
            payment.contact_name?.toLowerCase().includes(searchLower);
   });
 
+  // Crear tabs para el header
+  const headerTabs = [
+    {
+      id: "summary",
+      label: "Resumen de Subcontratos",
+      isActive: activeTab === "summary"
+    },
+    {
+      id: "payments",
+      label: "Detalle de Pagos", 
+      isActive: activeTab === "payments"
+    }
+  ];
+
+  const headerProps = {
+    title: "Subcontratos",
+    tabs: headerTabs,
+    onTabChange: setActiveTab
+  };
+
+  if (isLoading) {
+    return (
+      <Layout headerProps={headerProps} wide={true}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando subcontratos...</div>
+        </div>
+      </Layout>
+    )
+  }
+
   return (
-    <Layout wide={false}>
-      <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'currency',
-              label: FILTER_LABELS.CURRENCY,
-              icon: FILTER_ICONS.CURRENCY,
-              value: currencyView === 'pesificado' ? 'Peso Argentino' : 
-                     currencyView === 'dolarizado' ? 'Dólar Estadounidense' :
-                     'Todo',
-              setValue: (value) => {
-                if (value === 'Peso Argentino') setCurrencyView('pesificado')
-                else if (value === 'Dólar Estadounidense') setCurrencyView('dolarizado')
-                else setCurrencyView('discriminado')
-              },
-              options: ['Peso Argentino', 'Dólar Estadounidense'],
-              defaultLabel: 'Todo'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Crear Subcontrato',
-              icon: ACTION_ICONS.NEW,
-              onClick: handleCreateSubcontract,
-              variant: 'default'
-            }
-          ]}
-          tabs={{
-            activeTab,
-            onTabChange: (tab: string) => setActiveTab(tab),
-            tabs: [
-              { id: 'summary', label: 'Resumen de Subcontratos', icon: Package },
-              { id: 'payments', label: 'Detalle de Pagos', icon: DollarSign }
-            ]
-          }}
-        />
+    <Layout headerProps={headerProps} wide={true}>
+      {/* Feature Introduction */}
+      <FeatureIntroduction
+        icon={<Package className="h-6 w-6" />}
+        title="Gestión de Subcontratos"
+        features={[
+          { icon: <Package className="h-4 w-4" />, title: "Subcontratos Detallados", description: "Gestión completa de subcontratos con seguimiento de estados y fechas" },
+          { icon: <DollarSign className="h-4 w-4" />, title: "Control Financiero", description: "Seguimiento de montos, pagos realizados y saldos pendientes" },
+          { icon: <Calendar className="h-4 w-4" />, title: "Fechas de Ejecución", description: "Control de cronograma con fechas de inicio y finalización" },
+          { icon: <Building className="h-4 w-4" />, title: "Detalle de Pagos", description: "Registro detallado de todos los pagos realizados a subcontratistas" }
+        ]}
+      />
 
-        {/* Contenido con tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="hidden">
-            <TabsTrigger value="summary">Resumen de Subcontratos</TabsTrigger>
-            <TabsTrigger value="payments">Detalle de Pagos</TabsTrigger>
-          </TabsList>
+      {/* Action Bar Desktop */}
+      <ActionBarDesktop
+        title="Gestión de Subcontratos"
+        icon={<Package className="w-6 h-6" />}
+        features={[
+          {
+            icon: <Package className="w-5 h-5" />,
+            title: "Subcontratos Detallados",
+            description: "Gestión completa de subcontratos con seguimiento de estados, fechas y control de proveedores especializados."
+          },
+          {
+            icon: <DollarSign className="w-5 h-5" />,
+            title: "Control Financiero Completo",
+            description: "Seguimiento detallado de montos contratados, pagos realizados y saldos pendientes con análisis financiero integrado."
+          },
+          {
+            icon: <Calendar className="w-5 h-5" />,
+            title: "Cronograma de Ejecución",
+            description: "Control de fechas de inicio y finalización de subcontratos para optimización de tiempos de obra."
+          },
+          {
+            icon: <Building className="w-5 h-5" />,
+            title: "Detalle de Pagos",
+            description: "Registro completo de todos los pagos realizados con detalle de fechas, billeteras, monedas y cotizaciones."
+          }
+        ]}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        primaryActionLabel="Nuevo Subcontrato"
+        onPrimaryActionClick={handleCreateSubcontract}
+      />
 
-          {/* Tab 1: Resumen de Subcontratos */}
-          <TabsContent value="summary">
-            {filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
-              <EmptyState
-                icon={<Package className="w-12 h-12 text-muted-foreground" />}
-                title="Aún no tienes subcontratos creados"
-                description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
-              />
-            ) : (
-              <div className="space-y-4">
-                <Table
-                  columns={summaryColumns}
-                  data={filteredSubcontracts}
-                  isLoading={isLoading || isLoadingAnalysis}
-                  className="bg-card"
-                  defaultSort={{ key: 'title', direction: 'asc' }}
-                />
-              </div>
-            )}
-          </TabsContent>
+      {/* Contenido condicional por tab */}
+      {activeTab === "summary" && (
+        filteredSubcontracts.length === 0 && !isLoadingAnalysis ? (
+          <EmptyState
+            icon={<Package className="h-8 w-8" />}
+            title="Aún no tienes subcontratos creados"
+            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
+          />
+        ) : (
+          <div className="space-y-4">
+            <Table
+              columns={summaryColumns}
+              data={filteredSubcontracts}
+              isLoading={isLoading || isLoadingAnalysis}
+              className="bg-card"
+              defaultSort={{ key: 'title', direction: 'asc' }}
+            />
+          </div>
+        )
+      )}
 
-          {/* Tab 2: Detalle de Pagos */}
-          <TabsContent value="payments">
-            {filteredPayments.length === 0 && !isLoadingPayments ? (
-              <EmptyState
-                icon={<DollarSign className="w-12 h-12 text-muted-foreground" />}
-                title="Aún no hay pagos registrados"
-                description="Los pagos a subcontratistas aparecerán aquí una vez que se registren movimientos financieros asociados a los subcontratos."
-              />
-            ) : (
-              <div className="space-y-4">
-                <Table
-                  columns={paymentsColumns}
-                  data={filteredPayments}
-                  isLoading={isLoadingPayments}
-                  className="bg-card"
-                  defaultSort={{ key: 'movement_date', direction: 'desc' }}
-                />
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+      {activeTab === "payments" && (
+        filteredPayments.length === 0 && !isLoadingPayments ? (
+          <EmptyState
+            icon={<DollarSign className="h-8 w-8" />}
+            title="Aún no hay pagos registrados"
+            description="Los pagos a subcontratistas aparecerán aquí una vez que se registren movimientos financieros asociados a los subcontratos."
+          />
+        ) : (
+          <div className="space-y-4">
+            <Table
+              columns={paymentsColumns}
+              data={filteredPayments}
+              isLoading={isLoadingPayments}
+              className="bg-card"
+              defaultSort={{ key: 'movement_date', direction: 'desc' }}
+            />
+          </div>
+        )
+      )}
     </Layout>
   );
 }
