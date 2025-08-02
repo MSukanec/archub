@@ -141,12 +141,11 @@ export default function ConstructionMaterials() {
             key: 'category',
             label: 'Categoría',
             icon: Filter,
-            value: selectedCategory || 'Todas las categorías',
+            value: selectedCategory,
             setValue: (value) => {
-              if (value === 'Todas las categorías') setSelectedCategory('')
-              else setSelectedCategory(value)
+              setSelectedCategory(value || '')
             },
-            options: ['Todas las categorías', ...uniqueCategories],
+            options: uniqueCategories,
             defaultLabel: 'Todas las categorías'
           },
           {
@@ -159,7 +158,7 @@ export default function ConstructionMaterials() {
               else setGroupingType('none')
             },
             options: ['Sin Agrupación', 'Agrupar por Categorías'],
-            defaultLabel: 'Todas las agrupaciones'
+            defaultLabel: 'Sin Agrupación'
           }
         ]}
         actions={[]}
