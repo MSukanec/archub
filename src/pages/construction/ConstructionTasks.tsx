@@ -451,7 +451,8 @@ export default function ConstructionTasks() {
               {/* Botón de agrupación - Solo en tab de tareas */}
               {activeTab === "tasks" && (
                 <SelectableGhostButton
-                  defaultLabel="Agrupación"
+                  title="Agrupar"
+                  defaultLabel="Sin Agrupar"
                   selectedValue={groupingType}
                   icon={<FolderTree className="w-4 h-4" />}
                   options={[
@@ -462,7 +463,7 @@ export default function ConstructionTasks() {
                     { value: "rubros-phases", label: "Agrupar por Fases y Rubros" },
                     { value: "phases-rubros", label: "Agrupar por Rubros y Tareas" }
                   ]}
-                  onSelect={(value) => setGroupingType(value)}
+                  onSelect={(value, option) => setGroupingType(value)}
                 />
               )}
             </div>
