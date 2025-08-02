@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign } from "lucide-react";
+import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign, Calendar, Building, Wallet } from "lucide-react";
 import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -16,6 +16,8 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 export default function FinancesSubcontracts() {
   const { data: userData } = useCurrentUser();
@@ -26,6 +28,7 @@ export default function FinancesSubcontracts() {
   // Estado para controles del ActionBar
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+  const [activeTab, setActiveTab] = useState('summary');
 
   // Función para crear subcontrato
   const handleCreateSubcontract = () => {
@@ -40,6 +43,58 @@ export default function FinancesSubcontracts() {
   // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
+
+  // Query para obtener los pagos de subcontratos
+  const { data: subcontractPayments = [], isLoading: isLoadingPayments } = useQuery({
+    queryKey: ['subcontract-payments', userData?.preferences?.last_project_id],
+    queryFn: async () => {
+      if (!userData?.preferences?.last_project_id || !userData?.organization?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('movement_subcontracts')
+        .select(`
+          id,
+          movement:movements!inner(
+            id,
+            movement_date,
+            amount,
+            exchange_rate,
+            currency:currencies!inner(id, name, code, symbol),
+            wallet:organization_wallets!inner(
+              wallets!inner(id, name)
+            )
+          ),
+          subcontract:subcontracts!inner(
+            id,
+            title,
+            contact:contacts!inner(id, first_name, last_name, full_name)
+          )
+        `)
+        .eq('movement.project_id', userData.preferences.last_project_id)
+        .eq('movement.organization_id', userData.organization.id)
+        .order('movement(movement_date)', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching subcontract payments:', error);
+        return [];
+      }
+
+      return (data || []).map((item: any) => ({
+        id: item.id,
+        movement_date: item.movement.movement_date,
+        amount: item.movement.amount,
+        exchange_rate: item.movement.exchange_rate || 1,
+        subcontract_title: item.subcontract.title,
+        contact_name: item.subcontract.contact?.full_name || 
+          `${item.subcontract.contact?.first_name || ''} ${item.subcontract.contact?.last_name || ''}`.trim(),
+        wallet_name: item.movement.wallet?.wallets?.name || 'Sin billetera',
+        currency_name: item.movement.currency.name,
+        currency_symbol: item.movement.currency.symbol,
+        currency_code: item.movement.currency.code
+      }));
+    },
+    enabled: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
+  });
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -228,7 +283,23 @@ export default function FinancesSubcontracts() {
   });
 
   return (
-    <Layout wide={false}>
+    <Layout 
+      wide={false}
+      headerTabs={[
+        { 
+          id: 'summary', 
+          label: 'Resumen de Subcontratos', 
+          isActive: activeTab === 'summary',
+          onClick: () => setActiveTab('summary')
+        },
+        { 
+          id: 'payments', 
+          label: 'Detalle de Pagos', 
+          isActive: activeTab === 'payments',
+          onClick: () => setActiveTab('payments')
+        }
+      ]}
+    >
       <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktopRow
@@ -260,23 +331,45 @@ export default function FinancesSubcontracts() {
           ]}
         />
 
-        {/* Contenido principal */}
-        {filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
-          <EmptyState
-            icon={<Package className="w-12 h-12 text-muted-foreground" />}
-            title="Aún no tienes subcontratos creados"
-            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
-          />
-        ) : (
-          <div className="space-y-4">
-            <Table
-              columns={columns}
-              data={filteredSubcontracts}
-              isLoading={isLoading || isLoadingAnalysis}
-              className="bg-card"
-              defaultSort={{ key: 'title', direction: 'asc' }}
+        {/* Contenido condicional por tab */}
+        {activeTab === 'summary' && (
+          filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
+            <EmptyState
+              icon={<Package className="w-12 h-12 text-muted-foreground" />}
+              title="Aún no tienes subcontratos creados"
+              description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
             />
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <Table
+                columns={columns}
+                data={filteredSubcontracts}
+                isLoading={isLoading || isLoadingAnalysis}
+                className="bg-card"
+                defaultSort={{ key: 'title', direction: 'asc' }}
+              />
+            </div>
+          )
+        )}
+
+        {activeTab === 'payments' && (
+          filteredPayments.length === 0 && !isLoadingPayments ? (
+            <EmptyState
+              icon={<DollarSign className="w-12 h-12 text-muted-foreground" />}
+              title="Aún no hay pagos registrados"
+              description="Los pagos a subcontratistas aparecerán aquí una vez que se registren movimientos financieros asociados a los subcontratos."
+            />
+          ) : (
+            <div className="space-y-4">
+              <Table
+                columns={paymentsColumns}
+                data={filteredPayments}
+                isLoading={isLoadingPayments}
+                className="bg-card"
+                defaultSort={{ key: 'movement_date', direction: 'desc' }}
+              />
+            </div>
+          )
         )}
       </div>
     </Layout>
