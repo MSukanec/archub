@@ -22,6 +22,7 @@ interface SelectableGhostButtonProps {
   disabled?: boolean;
   placeholder?: string;
   title: string; // El título principal que siempre aparece (ej: "Fases", "Categorías")
+  showChevron?: boolean; // Opcional: mostrar chevron (por defecto false)
 }
 
 export function SelectableGhostButton({
@@ -33,6 +34,7 @@ export function SelectableGhostButton({
   disabled = false,
   placeholder,
   title,
+  showChevron = false,
 }: SelectableGhostButtonProps) {
   // Encontrar la opción seleccionada
   const selectedOption = options.find(option => option.value === selectedValue);
@@ -61,7 +63,7 @@ export function SelectableGhostButton({
           {icon && <span className="mr-1.5">{icon}</span>}
           <span className="font-medium">{title}:</span>
           <span className="ml-1">{selectedLabel}</span>
-          <ChevronDown className="w-3 h-3 ml-1.5" />
+          {showChevron && <ChevronDown className="w-3 h-3 ml-1.5" />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">

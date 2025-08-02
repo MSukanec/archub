@@ -52,13 +52,13 @@ export const FILTER_LABELS = {
   PHASE: 'Fases',
   TYPE: 'Tipos',
   
-  // Estados - formato "Label: Estado"
+  // Estados - formato simplificado
   ALL_CATEGORIES: 'Todo',
   ALL_PHASES: 'Todo',
   ALL_TYPES: 'Todo',
   NO_GROUPING: 'Sin Agrupar',
   
-  // Finanzas específicos
+  // Finanzas específicos - también simplificados
   FAVORITES: 'Favoritos',
   CURRENCY: 'Moneda',
   WALLET: 'Billetera',
