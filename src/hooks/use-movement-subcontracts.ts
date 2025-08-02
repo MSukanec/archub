@@ -23,6 +23,8 @@ export function useCreateMovementSubcontract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
+      queryClient.invalidateQueries({ queryKey: ['subcontract-analysis'] })
+      queryClient.invalidateQueries({ queryKey: ['subcontract-payments'] })
     },
   })
 }
@@ -38,6 +40,8 @@ export function useDeleteMovementSubcontract() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
+      queryClient.invalidateQueries({ queryKey: ['subcontract-analysis'] })
+      queryClient.invalidateQueries({ queryKey: ['subcontract-payments'] })
     },
   })
 }
@@ -69,6 +73,8 @@ export function useDeleteMovementSubcontractsByMovement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
+      queryClient.invalidateQueries({ queryKey: ['subcontract-analysis'] })
+      queryClient.invalidateQueries({ queryKey: ['subcontract-payments'] })
     },
   })
 }
