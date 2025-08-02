@@ -193,18 +193,18 @@ export default function FinancesSubcontracts() {
         
         // Determinar el color basado en el valor del saldo
         const saldoValue = currencyView === 'dolarizado' ? saldoUSD : saldoARS;
-        let colorStyle = {};
+        let colorClass = '';
         
         if (saldoValue > 0) {
-          colorStyle = { color: 'hsl(var(--chart-1))' }; // Positivo - verde
+          colorClass = 'text-green-600'; // Positivo - verde
         } else if (saldoValue < 0) {
-          colorStyle = { color: 'hsl(var(--chart-5))' }; // Negativo - rojo
+          colorClass = 'text-red-600'; // Negativo - rojo
         } else {
-          colorStyle = { color: 'hsl(var(--chart-4))' }; // Neutro - amarillo
+          colorClass = 'text-yellow-600'; // Neutro - amarillo
         }
         
         return (
-          <span className="font-medium" style={colorStyle}>
+          <span className={`font-medium ${colorClass}`}>
             {formattedSaldo}
           </span>
         );
@@ -215,45 +215,57 @@ export default function FinancesSubcontracts() {
       label: 'Estado',
       render: (subcontract: any) => {
         const status = subcontract.status;
-        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'outline';
+        let badgeStyle = {};
         let displayText = '';
         
-        // Debug: ver qué valor tiene status
-        console.log('Subcontract status:', status, 'Full subcontract:', subcontract);
-        
         switch (status) {
-          case 'activo':
-          case 'active':
-            variant = 'default';
-            displayText = 'Activo';
-            break;
           case 'completado':
           case 'completed':
-            variant = 'secondary';
+            badgeStyle = { 
+              backgroundColor: 'hsl(var(--chart-1))', 
+              color: 'white',
+              border: 'none'
+            };
             displayText = 'Completado';
-            break;
-          case 'cancelado':
-          case 'cancelled':
-            variant = 'destructive';
-            displayText = 'Cancelado';
             break;
           case 'pendiente':
           case 'pending':
-            variant = 'outline';
+            badgeStyle = { 
+              backgroundColor: 'hsl(var(--chart-4))', 
+              color: 'black',
+              border: 'none'
+            };
             displayText = 'Pendiente';
             break;
-          case 'en_proceso':
-          case 'in_progress':
-            variant = 'default';
-            displayText = 'En Proceso';
+          case 'activo':
+          case 'active':
+            badgeStyle = { 
+              backgroundColor: 'hsl(var(--chart-2))', 
+              color: 'white',
+              border: 'none'
+            };
+            displayText = 'Activo';
+            break;
+          case 'cancelado':
+          case 'cancelled':
+            badgeStyle = { 
+              backgroundColor: 'hsl(var(--chart-5))', 
+              color: 'white',
+              border: 'none'
+            };
+            displayText = 'Cancelado';
             break;
           default:
-            variant = 'outline';
+            badgeStyle = { 
+              backgroundColor: '#f3f4f6', 
+              color: '#374151',
+              border: '1px solid #d1d5db'
+            };
             displayText = status || 'Sin estado';
         }
         
         return (
-          <Badge variant={variant}>
+          <Badge style={badgeStyle} className="border-0">
             {displayText}
           </Badge>
         );
