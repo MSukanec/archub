@@ -499,6 +499,33 @@ export default function FinancesSubcontracts() {
       headerProps={headerProps}
     >
       <div className="space-y-6">
+        {/* ActionBar */}
+        <ActionBarDesktopRow
+          filters={[
+            {
+              key: 'currency',
+              title: 'Moneda',
+              label: FILTER_LABELS.CURRENCY,
+              icon: FILTER_ICONS.CURRENCY,
+              value: currencyView === 'pesificado' ? 'Peso Argentino' : 'Dólar Estadounidense',
+              setValue: (value) => {
+                if (value === 'Peso Argentino') setCurrencyView('pesificado')
+                else setCurrencyView('dolarizado')
+              },
+              options: ['Peso Argentino', 'Dólar Estadounidense'],
+              defaultLabel: 'Dólar Estadounidense'
+            }
+          ]}
+          actions={[
+            {
+              label: 'Crear Subcontrato',
+              icon: ACTION_ICONS.NEW,
+              onClick: handleCreateSubcontract,
+              variant: 'default'
+            }
+          ]}
+        />
+
         {/* Gráfico de Pagos por Mes */}
         <div className="grid grid-cols-4 gap-4">
           <SubcontractPaymentsChart
@@ -510,17 +537,7 @@ export default function FinancesSubcontracts() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SubcontractKPICard
-            title="Total Subcontratos"
-            value={totalSubcontracts}
-            icon={<Building className="h-4 w-4" />}
-            color="var(--chart-1)"
-            isLoading={isLoading}
-            formatter={(val) => val.toString()}
-            currencyCode="QTY"
-          />
-          
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SubcontractKPICard
             title="Valor Total Contratado"
             value={totalContractValue}
@@ -551,33 +568,6 @@ export default function FinancesSubcontracts() {
             currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
           />
         </div>
-
-        {/* ActionBar */}
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'currency',
-              title: 'Moneda',
-              label: FILTER_LABELS.CURRENCY,
-              icon: FILTER_ICONS.CURRENCY,
-              value: currencyView === 'pesificado' ? 'Peso Argentino' : 'Dólar Estadounidense',
-              setValue: (value) => {
-                if (value === 'Peso Argentino') setCurrencyView('pesificado')
-                else setCurrencyView('dolarizado')
-              },
-              options: ['Peso Argentino', 'Dólar Estadounidense'],
-              defaultLabel: 'Dólar Estadounidense'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Crear Subcontrato',
-              icon: ACTION_ICONS.NEW,
-              onClick: handleCreateSubcontract,
-              variant: 'default'
-            }
-          ]}
-        />
 
         {/* Contenido condicional por tab */}
         {activeTab === 'summary' && (
