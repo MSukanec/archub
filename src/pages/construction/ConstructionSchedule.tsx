@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2, Search, Filter } from 'lucide-react'
+import { Plus, Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2, Filter } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
@@ -49,7 +49,6 @@ function cleanTaskDisplayName(name: string): string {
 }
 
 export default function ConstructionSchedule() {
-  const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("gantt")
   const [groupingType, setGroupingType] = useState('rubros')
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
@@ -74,17 +73,8 @@ export default function ConstructionSchedule() {
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
 
-  // Filtrar tareas por búsqueda
-  const filteredTasks = useMemo(() => {
-    if (!searchValue.trim()) return tasks
-    const searchTerm = searchValue.toLowerCase()
-    return tasks.filter(task => 
-      task.name_rendered?.toLowerCase().includes(searchTerm) ||
-      task.category_name?.toLowerCase().includes(searchTerm) ||
-      task.unit_name?.toLowerCase().includes(searchTerm) ||
-      task.phase_name?.toLowerCase().includes(searchTerm)
-    )
-  }, [tasks, searchValue])
+  // Usar todas las tareas sin filtro de búsqueda
+  const filteredTasks = tasks
 
   // Funciones memoizadas para evitar re-renderizados
   const getRubroName = useMemo(() => (taskId: string) => {
@@ -229,16 +219,6 @@ export default function ConstructionSchedule() {
       {/* ActionBarDesktopRow */}
       <ActionBarDesktopRow
         filters={[
-          {
-            key: 'search',
-            label: 'Buscar',
-            icon: Search,
-            value: searchValue,
-            setValue: setSearchValue,
-            options: [],
-            defaultLabel: 'Buscar tareas...',
-            isSearch: true
-          },
           {
             key: 'grouping',
             label: 'Agrupación',
