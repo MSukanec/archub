@@ -125,8 +125,8 @@
   --chart-positive: hsl(76, 100%, 40%);
 
   /* Tables */
-  --table-header-bg: hsl(60, 8%, 88%);
-  --table-header-fg: hsl(0, 0%, 50%);
+  --table-header-bg: hsl(220, 70%, 60%);
+  --table-header-fg: hsl(0, 0%, 100%);
   --table-header-border: hsl(0, 0%, 80%);
   --table-row-bg: transparent;
   --table-row-fg: hsl(0, 0%, 35%);
@@ -160,14 +160,7 @@
   --text-inverted: hsl(0, 0%, 100%);
   --text-card-title: hsl(0, 0%, 0%);
 
-  /* Tables */
-  --table-header-bg: hsl(0, 0%, 35%);
-  --table-header-fg: hsl(0, 0%, 100%);
-  --table-header-border: hsl(0, 0%, 85%);
-  --table-row-bg: hsl(60, 8%, 95%);
-  --table-row-fg: hsl(0, 0%, 35%);
-  --table-row-border: hsl(0, 0%, 90%);
-  --table-row-hover-bg: hsl(0, 0%, 98%);
+
 
   /* Plan Colors */
   --plan-free-bg: hsl(76, 100%, 40%);

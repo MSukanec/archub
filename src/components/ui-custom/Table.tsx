@@ -341,12 +341,13 @@ export function Table<T = any>({
         {/* Column Headers - Fila inferior con títulos de columnas */}
         <div
           className={cn(
-            "grid gap-4 px-4 py-3 text-xs font-medium border-b border-[var(--table-header-border)]"
+            "grid gap-4 px-4 py-3 text-xs font-medium border-b"
           )}
           style={{ 
             gridTemplateColumns: getGridTemplateColumns(),
             backgroundColor: "var(--table-header-bg)", 
-            color: "var(--table-header-fg)" 
+            color: "var(--table-header-fg)",
+            borderBottomColor: "var(--table-header-border)"
           }}
         >
           {selectable && (
