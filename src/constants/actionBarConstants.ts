@@ -45,26 +45,26 @@ export const ACTION_ICONS = {
 // Etiquetas estándar para filtros
 export const FILTER_LABELS = {
   // Agrupación
-  GROUPING: 'Agrupación',
+  GROUPING: 'Agrupar',
   
   // Filtros básicos
-  CATEGORY: 'Categoría',
-  PHASE: 'Fase',
-  TYPE: 'Tipo',
+  CATEGORY: 'Categorías',
+  PHASE: 'Fases',
+  TYPE: 'Tipos',
   
-  // Estados - versión corta sin "Todas las"
-  ALL_CATEGORIES: 'Categorías',
-  ALL_PHASES: 'Fases',
-  ALL_TYPES: 'Tipos',
-  NO_GROUPING: 'Sin Agrupación',
+  // Estados - formato "Label: Estado"
+  ALL_CATEGORIES: 'Todo',
+  ALL_PHASES: 'Todo',
+  ALL_TYPES: 'Todo',
+  NO_GROUPING: 'Sin Agrupar',
   
   // Finanzas específicos
   FAVORITES: 'Favoritos',
   CURRENCY: 'Moneda',
   WALLET: 'Billetera',
-  ALL_MOVEMENTS: 'Movimientos',
-  ALL_CURRENCIES: 'Monedas',
-  ALL_WALLETS: 'Billeteras',
+  ALL_MOVEMENTS: 'Todo',
+  ALL_CURRENCIES: 'Todo',
+  ALL_WALLETS: 'Todo',
 } as const
 
 // Opciones estándar para agrupación
