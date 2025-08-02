@@ -59,11 +59,11 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
               <SelectableGhostButton
                 key={filter.key}
                 defaultLabel={filter.defaultLabel}
-                selectedValue={filter.value === "all" ? "" : filter.value}
+                selectedValue={filter.value}
                 options={selectableOptions}
                 onSelect={(value) => {
-                  // Si no hay valor seleccionado, usar "all"
-                  filter.setValue(value || "all");
+                  // Si no hay valor seleccionado, usar string vacío
+                  filter.setValue(value || "");
                 }}
                 icon={<filter.icon className="w-4 h-4" />}
                 placeholder={filter.defaultLabel}

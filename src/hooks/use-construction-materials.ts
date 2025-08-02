@@ -58,7 +58,7 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         : constructionTasksData;
 
       console.log("🔍 Phase Filter Debug:", {
-        selectedPhase,
+        selectedPhase: `'${selectedPhase}'`,
         shouldFilterByPhase,
         totalTasks: constructionTasksData.length,
         filteredTasks: filteredConstructionTasks.length,
