@@ -505,7 +505,7 @@ export default function FinancesSubcontracts() {
             data={paymentsChartData}
             isLoading={isLoading}
             currencySymbol={currencyView === 'dolarizado' ? 'US$' : '$'}
-            title="Evolución de Pagos de Subcontratos"
+
           />
         </div>
 

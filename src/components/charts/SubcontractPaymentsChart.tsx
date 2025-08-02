@@ -77,10 +77,7 @@ export function SubcontractPaymentsChart({
 
   return (
     <Card className="col-span-4">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -98,16 +95,16 @@ export function SubcontractPaymentsChart({
                   <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0.1}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" opacity={0.2} />
               <XAxis 
                 dataKey="formattedMonth" 
-                stroke="var(--muted-foreground)"
+                stroke="var(--chart-grid-text)"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis 
-                stroke="var(--muted-foreground)"
+                stroke="var(--chart-grid-text)"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
