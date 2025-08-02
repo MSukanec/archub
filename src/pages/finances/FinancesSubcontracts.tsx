@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign, Calendar, Building, Wallet } from "lucide-react";
+import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign, Calendar, Building, Wallet, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
 import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SubcontractKPICard } from '@/components/charts/SubcontractKPICard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
@@ -135,6 +136,34 @@ export default function FinancesSubcontracts() {
       analysis
     };
   });
+
+  // Calcular KPIs de subcontratos
+  const totalSubcontracts = enrichedSubcontracts.length;
+  const completedSubcontracts = enrichedSubcontracts.filter(s => s.status === 'completado').length;
+  const pendingSubcontracts = enrichedSubcontracts.filter(s => s.status === 'pendiente').length;
+  
+  const totalContractValue = enrichedSubcontracts.reduce((sum, s) => {
+    if (currencyView === 'dolarizado') {
+      return sum + ((s.amount_total || 0) / (s.exchange_rate || 1));
+    }
+    return sum + (s.amount_total || 0);
+  }, 0);
+  
+  const totalPaid = enrichedSubcontracts.reduce((sum, s) => {
+    if (currencyView === 'dolarizado') {
+      return sum + (s.analysis?.pagoALaFechaUSD || 0);
+    }
+    return sum + (s.analysis?.pagoALaFecha || 0);
+  }, 0);
+  
+  const totalPending = enrichedSubcontracts.reduce((sum, s) => {
+    if (currencyView === 'dolarizado') {
+      return sum + (s.analysis?.saldoUSD || 0);
+    }
+    return sum + (s.analysis?.saldo || 0);
+  }, 0);
+  
+  const averageContractValue = totalSubcontracts > 0 ? totalContractValue / totalSubcontracts : 0;
 
   // Columnas de la tabla
   const columns = [
@@ -435,6 +464,49 @@ export default function FinancesSubcontracts() {
       headerProps={headerProps}
     >
       <div className="space-y-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SubcontractKPICard
+            title="Total Subcontratos"
+            value={totalSubcontracts}
+            subtitle={`${completedSubcontracts} completados, ${pendingSubcontracts} pendientes`}
+            icon={<Building className="h-4 w-4" />}
+            color="hsl(var(--chart-1))"
+            isLoading={isLoading}
+            formatter={(val) => val.toString()}
+          />
+          
+          <SubcontractKPICard
+            title="Valor Total Contratado"
+            value={totalContractValue}
+            subtitle="Monto total de todos los subcontratos"
+            icon={<DollarSign className="h-4 w-4" />}
+            color="hsl(var(--chart-1))"
+            isLoading={isLoading}
+            formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+          />
+          
+          <SubcontractKPICard
+            title="Total Pagado"
+            value={totalPaid}
+            subtitle="Suma de todos los pagos realizados"
+            icon={<CheckCircle className="h-4 w-4" />}
+            color="hsl(var(--chart-1))"
+            isLoading={isLoading}
+            formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+          />
+          
+          <SubcontractKPICard
+            title="Saldo Pendiente"
+            value={totalPending}
+            subtitle="Monto total por pagar"
+            icon={<AlertTriangle className="h-4 w-4" />}
+            color={totalPending > 0 ? "hsl(var(--chart-1))" : totalPending < 0 ? "hsl(var(--chart-5))" : "hsl(var(--chart-4))"}
+            isLoading={isLoading}
+            formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+          />
+        </div>
+
         {/* ActionBar */}
         <ActionBarDesktopRow
           filters={[
