@@ -122,26 +122,25 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
           const constructionTaskQuantity = constructionTask?.quantity || 1;
           const totalQuantity = (item.amount || 0) * constructionTaskQuantity;
           
-          // Enhanced logging for porcelanato specifically
-          if (material.name.toLowerCase().includes('porcelanato 60x60')) {
-            console.log(`🎯 PORCELANATO DEBUG:`)
+          // Enhanced logging for deck specifically
+          if (material.name.toLowerCase().includes('deck')) {
+            console.log(`🎯 DECK DEBUG:`)
             console.log(`   - Material: ${material.name}`)
             console.log(`   - Task ID: ${item.task_id}`)
             console.log(`   - Material amount (per unit): ${item.amount}`)
             console.log(`   - Construction task quantity: ${constructionTaskQuantity}`)
             console.log(`   - Phase: ${constructionTask?.phase_name || 'Sin fase'} (pos: ${constructionTask?.phase_position || 'N/A'})`)
             console.log(`   - Total quantity: ${totalQuantity}`)
-            console.log(`   - Construction task:`, constructionTask)
-            console.log(`   - Existing material in map:`, existingMaterial)
+            console.log(`   - Existing material in map:`, existingMaterial ? `YES (current: ${existingMaterial.computed_quantity})` : 'NO')
           }
           
           if (existingMaterial) {
             const previousQty = existingMaterial.computed_quantity;
             existingMaterial.computed_quantity += totalQuantity;
             
-            // Enhanced logging for porcelanato accumulation
-            if (material.name.toLowerCase().includes('porcelanato 60x60')) {
-              console.log(`🔄 PORCELANATO ACCUMULATION:`)
+            // Enhanced logging for deck accumulation
+            if (material.name.toLowerCase().includes('deck')) {
+              console.log(`🔄 DECK ACCUMULATION:`)
               console.log(`   - Previous total: ${previousQty}`)
               console.log(`   - Adding: ${totalQuantity}`)
               console.log(`   - New total: ${existingMaterial.computed_quantity}`)
@@ -163,9 +162,9 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
               to_purchase_quantity: Math.max(0, computedQty - purchasedQty)
             });
             
-            // Enhanced logging for porcelanato first time
-            if (material.name.toLowerCase().includes('porcelanato 60x60')) {
-              console.log(`🆕 PORCELANATO FIRST TIME:`)
+            // Enhanced logging for deck first time
+            if (material.name.toLowerCase().includes('deck')) {
+              console.log(`🆕 DECK FIRST TIME:`)
               console.log(`   - Initial quantity: ${computedQty}`)
             }
           }

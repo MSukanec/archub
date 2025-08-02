@@ -17,7 +17,7 @@ export { Plus } from 'lucide-react'
 // Iconos estándar para filtros comunes
 export const FILTER_ICONS = {
   // Filtros principales
-  CATEGORY: FolderTree,
+  CATEGORY: Filter,
   PHASE: Calendar,
   TYPE: Tag,
   SEARCH: Search,
