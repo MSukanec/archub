@@ -141,6 +141,7 @@ export function SidebarSubmenu() {
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
       { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments', generalModeRestricted: true },
+      { icon: Package, label: 'Subcontratos', href: '/finances/subcontracts', requiresProject: true },
     ],
 
 
