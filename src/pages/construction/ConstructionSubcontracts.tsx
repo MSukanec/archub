@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign } from "lucide-react";
+import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -263,8 +264,9 @@ export default function ConstructionSubcontracts() {
           filters={[
             {
               key: 'currency',
-              label: 'Vista de Moneda',
-              icon: Filter,
+              title: 'Moneda',
+              label: FILTER_LABELS.CURRENCY,
+              icon: FILTER_ICONS.CURRENCY,
               value: currencyView === 'discriminado' ? 'Discriminado' :
                      currencyView === 'pesificado' ? 'Pesificado' : 
                      'Dolarizado',
@@ -274,13 +276,13 @@ export default function ConstructionSubcontracts() {
                 else if (value === 'Dolarizado') setCurrencyView('dolarizado')
               },
               options: ['Discriminado', 'Pesificado', 'Dolarizado'],
-              defaultLabel: 'Todas las vistas'
+              defaultLabel: FILTER_LABELS.ALL_CURRENCIES
             }
           ]}
           actions={[
             {
               label: 'Crear Subcontrato',
-              icon: Plus,
+              icon: ACTION_ICONS.NEW,
               onClick: handleCreateSubcontract,
               variant: 'default'
             }
