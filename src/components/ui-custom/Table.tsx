@@ -341,12 +341,12 @@ export function Table<T = any>({
         {/* Column Headers - Fila inferior con títulos de columnas */}
         <div
           className={cn(
-            "grid gap-4 px-4 py-3 text-xs font-medium border-b border-[var(--table-row-border)]"
+            "grid gap-4 px-4 py-3 text-xs font-medium border-b border-[var(--table-header-border)]"
           )}
           style={{ 
             gridTemplateColumns: getGridTemplateColumns(),
-            backgroundColor: "var(--card-bg)", 
-            color: "var(--text-subtle)" 
+            backgroundColor: "var(--table-header-bg)", 
+            color: "var(--table-header-fg)" 
           }}
         >
           {selectable && (
@@ -391,12 +391,16 @@ export function Table<T = any>({
                 {renderGroupHeader && (
                   <div className={cn(
                     "grid gap-4 px-4 py-3",
-                    mode === "budget" && "bg-[var(--accent)] text-white border-b border-[var(--table-row-border)]",
-                    mode === "construction" && "bg-[var(--accent)] text-white border-b border-[var(--table-row-border)]",
-                    mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)] border-b border-[var(--table-header-border)]",
+                    mode === "budget" && "border-b border-[var(--table-row-border)]",
+                    mode === "construction" && "border-b border-[var(--table-row-border)]",
+                    mode === "default" && "border-b border-[var(--table-header-border)]",
                     "text-xs font-medium"
                   )}
-                  style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                  style={{ 
+                    gridTemplateColumns: getGridTemplateColumns(),
+                    backgroundColor: "var(--table-group-header-bg)",
+                    color: "var(--table-group-header-fg)"
+                  }}
                   >
                     {renderGroupHeader(groupKey, groupRows)}
                   </div>
