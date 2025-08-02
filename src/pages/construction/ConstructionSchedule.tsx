@@ -230,8 +230,8 @@ export default function ConstructionSchedule() {
               else if (value === 'Por Fases') setGroupingType('fases')
               else setGroupingType('none')
             },
-            options: GROUPING_OPTIONS.SCHEDULE,
-            defaultLabel: 'Todas las agrupaciones'
+            options: ['Sin Agrupar', 'Por Rubros', 'Por Fases'],
+            defaultLabel: FILTER_LABELS.NO_GROUPING
           }
         ]}
         actions={[
