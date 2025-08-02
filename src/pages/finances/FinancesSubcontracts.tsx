@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign, Calendar, Building, Wallet, Coins } from "lucide-react";
+import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -18,7 +19,6 @@ import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts"
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { useProjectContext } from "@/stores/projectContext";
 
 interface SubcontractPayment {
   id: string;
@@ -38,18 +38,16 @@ export default function FinancesSubcontracts() {
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
-  const { selectedProjectId } = useProjectContext();
   
-  // Estado para controles
+  // Estado para controles del ActionBar
   const [searchValue, setSearchValue] = useState('');
-  const [filterByContact, setFilterByContact] = useState("all");
-  const [filterByCurrency, setFilterByCurrency] = useState("all"); 
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
   const [activeTab, setActiveTab] = useState('summary');
 
   // Función para crear subcontrato
   const handleCreateSubcontract = () => {
     openModal('subcontract', {
-      projectId: selectedProjectId,
+      projectId: userData?.preferences?.last_project_id,
       organizationId: userData?.organization?.id,
       userId: userData?.user?.id,
       isEditing: false
@@ -57,23 +55,14 @@ export default function FinancesSubcontracts() {
   };
   
   // Datos de subcontratos con análisis de pagos
-  const { data: subcontracts = [], isLoading } = useSubcontracts(selectedProjectId);
-  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(selectedProjectId);
-  
-  // Debug logs
-  console.log("🔍 FinancesSubcontracts Debug:", {
-    selectedProjectId,
-    subcontracts: subcontracts.length,
-    subcontractAnalysis: subcontractAnalysis.length,
-    isLoading,
-    isLoadingAnalysis
-  });
+  const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
+  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
 
   // Query para obtener los pagos de subcontratos
   const { data: subcontractPayments = [], isLoading: isLoadingPayments } = useQuery({
-    queryKey: ['subcontract-payments', selectedProjectId],
+    queryKey: ['subcontract-payments', userData?.preferences?.last_project_id],
     queryFn: async () => {
-      if (!selectedProjectId || !userData?.organization?.id) return [];
+      if (!userData?.preferences?.last_project_id || !userData?.organization?.id) return [];
       
       const { data, error } = await supabase
         .from('movement_subcontracts')
@@ -95,7 +84,7 @@ export default function FinancesSubcontracts() {
             contact:contacts!inner(id, first_name, last_name, full_name)
           )
         `)
-        .eq('movement.project_id', selectedProjectId)
+        .eq('movement.project_id', userData.preferences.last_project_id)
         .eq('movement.organization_id', userData.organization.id)
         .order('movement(movement_date)', { ascending: false });
 
@@ -118,7 +107,7 @@ export default function FinancesSubcontracts() {
         currency_code: item.movement.currency.code
       }));
     },
-    enabled: !!selectedProjectId && !!userData?.organization?.id
+    enabled: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
   });
 
   const getStatusBadge = (status: string) => {
@@ -135,6 +124,31 @@ export default function FinancesSubcontracts() {
 
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
+  };
+
+  // Función para convertir montos según la vista de moneda
+  const convertAmount = (amountARS: number, amountUSD: number, currencyCode: string) => {
+    if (currencyView === 'discriminado') {
+      return currencyCode === 'USD' ? amountUSD : amountARS;
+    } else if (currencyView === 'pesificado') {
+      return amountARS; // Siempre mostrar en ARS
+    } else if (currencyView === 'dolarizado') {
+      return amountUSD; // Siempre mostrar en USD
+    }
+    return amountARS;
+  };
+
+  const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
+    const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
+    
+    if (currencyView === 'discriminado') {
+      return formatCurrency(convertedAmount, originalCurrency === 'USD' ? 'US$' : '$');
+    } else if (currencyView === 'pesificado') {
+      return formatCurrency(convertedAmount, '$');
+    } else if (currencyView === 'dolarizado') {
+      return formatCurrency(convertedAmount, 'US$');
+    }
+    return formatCurrency(convertedAmount, '$');
   };
 
   // Combinar subcontratos con su análisis financiero
@@ -191,8 +205,11 @@ export default function FinancesSubcontracts() {
       label: 'Monto Total',
       width: '12%',
       render: (subcontract: any) => {
-        const totalARS = subcontract.analysis?.montoTotal || 0;
-        return formatCurrency(totalARS, '$');
+        const amountARS = subcontract.amount_total || 0;
+        const amountUSD = amountARS / (subcontract.exchange_rate || 1);
+        // Determinar la moneda original del subcontrato
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
+        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
       }
     },
     {
@@ -201,7 +218,8 @@ export default function FinancesSubcontracts() {
       width: '12%',
       render: (subcontract: any) => {
         const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
-        return formatCurrency(pagoARS, '$');
+        const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
+        return formatSingleCurrency(pagoARS, pagoUSD, 'ARS'); // Los pagos siempre en moneda mixta
       }
     },
     {
@@ -210,7 +228,8 @@ export default function FinancesSubcontracts() {
       width: '12%',
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
-        return formatCurrency(saldoARS, '$');
+        const saldoUSD = subcontract.analysis?.saldoUSD || 0;
+        return formatSingleCurrency(saldoARS, saldoUSD, 'ARS'); // Los saldos siempre en moneda mixta
       }
     },
     {
@@ -414,6 +433,28 @@ export default function FinancesSubcontracts() {
         onSearchChange={setSearchValue}
         primaryActionLabel="Nuevo Subcontrato"
         onPrimaryActionClick={handleCreateSubcontract}
+        customFilters={[
+          {
+            key: 'currency',
+            label: FILTER_LABELS.CURRENCY,
+            icon: FILTER_ICONS.CURRENCY,
+            value: currencyView === 'pesificado' ? 'Peso Argentino' : 
+                   currencyView === 'dolarizado' ? 'Dólar Estadounidense' :
+                   'Todo',
+            setValue: (value) => {
+              if (value === 'Peso Argentino') setCurrencyView('pesificado')
+              else if (value === 'Dólar Estadounidense') setCurrencyView('dolarizado')
+              else setCurrencyView('discriminado')
+            },
+            options: ['Peso Argentino', 'Dólar Estadounidense'],
+            defaultLabel: 'Todo'
+          }
+        ]}
+        onClearFilters={() => {
+          setCurrencyView('discriminado');
+          setSearchValue('');
+        }}
+        hasActiveFilters={currencyView !== 'discriminado' || searchValue !== ''}
       />
 
       {/* Contenido condicional por tab */}
