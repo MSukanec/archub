@@ -64,6 +64,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
+import { FILTER_LABELS } from "@/constants/actionBarConstants";
 
 interface Movement {
   id: string;
@@ -1327,48 +1328,48 @@ export default function Movements() {
         filters={[
           {
             key: 'type',
-            label: 'Tipo',
+            label: FILTER_LABELS.TYPE,
             icon: Tag,
             value: filterByType,
             setValue: setFilterByType,
             options: availableTypes,
-            defaultLabel: 'Todos los tipos'
+            defaultLabel: FILTER_LABELS.ALL_TYPES
           },
           {
             key: 'category',
-            label: 'Categoría',
+            label: FILTER_LABELS.CATEGORY,
             icon: FolderTree,
             value: filterByCategory,
             setValue: setFilterByCategory,
             options: availableCategories,
-            defaultLabel: 'Todas las categorías'
+            defaultLabel: FILTER_LABELS.ALL_CATEGORIES
           },
           {
             key: 'favorites',
-            label: 'Favoritos',
+            label: FILTER_LABELS.FAVORITES,
             icon: Star,
             value: filterByFavorites,
             setValue: setFilterByFavorites,
             options: ['favorites'],
-            defaultLabel: 'Todos los movimientos'
+            defaultLabel: FILTER_LABELS.ALL_MOVEMENTS
           },
           {
             key: 'currency',
-            label: 'Moneda',
+            label: FILTER_LABELS.CURRENCY,
             icon: Coins,
             value: filterByCurrency,
             setValue: setFilterByCurrency,
             options: availableCurrencies,
-            defaultLabel: 'Todas las monedas'
+            defaultLabel: FILTER_LABELS.ALL_CURRENCIES
           },
           {
             key: 'wallet',
-            label: 'Billetera',
+            label: FILTER_LABELS.WALLET,
             icon: Wallet,
             value: filterByWallet,
             setValue: setFilterByWallet,
             options: availableWallets,
-            defaultLabel: 'Todas las billeteras'
+            defaultLabel: FILTER_LABELS.ALL_WALLETS
           }
         ]}
         actions={[

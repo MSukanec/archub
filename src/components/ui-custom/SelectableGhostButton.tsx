@@ -62,7 +62,7 @@ export function SelectableGhostButton({
         >
           {icon && <span className="mr-1.5">{icon}</span>}
           <span className="font-medium">{title}:</span>
-          <span className="ml-1">{selectedLabel}</span>
+          <span className="ml-1 font-normal">{selectedLabel}</span>
           {showChevron && <ChevronDown className="w-3 h-3 ml-1.5" />}
         </Button>
       </DropdownMenuTrigger>
