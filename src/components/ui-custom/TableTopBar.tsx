@@ -60,7 +60,7 @@ export function TableTopBar({
               size="sm"
               onClick={() => onTabChange?.(tab)}
               className={cn(
-                "h-8 px-3 text-sm font-normal",
+                "h-8 px-3 text-xs font-normal",
                 activeTab === tab ? "button-secondary-pressed" : ""
               )}
             >
