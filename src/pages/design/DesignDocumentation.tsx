@@ -86,6 +86,18 @@ export default function DesignDocumentation() {
     }
   };
 
+  // Debug logging
+  console.log('DesignDocumentation - Debug data:', {
+    foldersLoading,
+    groupsLoading,
+    documentsLoading,
+    folders,
+    allGroups,
+    allDocuments,
+    filteredFolders,
+    filteredGroups
+  });
+
   if (foldersLoading || groupsLoading || documentsLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
@@ -100,9 +112,8 @@ export default function DesignDocumentation() {
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
 
-        {/* Table with TableTopBar */}
-        {filteredFolders.length > 0 || filteredGroups.length > 0 ? (
-          <Table
+        {/* Table with TableTopBar - Always show table */}
+        <Table
             columns={[
               {
                 key: 'type',
@@ -195,14 +206,14 @@ export default function DesignDocumentation() {
               searchValue: searchTerm,
               onSearchChange: setSearchTerm
             }}
+            emptyState={
+              <EmptyState
+                icon={<FileText className="w-12 h-12" />}
+                title="No hay documentos de diseño"
+                description="Comienza creando tu primera carpeta para organizar los documentos del proyecto de diseño."
+              />
+            }
           />
-        ) : (
-          <EmptyState
-            icon={<FileText className="w-12 h-12" />}
-            title="No hay documentos de diseño"
-            description="Comienza creando tu primera carpeta para organizar los documentos del proyecto de diseño."
-          />
-        )}
       </div>
     </Layout>
   );
