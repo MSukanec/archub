@@ -104,7 +104,7 @@ export default function ConstructionMaterials() {
       {
         key: 'name',
         label: 'Nombre',
-        width: '25%',
+        width: groupingType === 'categories' ? '35%' : '25%', // Más ancho cuando no hay categoría
         render: (material: any) => (
           <span className="text-sm">{material.name}</span>
         )
@@ -112,7 +112,7 @@ export default function ConstructionMaterials() {
       {
         key: 'brand',
         label: 'Marca',
-        width: '10%',
+        width: groupingType === 'categories' ? '9%' : '10%', // 10% menos cuando agrupado
         render: (material: any) => (
           <span className="text-sm text-muted-foreground">Indefinido</span>
         )
@@ -120,7 +120,7 @@ export default function ConstructionMaterials() {
       {
         key: 'model',
         label: 'Modelo',
-        width: '10%',
+        width: groupingType === 'categories' ? '9%' : '10%', // 10% menos cuando agrupado
         render: (material: any) => (
           <span className="text-sm text-muted-foreground">Indefinido</span>
         )
@@ -128,7 +128,7 @@ export default function ConstructionMaterials() {
       {
         key: 'computed_quantity',
         label: 'Necesario',
-        width: '13%',
+        width: groupingType === 'categories' ? '16%' : '13%', // Más ancho cuando agrupado
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
@@ -141,7 +141,7 @@ export default function ConstructionMaterials() {
       {
         key: 'purchased_quantity',
         label: 'Comprado',
-        width: '13%',
+        width: groupingType === 'categories' ? '16%' : '13%', // Más ancho cuando agrupado
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
@@ -154,7 +154,7 @@ export default function ConstructionMaterials() {
       {
         key: 'to_purchase_quantity',
         label: 'Por Comprar',
-        width: '14%',
+        width: groupingType === 'categories' ? '15%' : '14%', // Más ancho cuando agrupado
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
