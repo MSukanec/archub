@@ -244,7 +244,7 @@ export function Table<T = any>({
     count: enableVirtualScroll ? virtualItems.length : 0,
     getScrollElement: () => parentRef.current,
     estimateSize: () => estimateSize,
-    overscan: 10,
+    overscan: 5,
   });
 
   // Pagination - usando flattenedData en lugar de sortedData
