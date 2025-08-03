@@ -35,6 +35,8 @@ const useTaskParameterValues = () => {
   return useQuery({
     queryKey: ['task-parameter-values'],
     queryFn: async () => {
+      if (!supabase) return [];
+      
       const { data, error } = await supabase
         .from('task_parameter_options')
         .select(`
@@ -753,15 +755,22 @@ export default function ConstructionBudgets() {
 
       {/* DEBUG: Log budget info */}
       {(() => {
-        console.log('🔍 BUDGET RENDER DEBUG:', {
-          budgetsLength: budgets.length,
-          budgetsLoading,
-          budgets: budgets.map(b => ({ id: b.id, name: b.name })),
-          selectedBudgetId,
-          selectedBudget: selectedBudget ? { id: selectedBudget.id, name: selectedBudget.name } : null
-        });
+        console.log('🔍 PRESUPUESTOS DEBUG - budgets.length:', budgets.length);
+        console.log('🔍 PRESUPUESTOS DEBUG - budgetsLoading:', budgetsLoading);
+        if (budgets.length > 0) {
+          console.log('🔍 PRESUPUESTOS DEBUG - budgets names:', budgets.map(b => b.name));
+        }
         return null;
       })()}
+
+      {/* ALWAYS SHOW TEST CARD */}
+      <Card className="mb-6 bg-blue-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="text-sm">
+            🔍 TEST CARD - budgets.length: {budgets.length} | loading: {budgetsLoading ? 'true' : 'false'}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Budget Selector Card - Always show if budgets exist */}
       {budgets.length > 0 && (
