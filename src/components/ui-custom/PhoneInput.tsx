@@ -66,22 +66,22 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           <PopoverTrigger asChild>
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               disabled={disabled}
               className={cn(
                 "flex items-center justify-center rounded-l-md rounded-r-none border-r-0 min-w-[85px] h-10",
-                "text-sm py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground",
-                "transition-none",
+                "text-sm px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground",
+                "shadow-none hover:shadow-none focus:shadow-none transition-none box-border",
                 "hover:bg-[var(--input-bg)] hover:border-[var(--input-border)] hover:text-foreground",
                 "focus:bg-[var(--input-bg)] focus:border-[var(--input-border)] focus:text-foreground",
                 "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent",
                 "disabled:opacity-60 disabled:cursor-not-allowed"
               )}
             >
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm">{selectedCountry.flag}</span>
-                <span className="text-xs font-medium">{selectedCountry.dialCode}</span>
-                <ChevronDown className="h-3 w-3 opacity-50 ml-0.5" />
+              <div className="flex items-center gap-1">
+                <span className="text-base leading-none">{selectedCountry.flag}</span>
+                <span className="text-sm leading-none">{selectedCountry.dialCode}</span>
+                <ChevronDown className="h-3 w-3 opacity-50 ml-0.5 shrink-0" />
               </div>
             </Button>
           </PopoverTrigger>
