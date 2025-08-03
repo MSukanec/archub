@@ -73,12 +73,29 @@ export function HeaderDesktop({
   // Estado local para tracking inmediato del proyecto seleccionado
   const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(selectedProjectId);
   
-  // Sincronizar localSelectedProject con userData cuando cambie desde otras páginas
+  // Sincronizar localSelectedProject con el projectContext y userData
   useEffect(() => {
-    if (userData?.preferences?.last_project_id !== undefined) {
-      setLocalSelectedProject(userData.preferences.last_project_id);
+    // Priorizar selectedProjectId del contexto, luego userData
+    const projectId = selectedProjectId || userData?.preferences?.last_project_id;
+    if (projectId !== undefined) {
+      setLocalSelectedProject(projectId);
     }
-  }, [userData?.preferences?.last_project_id]);
+  }, [selectedProjectId, userData?.preferences?.last_project_id]);
+
+  // Sincronizar el projectContext cuando cambie la organización
+  useEffect(() => {
+    if (userData?.organization?.id && userData.preferences?.last_project_id) {
+      // Solo actualizar si el contexto no tiene el proyecto correcto
+      if (selectedProjectId !== userData.preferences.last_project_id) {
+        console.log("🔧 HeaderDesktop: Syncing project context with userData", {
+          contextProject: selectedProjectId,
+          userDataProject: userData.preferences.last_project_id,
+          organization: userData.organization.id
+        });
+        setSelectedProject(userData.preferences.last_project_id);
+      }
+    }
+  }, [userData?.organization?.id, userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject]);
 
   // Mutation para actualizar proyecto seleccionado usando nuevo sistema
   const updateProjectMutation = useMutation({
