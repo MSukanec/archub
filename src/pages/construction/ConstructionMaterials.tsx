@@ -18,7 +18,7 @@ export default function ConstructionMaterials() {
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedPhase, setSelectedPhase] = useState("")
-  const [groupingType, setGroupingType] = useState('none')
+  const [groupingType, setGroupingType] = useState('categories')
   
   const { data: userData, isLoading } = useCurrentUser()
   const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
