@@ -3,7 +3,6 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter, FolderTree } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
-import { TableTopBar } from '@/components/ui-custom/TableTopBar'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
@@ -470,12 +469,16 @@ export default function ConstructionTasks() {
               description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
             />
           ) : (
-            <>
-              {/* TableTopBar con botón de agrupación */}
-              <TableTopBar
-                showFilter={true}
-                isFilterActive={groupingType !== 'none'}
-                renderFilterContent={() => (
+            <Table
+              columns={columns}
+              data={finalTasks}
+              isLoading={isLoading}
+              mode="construction"
+              groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+              topBar={{
+                showFilter: true,
+                isFilterActive: groupingType !== 'none',
+                renderFilterContent: () => (
                   <div className="space-y-2 p-2 min-w-[150px]">
                     <div className="text-xs font-medium text-[var(--muted-foreground)] mb-2">Agrupar por:</div>
                     <Button
@@ -527,58 +530,50 @@ export default function ConstructionTasks() {
                       Por Rubros y Tareas
                     </Button>
                   </div>
-                )}
-              />
-              
-              <Table
-                columns={columns}
-                data={finalTasks}
-                isLoading={isLoading}
-                mode="construction"
-                groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-                renderCard={(task: any) => (
-                  <ConstructionTaskCard
-                    key={task.id}
-                    task={task}
-                    onEdit={handleEditTask}
-                    onDelete={(taskToDelete) => handleDeleteTask(taskToDelete.id)}
-                  />
-                )}
-                renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
-                  if (groupingType === 'tasks') {
-                    // Para agrupación por rubros y tareas, calcular suma de cantidades
-                    const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-                    const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
-                    const rubroName = groupRows[0]?.task?.rubro_name || '';
-                    
-                    return (
-                      <>
-                        <div className="col-span-1 truncate">
-                          {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
-                        </div>
-                        <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
-                        <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
-                      </>
-                    );
-                  } else {
-                    return (
-                      <>
-                        <div className="col-span-full text-sm font-medium">
-                          {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
-                        </div>
-                      </>
-                    );
-                  }
-                }}
-                emptyState={
-                  <EmptyState
-                    icon={<CheckSquare className="h-8 w-8" />}
-                    title="No hay tareas que coincidan"
-                    description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
-                  />
+                )
+              }}
+              renderCard={(task: any) => (
+                <ConstructionTaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={handleEditTask}
+                  onDelete={(taskToDelete) => handleDeleteTask(taskToDelete.id)}
+                />
+              )}
+              renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+                if (groupingType === 'tasks') {
+                  // Para agrupación por rubros y tareas, calcular suma de cantidades
+                  const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
+                  const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
+                  const rubroName = groupRows[0]?.task?.rubro_name || '';
+                  
+                  return (
+                    <>
+                      <div className="col-span-1 truncate">
+                        {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
+                      </div>
+                      <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
+                      <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <div className="col-span-full text-sm font-medium">
+                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+                      </div>
+                    </>
+                  );
                 }
-              />
-            </>
+              }}
+              emptyState={
+                <EmptyState
+                  icon={<CheckSquare className="h-8 w-8" />}
+                  title="No hay tareas que coincidan"
+                  description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
+                />
+              }
+            />
           )
         ) : (
           // Tab Fases - Drag & Drop Phase Manager
