@@ -1323,82 +1323,7 @@ export default function Movements() {
 
 
 
-      {/* ActionBar Desktop */}
-      <div className="hidden md:block">
-        <ActionBarDesktopRow
-        filters={[
-          {
-            key: 'type',
-            label: FILTER_LABELS.TYPE,
-            icon: Tag,
-            value: filterByType,
-            setValue: setFilterByType,
-            options: availableTypes,
-            defaultLabel: FILTER_LABELS.ALL_TYPES
-          },
-          {
-            key: 'category',
-            label: FILTER_LABELS.CATEGORY,
-            icon: FolderTree,
-            value: filterByCategory,
-            setValue: setFilterByCategory,
-            options: availableCategories,
-            defaultLabel: FILTER_LABELS.ALL_CATEGORIES
-          },
-          {
-            key: 'favorites',
-            label: FILTER_LABELS.FAVORITES,
-            icon: Star,
-            value: filterByFavorites,
-            setValue: setFilterByFavorites,
-            options: ['favorites'],
-            defaultLabel: FILTER_LABELS.ALL_MOVEMENTS
-          },
-          {
-            key: 'currency',
-            label: FILTER_LABELS.CURRENCY,
-            icon: Coins,
-            value: filterByCurrency,
-            setValue: setFilterByCurrency,
-            options: availableCurrencies,
-            defaultLabel: FILTER_LABELS.ALL_CURRENCIES
-          },
-          {
-            key: 'wallet',
-            label: FILTER_LABELS.WALLET,
-            icon: Wallet,
-            value: filterByWallet,
-            setValue: setFilterByWallet,
-            options: availableWallets,
-            defaultLabel: FILTER_LABELS.ALL_WALLETS
-          }
-        ]}
-        actions={[
-          {
-            label: 'Nuevo Movimiento',
-            icon: Plus,
-            onClick: () => openModal('movement'),
-            variant: 'default'
-          }
-        ]}
-        customRestricted={
-          <CustomRestricted 
-            functionName="Importación de Excel"
-            reason="general_mode"
-          >
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-              className="h-8 px-3 text-xs"
-            >
-              <Upload className="mr-1 h-3 w-3" />
-              Importar
-            </Button>
-          </CustomRestricted>
-        }
-      />
-      </div>
+
       
       {/* Cards de resumen financiero - Solo mostrar si hay movimientos */}
       {processedMovements.length > 0 && (
@@ -1527,10 +1452,104 @@ export default function Movements() {
         data={processedMovements}
         isLoading={isLoading}
         selectable={true}
-        showDoubleHeader={true}
         defaultSort={{
           key: "movement_date",
           direction: "desc",
+        }}
+        topBar={{
+          tabs: ['Todos', 'Ingresos', 'Egresos'],
+          activeTab: filterByType === 'all' ? 'Todos' : filterByType === 'Ingresos' ? 'Ingresos' : filterByType === 'Egresos' ? 'Egresos' : 'Todos',
+          onTabChange: (tab) => {
+            if (tab === 'Todos') setFilterByType('all');
+            else if (tab === 'Ingresos') setFilterByType('Ingresos');
+            else if (tab === 'Egresos') setFilterByType('Egresos');
+          },
+          showSearch: true,
+          searchValue: searchValue,
+          onSearchChange: setSearchValue,
+          showFilter: true,
+          renderFilterContent: () => (
+            <div className="space-y-3 p-2 min-w-[200px]">
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Categoría</Label>
+                <Select value={filterByCategory} onValueChange={setFilterByCategory}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las categorías" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las categorías</SelectItem>
+                    {availableCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Moneda</Label>
+                <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las monedas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las monedas</SelectItem>
+                    {availableCurrencies.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Billetera</Label>
+                <Select value={filterByWallet} onValueChange={setFilterByWallet}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las billeteras" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las billeteras</SelectItem>
+                    {availableWallets.map((wallet) => (
+                      <SelectItem key={wallet} value={wallet}>
+                        {wallet}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ),
+          showSort: true,
+          renderSortContent: () => (
+            <div className="space-y-2 p-2 min-w-[150px]">
+              <div className="text-xs font-medium text-[var(--muted-foreground)] mb-2">Ordenar por:</div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-8 text-xs"
+                onClick={() => console.log('Sort by recent')}
+              >
+                Más recientes
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-8 text-xs"
+                onClick={() => console.log('Sort by old')}
+              >
+                Más antiguos
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start h-8 text-xs"
+                onClick={() => console.log('Sort by amount')}
+              >
+                Mayor monto
+              </Button>
+            </div>
+          )
         }}
 
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {

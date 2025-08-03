@@ -1,4 +1,4 @@
-import React, { useState, useMemo, Fragment } from "react";
+import React, { useState, useMemo, Fragment, ReactNode } from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -9,6 +9,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { TableTopBar } from "./TableTopBar";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -51,11 +52,25 @@ interface TableProps<T = any> {
   renderGroupHeader?: (groupKey: string, groupRows: T[]) => React.ReactNode;
   // Modos de visualización
   mode?: "default" | "budget" | "construction";
-  // 🆕 DOBLE ENCABEZADO - Fila superior con botones
+  // 🆕 NUEVA BARRA SUPERIOR FLEXIBLE
+  topBar?: {
+    tabs?: string[];
+    activeTab?: string;
+    onTabChange?: (newTab: string) => void;
+    showSearch?: boolean;
+    onSearchChange?: (text: string) => void;
+    searchValue?: string;
+    showFilter?: boolean;
+    renderFilterContent?: () => ReactNode;
+    showSort?: boolean;
+    renderSortContent?: () => ReactNode;
+  };
+  // 🆕 DOBLE ENCABEZADO LEGACY (será reemplazado por topBar)
   headerActions?: {
     leftActions?: React.ReactNode;
     rightActions?: React.ReactNode;
   };
+  showDoubleHeader?: boolean;
 }
 
 export function Table<T = any>({
@@ -78,8 +93,11 @@ export function Table<T = any>({
   groupBy,
   renderGroupHeader,
   mode = "default",
-  // 🆕 DOBLE ENCABEZADO
+  // 🆕 NUEVA BARRA SUPERIOR FLEXIBLE
+  topBar,
+  // 🆕 DOBLE ENCABEZADO LEGACY
   headerActions,
+  showDoubleHeader = false,
 }: TableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(
     defaultSort?.key || null,
@@ -323,10 +341,24 @@ export function Table<T = any>({
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
-        {/* Header Actions Row - Fila superior con botones */}
-        {headerActions && (
+        {/* Nueva barra superior flexible */}
+        <TableTopBar
+          tabs={topBar?.tabs}
+          activeTab={topBar?.activeTab}
+          onTabChange={topBar?.onTabChange}
+          showSearch={topBar?.showSearch}
+          onSearchChange={topBar?.onSearchChange}
+          searchValue={topBar?.searchValue}
+          showFilter={topBar?.showFilter}
+          renderFilterContent={topBar?.renderFilterContent}
+          showSort={topBar?.showSort}
+          renderSortContent={topBar?.renderSortContent}
+        />
+        
+        {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}
+        {headerActions && showDoubleHeader && (
           <div 
-            className="flex items-center justify-between px-4 py-3"
+            className="flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)]"
             style={{ backgroundColor: "var(--card-bg)", color: "var(--card-fg)" }}
           >
             <div className="flex items-center gap-2">
