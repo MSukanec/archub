@@ -7,8 +7,8 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useLocation } from 'wouter';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+
+
 import { DocumentGroupCard } from '@/components/ui-custom/DocumentGroupCard';
 import { Table } from '@/components/ui-custom/Table';
 import DocumentCard from '@/components/cards/DocumentCard';
@@ -413,79 +413,27 @@ export default function ProjectDocumentation() {
     return actions;
   };
 
+  const headerProps = {
+    title: "Documentación",
+    actionButton: {
+      label: selectedFolderId ? "Subir Documentos" : "Nueva Carpeta",
+      icon: selectedFolderId ? Upload : Plus,
+      onClick: () => {
+        if (selectedFolderId) {
+          openModal('document-upload', { 
+            defaultFolderId: selectedFolderId,
+            defaultGroupId: selectedGroupId 
+          });
+        } else {
+          openModal('document-folder', {});
+        }
+      }
+    }
+  };
+
   return (
-    <Layout wide={true}>
+    <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktop
-          title="Documentación del Proyecto"
-          icon={<FileText className="w-5 h-5" />}
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          primaryActionLabel={selectedFolderId ? "Subir Documentos" : "Nueva Carpeta"}
-          onPrimaryActionClick={() => {
-            if (selectedFolderId) {
-              openModal('document-upload', { 
-                defaultFolderId: selectedFolderId,
-                defaultGroupId: selectedGroupId 
-              });
-            } else {
-              openModal('document-folder', {});
-            }
-          }}
-          features={[
-            {
-              icon: <Archive className="w-4 h-4" />,
-              title: "Control de versiones de documentos",
-              description: "Mantén un historial completo de todas las versiones de tus documentos de diseño con recuperación automática de versiones anteriores."
-            },
-            {
-              icon: <FolderOpen className="w-4 h-4" />,
-              title: "Organización jerárquica de carpetas",
-              description: "Estructura tus documentos en carpetas organizadas por disciplina, fase del proyecto o cualquier criterio personalizado."
-            },
-            {
-              icon: <Download className="w-4 h-4" />,
-              title: "Descarga y exportación masiva",
-              description: "Exporta documentos individuales o carpetas completas manteniendo la estructura organizativa original."
-            },
-            {
-              icon: <Users className="w-4 h-4" />,
-              title: "Colaboración en equipo en tiempo real",
-              description: "Acceso simultáneo del equipo con sincronización automática de cambios y comentarios colaborativos."
-            }
-          ]}
-        />
-
-        {/* Feature Introduction - Mobile Only */}
-        <FeatureIntroduction
-          title="Documentación"
-          icon={<FileText className="w-5 h-5" />}
-          features={[
-            {
-              icon: <Archive className="w-5 h-5" />,
-              title: "Control de versiones de documentos",
-              description: "Mantén un historial completo de todas las versiones de tus documentos de diseño. Cada actualización se guarda automáticamente, permitiendo recuperar versiones anteriores cuando sea necesario y mantener un registro de la evolución del proyecto."
-            },
-            {
-              icon: <FolderOpen className="w-5 h-5" />,
-              title: "Organización jerárquica de carpetas",
-              description: "Estructura tus documentos en carpetas y subcarpetas organizadas por disciplina, fase del proyecto o cualquier criterio que necesites. Esta organización facilita la búsqueda y mantiene todo ordenado para el equipo."
-            },
-            {
-              icon: <Download className="w-5 h-5" />,
-              title: "Descarga y exportación masiva",
-              description: "Exporta documentos individuales o carpetas completas con un solo clic. Perfecto para compartir entregables con clientes, contratistas o autoridades, manteniendo la estructura organizativa original."
-            },
-            {
-              icon: <Users className="w-5 h-5" />,
-              title: "Colaboración en equipo en tiempo real",
-              description: "Todo el equipo puede acceder, comentar y actualizar documentos simultáneamente. Los cambios se sincronizan automáticamente y cada miembro del equipo mantiene acceso a la información más actualizada del proyecto."
-            }
-          ]}
-          className="md:hidden"
-        />
-
         {/* Breadcrumbs */}
         {renderBreadcrumbs()}
 
