@@ -384,7 +384,7 @@ export default function OrganizationContacts() {
                   if (type) setFilterByType(type.id)
                 }
               },
-              options: ['Todos los Tipos', ...contactTypes.map(type => type.name)],
+              options: ['Todos los Tipos', 'Arquitecto', 'Ingeniero', 'Constructor', 'Proveedor', 'Cliente'],
               defaultLabel: 'Todos los Tipos'
             }
           ]}
