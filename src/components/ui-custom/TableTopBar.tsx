@@ -60,7 +60,7 @@ export function TableTopBar({
               size="sm"
               onClick={() => onTabChange?.(tab)}
               className={cn(
-                "h-8 px-3 text-base font-normal",
+                "h-8 px-3 text-sm font-normal",
                 activeTab === tab ? "button-secondary-pressed" : ""
               )}
             >
@@ -80,8 +80,8 @@ export function TableTopBar({
                 isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"
               )}>
                 <div className={cn(
-                  "relative flex items-center h-8 border border-[var(--card-border)] rounded-md bg-[var(--muted)] transition-all",
-                  isSearchExpanded ? "bg-[var(--background)]" : "bg-transparent border-transparent"
+                  "relative flex items-center h-8 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] transition-all",
+                  isSearchExpanded ? "bg-[var(--card-bg)]" : "bg-transparent border-transparent"
                 )}>
                   <Input
                     placeholder="Buscar..."

@@ -18,7 +18,7 @@ const buttonVariants = cva(
         secondary:
           "bg-[var(--button-secondary-bg)] text-[var(--button-ghost-text)] border border-[var(--menues-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-ghost-hover-text)] hover:border-[var(--menues-border)] rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         ghost:
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 border border-[var(--menues-border)] gap-2 text-sm font-medium [&_svg]:size-4",
+          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 border border-[var(--menues-border)] gap-2 text-xs font-normal [&_svg]:size-4",
         "ghost-icon":
           "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg h-8 w-8 p-0 border border-[var(--menues-border)] [&_svg]:size-4",
         "ghost-flat":
