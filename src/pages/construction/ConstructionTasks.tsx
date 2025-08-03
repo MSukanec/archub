@@ -476,61 +476,20 @@ export default function ConstructionTasks() {
               mode="construction"
               groupBy={groupingType === 'none' ? undefined : 'groupKey'}
               topBar={{
-                showFilter: true,
-                isFilterActive: groupingType !== 'none',
-                renderFilterContent: () => (
-                  <div className="space-y-2 p-2 min-w-[150px]">
-                    <div className="text-xs font-medium text-[var(--muted-foreground)] mb-2">Agrupar por:</div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                      onClick={() => setGroupingType('none')}
-                    >
-                      Sin Agrupar
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                      onClick={() => setGroupingType('phases')}
-                    >
-                      Por Fases
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                      onClick={() => setGroupingType('rubros')}
-                    >
-                      Por Rubros
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                      onClick={() => setGroupingType('tasks')}
-                    >
-                      Por Tareas
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                      onClick={() => setGroupingType('rubros-phases')}
-                    >
-                      Por Fases y Rubros
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 text-xs"
-                      onClick={() => setGroupingType('phases-rubros')}
-                    >
-                      Por Rubros y Tareas
-                    </Button>
-                  </div>
-                )
+                tabs: ['Sin Agrupar', 'Por Fases', 'Por Rubros', 'Por Tareas', 'Por Fases y Rubros', 'Por Rubros y Tareas'],
+                activeTab: groupingType === 'none' ? 'Sin Agrupar' : 
+                          groupingType === 'phases' ? 'Por Fases' :
+                          groupingType === 'rubros' ? 'Por Rubros' :
+                          groupingType === 'tasks' ? 'Por Tareas' :
+                          groupingType === 'rubros-phases' ? 'Por Fases y Rubros' : 'Por Rubros y Tareas',
+                onTabChange: (tab: string) => {
+                  if (tab === 'Sin Agrupar') setGroupingType('none')
+                  else if (tab === 'Por Fases') setGroupingType('phases')
+                  else if (tab === 'Por Rubros') setGroupingType('rubros')
+                  else if (tab === 'Por Tareas') setGroupingType('tasks')
+                  else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
+                  else setGroupingType('phases-rubros')
+                }
               }}
               renderCard={(task: any) => (
                 <ConstructionTaskCard
