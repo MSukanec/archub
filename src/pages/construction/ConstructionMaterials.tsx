@@ -2,14 +2,13 @@ import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
-import { Package, Search, ShoppingCart } from 'lucide-react'
-import { FILTER_ICONS, FILTER_LABELS, GROUPING_OPTIONS } from '@/constants/actionBarConstants'
+import { Package, ShoppingCart } from 'lucide-react'
 
 export default function ConstructionMaterials() {
   const [activeTab, setActiveTab] = useState('materials')
@@ -172,47 +171,6 @@ export default function ConstructionMaterials() {
       {/* Tab Content */}
       {activeTab === 'materials' && (
         <>
-          {/* ActionBar */}
-          <ActionBarDesktopRow
-            filters={[
-              {
-                key: 'phase',
-                label: FILTER_LABELS.PHASE,
-                icon: FILTER_ICONS.PHASE,
-                value: selectedPhase,
-                setValue: (value) => {
-                  setSelectedPhase(value || '')
-                },
-                options: phases,
-                defaultLabel: FILTER_LABELS.ALL_PHASES
-              },
-              {
-                key: 'category',
-                label: FILTER_LABELS.CATEGORY,
-                icon: FILTER_ICONS.CATEGORY,
-                value: selectedCategory,
-                setValue: (value) => {
-                  setSelectedCategory(value || '')
-                },
-                options: uniqueCategories,
-                defaultLabel: FILTER_LABELS.ALL_CATEGORIES
-              },
-              {
-                key: 'grouping',
-                label: FILTER_LABELS.GROUPING,
-                icon: FILTER_ICONS.GROUPING,
-                value: groupingType === 'categories' ? 'Agrupar por Categorías' : '',
-                setValue: (value) => {
-                  if (value === 'Agrupar por Categorías') setGroupingType('categories')
-                  else setGroupingType('none')
-                },
-                options: GROUPING_OPTIONS.MATERIALS,
-                defaultLabel: FILTER_LABELS.NO_GROUPING
-              }
-            ]}
-            actions={[]}
-          />
-
           {filteredMaterials.length === 0 ? (
             <EmptyState
               icon={<Package className="w-8 h-8 text-muted-foreground" />}
@@ -226,6 +184,55 @@ export default function ConstructionMaterials() {
               isLoading={materialsLoading}
               mode="construction"
               groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+              topBar={{
+                tabs: ['Sin Agrupar', 'Por Categorías'],
+                activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
+                onTabChange: (tab: string) => {
+                  if (tab === 'Sin Agrupar') setGroupingType('none')
+                  else setGroupingType('categories')
+                },
+                showFilter: true,
+                isFilterActive: selectedPhase !== '' || selectedCategory !== '',
+                renderFilterContent: () => (
+                  <div className="space-y-3 p-2 min-w-[200px]">
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Fase</label>
+                      <select 
+                        value={selectedPhase} 
+                        onChange={(e) => setSelectedPhase(e.target.value)}
+                        className="w-full h-8 text-xs px-2 rounded border bg-background"
+                      >
+                        <option value="">Todas las fases</option>
+                        {phases.map((phase) => (
+                          <option key={phase} value={phase}>
+                            {phase}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Categoría</label>
+                      <select 
+                        value={selectedCategory} 
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full h-8 text-xs px-2 rounded border bg-background"
+                      >
+                        <option value="">Todas las categorías</option>
+                        {uniqueCategories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ),
+                showClearFilters: true,
+                onClearFilters: () => {
+                  setSelectedPhase("")
+                  setSelectedCategory("")
+                }
+              }}
               renderGroupHeader={(groupKey: string, groupRows: any[]) => (
                 <>
                   <div className="col-span-full text-sm font-medium">
