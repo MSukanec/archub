@@ -12,7 +12,6 @@ import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText, SortAsc } from 'lucide-react'
-import { FILTER_ICONS, ACTION_ICONS, FILTER_LABELS, ACTION_LABELS } from '@/constants/actionBarConstants'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -26,8 +25,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 
 
 export default function OrganizationProjects() {
@@ -374,7 +372,6 @@ export default function OrganizationProjects() {
   ]
 
   const headerProps = {
-    icon: Folder,
     title: "Proyectos"
   }
 
@@ -409,91 +406,65 @@ export default function OrganizationProjects() {
     <>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* ActionBar Desktop */}
-        <ActionBarDesktop
-          title="Gestión de Proyectos"
-          icon={<Folder className="w-5 h-5" />}
-          showProjectSelector={false}
-          features={[
-            {
-              icon: <Plus className="w-5 h-5" />,
-              title: "Crear y Gestionar Proyectos",
-              description: "Crea nuevos proyectos para tu organización definiendo nombre, tipología, modalidad y estado. Cada proyecto puede ser seleccionado como 'ACTIVO' para trabajar en él desde todas las secciones de la aplicación."
-            },
-            {
-              icon: <Settings className="w-5 h-5" />,
-              title: "Cambio de Proyecto Activo",
-              description: "Cambia entre proyectos activos desde el selector del header de forma rápida. También puedes seleccionar 'Todos los Proyectos' para ver información general de toda tu organización."
-            },
-            {
-              icon: <BarChart3 className="w-5 h-5" />,
-              title: "Estados y Filtros",
-              description: "Filtra proyectos por estado (Activo, Planificación, Completado, En Pausa) y ordena por nombre o fecha de creación para una mejor organización."
-            },
-            {
-              icon: <FileText className="w-5 h-5" />,
-              title: "Gestión Completa",
-              description: "Cada proyecto incluye módulos completo de Diseño, Construcción y Finanzas. Edita información básica, elimina proyectos y navega directamente a los datos del proyecto seleccionado."
-            }
-          ]}
-        />
+        {/* Action Bar Row Simplificado */}
+        <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg bg-[var(--card-bg)]">
+          <div className="flex items-center justify-between px-4 py-3">
+            {/* Filtros de la izquierda */}
+            <div className="flex items-center gap-2">
+              <SelectableGhostButton
+                title="Estado"
+                defaultLabel="Todos los Estados"
+                selectedValue={filterByStatus === 'all' ? '' : (
+                  filterByStatus === 'active' ? 'Activo' :
+                  filterByStatus === 'planning' ? 'Planificación' :
+                  filterByStatus === 'completed' ? 'Completado' :
+                  filterByStatus === 'on-hold' ? 'En Pausa' : ''
+                )}
+                icon={<Filter className="w-4 h-4" />}
+                options={[
+                  { value: "active", label: "Activo" },
+                  { value: "planning", label: "Planificación" },
+                  { value: "completed", label: "Completado" },
+                  { value: "on-hold", label: "En Pausa" }
+                ]}
+                onSelect={(value) => setFilterByStatus(value || 'all')}
+              />
+              
+              <SelectableGhostButton
+                title="Ordenar"
+                defaultLabel="Más Recientes"
+                selectedValue={sortBy === 'date_recent' ? '' : (
+                  sortBy === 'name_asc' ? 'Nombre A-Z' :
+                  sortBy === 'name_desc' ? 'Nombre Z-A' :
+                  sortBy === 'date_oldest' ? 'Más Antiguos' : ''
+                )}
+                icon={<SortAsc className="w-4 h-4" />}
+                options={[
+                  { value: "name_asc", label: "Nombre A-Z" },
+                  { value: "name_desc", label: "Nombre Z-A" },
+                  { value: "date_recent", label: "Más Recientes" },
+                  { value: "date_oldest", label: "Más Antiguos" }
+                ]}
+                onSelect={(value) => setSortBy(value || 'date_recent')}
+              />
+            </div>
 
-        {/* ActionBar Row - Filtros y Acciones */}
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'status',
-              label: 'Estado',
-              icon: FILTER_ICONS.FILTER,
-              value: filterByStatus === 'all' ? '' : (
-                filterByStatus === 'active' ? 'Activo' :
-                filterByStatus === 'planning' ? 'Planificación' :
-                filterByStatus === 'completed' ? 'Completado' :
-                filterByStatus === 'on-hold' ? 'En Pausa' : ''
-              ),
-              setValue: (value) => {
-                if (value === 'Activo') setFilterByStatus('active');
-                else if (value === 'Planificación') setFilterByStatus('planning');
-                else if (value === 'Completado') setFilterByStatus('completed');
-                else if (value === 'En Pausa') setFilterByStatus('on-hold');
-                else setFilterByStatus('all');
-              },
-              options: ['Activo', 'Planificación', 'Completado', 'En Pausa'],
-              defaultLabel: 'Todos los Estados'
-            },
-            {
-              key: 'sort',
-              label: 'Ordenar',
-              icon: SortAsc,
-              value: sortBy === 'date_recent' ? '' : (
-                sortBy === 'name_asc' ? 'Nombre A-Z' :
-                sortBy === 'name_desc' ? 'Nombre Z-A' :
-                sortBy === 'date_oldest' ? 'Más Antiguos' : ''
-              ),
-              setValue: (value) => {
-                if (value === 'Nombre A-Z') setSortBy('name_asc');
-                else if (value === 'Nombre Z-A') setSortBy('name_desc');
-                else if (value === 'Más Antiguos') setSortBy('date_oldest');
-                else setSortBy('date_recent');
-              },
-              options: ['Nombre A-Z', 'Nombre Z-A', 'Más Recientes', 'Más Antiguos'],
-              defaultLabel: 'Más Recientes'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Nuevo Proyecto',
-              icon: ACTION_ICONS.ADD,
-              onClick: () => openModal('project', {}),
-              variant: 'default'
-            }
-          ]}
-          customRestricted={
-            <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-              <div></div>
-            </CustomRestricted>
-          }
-        />
+            {/* Acciones de la derecha */}
+            <div className="flex items-center gap-2">
+              <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => openModal('project', {})}
+                  className="h-8 text-xs"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Nuevo Proyecto
+                </Button>
+              </CustomRestricted>
+            </div>
+          </div>
+        </div>
 
         {/* Feature Introduction - Solo móvil */}
         <FeatureIntroduction
