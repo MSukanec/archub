@@ -11,8 +11,8 @@ import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { Users, Download, Calendar, CalendarDays, Clock, BarChart3, Filter, X } from 'lucide-react'
+
+import { Users, Download, Calendar, CalendarDays, Clock, BarChart3, Filter, X, Plus } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -245,7 +245,13 @@ export default function ConstructionAttendance() {
   )
 
   const headerProps = {
-    title: "Asistencia"
+    icon: Users,
+    title: "Asistencia",
+    actionButton: {
+      label: 'Registrar Asistencia',
+      icon: Plus,
+      onClick: () => openModal('attendance', {})
+    }
   }
 
   if (isLoading) {
@@ -288,45 +294,7 @@ export default function ConstructionAttendance() {
           ]}
         />
 
-        {/* ActionBar - Always visible */}
-        <ActionBarDesktop
-          title="Control de Asistencia de Personal"
-          icon={<Users className="w-6 h-6" />}
-          features={[
-            {
-              icon: <Calendar className="w-5 h-5" />,
-              title: "Registro Visual de Asistencia",
-              description: "Visualiza la asistencia del personal en formato de calendario con datos extraídos automáticamente de las entradas de bitácora del proyecto."
-            },
-            {
-              icon: <Filter className="w-5 h-5" />,
-              title: "Filtros por Tipo de Trabajador",
-              description: "Filtra la vista por tipos de personal (obreros, supervisores, técnicos) para análisis específicos por categoría profesional."
-            },
-            {
-              icon: <BarChart3 className="w-5 h-5" />,
-              title: "Estadísticas de Productividad",
-              description: "Revisa métricas de jornadas completas vs medias jornadas, días activos y tasas de asistencia para optimizar la gestión del equipo."
-            },
-            {
-              icon: <Clock className="w-5 h-5" />,
-              title: "Control de Períodos Flexibles",
-              description: "Configura rangos de fechas personalizados y oculta fines de semana para adaptar la vista a tu calendario de trabajo específico."
-            }
-          ]}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          showGrouping={false}
-          customFilters={customFilters}
-          onClearFilters={handleClearFilters}
-          onTodayClick={handleTodayClick}
-          primaryActionLabel="Registrar Asistencia"
-          onPrimaryActionClick={() => openModal('attendance', {})}
-          primaryActionRestriction={{
-            reason: "general_mode",
-            functionName: "Registrar Asistencia"
-          }}
-        />
+
 
         {/* Gradebook Component - Show always if there's original data, even if filtered workers is empty */}
         {workers.length > 0 ? (
