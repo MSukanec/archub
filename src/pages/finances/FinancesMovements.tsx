@@ -1341,8 +1341,8 @@ export default function Movements() {
 
 
       
-      {/* Cards de resumen financiero - Solo mostrar si hay movimientos */}
-      {processedMovements.length > 0 && (
+      {/* Cards de resumen financiero - Solo mostrar si hay movimientos originales */}
+      {movements.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Card 1: Resumen General */}
           <Card>
@@ -1353,7 +1353,7 @@ export default function Movements() {
                   <span className="text-xs text-green-600 dark:text-green-400">Ingresos</span>
                   <span className="text-xs font-semibold text-green-600 dark:text-green-400">
                     {formatCurrency(
-                      filteredMovements
+                      movements
                         .filter(m => m.movement_data?.type?.name === 'Ingresos')
                         .reduce((sum, m) => sum + (m.amount || 0), 0)
                     )}
@@ -1363,7 +1363,7 @@ export default function Movements() {
                   <span className="text-xs text-red-600 dark:text-red-400">Egresos</span>
                   <span className="text-xs font-semibold text-red-600 dark:text-red-400">
                     {formatCurrency(
-                      filteredMovements
+                      movements
                         .filter(m => m.movement_data?.type?.name === 'Egresos')
                         .reduce((sum, m) => sum + (m.amount || 0), 0)
                     )}
@@ -1373,10 +1373,10 @@ export default function Movements() {
                   <span className="text-xs font-medium">Balance</span>
                   <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                     {formatCurrency(
-                      filteredMovements
+                      movements
                         .filter(m => m.movement_data?.type?.name === 'Ingresos')
                         .reduce((sum, m) => sum + (m.amount || 0), 0) -
-                      filteredMovements
+                      movements
                         .filter(m => m.movement_data?.type?.name === 'Egresos')
                         .reduce((sum, m) => sum + (m.amount || 0), 0)
                     )}
@@ -1392,7 +1392,7 @@ export default function Movements() {
               <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Por Moneda</h3>
               <div className="space-y-2">
                 {availableCurrencies.map((currency) => {
-                  const currencyMovements = filteredMovements.filter(m => m.movement_data?.currency?.name === currency);
+                  const currencyMovements = movements.filter(m => m.movement_data?.currency?.name === currency);
                   const currencyBalance = currencyMovements
                     .filter(m => m.movement_data?.type?.name === 'Ingresos')
                     .reduce((sum, m) => sum + (m.amount || 0), 0) -
@@ -1421,7 +1421,7 @@ export default function Movements() {
                 {availableWallets.map((wallet) => {
                   // Obtener todas las monedas para esta billetera
                   const walletCurrenciesSet = new Set(
-                    filteredMovements
+                    movements
                       .filter(m => m.movement_data?.wallet?.name === wallet)
                       .map(m => m.movement_data?.currency?.name)
                       .filter(Boolean)
@@ -1433,7 +1433,7 @@ export default function Movements() {
                       <h4 className="text-xs font-medium text-[var(--secondary-card-fg)]">{wallet}</h4>
                       <div className="space-y-1 pl-2">
                         {walletCurrencies.map((currency) => {
-                          const walletCurrencyMovements = filteredMovements.filter(
+                          const walletCurrencyMovements = movements.filter(
                             m => m.movement_data?.wallet?.name === wallet && 
                                  m.movement_data?.currency?.name === currency
                           );
