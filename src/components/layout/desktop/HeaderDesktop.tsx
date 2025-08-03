@@ -234,17 +234,17 @@ export function HeaderDesktop({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CustomRestricted>
-              <span className="text-sm font-medium text-[var(--layout-text)]">
+              <span className="text-xs font-normal text-[var(--layout-text)]">
                 {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto"}
               </span>
-              <span className="text-sm text-[var(--layout-text-muted)]">/</span>
-              <span className="text-sm font-medium text-[var(--layout-text)]">
+              <span className="text-xs text-[var(--layout-text-muted)]">/</span>
+              <span className="text-xs font-normal text-[var(--layout-text)]">
                 {getCurrentSectionLabel()}
               </span>
               {pageMap[location] && getCurrentSectionLabel() !== pageMap[location] && (
                 <>
-                  <span className="text-sm text-[var(--layout-text-muted)]">/</span>
-                  <span className="text-sm font-medium text-[var(--layout-text)]">
+                  <span className="text-xs text-[var(--layout-text-muted)]">/</span>
+                  <span className="text-xs font-normal text-[var(--layout-text)]">
                     {pageMap[location]}
                   </span>
                 </>
@@ -252,7 +252,7 @@ export function HeaderDesktop({
             </div>
           ) : (
             /* Non-project breadcrumb */
-            <h1 className="text-sm font-medium text-[var(--layout-text)]">
+            <h1 className="text-xs font-normal text-[var(--layout-text)]">
               {title || getCurrentSectionLabel()}
             </h1>
           )}
