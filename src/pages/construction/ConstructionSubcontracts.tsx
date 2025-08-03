@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -269,20 +270,32 @@ export default function ConstructionSubcontracts() {
     searchValue: searchQuery,
     onSearchChange: setSearchQuery,
     searchPlaceholder: "Buscar subcontratos...",
-    filters: [
-      {
-        label: "Moneda",
-        value: currencyView === 'pesificado' ? 'Peso Argentino' : 
-               currencyView === 'dolarizado' ? 'Dólar Estadounidense' :
-               'Todo',
-        options: [
-          { label: 'Todo', value: 'discriminado' },
-          { label: 'Peso Argentino', value: 'pesificado' },
-          { label: 'Dólar Estadounidense', value: 'dolarizado' }
-        ],
-        onChange: (value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')
-      }
-    ]
+    showFilter: true,
+    isFilterActive: currencyView !== 'discriminado',
+    renderFilterContent: () => (
+      <div className="space-y-3 p-2 min-w-[200px]">
+        <div>
+          <Label className="text-xs font-medium mb-1 block">Moneda</Label>
+          <Select 
+            value={currencyView} 
+            onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
+          >
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Seleccionar moneda" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="discriminado">Todo</SelectItem>
+              <SelectItem value="pesificado">Peso Argentino</SelectItem>
+              <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    ),
+    showClearFilters: true,
+    onClearFilters: () => {
+      setCurrencyView('discriminado')
+    }
   }
 
   return (
