@@ -55,15 +55,10 @@ export function TableTopBar({
           {tabs.map((tab) => (
             <Button
               key={tab}
-              variant="ghost"
+              variant={activeTab === tab ? "secondary" : "ghost"}
               size="sm"
               onClick={() => onTabChange?.(tab)}
-              className={cn(
-                "h-8 px-3 text-sm font-medium transition-all",
-                activeTab === tab
-                  ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
-                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
-              )}
+              className="h-8 px-3 text-sm font-medium"
             >
               {tab}
             </Button>
@@ -77,7 +72,7 @@ export function TableTopBar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+              className="h-8 w-8 p-0"
               onClick={() => {
                 // Aquí se podría abrir un modal de búsqueda o focus en un input existente
                 console.log('Search clicked');
@@ -94,7 +89,7 @@ export function TableTopBar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                  className="h-8 w-8 p-0"
                 >
                   <ArrowUpDown className="h-4 w-4" />
                 </Button>
@@ -112,7 +107,7 @@ export function TableTopBar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                  className="h-8 w-8 p-0"
                 >
                   <Filter className="h-4 w-4" />
                 </Button>
