@@ -433,7 +433,13 @@ export default function ConstructionTasks() {
     actionButton: activeTab === "tasks" ? {
       label: "Agregar Tarea",
       icon: Plus,
-      onClick: handleAddSingleTask
+      onClick: handleAddSingleTask,
+      additionalButton: {
+        label: "Agregar en Masa",
+        icon: Plus,
+        onClick: handleAddTask,
+        variant: "ghost"
+      }
     } : {
       label: "Crear Fase",
       icon: Plus,
@@ -470,45 +476,56 @@ export default function ConstructionTasks() {
                 showFilter={true}
                 isFilterActive={groupingType !== 'none'}
                 renderFilterContent={() => (
-                  <div className="space-y-3 p-2 min-w-[200px]">
-                    <div>
-                      <label className="text-xs font-medium mb-1 block">Agrupación</label>
-                      <select 
-                        value={groupingType === 'none' ? 'Sin Agrupar' : 
-                               groupingType === 'phases' ? 'Agrupar por Fases' :
-                               groupingType === 'rubros' ? 'Agrupar por Rubros' :
-                               groupingType === 'tasks' ? 'Agrupar por Tareas' :
-                               groupingType === 'rubros-phases' ? 'Agrupar por Fases y Rubros' : 'Agrupar por Rubros y Tareas'}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === 'Sin Agrupar') setGroupingType('none')
-                          else if (value === 'Agrupar por Fases') setGroupingType('phases')
-                          else if (value === 'Agrupar por Rubros') setGroupingType('rubros')
-                          else if (value === 'Agrupar por Tareas') setGroupingType('tasks')
-                          else if (value === 'Agrupar por Fases y Rubros') setGroupingType('rubros-phases')
-                          else setGroupingType('phases-rubros')
-                        }}
-                        className="w-full h-8 text-xs px-2 border border-[var(--input-border)] rounded bg-[var(--input-bg)]"
-                      >
-                        <option value="Sin Agrupar">Sin Agrupar</option>
-                        <option value="Agrupar por Fases">Agrupar por Fases</option>
-                        <option value="Agrupar por Rubros">Agrupar por Rubros</option>
-                        <option value="Agrupar por Tareas">Agrupar por Tareas</option>
-                        <option value="Agrupar por Fases y Rubros">Agrupar por Fases y Rubros</option>
-                        <option value="Agrupar por Rubros y Tareas">Agrupar por Rubros y Tareas</option>
-                      </select>
-                    </div>
-                    <div className="pt-2 border-t border-[var(--menues-border)]">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start h-8 text-xs"
-                        onClick={handleAddTask}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Agregar en Masa
-                      </Button>
-                    </div>
+                  <div className="space-y-2 p-2 min-w-[150px]">
+                    <div className="text-xs font-medium text-[var(--muted-foreground)] mb-2">Agrupar por:</div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start h-8 text-xs"
+                      onClick={() => setGroupingType('none')}
+                    >
+                      Sin Agrupar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start h-8 text-xs"
+                      onClick={() => setGroupingType('phases')}
+                    >
+                      Por Fases
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start h-8 text-xs"
+                      onClick={() => setGroupingType('rubros')}
+                    >
+                      Por Rubros
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start h-8 text-xs"
+                      onClick={() => setGroupingType('tasks')}
+                    >
+                      Por Tareas
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start h-8 text-xs"
+                      onClick={() => setGroupingType('rubros-phases')}
+                    >
+                      Por Fases y Rubros
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start h-8 text-xs"
+                      onClick={() => setGroupingType('phases-rubros')}
+                    >
+                      Por Rubros y Tareas
+                    </Button>
                   </div>
                 )}
               />

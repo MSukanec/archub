@@ -50,6 +50,12 @@ interface HeaderDesktopProps {
     label: string;
     icon?: React.ComponentType<any>;
     onClick: () => void;
+    additionalButton?: {
+      label: string;
+      icon?: React.ComponentType<any>;
+      onClick: () => void;
+      variant?: "ghost" | "default" | "secondary";
+    };
   };
 }
 
@@ -258,9 +264,21 @@ export function HeaderDesktop({
           )}
         </div>
 
-        {/* Right: Action Button */}
+        {/* Right: Action Buttons */}
         <div className="flex items-center gap-2">
-          {/* Action Button */}
+          {/* Additional Button (appears first/left) */}
+          {actionButton?.additionalButton && (
+            <Button
+              variant={actionButton.additionalButton.variant || "ghost"}
+              size="sm"
+              onClick={actionButton.additionalButton.onClick}
+              className="h-8 px-3 text-xs font-normal"
+            >
+              {actionButton.additionalButton.icon && <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />}
+              {actionButton.additionalButton.label}
+            </Button>
+          )}
+          {/* Main Action Button */}
           {actionButton && (
             <Button
               variant="default"
