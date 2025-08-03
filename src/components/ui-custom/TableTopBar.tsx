@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from "react";
-import { Search, Filter, ArrowUpDown } from "lucide-react";
+import { Search, Filter, ArrowUpDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,6 +22,8 @@ interface TableTopBarProps {
   showSort?: boolean;
   renderSortContent?: () => ReactNode;
   isSortActive?: boolean;
+  showClearFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
 export function TableTopBar({
@@ -37,13 +39,15 @@ export function TableTopBar({
   showSort = false,
   renderSortContent,
   isSortActive = false,
+  showClearFilters = false,
+  onClearFilters,
 }: TableTopBarProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(searchValue);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // No renderizar nada si no hay configuración
-  const hasContent = tabs.length > 0 || showSearch || showFilter || showSort;
+  const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters;
 
   if (!hasContent) return null;
 
@@ -176,6 +180,19 @@ export function TableTopBar({
                 {renderFilterContent()}
               </PopoverContent>
             </Popover>
+          )}
+
+          {/* Botón de limpiar filtros (solo icono) */}
+          {showClearFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={onClearFilters}
+              title="Limpiar filtros"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </div>

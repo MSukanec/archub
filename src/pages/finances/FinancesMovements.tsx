@@ -500,6 +500,22 @@ export default function Movements() {
     ),
   );
 
+  // Get subcategories filtered by selected category
+  const getSubcategoriesForCategory = (categoryName: string) => {
+    if (categoryName === 'all') return [];
+    
+    return Array.from(
+      new Set(
+        movements
+          .filter(m => m.movement_data?.category?.name === categoryName)
+          .map(m => m.movement_data?.subcategory?.name)
+          .filter(Boolean)
+      )
+    );
+  };
+
+  const filteredSubcategories = getSubcategoriesForCategory(filterByCategory);
+
   const availableCurrencies = Array.from(
     new Set(
       movements.map((m) => m.movement_data?.currency?.name).filter(Boolean),
@@ -1457,23 +1473,32 @@ export default function Movements() {
           direction: "desc",
         }}
         topBar={{
-          tabs: ['Todos', 'Ingresos', 'Egresos'],
-          activeTab: filterByType === 'all' ? 'Todos' : filterByType === 'Ingresos' ? 'Ingresos' : filterByType === 'Egresos' ? 'Egresos' : 'Todos',
-          onTabChange: (tab) => {
-            if (tab === 'Todos') setFilterByType('all');
-            else if (tab === 'Ingresos') setFilterByType('Ingresos');
-            else if (tab === 'Egresos') setFilterByType('Egresos');
-          },
           showSearch: true,
           searchValue: searchValue,
           onSearchChange: setSearchValue,
           showFilter: true,
-          isFilterActive: filterByCategory !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
+          isFilterActive: filterByType !== 'all' || filterByCategory !== 'all' || filterBySubcategory !== 'all' || filterByFavorites !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
+                <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                <Select value={filterByType} onValueChange={setFilterByType}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todos los tipos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los tipos</SelectItem>
+                    <SelectItem value="Ingresos">Ingresos</SelectItem>
+                    <SelectItem value="Egresos">Egresos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label className="text-xs font-medium mb-1 block">Categoría</Label>
-                <Select value={filterByCategory} onValueChange={setFilterByCategory}>
+                <Select value={filterByCategory} onValueChange={(value) => {
+                  setFilterByCategory(value);
+                  if (value === 'all') setFilterBySubcategory('all');
+                }}>
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las categorías" />
                   </SelectTrigger>
@@ -1484,6 +1509,44 @@ export default function Movements() {
                         {category}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Subcategoría</Label>
+                <Select 
+                  value={filterBySubcategory} 
+                  onValueChange={setFilterBySubcategory}
+                  disabled={filterByCategory === 'all'}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las subcategorías" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las subcategorías</SelectItem>
+                    {filteredSubcategories.map((subcategory) => (
+                      <SelectItem key={subcategory} value={subcategory}>
+                        {subcategory}
+                      </SelectItem>
+                    ))}
+                    {filteredSubcategories.length === 0 && filterByCategory !== 'all' && (
+                      <SelectItem value="no-subcategories" disabled>
+                        Sin subcategorías disponibles
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Favoritos</Label>
+                <Select value={filterByFavorites} onValueChange={setFilterByFavorites}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="favorites">Solo favoritos</SelectItem>
+                    <SelectItem value="non-favorites">No favoritos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1551,7 +1614,17 @@ export default function Movements() {
                 Mayor monto
               </Button>
             </div>
-          )
+          ),
+          showClearFilters: true,
+          onClearFilters: () => {
+            setSearchValue("");
+            setFilterByType("all");
+            setFilterByCategory("all");
+            setFilterBySubcategory("all");
+            setFilterByFavorites("all");
+            setFilterByCurrency("all");
+            setFilterByWallet("all");
+          },
         }}
 
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
