@@ -337,9 +337,8 @@ export function Table<T = any>({
     );
   }
 
-  if (data.length === 0) {
-    return <div className={cn("space-y-3", className)}>{emptyState}</div>;
-  }
+  // Si no hay datos, mostramos la estructura básica con el TableTopBar pero sin datos
+  const hasData = data.length > 0;
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -424,7 +423,12 @@ export function Table<T = any>({
 
         {/* Table Rows con agrupamiento */}
         <div>
-          {groupBy ? (
+          {!hasData ? (
+            // Mostrar empty state cuando no hay datos
+            <div className="p-8 text-center">
+              {emptyState}
+            </div>
+          ) : groupBy ? (
             // Renderizado con agrupamiento
             Object.entries(groupedData).map(([groupKey, groupRows]) => (
               <Fragment key={groupKey}>
@@ -488,7 +492,7 @@ export function Table<T = any>({
                 ))}
               </Fragment>
             ))
-          ) : (
+          ) : hasData ? (
             // Renderizado sin agrupamiento (comportamiento original)
             paginatedData.map((item, index) => (
               <div
@@ -526,10 +530,10 @@ export function Table<T = any>({
                 ))}
               </div>
             ))
-          )}
+          ) : null}
           
           {/* 🆕 FILA DE TOTALES */}
-          {renderFooterRow && (
+          {renderFooterRow && hasData && (
             <div className={cn(
               "grid gap-4 px-4 py-3",
               mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
@@ -547,7 +551,11 @@ export function Table<T = any>({
 
       {/* Mobile Card View */}
       <div className="lg:hidden">
-        {paginatedData.map((item, index) =>
+        {!hasData ? (
+          <div className="p-8 text-center">
+            {emptyState}
+          </div>
+        ) : paginatedData.map((item, index) =>
           renderCard ? (
             // Use custom card renderer if provided
             <div key={index} onClick={() => onCardClick?.(item)}>
@@ -628,7 +636,7 @@ export function Table<T = any>({
                 </div>
               )}
             </div>
-          ),
+          )
         )}
       </div>
 
