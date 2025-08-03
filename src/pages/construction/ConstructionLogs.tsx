@@ -5,9 +5,9 @@ import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video, Clock, Settings, BarChart3 } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton';
-import { FILTER_ICONS } from '@/constants/actionBarConstants';
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -383,7 +383,12 @@ export default function ConstructionLogs() {
 
   const headerProps = {
     icon: FileText,
-    title: "Bitácora"
+    title: "Bitácora",
+    actionButton: {
+      label: 'Nueva Bitácora',
+      icon: Plus,
+      onClick: () => openModal('site-log')
+    }
   };
 
   if (isLoading || siteLogsLoading) {
@@ -427,62 +432,7 @@ export default function ConstructionLogs() {
         ]}
       />
 
-      {/* ActionBar Desktop */}
-      <div className="hidden md:block">
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'sort',
-              label: 'Ordenar',
-              icon: FILTER_ICONS.FILTER,
-              value: sortBy,
-              setValue: setSortBy,
-              options: ['date_recent', 'date_old', 'type'],
-              defaultLabel: 'Más Recientes'
-            },
-            {
-              key: 'type',
-              label: 'Tipo de Entrada',
-              icon: FILTER_ICONS.CATEGORY,
-              value: filterByType,
-              setValue: setFilterByType,
-              options: ['all', ...Object.keys(entryTypes)],
-              defaultLabel: 'Todos los Tipos'
-            },
-            {
-              key: 'special',
-              label: 'Filtros Especiales',
-              icon: FILTER_ICONS.FAVORITES,
-              value: favoritesOnly ? 'favorites' : publicOnly ? 'public' : 'all',
-              setValue: (value) => {
-                setFavoritesOnly(value === 'favorites');
-                setPublicOnly(value === 'public');
-              },
-              options: ['all', 'favorites', 'public'],
-              defaultLabel: 'Todas las Entradas'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Nueva Bitácora',
-              icon: Plus,
-              onClick: () => openModal('site-log'),
-              variant: 'default'
-            }
-          ]}
-          customRestricted={
-            <CustomRestricted 
-              reason="general_mode" 
-              functionName="Nueva Bitácora"
-            >
-              <Button onClick={() => openModal('site-log')}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nueva Bitácora
-              </Button>
-            </CustomRestricted>
-          }
-        />
-      </div>
+
 
       {filteredSiteLogs.length === 0 ? (
         <EmptyState
