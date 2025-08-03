@@ -1525,6 +1525,9 @@ export default function Movements() {
         data={processedMovements}
         isLoading={isLoading}
         selectable={true}
+        enableVirtualScroll={true}
+        virtualScrollHeight={600}
+        estimateSize={44}
         defaultSort={{
           key: "movement_date",
           direction: "desc",
