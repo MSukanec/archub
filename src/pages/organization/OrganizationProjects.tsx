@@ -24,7 +24,8 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+import { FILTER_ICONS } from '@/constants/actionBarConstants'
 
 
 export default function OrganizationProjects() {
@@ -322,48 +323,45 @@ export default function OrganizationProjects() {
     setFilterByStatus('all')
   }
 
-  // Filtros personalizados
-  const customFilters = (
-    <div className="flex items-center gap-3">
-      <SelectableGhostButton
-        title="Ordenar"
-        selectedValue={sortBy}
-        onSelect={(value) => setSortBy(value)}
-        defaultLabel="Más Recientes"
-        options={[
-          { value: "date_recent", label: "Más Recientes" },
-          { value: "date_oldest", label: "Más Antiguos" },
-          { value: "name_asc", label: "Nombre A-Z" },
-          { value: "name_desc", label: "Nombre Z-A" }
-        ]}
-      />
-      <SelectableGhostButton
-        title="Estado"
-        selectedValue={filterByStatus}
-        onSelect={(value) => setFilterByStatus(value)}
-        defaultLabel="Todos los Estados"
-        options={[
-          { value: "all", label: "Todos los Estados" },
-          { value: "active", label: "Activos" },
-          { value: "planning", label: "En Planificación" },
-          { value: "completed", label: "Completados" },
-          { value: "on-hold", label: "En Pausa" }
-        ]}
-      />
-    </div>
-  )
-
-  const actions = [
-    <CustomRestricted key="new-project" feature="max_projects" current={filteredProjects?.length || 0}>
-      <Button 
-        className="h-8 px-3 text-sm"
-        onClick={() => openModal('project', {})}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Nuevo Proyecto
-      </Button>
-    </CustomRestricted>
+  // Configuración de filtros para ActionBarDesktopRow
+  const filters = [
+    {
+      key: 'sort',
+      label: 'Ordenar',
+      icon: FILTER_ICONS.FILTER,
+      value: sortBy === 'date_recent' ? 'Más Recientes' : 
+             sortBy === 'date_oldest' ? 'Más Antiguos' :
+             sortBy === 'name_asc' ? 'Nombre A-Z' : 'Nombre Z-A',
+      setValue: (value: string) => {
+        if (value === 'Más Recientes') setSortBy('date_recent')
+        else if (value === 'Más Antiguos') setSortBy('date_oldest')
+        else if (value === 'Nombre A-Z') setSortBy('name_asc')
+        else setSortBy('name_desc')
+      },
+      options: ['Más Antiguos', 'Nombre A-Z', 'Nombre Z-A'],
+      defaultLabel: 'Más Recientes'
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      icon: FILTER_ICONS.TYPE,
+      value: filterByStatus === 'all' ? 'Todos los Estados' :
+             filterByStatus === 'active' ? 'Activos' :
+             filterByStatus === 'planning' ? 'En Planificación' :
+             filterByStatus === 'completed' ? 'Completados' : 'En Pausa',
+      setValue: (value: string) => {
+        if (value === 'Todos los Estados') setFilterByStatus('all')
+        else if (value === 'Activos') setFilterByStatus('active')
+        else if (value === 'En Planificación') setFilterByStatus('planning')
+        else if (value === 'Completados') setFilterByStatus('completed')
+        else setFilterByStatus('on-hold')
+      },
+      options: ['Activos', 'En Planificación', 'Completados', 'En Pausa'],
+      defaultLabel: 'Todos los Estados'
+    }
   ]
+
+
 
   const headerProps = {
     title: "Proyectos"
@@ -400,65 +398,18 @@ export default function OrganizationProjects() {
     <>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Action Bar Row Simplificado */}
-        <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg bg-[var(--card-bg)]">
-          <div className="flex items-center justify-between px-4 py-3">
-            {/* Filtros de la izquierda */}
-            <div className="flex items-center gap-2">
-              <SelectableGhostButton
-                title="Estado"
-                defaultLabel="Todos los Estados"
-                selectedValue={filterByStatus === 'all' ? '' : (
-                  filterByStatus === 'active' ? 'Activo' :
-                  filterByStatus === 'planning' ? 'Planificación' :
-                  filterByStatus === 'completed' ? 'Completado' :
-                  filterByStatus === 'on-hold' ? 'En Pausa' : ''
-                )}
-                icon={<Filter className="w-4 h-4" />}
-                options={[
-                  { value: "active", label: "Activo" },
-                  { value: "planning", label: "Planificación" },
-                  { value: "completed", label: "Completado" },
-                  { value: "on-hold", label: "En Pausa" }
-                ]}
-                onSelect={(value) => setFilterByStatus(value || 'all')}
-              />
-              
-              <SelectableGhostButton
-                title="Ordenar"
-                defaultLabel="Más Recientes"
-                selectedValue={sortBy === 'date_recent' ? '' : (
-                  sortBy === 'name_asc' ? 'Nombre A-Z' :
-                  sortBy === 'name_desc' ? 'Nombre Z-A' :
-                  sortBy === 'date_oldest' ? 'Más Antiguos' : ''
-                )}
-                icon={<SortAsc className="w-4 h-4" />}
-                options={[
-                  { value: "name_asc", label: "Nombre A-Z" },
-                  { value: "name_desc", label: "Nombre Z-A" },
-                  { value: "date_recent", label: "Más Recientes" },
-                  { value: "date_oldest", label: "Más Antiguos" }
-                ]}
-                onSelect={(value) => setSortBy(value || 'date_recent')}
-              />
-            </div>
-
-            {/* Acciones de la derecha */}
-            <div className="flex items-center gap-2">
-              <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={() => openModal('project', {})}
-                  className="h-8 text-xs"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Nuevo Proyecto
-                </Button>
-              </CustomRestricted>
-            </div>
-          </div>
-        </div>
+        {/* ActionBar Desktop */}
+        <ActionBarDesktopRow
+          filters={filters}
+          actions={[
+            {
+              label: 'Nuevo Proyecto',
+              icon: Plus,
+              onClick: () => openModal('project', {}),
+              variant: 'default'
+            }
+          ]}
+        />
 
         {/* Feature Introduction - Solo móvil */}
         <FeatureIntroduction
