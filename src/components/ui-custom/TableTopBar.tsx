@@ -73,7 +73,15 @@ export function TableTopBar({
         <div className="flex items-center gap-1">
           {/* Buscador expandible */}
           {showSearch && (
-            <div className="relative flex items-center">
+            <div 
+              className="relative flex items-center"
+              onMouseLeave={() => {
+                if (isSearchExpanded && !searchFocused) {
+                  setIsSearchExpanded(false);
+                  setSearchFocused(false);
+                }
+              }}
+            >
               {/* Input expandible con borde */}
               <div className={cn(
                 "absolute right-0 transition-all duration-300 overflow-hidden",
@@ -87,12 +95,17 @@ export function TableTopBar({
                     placeholder="Buscar..."
                     value={searchInputValue}
                     onChange={(e) => handleSearchChange(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
                     onBlur={() => {
-                      setIsSearchExpanded(false);
                       setSearchFocused(false);
+                      setTimeout(() => {
+                        if (!searchFocused) {
+                          setIsSearchExpanded(false);
+                        }
+                      }, 150);
                     }}
                     className={cn(
-                      "flex-1 h-full text-sm border-0 bg-transparent",
+                      "flex-1 h-full text-xs border-0 bg-transparent font-normal",
                       "placeholder:text-[var(--muted-foreground)]",
                       "focus:ring-0 focus:outline-none",
                       isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"
