@@ -150,18 +150,24 @@ interface BudgetTask {
 
 
 export default function ConstructionBudgets() {
+  console.log('🚀 COMPONENT STARTING');
+  
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
 
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
 
+  console.log('🚀 HOOKS INITIALIZED');
+  
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
+  
+  console.log('🚀 DATA LOADED - budgets:', budgets.length);
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -175,7 +181,7 @@ export default function ConstructionBudgets() {
     queryKey: ['units'],
     queryFn: async () => {
       if (!supabase) {
-        throw new Error("Supabase client not initialized");
+        return [];
       }
 
       const { data, error } = await supabase
@@ -185,7 +191,7 @@ export default function ConstructionBudgets() {
 
       if (error) {
         console.error("Error fetching units:", error);
-        throw error;
+        return [];
       }
 
       return data || [];
@@ -243,6 +249,10 @@ export default function ConstructionBudgets() {
       
       console.log('✅ Safely updating budget preference for user:', userData.user.id, 'with preferences ID:', userData.preferences.id);
       
+      if (!supabase) {
+        throw new Error('Supabase client not available');
+      }
+
       const { error } = await supabase
         .from('user_preferences')
         .update({ last_budget_id: budgetId })
