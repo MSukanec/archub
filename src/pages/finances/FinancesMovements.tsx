@@ -1589,37 +1589,7 @@ export default function Movements() {
               </div>
             </div>
           ),
-          showSort: true,
-          isSortActive: false, // TODO: Add sort state management
-          renderSortContent: () => (
-            <div className="space-y-2 p-2 min-w-[150px]">
-              <div className="text-xs font-medium text-[var(--muted-foreground)] mb-2">Ordenar por:</div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start h-8 text-xs"
-                onClick={() => console.log('Sort by recent')}
-              >
-                Más recientes
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start h-8 text-xs"
-                onClick={() => console.log('Sort by old')}
-              >
-                Más antiguos
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start h-8 text-xs"
-                onClick={() => console.log('Sort by amount')}
-              >
-                Mayor monto
-              </Button>
-            </div>
-          ),
+          showSort: false,
           showClearFilters: true,
           onClearFilters: () => {
             setSearchValue("");
