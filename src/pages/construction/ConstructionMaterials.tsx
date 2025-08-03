@@ -114,7 +114,7 @@ export default function ConstructionMaterials() {
         label: 'Marca',
         width: '10%',
         render: (material: any) => (
-          <span className="text-sm text-muted-foreground">Próximamente</span>
+          <span className="text-sm text-muted-foreground">Indefinido</span>
         )
       },
       {
@@ -122,7 +122,7 @@ export default function ConstructionMaterials() {
         label: 'Modelo',
         width: '10%',
         render: (material: any) => (
-          <span className="text-sm text-muted-foreground">Próximamente</span>
+          <span className="text-sm text-muted-foreground">Indefinido</span>
         )
       },
       {
