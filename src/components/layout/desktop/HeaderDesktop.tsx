@@ -209,7 +209,7 @@ export function HeaderDesktop({
     return iconMap[location] || <Folder className="w-4 h-4 text-[var(--accent)]" />;
   };
 
-  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances");
+  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/organization");
 
   // Hook para detectar el estado del sidebar
   const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
