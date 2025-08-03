@@ -34,7 +34,7 @@ Preferred communication style: Simple, everyday language.
 - **Shared Schema**: `shared/schema.ts` for frontend/backend consistency.
 - **Design System**: "new-york" style variant with neutral color palette and dark mode support.
 - **Modals**: Centralized modal management (`ModalFactory`) for consistent UI/UX.
-- **Component Reusability**: Emphasis on reusable UI components (e.g., `TableTopBar`, `ActionBarDesktop`, `CustomTable`, `FormModalLayout`).
+- **Component Reusability**: Emphasis on reusable UI components (e.g., `ActionBarDesktop`, `CustomTable`, `FormModalLayout`).
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations.
 - **Real-time Updates**: Extensive use of cache invalidation for immediate UI synchronization (e.g., after task/parameter/movement modifications).
 - **Gantt Chart**: Custom-built React-based Gantt chart with SVG dependency arrows and optimistic updates for smooth UX.
@@ -44,7 +44,6 @@ Preferred communication style: Simple, everyday language.
 - **Document Management**: Hierarchical document organization with versioning and file upload capabilities.
 - **Activity Logging**: Centralized activity tracking system for user actions across the platform.
 - **User Preferences Migration**: Replaced global `user_preferences.last_project_id` with organization-specific `user_organization_preferences` table. Each user now has a separate last project per organization, improving data accuracy and multi-organization support. Backend functions `archub_get_user()` and `archub_new_user()` updated accordingly.
-- **Table Top Bar System**: New flexible top bar system (`TableTopBar`) positioned above tables with tabs (pill-style), ghost button search/filter/sort controls. Replaces legacy ActionBarDesktop system for table-specific actions. All controls use ghost button variants for consistency.
 
 ## External Dependencies
 
