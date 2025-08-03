@@ -414,6 +414,7 @@ export default function ProjectDocumentation() {
   };
 
   const headerProps = {
+    icon: FileText,
     title: "Documentación",
     actionButton: {
       label: selectedFolderId ? "Subir Documentos" : "Nueva Carpeta",
