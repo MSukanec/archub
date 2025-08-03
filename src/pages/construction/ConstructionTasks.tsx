@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter, FolderTree } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
+import { TableTopBar } from '@/components/ui-custom/TableTopBar'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
@@ -428,7 +429,16 @@ export default function ConstructionTasks() {
   const headerProps = {
     title: "Listado de Tareas",
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actionButton: activeTab === "tasks" ? {
+      label: "Agregar Tarea",
+      icon: Plus,
+      onClick: handleAddSingleTask
+    } : {
+      label: "Crear Fase",
+      icon: Plus,
+      onClick: handleAddPhase
+    }
   }
 
   if (isLoading) {
@@ -444,53 +454,6 @@ export default function ConstructionTasks() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* ActionBar Desktop */}
-        <ActionBarDesktopRow
-          filters={activeTab === "tasks" ? [
-            {
-              key: 'grouping',
-              label: 'Agrupar',
-              icon: FILTER_ICONS.FILTER,
-              value: groupingType === 'none' ? 'Sin Agrupar' : 
-                     groupingType === 'phases' ? 'Agrupar por Fases' :
-                     groupingType === 'rubros' ? 'Agrupar por Rubros' :
-                     groupingType === 'tasks' ? 'Agrupar por Tareas' :
-                     groupingType === 'rubros-phases' ? 'Agrupar por Fases y Rubros' : 'Agrupar por Rubros y Tareas',
-              setValue: (value: string) => {
-                if (value === 'Sin Agrupar') setGroupingType('none')
-                else if (value === 'Agrupar por Fases') setGroupingType('phases')
-                else if (value === 'Agrupar por Rubros') setGroupingType('rubros')
-                else if (value === 'Agrupar por Tareas') setGroupingType('tasks')
-                else if (value === 'Agrupar por Fases y Rubros') setGroupingType('rubros-phases')
-                else setGroupingType('phases-rubros')
-              },
-              options: ['Agrupar por Fases', 'Agrupar por Rubros', 'Agrupar por Tareas', 'Agrupar por Fases y Rubros', 'Agrupar por Rubros y Tareas'],
-              defaultLabel: 'Sin Agrupar'
-            }
-          ] : []}
-          actions={activeTab === "tasks" ? [
-            {
-              label: 'Agregar en Masa',
-              icon: Plus,
-              onClick: handleAddTask,
-              variant: 'secondary'
-            },
-            {
-              label: 'Agregar Tarea',
-              icon: Plus,
-              onClick: handleAddSingleTask,
-              variant: 'default'
-            }
-          ] : [
-            {
-              label: 'Crear Fase',
-              icon: Plus,
-              onClick: handleAddPhase,
-              variant: 'default'
-            }
-          ]}
-        />
-
         {/* Tab Content */}
         {activeTab === "tasks" ? (
           // Tab Tareas - Contenido actual
@@ -501,54 +464,104 @@ export default function ConstructionTasks() {
               description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
             />
           ) : (
-            <Table
-              columns={columns}
-              data={finalTasks}
-              isLoading={isLoading}
-              mode="construction"
-              groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-              renderCard={(task: any) => (
-                <ConstructionTaskCard
-                  key={task.id}
-                  task={task}
-                  onEdit={handleEditTask}
-                  onDelete={(taskToDelete) => handleDeleteTask(taskToDelete.id)}
-                />
-              )}
-              renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
-                if (groupingType === 'tasks') {
-                  // Para agrupación por rubros y tareas, calcular suma de cantidades
-                  const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-                  const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
-                  const rubroName = groupRows[0]?.task?.rubro_name || '';
-                  
-                  return (
-                    <>
-                      <div className="col-span-1 truncate">
-                        {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
-                      </div>
-                      <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
-                      <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
-                    </>
-                  );
-                } else {
-                  return (
-                    <>
-                      <div className="col-span-full text-sm font-medium">
-                        {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
-                      </div>
-                    </>
-                  );
+            <>
+              {/* TableTopBar con botón de agrupación */}
+              <TableTopBar
+                showFilter={true}
+                isFilterActive={groupingType !== 'none'}
+                renderFilterContent={() => (
+                  <div className="space-y-3 p-2 min-w-[200px]">
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Agrupación</label>
+                      <select 
+                        value={groupingType === 'none' ? 'Sin Agrupar' : 
+                               groupingType === 'phases' ? 'Agrupar por Fases' :
+                               groupingType === 'rubros' ? 'Agrupar por Rubros' :
+                               groupingType === 'tasks' ? 'Agrupar por Tareas' :
+                               groupingType === 'rubros-phases' ? 'Agrupar por Fases y Rubros' : 'Agrupar por Rubros y Tareas'}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === 'Sin Agrupar') setGroupingType('none')
+                          else if (value === 'Agrupar por Fases') setGroupingType('phases')
+                          else if (value === 'Agrupar por Rubros') setGroupingType('rubros')
+                          else if (value === 'Agrupar por Tareas') setGroupingType('tasks')
+                          else if (value === 'Agrupar por Fases y Rubros') setGroupingType('rubros-phases')
+                          else setGroupingType('phases-rubros')
+                        }}
+                        className="w-full h-8 text-xs px-2 border border-[var(--input-border)] rounded bg-[var(--input-bg)]"
+                      >
+                        <option value="Sin Agrupar">Sin Agrupar</option>
+                        <option value="Agrupar por Fases">Agrupar por Fases</option>
+                        <option value="Agrupar por Rubros">Agrupar por Rubros</option>
+                        <option value="Agrupar por Tareas">Agrupar por Tareas</option>
+                        <option value="Agrupar por Fases y Rubros">Agrupar por Fases y Rubros</option>
+                        <option value="Agrupar por Rubros y Tareas">Agrupar por Rubros y Tareas</option>
+                      </select>
+                    </div>
+                    <div className="pt-2 border-t border-[var(--menues-border)]">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start h-8 text-xs"
+                        onClick={handleAddTask}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Agregar en Masa
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              />
+              
+              <Table
+                columns={columns}
+                data={finalTasks}
+                isLoading={isLoading}
+                mode="construction"
+                groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+                renderCard={(task: any) => (
+                  <ConstructionTaskCard
+                    key={task.id}
+                    task={task}
+                    onEdit={handleEditTask}
+                    onDelete={(taskToDelete) => handleDeleteTask(taskToDelete.id)}
+                  />
+                )}
+                renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+                  if (groupingType === 'tasks') {
+                    // Para agrupación por rubros y tareas, calcular suma de cantidades
+                    const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
+                    const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
+                    const rubroName = groupRows[0]?.task?.rubro_name || '';
+                    
+                    return (
+                      <>
+                        <div className="col-span-1 truncate">
+                          {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
+                        </div>
+                        <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
+                        <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
+                      </>
+                    );
+                  } else {
+                    return (
+                      <>
+                        <div className="col-span-full text-sm font-medium">
+                          {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+                        </div>
+                      </>
+                    );
+                  }
+                }}
+                emptyState={
+                  <EmptyState
+                    icon={<CheckSquare className="h-8 w-8" />}
+                    title="No hay tareas que coincidan"
+                    description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
+                  />
                 }
-              }}
-              emptyState={
-                <EmptyState
-                  icon={<CheckSquare className="h-8 w-8" />}
-                  title="No hay tareas que coincidan"
-                  description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
-                />
-              }
-            />
+              />
+            </>
           )
         ) : (
           // Tab Fases - Drag & Drop Phase Manager
