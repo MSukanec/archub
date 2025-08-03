@@ -3,10 +3,9 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2 } from 'lucide-react'
-import { FILTER_ICONS, FILTER_LABELS, GROUPING_OPTIONS, ACTION_ICONS, ACTION_LABELS, Plus } from '@/constants/actionBarConstants'
+import { Plus } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { Table } from '@/components/ui-custom/Table'
 import ProgressCurve from '@/components/charts/gantt/ProgressCurve'
 import BurndownChart from '@/components/charts/gantt/BurndownChart'
@@ -182,13 +181,24 @@ export default function ConstructionSchedule() {
     }
   ]
 
+  const headerProps = {
+    icon: Calendar,
+    title: "Cronograma",
+    tabs: headerTabs,
+    onTabChange: setActiveTab,
+    actionButton: {
+      label: 'Nueva Tarea',
+      icon: Plus,
+      onClick: () => openModal('construction-task', { 
+        projectId: projectId || '', 
+        organizationId: organizationId || '' 
+      })
+    }
+  }
+
   return (
     <Layout 
-      headerProps={{
-        title: "Cronograma de Construcción",
-        tabs: headerTabs,
-        onTabChange: setActiveTab
-      }}
+      headerProps={headerProps}
       wide={true}
     >
       {/* Feature Introduction - Mobile only */}
@@ -220,21 +230,7 @@ export default function ConstructionSchedule() {
         ]}
       />
 
-      {/* ActionBarDesktopRow */}
-      <ActionBarDesktopRow
-        filters={[]}
-        actions={[
-          {
-            label: ACTION_LABELS.NEW_TASK,
-            icon: ACTION_ICONS.NEW,
-            onClick: () => openModal('construction-task', { 
-              projectId: projectId || '', 
-              organizationId: organizationId || '' 
-            }),
-            variant: 'default'
-          }
-        ]}
-      />
+
 
       {/* Tab Content */}
       {activeTab === 'gantt' && (
