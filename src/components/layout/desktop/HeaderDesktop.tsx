@@ -129,6 +129,7 @@ export function HeaderDesktop({
     if (location.startsWith("/design")) return "Diseño";
     if (location.startsWith("/construction")) return "Construcción";
     if (location.startsWith("/finances")) return "Finanzas";
+    if (location.startsWith("/project")) return "Proyecto";
     if (location.startsWith("/teams")) return "Equipos";
     if (location.startsWith("/profile")) return "Perfil";
     if (location.startsWith("/settings")) return "Configuración";
@@ -175,6 +176,12 @@ export function HeaderDesktop({
     "/design/dashboard": "Resumen de Diseño",
     "/design/documentation": "Documentación",
     
+    // Proyecto
+    "/project/documentation": "Documentación",
+    "/project/basic-data": "Datos Básicos",
+    "/project/clients": "Clientes",
+    "/project": "Resumen del Proyecto",
+    
     // Organización
     "/organization/projects": "Proyectos",
     "/organization/contacts": "Contactos",
@@ -185,7 +192,7 @@ export function HeaderDesktop({
 
 
 
-  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/organization");
+  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/project") || location.startsWith("/organization");
 
   // Hook para detectar el estado del sidebar
   const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
