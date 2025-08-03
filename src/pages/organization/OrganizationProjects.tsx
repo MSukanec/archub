@@ -326,8 +326,9 @@ export default function OrganizationProjects() {
   const customFilters = (
     <div className="flex items-center gap-3">
       <SelectableGhostButton
-        value={sortBy}
-        onValueChange={setSortBy}
+        title="Ordenar"
+        selectedValue={sortBy}
+        onSelect={(value) => setSortBy(value)}
         defaultLabel="Más Recientes"
         options={[
           { value: "date_recent", label: "Más Recientes" },
@@ -337,8 +338,9 @@ export default function OrganizationProjects() {
         ]}
       />
       <SelectableGhostButton
-        value={filterByStatus}
-        onValueChange={setFilterByStatus}
+        title="Estado"
+        selectedValue={filterByStatus}
+        onSelect={(value) => setFilterByStatus(value)}
         defaultLabel="Todos los Estados"
         options={[
           { value: "all", label: "Todos los Estados" },
