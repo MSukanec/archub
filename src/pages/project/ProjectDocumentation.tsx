@@ -9,7 +9,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
-
+import { DocumentGroupCard } from '@/components/ui-custom/DocumentGroupCard';
 import { Table } from '@/components/ui-custom/Table';
 import DocumentCard from '@/components/cards/DocumentCard';
 import { Button } from '@/components/ui/button';
@@ -315,10 +315,12 @@ export default function ProjectDocumentation() {
             <h3 className="text-lg font-semibold mb-4">Grupos de Documentos</h3>
             <div className="grid gap-4">
               {filteredGroups.map((group) => (
-                <div key={group.id} className="p-4 border rounded-lg">
-                  <h4 className="font-medium">{group.name}</h4>
-                  <p className="text-sm text-muted-foreground">{group.description || 'Sin descripción'}</p>
-                </div>
+                <DocumentGroupCard
+                  key={group.id}
+                  group={group}
+                  onEdit={() => handleGroupClick(group.id, group.name)}
+                  onDelete={() => handleDeleteGroup(group.id, group.name)}
+                />
               ))}
             </div>
           </div>
