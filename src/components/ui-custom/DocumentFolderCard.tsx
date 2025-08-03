@@ -66,11 +66,11 @@ interface DocumentFolderCardProps {
 }
 
 const getFileIcon = (fileType: string) => {
-  if (fileType.startsWith('image/')) {
+  if (fileType && fileType.startsWith('image/')) {
     return <FileImage className="h-5 w-5 text-blue-500" />;
-  } else if (fileType.includes('pdf')) {
+  } else if (fileType && fileType.includes('pdf')) {
     return <FileText className="h-5 w-5 text-red-500" />;
-  } else if (fileType.includes('spreadsheet') || fileType.includes('excel')) {
+  } else if (fileType && (fileType.includes('spreadsheet') || fileType.includes('excel'))) {
     return <FileSpreadsheet className="h-5 w-5 text-green-500" />;
   } else {
     return <File className="h-5 w-5 text-gray-500" />;
@@ -102,12 +102,15 @@ export function DocumentFolderCard({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Sort documents by version number (highest first)
-  const sortedDocuments = [...documents].sort((a, b) => b.version_number - a.version_number);
+  // Sort documents by version number (highest first) with safe handling
+  const sortedDocuments = documents && documents.length > 0 
+    ? [...documents].sort((a, b) => (b.version_number || 0) - (a.version_number || 0))
+    : [];
   const latestDocument = sortedDocuments[0];
   const hasVersions = sortedDocuments.length > 1;
 
   const handleDownload = (doc: DesignDocument) => {
+    if (!doc.file_url) return;
     const link = window.document.createElement('a');
     link.href = doc.file_url;
     link.download = `${doc.file_name}_v${doc.version_number}`;
@@ -143,137 +146,147 @@ export function DocumentFolderCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Latest Version - Always Visible */}
-        <div className="p-4 border rounded-lg bg-muted/30">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3 flex-1">
-              {getFileIcon(latestDocument.file_type)}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm truncate">{latestDocument.file_name}</h4>
-                  <Badge variant="default" className="text-xs">v{latestDocument.version_number}</Badge>
-                  {getStatusBadge(latestDocument.status)}
-                </div>
-                
-                {latestDocument.description && (
-                  <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                    {latestDocument.description}
-                  </p>
-                )}
-                
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>{format(new Date(latestDocument.created_at), 'dd MMM yyyy', { locale: es })}</span>
-                  {latestDocument.creator && (
-                    <div className="flex items-center gap-1">
-                      <Avatar className="h-4 w-4">
-                        <AvatarImage src={latestDocument.creator.avatar_url} />
-                        <AvatarFallback className="text-xs">
-                          {latestDocument.creator.full_name?.charAt(0) || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="truncate max-w-[80px]">{latestDocument.creator.full_name}</span>
+        {/* Show content only if there are documents */}
+        {latestDocument ? (
+          <>
+            {/* Latest Version - Always Visible */}
+            <div className="p-4 border rounded-lg bg-muted/30">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3 flex-1">
+                  {getFileIcon(latestDocument.file_type)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm truncate">{latestDocument.file_name}</h4>
+                      <Badge variant="default" className="text-xs">v{latestDocument.version_number}</Badge>
+                      {getStatusBadge(latestDocument.status)}
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              {/* Update Version Button */}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onEdit?.(latestDocument)}
-                className="w-full"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Actualizar
-              </Button>
-              
-              {/* Download Button */}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleDownload(latestDocument)}
-                className="w-full"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Descargar
-              </Button>
-              
-              {/* More Actions Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-full">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEdit?.(latestDocument)}>
-                    Editar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onDelete?.(latestDocument)}
-                    className="text-destructive"
-                  >
-                    Eliminar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-
-        {/* Version History - Expandable */}
-        {hasVersions && isExpanded && (
-          <div className="space-y-2">
-            <h5 className="text-sm font-medium text-muted-foreground">Versiones anteriores</h5>
-            {sortedDocuments.slice(1).map((document) => (
-              <div key={document.id} className="p-3 border rounded-lg bg-background">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    {getFileIcon(document.file_type)}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium">{document.file_name}</span>
-                        <Badge variant="outline" className="text-xs">v{document.version_number}</Badge>
-                        {getStatusBadge(document.status)}
-                      </div>
-                      
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}</span>
-                        {document.creator && (
-                          <div className="flex items-center gap-1">
-                            <Avatar className="h-4 w-4">
-                              <AvatarImage src={document.creator.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {document.creator.full_name?.charAt(0) || '?'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="truncate max-w-[80px]">{document.creator.full_name}</span>
-                          </div>
-                        )}
-                      </div>
+                    
+                    {latestDocument.description && (
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        {latestDocument.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>{format(new Date(latestDocument.created_at), 'dd MMM yyyy', { locale: es })}</span>
+                      {latestDocument.creator && (
+                        <div className="flex items-center gap-1">
+                          <Avatar className="h-4 w-4">
+                            <AvatarImage src={latestDocument.creator.avatar_url} />
+                            <AvatarFallback className="text-xs">
+                              {latestDocument.creator.full_name?.charAt(0) || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="truncate max-w-[80px]">{latestDocument.creator.full_name}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  {/* Update Version Button */}
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleDownload(document)}
-                    className="ml-2"
+                    onClick={() => onEdit?.(latestDocument)}
+                    className="w-full"
                   >
-                    <Download className="h-4 w-4 mr-1" />
-                    Exportar
+                    <Upload className="h-4 w-4 mr-2" />
+                    Actualizar
                   </Button>
+                  
+                  {/* Download Button */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDownload(latestDocument)}
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Descargar
+                  </Button>
+                  
+                  {/* More Actions Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit?.(latestDocument)}>
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => onDelete?.(latestDocument)}
+                        className="text-destructive"
+                      >
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Version History - Expandable */}
+            {hasVersions && isExpanded && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium text-muted-foreground">Versiones anteriores</h5>
+                {sortedDocuments.slice(1).map((document) => (
+                  <div key={document.id} className="p-3 border rounded-lg bg-background">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        {getFileIcon(document.file_type)}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-medium">{document.file_name}</span>
+                            <Badge variant="outline" className="text-xs">v{document.version_number}</Badge>
+                            {getStatusBadge(document.status)}
+                          </div>
+                          
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>{format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}</span>
+                            {document.creator && (
+                              <div className="flex items-center gap-1">
+                                <Avatar className="h-4 w-4">
+                                  <AvatarImage src={document.creator.avatar_url} />
+                                  <AvatarFallback className="text-xs">
+                                    {document.creator.full_name?.charAt(0) || '?'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="truncate max-w-[80px]">{document.creator.full_name}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownload(document)}
+                        className="ml-2"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        Exportar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Empty state when no documents */
+          <div className="p-8 text-center">
+            <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Esta carpeta está vacía</p>
+            <p className="text-xs text-muted-foreground">Sube documentos para comenzar</p>
           </div>
         )}
       </CardContent>
-      
-      {/* Update Version Modal - TO BE IMPLEMENTED */}
     </Card>
   );
 }
