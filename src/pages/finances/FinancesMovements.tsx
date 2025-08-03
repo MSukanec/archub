@@ -1335,7 +1335,7 @@ export default function Movements() {
         actionButton: {
           label: "Nuevo Movimiento",
           icon: Plus,
-          onClick: () => openModal("newMovement")
+          onClick: () => openModal("movement")
         }
       }}
       wide={true}
