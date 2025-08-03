@@ -751,6 +751,71 @@ export default function ConstructionBudgets() {
         ]}
       />
 
+      {/* Budget Selector Card */}
+      {filteredBudgets.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Seleccionar Presupuesto</label>
+                <Select value={selectedBudgetId || ''} onValueChange={handleBudgetChange}>
+                  <SelectTrigger className="w-full sm:w-[300px]">
+                    <SelectValue placeholder="Selecciona un presupuesto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredBudgets.map((budget) => (
+                      <SelectItem key={budget.id} value={budget.id}>
+                        {budget.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                {selectedBudget && (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditBudget(selectedBudget)}
+                      className="text-xs font-normal"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleDeleteSelectedBudget}
+                      className="text-xs font-normal text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Eliminar
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        openModal('budget-task-bulk-add', { 
+                          budgetId: selectedBudget.id,
+                          onSuccess: () => {
+                            queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
+                          }
+                        })
+                      }}
+                      className="text-xs font-normal"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Nueva Tarea
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {filteredBudgets.length === 0 ? (
         <EmptyState
           icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
