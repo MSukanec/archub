@@ -543,7 +543,7 @@ export default function ConstructionTasks() {
                         {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
                       </div>
                       <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
-                      <div className="col-span-1">{totalQuantity}</div> {/* Cantidad total */}
+                      <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
                     </>
                   );
                 } else {
