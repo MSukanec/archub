@@ -112,7 +112,7 @@ export default function ConstructionMaterials() {
       {
         key: 'brand',
         label: 'Marca',
-        width: groupingType === 'categories' ? '9%' : '10%', // 10% menos cuando agrupado
+        width: groupingType === 'categories' ? '13%' : '10%', // Igual que las demás cuando agrupado
         render: (material: any) => (
           <span className="text-sm text-muted-foreground">Indefinido</span>
         )
@@ -120,7 +120,7 @@ export default function ConstructionMaterials() {
       {
         key: 'model',
         label: 'Modelo',
-        width: groupingType === 'categories' ? '9%' : '10%', // 10% menos cuando agrupado
+        width: groupingType === 'categories' ? '13%' : '10%', // Igual que las demás cuando agrupado
         render: (material: any) => (
           <span className="text-sm text-muted-foreground">Indefinido</span>
         )
@@ -128,7 +128,7 @@ export default function ConstructionMaterials() {
       {
         key: 'computed_quantity',
         label: 'Necesario',
-        width: groupingType === 'categories' ? '16%' : '13%', // Más ancho cuando agrupado
+        width: groupingType === 'categories' ? '13%' : '13%', // Igual que las demás cuando agrupado
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
@@ -141,7 +141,7 @@ export default function ConstructionMaterials() {
       {
         key: 'purchased_quantity',
         label: 'Comprado',
-        width: groupingType === 'categories' ? '16%' : '13%', // Más ancho cuando agrupado
+        width: groupingType === 'categories' ? '13%' : '13%', // Igual que las demás cuando agrupado
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
@@ -154,7 +154,7 @@ export default function ConstructionMaterials() {
       {
         key: 'to_purchase_quantity',
         label: 'Por Comprar',
-        width: groupingType === 'categories' ? '15%' : '14%', // Más ancho cuando agrupado
+        width: groupingType === 'categories' ? '13%' : '14%', // Igual que las demás cuando agrupado
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
