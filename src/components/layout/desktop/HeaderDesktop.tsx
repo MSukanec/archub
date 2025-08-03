@@ -70,32 +70,7 @@ export function HeaderDesktop({
   const { setSidebarContext, currentSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
-  // Estado local para tracking inmediato del proyecto seleccionado
-  const [localSelectedProject, setLocalSelectedProject] = useState<string | null>(selectedProjectId);
-  
-  // Sincronizar localSelectedProject con el projectContext y userData
-  useEffect(() => {
-    // Priorizar selectedProjectId del contexto, luego userData
-    const projectId = selectedProjectId || userData?.preferences?.last_project_id;
-    if (projectId !== undefined) {
-      setLocalSelectedProject(projectId);
-    }
-  }, [selectedProjectId, userData?.preferences?.last_project_id]);
-
-  // Sincronizar el projectContext cuando cambie la organización
-  useEffect(() => {
-    if (userData?.organization?.id && userData.preferences?.last_project_id) {
-      // Solo actualizar si el contexto no tiene el proyecto correcto
-      if (selectedProjectId !== userData.preferences.last_project_id) {
-        console.log("🔧 HeaderDesktop: Syncing project context with userData", {
-          contextProject: selectedProjectId,
-          userDataProject: userData.preferences.last_project_id,
-          organization: userData.organization.id
-        });
-        setSelectedProject(userData.preferences.last_project_id);
-      }
-    }
-  }, [userData?.organization?.id, userData?.preferences?.last_project_id, selectedProjectId, setSelectedProject]);
+  // Usar directamente userData.preferences.last_project_id como fuente de verdad
 
   // Mutation para actualizar proyecto seleccionado usando nuevo sistema
   const updateProjectMutation = useMutation({
@@ -133,7 +108,6 @@ export function HeaderDesktop({
   });
 
   const handleProjectChange = (projectId: string) => {
-    setLocalSelectedProject(projectId);
     updateProjectMutation.mutate(projectId);
   };
 
@@ -266,7 +240,7 @@ export function HeaderDesktop({
                     className="h-8 px-3 text-xs"
                   >
                     <Folder className="w-4 h-4 mr-1" />
-                    {projects.find(p => p.id === localSelectedProject)?.name || "Seleccionar proyecto"}
+                    {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Seleccionar proyecto"}
                     <ChevronDown className="w-3 h-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -276,13 +250,13 @@ export function HeaderDesktop({
                     <DropdownMenuItem
                       key={project.id}
                       onClick={() => handleProjectChange(project.id)}
-                      className={`${localSelectedProject === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                      className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
                     >
                       <div className="flex items-center w-full">
                         <Folder className="w-4 h-4 mr-2" />
                         <span className="truncate">{project.name}</span>
                       </div>
-                      {localSelectedProject === project.id && (
+                      {userData?.preferences?.last_project_id === project.id && (
                         <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
                       )}
                     </DropdownMenuItem>
