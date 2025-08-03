@@ -44,6 +44,7 @@ import ConstructionTasks from "@/pages/construction/ConstructionTasks";
 import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
 import ConstructionSubcontracts from "@/pages/construction/ConstructionSubcontracts";
 import DesignDashboard from "@/pages/design/DesignDashboard";
+import DesignDocumentation from "@/pages/design/DesignDocumentation";
 
 import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
 import OrganizationTasks from "@/pages/organization/OrganizationTasks";
@@ -180,6 +181,11 @@ function Router() {
         <Route path="/design/dashboard">
           <ProtectedRoute>
             <DesignDashboard />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/design/documentation">
+          <ProtectedRoute>
+            <DesignDocumentation />
           </ProtectedRoute>
         </Route>
 
