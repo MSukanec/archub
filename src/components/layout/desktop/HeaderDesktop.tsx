@@ -141,7 +141,7 @@ export function HeaderDesktop({
   const getBreadcrumbText = () => {
     const section = getCurrentSectionLabel();
     const pageName = pageMap[location];
-    const projectName = projects.find(p => p.id === userData?.preferences?.last_project_id)?.name;
+    const projectName = projects.find(p => p.id === selectedProjectId)?.name;
     
     if (isProjectBasedSection && projectName) {
       if (pageName && section !== pageName) {

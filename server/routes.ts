@@ -231,40 +231,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("🔧 Updating user organization preferences", { user_id, organization_id, last_project_id });
 
-      // First, verify that the user exists in the users table
-      const { data: existingUser, error: userCheckError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', user_id)
-        .single();
-
-      if (userCheckError || !existingUser) {
-        console.error("🔧 User not found in users table:", { user_id, error: userCheckError });
-        
-        // Try to create/sync the user from auth.users
-        const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(user_id);
-        
-        if (authError || !authUser.user) {
-          console.error("🔧 User not found in auth either:", authError);
-          return res.status(404).json({ error: "User not found" });
-        }
-
-        // Create user in users table
-        const { error: createUserError } = await supabase
-          .from('users')
-          .insert({
-            id: user_id,
-            email: authUser.user.email,
-            full_name: authUser.user.user_metadata?.full_name || authUser.user.email,
-            created_at: new Date().toISOString()
-          });
-
-        if (createUserError) {
-          console.error("🔧 Failed to create user:", createUserError);
-          // Continue with fallback to localStorage
-        }
-      }
-
       const { data, error } = await supabase
         .from('user_organization_preferences')
         .upsert(
@@ -283,15 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (error) {
         console.error("Error updating user organization preferences:", error);
-        // Fallback to localStorage approach
-        console.log("🔧 Falling back to localStorage for project selection");
-        res.json({ 
-          success: true, 
-          fallback: true, 
-          message: "Using localStorage fallback",
-          last_project_id 
-        });
-        return;
+        return res.status(500).json({ error: "Failed to update organization preferences" });
       }
 
       console.log("🔧 Successfully updated user organization preferences", data);
