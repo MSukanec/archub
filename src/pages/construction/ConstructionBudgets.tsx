@@ -463,28 +463,7 @@ export default function ConstructionBudgets() {
     )
   }
 
-  return (
-    <Layout wide={true} headerProps={headerProps}>
-
-      {filteredBudgets.length === 0 ? (
-        <EmptyState
-          icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
-          title={searchValue ? "No se encontraron presupuestos" : "No hay presupuestos creados"}
-          description={searchValue 
-            ? 'Prueba ajustando los filtros de búsqueda' 
-            : 'Comienza creando tu primer presupuesto para gestionar los costos del proyecto'
-          }
-        />
-      ) : (
-        <>
-          {/* Budget Task Table */}
-          {selectedBudget && (
-            <BudgetTaskTable budgetId={selectedBudget.id} />
-          )}
-        </>
-      )}
-    </Layout>
-  )
+  // REMOVING EARLY RETURN - This was causing the problem!
 
   // Budget Task Table Component using reusable Table
   function BudgetTaskTable({ budgetId }: { budgetId: string }) {
