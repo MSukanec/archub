@@ -11,7 +11,8 @@ import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText } from 'lucide-react'
+import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText, SortAsc } from 'lucide-react'
+import { FILTER_ICONS, ACTION_ICONS, FILTER_LABELS, ACTION_LABELS } from '@/constants/actionBarConstants'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -26,6 +27,7 @@ import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 
 
 export default function OrganizationProjects() {
@@ -418,16 +420,6 @@ export default function OrganizationProjects() {
         <ActionBarDesktop
           title="Gestión de Proyectos"
           icon={<Folder className="w-5 h-5" />}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          customFilters={customFilters}
-          primaryActionLabel="Nuevo Proyecto"
-          onPrimaryActionClick={() => openModal('project', {})}
-          primaryActionRestriction={{
-            feature: "max_projects",
-            current: filteredProjects?.length || 0,
-            functionName: "Crear Proyecto"
-          }}
           showProjectSelector={false}
           features={[
             {
@@ -448,9 +440,46 @@ export default function OrganizationProjects() {
             {
               icon: <FileText className="w-5 h-5" />,
               title: "Gestión Completa",
-              description: "Cada proyecto incluye módulos completos de Diseño, Construcción y Finanzas. Edita información básica, elimina proyectos y navega directamente a los datos del proyecto seleccionado."
+              description: "Cada proyecto incluye módulos completo de Diseño, Construcción y Finanzas. Edita información básica, elimina proyectos y navega directamente a los datos del proyecto seleccionado."
             }
           ]}
+        />
+
+        {/* ActionBar Row - Filtros y Acciones */}
+        <ActionBarDesktopRow
+          filters={[
+            {
+              key: 'status',
+              label: 'Estado',
+              icon: FILTER_ICONS.FILTER,
+              value: filterByStatus === 'all' ? '' : filterByStatus,
+              setValue: (value) => setFilterByStatus(value || 'all'),
+              options: ['active', 'planning', 'completed', 'on-hold'],
+              defaultLabel: 'Todos los Estados'
+            },
+            {
+              key: 'sort',
+              label: 'Ordenar',
+              icon: SortAsc,
+              value: sortBy === 'date_recent' ? '' : sortBy,
+              setValue: (value) => setSortBy(value || 'date_recent'),
+              options: ['name_asc', 'name_desc', 'date_recent', 'date_oldest'],
+              defaultLabel: 'Más Recientes'
+            }
+          ]}
+          actions={[
+            {
+              label: ACTION_LABELS.ADD_ITEM,
+              icon: ACTION_ICONS.ADD,
+              onClick: () => openModal('project', {}),
+              variant: 'default'
+            }
+          ]}
+          customRestricted={
+            <CustomRestricted feature="max_projects" current={filteredProjects?.length || 0}>
+              <div></div>
+            </CustomRestricted>
+          }
         />
 
         {/* Feature Introduction - Solo móvil */}
