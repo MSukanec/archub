@@ -7,6 +7,7 @@ import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
 import { useDesignDocuments, useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -129,10 +130,27 @@ interface FolderItemProps {
 
 function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup }: FolderItemProps) {
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
+  const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
 
-  // For now, we'll assume no ungrouped documents until we have the proper schema
-  const ungroupedDocuments: any[] = [];
+  // Debug logging with userData
+  const { data: userData } = useCurrentUser();
+  console.log('FolderItem Debug:', {
+    folderId: folder.id,
+    folderName: folder.name,
+    userData: userData,
+    projectId: userData?.preferences?.last_project_id,
+    organizationId: userData?.preferences?.last_organization_id,
+    groups: groups,
+    groupsCount: groups?.length || 0,
+    folderDocuments: folderDocuments,
+    documentsCount: folderDocuments?.length || 0,
+    isExpanded,
+    groupsLoading
+  });
+
+  // Documents that don't belong to any group
+  const ungroupedDocuments = folderDocuments?.filter(doc => !doc.group_id) || [];
   
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
 
@@ -172,6 +190,18 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => openModal('document-folder', { 
+                parentId: folder.id,
+                parentName: folder.name
+              })}
+              className="h-8 px-2 text-xs"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Nueva Subcarpeta
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => openModal('document-upload', { 
                 defaultFolderId: folder.id 
               })}
@@ -179,17 +209,6 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
             >
               <Upload className="h-3 w-3 mr-1" />
               Subir
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => openModal('document-group', { 
-                folderId: folder.id 
-              })}
-              className="h-8 px-2 text-xs"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Entrega
             </Button>
           </div>
         </div>
@@ -203,15 +222,35 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
             ) : (
               <>
                 {/* Document Groups (Entregas) */}
-                {groups?.map((group) => (
-                  <GroupItem
-                    key={group.id}
-                    group={group}
-                    folderId={folder.id}
-                    isExpanded={expandedGroups[group.id] || false}
-                    onToggle={() => onToggleGroup(group.id)}
-                  />
-                ))}
+                {groups && groups.length > 0 ? (
+                  groups.map((group) => (
+                    <GroupItem
+                      key={group.id}
+                      group={group}
+                      folderId={folder.id}
+                      isExpanded={expandedGroups[group.id] || false}
+                      onToggle={() => onToggleGroup(group.id)}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-sm text-muted-foreground">
+                    <Package className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                    No hay entregas en esta carpeta
+                    <div className="mt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openModal('document-group', { 
+                          folderId: folder.id 
+                        })}
+                        className="h-8 px-3 text-xs"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Crear Primera Entrega
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Ungrouped Documents */}
                 {ungroupedDocuments.length > 0 && (
@@ -257,6 +296,16 @@ interface GroupItemProps {
 function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
   const { data: documents } = useDesignDocuments(group.id);
   const { openModal } = useGlobalModalStore();
+  
+  // Debug logging
+  console.log('GroupItem Debug:', {
+    groupId: group.id,
+    groupName: group.name,
+    folderId,
+    documents: documents,
+    documentsCount: documents?.length || 0,
+    isExpanded
+  });
   
   // Documents for this specific group
   const groupDocuments = documents || [];

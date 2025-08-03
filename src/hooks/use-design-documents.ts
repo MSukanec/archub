@@ -89,6 +89,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
     queryFn: async (): Promise<DesignDocument[]> => {
       if (!projectId || !organizationId || !folderId) return [];
 
+      // First approach: get documents directly by folder_id
       const { data, error } = await supabase
         .from('design_documents')
         .select(`
@@ -108,6 +109,15 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         .eq('organization_id', organizationId)
         .eq('folder_id', folderId)
         .order('created_at', { ascending: false });
+
+      console.log('useDesignDocumentsByFolder Query Result:', {
+        folderId,
+        projectId,
+        organizationId,
+        data: data,
+        error: error,
+        query: 'design_documents with folder_id filter'
+      });
 
       if (error) {
         console.error('Error fetching folder documents:', error);

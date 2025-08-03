@@ -48,13 +48,24 @@ export function useDesignDocumentGroups(folderId?: string) {
             full_name,
             avatar_url
           )
-        `);
+        `)
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId);
 
       if (folderId) {
         query = query.eq('folder_id', folderId);
       }
 
       const { data, error } = await query.order('name', { ascending: true });
+
+      console.log('useDesignDocumentGroups Query Result:', {
+        folderId,
+        projectId,
+        organizationId,
+        data: data,
+        error: error,
+        query: 'design_document_groups with folder_id filter'
+      });
 
       if (error) {
         console.error('Error fetching design document groups:', error);
