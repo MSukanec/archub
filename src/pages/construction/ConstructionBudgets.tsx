@@ -751,8 +751,8 @@ export default function ConstructionBudgets() {
         ]}
       />
 
-      {/* Budget Selector Card */}
-      {filteredBudgets.length > 0 && (
+      {/* Budget Selector Card - Always show if budgets exist */}
+      {budgets.length > 0 && (
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -763,7 +763,7 @@ export default function ConstructionBudgets() {
                     <SelectValue placeholder="Selecciona un presupuesto" />
                   </SelectTrigger>
                   <SelectContent>
-                    {filteredBudgets.map((budget) => (
+                    {budgets.map((budget) => (
                       <SelectItem key={budget.id} value={budget.id}>
                         {budget.name}
                       </SelectItem>
@@ -816,15 +816,11 @@ export default function ConstructionBudgets() {
         </Card>
       )}
 
-      {filteredBudgets.length === 0 ? (
+      {budgets.length === 0 ? (
         <EmptyState
           icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
-          title={searchValue ? "No se encontraron presupuestos" : "No hay presupuestos creados"}
-          description={searchValue 
-            ? 'Prueba ajustando los filtros de búsqueda' 
-            : 'Comienza creando tu primer presupuesto para gestionar los costos del proyecto'
-          }
-
+          title="No hay presupuestos creados"
+          description="Comienza creando tu primer presupuesto para gestionar los costos del proyecto"
         />
       ) : (
         <>
