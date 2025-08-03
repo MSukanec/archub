@@ -418,7 +418,7 @@ export default function ConstructionLogs() {
   }
 
   return (
-    <Layout>
+    <Layout headerProps={headerProps}>
       <div className="space-y-6">
       {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
