@@ -39,7 +39,7 @@ export function TableTopBar({
 
   // No renderizar nada si no hay configuración
   const hasContent = tabs.length > 0 || showSearch || showFilter || showSort;
-  console.log('TableTopBar - hasContent:', hasContent, 'tabs:', tabs, 'showSearch:', showSearch, 'showFilter:', showFilter, 'showSort:', showSort);
+
   if (!hasContent) return null;
 
   const handleSearchChange = (value: string) => {
@@ -47,10 +47,8 @@ export function TableTopBar({
     onSearchChange?.(value);
   };
 
-  console.log('TableTopBar rendering with content');
   return (
-    <div className="block border-b border-[var(--card-border)] bg-[var(--card-bg)] bg-red-100"
-         style={{ minHeight: '50px' }}>
+    <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Lado izquierdo - Tabs (solo texto) */}
         <div className="flex items-center gap-1">
@@ -61,9 +59,9 @@ export function TableTopBar({
               size="sm"
               onClick={() => onTabChange?.(tab)}
               className={cn(
-                "h-8 px-3 text-sm font-medium rounded-full transition-all",
+                "h-8 px-3 text-sm font-medium transition-all",
                 activeTab === tab
-                  ? "bg-[var(--accent)] text-[var(--accent-foreground)] shadow-sm"
+                  ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
               )}
             >
@@ -73,28 +71,20 @@ export function TableTopBar({
         </div>
 
         {/* Lado derecho - Búsqueda, Orden, Filtros (solo iconos) */}
-        <div className="flex items-center gap-2">
-          {/* Buscador expandible con botón de icono */}
+        <div className="flex items-center gap-1">
+          {/* Botón de búsqueda (solo icono) */}
           {showSearch && (
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "relative transition-all duration-200",
-                searchFocused ? "w-64" : "w-48"
-              )}>
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
-                <Input
-                  placeholder="Buscar..."
-                  value={searchInputValue}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  className={cn(
-                    "pl-10 pr-4 h-8 text-sm border-0 bg-[var(--muted)] focus:bg-[var(--background)] transition-all",
-                    "placeholder:text-[var(--muted-foreground)]"
-                  )}
-                />
-              </div>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+              onClick={() => {
+                // Aquí se podría abrir un modal de búsqueda o focus en un input existente
+                console.log('Search clicked');
+              }}
+            >
+              <Search className="h-4 w-4" />
+            </Button>
           )}
 
           {/* Botón de ordenamiento (solo icono) */}
