@@ -381,14 +381,30 @@ export default function ConstructionLogs() {
 
 
 
+  // Header tabs configuration
+  const headerTabs = [
+    {
+      id: "bitacoras",
+      label: "Entradas",
+      isActive: activeTab === "bitacoras"
+    },
+    {
+      id: "graficos", 
+      label: "Gráficos",
+      isActive: activeTab === "graficos"
+    }
+  ]
+
   const headerProps = {
     icon: FileText,
     title: "Bitácora",
-    actionButton: {
+    tabs: headerTabs,
+    onTabChange: setActiveTab,
+    actionButton: activeTab === "bitacoras" ? {
       label: 'Nueva Bitácora',
       icon: Plus,
       onClick: () => openModal('site-log')
-    }
+    } : undefined
   };
 
   if (isLoading || siteLogsLoading) {
