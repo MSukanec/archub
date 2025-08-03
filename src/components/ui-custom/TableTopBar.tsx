@@ -59,7 +59,7 @@ export function TableTopBar({
               size="sm"
               onClick={() => onTabChange?.(tab)}
               className={cn(
-                "h-8 px-3 text-sm font-medium",
+                "h-8 px-3 text-base font-normal",
                 activeTab === tab ? "button-secondary-pressed" : ""
               )}
             >
@@ -97,8 +97,11 @@ export function TableTopBar({
                   <ArrowUpDown className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-2" align="end">
-                {renderSortContent()}
+              <PopoverContent className="w-56 p-3" align="end">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-[var(--foreground)]">Ordenar por:</h4>
+                  {renderSortContent()}
+                </div>
               </PopoverContent>
             </Popover>
           )}
@@ -115,8 +118,11 @@ export function TableTopBar({
                   <Filter className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-2" align="end">
-                {renderFilterContent()}
+              <PopoverContent className="w-56 p-3" align="end">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-[var(--foreground)]">Filtrar por:</h4>
+                  {renderFilterContent()}
+                </div>
               </PopoverContent>
             </Popover>
           )}
