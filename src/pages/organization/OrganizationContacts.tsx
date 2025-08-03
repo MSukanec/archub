@@ -368,7 +368,7 @@ export default function OrganizationContacts() {
                 else if (value === 'Más Antiguos') setSortBy('date_asc')
                 else setSortBy('date_desc')
               },
-              options: ['Más Recientes', 'Más Antiguos', 'Nombre (A-Z)', 'Nombre (Z-A)'],
+              options: ['Más Antiguos', 'Nombre (A-Z)', 'Nombre (Z-A)'],
               defaultLabel: 'Más Recientes'
             },
             {
@@ -384,7 +384,7 @@ export default function OrganizationContacts() {
                   if (type) setFilterByType(type.id)
                 }
               },
-              options: ['Todos los Tipos', 'Arquitecto', 'Ingeniero', 'Constructor', 'Proveedor', 'Cliente'],
+              options: ['Arquitecto', 'Ingeniero', 'Constructor', 'Proveedor', 'Cliente'],
               defaultLabel: 'Todos los Tipos'
             }
           ]}
