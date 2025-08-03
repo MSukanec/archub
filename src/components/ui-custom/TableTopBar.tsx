@@ -97,11 +97,8 @@ export function TableTopBar({
                   <ArrowUpDown className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-3" align="end">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-[var(--foreground)]">Ordenar por:</h4>
-                  {renderSortContent()}
-                </div>
+              <PopoverContent className="w-56" align="end">
+                {renderSortContent()}
               </PopoverContent>
             </Popover>
           )}
@@ -118,11 +115,8 @@ export function TableTopBar({
                   <Filter className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-3" align="end">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-[var(--foreground)]">Filtrar por:</h4>
-                  {renderFilterContent()}
-                </div>
+              <PopoverContent className="w-56" align="end">
+                {renderFilterContent()}
               </PopoverContent>
             </Popover>
           )}
