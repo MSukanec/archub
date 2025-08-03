@@ -74,41 +74,48 @@ export function TableTopBar({
           {/* Buscador expandible */}
           {showSearch && (
             <div className="relative flex items-center">
-              {/* Input expandible que aparece detrás del botón */}
+              {/* Input expandible con borde */}
               <div className={cn(
-                "absolute right-8 transition-all duration-300 overflow-hidden",
-                isSearchExpanded ? "w-48 opacity-100" : "w-0 opacity-0"
+                "absolute right-0 transition-all duration-300 overflow-hidden",
+                isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"
               )}>
-                <Input
-                  placeholder="Buscar..."
-                  value={searchInputValue}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onBlur={() => {
-                    setIsSearchExpanded(false);
-                    setSearchFocused(false);
-                  }}
-                  className={cn(
-                    "h-8 text-sm border-0 bg-[var(--muted)] focus:bg-[var(--background)] transition-all",
-                    "placeholder:text-[var(--muted-foreground)]"
-                  )}
-                  autoFocus={isSearchExpanded}
-                />
+                <div className={cn(
+                  "relative flex items-center h-8 border border-[var(--card-border)] rounded-md bg-[var(--muted)] transition-all",
+                  isSearchExpanded ? "bg-[var(--background)]" : "bg-transparent border-transparent"
+                )}>
+                  <Input
+                    placeholder="Buscar..."
+                    value={searchInputValue}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onBlur={() => {
+                      setIsSearchExpanded(false);
+                      setSearchFocused(false);
+                    }}
+                    className={cn(
+                      "flex-1 h-full text-sm border-0 bg-transparent",
+                      "placeholder:text-[var(--muted-foreground)]",
+                      "focus:ring-0 focus:outline-none",
+                      isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"
+                    )}
+                    autoFocus={isSearchExpanded}
+                  />
+                  
+                  {/* Icono dentro del input */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 h-8 w-8 p-0 hover:bg-transparent"
+                    onClick={() => {
+                      setIsSearchExpanded(!isSearchExpanded);
+                      if (!isSearchExpanded) {
+                        setTimeout(() => setSearchFocused(true), 100);
+                      }
+                    }}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              
-              {/* Botón del icono que permanece fijo */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 relative z-10"
-                onClick={() => {
-                  setIsSearchExpanded(!isSearchExpanded);
-                  if (!isSearchExpanded) {
-                    setTimeout(() => setSearchFocused(true), 100);
-                  }
-                }}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
             </div>
           )}
 
