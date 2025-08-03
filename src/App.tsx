@@ -68,6 +68,8 @@ import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import AdminCategories from "@/pages/admin/AdminCategories";
 
+// Test components
+import VirtualTableExample from "@/components/examples/VirtualTableExample";
 
 import NotFound from "@/pages/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, Fragment } from "react";
+import React, { useState, useMemo, Fragment, useRef } from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -9,6 +9,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -56,6 +57,10 @@ interface TableProps<T = any> {
     leftActions?: React.ReactNode;
     rightActions?: React.ReactNode;
   };
+  // 🆕 SCROLL VIRTUAL - Configuración para virtualization
+  enableVirtualScroll?: boolean;
+  virtualScrollHeight?: number; // Altura del contenedor en px (default: 600)
+  estimateSize?: number; // Altura estimada de cada fila en px (default: 44)
 }
 
 export function Table<T = any>({
@@ -80,6 +85,10 @@ export function Table<T = any>({
   mode = "default",
   // 🆕 DOBLE ENCABEZADO
   headerActions,
+  // 🆕 SCROLL VIRTUAL
+  enableVirtualScroll = false,
+  virtualScrollHeight = 600,
+  estimateSize = 44,
 }: TableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(
     defaultSort?.key || null,
@@ -89,7 +98,10 @@ export function Table<T = any>({
   );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 100;
-  const showPagination = data.length > itemsPerPage;
+  const showPagination = !enableVirtualScroll && data.length > itemsPerPage;
+
+  // 🆕 SCROLL VIRTUAL - Referencias y configuración
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // Helper function to handle sort logic
   const handleSort = (
@@ -176,10 +188,64 @@ export function Table<T = any>({
     return grouped;
   }, [data, sortKey, sortDirection, columns, groupBy]);
 
-  // Aplanar datos agrupados para paginación
+  // 🆕 ITEMS VIRTUALIZADOS - Crear estructura plana para el virtualizador
+  const virtualItems = useMemo(() => {
+    const items: Array<{
+      type: 'group-header' | 'row';
+      data: T | null;
+      groupKey?: string;
+      groupRows?: T[];
+      index: number;
+    }> = [];
+
+    if (groupBy && renderGroupHeader) {
+      // Con agrupamiento: crear elementos para headers + filas
+      let index = 0;
+      Object.entries(groupedData).forEach(([groupKey, groupRows]) => {
+        // Agregar header del grupo
+        items.push({
+          type: 'group-header',
+          data: null,
+          groupKey,
+          groupRows,
+          index: index++
+        });
+        
+        // Agregar filas del grupo
+        groupRows.forEach((item) => {
+          items.push({
+            type: 'row',
+            data: item,
+            index: index++
+          });
+        });
+      });
+    } else {
+      // Sin agrupamiento: solo filas
+      Object.values(groupedData).flat().forEach((item, idx) => {
+        items.push({
+          type: 'row',
+          data: item,
+          index: idx
+        });
+      });
+    }
+
+    return items;
+  }, [groupedData, groupBy, renderGroupHeader]);
+
+  // Aplanar datos agrupados para paginación (solo cuando no hay virtual scroll)
   const flattenedData = useMemo(() => {
     return Object.values(groupedData).flat();
   }, [groupedData]);
+
+  // 🆕 VIRTUALIZADOR - Solo cuando está habilitado
+  const rowVirtualizer = useVirtualizer({
+    count: enableVirtualScroll ? virtualItems.length : 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => estimateSize,
+    overscan: 10,
+  });
 
   // Pagination - usando flattenedData en lugar de sortedData
   const totalPages = Math.ceil(flattenedData.length / itemsPerPage);
@@ -382,132 +448,223 @@ export function Table<T = any>({
           ))}
         </div>
 
-        {/* Table Rows con agrupamiento */}
-        <div>
-          {groupBy ? (
-            // Renderizado con agrupamiento
-            Object.entries(groupedData).map(([groupKey, groupRows]) => (
-              <Fragment key={groupKey}>
-                {/* Header de grupo */}
-                {renderGroupHeader && (
-                  <div className={cn(
-                    "grid gap-4 px-4 py-3",
-                    mode === "budget" && "border-b border-[var(--table-row-border)]",
-                    mode === "construction" && "border-b border-[var(--table-row-border)]",
-                    mode === "default" && "border-b border-[var(--table-header-border)]",
-                    "text-xs font-medium [&>*]:text-xs [&>*]:font-medium"
-                  )}
-                  style={{ 
-                    gridTemplateColumns: getGridTemplateColumns(),
-                    backgroundColor: "var(--table-group-header-bg)",
-                    color: "var(--table-group-header-fg)"
-                  }}
-                  >
-                    {renderGroupHeader(groupKey, groupRows)}
-                  </div>
-                )}
-                
-                {/* Filas del grupo */}
-                {groupRows.map((item, index) => (
-                  <div
-                    key={getItemId(item)}
-                    className={cn(
-                      "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
-                      index < groupRows.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
-                      getRowClassName?.(item),
-                    )}
-                    style={{ gridTemplateColumns: getGridTemplateColumns() }}
-                  >
-                    {selectable && (
-                      <div className="flex items-center justify-center">
-                        <Checkbox
-                          checked={isItemSelected(item)}
-                          onCheckedChange={(checked) =>
-                            handleSelectItem(item, checked as boolean)
-                          }
-                          aria-label={`Seleccionar fila ${index + 1}`}
-                          className="h-3 w-3"
-                        />
-                      </div>
-                    )}
-                    {columns.map((column) => (
-                      <div
-                        key={String(column.key)}
-                        className={cn(
-                          "text-xs flex items-center justify-start",
-                          mode === "budget" && "text-[var(--table-row-fg)]",
-                          mode === "construction" && "text-[var(--table-row-fg)]"
-                        )}
-                      >
-                        {column.render
-                          ? column.render(item)
-                          : String(item[column.key as keyof T] || "-")}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </Fragment>
-            ))
-          ) : (
-            // Renderizado sin agrupamiento (comportamiento original)
-            paginatedData.map((item, index) => (
-              <div
-                key={getItemId(item)}
-                className={cn(
-                  "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
-                  index < paginatedData.length - 1
-                    ? "border-b border-[var(--table-row-border)]"
-                    : "",
-                  getRowClassName?.(item),
-                )}
-                style={{ gridTemplateColumns: getGridTemplateColumns() }}
-              >
-                {selectable && (
-                  <div className="flex items-center justify-center">
-                    <Checkbox
-                      checked={isItemSelected(item)}
-                      onCheckedChange={(checked) =>
-                        handleSelectItem(item, checked as boolean)
-                      }
-                      aria-label={`Seleccionar fila ${index + 1}`}
-                      className="h-3 w-3"
-                    />
-                  </div>
-                )}
-                {columns.map((column) => (
-                  <div
-                    key={String(column.key)}
-                    className="text-xs flex items-center justify-start"
-                  >
-                    {column.render
-                      ? column.render(item)
-                      : String(item[column.key as keyof T] || "-")}
-                  </div>
-                ))}
-              </div>
-            ))
-          )}
-          
-          {/* 🆕 FILA DE TOTALES */}
-          {renderFooterRow && (
-            <div className={cn(
-              "grid gap-4 px-4 py-3",
-              mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
-              mode === "construction" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
-              mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
-              "text-xs font-medium"
-            )}
-            style={{ gridTemplateColumns: getGridTemplateColumns() }}
+        {/* 🆕 TABLE ROWS - Con scroll virtual o renderizado tradicional */}
+        {enableVirtualScroll ? (
+          // 🔥 SCROLL VIRTUAL - Contenedor con altura fija
+          <div
+            ref={parentRef}
+            className="overflow-auto"
+            style={{ height: `${virtualScrollHeight}px` }}
+          >
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
             >
-              {renderFooterRow()}
+              {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                const item = virtualItems[virtualItem.index];
+                
+                return (
+                  <div
+                    key={virtualItem.index}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                  >
+                    {item.type === 'group-header' && renderGroupHeader && item.groupKey && item.groupRows ? (
+                      // Header del grupo
+                      <div className={cn(
+                        "grid gap-4 px-4 py-3",
+                        mode === "budget" && "border-b border-[var(--table-row-border)]",
+                        mode === "construction" && "border-b border-[var(--table-row-border)]",
+                        mode === "default" && "border-b border-[var(--table-header-border)]",
+                        "text-xs font-medium [&>*]:text-xs [&>*]:font-medium"
+                      )}
+                      style={{ 
+                        gridTemplateColumns: getGridTemplateColumns(),
+                        backgroundColor: "var(--table-group-header-bg)",
+                        color: "var(--table-group-header-fg)"
+                      }}
+                      >
+                        {renderGroupHeader(item.groupKey, item.groupRows)}
+                      </div>
+                    ) : item.type === 'row' && item.data ? (
+                      // Fila de datos
+                      <div
+                        className={cn(
+                          "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]",
+                          getRowClassName?.(item.data),
+                        )}
+                        style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                      >
+                        {selectable && (
+                          <div className="flex items-center justify-center">
+                            <Checkbox
+                              checked={isItemSelected(item.data)}
+                              onCheckedChange={(checked) =>
+                                handleSelectItem(item.data!, checked as boolean)
+                              }
+                              aria-label={`Seleccionar fila ${virtualItem.index + 1}`}
+                              className="h-3 w-3"
+                            />
+                          </div>
+                        )}
+                        {columns.map((column) => (
+                          <div
+                            key={String(column.key)}
+                            className={cn(
+                              "text-xs flex items-center justify-start",
+                              mode === "budget" && "text-[var(--table-row-fg)]",
+                              mode === "construction" && "text-[var(--table-row-fg)]"
+                            )}
+                          >
+                            {column.render
+                              ? column.render(item.data!)
+                              : String(item.data![column.key as keyof T] || "-")}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          // 🔄 RENDERIZADO TRADICIONAL - Sin scroll virtual
+          <div>
+            {groupBy ? (
+              // Renderizado con agrupamiento
+              Object.entries(groupedData).map(([groupKey, groupRows]) => (
+                <Fragment key={groupKey}>
+                  {/* Header de grupo */}
+                  {renderGroupHeader && (
+                    <div className={cn(
+                      "grid gap-4 px-4 py-3",
+                      mode === "budget" && "border-b border-[var(--table-row-border)]",
+                      mode === "construction" && "border-b border-[var(--table-row-border)]",
+                      mode === "default" && "border-b border-[var(--table-header-border)]",
+                      "text-xs font-medium [&>*]:text-xs [&>*]:font-medium"
+                    )}
+                    style={{ 
+                      gridTemplateColumns: getGridTemplateColumns(),
+                      backgroundColor: "var(--table-group-header-bg)",
+                      color: "var(--table-group-header-fg)"
+                    }}
+                    >
+                      {renderGroupHeader(groupKey, groupRows)}
+                    </div>
+                  )}
+                  
+                  {/* Filas del grupo */}
+                  {groupRows.map((item, index) => (
+                    <div
+                      key={getItemId(item)}
+                      className={cn(
+                        "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                        index < groupRows.length - 1 ? "border-b border-[var(--table-row-border)]" : "",
+                        getRowClassName?.(item),
+                      )}
+                      style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                    >
+                      {selectable && (
+                        <div className="flex items-center justify-center">
+                          <Checkbox
+                            checked={isItemSelected(item)}
+                            onCheckedChange={(checked) =>
+                              handleSelectItem(item, checked as boolean)
+                            }
+                            aria-label={`Seleccionar fila ${index + 1}`}
+                            className="h-3 w-3"
+                          />
+                        </div>
+                      )}
+                      {columns.map((column) => (
+                        <div
+                          key={String(column.key)}
+                          className={cn(
+                            "text-xs flex items-center justify-start",
+                            mode === "budget" && "text-[var(--table-row-fg)]",
+                            mode === "construction" && "text-[var(--table-row-fg)]"
+                          )}
+                        >
+                          {column.render
+                            ? column.render(item)
+                            : String(item[column.key as keyof T] || "-")}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </Fragment>
+              ))
+            ) : (
+              // Renderizado sin agrupamiento (comportamiento original)
+              paginatedData.map((item, index) => (
+                <div
+                  key={getItemId(item)}
+                  className={cn(
+                    "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors",
+                    index < paginatedData.length - 1
+                      ? "border-b border-[var(--table-row-border)]"
+                      : "",
+                    getRowClassName?.(item),
+                  )}
+                  style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                >
+                  {selectable && (
+                    <div className="flex items-center justify-center">
+                      <Checkbox
+                        checked={isItemSelected(item)}
+                        onCheckedChange={(checked) =>
+                          handleSelectItem(item, checked as boolean)
+                        }
+                        aria-label={`Seleccionar fila ${index + 1}`}
+                        className="h-3 w-3"
+                      />
+                    </div>
+                  )}
+                  {columns.map((column) => (
+                    <div
+                      key={String(column.key)}
+                      className="text-xs flex items-center justify-start"
+                    >
+                      {column.render
+                        ? column.render(item)
+                        : String(item[column.key as keyof T] || "-")}
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
+            
+            {/* 🆕 FILA DE TOTALES */}
+            {renderFooterRow && (
+              <div className={cn(
+                "grid gap-4 px-4 py-3",
+                mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
+                mode === "construction" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
+                mode === "default" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
+                "text-xs font-medium"
+              )}
+              style={{ gridTemplateColumns: getGridTemplateColumns() }}
+              >
+                {renderFooterRow()}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Mobile Card View */}
+      {/* Mobile Card View - Siempre usa flattenedData (sin virtual scroll) */}
       <div className="lg:hidden">
-        {paginatedData.map((item, index) =>
+        {(enableVirtualScroll ? flattenedData : paginatedData).map((item, index) =>
           renderCard ? (
             // Use custom card renderer if provided
             <div key={index} onClick={() => onCardClick?.(item)}>
