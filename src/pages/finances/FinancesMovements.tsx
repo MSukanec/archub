@@ -1323,8 +1323,9 @@ export default function Movements() {
 
 
 
-      {/* ActionBarDesktopRow */}
-      <ActionBarDesktopRow
+      {/* ActionBar Desktop */}
+      <div className="hidden md:block">
+        <ActionBarDesktopRow
         filters={[
           {
             key: 'type',
@@ -1397,6 +1398,7 @@ export default function Movements() {
           </CustomRestricted>
         }
       />
+      </div>
       
       {/* Cards de resumen financiero - Solo mostrar si hay movimientos */}
       {processedMovements.length > 0 && (
