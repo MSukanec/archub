@@ -733,6 +733,9 @@ export default function ConstructionBudgets() {
 
 
 
+  console.log('🚀 BEFORE RETURN - About to render JSX');
+  console.log('🚀 RENDER DATA:', { budgetsLength: budgets.length, selectedBudgetId });
+
   return (
     <Layout wide={true} headerProps={headerProps}>
       {/* Feature Introduction - Mobile only */}
