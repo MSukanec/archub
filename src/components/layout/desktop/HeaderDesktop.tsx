@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Plus, Filter, X, Search, Building, Building2, Folder, Menu, DollarSign, Users, Calendar, BarChart3, FileText, Settings, User } from "lucide-react";
+import { ChevronDown, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -131,6 +131,21 @@ export function HeaderDesktop({
     return "Archub";
   };
 
+  const getBreadcrumbText = () => {
+    const section = getCurrentSectionLabel();
+    const pageName = pageMap[location];
+    const projectName = projects.find(p => p.id === userData?.preferences?.last_project_id)?.name;
+    
+    if (isProjectBasedSection && projectName) {
+      if (pageName && section !== pageName) {
+        return `${projectName} / ${section} / ${pageName}`;
+      }
+      return `${projectName} / ${section}`;
+    }
+    
+    return title || section;
+  };
+
   // Mapeo de páginas específicas - definido fuera de funciones para reutilizar
   const pageMap: { [key: string]: string } = {
     // Finanzas
@@ -162,50 +177,7 @@ export function HeaderDesktop({
     "/organization/tasks": "Tareas para Hacer"
   };
 
-  const getPageBreadcrumb = () => {
-    const section = getCurrentSectionLabel();
-    const pageName = pageMap[location];
-    
-    if (pageName && section !== pageName) {
-      return `${section} > ${pageName}`;
-    }
-    
-    return title || section;
-  };
 
-  const getBreadcrumbIcon = () => {
-    // Mapeo específico de páginas a iconos
-    const iconMap: { [key: string]: React.ReactNode } = {
-      // Finanzas
-      "/finances/movements": <DollarSign className="w-4 h-4 text-[var(--accent)]" />,
-      "/finances/installments": <FileText className="w-4 h-4 text-[var(--accent)]" />, 
-      "/finances/analysis": <BarChart3 className="w-4 h-4 text-[var(--accent)]" />,
-      "/finances": <DollarSign className="w-4 h-4 text-[var(--accent)]" />,
-      
-      // Construcción  
-      "/construction/tasks": <BarChart3 className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction/budgets": <DollarSign className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction/materials": <Building2 className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction/schedule": <Calendar className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction/logs": <FileText className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction/attendance": <Users className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction/gallery": <FileText className="w-4 h-4 text-[var(--accent)]" />,
-      "/construction": <Building2 className="w-4 h-4 text-[var(--accent)]" />,
-      
-      // Diseño
-      "/design/dashboard": <Building2 className="w-4 h-4 text-[var(--accent)]" />,
-      "/design/documentation": <FileText className="w-4 h-4 text-[var(--accent)]" />,
-      
-      // Organización
-      "/organization/projects": <Folder className="w-4 h-4 text-[var(--accent)]" />,
-      "/organization/contacts": <Users className="w-4 h-4 text-[var(--accent)]" />,
-      "/organization/preferences": <Settings className="w-4 h-4 text-[var(--accent)]" />,
-      "/organization/activity": <BarChart3 className="w-4 h-4 text-[var(--accent)]" />,
-      "/organization/tasks": <FileText className="w-4 h-4 text-[var(--accent)]" />
-    };
-
-    return iconMap[location] || <Folder className="w-4 h-4 text-[var(--accent)]" />;
-  };
 
   const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/organization");
 
@@ -227,15 +199,66 @@ export function HeaderDesktop({
     >
       {/* Primera fila: Breadcrumb y Selector de Proyecto */}
       <div className="w-full h-10 px-4 flex items-center justify-between">
-        {/* Left: Page Title with Icon */}
+        {/* Left: Breadcrumb */}
         <div className="flex items-center gap-2">
-          {getBreadcrumbIcon()}
-          <h1 className="text-sm font-medium text-[var(--layout-text)]">
-            {pageMap[location] || title || getCurrentSectionLabel()}
-          </h1>
+          {isProjectBasedSection ? (
+            /* Project-based breadcrumb with dropdown */
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium text-[var(--layout-text)]">
+                {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto"}
+              </span>
+              <CustomRestricted feature="project_management">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56">
+                    {projects.map((project) => (
+                      <DropdownMenuItem
+                        key={project.id}
+                        onClick={() => handleProjectChange(project.id)}
+                        className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                      >
+                        <div className="flex items-center w-full">
+                          <Folder className="w-4 h-4 mr-2" />
+                          <span className="truncate">{project.name}</span>
+                        </div>
+                        {userData?.preferences?.last_project_id === project.id && (
+                          <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </CustomRestricted>
+              <span className="text-sm text-[var(--layout-text-muted)]">/</span>
+              <span className="text-sm font-medium text-[var(--layout-text)]">
+                {getCurrentSectionLabel()}
+              </span>
+              {pageMap[location] && getCurrentSectionLabel() !== pageMap[location] && (
+                <>
+                  <span className="text-sm text-[var(--layout-text-muted)]">/</span>
+                  <span className="text-sm font-medium text-[var(--layout-text)]">
+                    {pageMap[location]}
+                  </span>
+                </>
+              )}
+            </div>
+          ) : (
+            /* Non-project breadcrumb */
+            <h1 className="text-sm font-medium text-[var(--layout-text)]">
+              {title || getCurrentSectionLabel()}
+            </h1>
+          )}
         </div>
 
-        {/* Right: Action Button + Project Selector */}
+        {/* Right: Action Button */}
         <div className="flex items-center gap-2">
           {/* Action Button */}
           {actionButton && (
@@ -248,43 +271,6 @@ export function HeaderDesktop({
               {actionButton.icon && <actionButton.icon className="w-4 h-4 mr-1" />}
               {actionButton.label}
             </Button>
-          )}
-
-          {/* Project Selector (only if project-based section) */}
-          {isProjectBasedSection && (
-            <CustomRestricted feature="project_management">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                  >
-                    <Folder className="w-4 h-4 mr-1" />
-                    {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Seleccionar proyecto"}
-                    <ChevronDown className="w-3 h-3 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  
-                  {projects.map((project) => (
-                    <DropdownMenuItem
-                      key={project.id}
-                      onClick={() => handleProjectChange(project.id)}
-                      className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
-                    >
-                      <div className="flex items-center w-full">
-                        <Folder className="w-4 h-4 mr-2" />
-                        <span className="truncate">{project.name}</span>
-                      </div>
-                      {userData?.preferences?.last_project_id === project.id && (
-                        <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CustomRestricted>
           )}
         </div>
       </div>
