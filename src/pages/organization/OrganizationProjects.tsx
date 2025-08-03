@@ -375,14 +375,7 @@ export default function OrganizationProjects() {
 
   const headerProps = {
     icon: Folder,
-    title: "Proyectos",
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    showFilters: true,
-    customFilters,
-    onClearFilters: clearFilters,
-    actions
+    title: "Proyectos"
   }
 
   if (isLoading || projectsLoading) {
@@ -452,24 +445,44 @@ export default function OrganizationProjects() {
               key: 'status',
               label: 'Estado',
               icon: FILTER_ICONS.FILTER,
-              value: filterByStatus === 'all' ? '' : filterByStatus,
-              setValue: (value) => setFilterByStatus(value || 'all'),
-              options: ['active', 'planning', 'completed', 'on-hold'],
+              value: filterByStatus === 'all' ? '' : (
+                filterByStatus === 'active' ? 'Activo' :
+                filterByStatus === 'planning' ? 'Planificación' :
+                filterByStatus === 'completed' ? 'Completado' :
+                filterByStatus === 'on-hold' ? 'En Pausa' : ''
+              ),
+              setValue: (value) => {
+                if (value === 'Activo') setFilterByStatus('active');
+                else if (value === 'Planificación') setFilterByStatus('planning');
+                else if (value === 'Completado') setFilterByStatus('completed');
+                else if (value === 'En Pausa') setFilterByStatus('on-hold');
+                else setFilterByStatus('all');
+              },
+              options: ['Activo', 'Planificación', 'Completado', 'En Pausa'],
               defaultLabel: 'Todos los Estados'
             },
             {
               key: 'sort',
               label: 'Ordenar',
               icon: SortAsc,
-              value: sortBy === 'date_recent' ? '' : sortBy,
-              setValue: (value) => setSortBy(value || 'date_recent'),
-              options: ['name_asc', 'name_desc', 'date_recent', 'date_oldest'],
+              value: sortBy === 'date_recent' ? '' : (
+                sortBy === 'name_asc' ? 'Nombre A-Z' :
+                sortBy === 'name_desc' ? 'Nombre Z-A' :
+                sortBy === 'date_oldest' ? 'Más Antiguos' : ''
+              ),
+              setValue: (value) => {
+                if (value === 'Nombre A-Z') setSortBy('name_asc');
+                else if (value === 'Nombre Z-A') setSortBy('name_desc');
+                else if (value === 'Más Antiguos') setSortBy('date_oldest');
+                else setSortBy('date_recent');
+              },
+              options: ['Nombre A-Z', 'Nombre Z-A', 'Más Recientes', 'Más Antiguos'],
               defaultLabel: 'Más Recientes'
             }
           ]}
           actions={[
             {
-              label: ACTION_LABELS.ADD_ITEM,
+              label: 'Nuevo Proyecto',
               icon: ACTION_ICONS.ADD,
               onClick: () => openModal('project', {}),
               variant: 'default'
@@ -490,50 +503,7 @@ export default function OrganizationProjects() {
           className="md:hidden"
         />
 
-        {/* General Mode Card */}
-        <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200 cursor-default">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12 border border-black shadow-lg">
-                  <AvatarFallback className="text-black font-bold text-lg bg-gray-200">
-                    G
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold text-foreground text-lg">General</h3>
-                  <p className="text-sm text-muted-foreground">Ver información de toda la organización</p>
-                </div>
-              </div>
-              
-              {!userData?.preferences?.last_project_id ? (
-                <Button 
-                  size="sm"
-                  className="text-xs font-medium px-3 py-1 h-7 text-white"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Already in General mode, do nothing
-                  }}
-                >
-                  ACTIVO
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="text-xs font-medium px-3 py-1 h-7"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectGeneral();
-                  }}
-                >
-                  Seleccionar activo
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
