@@ -1332,6 +1332,11 @@ export default function Movements() {
     <Layout
       headerProps={{
         title: "Movimientos",
+        actionButton: {
+          label: "Nuevo Movimiento",
+          icon: Plus,
+          onClick: () => openModal("newMovement")
+        }
       }}
       wide={true}
     >
@@ -1665,7 +1670,7 @@ export default function Movements() {
           setSelectedMovements(regularMovements);
         }}
         getItemId={(item) => item.id}
-        renderCard={(item: Movement | ConversionGroup | TransferGroup) => {
+        renderCard={(item: any) => {
           if ('is_conversion_group' in item) {
             // Render ConversionCard for conversion groups
             return (
@@ -1673,9 +1678,9 @@ export default function Movements() {
                 conversion={item}
                 onEdit={handleEditConversion}
                 onDelete={handleDeleteConversion}
-                onToggleFavorite={(conversionGroup) => {
+                onToggleFavorite={(conversionGroup: any) => {
                   // Toggle favorite for all movements in the group
-                  conversionGroup.movements.forEach(movement => {
+                  conversionGroup.movements.forEach((movement: any) => {
                     handleToggleFavorite(movement);
                   });
                 }}
@@ -1688,9 +1693,9 @@ export default function Movements() {
                 transfer={item}
                 onEdit={handleEditTransfer}
                 onDelete={handleDeleteTransfer}
-                onToggleFavorite={(transferGroup) => {
+                onToggleFavorite={(transferGroup: any) => {
                   // Toggle favorite for all movements in the group
-                  transferGroup.movements.forEach(movement => {
+                  transferGroup.movements.forEach((movement: any) => {
                     handleToggleFavorite(movement);
                   });
                 }}

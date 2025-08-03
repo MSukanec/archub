@@ -45,6 +45,12 @@ interface HeaderDesktopProps {
   // Props para sistema de tabs
   tabs?: Tab[];
   onTabChange?: (tabId: string) => void;
+  // 🆕 NUEVA PROP: Botón de acción principal
+  actionButton?: {
+    label: string;
+    icon?: React.ComponentType<any>;
+    onClick: () => void;
+  };
 }
 
 export function HeaderDesktop({
@@ -60,6 +66,7 @@ export function HeaderDesktop({
   actions = [],
   tabs = [],
   onTabChange,
+  actionButton,
 }: HeaderDesktopProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
@@ -228,8 +235,22 @@ export function HeaderDesktop({
           </h1>
         </div>
 
-        {/* Right: Project Selector (only if project-based section) */}
-        <div className="flex items-center">
+        {/* Right: Action Button + Project Selector */}
+        <div className="flex items-center gap-2">
+          {/* Action Button */}
+          {actionButton && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={actionButton.onClick}
+              className="h-8 px-3 text-xs font-normal"
+            >
+              {actionButton.icon && <actionButton.icon className="w-4 h-4 mr-1" />}
+              {actionButton.label}
+            </Button>
+          )}
+
+          {/* Project Selector (only if project-based section) */}
           {isProjectBasedSection && (
             <CustomRestricted feature="project_management">
               <DropdownMenu>

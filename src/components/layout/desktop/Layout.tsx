@@ -37,6 +37,11 @@ interface LayoutProps {
     actions?: React.ReactNode[];
     tabs?: Tab[];
     onTabChange?: (tabId: string) => void;
+    actionButton?: {
+      label: string;
+      icon?: React.ComponentType<any>;
+      onClick: () => void;
+    };
   };
 }
 
