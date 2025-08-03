@@ -77,10 +77,21 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
 
   const toggleFolder = (folderId: string) => {
-    setExpandedFolders(prev => ({
-      ...prev,
-      [folderId]: !prev[folderId]
-    }));
+    setExpandedFolders(prev => {
+      // If clicking the same folder that's already expanded, close it
+      if (prev[folderId]) {
+        return { ...prev, [folderId]: false };
+      }
+      
+      // Otherwise, close all folders and open only the clicked one
+      const newState: ExpandedState = {};
+      Object.keys(prev).forEach(key => {
+        newState[key] = false;
+      });
+      newState[folderId] = true;
+      
+      return newState;
+    });
   };
 
   const toggleGroup = (groupId: string) => {
@@ -258,9 +269,9 @@ function FolderItemWithSubfolders({
                     No hay entregas en esta carpeta
                     <div className="mt-2">
                       <Button
-                        variant="outline"
+                        variant="default"
                         size="sm"
-                        onClick={() => openModal('document-group', { 
+                        onClick={() => openModal('new-design-document-group', { 
                           folderId: folder.id 
                         })}
                         className="h-8 px-3 text-xs"
@@ -274,14 +285,15 @@ function FolderItemWithSubfolders({
 
                 {/* Ungrouped Documents */}
                 {ungroupedDocuments.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <h4 className="text-sm font-medium text-muted-foreground">Documentos sin entrega</h4>
-                    {ungroupedDocuments.map((document) => (
-                      <DocumentItem
-                        key={document.id}
-                        document={document}
-                      />
-                    ))}
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-3">Documentos sin entrega</h4>
+                    <div className="bg-muted/30 rounded-lg border">
+                      {ungroupedDocuments.map((document, index) => (
+                        <div key={document.id} className={index !== ungroupedDocuments.length - 1 ? "border-b border-border/50" : ""}>
+                          <DocumentItem document={document} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </>
@@ -394,9 +406,9 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                   No hay entregas en esta carpeta
                   <div className="mt-2">
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="sm"
-                      onClick={() => openModal('document-group', { 
+                      onClick={() => openModal('new-design-document-group', { 
                         folderId: folder.id 
                       })}
                       className="h-7 px-3 text-xs"
@@ -410,14 +422,15 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
 
               {/* Ungrouped Documents */}
               {ungroupedDocuments.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Documentos sin entrega</h4>
-                  {ungroupedDocuments.map((document) => (
-                    <DocumentItem
-                      key={document.id}
-                      document={document}
-                    />
-                  ))}
+                <div className="mt-3">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Documentos sin entrega</h4>
+                  <div className="bg-muted/30 rounded-lg border">
+                    {ungroupedDocuments.map((document, index) => (
+                      <div key={document.id} className={index !== ungroupedDocuments.length - 1 ? "border-b border-border/50" : ""}>
+                        <DocumentItem document={document} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </>
@@ -467,11 +480,15 @@ function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
       </Button>
 
       {isExpanded && (
-        <div className="px-3 pb-3 space-y-2">
+        <div className="px-3 pb-3">
           {groupDocuments && groupDocuments.length > 0 ? (
-            groupDocuments.map((document) => (
-              <DocumentItem key={document.id} document={document} />
-            ))
+            <div className="bg-muted/30 rounded-lg border">
+              {groupDocuments.map((document, index) => (
+                <div key={document.id} className={index !== groupDocuments.length - 1 ? "border-b border-border/50" : ""}>
+                  <DocumentItem document={document} />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="text-center py-4 text-sm text-muted-foreground">
               Esta entrega está vacía
@@ -488,30 +505,74 @@ interface DocumentItemProps {
 }
 
 function DocumentItem({ document }: DocumentItemProps) {
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'aprobado':
+        return <Circle className="h-3 w-3 text-green-500 fill-current" />;
+      case 'rechazado':
+        return <Circle className="h-3 w-3 text-red-500 fill-current" />;
+      case 'en_revision':
+        return <Circle className="h-3 w-3 text-blue-500 fill-current" />;
+      default:
+        return <Circle className="h-3 w-3 text-gray-400 fill-current" />;
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (!bytes) return '';
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(1)} MB`;
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
+  };
+
   return (
-    <Card className="p-3">
-      <div className="flex items-center gap-3">
-        <FileText className="h-4 w-4 text-blue-500" />
-        <div className="flex-1 min-w-0">
-          <div className="font-medium truncate">{document.name}</div>
-          <div className="text-sm text-muted-foreground">
-            {document.file_size && `${(document.file_size / 1024 / 1024).toFixed(1)} MB`}
-            {document.created_at && (
-              <span className="ml-2">
-                {format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}
-              </span>
-            )}
-          </div>
+    <div className="flex items-center px-3 py-2 hover:bg-muted/50 rounded-md transition-colors">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Status dot */}
+        <div className="flex-shrink-0">
+          {getStatusIcon(document.status)}
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+        
+        {/* File icon */}
+        <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+        
+        {/* File name */}
+        <div className="font-medium truncate min-w-0 flex-1">
+          {document.name}
         </div>
       </div>
-    </Card>
+      
+      {/* Status text */}
+      <div className="text-xs text-muted-foreground min-w-0 px-2">
+        {document.status === 'aprobado' && 'Aprobado'}
+        {document.status === 'rechazado' && 'Rechazado'}
+        {document.status === 'en_revision' && 'En revisión'}
+        {!document.status && 'Pendiente'}
+      </div>
+      
+      {/* File size */}
+      <div className="text-xs text-muted-foreground min-w-0 px-2">
+        {formatFileSize(document.file_size)}
+      </div>
+      
+      {/* Date */}
+      <div className="text-xs text-muted-foreground min-w-0 px-2">
+        {formatDate(document.created_at)}
+      </div>
+      
+      {/* Actions */}
+      <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+          <Download className="h-3 w-3" />
+        </Button>
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+          <MoreVertical className="h-3 w-3" />
+        </Button>
+      </div>
+    </div>
   );
 }
