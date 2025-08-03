@@ -60,10 +60,10 @@ export function SelectableGhostButton({
           className={buttonClassName}
           disabled={disabled}
         >
-          {icon && <span className="mr-1">{icon}</span>}
+          {icon && <span style={{ marginRight: '0.2em' }}>{icon}</span>}
           <span className="font-medium">{title}:</span>
-          <span className="ml-1 font-normal">{selectedLabel}</span>
-          {showChevron && <ChevronDown className="w-3 h-3 ml-1" />}
+          <span style={{ marginLeft: '0.2em' }} className="font-normal">{selectedLabel}</span>
+          {showChevron && <ChevronDown className="w-3 h-3" style={{ marginLeft: '0.2em' }} />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
