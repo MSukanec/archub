@@ -5,7 +5,9 @@ import { es } from "date-fns/locale";
 import { FileText, Plus, Star, Globe, Lock, ChevronDown, ChevronRight, Edit, Trash2, MoreHorizontal, Flame, Package, StickyNote, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, Thermometer, TrendingUp, Users, AlertTriangle, CloudSun, CheckCircle, Search, Camera, Eye, Calendar, Filter, X, Image, Video, Clock, Settings, BarChart3 } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton';
+import { FILTER_ICONS } from '@/constants/actionBarConstants';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -367,60 +369,7 @@ export default function ConstructionLogs() {
     setDeleteDialogOpen(true);
   };
 
-  const customFilters = (
-    <div className="flex gap-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date_recent">Más recientes</SelectItem>
-            <SelectItem value="date_old">Más antiguos</SelectItem>
-            <SelectItem value="type">Tipo</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtrar por tipo</Label>
-        <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
-            {Object.entries(entryTypes).map(([key, { label }]) => (
-              <SelectItem key={key} value={key}>{label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtros adicionales</Label>
-        <div className="flex gap-3">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="favorites"
-              checked={favoritesOnly}
-              onCheckedChange={setFavoritesOnly}
-            />
-            <Label htmlFor="favorites" className="text-sm">Solo favoritos</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="public"
-              checked={publicOnly}
-              onCheckedChange={setPublicOnly}
-            />
-            <Label htmlFor="public" className="text-sm">Solo públicos</Label>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   const clearFilters = () => {
     setSearchValue("");
@@ -430,16 +379,7 @@ export default function ConstructionLogs() {
     setPublicOnly(false);
   };
 
-  const actions = [
-    <Button 
-      key="new-entry"
-      className="h-8 px-3 text-sm"
-      onClick={() => openModal('site-log')}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Nueva Bitácora
-    </Button>
-  ];
+
 
   const headerProps = {
     icon: FileText,
@@ -457,7 +397,8 @@ export default function ConstructionLogs() {
   }
 
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout>
+      <div className="space-y-6">
       {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
         title="Bitácora de Construcción"
@@ -486,57 +427,62 @@ export default function ConstructionLogs() {
         ]}
       />
 
-      {/* Action Bar Desktop - siempre visible */}
-      <ActionBarDesktop
-        title="Bitácora de Construcción"
-        icon={<FileText className="w-6 h-6" />}
-        features={[
-          {
-            icon: <StickyNote className="w-5 h-5" />,
-            title: "Registro Diario Completo",
-            description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
-          },
-          {
-            icon: <Camera className="w-5 h-5" />,
-            title: "Documentación Visual",
-            description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
-          },
-          {
-            icon: <Settings className="w-5 h-5" />,
-            title: "Control de Privacidad",
-            description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
-          },
-          {
-            icon: <Clock className="w-5 h-5" />,
-            title: "Seguimiento Temporal",
-            description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
+      {/* ActionBar Desktop */}
+      <div className="hidden md:block">
+        <ActionBarDesktopRow
+          filters={[
+            {
+              key: 'sort',
+              label: 'Ordenar',
+              icon: FILTER_ICONS.FILTER,
+              value: sortBy,
+              setValue: setSortBy,
+              options: ['date_recent', 'date_old', 'type'],
+              defaultLabel: 'Más Recientes'
+            },
+            {
+              key: 'type',
+              label: 'Tipo de Entrada',
+              icon: FILTER_ICONS.CATEGORY,
+              value: filterByType,
+              setValue: setFilterByType,
+              options: ['all', ...Object.keys(entryTypes)],
+              defaultLabel: 'Todos los Tipos'
+            },
+            {
+              key: 'special',
+              label: 'Filtros Especiales',
+              icon: FILTER_ICONS.FAVORITES,
+              value: favoritesOnly ? 'favorites' : publicOnly ? 'public' : 'all',
+              setValue: (value) => {
+                setFavoritesOnly(value === 'favorites');
+                setPublicOnly(value === 'public');
+              },
+              options: ['all', 'favorites', 'public'],
+              defaultLabel: 'Todas las Entradas'
+            }
+          ]}
+          actions={[
+            {
+              label: 'Nueva Bitácora',
+              icon: Plus,
+              onClick: () => openModal('site-log'),
+              variant: 'default'
+            }
+          ]}
+          customRestricted={
+            <CustomRestricted 
+              reason="general_mode" 
+              functionName="Nueva Bitácora"
+            >
+              <Button onClick={() => openModal('site-log')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nueva Bitácora
+              </Button>
+            </CustomRestricted>
           }
-        ]}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        primaryActionLabel="Nueva Bitácora"
-        onPrimaryActionClick={() => openModal('site-log')}
-        primaryActionRestriction={{
-          reason: "general_mode",
-          functionName: "Nueva Bitácora"
-        }}
-        customFilters={customFilters}
-        onClearFilters={clearFilters}
-        tabs={[
-          {
-            value: "bitacoras",
-            label: "Bitácoras",
-            icon: <FileText className="h-4 w-4" />
-          },
-          {
-            value: "graficos",
-            label: "Gráficos Avanzados",
-            icon: <BarChart3 className="h-4 w-4" />
-          }
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+        />
+      </div>
 
       {filteredSiteLogs.length === 0 ? (
         <EmptyState
@@ -886,6 +832,7 @@ export default function ConstructionLogs() {
         isOpen={lightbox.isOpen}
         onClose={lightbox.closeLightbox}
       />
+      </div>
     </Layout>
   );
 }
