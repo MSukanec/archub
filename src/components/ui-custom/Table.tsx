@@ -339,21 +339,24 @@ export function Table<T = any>({
 
   return (
     <div className={cn("space-y-3", className)}>
+      {/* Nueva barra superior flexible - FUERA de la tabla */}
+      {topBar && (
+        <TableTopBar
+          tabs={topBar.tabs}
+          activeTab={topBar.activeTab}
+          onTabChange={topBar.onTabChange}
+          showSearch={topBar.showSearch}
+          onSearchChange={topBar.onSearchChange}
+          searchValue={topBar.searchValue}
+          showFilter={topBar.showFilter}
+          renderFilterContent={topBar.renderFilterContent}
+          showSort={topBar.showSort}
+          renderSortContent={topBar.renderSortContent}
+        />
+      )}
+      
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
-        {/* Nueva barra superior flexible */}
-        <TableTopBar
-          tabs={topBar?.tabs}
-          activeTab={topBar?.activeTab}
-          onTabChange={topBar?.onTabChange}
-          showSearch={topBar?.showSearch}
-          onSearchChange={topBar?.onSearchChange}
-          searchValue={topBar?.searchValue}
-          showFilter={topBar?.showFilter}
-          renderFilterContent={topBar?.renderFilterContent}
-          showSort={topBar?.showSort}
-          renderSortContent={topBar?.renderSortContent}
-        />
         
         {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}
         {headerActions && showDoubleHeader && (

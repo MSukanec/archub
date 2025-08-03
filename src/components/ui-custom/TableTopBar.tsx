@@ -47,7 +47,7 @@ export function TableTopBar({
   };
 
   return (
-    <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+    <div className="hidden lg:block rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] mb-4 shadow-sm">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Lado izquierdo - Tabs */}
         <div className="flex items-center gap-1">
@@ -71,25 +71,32 @@ export function TableTopBar({
 
         {/* Lado derecho - Búsqueda, Orden, Filtros */}
         <div className="flex items-center gap-2">
-          {/* Buscador expandible */}
+          {/* Buscador como botón ghost expandible */}
           {showSearch && (
-            <div className={cn(
-              "relative transition-all duration-200",
-              searchFocused ? "w-64" : "w-48"
-            )}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
-              <Input
-                placeholder="Buscar..."
-                value={searchInputValue}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                className={cn(
-                  "pl-10 pr-4 h-8 text-sm border-0 bg-[var(--muted)] focus:bg-[var(--background)] transition-all",
-                  "placeholder:text-[var(--muted-foreground)]"
-                )}
-              />
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Buscar
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-3" align="end">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+                  <Input
+                    placeholder="Buscar movimientos..."
+                    value={searchInputValue}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="pl-10 pr-4 h-9 text-sm"
+                    autoFocus
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
 
           {/* Botón de ordenamiento */}
@@ -99,9 +106,10 @@ export function TableTopBar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                  className="h-8 px-3 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
                 >
-                  <ArrowUpDown className="h-4 w-4" />
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  Orden
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-2" align="end">
@@ -117,9 +125,10 @@ export function TableTopBar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                  className="h-8 px-3 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
                 >
-                  <Filter className="h-4 w-4" />
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtros
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-2" align="end">
