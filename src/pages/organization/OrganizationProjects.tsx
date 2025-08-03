@@ -413,7 +413,7 @@ export default function OrganizationProjects() {
         <ActionBarDesktop
           title="Gestión de Proyectos"
           icon={<Folder className="w-5 h-5" />}
-          showProjectSelector={false}
+          showProjectSelector={true}
           features={[
             {
               icon: <Plus className="w-5 h-5" />,
