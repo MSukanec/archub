@@ -204,9 +204,6 @@ export function HeaderDesktop({
           {isProjectBasedSection ? (
             /* Project-based breadcrumb with dropdown */
             <div className="flex items-center gap-1">
-              <span className="text-sm font-medium text-[var(--layout-text)]">
-                {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto"}
-              </span>
               <CustomRestricted feature="project_management">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -237,6 +234,9 @@ export function HeaderDesktop({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CustomRestricted>
+              <span className="text-sm font-medium text-[var(--layout-text)]">
+                {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto"}
+              </span>
               <span className="text-sm text-[var(--layout-text-muted)]">/</span>
               <span className="text-sm font-medium text-[var(--layout-text)]">
                 {getCurrentSectionLabel()}
