@@ -154,7 +154,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
               </Button>
             ) : (
               <Button 
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 className="text-xs font-medium px-3 py-1 h-7"
                 onClick={(e) => {
