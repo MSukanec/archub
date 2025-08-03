@@ -149,8 +149,8 @@ export default function OrganizationContacts() {
 
   const handleEditContact = (contact: any) => {
     openModal('contact', { 
-      isEditing: true, 
-      editingContact: contact 
+      editingContact: contact,
+      isEditing: true
     })
   }
 
@@ -305,7 +305,7 @@ export default function OrganizationContacts() {
             size="sm"
             onClick={(e) => {
               e.stopPropagation()
-              openModal('contact', { contact, isEditing: true })
+              openModal('contact', { editingContact: contact, isEditing: true })
             }}
             className="h-8 w-8 p-0"
           >
