@@ -1,29 +1,27 @@
 import { useState } from "react";
 import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign } from "lucide-react";
-import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useMobile } from "@/hooks/use-mobile";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 
 export default function ConstructionSubcontracts() {
   const { data: userData } = useCurrentUser();
-  const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
   
-  // Estado para controles del ActionBar
+  // Estado para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
 
@@ -256,60 +254,55 @@ export default function ConstructionSubcontracts() {
     return titleMatch || contactMatch;
   });
 
+  const headerProps = {
+    icon: Package,
+    title: "Subcontratos",
+    actionButton: {
+      label: 'Crear Subcontrato',
+      icon: Plus,
+      onClick: handleCreateSubcontract
+    }
+  }
+
+  const tableTopBar = {
+    showSearch: true,
+    searchValue: searchQuery,
+    onSearchChange: setSearchQuery,
+    searchPlaceholder: "Buscar subcontratos...",
+    filters: [
+      {
+        label: "Moneda",
+        value: currencyView === 'pesificado' ? 'Peso Argentino' : 
+               currencyView === 'dolarizado' ? 'Dólar Estadounidense' :
+               'Todo',
+        options: [
+          { label: 'Todo', value: 'discriminado' },
+          { label: 'Peso Argentino', value: 'pesificado' },
+          { label: 'Dólar Estadounidense', value: 'dolarizado' }
+        ],
+        onChange: (value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')
+      }
+    ]
+  }
+
   return (
-    <Layout wide={false}>
-      <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'currency',
-              title: 'Moneda',
-              label: FILTER_LABELS.CURRENCY,
-              icon: FILTER_ICONS.CURRENCY,
-              value: currencyView === 'pesificado' ? 'Peso Argentino' : 
-                     currencyView === 'dolarizado' ? 'Dólar Estadounidense' :
-                     'Todo',
-              setValue: (value) => {
-                if (value === 'Peso Argentino') setCurrencyView('pesificado')
-                else if (value === 'Dólar Estadounidense') setCurrencyView('dolarizado')
-                else setCurrencyView('discriminado')
-              },
-              options: ['Peso Argentino', 'Dólar Estadounidense'],
-              defaultLabel: 'Todo'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Crear Subcontrato',
-              icon: ACTION_ICONS.NEW,
-              onClick: handleCreateSubcontract,
-              variant: 'default'
-            }
-          ]}
+    <Layout wide={true} headerProps={headerProps}>
+      {filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
+        <EmptyState
+          icon={<Package className="w-12 h-12 text-muted-foreground" />}
+          title="Aún no tienes subcontratos creados"
+          description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
         />
-
-
-
-        {/* Contenido principal */}
-        {filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
-          <EmptyState
-            icon={<Package className="w-12 h-12 text-muted-foreground" />}
-            title="Aún no tienes subcontratos creados"
-            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
-          />
-        ) : (
-          <div className="space-y-4">
-            <Table
-              columns={columns}
-              data={filteredSubcontracts}
-              isLoading={isLoading || isLoadingAnalysis}
-              className="bg-card"
-              defaultSort={{ key: 'title', direction: 'asc' }}
-            />
-          </div>
-        )}
-      </div>
+      ) : (
+        <Table
+          columns={columns}
+          data={filteredSubcontracts}
+          isLoading={isLoading || isLoadingAnalysis}
+          className="bg-card"
+          defaultSort={{ key: 'title', direction: 'asc' }}
+          topBar={tableTopBar}
+        />
+      )}
     </Layout>
   );
 }
