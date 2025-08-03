@@ -18,8 +18,10 @@ interface TableTopBarProps {
   searchValue?: string;
   showFilter?: boolean;
   renderFilterContent?: () => ReactNode;
+  isFilterActive?: boolean;
   showSort?: boolean;
   renderSortContent?: () => ReactNode;
+  isSortActive?: boolean;
 }
 
 export function TableTopBar({
@@ -31,8 +33,10 @@ export function TableTopBar({
   searchValue = "",
   showFilter = false,
   renderFilterContent,
+  isFilterActive = false,
   showSort = false,
   renderSortContent,
+  isSortActive = false,
 }: TableTopBarProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(searchValue);
@@ -139,7 +143,10 @@ export function TableTopBar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className={cn(
+                    "h-8 w-8 p-0",
+                    isSortActive ? "button-secondary-pressed" : ""
+                  )}
                 >
                   <ArrowUpDown className="h-4 w-4" />
                 </Button>
@@ -157,7 +164,10 @@ export function TableTopBar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className={cn(
+                    "h-8 w-8 p-0",
+                    isFilterActive ? "button-secondary-pressed" : ""
+                  )}
                 >
                   <Filter className="h-4 w-4" />
                 </Button>

@@ -1468,6 +1468,7 @@ export default function Movements() {
           searchValue: searchValue,
           onSearchChange: setSearchValue,
           showFilter: true,
+          isFilterActive: filterByCategory !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
@@ -1521,6 +1522,7 @@ export default function Movements() {
             </div>
           ),
           showSort: true,
+          isSortActive: false, // TODO: Add sort state management
           renderSortContent: () => (
             <div className="space-y-2 p-2 min-w-[150px]">
               <div className="text-xs font-medium text-[var(--muted-foreground)] mb-2">Ordenar por:</div>

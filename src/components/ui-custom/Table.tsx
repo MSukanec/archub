@@ -62,8 +62,10 @@ interface TableProps<T = any> {
     searchValue?: string;
     showFilter?: boolean;
     renderFilterContent?: () => ReactNode;
+    isFilterActive?: boolean;
     showSort?: boolean;
     renderSortContent?: () => ReactNode;
+    isSortActive?: boolean;
   };
   // 🆕 DOBLE ENCABEZADO LEGACY (será reemplazado por topBar)
   headerActions?: {
@@ -351,8 +353,10 @@ export function Table<T = any>({
           searchValue={topBar?.searchValue}
           showFilter={topBar?.showFilter}
           renderFilterContent={topBar?.renderFilterContent}
+          isFilterActive={topBar?.isFilterActive}
           showSort={topBar?.showSort}
           renderSortContent={topBar?.renderSortContent}
+          isSortActive={topBar?.isSortActive}
         />
         
         {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}
