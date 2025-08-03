@@ -9,6 +9,8 @@ import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
 import { Package, ShoppingCart } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 export default function ConstructionMaterials() {
   const [activeTab, setActiveTab] = useState('materials')
@@ -196,34 +198,36 @@ export default function ConstructionMaterials() {
                 renderFilterContent: () => (
                   <div className="space-y-3 p-2 min-w-[200px]">
                     <div>
-                      <label className="text-xs font-medium mb-1 block">Fase</label>
-                      <select 
-                        value={selectedPhase} 
-                        onChange={(e) => setSelectedPhase(e.target.value)}
-                        className="w-full h-8 text-xs px-2 rounded border bg-background"
-                      >
-                        <option value="">Todas las fases</option>
-                        {phases.map((phase) => (
-                          <option key={phase} value={phase}>
-                            {phase}
-                          </option>
-                        ))}
-                      </select>
+                      <Label className="text-xs font-medium mb-1 block">Fase</Label>
+                      <Select value={selectedPhase} onValueChange={setSelectedPhase}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Todas las fases" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Todas las fases</SelectItem>
+                          {phases.map((phase) => (
+                            <SelectItem key={phase} value={phase}>
+                              {phase}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
-                      <label className="text-xs font-medium mb-1 block">Categoría</label>
-                      <select 
-                        value={selectedCategory} 
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full h-8 text-xs px-2 rounded border bg-background"
-                      >
-                        <option value="">Todas las categorías</option>
-                        {uniqueCategories.map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
+                      <Label className="text-xs font-medium mb-1 block">Categoría</Label>
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Todas las categorías" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Todas las categorías</SelectItem>
+                          {uniqueCategories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 ),
