@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
-import { useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
+import { useDesignDocuments, useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { format } from 'date-fns';
@@ -128,12 +128,11 @@ interface FolderItemProps {
 }
 
 function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup }: FolderItemProps) {
-  const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(isExpanded ? folder.id : '');
-  const { data: folderDocuments } = useDesignDocumentsByFolder(isExpanded ? folder.id : '');
+  const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { openModal } = useGlobalModalStore();
 
-  // Documents that don't belong to any group
-  const ungroupedDocuments = folderDocuments?.filter(doc => !doc.group_id) || [];
+  // For now, we'll assume no ungrouped documents until we have the proper schema
+  const ungroupedDocuments: any[] = [];
   
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
 
@@ -157,9 +156,9 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
 
             <div className="flex items-center gap-2">
               {isExpanded ? (
-                <FolderOpen className="h-5 w-5 text-blue-500" />
+                <FolderOpen className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
               ) : (
-                <FolderClosed className="h-5 w-5 text-gray-500" />
+                <FolderClosed className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
               )}
               <span className="font-medium">{folder.name}</span>
             </div>
@@ -256,11 +255,11 @@ interface GroupItemProps {
 }
 
 function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
-  const { data: documents } = useDesignDocumentsByFolder(isExpanded ? folderId : '');
+  const { data: documents } = useDesignDocuments(group.id);
   const { openModal } = useGlobalModalStore();
   
-  // Filter documents that belong to this group
-  const groupDocuments = documents?.filter(doc => doc.group_id === group.id) || [];
+  // Documents for this specific group
+  const groupDocuments = documents || [];
 
   // Simulate deployment status based on document status
   const getDeploymentStatus = () => {
