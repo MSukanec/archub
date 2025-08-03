@@ -36,6 +36,7 @@ export function TableTopBar({
 }: TableTopBarProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(searchValue);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // No renderizar nada si no hay configuración
   const hasContent = tabs.length > 0 || showSearch || showFilter || showSort;
@@ -72,24 +73,42 @@ export function TableTopBar({
         <div className="flex items-center gap-1">
           {/* Buscador expandible */}
           {showSearch && (
-            <div className="flex items-center">
+            <div className="relative flex items-center">
+              {/* Input expandible que aparece detrás del botón */}
               <div className={cn(
-                "relative transition-all duration-200",
-                searchFocused ? "w-64" : "w-48"
+                "absolute right-8 transition-all duration-300 overflow-hidden",
+                isSearchExpanded ? "w-48 opacity-100" : "w-0 opacity-0"
               )}>
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
                 <Input
                   placeholder="Buscar..."
                   value={searchInputValue}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
+                  onBlur={() => {
+                    setIsSearchExpanded(false);
+                    setSearchFocused(false);
+                  }}
                   className={cn(
-                    "pl-10 pr-4 h-8 text-sm border-0 bg-[var(--muted)] focus:bg-[var(--background)] transition-all",
+                    "h-8 text-sm border-0 bg-[var(--muted)] focus:bg-[var(--background)] transition-all",
                     "placeholder:text-[var(--muted-foreground)]"
                   )}
+                  autoFocus={isSearchExpanded}
                 />
               </div>
+              
+              {/* Botón del icono que permanece fijo */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 relative z-10"
+                onClick={() => {
+                  setIsSearchExpanded(!isSearchExpanded);
+                  if (!isSearchExpanded) {
+                    setTimeout(() => setSearchFocused(true), 100);
+                  }
+                }}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
             </div>
           )}
 
