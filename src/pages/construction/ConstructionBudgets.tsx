@@ -777,7 +777,7 @@ export default function ConstructionBudgets() {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => handleEditBudget(selectedBudget)}
+                      onClick={() => handleEditBudget()}
                       className="text-xs font-normal"
                     >
                       <Edit className="w-4 h-4 mr-1" />
