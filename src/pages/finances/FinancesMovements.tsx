@@ -1527,6 +1527,7 @@ export default function Movements() {
         data={processedMovements}
         isLoading={isLoading}
         selectable={true}
+        showDoubleHeader={true}
         defaultSort={{
           key: "movement_date",
           direction: "desc",
