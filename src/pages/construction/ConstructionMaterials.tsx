@@ -96,7 +96,7 @@ export default function ConstructionMaterials() {
       {
         key: 'category_name',
         label: 'Categoría',
-        width: '20%',
+        width: '15%',
         render: (material: any) => (
           <span className="text-sm font-medium">{material.category_name}</span>
         )
@@ -104,15 +104,31 @@ export default function ConstructionMaterials() {
       {
         key: 'name',
         label: 'Nombre',
-        width: '35%',
+        width: '25%',
         render: (material: any) => (
           <span className="text-sm">{material.name}</span>
         )
       },
       {
+        key: 'brand',
+        label: 'Marca',
+        width: '10%',
+        render: (material: any) => (
+          <span className="text-sm text-muted-foreground">Próximamente</span>
+        )
+      },
+      {
+        key: 'model',
+        label: 'Modelo',
+        width: '10%',
+        render: (material: any) => (
+          <span className="text-sm text-muted-foreground">Próximamente</span>
+        )
+      },
+      {
         key: 'computed_quantity',
-        label: 'Cantidad Computada',
-        width: '15%',
+        label: 'Necesario',
+        width: '13%',
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
@@ -124,8 +140,8 @@ export default function ConstructionMaterials() {
       },
       {
         key: 'purchased_quantity',
-        label: 'Cantidad Comprada',
-        width: '15%',
+        label: 'Comprado',
+        width: '13%',
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
@@ -137,8 +153,8 @@ export default function ConstructionMaterials() {
       },
       {
         key: 'to_purchase_quantity',
-        label: 'Cantidad A Comprar',
-        width: '15%',
+        label: 'Por Comprar',
+        width: '14%',
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
