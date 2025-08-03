@@ -752,13 +752,16 @@ export default function ConstructionBudgets() {
       />
 
       {/* DEBUG: Log budget info */}
-      {console.log('🔍 BUDGET RENDER DEBUG:', {
-        budgetsLength: budgets.length,
-        budgetsLoading,
-        budgets: budgets.map(b => ({ id: b.id, name: b.name })),
-        selectedBudgetId,
-        selectedBudget: selectedBudget ? { id: selectedBudget.id, name: selectedBudget.name } : null
-      })}
+      {(() => {
+        console.log('🔍 BUDGET RENDER DEBUG:', {
+          budgetsLength: budgets.length,
+          budgetsLoading,
+          budgets: budgets.map(b => ({ id: b.id, name: b.name })),
+          selectedBudgetId,
+          selectedBudget: selectedBudget ? { id: selectedBudget.id, name: selectedBudget.name } : null
+        });
+        return null;
+      })()}
 
       {/* Budget Selector Card - Always show if budgets exist */}
       {budgets.length > 0 && (
