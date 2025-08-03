@@ -10,9 +10,6 @@ import { useMobile } from '@/hooks/use-mobile'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Button } from '@/components/ui/button'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 export default function ProjectDashboard() {
   const { data: userData } = useCurrentUser()
@@ -64,11 +61,6 @@ export default function ProjectDashboard() {
     return (
       <Layout wide headerProps={{ title: "Resumen del Proyecto" }}>
         <div className="space-y-6">
-          <ActionBarDesktop
-            title="Resumen del Proyecto"
-            icon={<FolderOpen className="h-5 w-5" />}
-            features={features}
-          />
           <EmptyState
             title="No hay proyecto seleccionado"
             description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
@@ -81,37 +73,6 @@ export default function ProjectDashboard() {
   return (
     <Layout wide headerProps={{ title: "Resumen del Proyecto" }}>
       <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktop
-          title="Resumen del Proyecto"
-          icon={<FolderOpen className="h-5 w-5" />}
-          features={features}
-        />
-
-        {/* ActionBar Row para acciones rápidas */}
-        <ActionBarDesktopRow
-          filters={[]}
-          actions={[
-            {
-              label: 'Configuración',
-              icon: Settings,
-              onClick: () => {
-                // TODO: Implement project settings modal
-                console.log('Open project settings')
-              },
-              variant: 'outline'
-            }
-          ]}
-        />
-
-        {/* Feature Introduction - Mobile only */}
-        <FeatureIntroduction
-          title="Resumen del Proyecto"
-          icon={<FolderOpen className="h-6 w-6" />}
-          features={features}
-          className="md:hidden"
-        />
-
         {/* Hero Card with Project Background - Only render if we have a project */}
         {currentProject && organizationId && (
           <ProjectHeroCard 
