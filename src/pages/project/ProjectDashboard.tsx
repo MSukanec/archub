@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FolderOpen, BarChart3, TrendingUp, Users, Calendar } from 'lucide-react'
+import { FolderOpen, BarChart3, TrendingUp, Users, Calendar, Settings, Plus } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useProjectStats } from '@/hooks/use-project-stats'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -11,6 +11,7 @@ import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Button } from '@/components/ui/button'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 export default function ProjectDashboard() {
@@ -61,7 +62,7 @@ export default function ProjectDashboard() {
 
   if (!currentProject && !statsLoading) {
     return (
-      <Layout wide>
+      <Layout wide headerProps={{ title: "Resumen del Proyecto" }}>
         <div className="space-y-6">
           <ActionBarDesktop
             title="Resumen del Proyecto"
@@ -78,13 +79,29 @@ export default function ProjectDashboard() {
   }
 
   return (
-    <Layout wide>
+    <Layout wide headerProps={{ title: "Resumen del Proyecto" }}>
       <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktop
           title="Resumen del Proyecto"
           icon={<FolderOpen className="h-5 w-5" />}
           features={features}
+        />
+
+        {/* ActionBar Row para acciones rápidas */}
+        <ActionBarDesktopRow
+          filters={[]}
+          actions={[
+            {
+              label: 'Configuración',
+              icon: Settings,
+              onClick: () => {
+                // TODO: Implement project settings modal
+                console.log('Open project settings')
+              },
+              variant: 'outline'
+            }
+          ]}
         />
 
         {/* Feature Introduction - Mobile only */}
