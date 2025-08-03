@@ -353,51 +353,50 @@ export default function OrganizationContacts() {
     <Layout>
       <div className="space-y-6">
         {/* ActionBar Desktop */}
-        <div className="hidden md:block">
-          <ActionBarDesktopRow
-            leftContent={
-              <div className="flex items-center gap-2">
-                <SelectableGhostButton
-                  title="Ordenar"
-                  icon={<FILTER_ICONS.FILTER className="w-4 h-4" />}
-                  defaultLabel="Más Recientes"
-                  selectedValue={sortBy}
-                  options={[
-                    { value: 'name_asc', label: 'Nombre (A-Z)' },
-                    { value: 'name_desc', label: 'Nombre (Z-A)' },
-                    { value: 'date_asc', label: 'Más Antiguos' },
-                    { value: 'date_desc', label: 'Más Recientes' }
-                  ]}
-                  onSelect={(value) => setSortBy(value)}
-                />
-                
-                <SelectableGhostButton
-                  title="Tipo"
-                  icon={<FILTER_ICONS.TYPE className="w-4 h-4" />}
-                  defaultLabel="Todos los Tipos"
-                  selectedValue={filterByType}
-                  options={[
-                    { value: 'all', label: 'Todos los Tipos' },
-                    ...contactTypes.map(type => ({
-                      value: type.id,
-                      label: type.name
-                    }))
-                  ]}
-                  onSelect={(value) => setFilterByType(value)}
-                />
-              </div>
+        <ActionBarDesktopRow
+          filters={[
+            {
+              key: 'sort',
+              label: 'Ordenar',
+              icon: FILTER_ICONS.FILTER,
+              value: sortBy === 'name_asc' ? 'Nombre (A-Z)' : 
+                     sortBy === 'name_desc' ? 'Nombre (Z-A)' :
+                     sortBy === 'date_asc' ? 'Más Antiguos' : 'Más Recientes',
+              setValue: (value) => {
+                if (value === 'Nombre (A-Z)') setSortBy('name_asc')
+                else if (value === 'Nombre (Z-A)') setSortBy('name_desc')
+                else if (value === 'Más Antiguos') setSortBy('date_asc')
+                else setSortBy('date_desc')
+              },
+              options: ['Más Recientes', 'Más Antiguos', 'Nombre (A-Z)', 'Nombre (Z-A)'],
+              defaultLabel: 'Más Recientes'
+            },
+            {
+              key: 'type',
+              label: 'Tipo',
+              icon: FILTER_ICONS.TYPE,
+              value: filterByType === 'all' ? 'Todos los Tipos' : contactTypes.find(t => t.id === filterByType)?.name || 'Todos los Tipos',
+              setValue: (value) => {
+                if (value === 'Todos los Tipos') {
+                  setFilterByType('all')
+                } else {
+                  const type = contactTypes.find(t => t.name === value)
+                  if (type) setFilterByType(type.id)
+                }
+              },
+              options: ['Todos los Tipos', ...contactTypes.map(type => type.name)],
+              defaultLabel: 'Todos los Tipos'
             }
-            rightContent={
-              <Button 
-                onClick={() => openModal('contact', { isEditing: false })}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Crear contacto
-              </Button>
+          ]}
+          actions={[
+            {
+              label: 'Crear contacto',
+              icon: Plus,
+              onClick: () => openModal('contact', { isEditing: false }),
+              variant: 'default'
             }
-          />
-        </div>
+          ]}
+        />
 
         {/* FeatureIntroduction - Solo mobile */}
         <div className="md:hidden">
