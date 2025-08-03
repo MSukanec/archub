@@ -5,7 +5,8 @@ import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Set
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+import { FILTER_ICONS } from '@/constants/actionBarConstants'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -443,68 +444,52 @@ export default function ConstructionTasks() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
-        {/* Action Bar Row Simplificado */}
-        <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg bg-[var(--card-bg)]">
-          <div className="flex items-center justify-between px-4 py-3">
-            {/* Filtros de la izquierda */}
-            <div className="flex items-center gap-2">
-              {/* Botón de agrupación - Solo en tab de tareas */}
-              {activeTab === "tasks" && (
-                <SelectableGhostButton
-                  title="Agrupar"
-                  defaultLabel="Sin Agrupar"
-                  selectedValue={groupingType}
-                  icon={<FolderTree className="w-4 h-4" />}
-                  options={[
-                    { value: "none", label: "Sin Agrupar" },
-                    { value: "phases", label: "Agrupar por Fases" },
-                    { value: "rubros", label: "Agrupar por Rubros" },
-                    { value: "tasks", label: "Agrupar por Tareas" },
-                    { value: "rubros-phases", label: "Agrupar por Fases y Rubros" },
-                    { value: "phases-rubros", label: "Agrupar por Rubros y Tareas" }
-                  ]}
-                  onSelect={(value, option) => setGroupingType(value)}
-                />
-              )}
-            </div>
-
-            {/* Acciones de la derecha */}
-            <div className="flex items-center gap-2">
-              {activeTab === "tasks" ? (
-                <>
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    onClick={handleAddTask}
-                    className="h-8 text-xs"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Agregar en Masa
-                  </Button>
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    onClick={handleAddSingleTask}
-                    className="h-8 text-xs"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Agregar Tarea
-                  </Button>
-                </>
-              ) : (
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={handleAddPhase}
-                  className="h-8 text-xs"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Crear Fase
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* ActionBar Desktop */}
+        <ActionBarDesktopRow
+          filters={activeTab === "tasks" ? [
+            {
+              key: 'grouping',
+              label: 'Agrupar',
+              icon: FILTER_ICONS.FILTER,
+              value: groupingType === 'none' ? 'Sin Agrupar' : 
+                     groupingType === 'phases' ? 'Agrupar por Fases' :
+                     groupingType === 'rubros' ? 'Agrupar por Rubros' :
+                     groupingType === 'tasks' ? 'Agrupar por Tareas' :
+                     groupingType === 'rubros-phases' ? 'Agrupar por Fases y Rubros' : 'Agrupar por Rubros y Tareas',
+              setValue: (value: string) => {
+                if (value === 'Sin Agrupar') setGroupingType('none')
+                else if (value === 'Agrupar por Fases') setGroupingType('phases')
+                else if (value === 'Agrupar por Rubros') setGroupingType('rubros')
+                else if (value === 'Agrupar por Tareas') setGroupingType('tasks')
+                else if (value === 'Agrupar por Fases y Rubros') setGroupingType('rubros-phases')
+                else setGroupingType('phases-rubros')
+              },
+              options: ['Agrupar por Fases', 'Agrupar por Rubros', 'Agrupar por Tareas', 'Agrupar por Fases y Rubros', 'Agrupar por Rubros y Tareas'],
+              defaultLabel: 'Sin Agrupar'
+            }
+          ] : []}
+          actions={activeTab === "tasks" ? [
+            {
+              label: 'Agregar en Masa',
+              icon: Plus,
+              onClick: handleAddTask,
+              variant: 'secondary'
+            },
+            {
+              label: 'Agregar Tarea',
+              icon: Plus,
+              onClick: handleAddSingleTask,
+              variant: 'default'
+            }
+          ] : [
+            {
+              label: 'Crear Fase',
+              icon: Plus,
+              onClick: handleAddPhase,
+              variant: 'default'
+            }
+          ]}
+        />
 
         {/* Tab Content */}
         {activeTab === "tasks" ? (
