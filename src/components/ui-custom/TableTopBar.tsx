@@ -58,7 +58,10 @@ export function TableTopBar({
               variant={activeTab === tab ? "secondary" : "ghost"}
               size="sm"
               onClick={() => onTabChange?.(tab)}
-              className="h-8 px-3 text-sm font-medium"
+              className={cn(
+                "h-8 px-3 text-sm font-medium",
+                activeTab === tab ? "button-secondary-pressed" : ""
+              )}
             >
               {tab}
             </Button>
