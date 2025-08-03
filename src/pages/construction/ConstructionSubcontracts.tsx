@@ -311,7 +311,6 @@ export default function ConstructionSubcontracts() {
           columns={columns}
           data={filteredSubcontracts}
           isLoading={isLoading || isLoadingAnalysis}
-          className="bg-card"
           defaultSort={{ key: 'title', direction: 'asc' }}
           topBar={tableTopBar}
         />
