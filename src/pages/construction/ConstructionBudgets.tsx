@@ -1,5 +1,4 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -434,7 +433,12 @@ export default function ConstructionBudgets() {
 
   const headerProps = {
     icon: Calculator,
-    title: "Presupuestos"
+    title: "Presupuestos",
+    actionButton: {
+      label: 'Nuevo Presupuesto',
+      icon: Plus,
+      onClick: () => openModal('budget', {})
+    }
   }
 
   if (isLoading || budgetsLoading) {
@@ -449,66 +453,6 @@ export default function ConstructionBudgets() {
 
   return (
     <Layout wide={true} headerProps={headerProps}>
-      {/* Action Bar Desktop - siempre visible */}
-      <ActionBarDesktop
-        title="Presupuestos de Construcción"
-        icon={<Calculator className="w-6 h-6" />}
-        features={[
-          {
-            icon: <CheckSquare className="w-4 h-4" />,
-            title: "Presupuestos Detallados",
-            description: "Crea y gestiona presupuestos con tareas específicas, cantidades y costos detallados por proyecto."
-          },
-          {
-            icon: <Filter className="w-4 h-4" />,
-            title: "Organización por Rubros",
-            description: "Agrupa tareas por categorías para una mejor visualización y análisis de costos por área."
-          },
-          {
-            icon: <Target className="w-4 h-4" />,
-            title: "Búsqueda Inteligente",
-            description: "Encuentra rápidamente tareas del catálogo o crea nuevas tareas personalizadas para tu presupuesto."
-          },
-          {
-            icon: <BarChart3 className="w-4 h-4" />,
-            title: "Control de Costos",
-            description: "Monitorea el progreso y los totales de tu presupuesto en tiempo real con actualizaciones automáticas."
-          }
-        ]}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        showGrouping={selectedBudget ? true : false}
-        groupingType={groupingType}
-        onGroupingChange={setGroupingType}
-        primaryActionLabel="Nueva Tarea"
-        onPrimaryActionClick={() => {
-          if (selectedBudget) {
-            openModal('budget-task-bulk-add', { 
-              budgetId: selectedBudget.id,
-              onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
-              }
-            })
-          }
-        }}
-        customActions={[
-          <Button 
-            key="nuevo-presupuesto"
-            variant="secondary" 
-            onClick={() => openModal('budget', {})}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Presupuesto
-          </Button>
-        ]}
-        budgetSelector={{
-          budgets: filteredBudgets,
-          selectedBudgetId,
-          onBudgetChange: handleBudgetChange,
-          onEditBudget: handleEditBudget,
-          onDeleteBudget: handleDeleteSelectedBudget
-        }}
-      />
 
       {filteredBudgets.length === 0 ? (
         <EmptyState
@@ -819,67 +763,6 @@ export default function ConstructionBudgets() {
         />
       ) : (
         <>
-          {/* Action Bar Desktop - Only visible when data exists */}
-          <ActionBarDesktop
-            title="Presupuestos de Construcción"
-            icon={<Calculator className="w-6 h-6" />}
-            features={[
-              {
-                icon: <CheckSquare className="w-4 h-4" />,
-                title: "Presupuestos Detallados",
-                description: "Crea y gestiona presupuestos con tareas específicas, cantidades y costos detallados por proyecto."
-              },
-              {
-                icon: <Filter className="w-4 h-4" />,
-                title: "Organización por Rubros",
-                description: "Agrupa tareas por categorías para una mejor visualización y análisis de costos por área."
-              },
-              {
-                icon: <Target className="w-4 h-4" />,
-                title: "Búsqueda Inteligente",
-                description: "Encuentra rápidamente tareas del catálogo o crea nuevas tareas personalizadas para tu presupuesto."
-              },
-              {
-                icon: <BarChart3 className="w-4 h-4" />,
-                title: "Control de Costos",
-                description: "Monitorea el progreso y los totales de tu presupuesto en tiempo real con actualizaciones automáticas."
-              }
-            ]}
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            showGrouping={selectedBudget ? true : false}
-            groupingType={groupingType}
-            onGroupingChange={setGroupingType}
-            primaryActionLabel="Nueva Tarea"
-            onPrimaryActionClick={() => {
-              if (selectedBudget) {
-                openModal('budget-task-bulk-add', { 
-                  budgetId: selectedBudget.id,
-                  onSuccess: () => {
-                    queryClient.invalidateQueries({ queryKey: ['budget-tasks', selectedBudget.id] });
-                  }
-                })
-              }
-            }}
-            customActions={[
-              <Button 
-                key="nuevo-presupuesto"
-                variant="secondary" 
-                onClick={() => openModal('budget', {})}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Presupuesto
-              </Button>
-            ]}
-            budgetSelector={{
-              budgets: filteredBudgets,
-              selectedBudgetId,
-              onBudgetChange: handleBudgetChange,
-              onEditBudget: handleEditBudget,
-              onDeleteBudget: handleDeleteSelectedBudget
-            }}
-          />
-
           {/* Budget Task Table */}
           {selectedBudget && (
             <BudgetTaskTable budgetId={selectedBudget.id} />
