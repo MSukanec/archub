@@ -499,10 +499,14 @@ export function Table<T = any>({
                       // Fila de datos
                       <div
                         className={cn(
-                          "group relative grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]",
+                          "group relative grid gap-4 px-4 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]",
                           getRowClassName?.(item.data),
                         )}
-                        style={{ gridTemplateColumns: getGridTemplateColumns() }}
+                        style={{ 
+                          gridTemplateColumns: getGridTemplateColumns(),
+                          height: `${virtualItem.size}px`,
+                          alignItems: 'center'
+                        }}
                       >
                         {selectable && (
                           <div className="flex items-center justify-center">
