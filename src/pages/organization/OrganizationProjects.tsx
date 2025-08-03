@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
+
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -325,37 +324,30 @@ export default function OrganizationProjects() {
 
   // Filtros personalizados
   const customFilters = (
-    <div className="w-72 p-4 space-y-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date_recent">Fecha (Más reciente)</SelectItem>
-            <SelectItem value="date_oldest">Fecha (Más antigua)</SelectItem>
-            <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-            <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Filtrar por estado</Label>
-        <Select value={filterByStatus} onValueChange={setFilterByStatus}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="active">Activos</SelectItem>
-            <SelectItem value="planning">En planificación</SelectItem>
-            <SelectItem value="completed">Completados</SelectItem>
-            <SelectItem value="on-hold">En pausa</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="flex items-center gap-3">
+      <SelectableGhostButton
+        value={sortBy}
+        onValueChange={setSortBy}
+        defaultLabel="Más Recientes"
+        options={[
+          { value: "date_recent", label: "Más Recientes" },
+          { value: "date_oldest", label: "Más Antiguos" },
+          { value: "name_asc", label: "Nombre A-Z" },
+          { value: "name_desc", label: "Nombre Z-A" }
+        ]}
+      />
+      <SelectableGhostButton
+        value={filterByStatus}
+        onValueChange={setFilterByStatus}
+        defaultLabel="Todos los Estados"
+        options={[
+          { value: "all", label: "Todos los Estados" },
+          { value: "active", label: "Activos" },
+          { value: "planning", label: "En Planificación" },
+          { value: "completed", label: "Completados" },
+          { value: "on-hold", label: "En Pausa" }
+        ]}
+      />
     </div>
   )
 
