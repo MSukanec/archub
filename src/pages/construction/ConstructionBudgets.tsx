@@ -150,24 +150,18 @@ interface BudgetTask {
 
 
 export default function ConstructionBudgets() {
-  console.log('🚀 COMPONENT STARTING');
-  
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
 
   const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
 
-  console.log('🚀 HOOKS INITIALIZED');
-  
   const { data: userData, isLoading } = useCurrentUser()
   const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(userData?.preferences?.last_project_id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
-  
-  console.log('🚀 DATA LOADED - budgets:', budgets.length);
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -712,9 +706,6 @@ export default function ConstructionBudgets() {
 
 
 
-  console.log('🚀 BEFORE RETURN - About to render JSX');
-  console.log('🚀 RENDER DATA:', { budgetsLength: budgets.length, selectedBudgetId });
-
   return (
     <Layout wide={true} headerProps={headerProps}>
       {/* Feature Introduction - Mobile only */}
@@ -745,26 +736,7 @@ export default function ConstructionBudgets() {
         ]}
       />
 
-      {/* DEBUG: Log budget info */}
-      {(() => {
-        console.log('🔍 PRESUPUESTOS DEBUG - budgets.length:', budgets.length);
-        console.log('🔍 PRESUPUESTOS DEBUG - budgetsLoading:', budgetsLoading);
-        if (budgets.length > 0) {
-          console.log('🔍 PRESUPUESTOS DEBUG - budgets names:', budgets.map(b => b.name));
-        }
-        return null;
-      })()}
-
-      {/* ALWAYS SHOW TEST CARD */}
-      <Card className="mb-6 bg-blue-50 border-blue-200">
-        <CardContent className="p-4">
-          <div className="text-sm">
-            🔍 TEST CARD - budgets.length: {budgets.length} | loading: {budgetsLoading ? 'true' : 'false'}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Budget Selector Card - Always show if budgets exist */}
+      {/* Budget Selector Card */}
       {budgets.length > 0 && (
         <Card className="mb-6">
           <CardContent className="p-4">
