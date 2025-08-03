@@ -39,6 +39,7 @@ export function TableTopBar({
 
   // No renderizar nada si no hay configuración
   const hasContent = tabs.length > 0 || showSearch || showFilter || showSort;
+  console.log('TableTopBar - hasContent:', hasContent, 'tabs:', tabs, 'showSearch:', showSearch, 'showFilter:', showFilter, 'showSort:', showSort);
   if (!hasContent) return null;
 
   const handleSearchChange = (value: string) => {
@@ -46,8 +47,10 @@ export function TableTopBar({
     onSearchChange?.(value);
   };
 
+  console.log('TableTopBar rendering with content');
   return (
-    <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+    <div className="block border-b border-[var(--card-border)] bg-[var(--card-bg)] bg-red-100"
+         style={{ minHeight: '50px' }}>
       <div className="flex items-center justify-between px-4 py-3">
         {/* Lado izquierdo - Tabs (solo texto) */}
         <div className="flex items-center gap-1">
