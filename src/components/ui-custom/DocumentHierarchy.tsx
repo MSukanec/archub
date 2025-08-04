@@ -570,9 +570,9 @@ function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
           </Badge>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={getStatusColor(group.status)}>
-            {getStatusIcon(group.status)}
-            <span className="ml-1">{group.status}</span>
+          <Badge variant="outline" className={getStatusColor(group.status || 'pendiente')}>
+            {getStatusIcon(group.status || 'pendiente')}
+            <span className="ml-1">{group.status || 'pendiente'}</span>
           </Badge>
         </div>
       </Button>
