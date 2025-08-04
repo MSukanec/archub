@@ -26,7 +26,9 @@ import {
   Circle,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Edit,
+  Trash2
 } from 'lucide-react';
 
 interface DocumentHierarchyProps {
@@ -231,6 +233,40 @@ function FolderItemWithSubfolders({
                 <Upload className="h-3 w-3 mr-1" />
                 Subir
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openModal('document-folder', { 
+                  folderId: folder.id,
+                  folderName: folder.name,
+                  parentId: folder.parent_id,
+                  mode: 'edit'
+                })}
+                className="h-8 w-8 p-0"
+                title="Editar carpeta"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openModal('delete-confirmation', {
+                  mode: 'simple',
+                  title: 'Eliminar Carpeta',
+                  description: `¿Estás seguro de que quieres eliminar la carpeta "${folder.name}"? Esta acción no se puede deshacer.`,
+                  itemName: folder.name,
+                  itemType: 'carpeta',
+                  destructiveActionText: 'Eliminar Carpeta',
+                  onConfirm: () => {
+                    // TODO: Implement delete folder logic
+                    console.log('Delete folder:', folder.id);
+                  }
+                })}
+                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                title="Eliminar carpeta"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -249,7 +285,7 @@ function FolderItemWithSubfolders({
                         <FolderItem
                           folder={subfolder}
                           isExpanded={expandedFolders[subfolder.id] || false}
-                          onToggle={() => toggleFolder(subfolder.id, true)}
+                          onToggle={() => onToggleFolder(subfolder.id)}
                           expandedGroups={expandedGroups}
                           onToggleGroup={onToggleGroup}
                           isSubfolder={true}
@@ -278,7 +314,7 @@ function FolderItemWithSubfolders({
                       <Button
                         variant="default"
                         size="sm"
-                        onClick={() => openModal('new-design-document-group', { 
+                        onClick={() => openModal('document-group-form', { 
                           folderId: folder.id 
                         })}
                         className="h-8 px-3 text-xs"
@@ -381,6 +417,40 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
               <Upload className="h-3 w-3 mr-1" />
               Subir
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('document-folder', { 
+                folderId: folder.id,
+                folderName: folder.name,
+                parentId: folder.parent_id,
+                mode: 'edit'
+              })}
+              className="h-7 w-7 p-0"
+              title="Editar subcarpeta"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('delete-confirmation', {
+                mode: 'simple',
+                title: 'Eliminar Subcarpeta',
+                description: `¿Estás seguro de que quieres eliminar la subcarpeta "${folder.name}"? Esta acción no se puede deshacer.`,
+                itemName: folder.name,
+                itemType: 'subcarpeta',
+                destructiveActionText: 'Eliminar Subcarpeta',
+                onConfirm: () => {
+                  // TODO: Implement delete subfolder logic
+                  console.log('Delete subfolder:', folder.id);
+                }
+              })}
+              className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
+              title="Eliminar subcarpeta"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -410,7 +480,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={() => openModal('new-design-document-group', { 
+                      onClick={() => openModal('document-group-form', { 
                         folderId: folder.id 
                       })}
                       className="h-7 px-3 text-xs"
