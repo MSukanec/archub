@@ -79,8 +79,12 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
   const deleteFolderMutation = useDeleteDesignDocumentFolder();
 
-  const toggleFolder = (folderId: string, isSubfolder = false) => {
+  const toggleFolder = (folderId: string) => {
     setExpandedFolders(prev => {
+      // Find if this folder is a subfolder by checking if it has a parent_id
+      const clickedFolder = folders?.find(f => f.id === folderId);
+      const isSubfolder = clickedFolder?.parent_id;
+      
       // If clicking the same folder that's already expanded, close it
       if (prev[folderId]) {
         return { ...prev, [folderId]: false };
@@ -94,7 +98,7 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
       // If it's a main folder, close all other main folders but keep subfolders open
       const newState: ExpandedState = { ...prev };
       
-      // Close only main folders (those that are parent folders)
+      // Close only main folders (those that don't have parent_id)
       const parentFolders = folders?.filter(folder => !folder.parent_id) || [];
       parentFolders.forEach(folder => {
         if (folder.id !== folderId) {
@@ -292,7 +296,7 @@ function FolderItemWithSubfolders({
                         <FolderItem
                           folder={subfolder}
                           isExpanded={expandedFolders[subfolder.id] || false}
-                          onToggle={() => onToggleFolder(subfolder.id)}
+                          onToggle={() => toggleFolder(subfolder.id)}
                           expandedGroups={expandedGroups}
                           onToggleGroup={onToggleGroup}
                           isSubfolder={true}
