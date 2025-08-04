@@ -52,49 +52,13 @@ export const useProjectContext = create<ProjectContextState>()(
       setCurrentOrganization: (organizationId: string | null) => {
         console.log("🔧 ProjectContext: Setting organization to", organizationId);
         
-        // Al cambiar organización, cargar el último proyecto de esa organización
-        if (organizationId) {
-          // Obtener user_id del authStore
-          const user = useAuthStore.getState().user;
-          if (user) {
-            fetch(`/api/user/organization-preferences/${organizationId}`, {
-              headers: {
-                'x-user-id': user.id
-              }
-            })
-              .then(response => response.json())
-              .then(data => {
-                const lastProjectId = data?.last_project_id || null;
-                console.log("🔧 ProjectContext: Loading last project for organization", organizationId, "->", lastProjectId);
-                set({ 
-                  selectedProjectId: lastProjectId,
-                  isGlobalView: lastProjectId === null,
-                  currentOrganizationId: organizationId
-                });
-              })
-              .catch(error => {
-                console.error("🔧 Error loading organization preferences:", error);
-                set({ 
-                  selectedProjectId: null,
-                  isGlobalView: true,
-                  currentOrganizationId: organizationId
-                });
-              });
-          } else {
-            console.error("🔧 No user found in authStore for organization preferences");
-            set({ 
-              selectedProjectId: null,
-              isGlobalView: true,
-              currentOrganizationId: organizationId
-            });
-          }
-        } else {
-          set({ 
-            selectedProjectId: null,
-            isGlobalView: true,
-            currentOrganizationId: null
-          });
-        }
+        // Al cambiar organización, setear inmediatamente la organización
+        // El proyecto se cargará automáticamente via React Query en los componentes
+        set({ 
+          currentOrganizationId: organizationId,
+          selectedProjectId: null,  // Reseteamos el proyecto temporalmente
+          isGlobalView: true
+        });
       },
     }),
     {

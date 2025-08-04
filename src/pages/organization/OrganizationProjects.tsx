@@ -32,14 +32,13 @@ export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
-
-
-
+  
   const { openModal } = useGlobalModalStore()
   const [isMobile, setIsMobile] = useState(false)
   
   const { data: userData, isLoading } = useCurrentUser()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects(userData?.organization?.id)
+  const organizationId = userData?.organization?.id
+  const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
@@ -154,14 +153,21 @@ export default function OrganizationProjects() {
   // Mutación para seleccionar proyecto  
   const selectProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
+      if (!supabase || !userData?.user?.id || !organizationId) {
+        throw new Error('Required data not available');
       }
       
+      // Usar la nueva tabla user_organization_preferences
       const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: projectId })
-        .eq('user_id', userData?.user.id)
+        .from('user_organization_preferences')
+        .upsert({
+          user_id: userData.user.id,
+          organization_id: organizationId,
+          last_project_id: projectId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id'
+        })
       
       if (error) throw error
       
@@ -169,11 +175,13 @@ export default function OrganizationProjects() {
     },
     onSuccess: (projectId) => {
       // Update project context immediately
-      setSelectedProject(projectId);
+      setSelectedProject(projectId, organizationId);
       
-      // Force immediate refresh of user data
+      // Invalidar cache de user organization preferences
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+      });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.refetchQueries({ queryKey: ['current-user'] });
       
       toast({
         title: "Proyecto seleccionado",

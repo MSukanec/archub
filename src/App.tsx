@@ -71,6 +71,7 @@ import AdminCategories from "@/pages/admin/AdminCategories";
 
 import NotFound from "@/pages/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
+import { ProjectContextInitializer } from "@/components/context/ProjectContextInitializer";
 
 function Router() {
   return (
@@ -393,6 +394,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <MobileActionBarProvider>
+          <ProjectContextInitializer />
           <Toaster />
           <Router />
           <ModalFactory />
