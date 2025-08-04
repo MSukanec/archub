@@ -329,8 +329,8 @@ function FolderItemWithSubfolders({
                       <Button
                         variant="default"
                         size="sm"
-                        onClick={() => openModal('document-group-form', { 
-                          folderId: folder.id 
+                        onClick={() => openModal('document-upload', { 
+                          defaultFolderId: folder.id 
                         })}
                         className="h-8 px-3 text-xs"
                       >
@@ -499,8 +499,8 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={() => openModal('document-group-form', { 
-                        folderId: folder.id 
+                      onClick={() => openModal('document-upload', { 
+                        defaultFolderId: folder.id 
                       })}
                       className="h-7 px-3 text-xs"
                     >
