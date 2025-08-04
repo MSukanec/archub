@@ -188,6 +188,8 @@ function FolderItemWithSubfolders({
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
 
+
+
   // Documents that don't belong to any group
   const ungroupedDocuments = folderDocuments?.filter(doc => !doc.group_id) || [];
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
@@ -296,7 +298,7 @@ function FolderItemWithSubfolders({
                         <FolderItem
                           folder={subfolder}
                           isExpanded={expandedFolders[subfolder.id] || false}
-                          onToggle={() => toggleFolder(subfolder.id)}
+                          onToggle={() => onToggleFolder(subfolder.id)}
                           expandedGroups={expandedGroups}
                           onToggleGroup={onToggleGroup}
                           isSubfolder={true}
@@ -376,6 +378,8 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
+
+
 
   // Documents that don't belong to any group
   const ungroupedDocuments = folderDocuments?.filter(doc => !doc.group_id) || [];
