@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
+import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
 import { useDesignDocuments, useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -77,6 +77,7 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
   const { openModal } = useGlobalModalStore();
 
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
+  const deleteFolderMutation = useDeleteDesignDocumentFolder();
 
   const toggleFolder = (folderId: string, isSubfolder = false) => {
     setExpandedFolders(prev => {
@@ -258,9 +259,9 @@ function FolderItemWithSubfolders({
                   itemType: 'carpeta',
                   destructiveActionText: 'Eliminar Carpeta',
                   onConfirm: () => {
-                    // TODO: Implement delete folder logic
-                    console.log('Delete folder:', folder.id);
-                  }
+                    deleteFolderMutation.mutate(folder.id);
+                  },
+                  isLoading: deleteFolderMutation.isPending
                 })}
                 className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
                 title="Eliminar carpeta"
@@ -442,9 +443,9 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 itemType: 'subcarpeta',
                 destructiveActionText: 'Eliminar Subcarpeta',
                 onConfirm: () => {
-                  // TODO: Implement delete subfolder logic
-                  console.log('Delete subfolder:', folder.id);
-                }
+                  deleteFolderMutation.mutate(folder.id);
+                },
+                isLoading: deleteFolderMutation.isPending
               })}
               className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
               title="Eliminar subcarpeta"
