@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
-import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
+import { useDesignDocumentGroups, useCreateDesignDocumentGroup } from '@/hooks/use-design-document-groups';
 import { useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useCreateDesignDocument, useDesignDocuments } from '@/hooks/use-design-documents';
 import { FormModalLayout } from '../../form/FormModalLayout';
@@ -68,6 +68,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const { data: existingDocuments = [] } = useDesignDocuments();
   const createFolderMutation = useCreateDesignDocumentFolder();
   const createDocumentMutation = useCreateDesignDocument();
+  const createGroupMutation = useCreateDesignDocumentGroup();
 
   // Initialize panel to edit mode when modal opens
   useEffect(() => {
@@ -184,10 +185,33 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         throw new Error('Debe seleccionar al menos un archivo');
       }
 
-      // group_id is optional, documents can be uploaded directly to folders
-
       setIsUploading(true);
       setUploadProgress(0);
+
+      // Create a group automatically if none exists using the SQL function
+      let groupId = data.group_id;
+      if (!groupId && data.folder_id) {
+        try {
+          const { data: nextName, error: nameError } = await supabase
+            .rpc('generate_next_document_group_name', { p_folder_id: data.folder_id });
+
+          if (nameError) {
+            throw new Error(`Error generating group name: ${nameError.message}`);
+          }
+
+          const newGroup = await createGroupMutation.mutateAsync({
+            name: nextName,
+            description: data.group_description || '',
+            folder_id: data.folder_id,
+          });
+
+          groupId = newGroup.id;
+          console.log('Created new group:', nextName, 'with ID:', groupId);
+        } catch (error) {
+          console.error('Error creating group:', error);
+          throw new Error('Error creando grupo automáticamente');
+        }
+      }
 
       // Process each file
       const uploads = selectedFiles.map(async (file, index) => {
@@ -195,7 +219,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         
         // Generate file path: organization_id/project_id/documents/[group_id|folder_id]/filename
         const extension = file.name.split('.').pop() || '';
-        const folderPath = data.group_id || data.folder_id;
+        const folderPath = groupId || data.folder_id;
         const filePath = `${userData.preferences?.last_organization_id}/${userData.preferences?.last_project_id}/documents/${folderPath}/${Date.now()}-${file.name}`;
         
         // First upload file to Supabase Storage
@@ -224,7 +248,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           file_url: urlData.publicUrl,
           file_type: file.type,
           file_size: file.size,
-          group_id: data.group_id || null,
+          group_id: groupId || null,
           folder_id: data.folder_id, // Fixed: Always assign folder_id
           status: data.status,
           visibility: data.visibility,
