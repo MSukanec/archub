@@ -115,6 +115,7 @@ export function useCreateDesignDocumentGroup() {
           name: groupData.name,
           description: groupData.description,
           folder_id: groupData.folder_id,
+          project_id: projectId,
           organization_id: organizationId,
           created_by: userData.user.id,
         })
@@ -127,8 +128,11 @@ export function useCreateDesignDocumentGroup() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (newGroup) => {
+      console.log('Group created successfully:', newGroup);
       queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['design-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
     }
   });
 }

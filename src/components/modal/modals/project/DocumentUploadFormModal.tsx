@@ -207,6 +207,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
 
           groupId = newGroup.id;
           console.log('Created new group:', nextName, 'with ID:', groupId);
+          console.log('Full group data:', newGroup);
         } catch (error) {
           console.error('Error creating group:', error);
           throw new Error('Error creando grupo automáticamente');
@@ -263,10 +264,18 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         description: `${selectedFiles.length > 1 ? 'Documentos subidos' : 'Documento subido'} correctamente`,
       });
       // Invalidate all document-related queries
+      console.log('Invalidating cache queries after document upload');
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
       queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+      
+      // Force a refetch of the specific folder groups
+      if (selectedFolderId) {
+        queryClient.invalidateQueries({ 
+          queryKey: ['design-document-groups', userData?.preferences?.last_project_id, userData?.preferences?.last_organization_id, selectedFolderId]
+        });
+      }
       handleClose();
     },
     onError: (error) => {
