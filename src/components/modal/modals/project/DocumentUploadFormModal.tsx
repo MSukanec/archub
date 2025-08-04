@@ -196,7 +196,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         // Generate file path: organization_id/project_id/documents/[group_id|folder_id]/filename
         const extension = file.name.split('.').pop() || '';
         const folderPath = data.group_id || data.folder_id;
-        const filePath = `${userData.preferences.last_organization_id}/${userData.preferences.last_project_id}/documents/${folderPath}/${Date.now()}-${file.name}`;
+        const filePath = `${userData.preferences?.last_organization_id}/${userData.preferences?.last_project_id}/documents/${folderPath}/${Date.now()}-${file.name}`;
         
         // First upload file to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -225,7 +225,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           file_type: file.type,
           file_size: file.size,
           group_id: data.group_id || null,
-          // folder_id: data.folder_id, // Will be set by trigger based on group
+          folder_id: data.folder_id, // Fixed: Always assign folder_id
           status: data.status,
           visibility: data.visibility,
         });
@@ -538,8 +538,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       onLeftClick={handleClose}
       rightLabel={isUploading ? "Subiendo..." : (isEditing ? "Actualizar Entrega" : "Nueva Entrega de Documentos")}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={isUploading}
-      rightDisabled={selectedFiles.length === 0}
+      submitDisabled={selectedFiles.length === 0 || isUploading}
     />
   );
 

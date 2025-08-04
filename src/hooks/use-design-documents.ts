@@ -89,9 +89,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
     queryFn: async (): Promise<DesignDocument[]> => {
       if (!projectId || !organizationId || !folderId) return [];
 
-      // Get documents either:
-      // 1. Documents directly assigned to folder (folder_id matches)
-      // 2. Documents in groups that belong to this folder
+      // Get documents directly assigned to folder (folder_id matches)
       const { data, error } = await supabase
         .from('design_documents')
         .select(`
@@ -109,7 +107,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         `)
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
-        .or(`folder_id.eq.${folderId},group.folder_id.eq.${folderId}`)
+        .eq('folder_id', folderId)
         .order('created_at', { ascending: false });
 
       console.log('useDesignDocumentsByFolder Query Result:', {
