@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
-import { useDesignDocuments, useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
+import { useDesignDocuments, useDesignDocumentsByFolder, useDeleteDesignDocument } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
@@ -604,6 +604,7 @@ interface DocumentItemProps {
 
 function DocumentItem({ document }: DocumentItemProps) {
   const { openModal } = useGlobalModalStore();
+  const deleteDocumentMutation = useDeleteDesignDocument();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -647,9 +648,13 @@ function DocumentItem({ document }: DocumentItemProps) {
       title: 'Eliminar documento',
       description: `¿Estás seguro de que deseas eliminar el documento "${document.name}"?`,
       destructiveActionText: 'Eliminar',
-      onConfirm: () => {
-        // Aquí iría la lógica para eliminar el documento
-        console.log('Eliminando documento:', document.id);
+      onConfirm: async () => {
+        try {
+          await deleteDocumentMutation.mutateAsync(document.id);
+          console.log('Documento eliminado exitosamente:', document.id);
+        } catch (error) {
+          console.error('Error al eliminar documento:', error);
+        }
       }
     });
   };
