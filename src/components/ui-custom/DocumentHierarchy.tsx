@@ -147,6 +147,8 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
           expandedGroups={expandedGroups}
           onToggleFolder={toggleFolder}
           onToggleGroup={toggleGroup}
+          onDeleteFolder={(folderId) => deleteFolderMutation.mutate(folderId)}
+          isDeleting={deleteFolderMutation.isPending}
         />
       ))}
     </div>
@@ -162,6 +164,8 @@ interface FolderItemWithSubfoldersProps {
   expandedGroups: ExpandedState;
   onToggleFolder: (folderId: string) => void;
   onToggleGroup: (groupId: string) => void;
+  onDeleteFolder: (folderId: string) => void;
+  isDeleting: boolean;
 }
 
 function FolderItemWithSubfolders({ 
@@ -172,7 +176,9 @@ function FolderItemWithSubfolders({
   expandedFolders, 
   expandedGroups, 
   onToggleFolder, 
-  onToggleGroup 
+  onToggleGroup,
+  onDeleteFolder,
+  isDeleting
 }: FolderItemWithSubfoldersProps) {
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
@@ -259,9 +265,9 @@ function FolderItemWithSubfolders({
                   itemType: 'carpeta',
                   destructiveActionText: 'Eliminar Carpeta',
                   onConfirm: () => {
-                    deleteFolderMutation.mutate(folder.id);
+                    onDeleteFolder(folder.id);
                   },
-                  isLoading: deleteFolderMutation.isPending
+                  isLoading: isDeleting
                 })}
                 className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
                 title="Eliminar carpeta"
@@ -290,6 +296,8 @@ function FolderItemWithSubfolders({
                           expandedGroups={expandedGroups}
                           onToggleGroup={onToggleGroup}
                           isSubfolder={true}
+                          onDeleteFolder={onDeleteFolder}
+                          isDeleting={isDeleting}
                         />
                       </div>
                     ))}
@@ -356,9 +364,11 @@ interface FolderItemProps {
   expandedGroups: ExpandedState;
   onToggleGroup: (groupId: string) => void;
   isSubfolder?: boolean;
+  onDeleteFolder: (folderId: string) => void;
+  isDeleting: boolean;
 }
 
-function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup, isSubfolder = false }: FolderItemProps) {
+function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup, isSubfolder = false, onDeleteFolder, isDeleting }: FolderItemProps) {
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
@@ -443,9 +453,9 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 itemType: 'subcarpeta',
                 destructiveActionText: 'Eliminar Subcarpeta',
                 onConfirm: () => {
-                  deleteFolderMutation.mutate(folder.id);
+                  onDeleteFolder(folder.id);
                 },
-                isLoading: deleteFolderMutation.isPending
+                isLoading: isDeleting
               })}
               className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
               title="Eliminar subcarpeta"
