@@ -170,21 +170,16 @@ function FolderItemWithSubfolders({
   return (
     <div className="space-y-2">
       <Card className="w-full">
-        <CardHeader className="py-3">
+        <CardHeader className="py-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={onToggle}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggle}
-                className="h-6 w-6 p-0"
-              >
+              <div className="flex-shrink-0">
                 {isExpanded ? (
                   <ChevronDown className="h-4 w-4" />
                 ) : (
                   <ChevronRight className="h-4 w-4" />
                 )}
-              </Button>
+              </div>
 
               <div className="flex items-center gap-2">
                 {isExpanded ? (
@@ -200,7 +195,7 @@ function FolderItemWithSubfolders({
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -325,21 +320,16 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
 
   return (
     <Card className="w-full">
-      <CardHeader className="py-2">
+      <CardHeader className="py-2 cursor-pointer hover:bg-muted/50 transition-colors" onClick={onToggle}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggle}
-              className="h-6 w-6 p-0"
-            >
+            <div className="flex-shrink-0">
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-            </Button>
+            </div>
 
             <div className="flex items-center gap-2">
               {isExpanded ? (
@@ -355,7 +345,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <Button
               variant="ghost"
               size="sm"
