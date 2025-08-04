@@ -229,7 +229,9 @@ export function useDeleteDesignDocument() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
     }
   });
 }
