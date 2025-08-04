@@ -28,8 +28,15 @@ import {
   XCircle,
   Clock,
   Edit,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface DocumentHierarchyProps {
   className?: string;
@@ -596,6 +603,8 @@ interface DocumentItemProps {
 }
 
 function DocumentItem({ document }: DocumentItemProps) {
+  const { openModal } = useGlobalModalStore();
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'aprobado':
@@ -618,6 +627,37 @@ function DocumentItem({ document }: DocumentItemProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
+  };
+
+  const handleDownload = () => {
+    if (document.file_url) {
+      window.open(document.file_url, '_blank');
+    }
+  };
+
+  const handleEdit = () => {
+    openModal('document-upload', { 
+      editingDocument: document,
+      defaultFolderId: document.folder_id 
+    });
+  };
+
+  const handleDelete = () => {
+    openModal('delete-confirmation', {
+      title: 'Eliminar documento',
+      description: `¿Estás seguro de que deseas eliminar el documento "${document.name}"?`,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => {
+        // Aquí iría la lógica para eliminar el documento
+        console.log('Eliminando documento:', document.id);
+      }
+    });
+  };
+
+  const handleView = () => {
+    if (document.file_url) {
+      window.open(document.file_url, '_blank');
+    }
   };
 
   return (
@@ -657,12 +697,41 @@ function DocumentItem({ document }: DocumentItemProps) {
       
       {/* Actions */}
       <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-6 w-6 p-0 hover:bg-blue-50"
+          onClick={handleDownload}
+          title="Descargar archivo"
+        >
           <Download className="h-3 w-3" />
         </Button>
-        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-          <MoreVertical className="h-3 w-3" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0 hover:bg-gray-50"
+              title="Más opciones"
+            >
+              <MoreVertical className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleView}>
+              <Eye className="h-4 w-4 mr-2" />
+              Ver archivo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleEdit}>
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
