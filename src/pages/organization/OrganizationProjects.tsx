@@ -24,8 +24,6 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
-import { FILTER_ICONS } from '@/constants/actionBarConstants'
 
 
 export default function OrganizationProjects() {
@@ -58,54 +56,12 @@ export default function OrganizationProjects() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Configurar acciones para móvil
+  // Limpiar acciones del action bar al salir de la página
   useEffect(() => {
-    if (isMobile) {
-      setActions({
-        slot1: {
-          id: 'home',
-          icon: <Home className="w-5 h-5" />,
-          label: 'Inicio',
-          onClick: () => navigate('/organization/dashboard')
-        },
-        slot2: {
-          id: 'search',
-          icon: <Search className="w-5 h-5" />,
-          label: 'Buscar',
-          onClick: () => {}
-        },
-        slot3: {
-          id: 'create',
-          icon: <Plus className="w-5 h-5" />,
-          label: 'Crear',
-          variant: 'primary',
-          onClick: () => openModal('project', {})
-        },
-        slot4: {
-          id: 'filter',
-          icon: <Filter className="w-5 h-5" />,
-          label: 'Filtros',
-          onClick: () => {}
-        },
-        slot5: {
-          id: 'clear',
-          icon: <X className="w-5 h-5" />,
-          label: 'Limpiar',
-          onClick: () => {
-            setSearchValue('')
-            setFilterByStatus('all')
-            setSortBy('date_recent')
-          }
-        }
-      })
-    }
-
     return () => {
-      if (isMobile) {
-        setActions({})
-      }
+      setActions({})
     }
-  }, [isMobile, navigate, setActions])
+  }, [setActions])
 
   // Filtrar y ordenar proyectos
   let filteredProjects = projects?.filter(project => {
@@ -331,48 +287,17 @@ export default function OrganizationProjects() {
     setFilterByStatus('all')
   }
 
-  // Configuración de filtros para ActionBarDesktopRow
-  const filters = [
-    {
-      key: 'sort',
-      label: 'Ordenar',
-      icon: FILTER_ICONS.FILTER,
-      value: sortBy === 'date_recent' ? 'Más Recientes' : 
-             sortBy === 'date_oldest' ? 'Más Antiguos' :
-             sortBy === 'name_asc' ? 'Nombre A-Z' : 'Nombre Z-A',
-      setValue: (value: string) => {
-        if (value === 'Más Recientes') setSortBy('date_recent')
-        else if (value === 'Más Antiguos') setSortBy('date_oldest')
-        else if (value === 'Nombre A-Z') setSortBy('name_asc')
-        else setSortBy('name_desc')
-      },
-      options: ['Más Antiguos', 'Nombre A-Z', 'Nombre Z-A'],
-      defaultLabel: 'Más Recientes'
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      icon: FILTER_ICONS.TYPE,
-      value: filterByStatus === 'all' ? 'Todos los Estados' :
-             filterByStatus === 'active' ? 'Activos' :
-             filterByStatus === 'planning' ? 'En Planificación' :
-             filterByStatus === 'completed' ? 'Completados' : 'En Pausa',
-      setValue: (value: string) => {
-        if (value === 'Todos los Estados') setFilterByStatus('all')
-        else if (value === 'Activos') setFilterByStatus('active')
-        else if (value === 'En Planificación') setFilterByStatus('planning')
-        else if (value === 'Completados') setFilterByStatus('completed')
-        else setFilterByStatus('on-hold')
-      },
-      options: ['Activos', 'En Planificación', 'Completados', 'En Pausa'],
-      defaultLabel: 'Todos los Estados'
-    }
-  ]
+
 
 
 
   const headerProps = {
-    title: "Proyectos"
+    title: "Proyectos",
+    primaryAction: {
+      label: "Nuevo Proyecto",
+      icon: Plus,
+      onClick: () => openModal('project', {})
+    }
   }
 
   if (isLoading || projectsLoading) {
@@ -406,18 +331,7 @@ export default function OrganizationProjects() {
     <>
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* ActionBar Desktop */}
-        <ActionBarDesktopRow
-          filters={filters}
-          actions={[
-            {
-              label: 'Nuevo Proyecto',
-              icon: Plus,
-              onClick: () => openModal('project', {}),
-              variant: 'default'
-            }
-          ]}
-        />
+
 
         {/* Feature Introduction - Solo móvil */}
         <FeatureIntroduction
