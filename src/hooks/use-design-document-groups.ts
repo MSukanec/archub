@@ -118,7 +118,6 @@ export function useCreateDesignDocumentGroup() {
           project_id: projectId,
           organization_id: organizationId,
           created_by: userData.user.id,
-          status: 'pendiente',
         })
         .select()
         .single();
