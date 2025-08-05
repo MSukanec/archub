@@ -48,7 +48,8 @@ import {
   UserCircle,
   HandCoins,
   Settings,
-  Ruler
+  Ruler,
+  Receipt
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -169,6 +170,7 @@ export function SidebarSubmenu() {
         { icon: Tag, label: 'Marcas', href: '/admin/brands' },
         { icon: Ruler, label: 'Unidades', href: '/admin/unit-presentations' },
         { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },
+        { icon: Receipt, label: 'Precios de Materiales', href: '/admin/material-prices' },
       ]},
     ],
   };
