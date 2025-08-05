@@ -13,8 +13,9 @@ import { Badge } from '@/components/ui/badge'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
 
-import { Plus, Edit, Trash2, Package, Tag, Copy } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image } from 'lucide-react'
 
 export default function AdminProducts() {
   const [searchValue, setSearchValue] = useState('')
@@ -23,6 +24,8 @@ export default function AdminProducts() {
   const [filterByBrand, setFilterByBrand] = useState('')
   
   const { openModal } = useGlobalModalStore()
+  const [lightboxImages, setLightboxImages] = useState<string[]>([])
+  const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
 
   // Fetch products using the hook
   const { data: products = [], isLoading } = useProducts()
@@ -202,6 +205,66 @@ export default function AdminProducts() {
       )
     },
     {
+      key: 'url',
+      label: 'URL',
+      width: '8%',
+      render: (product: Product) => (
+        <div className="flex items-center">
+          {product.url ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open(product.url, '_blank')}
+              className="h-7 px-2 text-blue-600 hover:text-blue-700"
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              URL
+            </Button>
+          ) : (
+            <span className="text-xs text-muted-foreground">-</span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'image',
+      label: 'Imagen',
+      width: '8%',
+      render: (product: Product) => (
+        <div className="flex items-center">
+          {product.image_url ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setLightboxImages([product.image_url!])
+                openLightbox(0)
+              }}
+              className="h-7 w-7 p-0"
+            >
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="h-6 w-6 object-cover rounded"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = '<Image className="h-3 w-3 text-muted-foreground" />';
+                  }
+                }}
+              />
+            </Button>
+          ) : (
+            <div className="flex items-center justify-center h-7 w-7">
+              <Image className="h-3 w-3 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
       key: 'actions',
       label: 'Acciones',
       width: '10%',
@@ -320,6 +383,14 @@ export default function AdminProducts() {
           }
         />
       </div>
+      
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        currentIndex={currentIndex}
+        isOpen={isOpen}
+        onClose={closeLightbox}
+      />
     </Layout>
   )
 }

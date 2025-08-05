@@ -27,6 +27,7 @@ const productSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   image_url: z.string().optional(),
+  url: z.string().optional(),
   default_price: z.coerce.number().optional(),
   default_provider: z.string().optional(),
 })
@@ -70,6 +71,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       name: '',
       description: '',
       image_url: '',
+      url: '',
       default_price: undefined,
       default_provider: '',
     },
@@ -92,6 +94,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         name: editingProduct.name || '',
         description: editingProduct.description || '',
         image_url: editingProduct.image_url || '',
+        url: editingProduct.url || '',
         default_price: editingProduct.default_price,
         default_provider: editingProduct.default_provider || '',
       }
@@ -106,6 +109,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         name: '',
         description: '',
         image_url: '',
+        url: '',
         default_price: undefined,
         default_provider: '',
       })
@@ -123,6 +127,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         name: data.name,
         description: data.description || undefined,
         image_url: data.image_url || undefined,
+        url: data.url || undefined,
         default_price: data.default_price,
         default_provider: data.default_provider || undefined,
       }
@@ -240,6 +245,25 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
               <FormControl>
                 <Input
                   placeholder="Ej: Cemento Portland Tipo I, Ladrillo King Kong..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* URL */}
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL del Producto</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="https://ejemplo.com/producto"
                   {...field}
                 />
               </FormControl>
