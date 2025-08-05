@@ -61,17 +61,15 @@ export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPo
         sideOffset={10}
       >
         <div className="relative">
-          {/* Header - Sin ícono, texto en doble fila */}
-          <div className="px-3 py-3 flex items-start justify-between border-b border-[var(--card-border)]">
-            <div className="flex-1 pr-2">
-              <h2 className="text-sm font-medium text-[var(--card-fg)] leading-tight">
+          {/* Header - Con ícono, sin descripción */}
+          <div className="px-3 py-3 flex items-center justify-between border-b border-[var(--card-border)]">
+            <div className="flex items-center gap-2 flex-1">
+              <Package className="h-4 w-4 text-[var(--accent)]" />
+              <h2 className="text-sm font-medium text-[var(--card-fg)]">
                 Materiales por unidad
               </h2>
-              <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-                Detalle y costos de materiales
-              </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -150,10 +148,8 @@ export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPo
                   })}
                 </div>
 
-                <Separator className="my-3" />
-
-                {/* Total */}
-                <div className="flex items-center justify-between py-2">
+                {/* Total - Misma altura que header */}
+                <div className="px-3 py-3 flex items-center justify-between border-t border-[var(--card-border)]">
                   <span className="font-semibold text-sm text-gray-900">Total por unidad:</span>
                   <Badge variant="secondary" className="font-mono text-sm px-3 py-1">
                     ${totalPerUnit.toLocaleString()}
