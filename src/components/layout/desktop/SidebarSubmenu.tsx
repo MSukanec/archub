@@ -47,7 +47,8 @@ import {
   Brush,
   UserCircle,
   HandCoins,
-  Settings
+  Settings,
+  Ruler
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -166,6 +167,7 @@ export function SidebarSubmenu() {
         { icon: Package, label: 'Productos', href: '/admin/products' },
         { icon: Package2, label: 'Materiales', href: '/admin/materials' },
         { icon: Tag, label: 'Marcas', href: '/admin/brands' },
+        { icon: Ruler, label: 'Unidades', href: '/admin/unit-presentations' },
         { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },
       ]},
     ],

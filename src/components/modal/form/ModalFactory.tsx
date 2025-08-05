@@ -28,6 +28,7 @@ import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';
 import { ProductFormModal } from '../modals/admin/ProductFormModal';
+import { UnitPresentationFormModal } from '../modals/admin/UnitPresentationFormModal';
 import { DependencyConnectionModal } from '../modals/construction/DependencyConnectionModal';
 import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
 import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
@@ -103,6 +104,9 @@ export function ModalFactory() {
     
     case 'product-form':
       return <ProductFormModal modalData={data} onClose={closeModal} />;
+    
+    case 'unit-presentation-form':
+      return <UnitPresentationFormModal modalData={data} onClose={closeModal} />;
     
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
