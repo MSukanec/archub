@@ -28,6 +28,9 @@ import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { TaskMaterialsPopover } from '@/components/construction/TaskMaterialsPopover'
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal'
+import TaskLaborCost from '@/components/construction/TaskLaborCost'
+import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
+import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -291,6 +294,28 @@ export default function ConstructionTasks() {
       width: '8%'
     },
     {
+      key: 'labor_cost',
+      label: 'Costo Mo.',
+      render: (task: any) => (
+        <div className="text-center">
+          <TaskLaborCost task={task} />
+        </div>
+      ),
+      width: '8%',
+      sortable: false
+    },
+    {
+      key: 'labor_subtotal',
+      label: 'Subt. Mo.',
+      render: (task: any) => (
+        <div className="text-center">
+          <TaskLaborSubtotal task={task} />
+        </div>
+      ),
+      width: '8%',
+      sortable: false
+    },
+    {
       key: 'material_details',
       label: 'Costo Mat.',
       render: (task: any) => (
@@ -298,7 +323,7 @@ export default function ConstructionTasks() {
           <TaskMaterialsPopover task={task} showCost={true} />
         </div>
       ),
-      width: '10%',
+      width: '8%',
       sortable: false
     },
     {
@@ -307,6 +332,17 @@ export default function ConstructionTasks() {
       render: (task: any) => (
         <div className="text-center">
           <TaskMaterialsSubtotal task={task} />
+        </div>
+      ),
+      width: '8%',
+      sortable: false
+    },
+    {
+      key: 'total_subtotal',
+      label: 'Subtotal',
+      render: (task: any) => (
+        <div className="text-center">
+          <TaskTotalSubtotal task={task} />
         </div>
       ),
       width: '10%',
