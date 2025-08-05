@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -78,8 +79,11 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const { data: units = [] } = useUnits()
   const { setPanel } = useModalPanelStore()
   
-  // Convert categories to cascading format
-  const cascadingOptions = convertToCascadingOptions(categories)
+  // Convert categories to cascading format - memoize to prevent recreation
+  const cascadingOptions = React.useMemo(() => 
+    convertToCascadingOptions(categories), 
+    [categories]
+  )
   
   // Track selected category path for CascadingSelect
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
@@ -101,7 +105,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
   // Load editing data
   useEffect(() => {
-    if (isEditing && editingMaterial) {
+    if (isEditing && editingMaterial && categories.length > 0) {
       form.reset({
         name: editingMaterial.name,
         category_id: editingMaterial.category_id,
@@ -111,7 +115,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       // Set the category path for CascadingSelect
       const path = findCategoryPath(categories, editingMaterial.category_id)
       setSelectedCategoryPath(path)
-    } else {
+    } else if (!isEditing) {
       form.reset({
         name: '',
         category_id: '',
@@ -119,7 +123,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       })
       setSelectedCategoryPath([])
     }
-  }, [editingMaterial, isEditing, form, categories])
+  }, [editingMaterial?.id, isEditing, categories.length])
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
