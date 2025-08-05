@@ -29,16 +29,7 @@ export default function AdminMaterials() {
   const { data: materials = [], isLoading } = useMaterials()
   const deleteMaterialMutation = useDeleteMaterial()
 
-  // Statistics calculations
-  const totalMaterials = materials.length
-  const totalCategories = Array.from(new Set(materials.map(mat => mat.category?.name).filter(Boolean))).length
-  const totalUnits = Array.from(new Set(materials.map(mat => mat.unit?.name).filter(Boolean))).length
-  const recentMaterials = materials.filter(mat => {
-    const createdDate = new Date(mat.created_at)
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    return createdDate > weekAgo
-  }).length
+  // Remove KPI statistics - no longer needed
 
   // Apply client-side filtering
   const filteredMaterials = materials.filter(material => {
@@ -221,48 +212,7 @@ export default function AdminMaterials() {
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Materiales</p>
-                <p className="text-lg font-semibold">{totalMaterials}</p>
-              </div>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-          
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Categorías</p>
-                <p className="text-lg font-semibold">{totalCategories}</p>
-              </div>
-              <Crown className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-          
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Unidades</p>
-                <p className="text-lg font-semibold">{totalUnits}</p>
-              </div>
-              <Crown className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-          
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Nuevos (7 días)</p>
-                <p className="text-lg font-semibold">{recentMaterials}</p>
-              </div>
-              <Crown className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </Card>
-        </div>
+        {/* KPI Cards removed as requested */}
 
         {/* Materials Table */}
         <Table

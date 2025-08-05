@@ -50,7 +50,7 @@ export function useMaterials() {
         .select(`
           *,
           unit:units(name),
-          category:material_categories(name),
+          category:material_categories!materials_category_id_fkey(name),
           organization_material_prices(
             id,
             unit_price,
@@ -101,7 +101,7 @@ export function useCreateMaterial() {
         .select(`
           *,
           unit:units(name),
-          category:material_categories(name)
+          category:material_categories!materials_category_id_fkey(name)
         `)
         .single()
 
@@ -145,7 +145,7 @@ export function useUpdateMaterial() {
         .select(`
           *,
           unit:units(name),
-          category:material_categories(name)
+          category:material_categories!materials_category_id_fkey(name)
         `)
         .single()
 
