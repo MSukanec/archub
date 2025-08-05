@@ -14,7 +14,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
-import { Edit, Trash2, Target, Zap, CheckSquare, Clock } from 'lucide-react'
+import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus } from 'lucide-react'
 
 export default function AdminGeneratedTasks() {
   const [searchValue, setSearchValue] = useState('')
@@ -200,27 +200,57 @@ export default function AdminGeneratedTasks() {
     }
   ]
 
+  const headerProps = {
+    title: 'Tareas Generadas',
+    showBreadcrumb: true,
+    breadcrumb: [
+      { label: 'Administración', href: '/admin' },
+      { label: 'Tareas Generadas', href: '/admin/generated-tasks' }
+    ],
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    customFilters,
+    onClearFilters: clearFilters,
+    actions: [
+      <Button 
+        key="new-task"
+        onClick={() => openModal('parametric-task')}
+        size="sm"
+        className="gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Nueva Tarea Generada
+      </Button>
+    ]
+  };
+
   return (
-    <Layout>
+    <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        <ActionBarDesktop
-          title="Gestión de Tareas Generadas"
-          icon={<Target className="w-6 h-6" />}
-          features={features}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          customFilters={customFilters}
-          onClearFilters={clearFilters}
-          primaryActionLabel="Nueva Tarea Generada"
-          onPrimaryActionClick={() => openModal('parametric-task')}
-        />
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-card p-4 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Tareas</p>
+                <p className="text-lg font-semibold">{filteredGeneratedTasks.length}</p>
+              </div>
+              <Target className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+        </div>
 
         <Table
           data={filteredGeneratedTasks}
           columns={columns}
           isLoading={isLoading}
-          emptyMessage="No hay tareas generadas"
-          emptyDescription="Crea tu primera tarea generada para comenzar a organizar el trabajo."
+          emptyState={
+            <div className="text-center py-8">
+              <h3 className="text-lg font-medium text-muted-foreground">No hay tareas generadas</h3>
+              <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea generada para comenzar a organizar el trabajo.</p>
+            </div>
+          }
         />
       </div>
     </Layout>

@@ -312,22 +312,23 @@ export default function AdminUsers() {
   )
 
   const headerProps = {
-    title: 'Gestión de Usuarios'
+    title: 'Usuarios',
+    showBreadcrumb: true,
+    breadcrumb: [
+      { label: 'Administración', href: '/admin' },
+      { label: 'Usuarios', href: '/admin/users' }
+    ],
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    customFilters,
+    onClearFilters: clearFilters,
+    actions: []
   }
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Action Bar */}
-        <ActionBarDesktop
-          title="Gestión de Usuarios"
-          icon={<Users className="h-5 w-5" />}
-          showSearch={true}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          customFilters={customFilters}
-          onClearFilters={clearFilters}
-        />
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-3">

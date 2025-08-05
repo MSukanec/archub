@@ -240,9 +240,7 @@ export default function AdminOrganizations() {
     </div>
   );
 
-  const headerProps = {
-    title: "Gestión de Organizaciones"
-  };
+
 
   const columns = [
     {
@@ -372,19 +370,24 @@ export default function AdminOrganizations() {
     }
   ];
 
+  const headerProps = {
+    title: 'Organizaciones',
+    showBreadcrumb: true,
+    breadcrumb: [
+      { label: 'Administración', href: '/admin' },
+      { label: 'Organizaciones', href: '/admin/organizations' }
+    ],
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    customFilters,
+    onClearFilters: handleClearFilters,
+    actions: []
+  };
+
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Action Bar */}
-        <ActionBarDesktop
-          title="Gestión de Organizaciones"
-          icon={<Building className="h-5 w-5" />}
-          showSearch={true}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          customFilters={customFilters}
-          onClearFilters={handleClearFilters}
-        />
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-3">

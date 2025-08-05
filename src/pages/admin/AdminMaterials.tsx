@@ -206,6 +206,11 @@ export default function AdminMaterials() {
 
   const headerProps = {
     title: 'Materiales',
+    showBreadcrumb: true,
+    breadcrumb: [
+      { label: 'Administración', href: '/admin' },
+      { label: 'Materiales', href: '/admin/materials' }
+    ],
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

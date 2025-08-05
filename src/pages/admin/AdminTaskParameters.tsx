@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Plus, Edit, Trash2, Eye, Building2, List, TreePine } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -335,61 +336,61 @@ export default function AdminTaskParameters() {
     );
   }
 
+  const headerProps = {
+    title: 'Parámetros de Tareas',
+    showBreadcrumb: true,
+    breadcrumb: [
+      { label: 'Administración', href: '/admin' },
+      { label: 'Parámetros de Tareas', href: '/admin/task-parameters' }
+    ],
+    showSearch: true,
+    searchValue: searchTerm,
+    onSearchChange: setSearchTerm,
+    customFilters: renderCustomFilters(),
+    actions: [
+      <Button 
+        key="nuevo-parametro"
+        onClick={() => openModal('task-parameter', {
+          onParameterCreated: (parameterId: string) => {
+            setSelectedParameterId(parameterId);
+          }
+        })}
+        size="sm"
+        className="gap-2"
+      >
+        <Plus className="w-4 h-4" />
+        Nuevo Parámetro
+      </Button>
+    ]
+  };
+
   return (
-    <Layout wide={true}>
-      <ActionBarDesktop
-        title="Parámetros de Tareas"
-        icon={<Settings className="w-5 h-5" />}
-        features={features}
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        customFilters={renderCustomFilters()}
-        showProjectSelector={false}
-        tabs={[
-          {
-            value: "lista",
-            label: "Lista",
-            icon: <List className="h-4 w-4" />
-          },
-          {
-            value: "arbol",
-            label: "Árbol",
-            icon: <TreePine className="h-4 w-4" />
-          }
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        primaryActionLabel="Agregar Opción"
-        onPrimaryActionClick={() => {
-          if (selectedParameter) {
-            openModal('task-parameter-option', {
-              parameterId: selectedParameter.id
-            });
-          }
-        }}
-        customActions={[
-          <Button 
-            key="nuevo-parametro"
-            variant="secondary" 
-            onClick={() => openModal('task-parameter', {
-              onParameterCreated: (parameterId: string) => {
-                // Auto-select the newly created parameter
-                setSelectedParameterId(parameterId);
-              }
-            })}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Parámetro
-          </Button>
-        ]}
-        parameterSelector={filteredAndSortedParameters.length > 0 ? {
-          parameters: filteredAndSortedParameters,
-          selectedParameterId,
-          onParameterChange: handleParameterChange,
-          onEditParameter: handleEditParameter,
-          onDeleteParameter: handleDeleteParameter
-        } : undefined}
-      />
+    <Layout wide headerProps={headerProps}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {/* Tabs List */}
+        <div className="flex items-center justify-between mb-6">
+          <TabsList className="grid w-auto grid-cols-2">
+            <TabsTrigger value="lista">Lista</TabsTrigger>
+            <TabsTrigger value="arbol">Árbol</TabsTrigger>
+          </TabsList>
+          
+          {activeTab === "lista" && filteredAndSortedParameters.length > 0 && selectedParameter && (
+            <Button 
+              onClick={() => {
+                if (selectedParameter) {
+                  openModal('task-parameter-option', {
+                    parameterId: selectedParameter.id
+                  });
+                }
+              }}
+              size="sm"
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Agregar Opción
+            </Button>
+          )}
+        </div>
       
       {/* Tab Content */}
       <div className="space-y-6">
@@ -422,7 +423,8 @@ export default function AdminTaskParameters() {
         {activeTab === "arbol" && (
           <ParameterNodeEditor />
         )}
-      </div>
+        </div>
+      </Tabs>
 
       {/* All modals now managed by ModalFactory */}
     </Layout>

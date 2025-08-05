@@ -11,7 +11,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MoreHorizontal, FileText, Calendar, Users, BookOpen, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, FileText, Calendar, Users, BookOpen, Edit, Trash2, Plus } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
@@ -166,9 +166,7 @@ export default function AdminChangelogs() {
     }
   };
 
-  const headerProps = {
-    title: "Gestión de Changelog",
-  };
+
 
   const columns = [
     {
@@ -233,19 +231,31 @@ export default function AdminChangelogs() {
     }
   ];
 
+  const headerProps = {
+    title: 'Changelog',
+    showBreadcrumb: true,
+    breadcrumb: [
+      { label: 'Administración', href: '/admin' },
+      { label: 'Changelog', href: '/admin/changelogs' }
+    ],
+    showSearch: true,
+    searchValue,
+    onSearchChange: setSearchValue,
+    actions: [
+      <Button 
+        key="new-entry"
+        onClick={() => openModal('changelog-entry', {})}
+        size="sm"
+        className="gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Nueva Entrada
+      </Button>
+    ]
+  };
+
   return (
     <Layout headerProps={headerProps} wide>
-      {/* ActionBar */}
-      <ActionBarDesktop
-        title="Gestión de Changelog"
-        icon={<FileText className="w-5 h-5" />}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        primaryActionLabel="Nueva Entrada"
-        onPrimaryActionClick={() => openModal('changelog-entry', {})}
-        showGrouping={false}
-      />
-
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
@@ -302,7 +312,12 @@ export default function AdminChangelogs() {
         data={filteredData}
         columns={columns}
         isLoading={isLoading}
-        emptyMessage="No se encontraron entradas del changelog"
+        emptyState={
+          <div className="text-center py-8">
+            <h3 className="text-lg font-medium text-muted-foreground">No hay entradas del changelog</h3>
+            <p className="text-sm text-muted-foreground mt-1">No se encontraron entradas que coincidan con los filtros seleccionados.</p>
+          </div>
+        }
         defaultSort={{ key: 'created_at', direction: 'desc' }}
       />
 
