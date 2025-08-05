@@ -34,7 +34,7 @@ export function FormModalFooter({
   const finalOnLeftClick = onLeftClick; // Permite manejar el cierre desde el componente padre
   const finalOnRightClick = onSubmit || onRightClick;
   return (
-    <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
+    <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-[-1]">
       <div className="flex gap-2 w-full">
         {finalLeftLabel && finalOnLeftClick ? (
           <>
