@@ -64,6 +64,7 @@ import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
+import AdminBrands from "@/pages/admin/AdminBrands";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
 import AdminCategories from "@/pages/admin/AdminCategories";
@@ -365,6 +366,13 @@ function Router() {
           <ProtectedRoute>
             <AdminProtectedRoute>
               <AdminMaterials />
+            </AdminProtectedRoute>
+          </ProtectedRoute>
+        </Route>
+        <Route path="/admin/brands">
+          <ProtectedRoute>
+            <AdminProtectedRoute>
+              <AdminBrands />
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
