@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
-import { createPortal } from "react-dom"
 import { ChevronDown, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,7 +32,6 @@ export function CascadingSelect({
   const [currentLevel, setCurrentLevel] = useState(0)
   const [currentOptions, setCurrentOptions] = useState<CascadingOption[]>(options)
   const [selectedPath, setSelectedPath] = useState<CascadingOption[]>([])
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const triggerRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -99,16 +97,6 @@ export function CascadingSelect({
   const handleTriggerClick = () => {
     if (disabled) return
     if (!isOpen) {
-      // Calculate dropdown position
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect()
-        setDropdownPosition({
-          top: rect.bottom + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width
-        })
-      }
-      
       // Al abrir, establecer el nivel correcto basado en la selección actual
       if (selectedPath.length > 0) {
         const lastSelected = selectedPath[selectedPath.length - 1]
@@ -232,19 +220,13 @@ export function CascadingSelect({
         )} />
       </button>
 
-      {/* Dropdown Content usando Portal para aparecer sobre el modal */}
-      {isOpen && createPortal(
+      {/* Dropdown Content - Estéticamente idéntico al Select */}
+      {isOpen && (
         <div
           ref={contentRef}
           className={cn(
-            "fixed z-[999999] max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95"
+            "absolute z-[100000] w-full mt-1 max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
           )}
-          style={{
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            width: dropdownPosition.width,
-            marginTop: '4px'
-          }}
         >
           <div className="p-1 max-h-56 overflow-auto overscroll-contain">
             {currentOptions.map((option) => (
@@ -271,8 +253,7 @@ export function CascadingSelect({
               </div>
             )}
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   )
