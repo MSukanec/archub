@@ -161,8 +161,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         id: tm.id,
         material_id: tm.material_id,
         amount: tm.amount,
-        material_name: tm.materials?.name,
-        unit_name: tm.materials?.units?.name
+        material_name: tm.material_view?.name,
+        unit_name: tm.material_view?.unit_of_computation
       })))
     }
   }, [existingTaskMaterials])
