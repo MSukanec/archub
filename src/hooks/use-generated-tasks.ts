@@ -246,7 +246,7 @@ export function useDeleteGeneratedTask() {
   });
 }
 
-// Hook para obtener materiales de una tarea generada
+// Hook para obtener materiales de una tarea generada con precios de material_view
 export function useTaskMaterials(taskId: string | null) {
   return useQuery({
     queryKey: ['task-materials', taskId],
@@ -256,11 +256,16 @@ export function useTaskMaterials(taskId: string | null) {
       const { data, error } = await supabase
         .from('task_materials')
         .select(`
-          *,
-          materials (
+          id,
+          task_id,
+          material_id,
+          amount,
+          unit_quantity,
+          material_view (
             id,
             name,
-            units(name)
+            unit_name,
+            unit_price
           )
         `)
         .eq('task_id', taskId);
@@ -270,7 +275,7 @@ export function useTaskMaterials(taskId: string | null) {
         throw error;
       }
       
-      return data as TaskMaterial[];
+      return data || [];
     },
     enabled: !!taskId && !!supabase
   });

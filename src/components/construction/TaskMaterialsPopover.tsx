@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
-import { Eye, X, Package, ArrowUpDown } from 'lucide-react'
+import { Eye, X, Package, RotateCcw } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 
@@ -19,10 +19,11 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
     console.log('Reemplazar material:', materialId)
   }
 
-  // Calcular total por unidad (simplificado por ahora)
+  // Calcular total por unidad usando material_view.unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
-    // Por ahora usamos un precio genérico, luego se conectará con precios reales
-    return sum + (material.amount * 10) // $10 por defecto
+    const unitPrice = material.material_view?.unit_price || 0;
+    const quantity = material.unit_quantity || material.amount || 0;
+    return sum + (quantity * unitPrice);
   }, 0)
 
   return (
@@ -37,7 +38,7 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-80 p-0" 
+        className="w-96 p-0" 
         align="center"
         side="left"
         sideOffset={10}
@@ -69,7 +70,7 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
           </div>
 
           {/* Content */}
-          <div className="p-4 space-y-2">
+          <div className="p-4">
             {isLoading ? (
               <div className="text-center py-3">
                 <div className="text-sm text-muted-foreground">Cargando materiales...</div>
@@ -82,36 +83,66 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
               </div>
             ) : (
               <>
-                {materials.map((material) => (
-                  <div key={material.id} className="flex items-center justify-between py-1">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {material.materials?.name || 'Material sin nombre'}
+                {/* Lista de materiales con scroll si hay más de 5 */}
+                <div className={`space-y-3 ${materials.length > 5 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
+                  {materials.map((material) => {
+                    const quantity = material.unit_quantity || material.amount || 0;
+                    const unitPrice = material.material_view?.unit_price || 0;
+                    const subtotal = quantity * unitPrice;
+                    const unitName = material.material_view?.unit_name || 'UD';
+                    
+                    return (
+                      <div key={material.id} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-b-0">
+                        {/* Icono del material */}
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <Package className="h-4 w-4 text-blue-600" />
+                          </div>
+                        </div>
+                        
+                        {/* Información del material */}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate text-gray-900">
+                            {material.material_view?.name || 'Material sin nombre'}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>{quantity} {unitName}</span>
+                            <span>•</span>
+                            <span className="font-mono">
+                              {unitPrice > 0 ? `$${unitPrice.toLocaleString()}` : '–'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Precio total y botón */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-gray-900">
+                              {subtotal > 0 ? `$${subtotal.toLocaleString()}` : '–'}
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReplaceMaterial(material.id)}
+                            className="h-7 w-7 p-0 hover:bg-blue-50 hover:text-blue-600"
+                            title="Reemplazar por producto real"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {material.amount} {material.materials?.units?.name || 'ud'} – $
-                        {(material.amount * 10).toFixed(0)}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleReplaceMaterial(material.id)}
-                      className="h-7 w-7 p-0 flex-shrink-0 ml-2 hover:bg-blue-50 hover:text-blue-600"
-                      title="Reemplazar material"
-                    >
-                      <ArrowUpDown className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
 
-                <Separator className="my-2" />
+                <Separator className="my-3" />
 
                 {/* Total */}
-                <div className="flex items-center justify-between py-1">
-                  <span className="font-medium text-sm">Total por unidad:</span>
-                  <Badge variant="secondary" className="font-mono">
-                    ${totalPerUnit.toFixed(0)}
+                <div className="flex items-center justify-between py-2">
+                  <span className="font-semibold text-sm text-gray-900">Total por unidad:</span>
+                  <Badge variant="secondary" className="font-mono text-sm px-3 py-1">
+                    ${totalPerUnit.toLocaleString()}
                   </Badge>
                 </div>
               </>
