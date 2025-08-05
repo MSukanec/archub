@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, DollarSign, FileText, TrendingUp } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, DollarSign, FileText, TrendingUp, LayoutGrid } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
