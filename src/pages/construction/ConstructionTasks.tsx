@@ -297,7 +297,7 @@ export default function ConstructionTasks() {
             variant="ghost"
             size="sm"
             onClick={() => handleViewMaterialDetails(task)}
-            className="h-7 w-7 p-0 hover:bg-blue-50 hover:text-blue-600"
+            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
           >
             <Eye className="h-4 w-4" />
           </Button>
@@ -315,6 +315,7 @@ export default function ConstructionTasks() {
             variant="ghost"
             size="sm"
             onClick={() => handleEditTask(task)}
+            className="h-8 w-8 p-0"
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -322,12 +323,13 @@ export default function ConstructionTasks() {
             variant="ghost"
             size="sm"
             onClick={() => handleDeleteTask(task.id)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
-      width: '5%',
+      width: '10%',
       sortable: false
     }
   ]
