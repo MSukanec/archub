@@ -19,10 +19,10 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
     console.log('Reemplazar material:', materialId)
   }
 
-  // Calcular total por unidad usando material_view.unit_price
+  // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
-    const unitPrice = material.material_view?.unit_price || 0;
-    const quantity = material.unit_quantity || material.amount || 0;
+    const unitPrice = material.material_view?.computed_unit_price || 0;
+    const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
 
@@ -86,10 +86,10 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
                 {/* Lista de materiales con scroll si hay más de 5 */}
                 <div className={`space-y-3 ${materials.length > 5 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
                   {materials.map((material) => {
-                    const quantity = material.unit_quantity || material.amount || 0;
-                    const unitPrice = material.material_view?.unit_price || 0;
+                    const quantity = material.amount || 0;
+                    const unitPrice = material.material_view?.computed_unit_price || 0;
                     const subtotal = quantity * unitPrice;
-                    const unitName = material.material_view?.unit_name || 'UD';
+                    const unitName = material.material_view?.unit_of_computation || 'UD';
                     
                     return (
                       <div key={material.id} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-b-0">

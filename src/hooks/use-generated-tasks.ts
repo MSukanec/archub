@@ -260,12 +260,11 @@ export function useTaskMaterials(taskId: string | null) {
           task_id,
           material_id,
           amount,
-          unit_quantity,
           material_view (
             id,
             name,
-            unit_name,
-            unit_price
+            unit_of_computation,
+            computed_unit_price
           )
         `)
         .eq('task_id', taskId);
