@@ -71,17 +71,27 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
     },
   })
 
-  // Load editing data
+  // Load editing data (including duplication)
   useEffect(() => {
-    if (isEditing && editingProduct) {
-      form.reset({
-        material_id: editingProduct.material_id,
+    console.log('ProductFormModal useEffect triggered:', {
+      isEditing,
+      isDuplicating,
+      hasEditingProduct: !!editingProduct,
+      editingProduct
+    })
+    
+    if ((isEditing || isDuplicating) && editingProduct) {
+      const formData = {
+        material_id: editingProduct.material_id || '',
         brand_id: editingProduct.brand_id || '',
         unit_id: editingProduct.unit_id || '',
-        name: editingProduct.name,
+        name: editingProduct.name || '',
         description: editingProduct.description || '',
         image_url: editingProduct.image_url || '',
-      })
+      }
+      
+      console.log('Loading form data:', formData)
+      form.reset(formData)
     } else {
       form.reset({
         material_id: '',
@@ -92,7 +102,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         image_url: '',
       })
     }
-  }, [isEditing, editingProduct, form])
+  }, [isEditing, isDuplicating, editingProduct, form])
 
   const onSubmit = async (data: z.infer<typeof productSchema>) => {
     setIsLoading(true)
