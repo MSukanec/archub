@@ -225,7 +225,7 @@ export function CascadingSelect({
         <div
           ref={contentRef}
           className={cn(
-            "absolute z-[10000] w-full mt-1 max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+            "absolute z-[100000] w-full mt-1 max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
           )}
         >
           <div className="p-1 max-h-56 overflow-auto overscroll-contain">
