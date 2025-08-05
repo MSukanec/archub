@@ -12,7 +12,7 @@ async function buildCategoryHierarchy(categoryId: string): Promise<string> {
   
   // Traverse up the hierarchy
   while (currentCategoryId) {
-    const { data: category, error } = await supabase
+    const { data: category, error }: { data: { name: string; parent_id: string | null } | null; error: any } = await supabase
       .from('material_categories')
       .select('name, parent_id')
       .eq('id', currentCategoryId)

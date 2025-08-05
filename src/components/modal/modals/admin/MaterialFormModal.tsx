@@ -10,9 +10,10 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
-import { useMaterialCategories } from '@/hooks/use-material-categories'
+import { useMaterialCategories, MaterialCategory } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -23,6 +24,38 @@ const materialSchema = z.object({
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
 })
+
+// Helper function to convert MaterialCategory[] to CascadingSelect format
+function convertToCascadingOptions(categories: MaterialCategory[]): any[] {
+  return categories.map(category => ({
+    value: category.id,
+    label: category.name,
+    children: category.children && category.children.length > 0 
+      ? convertToCascadingOptions(category.children) 
+      : undefined
+  }))
+}
+
+// Helper function to find category path by ID
+function findCategoryPath(categories: MaterialCategory[], targetId: string): string[] {
+  function search(cats: MaterialCategory[], path: string[] = []): string[] | null {
+    for (const cat of cats) {
+      const currentPath = [...path, cat.id];
+      
+      if (cat.id === targetId) {
+        return currentPath;
+      }
+      
+      if (cat.children && cat.children.length > 0) {
+        const result = search(cat.children, currentPath);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+  
+  return search(categories) || [];
+}
 
 interface MaterialFormModalProps {
   modalData: {
@@ -44,11 +77,17 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
   const { setPanel } = useModalPanelStore()
+  
+  // Convert categories to cascading format
+  const cascadingOptions = convertToCascadingOptions(categories)
+  
+  // Track selected category path for CascadingSelect
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
 
-  // Force edit mode when modal opens
-  useEffect(() => {
-    setPanel('edit')
-  }, [])
+  // Remove the forced edit mode - let users access the modal freely
+  // useEffect(() => {
+  //   setPanel('edit')
+  // }, [])
 
   // Form setup
   const form = useForm<z.infer<typeof materialSchema>>({
@@ -68,14 +107,19 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         category_id: editingMaterial.category_id,
         unit_id: editingMaterial.unit_id,
       })
+      
+      // Set the category path for CascadingSelect
+      const path = findCategoryPath(categories, editingMaterial.category_id)
+      setSelectedCategoryPath(path)
     } else {
       form.reset({
         name: '',
         category_id: '',
         unit_id: '',
       })
+      setSelectedCategoryPath([])
     }
-  }, [editingMaterial, isEditing, form])
+  }, [editingMaterial, isEditing, form, categories])
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
@@ -148,20 +192,21 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           render={({ field }) => (
             <FormItem>
               <FormLabel>Categoría *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <CascadingSelect
+                  options={cascadingOptions}
+                  value={selectedCategoryPath}
+                  onValueChange={(path) => {
+                    setSelectedCategoryPath(path)
+                    // Set the deepest (last) category ID as the form value
+                    const deepestCategoryId = path[path.length - 1] || ''
+                    field.onChange(deepestCategoryId)
+                  }}
+                  placeholder="Seleccionar categoría..."
+                  disabled={isSystemMaterial}
+                  className="w-full"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
