@@ -11,23 +11,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useCreateMaterial, useUpdateMaterial, useCreateMaterialPrice, useMaterialPrice, useUpdateMaterialPrice, Material, NewMaterialData } from '@/hooks/use-materials'
+import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useCurrencies } from '@/hooks/use-currencies'
-import { HelpPopover } from '@/components/ui-custom/HelpPopover'
 
-import { Package, DollarSign } from 'lucide-react'
+import { Package } from 'lucide-react'
 
 const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
-  currency_id: z.string().optional(),
-  price: z.string().optional().refine((val) => !val || !isNaN(Number(val)), {
-    message: 'El precio debe ser un número válido',
-  }),
 })
 
 interface MaterialFormModalProps {
@@ -46,19 +40,10 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // Hooks
   const createMutation = useCreateMaterial()
   const updateMutation = useUpdateMaterial()
-  const createPriceMutation = useCreateMaterialPrice()
-  const updatePriceMutation = useUpdateMaterialPrice()
   const { data: userData } = useCurrentUser()
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
-  const { data: currencies = [] } = useCurrencies()
   const { setPanel } = useModalPanelStore()
-  
-  // Hook para cargar precio del material cuando se está editando
-  const { data: materialPrice } = useMaterialPrice(
-    editingMaterial?.id || '',
-    userData?.organization?.id || ''
-  )
 
   // Force edit mode when modal opens
   useEffect(() => {
@@ -72,8 +57,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       name: '',
       category_id: '',
       unit_id: '',
-      currency_id: '',
-      price: '',
     },
   })
 
@@ -84,23 +67,18 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         name: editingMaterial.name,
         category_id: editingMaterial.category_id,
         unit_id: editingMaterial.unit_id,
-        currency_id: materialPrice?.currency_id || '',
-        price: materialPrice?.unit_price?.toString() || '',
       })
     } else {
       form.reset({
         name: '',
         category_id: '',
         unit_id: '',
-        currency_id: '',
-        price: '',
       })
     }
-  }, [editingMaterial, isEditing, materialPrice, form])
+  }, [editingMaterial, isEditing, form])
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
-    console.log('🚀 Form submitted with values:', values)
     setIsLoading(true)
 
     try {
@@ -114,27 +92,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             category_id: values.category_id,
           },
         })
-        
-        // Actualizar o crear precio si se especificó
-        if (values.price && values.price.trim() !== '' && userData?.organization?.id) {
-          const priceData = {
-            organization_id: userData.organization.id,
-            material_id: editingMaterial.id,
-            unit_price: parseFloat(values.price),
-            currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
-          }
-          
-          if (materialPrice?.id) {
-            // Actualizar precio existente
-            await updatePriceMutation.mutateAsync({
-              id: materialPrice.id,
-              data: priceData
-            })
-          } else {
-            // Crear nuevo precio
-            await createPriceMutation.mutateAsync(priceData)
-          }
-        }
       } else {
         // Crear material
         const materialData: NewMaterialData = {
@@ -145,46 +102,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           is_system: false,
         }
         
-        console.log('📦 Creating material with data:', materialData)
-        const newMaterial = await createMutation.mutateAsync(materialData)
-        console.log('✅ Material created:', newMaterial)
-        
-        // Si se especificó un precio, crear el registro de precio
-        if (values.price && values.price.trim() !== '' && userData?.organization?.id && newMaterial) {
-          console.log('💰 Creating price with data:', {
-            organization_id: userData.organization.id,
-            material_id: newMaterial.id,
-            unit_price: parseFloat(values.price),
-            currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
-          })
-          
-          console.log('🔍 userData:', userData)
-          console.log('🔍 newMaterial:', newMaterial)
-          console.log('🔍 values.currency_id:', values.currency_id)
-          console.log('🔍 values.price:', values.price)
-          
-          const priceData = {
-            organization_id: userData.organization.id,
-            material_id: newMaterial.id,
-            unit_price: parseFloat(values.price),
-            currency_id: values.currency_id && values.currency_id !== '' ? values.currency_id : null,
-          }
-          
-          try {
-            await createPriceMutation.mutateAsync(priceData)
-            console.log('✅ Price created successfully')
-          } catch (priceError) {
-            console.error('❌ Error creating price:', priceError)
-            throw priceError
-          }
-        } else {
-          console.log('⚠️ No price data to save:', {
-            hasPrice: !!values.price,
-            priceValue: values.price,
-            hasOrganization: !!userData?.organization?.id,
-            hasMaterial: !!newMaterial
-          })
-        }
+        await createMutation.mutateAsync(materialData)
       }
       onClose()
     } catch (error) {
@@ -203,167 +121,77 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // Edit panel
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        
-        {/* SECCIÓN 1: INFORMACIÓN BÁSICA DEL MATERIAL */}
-        <div className="space-y-4">
-          {/* Título de sección */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Package className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Información Básica del Material</h3>
-              <p className="text-xs text-muted-foreground">
-                {isSystemMaterial ? 'Datos del sistema (solo lectura)' : 'Configuración general del material'}
-              </p>
-            </div>
-          </div>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Material Name */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Material *</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Cemento Portland"
+                  disabled={isSystemMaterial}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Material Name */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del Material *</FormLabel>
+        {/* Category */}
+        <FormField
+          control={form.control}
+          name="category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoría *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
                 <FormControl>
-                  <Input
-                    placeholder="Ej: Cemento Portland"
-                    disabled={isSystemMaterial}
-                    {...field}
-                  />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar categoría" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          {/* Category and Unit Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Category */}
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categoría *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar categoría" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Unit */}
-            <FormField
-              control={form.control}
-              name="unit_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unidad de Cómputo *</FormLabel>
-                  <div className="flex items-center gap-2">
-                    <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar unidad de cómputo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {units.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <HelpPopover
-                      title="¿Qué es la Unidad de Cómputo?"
-                      description="Esta no es la unidad de venta del material, sino la unidad con la que se calculan las cantidades en el proyecto. Por ejemplo: la cal se computa por kilogramos (KG) para los cálculos de obra, pero se vende por bolsas de 25kg. El cemento se computa por kilogramos pero se vende por bolsas de 50kg. Esta unidad te ayuda a hacer cálculos precisos de materiales."
-                    />
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* SECCIÓN 2: INFORMACIÓN DE PRECIOS */}
-        <div className="space-y-4">
-          {/* Título de sección */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <DollarSign className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Información de Precios</h3>
-              <p className="text-xs text-muted-foreground">Costos específicos para tu organización</p>
-            </div>
-          </div>
-
-          {/* Currency and Price Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Currency */}
-            <FormField
-              control={form.control}
-              name="currency_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moneda (Opcional)</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar moneda" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency.id} value={currency.id}>
-                          {currency.name} ({currency.symbol})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Price */}
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Costo por Unidad (Opcional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Ej: 1250.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
+        {/* Unit */}
+        <FormField
+          control={form.control}
+          name="unit_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidad de Cómputo *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar unidad de cómputo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </form>
     </Form>
   )
