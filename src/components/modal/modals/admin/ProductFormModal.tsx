@@ -23,7 +23,7 @@ import { Package } from 'lucide-react'
 const productSchema = z.object({
   material_id: z.string().min(1, 'El material es requerido'),
   brand_id: z.string().optional(),
-  unit_presentation_id: z.string().min(1, 'La unidad es requerida'),
+  unit_id: z.string().min(1, 'La unidad es requerida'),
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   image_url: z.string().optional(),
@@ -63,7 +63,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
     defaultValues: {
       material_id: '',
       brand_id: '',
-      unit_presentation_id: '',
+      unit_id: '',
       name: '',
       description: '',
       image_url: '',
@@ -76,7 +76,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       form.reset({
         material_id: editingProduct.material_id,
         brand_id: editingProduct.brand_id || '',
-        unit_presentation_id: editingProduct.unit_presentation_id || '',
+        unit_id: editingProduct.unit_id || '',
         name: editingProduct.name,
         description: editingProduct.description || '',
         image_url: editingProduct.image_url || '',
@@ -85,7 +85,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       form.reset({
         material_id: '',
         brand_id: '',
-        unit_presentation_id: '',
+        unit_id: '',
         name: '',
         description: '',
         image_url: '',
@@ -100,7 +100,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       const productData: NewProductData = {
         material_id: data.material_id,
         brand_id: data.brand_id || undefined,
-        unit_presentation_id: data.unit_presentation_id,
+        unit_id: data.unit_id,
         name: data.name,
         description: data.description || undefined,
         image_url: data.image_url || undefined,
@@ -187,7 +187,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         {/* Unit Presentation */}
         <FormField
           control={form.control}
-          name="unit_presentation_id"
+          name="unit_id"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Unidad *</FormLabel>

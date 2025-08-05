@@ -7,7 +7,7 @@ export interface Product {
   id: string;
   material_id: string;
   brand_id?: string;
-  unit_presentation_id?: string;
+  unit_id?: string;
   name: string;
   description?: string;
   image_url?: string;
@@ -35,7 +35,7 @@ export interface Product {
 export interface NewProductData {
   material_id: string;
   brand_id?: string;
-  unit_presentation_id?: string;
+  unit_id?: string;
   name: string;
   description?: string;
   image_url?: string;
@@ -57,7 +57,7 @@ export function useProducts() {
           *,
           material:materials(id, name),
           brand:brands(id, name),
-          unit_presentation:unit_presentations(
+          unit_presentation:unit_presentations!unit_id(
             id, name, equivalence,
             unit:units(id, name)
           )
@@ -90,7 +90,7 @@ export function useCreateProduct() {
           *,
           material:materials(id, name),
           brand:brands(id, name),
-          unit_presentation:unit_presentations(
+          unit_presentation:unit_presentations!unit_id(
             id, name, equivalence,
             unit:units(id, name)
           )
@@ -138,7 +138,7 @@ export function useUpdateProduct() {
           *,
           material:materials(id, name),
           brand:brands(id, name),
-          unit_presentation:unit_presentations(
+          unit_presentation:unit_presentations!unit_id(
             id, name, equivalence,
             unit:units(id, name)
           )
