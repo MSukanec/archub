@@ -127,39 +127,13 @@ export default function ConstructionMaterials() {
       },
       {
         key: 'computed_quantity',
-        label: 'Necesario',
-        width: groupingType === 'categories' ? '13%' : '13%', // Igual que las demás cuando agrupado
+        label: 'Cómputo Técnico',
+        width: groupingType === 'categories' ? '26%' : '35%', // Más ancho ya que ahora es la única columna de cantidad
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
             <span className="text-sm font-medium">
               {material.computed_quantity.toFixed(2)} {unit}
-            </span>
-          )
-        }
-      },
-      {
-        key: 'purchased_quantity',
-        label: 'Comprado',
-        width: groupingType === 'categories' ? '13%' : '13%', // Igual que las demás cuando agrupado
-        render: (material: any) => {
-          const unit = material.unit_name || 'unidad'
-          return (
-            <span className="text-sm text-muted-foreground">
-              {material.purchased_quantity.toFixed(2)} {unit}
-            </span>
-          )
-        }
-      },
-      {
-        key: 'to_purchase_quantity',
-        label: 'Por Comprar',
-        width: groupingType === 'categories' ? '13%' : '14%', // Igual que las demás cuando agrupado
-        render: (material: any) => {
-          const unit = material.unit_name || 'unidad'
-          return (
-            <span className="text-sm text-muted-foreground">
-              {material.to_purchase_quantity.toFixed(2)} {unit}
             </span>
           )
         }
