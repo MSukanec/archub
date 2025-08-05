@@ -188,10 +188,22 @@ export default function AdminCategories() {
               <HierarchicalCategoryTree
                 categories={filteredCategories}
                 expandedCategories={expandedCategories}
-                onToggleExpansion={toggleCategoryExpansion}
-                onEdit={handleEditCategory}
-                onDelete={handleDeleteCategory}
-                searchTerm={searchTerm}
+                onToggleExpanded={toggleCategoryExpansion}
+                onEdit={(category) => handleEditCategory(category.id)}
+                onDelete={(categoryId) => {
+                  // Find category name for confirmation - simplified version
+                  const categoryName = filteredCategories.find(cat => cat.id === categoryId)?.name || 'Categoría';
+                  handleDeleteCategory(categoryId, categoryName);
+                }}
+                onTemplate={() => {}} // Not implemented yet
+                onAddTaskGroup={() => {}} // Not implemented yet  
+                onCreateChild={(category) => {
+                  // Create child category with parent selected
+                  openModal('task-category', { 
+                    isEditing: true,
+                    parentCategoryId: category.id
+                  });
+                }}
               />
             )}
           </CardContent>

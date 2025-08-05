@@ -206,7 +206,8 @@ export default function AdminMaterialCategories() {
                   handleDeleteCategory(categoryId, categoryName);
                 }}
                 onTemplate={() => {}} // Not used for material categories
-                onAddTaskGroup={(category) => {
+                onAddTaskGroup={() => {}} // Not used for material categories
+                onCreateChild={(category) => {
                   // Convert CategoryTreeNode to MaterialCategory for the child creation handler
                   const materialCategory = categories.find(cat => cat.id === category.id) || 
                     findCategoryInTree(categories, category.id);
@@ -214,7 +215,6 @@ export default function AdminMaterialCategories() {
                     handleCreateChildCategory(materialCategory);
                   }
                 }}
-                searchTerm={searchTerm}
               />
             )}
           </CardContent>

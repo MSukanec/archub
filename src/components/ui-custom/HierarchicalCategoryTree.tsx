@@ -4,14 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
+// Remove the import since TaskGroupAdmin doesn't exist
+// import { TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 
 interface CategoryTreeNode {
   id: string;
   name: string;
   code?: string;
   children?: CategoryTreeNode[];
-  taskGroups?: TaskGroupAdmin[];
+  taskGroups?: any[];
   template?: any;
   parent_id?: string | null;
 }
@@ -24,8 +25,9 @@ interface HierarchicalCategoryTreeProps {
   onDelete: (categoryId: string) => void;
   onTemplate: (category: CategoryTreeNode) => void;
   onAddTaskGroup?: (category: CategoryTreeNode) => void;
-  onEditTaskGroup?: (taskGroup: TaskGroupAdmin, category: CategoryTreeNode) => void;
+  onEditTaskGroup?: (taskGroup: any, category: CategoryTreeNode) => void;
   onDeleteTaskGroup?: (taskGroupId: string) => void;
+  onCreateChild?: (category: CategoryTreeNode) => void;
 
   level?: number;
 }
@@ -40,6 +42,7 @@ export function HierarchicalCategoryTree({
   onAddTaskGroup,
   onEditTaskGroup,
   onDeleteTaskGroup,
+  onCreateChild,
 
   level = 0
 }: HierarchicalCategoryTreeProps) {
@@ -130,7 +133,20 @@ export function HierarchicalCategoryTree({
           
           {/* Right side: Action buttons - +, EDITAR, BORRAR */}
           <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
-            {/* Solo mostrar botón + (Agregar Grupo) en categorías finales (3 letras) */}
+            {/* Botón + para crear categoría hija (siempre visible) */}
+            {onCreateChild && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onCreateChild(category)}
+                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                title="Crear categoría hija"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            )}
+            
+            {/* Botón + para Agregar Grupo de Tareas (solo en categorías finales de 3 letras) */}
             {category.code && category.code.length === 3 && onAddTaskGroup && (
               <Button
                 variant="ghost"
@@ -139,7 +155,7 @@ export function HierarchicalCategoryTree({
                 className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
                 title="Agregar Grupo de Tareas"
               >
-                <Plus className="h-3 w-3" />
+                <Layers className="h-3 w-3" />
               </Button>
             )}
             
@@ -178,6 +194,7 @@ export function HierarchicalCategoryTree({
               onAddTaskGroup={onAddTaskGroup}
               onEditTaskGroup={onEditTaskGroup}
               onDeleteTaskGroup={onDeleteTaskGroup}
+              onCreateChild={onCreateChild}
 
               level={currentLevel + 1}
             />
