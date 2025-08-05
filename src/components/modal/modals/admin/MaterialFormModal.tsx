@@ -79,18 +79,19 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const { setPanel } = useModalPanelStore()
   
   // Convert categories to cascading format - memoize to prevent recreation
-  const cascadingOptions = useMemo(() => 
-    convertToCascadingOptions(categories), 
-    [categories]
-  )
+  const cascadingOptions = useMemo(() => {
+    const options = convertToCascadingOptions(categories)
+    console.log('Cascading options:', options)
+    return options
+  }, [categories])
   
   // Track selected category path for CascadingSelect
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
 
-  // Remove the forced edit mode - let users access the modal freely
-  // useEffect(() => {
-  //   setPanel('edit')
-  // }, [])
+  // Force edit mode when modal opens - enable user access
+  useEffect(() => {
+    setPanel('edit')
+  }, [])
 
   // Form setup
   const form = useForm<z.infer<typeof materialSchema>>({
@@ -104,6 +105,13 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
 
   // Load editing data
   useEffect(() => {
+    console.log('MaterialFormModal useEffect triggered:', { 
+      isEditing, 
+      hasEditingMaterial: !!editingMaterial, 
+      categoriesLength: categories.length,
+      unitsLength: units.length 
+    })
+    
     if (isEditing && editingMaterial && categories.length > 0) {
       form.reset({
         name: editingMaterial.name,
@@ -267,7 +275,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={viewPanel}
+      viewPanel={null}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
