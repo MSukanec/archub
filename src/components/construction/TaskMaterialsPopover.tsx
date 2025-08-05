@@ -8,9 +8,10 @@ import { Separator } from '@/components/ui/separator'
 
 interface TaskMaterialsPopoverProps {
   task: any
+  showCost?: boolean
 }
 
-export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
+export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { data: materials = [], isLoading } = useTaskMaterials(task.task_id)
 
@@ -26,17 +27,33 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
     return sum + (quantity * unitPrice);
   }, 0)
 
+  // Formatear el costo total
+  const formatCost = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
+
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
+    <>
+      {showCost && totalPerUnit > 0 && (
+        <span className="text-xs font-medium text-muted-foreground">
+          {formatCost(totalPerUnit)}
+        </span>
+      )}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
       <PopoverContent 
         className="w-96 p-0" 
         align="center"
@@ -150,6 +167,7 @@ export function TaskMaterialsPopover({ task }: TaskMaterialsPopoverProps) {
           </div>
         </div>
       </PopoverContent>
-    </Popover>
+      </Popover>
+    </>
   )
 }

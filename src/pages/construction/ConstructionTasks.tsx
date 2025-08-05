@@ -291,13 +291,13 @@ export default function ConstructionTasks() {
     },
     {
       key: 'material_details',
-      label: 'Detalle de Materiales',
+      label: 'Costo Mat.',
       render: (task: any) => (
-        <div className="flex justify-center">
-          <TaskMaterialsPopover task={task} />
+        <div className="flex items-center justify-center gap-2">
+          <TaskMaterialsPopover task={task} showCost={true} />
         </div>
       ),
-      width: '8%',
+      width: '10%',
       sortable: false
     },
     {
