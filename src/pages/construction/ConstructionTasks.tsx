@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter, FolderTree } from 'lucide-react'
+import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter, FolderTree, Eye } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
@@ -176,6 +176,12 @@ export default function ConstructionTasks() {
     })
   }
 
+  const handleViewMaterialDetails = (task: any) => {
+    // TODO: Implementar modal de detalle de materiales
+    console.log('Ver detalle de materiales para tarea:', task);
+    // openModal('task-material-details', { task })
+  }
+
   const handleEditPhase = (phase: any) => {
     openModal('construction-phase', {
       projectId,
@@ -273,16 +279,32 @@ export default function ConstructionTasks() {
       width: 'auto' // El resto del espacio disponible (70%)
     },
     {
-      key: 'unit',
-      label: 'Unidad',
-      render: (task: any) => task.task?.unit_symbol || 'Sin unidad',
-      width: '5%'
+      key: 'quantity_with_unit',
+      label: 'Cantidad',
+      render: (task: any) => {
+        const quantity = task.quantity || 0;
+        const unit = task.task?.unit_symbol || '';
+        return unit ? `${quantity} ${unit}` : quantity.toString();
+      },
+      width: '8%'
     },
     {
-      key: 'quantity',
-      label: 'Cantidad',
-      render: (task: any) => task.quantity || 0,
-      width: '5%'
+      key: 'material_details',
+      label: 'Detalle de Materiales',
+      render: (task: any) => (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleViewMaterialDetails(task)}
+            className="h-7 w-7 p-0 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+      width: '8%',
+      sortable: false
     },
     {
       key: 'actions',
