@@ -116,10 +116,10 @@ export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPo
                         
                         {/* Información del material */}
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate text-gray-900">
+                          <div className="font-medium text-sm text-gray-900 leading-tight">
                             {material.material_view?.name || 'Material sin nombre'}
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                             <span>{quantity} {unitName}</span>
                             <span>•</span>
                             <span className="font-mono">
