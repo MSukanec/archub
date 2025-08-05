@@ -26,6 +26,7 @@ import ConstructionTaskCard from '@/components/cards/ConstructionTaskCard'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
+import { TaskMaterialsPopover } from '@/components/construction/TaskMaterialsPopover'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -293,14 +294,7 @@ export default function ConstructionTasks() {
       label: 'Detalle de Materiales',
       render: (task: any) => (
         <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleViewMaterialDetails(task)}
-            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
+          <TaskMaterialsPopover task={task} />
         </div>
       ),
       width: '8%',
