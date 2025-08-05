@@ -112,24 +112,6 @@ export default function AdminProducts() {
       )
     },
     {
-      key: 'name',
-      label: 'Producto',
-      render: (product: Product) => (
-        <div className="flex items-center gap-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">{product.name}</span>
-            <span className="text-xs text-muted-foreground">
-              {product.unit_presentation ? 
-                `${product.unit_presentation.name} (${product.unit_presentation.equivalence} ${product.unit_presentation.unit?.name})` : 
-                'Sin unidad'
-              }
-            </span>
-          </div>
-        </div>
-      )
-    },
-    {
       key: 'material',
       label: 'Material',
       render: (product: Product) => (
@@ -145,6 +127,21 @@ export default function AdminProducts() {
         <div className="flex items-center gap-1">
           <Tag className="h-3 w-3 text-muted-foreground" />
           <span className="text-sm">{product.brand?.name || 'Sin marca'}</span>
+        </div>
+      )
+    },
+    {
+      key: 'name',
+      label: 'Modelo',
+      render: (product: Product) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-sm">{product.name}</span>
+          <span className="text-xs text-muted-foreground">
+            {product.unit_presentation ? 
+              `${product.unit_presentation.name} (${product.unit_presentation.equivalence} ${product.unit_presentation.unit?.name})` : 
+              'Sin unidad'
+            }
+          </span>
         </div>
       )
     },
