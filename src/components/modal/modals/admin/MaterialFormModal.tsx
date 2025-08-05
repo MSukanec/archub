@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import * as React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -80,7 +79,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const { setPanel } = useModalPanelStore()
   
   // Convert categories to cascading format - memoize to prevent recreation
-  const cascadingOptions = React.useMemo(() => 
+  const cascadingOptions = useMemo(() => 
     convertToCascadingOptions(categories), 
     [categories]
   )
