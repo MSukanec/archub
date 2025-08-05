@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
+import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { Card } from '@/components/ui/card'
@@ -25,9 +26,29 @@ export default function AdminMaterials() {
   
   const { openModal } = useGlobalModalStore()
 
-  // Fetch materials using the hook
+  // Fetch materials and categories using the hooks
   const { data: materials = [], isLoading } = useMaterials()
+  const { data: categories = [] } = useMaterialCategories()
   const deleteMaterialMutation = useDeleteMaterial()
+
+  // Function to build category hierarchy path
+  const buildCategoryPath = (categoryId: string): string => {
+    const findCategoryPath = (cats: any[], targetId: string, path: string[] = []): string[] | null => {
+      for (const cat of cats) {
+        if (cat.id === targetId) {
+          return [...path, cat.name]
+        }
+        if (cat.children && cat.children.length > 0) {
+          const found = findCategoryPath(cat.children, targetId, [...path, cat.name])
+          if (found) return found
+        }
+      }
+      return null
+    }
+    
+    const path = findCategoryPath(categories, categoryId)
+    return path ? path.join(' / ') : 'Sin categoría'
+  }
 
   // Remove KPI statistics - no longer needed
 
@@ -117,7 +138,7 @@ export default function AdminMaterials() {
       label: 'Categoría',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
-          {material.category?.name || 'N/A'}
+          {buildCategoryPath(material.category_id)}
         </span>
       )
     },
