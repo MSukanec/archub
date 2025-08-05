@@ -6,11 +6,14 @@ import { toast } from '@/hooks/use-toast';
 export interface MaterialCategory {
   id: string;
   name: string;
+  parent_id: string | null;
   created_at: string;
+  children?: MaterialCategory[];
 }
 
 export interface NewMaterialCategoryData {
   name: string;
+  parent_id?: string | null;
 }
 
 export function useMaterialCategories() {
@@ -24,6 +27,7 @@ export function useMaterialCategories() {
         .select(`
           id,
           name,
+          parent_id,
           created_at
         `)
         .order('name', { ascending: true });
@@ -33,7 +37,35 @@ export function useMaterialCategories() {
         throw error;
       }
 
-      return (data || []) as MaterialCategory[];
+      // Transform flat data into hierarchical structure
+      const categories = (data || []) as MaterialCategory[];
+      
+      // Build hierarchy by creating a map of parent-child relationships
+      const categoryMap = new Map<string, MaterialCategory>();
+      const rootCategories: MaterialCategory[] = [];
+      
+      // First pass: create map with all categories
+      categories.forEach(category => {
+        categoryMap.set(category.id, { ...category, children: [] });
+      });
+      
+      // Second pass: build parent-child relationships
+      categories.forEach(category => {
+        const categoryWithChildren = categoryMap.get(category.id)!;
+        
+        if (category.parent_id) {
+          // This is a child category
+          const parent = categoryMap.get(category.parent_id);
+          if (parent) {
+            parent.children!.push(categoryWithChildren);
+          }
+        } else {
+          // This is a root category
+          rootCategories.push(categoryWithChildren);
+        }
+      });
+      
+      return rootCategories;
     },
   });
 }
