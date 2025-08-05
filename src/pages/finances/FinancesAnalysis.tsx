@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, LayoutGrid, DollarSign, FileText, TrendingUp, Plus, Star, Tag, FolderTree } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, PieChart, DollarSign, FileText, TrendingUp } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
@@ -55,7 +55,7 @@ export default function FinancesAnalysis() {
 
   // Get subcontracts analysis data - use selectedProjectId, but for subcontracts we need a specific project
   const { data: subcontractAnalysisData = [], isLoading: isLoadingSubcontracts } = useSubcontractAnalysis(
-    selectedProjectId === 'all' ? projectId : selectedProjectId
+    selectedProjectId === 'all' ? (projectId || null) : (selectedProjectId || null)
   )
 
   // Filter only expense movements (EGRESOS) by UUID and specific categories
@@ -499,61 +499,7 @@ export default function FinancesAnalysis() {
       }}
     >
       <div className="space-y-4">
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'grouping',
-              label: 'Agrupación',
-              icon: Tag,
-              value: groupByCategory ? 'Por Subcategoría' : 'Sin Agrupar',
-              setValue: (value) => setGroupByCategory(value === 'Por Subcategoría'),
-              options: ['Sin Agrupar', 'Por Subcategoría'],
-              defaultLabel: 'Todas las agrupaciones',
-              enabled: activeTab === "analysis"
-            },
-            {
-              key: 'currency',
-              label: 'Moneda',
-              icon: FolderTree,
-              value: currencyView === 'discriminado' ? 'Discriminado' : currencyView === 'pesificado' ? 'Pesificado' : 'Dolarizado',
-              setValue: (value) => {
-                if (value === 'Discriminado') setCurrencyView('discriminado')
-                else if (value === 'Pesificado') setCurrencyView('pesificado')
-                else if (value === 'Dolarizado') setCurrencyView('dolarizado')
-              },
-              options: activeTab === "charts" 
-                ? ['Pesificado', 'Dolarizado'] 
-                : ['Discriminado', 'Pesificado', 'Dolarizado'],
-              defaultLabel: 'Todas las monedas'
-            },
-            {
-              key: 'project',
-              label: 'Proyecto',
-              icon: Star,
-              value: selectedProjectId === 'all' ? 'Todos los Proyectos' : (projects.find(p => p.id === selectedProjectId)?.name || 'Todos los Proyectos'),
-              setValue: (projectName) => {
-                if (projectName === 'Todos los Proyectos') {
-                  setSelectedProjectId('all')
-                } else {
-                  const project = projects.find(p => p.name === projectName)
-                  if (project) {
-                    setSelectedProjectId(project.id)
-                  }
-                }
-              },
-              options: availableProjects,
-              defaultLabel: 'Todos los proyectos'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Nuevo Movimiento',
-              icon: Plus,
-              onClick: () => console.log('Navigate to new movement'),
-              variant: 'default'
-            }
-          ]}
-        />
+
 
         {/* Tab Content */}
         {activeTab === "analysis" ? (
