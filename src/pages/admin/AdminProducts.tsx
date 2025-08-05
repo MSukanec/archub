@@ -170,6 +170,29 @@ export default function AdminProducts() {
       )
     },
     {
+      key: 'default_price',
+      label: 'Precio por Defecto',
+      render: (product: Product) => (
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-mono">
+            {product.default_price !== null && product.default_price !== undefined ? 
+              `S/. ${product.default_price.toFixed(2)}` : 
+              '-'
+            }
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'default_provider',
+      label: 'Proveedor por Defecto',
+      render: (product: Product) => (
+        <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+          {product.default_provider || '-'}
+        </span>
+      )
+    },
+    {
       key: 'description',
       label: 'Descripción',
       render: (product: Product) => (

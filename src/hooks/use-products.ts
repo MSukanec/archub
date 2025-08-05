@@ -35,6 +35,8 @@ export interface Product {
   name: string;
   description?: string;
   image_url?: string;
+  default_price?: number;
+  default_provider?: string;
   created_at: string;
   // Campos calculados
   categoryHierarchy?: string;
@@ -71,6 +73,8 @@ export interface NewProductData {
   name: string;
   description?: string;
   image_url?: string;
+  default_price?: number;
+  default_provider?: string;
 }
 
 export function useProducts() {

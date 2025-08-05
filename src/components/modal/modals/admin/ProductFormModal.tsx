@@ -27,6 +27,8 @@ const productSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   image_url: z.string().optional(),
+  default_price: z.coerce.number().optional(),
+  default_provider: z.string().optional(),
 })
 
 interface ProductFormModalProps {
@@ -68,6 +70,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       name: '',
       description: '',
       image_url: '',
+      default_price: undefined,
+      default_provider: '',
     },
   })
 
@@ -88,6 +92,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         name: editingProduct.name || '',
         description: editingProduct.description || '',
         image_url: editingProduct.image_url || '',
+        default_price: editingProduct.default_price,
+        default_provider: editingProduct.default_provider || '',
       }
       
       console.log('Loading form data:', formData)
@@ -100,6 +106,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         name: '',
         description: '',
         image_url: '',
+        default_price: undefined,
+        default_provider: '',
       })
     }
   }, [isEditing, isDuplicating, editingProduct, form])
@@ -115,6 +123,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
         name: data.name,
         description: data.description || undefined,
         image_url: data.image_url || undefined,
+        default_price: data.default_price,
+        default_provider: data.default_provider || undefined,
       }
 
       if (isEditing && editingProduct) {
@@ -230,6 +240,46 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
               <FormControl>
                 <Input
                   placeholder="Ej: Cemento Portland Tipo I, Ladrillo King Kong..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Default Price */}
+        <FormField
+          control={form.control}
+          name="default_price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Precio por Defecto</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Default Provider */}
+        <FormField
+          control={form.control}
+          name="default_provider"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proveedor por Defecto</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Nombre del proveedor..."
                   {...field}
                 />
               </FormControl>
