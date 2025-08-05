@@ -103,7 +103,11 @@ export function useCreateMaterialCategory() {
       
       // Check for specific foreign key constraint error
       if (error?.code === '23503' && error?.message?.includes('material_categories_parent_id_fkey')) {
-        errorMessage = "Error de configuración de base de datos: El constraint de foreign key para parent_id está mal configurado. Debe apuntar a material_categories, no a materials.";
+        if (error?.details?.includes('movement_concepts')) {
+          errorMessage = "🔧 Error de BD: El constraint parent_id apunta incorrectamente a movement_concepts. Ve al SQL Editor en Supabase y ejecuta: DROP CONSTRAINT material_categories_parent_id_fkey CASCADE; luego ADD CONSTRAINT material_categories_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES material_categories(id);";
+        } else {
+          errorMessage = "Error de configuración de base de datos: El constraint de foreign key para parent_id está mal configurado.";
+        }
       }
       
       toast({
@@ -149,7 +153,11 @@ export function useUpdateMaterialCategory() {
       
       // Check for specific foreign key constraint error
       if (error?.code === '23503' && error?.message?.includes('material_categories_parent_id_fkey')) {
-        errorMessage = "Error de configuración de base de datos: El constraint de foreign key para parent_id está mal configurado. Debe apuntar a material_categories, no a materials.";
+        if (error?.details?.includes('movement_concepts')) {
+          errorMessage = "🔧 Error de BD: El constraint parent_id apunta incorrectamente a movement_concepts. Ve al SQL Editor en Supabase y ejecuta: DROP CONSTRAINT material_categories_parent_id_fkey CASCADE; luego ADD CONSTRAINT material_categories_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES material_categories(id);";
+        } else {
+          errorMessage = "Error de configuración de base de datos: El constraint de foreign key para parent_id está mal configurado.";
+        }
       }
       
       toast({
