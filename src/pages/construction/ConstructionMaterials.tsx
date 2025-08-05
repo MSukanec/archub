@@ -128,12 +128,25 @@ export default function ConstructionMaterials() {
       {
         key: 'computed_quantity',
         label: 'Cómputo Técnico',
-        width: groupingType === 'categories' ? '26%' : '35%', // Más ancho ya que ahora es la única columna de cantidad
+        width: groupingType === 'categories' ? '20%' : '25%', // Reducido para hacer espacio a la nueva columna
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
             <span className="text-sm font-medium">
               {material.computed_quantity.toFixed(2)} {unit}
+            </span>
+          )
+        }
+      },
+      {
+        key: 'commercial_quantity',
+        label: 'Cómputo Comercial',
+        width: groupingType === 'categories' ? '20%' : '25%', // Mismo ancho que Cómputo Técnico
+        render: (material: any) => {
+          const unit = material.unit_name || 'unidad'
+          return (
+            <span className="text-sm text-muted-foreground">
+              - {unit}
             </span>
           )
         }
