@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Tag, Filter, X, TreePine } from 'lucide-react';
+import { Plus, Tag } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -96,6 +96,17 @@ export default function AdminMaterialCategories() {
     });
   };
 
+  const findCategoryInTree = (cats: MaterialCategory[], id: string): MaterialCategory | null => {
+    for (const cat of cats) {
+      if (cat.id === id) return cat;
+      if (cat.children) {
+        const found = findCategoryInTree(cat.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
   const handleCreateChildCategory = (parentCategory: MaterialCategory) => {
     openModal('material-category-form', {
       editingMaterialCategory: null,
@@ -132,111 +143,23 @@ export default function AdminMaterialCategories() {
     return filterCategories(categories);
   }, [categories, searchTerm]);
 
-  // Statistics calculations
-  const countCategoriesRecursive = (cats: MaterialCategory[]): number => {
-    return cats.reduce((count, cat) => {
-      let childCount = 0;
-      if (cat.children && cat.children.length > 0) {
-        childCount = countCategoriesRecursive(cat.children);
-      }
-      return count + 1 + childCount;
-    }, 0);
-  };
 
-  const totalCategories = countCategoriesRecursive(categories);
-  const rootCategories = categories.length;
-
-  const getRecentCategoriesCount = (cats: MaterialCategory[]): number => {
-    let count = 0;
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    
-    const checkRecursive = (categories: MaterialCategory[]) => {
-      categories.forEach(cat => {
-        const createdDate = new Date(cat.created_at);
-        if (createdDate > weekAgo) {
-          count++;
-        }
-        if (cat.children && cat.children.length > 0) {
-          checkRecursive(cat.children);
-        }
-      });
-    };
-    
-    checkRecursive(cats);
-    return count;
-  };
-
-  const recentCategories = getRecentCategoriesCount(categories);
 
   const headerProps = {
     title: 'Categorías de Materiales',
     showSearch: true,
     searchValue: searchTerm,
     onSearchChange: handleSearch,
-    actions: [
-      <Button 
-        key="new-category"
-        onClick={handleCreateCategory}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nueva Categoría
-      </Button>
-    ]
+    actionButton: {
+      label: "Nueva Categoría",
+      icon: Plus,
+      onClick: handleCreateCategory
+    }
   };
 
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Total</span>
-                <Tag className="h-3 w-3 text-muted-foreground" />
-              </div>
-              <div className="text-xl font-bold">{totalCategories}</div>
-              <p className="text-xs text-muted-foreground">categorías</p>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Principales</span>
-                <TreePine className="h-3 w-3 text-muted-foreground" />
-              </div>
-              <div className="text-xl font-bold">{rootCategories}</div>
-              <p className="text-xs text-muted-foreground">principales</p>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Recientes</span>
-                <Plus className="h-3 w-3 text-muted-foreground" />
-              </div>
-              <div className="text-xl font-bold">{recentCategories}</div>
-              <p className="text-xs text-muted-foreground">últimos 7 días</p>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Filtrados</span>
-                <Filter className="h-3 w-3 text-muted-foreground" />
-              </div>
-              <div className="text-xl font-bold">{countCategoriesRecursive(filteredCategories)}</div>
-              <p className="text-xs text-muted-foreground">coincidencias</p>
-            </div>
-          </Card>
-        </div>
-
         {/* Hierarchical Category Tree */}
         <Card>
           <CardContent className="p-6">
@@ -258,7 +181,14 @@ export default function AdminMaterialCategories() {
                 categories={filteredCategories}
                 expandedCategories={expandedCategories}
                 onToggleExpanded={toggleCategoryExpansion}
-                onEdit={handleEditCategory}
+                onEdit={(category) => {
+                  // Convert CategoryTreeNode to MaterialCategory for the edit handler
+                  const materialCategory = categories.find(cat => cat.id === category.id) || 
+                    findCategoryInTree(categories, category.id);
+                  if (materialCategory) {
+                    handleEditCategory(materialCategory);
+                  }
+                }}
                 onDelete={(categoryId: string) => {
                   // Find category name for confirmation
                   const findCategoryName = (cats: MaterialCategory[], id: string): string => {
@@ -276,7 +206,14 @@ export default function AdminMaterialCategories() {
                   handleDeleteCategory(categoryId, categoryName);
                 }}
                 onTemplate={() => {}} // Not used for material categories
-                onAddTaskGroup={handleCreateChildCategory} // Repurpose as "add subcategory"
+                onAddTaskGroup={(category) => {
+                  // Convert CategoryTreeNode to MaterialCategory for the child creation handler
+                  const materialCategory = categories.find(cat => cat.id === category.id) || 
+                    findCategoryInTree(categories, category.id);
+                  if (materialCategory) {
+                    handleCreateChildCategory(materialCategory);
+                  }
+                }}
                 searchTerm={searchTerm}
               />
             )}
