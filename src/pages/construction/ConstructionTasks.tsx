@@ -27,6 +27,7 @@ import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { TaskMaterialsPopover } from '@/components/construction/TaskMaterialsPopover'
+import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal'
 
 export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
@@ -295,6 +296,17 @@ export default function ConstructionTasks() {
       render: (task: any) => (
         <div className="flex items-center justify-center gap-2">
           <TaskMaterialsPopover task={task} showCost={true} />
+        </div>
+      ),
+      width: '10%',
+      sortable: false
+    },
+    {
+      key: 'material_subtotal',
+      label: 'Subt. Mat.',
+      render: (task: any) => (
+        <div className="text-center">
+          <TaskMaterialsSubtotal task={task} />
         </div>
       ),
       width: '10%',
