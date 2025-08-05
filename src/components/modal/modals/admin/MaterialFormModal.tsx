@@ -170,8 +170,8 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null
 
-  // Determinar si el material es del sistema
-  const isSystemMaterial = editingMaterial?.is_system && editingMaterial?.organization_id !== userData?.organization?.id
+  // Allow editing all materials - remove system material blocking
+  const isSystemMaterial = false
 
   // Edit panel
   const editPanel = (
@@ -187,7 +187,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
               <FormControl>
                 <Input
                   placeholder="Ej: Cemento Portland"
-                  disabled={isSystemMaterial}
                   {...field}
                 />
               </FormControl>
@@ -214,7 +213,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                     field.onChange(deepestCategoryId)
                   }}
                   placeholder="Seleccionar categoría..."
-                  disabled={isSystemMaterial}
                   className="w-full"
                 />
               </FormControl>
@@ -230,7 +228,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           render={({ field }) => (
             <FormItem>
               <FormLabel>Unidad de Cómputo *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isSystemMaterial}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar unidad de cómputo" />
