@@ -88,7 +88,7 @@ export function useProducts() {
       }
 
       const { data, error } = await supabase
-        .from('product_models')
+        .from('products')
         .select(`
           *,
           material:materials(
@@ -137,7 +137,7 @@ export function useCreateProduct() {
       if (!supabase) throw new Error('Supabase client not available')
 
       const { data: result, error } = await supabase
-        .from('product_models')
+        .from('products')
         .insert([data])
         .select(`
           *,
@@ -187,7 +187,7 @@ export function useUpdateProduct() {
       if (!supabase) throw new Error('Supabase client not available')
 
       const { data: result, error } = await supabase
-        .from('product_models')
+        .from('products')
         .update(data)
         .eq('id', id)
         .select(`
@@ -238,7 +238,7 @@ export function useDeleteProduct() {
       if (!supabase) throw new Error('Supabase client not available')
 
       const { error } = await supabase
-        .from('product_models')
+        .from('products')
         .delete()
         .eq('id', id)
 
