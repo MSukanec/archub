@@ -10,6 +10,7 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
@@ -26,6 +27,7 @@ const materialSchema = z.object({
   unit_id: z.string().min(1, 'La unidad es requerida'),
   default_unit_presentation_id: z.string().optional(),
   basic_price_override: z.union([z.string(), z.number()]).optional(),
+  is_completed: z.boolean().optional(),
 })
 
 // Helper function to convert MaterialCategory[] to CascadingSelect format
@@ -107,6 +109,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       unit_id: '',
       default_unit_presentation_id: '',
       basic_price_override: '',
+      is_completed: false,
     },
   })
 
@@ -127,6 +130,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         unit_id: editingMaterial.unit_id,
         default_unit_presentation_id: editingMaterial.default_unit_presentation_id || '',
         basic_price_override: editingMaterial.basic_price_override?.toString() || '',
+        is_completed: editingMaterial.is_completed || false,
       })
       
       // Set the category path for CascadingSelect
@@ -139,6 +143,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         unit_id: '',
         default_unit_presentation_id: '',
         basic_price_override: '',
+        is_completed: false,
       })
       setSelectedCategoryPath([])
     }
@@ -159,6 +164,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             category_id: values.category_id,
             default_unit_presentation_id: values.default_unit_presentation_id || undefined,
             basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
+            is_completed: values.is_completed,
           },
         })
       } else {
@@ -169,6 +175,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           unit_id: values.unit_id,
           default_unit_presentation_id: values.default_unit_presentation_id || undefined,
           basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
+          is_completed: values.is_completed,
           organization_id: userData?.organization?.id,
           is_system: false,
         }
@@ -307,6 +314,30 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                 />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Is Completed */}
+        <FormField
+          control={form.control}
+          name="is_completed"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">
+                  Material Completado
+                </FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Marca este material como completado
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />

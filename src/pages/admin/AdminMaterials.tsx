@@ -121,13 +121,21 @@ export default function AdminMaterials() {
 
   const columns = [
     {
-      key: 'created_at',
-      label: 'Fecha de Creación',
-      width: '5%',
+      key: 'is_completed',
+      label: 'Completado',
+      width: '8%',
       render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {format(new Date(material.created_at), 'dd/MM/yy', { locale: es })}
-        </span>
+        <div className="flex justify-center">
+          {material.is_completed ? (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+              Completado
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+              Incompleto
+            </span>
+          )}
+        </div>
       )
     },
     {
