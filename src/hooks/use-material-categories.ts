@@ -96,11 +96,19 @@ export function useCreateMaterialCategory() {
         variant: "default",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating material category:', error);
+      
+      let errorMessage = "No se pudo crear la categoría de material.";
+      
+      // Check for specific foreign key constraint error
+      if (error?.code === '23503' && error?.message?.includes('material_categories_parent_id_fkey')) {
+        errorMessage = "Error de configuración de base de datos: El constraint de foreign key para parent_id está mal configurado. Debe apuntar a material_categories, no a materials.";
+      }
+      
       toast({
         title: "Error",
-        description: "No se pudo crear la categoría de material.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -134,11 +142,19 @@ export function useUpdateMaterialCategory() {
         variant: "default",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating material category:', error);
+      
+      let errorMessage = "No se pudo actualizar la categoría de material.";
+      
+      // Check for specific foreign key constraint error
+      if (error?.code === '23503' && error?.message?.includes('material_categories_parent_id_fkey')) {
+        errorMessage = "Error de configuración de base de datos: El constraint de foreign key para parent_id está mal configurado. Debe apuntar a material_categories, no a materials.";
+      }
+      
       toast({
         title: "Error",
-        description: "No se pudo actualizar la categoría de material.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
