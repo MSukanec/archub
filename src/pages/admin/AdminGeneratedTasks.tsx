@@ -202,27 +202,16 @@ export default function AdminGeneratedTasks() {
 
   const headerProps = {
     title: 'Tareas Generadas',
-    showBreadcrumb: true,
-    breadcrumb: [
-      { label: 'Administración', href: '/admin' },
-      { label: 'Tareas Generadas', href: '/admin/generated-tasks' }
-    ],
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [
-      <Button 
-        key="new-task"
-        onClick={() => openModal('parametric-task')}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nueva Tarea Generada
-      </Button>
-    ]
+    actionButton: {
+      label: "Nueva Tarea Generada",
+      icon: Plus,
+      onClick: () => openModal('parametric-task')
+    }
   };
 
   return (

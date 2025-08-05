@@ -372,17 +372,11 @@ export default function AdminOrganizations() {
 
   const headerProps = {
     title: 'Organizaciones',
-    showBreadcrumb: true,
-    breadcrumb: [
-      { label: 'Administración', href: '/admin' },
-      { label: 'Organizaciones', href: '/admin/organizations' }
-    ],
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     customFilters,
-    onClearFilters: handleClearFilters,
-    actions: []
+    onClearFilters: handleClearFilters
   };
 
   return (

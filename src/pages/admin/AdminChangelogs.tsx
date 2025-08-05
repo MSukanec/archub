@@ -233,25 +233,14 @@ export default function AdminChangelogs() {
 
   const headerProps = {
     title: 'Changelog',
-    showBreadcrumb: true,
-    breadcrumb: [
-      { label: 'Administración', href: '/admin' },
-      { label: 'Changelog', href: '/admin/changelogs' }
-    ],
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
-    actions: [
-      <Button 
-        key="new-entry"
-        onClick={() => openModal('changelog-entry', {})}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nueva Entrada
-      </Button>
-    ]
+    actionButton: {
+      label: "Nueva Entrada",
+      icon: Plus,
+      onClick: () => openModal('changelog-entry', {})
+    }
   };
 
   return (

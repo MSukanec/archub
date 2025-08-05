@@ -206,27 +206,16 @@ export default function AdminMaterials() {
 
   const headerProps = {
     title: 'Materiales',
-    showBreadcrumb: true,
-    breadcrumb: [
-      { label: 'Administración', href: '/admin' },
-      { label: 'Materiales', href: '/admin/materials' }
-    ],
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: [
-      <Button 
-        key="new-material"
-        onClick={handleCreate}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nuevo Material
-      </Button>
-    ]
+    actionButton: {
+      label: "Nuevo Material",
+      icon: Plus,
+      onClick: handleCreate
+    }
   }
 
   return (

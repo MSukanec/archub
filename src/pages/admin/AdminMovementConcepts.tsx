@@ -209,33 +209,23 @@ export default function AdminMovementConcepts() {
     filters: [
       { 
         label: "Todos", 
-        isActive: systemFilter === 'all',
         onClick: () => setSystemFilter('all') 
       },
       { 
         label: "Sistema", 
-        isActive: systemFilter === 'system',
         onClick: () => setSystemFilter('system') 
       },
       { 
         label: "Usuario", 
-        isActive: systemFilter === 'user',
         onClick: () => setSystemFilter('user') 
       }
     ],
     onClearFilters: clearFilters,
-    hasActiveFilters,
-    actions: [
-      <Button 
-        key="new-concept"
-        onClick={handleOpenCreateModal}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Nuevo Concepto
-      </Button>
-    ]
+    actionButton: {
+      label: "Nuevo Concepto",
+      icon: Plus,
+      onClick: handleOpenCreateModal
+    }
   };
 
   if (isError) {

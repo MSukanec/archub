@@ -313,17 +313,16 @@ export default function AdminUsers() {
 
   const headerProps = {
     title: 'Usuarios',
-    showBreadcrumb: true,
-    breadcrumb: [
-      { label: 'Administración', href: '/admin' },
-      { label: 'Usuarios', href: '/admin/users' }
-    ],
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
-    actions: []
+    actionButton: {
+      label: "Nuevo Usuario",
+      icon: Plus,
+      onClick: () => openModal('admin-user')
+    }
   }
 
   return (

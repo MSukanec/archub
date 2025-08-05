@@ -338,30 +338,31 @@ export default function AdminTaskParameters() {
 
   const headerProps = {
     title: 'Parámetros de Tareas',
-    showBreadcrumb: true,
-    breadcrumb: [
-      { label: 'Administración', href: '/admin' },
-      { label: 'Parámetros de Tareas', href: '/admin/task-parameters' }
-    ],
     showSearch: true,
     searchValue: searchTerm,
     onSearchChange: setSearchTerm,
     customFilters: renderCustomFilters(),
-    actions: [
-      <Button 
-        key="nuevo-parametro"
-        onClick={() => openModal('task-parameter', {
-          onParameterCreated: (parameterId: string) => {
-            setSelectedParameterId(parameterId);
+    actionButton: {
+      label: "Nuevo Parámetro",
+      icon: Plus,
+      onClick: () => openModal('task-parameter', {
+        onParameterCreated: (parameterId: string) => {
+          setSelectedParameterId(parameterId);
+        }
+      }),
+      additionalButton: activeTab === "lista" && filteredAndSortedParameters.length > 0 && selectedParameter ? {
+        label: "Agregar Opción",
+        icon: Plus,
+        onClick: () => {
+          if (selectedParameter) {
+            openModal('task-parameter-option', {
+              parameterId: selectedParameter.id
+            });
           }
-        })}
-        size="sm"
-        className="gap-2"
-      >
-        <Plus className="w-4 h-4" />
-        Nuevo Parámetro
-      </Button>
-    ]
+        },
+        variant: "ghost" as const
+      } : undefined
+    }
   };
 
   return (
@@ -374,22 +375,7 @@ export default function AdminTaskParameters() {
             <TabsTrigger value="arbol">Árbol</TabsTrigger>
           </TabsList>
           
-          {activeTab === "lista" && filteredAndSortedParameters.length > 0 && selectedParameter && (
-            <Button 
-              onClick={() => {
-                if (selectedParameter) {
-                  openModal('task-parameter-option', {
-                    parameterId: selectedParameter.id
-                  });
-                }
-              }}
-              size="sm"
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Agregar Opción
-            </Button>
-          )}
+
         </div>
       
       {/* Tab Content */}
