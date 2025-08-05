@@ -163,6 +163,7 @@ export function SidebarSubmenu() {
         { icon: DollarSign, label: 'Conceptos de Movimientos', href: '/admin/movement-concepts' },
       ]},
       { type: 'accordion', label: 'MATERIALES', items: [
+        { icon: Package, label: 'Productos', href: '/admin/products' },
         { icon: Package2, label: 'Materiales', href: '/admin/materials' },
         { icon: Tag, label: 'Marcas', href: '/admin/brands' },
         { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories' },
