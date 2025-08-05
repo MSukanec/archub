@@ -10,7 +10,8 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 
 import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/hooks/use-products'
 import { useMaterials } from '@/hooks/use-materials'
@@ -135,20 +136,19 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Material *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un material" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {materials.map((material) => (
-                    <SelectItem key={material.id} value={material.id}>
-                      {material.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={materials.map(material => ({
+                    value: material.id,
+                    label: material.name
+                  }))}
+                  placeholder="Selecciona un material"
+                  searchPlaceholder="Buscar material..."
+                  emptyMessage="No se encontraron materiales"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -161,21 +161,22 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Marca</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una marca (opcional)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="">Sin marca</SelectItem>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={[
+                    { value: '', label: 'Sin marca' },
+                    ...brands.map(brand => ({
+                      value: brand.id,
+                      label: brand.name
+                    }))
+                  ]}
+                  placeholder="Selecciona una marca (opcional)"
+                  searchPlaceholder="Buscar marca..."
+                  emptyMessage="No se encontraron marcas"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
