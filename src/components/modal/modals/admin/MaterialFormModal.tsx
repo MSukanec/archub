@@ -60,6 +60,7 @@ function findCategoryPath(categories: MaterialCategory[], targetId: string): str
 interface MaterialFormModalProps {
   modalData: {
     editingMaterial?: Material | null
+    isDuplicating?: boolean
   }
   onClose: () => void
 }
@@ -67,8 +68,8 @@ interface MaterialFormModalProps {
 export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
-  const { editingMaterial } = modalData
-  const isEditing = !!editingMaterial
+  const { editingMaterial, isDuplicating = false } = modalData
+  const isEditing = !!editingMaterial && !isDuplicating
 
   // Hooks
   const createMutation = useCreateMaterial()
@@ -107,14 +108,15 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   useEffect(() => {
     console.log('MaterialFormModal useEffect triggered:', { 
       isEditing, 
+      isDuplicating,
       hasEditingMaterial: !!editingMaterial, 
       categoriesLength: categories.length,
       unitsLength: units.length 
     })
     
-    if (isEditing && editingMaterial && categories.length > 0) {
+    if ((isEditing || isDuplicating) && editingMaterial && categories.length > 0) {
       form.reset({
-        name: editingMaterial.name,
+        name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,
         category_id: editingMaterial.category_id,
         unit_id: editingMaterial.unit_id,
       })
@@ -122,7 +124,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       // Set the category path for CascadingSelect
       const path = findCategoryPath(categories, editingMaterial.category_id)
       setSelectedCategoryPath(path)
-    } else if (!isEditing) {
+    } else if (!isEditing && !isDuplicating) {
       form.reset({
         name: '',
         category_id: '',
@@ -130,7 +132,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       })
       setSelectedCategoryPath([])
     }
-  }, [editingMaterial?.id, isEditing, categories.length])
+  }, [editingMaterial?.id, isEditing, isDuplicating, categories.length])
 
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
@@ -253,7 +255,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // Header content
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? "Editar Material" : "Nuevo Material"}
+      title={isEditing ? "Editar Material" : isDuplicating ? "Duplicar Material" : "Nuevo Material"}
       icon={Package}
     />
   )

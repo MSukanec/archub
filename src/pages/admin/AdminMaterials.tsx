@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 
-import { Plus, Edit, Trash2, Package, Crown } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Crown, Copy } from 'lucide-react'
 
 export default function AdminMaterials() {
   const [searchValue, setSearchValue] = useState('')
@@ -76,6 +76,13 @@ export default function AdminMaterials() {
 
   const handleCreate = () => {
     openModal('material-form', { editingMaterial: null })
+  }
+
+  const handleDuplicate = (material: Material) => {
+    openModal('material-form', { 
+      editingMaterial: material,
+      isDuplicating: true 
+    })
   }
 
   const handleDelete = (material: Material) => {
@@ -166,6 +173,14 @@ export default function AdminMaterials() {
             onClick={() => handleEdit(material)}
           >
             <Edit className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-[var(--button-ghost-hover-bg)]"
+            onClick={() => handleDuplicate(material)}
+          >
+            <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
