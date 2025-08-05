@@ -112,6 +112,18 @@ export default function AdminProducts() {
       )
     },
     {
+      key: 'categoryHierarchy',
+      label: 'Categoría',
+      width: '20%',
+      render: (product: Product) => (
+        <div className="flex flex-col">
+          <span className="text-xs text-muted-foreground font-mono leading-tight">
+            {product.categoryHierarchy || 'Sin categoría'}
+          </span>
+        </div>
+      )
+    },
+    {
       key: 'material',
       label: 'Material',
       render: (product: Product) => (

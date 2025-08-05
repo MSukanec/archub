@@ -3,6 +3,30 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
+// Helper function to build category hierarchy path
+async function buildCategoryHierarchy(categoryId: string): Promise<string> {
+  if (!categoryId || !supabase) return 'Sin categoría';
+  
+  const hierarchy: string[] = [];
+  let currentCategoryId: string | null = categoryId;
+  
+  // Traverse up the hierarchy
+  while (currentCategoryId) {
+    const { data: category, error } = await supabase
+      .from('material_categories')
+      .select('name, parent_id')
+      .eq('id', currentCategoryId)
+      .single();
+    
+    if (error || !category) break;
+    
+    hierarchy.unshift(category.name); // Add to beginning of array
+    currentCategoryId = category.parent_id;
+  }
+  
+  return hierarchy.length > 0 ? hierarchy.join(' > ') : 'Sin categoría';
+}
+
 export interface Product {
   id: string;
   material_id: string;
@@ -12,10 +36,18 @@ export interface Product {
   description?: string;
   image_url?: string;
   created_at: string;
+  // Campos calculados
+  categoryHierarchy?: string;
   // Relaciones
   material?: {
     id: string;
     name: string;
+    category_id: string;
+    category?: {
+      id: string;
+      name: string;
+      parent_id: string | null;
+    };
   };
   brand?: {
     id: string;
@@ -55,7 +87,10 @@ export function useProducts() {
         .from('product_models')
         .select(`
           *,
-          material:materials(id, name),
+          material:materials(
+            id, name, category_id,
+            category:material_categories!materials_category_id_fkey(id, name, parent_id)
+          ),
           brand:brands(id, name),
           unit_presentation:unit_presentations!unit_id(
             id, name, equivalence,
@@ -69,7 +104,21 @@ export function useProducts() {
         throw error
       }
 
-      return data || []
+      // Build category hierarchy for each product
+      const productsWithHierarchy = await Promise.all(
+        (data || []).map(async (product: any) => {
+          const categoryHierarchy = product.material?.category_id 
+            ? await buildCategoryHierarchy(product.material.category_id)
+            : 'Sin categoría';
+          
+          return {
+            ...product,
+            categoryHierarchy
+          };
+        })
+      );
+
+      return productsWithHierarchy
     },
     enabled: !!supabase
   })
@@ -88,7 +137,10 @@ export function useCreateProduct() {
         .insert([data])
         .select(`
           *,
-          material:materials(id, name),
+          material:materials(
+            id, name, category_id,
+            category:material_categories!materials_category_id_fkey(id, name, parent_id)
+          ),
           brand:brands(id, name),
           unit_presentation:unit_presentations!unit_id(
             id, name, equivalence,
@@ -136,7 +188,10 @@ export function useUpdateProduct() {
         .eq('id', id)
         .select(`
           *,
-          material:materials(id, name),
+          material:materials(
+            id, name, category_id,
+            category:material_categories!materials_category_id_fkey(id, name, parent_id)
+          ),
           brand:brands(id, name),
           unit_presentation:unit_presentations!unit_id(
             id, name, equivalence,
