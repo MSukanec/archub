@@ -119,7 +119,12 @@ export default function AdminProducts() {
           <Package className="h-4 w-4 text-muted-foreground" />
           <div className="flex flex-col">
             <span className="font-medium text-sm">{product.name}</span>
-            <span className="text-xs text-muted-foreground">{product.unit}</span>
+            <span className="text-xs text-muted-foreground">
+              {product.unit_presentation ? 
+                `${product.unit_presentation.name} (${product.unit_presentation.equivalence} ${product.unit_presentation.unit?.name})` : 
+                'Sin unidad'
+              }
+            </span>
           </div>
         </div>
       )

@@ -16,14 +16,15 @@ import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/hooks/use-products'
 import { useMaterials } from '@/hooks/use-materials'
 import { useBrands } from '@/hooks/use-brands'
+import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 
 import { Package } from 'lucide-react'
 
 const productSchema = z.object({
   material_id: z.string().min(1, 'El material es requerido'),
   brand_id: z.string().optional(),
+  unit_presentation_id: z.string().min(1, 'La unidad es requerida'),
   name: z.string().min(1, 'El nombre es requerido'),
-  unit: z.string().min(1, 'La unidad es requerida'),
   description: z.string().optional(),
   image_url: z.string().optional(),
 })
@@ -49,6 +50,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
   // Data hooks
   const { data: materials = [] } = useMaterials()
   const { data: brands = [] } = useBrands()
+  const { data: unitPresentations = [] } = useUnitPresentations()
 
   // Force edit mode when modal opens
   useEffect(() => {
@@ -61,8 +63,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
     defaultValues: {
       material_id: '',
       brand_id: '',
+      unit_presentation_id: '',
       name: '',
-      unit: '',
       description: '',
       image_url: '',
     },
@@ -74,8 +76,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       form.reset({
         material_id: editingProduct.material_id,
         brand_id: editingProduct.brand_id || '',
+        unit_presentation_id: editingProduct.unit_presentation_id || '',
         name: editingProduct.name,
-        unit: editingProduct.unit,
         description: editingProduct.description || '',
         image_url: editingProduct.image_url || '',
       })
@@ -83,8 +85,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       form.reset({
         material_id: '',
         brand_id: '',
+        unit_presentation_id: '',
         name: '',
-        unit: '',
         description: '',
         image_url: '',
       })
@@ -98,8 +100,8 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
       const productData: NewProductData = {
         material_id: data.material_id,
         brand_id: data.brand_id || undefined,
+        unit_presentation_id: data.unit_presentation_id,
         name: data.name,
-        unit: data.unit,
         description: data.description || undefined,
         image_url: data.image_url || undefined,
       }
@@ -182,17 +184,24 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
           )}
         />
 
-        {/* Product Name */}
+        {/* Unit Presentation */}
         <FormField
           control={form.control}
-          name="name"
+          name="unit_presentation_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre del Producto *</FormLabel>
+              <FormLabel>Unidad *</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Ej: Cemento Portland Tipo I, Ladrillo King Kong..."
-                  {...field}
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={unitPresentations.map(unitPresentation => ({
+                    value: unitPresentation.id,
+                    label: `${unitPresentation.name} (${unitPresentation.equivalence} ${unitPresentation.unit?.name})`
+                  }))}
+                  placeholder="Selecciona una unidad de presentación"
+                  searchPlaceholder="Buscar unidad..."
+                  emptyMessage="No se encontraron unidades"
                 />
               </FormControl>
               <FormMessage />
@@ -200,16 +209,16 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
           )}
         />
 
-        {/* Unit */}
+        {/* Product Name */}
         <FormField
           control={form.control}
-          name="unit"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Unidad *</FormLabel>
+              <FormLabel>Nombre / Modelo del Producto *</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ej: kg, m3, unidad, bolsa, m2..."
+                  placeholder="Ej: Cemento Portland Tipo I, Ladrillo King Kong..."
                   {...field}
                 />
               </FormControl>

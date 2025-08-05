@@ -7,12 +7,10 @@ export interface Product {
   id: string;
   material_id: string;
   brand_id?: string;
+  unit_presentation_id?: string;
   name: string;
-  unit: string;
-  unit_equivalences?: any;
   description?: string;
   image_url?: string;
-  specs?: any;
   created_at: string;
   // Relaciones
   material?: {
@@ -23,17 +21,24 @@ export interface Product {
     id: string;
     name: string;
   };
+  unit_presentation?: {
+    id: string;
+    name: string;
+    equivalence: number;
+    unit?: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 export interface NewProductData {
   material_id: string;
   brand_id?: string;
+  unit_presentation_id?: string;
   name: string;
-  unit: string;
-  unit_equivalences?: any;
   description?: string;
   image_url?: string;
-  specs?: any;
 }
 
 export function useProducts() {
@@ -51,7 +56,11 @@ export function useProducts() {
         .select(`
           *,
           material:materials(id, name),
-          brand:brands(id, name)
+          brand:brands(id, name),
+          unit_presentation:unit_presentations(
+            id, name, equivalence,
+            unit:units(id, name)
+          )
         `)
         .order('name')
 
@@ -80,7 +89,11 @@ export function useCreateProduct() {
         .select(`
           *,
           material:materials(id, name),
-          brand:brands(id, name)
+          brand:brands(id, name),
+          unit_presentation:unit_presentations(
+            id, name, equivalence,
+            unit:units(id, name)
+          )
         `)
         .single()
 
@@ -124,7 +137,11 @@ export function useUpdateProduct() {
         .select(`
           *,
           material:materials(id, name),
-          brand:brands(id, name)
+          brand:brands(id, name),
+          unit_presentation:unit_presentations(
+            id, name, equivalence,
+            unit:units(id, name)
+          )
         `)
         .single()
 
