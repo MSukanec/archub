@@ -10,7 +10,7 @@ export interface Material {
   unit_id: string
   category_id: string
   default_unit_presentation_id?: string
-  basic_price_override?: number
+  base_price_override?: number
   is_completed?: boolean
   provider?: string
   organization_id?: string
@@ -35,7 +35,7 @@ export interface NewMaterialData {
   unit_id: string
   category_id: string
   default_unit_presentation_id?: string
-  basic_price_override?: number
+  base_price_override?: number
   is_completed?: boolean
   provider?: string
   organization_id?: string

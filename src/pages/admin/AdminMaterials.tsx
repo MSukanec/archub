@@ -188,12 +188,12 @@ export default function AdminMaterials() {
       )
     },
     {
-      key: 'basic_price_override',
+      key: 'base_price_override',
       label: 'Precio por Defecto',
       width: '8%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
-          {material.basic_price_override ? `$${material.basic_price_override.toLocaleString()}` : 'N/A'}
+          {material.base_price_override ? `$${material.base_price_override.toLocaleString()}` : 'N/A'}
         </span>
       )
     },

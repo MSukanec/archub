@@ -26,7 +26,7 @@ const materialSchema = z.object({
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
   default_unit_presentation_id: z.string().optional(),
-  basic_price_override: z.union([z.string(), z.number()]).optional(),
+  base_price_override: z.union([z.string(), z.number()]).optional(),
   is_completed: z.boolean().optional(),
   provider: z.string().optional(),
 })
@@ -109,7 +109,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       category_id: '',
       unit_id: '',
       default_unit_presentation_id: '',
-      basic_price_override: '',
+      base_price_override: '',
       is_completed: false,
       provider: '',
     },
@@ -131,7 +131,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         category_id: editingMaterial.category_id,
         unit_id: editingMaterial.unit_id,
         default_unit_presentation_id: editingMaterial.default_unit_presentation_id || '',
-        basic_price_override: editingMaterial.basic_price_override?.toString() || '',
+        base_price_override: editingMaterial.base_price_override?.toString() || '',
         is_completed: editingMaterial.is_completed || false,
         provider: editingMaterial.provider || '',
       })
@@ -145,7 +145,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         category_id: '',
         unit_id: '',
         default_unit_presentation_id: '',
-        basic_price_override: '',
+        base_price_override: '',
         is_completed: false,
         provider: '',
       })
@@ -167,7 +167,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             unit_id: values.unit_id,
             category_id: values.category_id,
             default_unit_presentation_id: values.default_unit_presentation_id || undefined,
-            basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
+            base_price_override: values.base_price_override ? Number(values.base_price_override) : undefined,
             is_completed: values.is_completed,
             provider: values.provider || undefined,
           },
@@ -179,7 +179,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           category_id: values.category_id,
           unit_id: values.unit_id,
           default_unit_presentation_id: values.default_unit_presentation_id || undefined,
-          basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
+          base_price_override: values.base_price_override ? Number(values.base_price_override) : undefined,
           is_completed: values.is_completed,
           provider: values.provider || undefined,
           organization_id: userData?.organization?.id,
@@ -321,10 +321,10 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           )}
         />
 
-        {/* Basic Price Override */}
+        {/* Base Price Override */}
         <FormField
           control={form.control}
-          name="basic_price_override"
+          name="base_price_override"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Precio por Defecto</FormLabel>
