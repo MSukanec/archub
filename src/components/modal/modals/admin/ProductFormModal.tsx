@@ -32,6 +32,7 @@ const productSchema = z.object({
 interface ProductFormModalProps {
   modalData: {
     editingProduct?: Product | null
+    isDuplicating?: boolean
   }
   onClose: () => void
 }
@@ -39,8 +40,8 @@ interface ProductFormModalProps {
 export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
-  const { editingProduct } = modalData
-  const isEditing = !!editingProduct
+  const { editingProduct, isDuplicating = false } = modalData
+  const isEditing = !!editingProduct && !isDuplicating
 
   // Hooks
   const createMutation = useCreateProduct()
@@ -270,7 +271,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
 
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? "Editar Producto" : "Nuevo Producto"}
+      title={isEditing ? "Editar Producto" : isDuplicating ? "Duplicar Producto" : "Nuevo Producto"}
       icon={Package}
     />
   )
@@ -279,8 +280,10 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? "Actualizar" : "Crear"}
+      rightLabel={isEditing ? "Actualizar" : isDuplicating ? "Duplicar" : "Crear"}
       onRightClick={form.handleSubmit(onSubmit)}
+      submitDisabled={isLoading}
+      showLoadingSpinner={isLoading}
     />
   )
 

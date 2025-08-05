@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 
-import { Plus, Edit, Trash2, Package, Tag } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Tag, Copy } from 'lucide-react'
 
 export default function AdminProducts() {
   const [searchValue, setSearchValue] = useState('')
@@ -79,6 +79,18 @@ export default function AdminProducts() {
 
   const handleCreate = () => {
     openModal('product-form', { editingProduct: null })
+  }
+
+  const handleDuplicate = (product: Product) => {
+    // Create a duplicate object with "Copia" added to the name
+    const duplicateProduct = {
+      ...product,
+      id: undefined, // Remove ID so it creates a new product
+      name: `${product.name} - Copia`,
+      created_at: undefined, // Remove created_at
+      updated_at: undefined  // Remove updated_at
+    }
+    openModal('product-form', { editingProduct: duplicateProduct, isDuplicating: true })
   }
 
   const handleDelete = (product: Product) => {
@@ -179,6 +191,14 @@ export default function AdminProducts() {
             className="h-7 w-7 p-0"
           >
             <Edit className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDuplicate(product)}
+            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
+          >
+            <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
