@@ -25,6 +25,7 @@ const materialSchema = z.object({
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
   default_unit_presentation_id: z.string().optional(),
+  basic_price_override: z.union([z.string(), z.number()]).optional(),
 })
 
 // Helper function to convert MaterialCategory[] to CascadingSelect format
@@ -105,6 +106,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       category_id: '',
       unit_id: '',
       default_unit_presentation_id: '',
+      basic_price_override: '',
     },
   })
 
@@ -124,6 +126,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         category_id: editingMaterial.category_id,
         unit_id: editingMaterial.unit_id,
         default_unit_presentation_id: editingMaterial.default_unit_presentation_id || '',
+        basic_price_override: editingMaterial.basic_price_override?.toString() || '',
       })
       
       // Set the category path for CascadingSelect
@@ -135,6 +138,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         category_id: '',
         unit_id: '',
         default_unit_presentation_id: '',
+        basic_price_override: '',
       })
       setSelectedCategoryPath([])
     }
@@ -154,6 +158,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             unit_id: values.unit_id,
             category_id: values.category_id,
             default_unit_presentation_id: values.default_unit_presentation_id || undefined,
+            basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
           },
         })
       } else {
@@ -163,6 +168,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           category_id: values.category_id,
           unit_id: values.unit_id,
           default_unit_presentation_id: values.default_unit_presentation_id || undefined,
+          basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
           organization_id: userData?.organization?.id,
           is_system: false,
         }
@@ -279,6 +285,27 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Basic Price Override */}
+        <FormField
+          control={form.control}
+          name="basic_price_override"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Precio por Defecto</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Ej: 1500.00"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
