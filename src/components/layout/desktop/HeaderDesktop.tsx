@@ -187,12 +187,22 @@ export function HeaderDesktop({
     "/organization/contacts": "Contactos",
     "/organization/preferences": "Preferencias",
     "/organization/activity": "Actividad",
-    "/organization/tasks": "Tareas para Hacer"
+    "/organization/tasks": "Tareas para Hacer",
+    
+    // Administración
+    "/admin/users": "Usuarios",
+    "/admin/organizations": "Organizaciones",
+    "/admin/changelogs": "Changelog",
+    "/admin/materials": "Materiales",
+    "/admin/material-categories": "Categorías de Materiales",
+    "/admin/movement-concepts": "Conceptos de Movimientos",
+    "/admin/task-parameters": "Parámetros de Tareas",
+    "/admin/generated-tasks": "Tareas Generadas"
   };
 
 
 
-  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/project") || location.startsWith("/organization");
+  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/project") || location.startsWith("/organization") || location.startsWith("/admin");
 
   // Hook para detectar el estado del sidebar
   const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
