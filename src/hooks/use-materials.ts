@@ -9,11 +9,13 @@ export interface Material {
   name: string
   unit_id: string
   category_id: string
+  default_unit_presentation_id?: string
   organization_id?: string
   is_system: boolean
   created_at: string
   unit?: { name: string }
   category?: { name: string }
+  default_unit_presentation?: { name: string }
   organization_material_prices?: Array<{
     id: string
     unit_price: number
@@ -29,6 +31,7 @@ export interface NewMaterialData {
   name: string
   unit_id: string
   category_id: string
+  default_unit_presentation_id?: string
   organization_id?: string
   is_system?: boolean
 }
@@ -51,6 +54,7 @@ export function useMaterials() {
           *,
           unit:units(name),
           category:material_categories!materials_category_id_fkey(name),
+          default_unit_presentation:unit_presentations(name),
           organization_material_prices(
             id,
             unit_price,

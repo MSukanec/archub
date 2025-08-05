@@ -151,11 +151,21 @@ export default function AdminMaterials() {
     },
     {
       key: 'unit_id',
-      label: 'Unidad',
-      width: '5%',
+      label: 'Unidad de Cómputo',
+      width: '8%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
           {material.unit?.name || 'N/A'}
+        </span>
+      )
+    },
+    {
+      key: 'default_unit_presentation_id',
+      label: 'Unidad de Venta por Defecto',
+      width: '10%',
+      render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
+          {material.default_unit_presentation?.name || 'N/A'}
         </span>
       )
     },
