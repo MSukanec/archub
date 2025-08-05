@@ -158,6 +158,16 @@ export default function AdminMaterials() {
       )
     },
     {
+      key: 'provider',
+      label: 'Proveedor',
+      width: '10%',
+      render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
+          {material.provider || 'N/A'}
+        </span>
+      )
+    },
+    {
       key: 'unit_id',
       label: 'Unidad de Cómputo',
       width: '8%',

@@ -28,6 +28,7 @@ const materialSchema = z.object({
   default_unit_presentation_id: z.string().optional(),
   basic_price_override: z.union([z.string(), z.number()]).optional(),
   is_completed: z.boolean().optional(),
+  provider: z.string().optional(),
 })
 
 // Helper function to convert MaterialCategory[] to CascadingSelect format
@@ -110,6 +111,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       default_unit_presentation_id: '',
       basic_price_override: '',
       is_completed: false,
+      provider: '',
     },
   })
 
@@ -131,6 +133,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         default_unit_presentation_id: editingMaterial.default_unit_presentation_id || '',
         basic_price_override: editingMaterial.basic_price_override?.toString() || '',
         is_completed: editingMaterial.is_completed || false,
+        provider: editingMaterial.provider || '',
       })
       
       // Set the category path for CascadingSelect
@@ -144,6 +147,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         default_unit_presentation_id: '',
         basic_price_override: '',
         is_completed: false,
+        provider: '',
       })
       setSelectedCategoryPath([])
     }
@@ -165,6 +169,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             default_unit_presentation_id: values.default_unit_presentation_id || undefined,
             basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
             is_completed: values.is_completed,
+            provider: values.provider || undefined,
           },
         })
       } else {
@@ -176,6 +181,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           default_unit_presentation_id: values.default_unit_presentation_id || undefined,
           basic_price_override: values.basic_price_override ? Number(values.basic_price_override) : undefined,
           is_completed: values.is_completed,
+          provider: values.provider || undefined,
           organization_id: userData?.organization?.id,
           is_system: false,
         }
@@ -292,6 +298,24 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Provider */}
+        <FormField
+          control={form.control}
+          name="provider"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proveedor</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: CEMEX, Ferreterías ABC"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
