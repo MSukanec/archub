@@ -35,6 +35,7 @@ import { TaskCategoryFormModal } from '../modals/admin/TaskCategoryFormModal';
 import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
+import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 
 import { ParametricTaskFormModal } from '../modals/admin/TaskParametricFormModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
@@ -135,6 +136,8 @@ export function ModalFactory() {
       return <TaskParameterFormModal modalData={data} onClose={closeModal} />;
     case 'task-parameter-option':
       return <TaskParameterOptionFormModal modalType="task-parameter-option" />;
+    case 'task-template':
+      return <TaskTemplateFormModal modalData={data} onClose={closeModal} />;
 
 
     case 'parametric-task':

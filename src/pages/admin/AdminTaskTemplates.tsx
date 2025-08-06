@@ -88,10 +88,7 @@ export default function AdminTaskTemplates() {
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0"
-            onClick={() => {
-              // TODO: Implementar modal de edición
-              console.log('Edit template:', template.id)
-            }}
+            onClick={() => openModal('task-template', { template })}
           >
             <Edit className="h-3 w-3" />
           </Button>
@@ -111,10 +108,15 @@ export default function AdminTaskTemplates() {
             size="sm"
             className="h-6 w-6 p-0 text-destructive hover:text-destructive"
             onClick={() => {
-              {
-                // TODO: Implementar confirmación de eliminación
-                console.log('Delete template:', template.id)
-              }
+              openModal('delete-confirmation', {
+                title: 'Eliminar Plantilla',
+                description: '¿Estás seguro de que deseas eliminar esta plantilla de tarea?',
+                itemName: template.name,
+                onConfirm: () => {
+                  // TODO: Implementar eliminación
+                  console.log('Eliminar plantilla:', template.id)
+                }
+              })
             }}
           >
             <Trash2 className="h-3 w-3" />
@@ -127,9 +129,17 @@ export default function AdminTaskTemplates() {
   const headerProps = {
     title: 'Plantillas de Tareas',
     description: 'Gestión de plantillas de tareas paramétricas para generación automática',
-    tabs: ['Lista', 'Editor'],
+    tabs: [
+      { id: 'Lista', label: 'Lista', isActive: activeTab === 'Lista' },
+      { id: 'Editor', label: 'Editor', isActive: activeTab === 'Editor' }
+    ],
     activeTab,
-    onTabChange: setActiveTab
+    onTabChange: (tabId: string) => setActiveTab(tabId as TabType),
+    actionButton: {
+      label: 'Nueva Plantilla',
+      icon: Plus,
+      onClick: () => openModal('task-template')
+    }
   }
 
   return (
@@ -143,19 +153,7 @@ export default function AdminTaskTemplates() {
             topBar={{
               showSearch: true,
               searchValue: searchValue,
-              onSearchChange: setSearchValue,
-              rightContent: (
-                <Button
-                  onClick={() => {
-                    // TODO: Implementar modal de creación
-                    console.log('Create new template')
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Nueva Plantilla
-                </Button>
-              )
+              onSearchChange: setSearchValue
             }}
             emptyState={
               <EmptyState
@@ -168,10 +166,7 @@ export default function AdminTaskTemplates() {
                 action={
                   !searchValue && (
                     <Button
-                      onClick={() => {
-                        // TODO: Implementar modal de creación
-                        console.log('Create first template')
-                      }}
+                      onClick={() => openModal('task-template')}
                       className="flex items-center gap-2"
                     >
                       <Plus className="h-4 w-4" />
