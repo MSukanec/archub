@@ -9,10 +9,7 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { Package } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateSubcontract, useUpdateSubcontract, useSubcontract } from "@/hooks/use-subcontracts";
-import { useContacts } from "@/hooks/use-contacts";
-import UserSelector from "@/components/ui-custom/UserSelector";
 import { useConstructionTasks } from "@/hooks/use-construction-tasks";
-import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,10 +27,6 @@ import DatePicker from '@/components/ui-custom/DatePicker';
 const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   title: z.string().min(1, "El título es obligatorio"),
-  contact_id: z.string().min(1, "Debe seleccionar un proveedor"),
-  currency_id: z.string().min(1, "Debe seleccionar una moneda"),
-  amount_total: z.number().min(0, "El monto debe ser mayor o igual a 0").optional(),
-  exchange_rate: z.number().min(0, "La cotización debe ser mayor a 0"),
   status: z.string().min(1, "Debe seleccionar un estado"),
   notes: z.string().optional(),
 });
@@ -68,55 +61,20 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   // Datos del subcontrato existente si se está editando
   const { data: existingSubcontract } = useSubcontract(modalData.subcontractId || null);
   
-  // Obtener contactos/proveedores
-  const { data: contacts = [] } = useContacts();
-  
-  // Debug logging para contactos
-  React.useEffect(() => {
-    console.log('Subcontract Modal - Contacts data:', contacts);
-    console.log('Subcontract Modal - Contacts length:', contacts.length);
-  }, [contacts]);
-  
   // Obtener todas las tareas del proyecto
   const { data: projectTasks = [] } = useConstructionTasks(modalData.projectId, modalData.organizationId);
-  
-  // Obtener monedas de la organización
-  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(modalData.organizationId);
-
-  // Debug logging para monedas
-  React.useEffect(() => {
-    console.log('Organization currencies available:', organizationCurrencies);
-    console.log('Organization currencies count:', organizationCurrencies.length);
-    if (organizationCurrencies.length > 0) {
-      console.log('First currency:', organizationCurrencies[0]);
-      console.log('Default currency found:', organizationCurrencies.find(oc => oc.is_default));
-    }
-  }, [organizationCurrencies]);
-
-  // Determinar moneda por defecto - usar el ID de organization_currencies, no currency.id
-  const defaultCurrency = organizationCurrencies.find(oc => oc.is_default)?.id || organizationCurrencies[0]?.id || '';
-  console.log('Default currency selected:', defaultCurrency);
 
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       title: '',
-      contact_id: '',
-      currency_id: defaultCurrency,
-      amount_total: 0,
-      exchange_rate: 1,
       status: 'pendiente',
       notes: '',
     }
   });
 
-  // Actualizar la moneda por defecto cuando se carga
-  React.useEffect(() => {
-    if (defaultCurrency && !form.watch('currency_id')) {
-      form.setValue('currency_id', defaultCurrency);
-    }
-  }, [defaultCurrency, form]);
+
 
   // Cargar datos del subcontrato existente si se está editando
   React.useEffect(() => {
@@ -124,10 +82,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       form.reset({
         date: existingSubcontract.date,
         title: existingSubcontract.title,
-        contact_id: existingSubcontract.contact_id,
-        currency_id: existingSubcontract.currency_id,
-        amount_total: existingSubcontract.amount_total || 0,
-        exchange_rate: existingSubcontract.exchange_rate || 1,
         status: existingSubcontract.status,
         notes: existingSubcontract.notes || '',
       });
@@ -179,13 +133,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           subcontractId: modalData.subcontractId,
           subcontract: {
             date: data.date,
-            contact_id: data.contact_id,
             title: data.title,
-            currency_id: data.currency_id,
-            amount_total: data.amount_total || 0,
-            exchange_rate: data.exchange_rate,
             status: data.status,
-            notes: data.notes || null
+            notes: data.notes || null,
+            contact_id: existingSubcontract?.contact_id || null,
+            currency_id: existingSubcontract?.currency_id || null,
+            amount_total: existingSubcontract?.amount_total || 0,
+            exchange_rate: existingSubcontract?.exchange_rate || 1
           },
           taskIds
         });
@@ -196,13 +150,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             project_id: modalData.projectId,
             organization_id: modalData.organizationId,
             date: data.date,
-            contact_id: data.contact_id,
             title: data.title,
-            currency_id: data.currency_id,
-            amount_total: data.amount_total || 0,
-            exchange_rate: data.exchange_rate,
             status: data.status,
-            notes: data.notes || null
+            notes: data.notes || null,
+            contact_id: null, // Campo opcional
+            currency_id: null, // Campo opcional
+            amount_total: 0,
+            exchange_rate: 1
           },
           taskIds
         });
@@ -232,27 +186,26 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   // Panel principal para edición
   const editPanel = (
     <div className="space-y-4">
-      {/* Fecha - Campo individual arriba */}
-      <div className="space-y-1">
-        <Label htmlFor="date" className="text-xs font-medium">
-          Fecha *
-        </Label>
-        <DatePicker
-          value={form.watch('date') ? new Date(form.watch('date')) : undefined}
-          onChange={(date) => {
-            if (date) {
-              form.setValue('date', date.toISOString().split('T')[0]);
-            }
-          }}
-          placeholder="Seleccionar fecha..."
-        />
-        {form.formState.errors.date && (
-          <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
-        )}
-      </div>
-
-      {/* Título - Proveedor */}
+      {/* Fecha y Título - Inline */}
       <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="date" className="text-xs font-medium">
+            Fecha *
+          </Label>
+          <DatePicker
+            value={form.watch('date') ? new Date(form.watch('date')) : undefined}
+            onChange={(date) => {
+              if (date) {
+                form.setValue('date', date.toISOString().split('T')[0]);
+              }
+            }}
+            placeholder="Seleccionar fecha..."
+          />
+          {form.formState.errors.date && (
+            <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
+          )}
+        </div>
+
         <div className="space-y-1">
           <Label htmlFor="title" className="text-xs font-medium">
             Título *
@@ -266,111 +219,30 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
           )}
         </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="contact_id" className="text-xs font-medium">
-            Proveedor *
-          </Label>
-          <UserSelector
-            users={contacts.map(contact => ({
-              id: contact.id,
-              full_name: contact.full_name || `${contact.first_name} ${contact.last_name}`.trim() || 'Sin nombre',
-              avatar_url: undefined
-            }))}
-            value={form.watch('contact_id') || ''}
-            onChange={(value) => form.setValue('contact_id', value)}
-            placeholder="Seleccionar proveedor..."
-            className="w-full"
-          />
-          {form.formState.errors.contact_id && (
-            <p className="text-xs text-destructive">{form.formState.errors.contact_id.message}</p>
-          )}
-        </div>
       </div>
 
-      {/* Moneda - Monto Total */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="currency_id" className="text-xs font-medium">
-            Moneda *
-          </Label>
-          <Select
-            value={form.watch('currency_id') || ''}
-            onValueChange={(value) => form.setValue('currency_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar moneda..." />
-            </SelectTrigger>
-            <SelectContent>
-              {organizationCurrencies.map((orgCurrency) => (
-                <SelectItem key={orgCurrency.id} value={orgCurrency.id}>
-                  {orgCurrency.currency.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {form.formState.errors.currency_id && (
-            <p className="text-xs text-destructive">{form.formState.errors.currency_id.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="amount_total" className="text-xs font-medium">
-            Monto Total
-          </Label>
-          <Input
-            id="amount_total"
-            type="number"
-            step="0.01"
-            placeholder="0"
-            {...form.register('amount_total', { valueAsNumber: true })}
-          />
-          {form.formState.errors.amount_total && (
-            <p className="text-xs text-destructive">{form.formState.errors.amount_total.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Cotización - Estado */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="exchange_rate" className="text-xs font-medium">
-            Cotización *
-          </Label>
-          <Input
-            id="exchange_rate"
-            type="number"
-            step="0.0001"
-            placeholder="1.0000"
-            {...form.register('exchange_rate', { valueAsNumber: true })}
-          />
-          {form.formState.errors.exchange_rate && (
-            <p className="text-xs text-destructive">{form.formState.errors.exchange_rate.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="status" className="text-xs font-medium">
-            Estado *
-          </Label>
-          <Select
-            value={form.watch('status') || 'pendiente'}
-            onValueChange={(value) => form.setValue('status', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar estado..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pendiente">Pendiente</SelectItem>
-              <SelectItem value="en_progreso">En Progreso</SelectItem>
-              <SelectItem value="completado">Completado</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
-            </SelectContent>
-          </Select>
-          {form.formState.errors.status && (
-            <p className="text-xs text-destructive">{form.formState.errors.status.message}</p>
-          )}
-        </div>
+      {/* Estado */}
+      <div className="space-y-1">
+        <Label htmlFor="status" className="text-xs font-medium">
+          Estado *
+        </Label>
+        <Select
+          value={form.watch('status') || 'pendiente'}
+          onValueChange={(value) => form.setValue('status', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar estado..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pendiente">Pendiente</SelectItem>
+            <SelectItem value="en_progreso">En Progreso</SelectItem>
+            <SelectItem value="completado">Completado</SelectItem>
+            <SelectItem value="cancelado">Cancelado</SelectItem>
+          </SelectContent>
+        </Select>
+        {form.formState.errors.status && (
+          <p className="text-xs text-destructive">{form.formState.errors.status.message}</p>
+        )}
       </div>
 
       <div className="space-y-1">
