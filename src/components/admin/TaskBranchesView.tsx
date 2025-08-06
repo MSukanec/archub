@@ -52,17 +52,35 @@ export default function TaskBranchesView() {
   const { data: generatedTasks = [], isLoading: isLoadingTasks } = useGeneratedTasks()
   const { data: parameters = [], isLoading: isLoadingParams } = useTaskParametersAdmin()
   
-  // Obtener valores de parámetros
-  const { data: parameterValues = [], isLoading: isLoadingValues } = useQuery({
-    queryKey: ['all-task-parameter-values-for-branches'],
+  // Obtener valores de parámetros desde task_parameter_options
+  const { data: parameterValues = [], isLoading: isLoadingValues, error: valuesError } = useQuery({
+    queryKey: ['task-parameter-options-branches-v2'],
     queryFn: async () => {
+      console.log('🔍 Cargando opciones de parámetros desde task_parameter_options...')
       const { data, error } = await supabase
-        .from('task_parameter_values')
+        .from('task_parameter_options')
         .select('id, parameter_id, name, label, description')
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error al cargar opciones de parámetros:', error)
+        throw error
+      }
+      
+      console.log('✅ Opciones de parámetros cargadas:', data?.length || 0)
+      console.log('📊 Muestra de opciones:', data?.slice(0, 3))
       return data || []
     }
+  })
+
+  console.log('🎯 TaskBranchesView - Datos obtenidos:', {
+    tasksCount: generatedTasks.length,
+    parametersCount: parameters.length,
+    parameterValuesCount: parameterValues.length,
+    isLoadingTasks,
+    isLoadingParams,
+    isLoadingValues,
+    valuesError: valuesError?.message,
+    sampleTask: generatedTasks[0]
   })
 
   // Crear mapas para eficiencia
@@ -80,7 +98,17 @@ export default function TaskBranchesView() {
 
   // Procesar tareas en ramas
   const taskBranches = useMemo(() => {
+    console.log('🔍 Verificando condiciones para procesar ramas:', {
+      generatedTasksLength: generatedTasks.length,
+      parametersLength: parameters.length,
+      parameterValuesLength: parameterValues.length,
+      hasGeneratedTasks: generatedTasks.length > 0,
+      hasParameters: parameters.length > 0,
+      hasParameterValues: parameterValues.length > 0
+    })
+
     if (!generatedTasks.length || !parameters.length || !parameterValues.length) {
+      console.log('❌ No se pueden procesar ramas - faltan datos')
       return []
     }
 
@@ -88,8 +116,20 @@ export default function TaskBranchesView() {
 
     const branchesMap = new Map<string, TaskWithValues[]>()
 
-    generatedTasks.forEach(task => {
-      if (!task.param_order || !task.param_values) return
+    generatedTasks.forEach((task, taskIndex) => {
+      console.log(`📋 Procesando tarea ${taskIndex + 1}:`, {
+        id: task.id,
+        display_name: task.display_name,
+        param_order: task.param_order,
+        param_values: task.param_values,
+        hasParamOrder: !!task.param_order,
+        hasParamValues: !!task.param_values
+      })
+
+      if (!task.param_order || !task.param_values) {
+        console.log(`⚠️ Tarea ${task.id} sin param_order o param_values`)
+        return
+      }
 
       // Crear cadena de parámetros con valores
       const parameterChain: ParameterWithValue[] = []
