@@ -17,21 +17,6 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
-// Tipos para el subform
-interface ParameterSelection {
-  parameterSlug: string;
-  optionId: string;
-  optionName: string;
-}
-
-interface TaskData {
-  selections: ParameterSelection[];
-  preview: string;
-  paramValues: Record<string, string>;
-  paramOrder: string[];
-  availableParameters: any[];
-}
-
 const singleTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
@@ -61,26 +46,9 @@ export function ConstructionSingleTaskModal({
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [selectedTaskUnit, setSelectedTaskUnit] = useState<string>('');
   
-  // Estados para el subform de crear tarea personalizada
-  const [showParametricTaskCreator, setShowParametricTaskCreator] = useState(false);
-  const [parametricSelections, setParametricSelections] = useState<ParameterSelection[]>([]);
-  const [parametricTaskPreview, setParametricTaskPreview] = useState<string>('');
-  const [parametricParameterOrder, setParametricParameterOrder] = useState<string[]>([]);
-  const [isCreatingParametricTask, setIsCreatingParametricTask] = useState(false);
-  
-  // Estados para el formulario de tarea personalizada
-  const [taskNameText, setTaskNameText] = useState<string>('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-  const [selectedUnitId, setSelectedUnitId] = useState<string>('');
-  const [isCreatingCustomTask, setIsCreatingCustomTask] = useState(false);
-  
-  // Referencia al ParametricTaskBuilder
-  const parametricTaskBuilderRef = useRef<{ executeCreateTaskCallback: () => void }>(null);
-  
   const { data: userData } = useCurrentUser();
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
-  const queryClient = useQueryClient();
   
   const isEditing = modalData.isEditing && modalData.editingTask;
 
@@ -252,7 +220,7 @@ export function ConstructionSingleTaskModal({
   };
 
   const viewPanel = isEditing && modalData.editingTask ? (
-    <>
+    <div className="space-y-4">
       <div>
         <h4 className="font-medium">Tarea</h4>
         <p className="text-muted-foreground mt-1">
@@ -293,7 +261,7 @@ export function ConstructionSingleTaskModal({
           </p>
         </div>
       )}
-    </>
+    </div>
   ) : null;
 
   const editPanel = (
@@ -473,42 +441,32 @@ export function ConstructionSingleTaskModal({
     </div>
   );
 
+  const headerContent = (
+    <FormModalHeader 
+      title={isEditing ? 'Editar Tarea' : 'Agregar Tarea'}
+      icon={Calendar}
+    />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={isEditing ? 'Actualizar Tarea' : 'Agregar Tarea'}
+      onRightClick={form.handleSubmit(onSubmit)}
+      showLoadingSpinner={isSubmitting}
+      submitDisabled={!selectedTaskId}
+    />
+  );
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center gap-3">
-            <Settings className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">
-              {isEditing ? "Editar Tarea de Construcción" : "Agregar Tarea"}
-            </h2>
-          </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            ×
-          </Button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto">
-          {viewPanel}
-          {editPanel}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t bg-muted/50">
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button 
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={!selectedTaskId || isSubmitting}
-            className="min-w-[120px]"
-          >
-            {isSubmitting ? "..." : (isEditing ? "Guardar Cambios" : "Agregar Tarea")}
-          </Button>
-        </div>
-      </div>
-    </div>
+    <FormModalLayout
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      isEditing={true}
+      onClose={onClose}
+    />
   );
 }

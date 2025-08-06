@@ -30,7 +30,6 @@ export function useConstructionTasksView(projectId: string) {
         .from('construction_tasks_view')
         .select('*')
         .eq('project_id', projectId)
-        .order('phase_position', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true });
 
       if (error) {
