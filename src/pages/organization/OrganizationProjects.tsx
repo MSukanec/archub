@@ -293,7 +293,7 @@ export default function OrganizationProjects() {
 
   const headerProps = {
     title: "Proyectos",
-    primaryAction: {
+    actionButton: {
       label: "Nuevo Proyecto",
       icon: Plus,
       onClick: () => openModal('project', {})
