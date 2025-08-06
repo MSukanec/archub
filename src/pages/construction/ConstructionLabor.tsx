@@ -1,10 +1,24 @@
 import { useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { Users, UserCheck, Package, MoreHorizontal } from 'lucide-react'
+import { Users, UserCheck, Package, MoreHorizontal, Plus } from 'lucide-react'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 export default function ConstructionLabor() {
   const [activeTab, setActiveTab] = useState('propia')
+  const { data: userData } = useCurrentUser()
+  const { openModal } = useGlobalModalStore()
+
+  // Función para crear un nuevo subcontrato
+  const handleCreateSubcontract = () => {
+    openModal('subcontract', {
+      projectId: userData?.preferences?.last_project_id,
+      organizationId: userData?.organization?.id,
+      userId: userData?.user?.id,
+      isEditing: false
+    })
+  }
 
   // Configuración de tabs para el header
   const headerTabs = [
@@ -30,7 +44,16 @@ export default function ConstructionLabor() {
     title: "Mano de Obra",
     icon: Users,
     tabs: headerTabs,
-    onTabChange: (tabId: string) => setActiveTab(tabId)
+    onTabChange: (tabId: string) => setActiveTab(tabId),
+    // Mostrar botón solo en la pestaña de subcontratos
+    ...(activeTab === 'subcontratos' && {
+      actionButton: {
+        label: "Nuevo Subcontrato",
+        icon: Plus,
+        onClick: handleCreateSubcontract,
+        variant: "default" as const
+      }
+    })
   }
 
   // Función para renderizar el contenido según el tab activo
