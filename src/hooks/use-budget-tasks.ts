@@ -88,7 +88,7 @@ export function useBudgetTasks(budgetId: string) {
     enabled: !!budgetId && !!supabase
   });
 
-  // Agregar tarea al presupuesto (actualizar campo budget_id en construction_tasks)
+  // Agregar tarea al presupuesto usando budget_tasks
   const createBudgetTask = useMutation({
     mutationFn: async (taskData: CreateBudgetTaskData) => {
       console.log("Adding task to budget:", taskData);
@@ -98,9 +98,8 @@ export function useBudgetTasks(budgetId: string) {
       }
 
       const { data, error } = await supabase
-        .from("construction_tasks")
-        .update({ budget_id: taskData.budget_id })
-        .eq("id", taskData.task_id)
+        .from("budget_tasks")
+        .insert(taskData)
         .select()
         .single();
 
@@ -126,28 +125,28 @@ export function useBudgetTasks(budgetId: string) {
     }
   });
 
-  // Actualizar tarea en presupuesto
+  // Actualizar tarea en presupuesto usando budget_tasks
   const updateBudgetTask = useMutation({
-    mutationFn: async ({ id, budget_id }: { id: string; budget_id: string }) => {
-      console.log("Updating task budget assignment:", id, budget_id);
+    mutationFn: async ({ id, ...updateData }: UpdateBudgetTaskData) => {
+      console.log("Updating budget task:", id, updateData);
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       const { data, error } = await supabase
-        .from("construction_tasks")
-        .update({ budget_id })
+        .from("budget_tasks")
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
 
       if (error) {
-        console.error("Error updating task budget assignment:", error);
+        console.error("Error updating budget task:", error);
         throw error;
       }
 
-      console.log("Task budget assignment updated:", data);
+      console.log("Budget task updated:", data);
       return data;
     },
     onSuccess: () => {
@@ -173,13 +172,9 @@ export function useBudgetTasks(budgetId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      const taskIds = tasksData.map(task => task.task_id);
-      const budgetId = tasksData[0]?.budget_id;
-
       const { data, error } = await supabase
-        .from("construction_tasks")
-        .update({ budget_id: budgetId })
-        .in("id", taskIds)
+        .from("budget_tasks")
+        .insert(tasksData)
         .select();
 
       if (error) {
@@ -208,7 +203,7 @@ export function useBudgetTasks(budgetId: string) {
     }
   });
 
-  // Remover tarea del presupuesto (quitar budget_id)
+  // Remover tarea del presupuesto eliminando de budget_tasks
   const deleteBudgetTask = useMutation({
     mutationFn: async (taskId: string) => {
       console.log("Removing task from budget:", taskId);
@@ -218,9 +213,9 @@ export function useBudgetTasks(budgetId: string) {
       }
 
       const { error } = await supabase
-        .from("construction_tasks")
-        .update({ budget_id: null })
-        .eq("id", taskId);
+        .from("budget_tasks")
+        .delete()
+        .eq("task_id", taskId);
 
       if (error) {
         console.error("Error removing task from budget:", error);
