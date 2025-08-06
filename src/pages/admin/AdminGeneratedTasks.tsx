@@ -275,27 +275,15 @@ export default function AdminTasks() {
           >
             <Edit className="h-4 w-4" />
           </Button>
-          {/* Mostrar botón eliminar para tareas que NO son del sistema */}
-          {!task.is_system && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(task)}
-              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              title="Eliminar tarea (solo tareas de usuario)"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-          {/* Indicador visual del tipo de tarea */}
-          {task.is_system && (
-            <div 
-              className="h-8 w-8 flex items-center justify-center text-gray-400"
-              title="Tarea del sistema - no se puede eliminar"
-            >
-              <span className="text-xs">🔒</span>
-            </div>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(task)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+            title="Eliminar tarea"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       )
     }
