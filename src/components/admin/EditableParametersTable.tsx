@@ -73,16 +73,26 @@ export default function EditableParametersTable() {
   const { data: dependencies = [], isLoading: isLoadingDependencies } = useQuery({
     queryKey: ['task-parameter-dependencies'],
     queryFn: async () => {
+      console.log('🔍 Cargando dependencias de parámetros...')
       const { data, error } = await supabase
         .from('task_parameter_dependencies')
         .select(`
-          *,
+          id,
+          parent_parameter_id,
+          parent_option_id,
+          child_parameter_id,
           parent_parameter:task_parameters!parent_parameter_id(id, slug, label),
           child_parameter:task_parameters!child_parameter_id(id, slug, label),
           parent_option:task_parameter_options!parent_option_id(id, name, label)
         `)
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error al cargar dependencias:', error)
+        throw error
+      }
+      
+      console.log('✅ Dependencias cargadas:', data?.length || 0, 'registros')
+      console.log('📊 Datos de dependencias:', data?.slice(0, 3))
       return data || []
     }
   })
@@ -121,6 +131,8 @@ export default function EditableParametersTable() {
   const hierarchicalData = createHierarchy(parameters, dependencies)
 
   function createHierarchy(params: any[], deps: ParameterDependency[]): ParameterNode[] {
+    console.log('🏗️ Construyendo jerarquía con', params.length, 'parámetros y', deps.length, 'dependencias')
+    
     const paramMap = new Map<string, ParameterNode>()
     
     // Crear nodos base
@@ -137,27 +149,45 @@ export default function EditableParametersTable() {
     })
 
     // Construir jerarquía basada en dependencias
+    let hierarchyBuilt = 0
     deps.forEach(dep => {
       const parentNode = paramMap.get(dep.parent_parameter_id)
       const childNode = paramMap.get(dep.child_parameter_id)
       
       if (parentNode && childNode) {
-        parentNode.children.push(childNode)
-        childNode.level = parentNode.level + 1
-        childNode.dependencyInfo = {
-          parentParameterId: dep.parent_parameter_id,
-          parentOptionId: dep.parent_option_id,
-          parentParameterLabel: dep.parent_parameter?.label || 'Desconocido',
-          parentOptionLabel: dep.parent_option?.label || 'Desconocido'
+        // Evitar duplicados en hijos
+        if (!parentNode.children.find(child => child.id === childNode.id)) {
+          parentNode.children.push(childNode)
+          childNode.level = parentNode.level + 1
+          childNode.dependencyInfo = {
+            parentParameterId: dep.parent_parameter_id,
+            parentOptionId: dep.parent_option_id,
+            parentParameterLabel: dep.parent_parameter?.label || 'Parámetro desconocido',
+            parentOptionLabel: dep.parent_option?.label || dep.parent_option?.name || 'Opción desconocida'
+          }
+          hierarchyBuilt++
         }
+      } else {
+        console.log('⚠️ Dependencia con parámetros faltantes:', {
+          depId: dep.id,
+          parentExists: !!parentNode,
+          childExists: !!childNode,
+          parentId: dep.parent_parameter_id,
+          childId: dep.child_parameter_id
+        })
       }
     })
+
+    console.log('✅ Jerarquías construidas:', hierarchyBuilt)
 
     // Obtener nodos raíz (parámetros que no son hijos de otros)
     const childParameterIds = new Set(deps.map(dep => dep.child_parameter_id))
     const rootNodes = Array.from(paramMap.values()).filter(node => 
       !childParameterIds.has(node.id)
     )
+
+    console.log('🌳 Nodos raíz encontrados:', rootNodes.length)
+    console.log('📋 Parámetros hijo:', childParameterIds.size)
 
     // Ordenar alfabéticamente
     function sortNodes(nodes: ParameterNode[]) {
@@ -254,12 +284,12 @@ export default function EditableParametersTable() {
     console.log('Delete parameter:', parameterId)
   }
 
-  function renderParameterRow(param: ParameterNode, index: number): React.ReactNode {
+  function renderParameterRow(param: ParameterNode, index: number | string): React.ReactNode {
     const isEditing = editingState.parameterId === param.id
     const hasDuplicateSlug = duplicateSlugs.includes(param.slug)
 
     return (
-      <div key={param.id} className="border border-muted-foreground/20 rounded-lg">
+      <div key={`param-${param.id}-${index}`} className="border border-muted-foreground/20 rounded-lg">
         <div className="grid grid-cols-12 gap-4 p-3 items-center">
           {/* Expand/Collapse + Nombre */}
           <div className="col-span-3 flex items-center gap-2" style={{ paddingLeft: `${param.level * 20}px` }}>
@@ -406,7 +436,7 @@ export default function EditableParametersTable() {
         {/* Hijos (cuando esté expandido) */}
         {param.isExpanded && param.children.length > 0 && (
           <div className="border-t border-muted-foreground/20">
-            {param.children.map((child, childIndex) => renderParameterRow(child, childIndex))}
+            {param.children.map((child, childIndex) => renderParameterRow(child, `${index}-${childIndex}`))}
           </div>
         )}
       </div>
@@ -507,7 +537,7 @@ export default function EditableParametersTable() {
 
             {/* Datos */}
             <div className="space-y-2">
-              {filteredData.map((param, index) => renderParameterRow(param, index))}
+              {filteredData.map((param, index) => renderParameterRow(param, `root-${index}`))}
             </div>
           </div>
         )}
