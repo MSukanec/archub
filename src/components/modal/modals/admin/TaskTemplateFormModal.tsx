@@ -254,6 +254,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
       footerContent={footerContent}
       onClose={onClose}
       isEditing={true}
+      columns={1}
     />
   )
 }
