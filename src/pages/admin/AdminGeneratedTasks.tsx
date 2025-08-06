@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
@@ -303,79 +302,78 @@ export default function AdminTasks() {
       label: "Nueva Tarea",
       icon: Plus,
       onClick: () => openModal('parametric-task')
-    }
+    },
+    tabs: [
+      { key: 'Lista de Tareas', label: 'Lista' },
+      { key: 'Árbol de Tareas', label: 'Árbol' }
+    ],
+    activeTab,
+    onTabChange: setActiveTab
   };
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="Lista de Tareas">Lista de Tareas</TabsTrigger>
-            <TabsTrigger value="Árbol de Tareas">Árbol de Tareas</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="Lista de Tareas" className="space-y-4">
-            <Table
-              data={filteredGeneratedTasks}
-              columns={columns}
-              isLoading={isLoading}
-              topBar={{
-                showSearch: true,
-                searchValue: searchValue,
-                onSearchChange: setSearchValue,
-                showFilter: true,
-                isFilterActive: typeFilter !== 'all',
-                renderFilterContent: () => (
-                  <div className="space-y-3 p-2 min-w-[200px]">
-                    <div>
-                      <Label className="text-xs font-medium mb-1 block">Tipo</Label>
-                      <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Todas las tareas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todas las tareas</SelectItem>
-                          <SelectItem value="system">Tareas del sistema</SelectItem>
-                          <SelectItem value="user">Tareas de usuario</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+        {activeTab === 'Lista de Tareas' && (
+          <Table
+            data={filteredGeneratedTasks}
+            columns={columns}
+            isLoading={isLoading}
+            topBar={{
+              showSearch: true,
+              searchValue: searchValue,
+              onSearchChange: setSearchValue,
+              showFilter: true,
+              isFilterActive: typeFilter !== 'all',
+              renderFilterContent: () => (
+                <div className="space-y-3 p-2 min-w-[200px]">
+                  <div>
+                    <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                    <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Todas las tareas" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas las tareas</SelectItem>
+                        <SelectItem value="system">Tareas del sistema</SelectItem>
+                        <SelectItem value="user">Tareas de usuario</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ),
-                showClearFilters: typeFilter !== 'all',
-                onClearFilters: clearFilters
-              }}
-              emptyState={
-                <div className="text-center py-8">
-                  <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea para comenzar a organizar el trabajo.</p>
                 </div>
-              }
-            />
-          </TabsContent>
-          
-          <TabsContent value="Árbol de Tareas" className="space-y-4">
-            <div className="bg-card border rounded-lg p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold">Parámetros de Tareas</h3>
-                <p className="text-sm text-muted-foreground">Vista jerárquica de todos los parámetros y sus opciones</p>
+              ),
+              showClearFilters: typeFilter !== 'all',
+              onClearFilters: clearFilters
+            }}
+            emptyState={
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
+                <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea para comenzar a organizar el trabajo.</p>
               </div>
-              
-              {parameters.length === 0 ? (
-                <div className="text-center py-8">
-                  <TreePine className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium text-muted-foreground">No hay parámetros</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Crea el primer parámetro para comenzar a estructurar las tareas.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {parameters.map(parameter => renderParameterTreeItem(parameter))}
-                </div>
-              )}
+            }
+          />
+        )}
+        
+        {activeTab === 'Árbol de Tareas' && (
+          <div className="bg-card border rounded-lg p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">Parámetros de Tareas</h3>
+              <p className="text-sm text-muted-foreground">Vista jerárquica de todos los parámetros y sus opciones</p>
             </div>
-          </TabsContent>
-        </Tabs>
+            
+            {parameters.length === 0 ? (
+              <div className="text-center py-8">
+                <TreePine className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground">No hay parámetros</h3>
+                <p className="text-sm text-muted-foreground mt-1">Crea el primer parámetro para comenzar a estructurar las tareas.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {parameters.map(parameter => renderParameterTreeItem(parameter))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Layout>
   )
