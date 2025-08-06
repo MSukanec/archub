@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { HierarchicalCategoryTree } from '@/components/ui-custom/HierarchicalCategoryTree';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -118,34 +117,23 @@ export default function AdminCategories() {
     return filterCategories(categories);
   }, [categories, searchTerm]);
 
-  // Statistics removed per user request
-
-  const features = [
-    {
-      icon: <TreePine className="w-4 h-4" />,
-      title: "Organización Jerárquica",
-      description: "Estructura las categorías en múltiples niveles para una clasificación detallada de tareas."
-    },
-    {
-      icon: <Tag className="w-4 h-4" />,
-      title: "Clasificación Avanzada", 
-      description: "Sistema de categorización que permite organizar tipos de trabajo por especialidad y complejidad."
-    },
-    {
-      icon: <Filter className="w-4 h-4" />,
-      title: "Búsqueda Inteligente",
-      description: "Encuentra categorías específicas mediante filtros de texto que buscan en toda la jerarquía."
-    },
-    {
-      icon: <Plus className="w-4 h-4" />,
-      title: "Gestión Completa",
-      description: "Crea, edita y elimina categorías con validación automática de dependencias y estructura."
+  // Create header props for Layout
+  const headerProps = {
+    title: "Gestión de Categorías de Tareas",
+    description: "Administra las categorías y subcategorías de tareas del sistema",
+    icon: TreePine,
+    actions: {
+      primary: {
+        label: "Nueva Categoría",
+        icon: Plus,
+        onClick: handleCreateCategory
+      }
     }
-  ];
+  };
 
   if (isLoading) {
     return (
-      <Layout>
+      <Layout headerProps={headerProps}>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -157,18 +145,9 @@ export default function AdminCategories() {
   }
 
   return (
-    <Layout>
+    <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        <ActionBarDesktop
-          title="Gestión de Categorías de Tareas"
-          icon={<TreePine className="w-5 h-5" />}
-          features={features}
-          primaryActionLabel="Nueva Categoría"
-          onPrimaryActionClick={handleCreateCategory}
-          showProjectSelector={false}
-        />
 
-        {/* Categories Tree */}
         <Card>
           <CardContent className="p-6">
             {filteredCategories.length === 0 ? (
