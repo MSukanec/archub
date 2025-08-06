@@ -38,8 +38,7 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
           task_id,
           quantity,
           project_id,
-          phase_name,
-          phase_position
+          phase_name
         `)
         .eq("project_id", projectId);
 
@@ -74,8 +73,7 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
         id: ct.id,
         task_id: ct.task_id,
         quantity: ct.quantity,
-        phase_name: ct.phase_name,
-        phase_position: ct.phase_position
+        phase_name: ct.phase_name
       })));
 
       // Extract task IDs from filtered construction tasks

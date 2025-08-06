@@ -12,7 +12,6 @@ export interface ConstructionTaskSearchResult {
   quantity: number;
   phase_instance_id: string;
   phase_name: string;
-  phase_position: number;
   progress_percent: number;
   unit_id: string;
   unit_name: string;

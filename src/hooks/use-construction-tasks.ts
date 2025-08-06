@@ -61,7 +61,6 @@ export interface ConstructionTask {
   // Información de fase
   phase_instance_id: string;
   phase_name: string;
-  phase_position: number;
   
   // Progreso
   progress_percent: number;
@@ -211,7 +210,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           // Campos de fase - obtenidos de la relación
           phase_instance_id: projectPhase?.id || '', 
           phase_name: phase?.name || 'Sin fase',
-          phase_position: projectPhase?.position || 0,
+
           progress_percent: phaseRelation?.progress_percent || 0,
           
           // Compatibilidad con sistema existente
