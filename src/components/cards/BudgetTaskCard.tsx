@@ -6,22 +6,19 @@ import SwipeableCard from '@/components/layout/mobile/SwipeableCard'
 
 interface BudgetTask {
   id: string
-  budget_id: string
+  project_id: string
   task_id: string
+  name_rendered: string
+  category_name: string
   quantity: number
   start_date: string | null
   end_date: string | null
-  organization_id: string
-  task: {
-    id: string
-    code: string
-    name: string
-    template_id: string | null
-    param_values: any
-    is_public: boolean
-    organization_id: string
-    unit_id: string | null
-  }
+  duration_in_days: number | null
+  progress_percent: number
+  phase_name: string | null
+  created_at: string
+  updated_at: string
+  budget_id: string
 }
 
 interface BudgetTaskCardProps {
@@ -58,7 +55,7 @@ export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete
           {/* Top Row: Code and Quantity */}
           <div className="flex items-center justify-between">
             <Badge variant="outline" className="text-xs font-mono">
-              {task.task.code}
+              {task.task_id?.substring(0, 8) || 'Sin código'}
             </Badge>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Cant:</span>
@@ -86,7 +83,7 @@ export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Rubro:</span>
-              <span className="text-xs font-medium">{task.task.rubro_name || 'Sin rubro'}</span>
+              <span className="text-xs font-medium">{task.category_name || 'Sin rubro'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold">$0</span>

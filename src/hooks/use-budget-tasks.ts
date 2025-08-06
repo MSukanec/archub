@@ -4,38 +4,19 @@ import { toast } from "@/hooks/use-toast";
 
 export interface BudgetTask {
   id: string;
-  budget_id: string;
-  task_id: string;
-  organization_id: string;
   project_id: string;
+  task_id: string;
+  name_rendered: string;
+  category_name: string;
+  quantity: number;
+  start_date: string | null;
+  end_date: string | null;
+  duration_in_days: number | null;
+  progress_percent: number;
+  phase_name: string | null;
   created_at: string;
   updated_at: string;
-  // Datos de la tarea relacionada (construction_gantt_view)
-  task: {
-    task_instance_id: string;
-    project_id: string;
-    task_id: string;
-    task_code: string;
-    start_date: string | null;
-    end_date: string | null;
-    duration_in_days: number | null;
-    quantity: number;
-    phase_instance_id: string;
-    phase_name: string;
-    progress_percent: number;
-    unit_id: string;
-    unit_name: string;
-    unit_symbol: string;
-    display_name: string;
-    subcategory_id: string;
-    subcategory_name: string;
-    category_id: string;
-    category_name: string;
-    rubro_id: string;
-    rubro_name: string;
-    task_group_id: string;
-    task_group_name: string;
-  };
+  budget_id: string;
 }
 
 export interface CreateBudgetTaskData {
@@ -52,7 +33,7 @@ export interface UpdateBudgetTaskData extends CreateBudgetTaskData {
 export function useBudgetTasks(budgetId: string) {
   const queryClient = useQueryClient();
 
-  // Obtener tareas del presupuesto
+  // Obtener tareas del presupuesto directamente desde construction_tasks_view
   const {
     data: budgetTasks = [],
     isLoading,
@@ -66,9 +47,9 @@ export function useBudgetTasks(budgetId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      // Obtener las tareas del presupuesto
+      // Obtener directamente desde construction_tasks_view filtrando por budget_id
       const { data, error } = await supabase
-        .from("budget_tasks")
+        .from("construction_tasks_view")
         .select("*")
         .eq("budget_id", budgetId)
         .order("created_at", { ascending: false });
@@ -80,58 +61,33 @@ export function useBudgetTasks(budgetId: string) {
 
       console.log("Budget tasks data received:", data);
       
-      if (!data || data.length === 0) {
-        return [];
-      }
-
-      // Ahora obtener los datos de las tareas desde construction_tasks_view
-      const taskIds = data.map(task => task.task_id);
-      const { data: tasksData, error: tasksError } = await supabase
-        .from("construction_tasks_view")
-        .select("*")
-        .in("id", taskIds);
-
-      if (tasksError) {
-        console.error("Error fetching construction tasks data:", tasksError);
-        throw tasksError;
-      }
-
-      // Combinar los datos
-      const enrichedData = data.map(budgetTask => {
-        const taskData = tasksData?.find(t => t.id === budgetTask.task_id);
-        return {
-          ...budgetTask,
-          task: taskData || null
-        };
-      });
-
-      console.log("Sample enriched budget task:", enrichedData[0]);
-      return enrichedData;
+      return data || [];
     },
     enabled: !!budgetId && !!supabase
   });
 
-  // Crear tarea en presupuesto
+  // Agregar tarea al presupuesto (actualizar campo budget_id en construction_tasks)
   const createBudgetTask = useMutation({
     mutationFn: async (taskData: CreateBudgetTaskData) => {
-      console.log("Creating budget task:", taskData);
+      console.log("Adding task to budget:", taskData);
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       const { data, error } = await supabase
-        .from("budget_tasks")
-        .insert(taskData)
+        .from("construction_tasks")
+        .update({ budget_id: taskData.budget_id })
+        .eq("id", taskData.task_id)
         .select()
         .single();
 
       if (error) {
-        console.error("Error creating budget task:", error);
+        console.error("Error adding task to budget:", error);
         throw error;
       }
 
-      console.log("Budget task created:", data);
+      console.log("Task added to budget:", data);
       return data;
     },
     onSuccess: () => {
@@ -150,26 +106,26 @@ export function useBudgetTasks(budgetId: string) {
 
   // Actualizar tarea en presupuesto
   const updateBudgetTask = useMutation({
-    mutationFn: async ({ id, ...updateData }: UpdateBudgetTaskData) => {
-      console.log("Updating budget task:", id, updateData);
+    mutationFn: async ({ id, budget_id }: { id: string; budget_id: string }) => {
+      console.log("Updating task budget assignment:", id, budget_id);
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       const { data, error } = await supabase
-        .from("budget_tasks")
-        .update(updateData)
+        .from("construction_tasks")
+        .update({ budget_id })
         .eq("id", id)
         .select()
         .single();
 
       if (error) {
-        console.error("Error updating budget task:", error);
+        console.error("Error updating task budget assignment:", error);
         throw error;
       }
 
-      console.log("Budget task updated:", data);
+      console.log("Task budget assignment updated:", data);
       return data;
     },
     onSuccess: () => {
@@ -186,26 +142,30 @@ export function useBudgetTasks(budgetId: string) {
     }
   });
 
-  // Crear múltiples tareas en presupuesto (bulk)
+  // Agregar múltiples tareas al presupuesto (bulk)
   const createMultipleBudgetTasks = useMutation({
     mutationFn: async (tasksData: CreateBudgetTaskData[]) => {
-      console.log("Creating multiple budget tasks:", tasksData.length, "tasks");
+      console.log("Adding multiple tasks to budget:", tasksData.length, "tasks");
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
+      const taskIds = tasksData.map(task => task.task_id);
+      const budgetId = tasksData[0]?.budget_id;
+
       const { data, error } = await supabase
-        .from("budget_tasks")
-        .insert(tasksData)
+        .from("construction_tasks")
+        .update({ budget_id: budgetId })
+        .in("id", taskIds)
         .select();
 
       if (error) {
-        console.error("Error creating multiple budget tasks:", error);
+        console.error("Error adding multiple tasks to budget:", error);
         throw error;
       }
 
-      console.log("Multiple budget tasks created:", data.length, "tasks");
+      console.log("Multiple tasks added to budget:", data.length, "tasks");
       return data;
     },
     onSuccess: () => {
@@ -226,26 +186,26 @@ export function useBudgetTasks(budgetId: string) {
     }
   });
 
-  // Eliminar tarea del presupuesto
+  // Remover tarea del presupuesto (quitar budget_id)
   const deleteBudgetTask = useMutation({
     mutationFn: async (taskId: string) => {
-      console.log("Deleting budget task:", taskId);
+      console.log("Removing task from budget:", taskId);
       
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
 
       const { error } = await supabase
-        .from("budget_tasks")
-        .delete()
+        .from("construction_tasks")
+        .update({ budget_id: null })
         .eq("id", taskId);
 
       if (error) {
-        console.error("Error deleting budget task:", error);
+        console.error("Error removing task from budget:", error);
         throw error;
       }
 
-      console.log("Budget task deleted successfully");
+      console.log("Task removed from budget successfully");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budget-tasks", budgetId] });
