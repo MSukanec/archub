@@ -157,27 +157,6 @@ export default function AdminTasks() {
     }
   ]
 
-  // Custom filters component
-  const customFilters = (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Filtrar por tipo
-        </Label>
-        <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Todas las tareas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las tareas</SelectItem>
-            <SelectItem value="system">Tareas del sistema</SelectItem>
-            <SelectItem value="user">Tareas de usuario</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  )
-
   const features = [
     {
       icon: <Zap className="w-5 h-5" />,
@@ -203,11 +182,6 @@ export default function AdminTasks() {
 
   const headerProps = {
     title: 'Tareas',
-    showSearch: true,
-    searchValue,
-    onSearchChange: setSearchValue,
-    customFilters,
-    onClearFilters: clearFilters,
     actionButton: {
       label: "Nueva Tarea",
       icon: Plus,
@@ -218,23 +192,36 @@ export default function AdminTasks() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-card p-4 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Tareas</p>
-                <p className="text-lg font-semibold">{filteredGeneratedTasks.length}</p>
-              </div>
-              <Target className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </div>
-        </div>
-
         <Table
           data={filteredGeneratedTasks}
           columns={columns}
           isLoading={isLoading}
+          topBar={{
+            showSearch: true,
+            searchValue: searchValue,
+            onSearchChange: setSearchValue,
+            showFilter: true,
+            isFilterActive: typeFilter !== 'all',
+            renderFilterContent: () => (
+              <div className="space-y-3 p-2 min-w-[200px]">
+                <div>
+                  <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                  <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todas las tareas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las tareas</SelectItem>
+                      <SelectItem value="system">Tareas del sistema</SelectItem>
+                      <SelectItem value="user">Tareas de usuario</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ),
+            showClearFilters: typeFilter !== 'all',
+            onClearFilters: clearFilters
+          }}
           emptyState={
             <div className="text-center py-8">
               <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
