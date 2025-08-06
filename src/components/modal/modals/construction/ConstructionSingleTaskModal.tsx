@@ -45,6 +45,7 @@ export function ConstructionSingleTaskModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState<string>('');
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
+  const [selectedTaskUnit, setSelectedTaskUnit] = useState<string>('');
   
   const { data: userData } = useCurrentUser();
   const createTask = useCreateConstructionTask();
@@ -91,10 +92,7 @@ export function ConstructionSingleTaskModal({
         throw error;
       }
       
-      console.log('🔍 Debug: Datos de tareas cargadas:', allTasks?.slice(0, 3));
-      if (allTasks?.length > 0) {
-        console.log('🔍 Debug: Estructura de primera tarea:', JSON.stringify(allTasks[0], null, 2));
-      }
+
       
       return allTasks || [];
     },
@@ -134,8 +132,8 @@ export function ConstructionSingleTaskModal({
     if (!tasks || tasks.length === 0) return [];
     
     const rubros = tasks
-      .filter(task => task.category_name)
-      .map(task => task.category_name)
+      .filter(task => task.element_category_name)
+      .map(task => task.element_category_name)
       .filter((rubro, index, self) => self.indexOf(rubro) === index)
       .sort();
     
@@ -154,13 +152,13 @@ export function ConstructionSingleTaskModal({
       filtered = filtered.filter(task => 
         task.name_rendered?.toLowerCase().includes(searchLower) ||
         task.code?.toLowerCase().includes(searchLower) ||
-        task.category_name?.toLowerCase().includes(searchLower)
+        task.element_category_name?.toLowerCase().includes(searchLower)
       );
     }
     
     // Filtro por rubro
     if (rubroFilter) {
-      filtered = filtered.filter(task => task.category_name === rubroFilter);
+      filtered = filtered.filter(task => task.element_category_name === rubroFilter);
     }
     
     return filtered;
@@ -170,6 +168,13 @@ export function ConstructionSingleTaskModal({
   const handleTaskSelect = (taskId: string) => {
     setSelectedTaskId(taskId);
     form.setValue('task_id', taskId);
+    
+    // Encontrar la tarea seleccionada para obtener su unidad
+    const selectedTask = tasks.find(task => task.id === taskId);
+    if (selectedTask?.unit_name) {
+      // Actualizar el placeholder del campo cantidad para mostrar la unidad
+      setSelectedTaskUnit(selectedTask.unit_name);
+    }
   };
 
   // Función para enviar el formulario
@@ -383,20 +388,27 @@ export function ConstructionSingleTaskModal({
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Cantidad *
           </label>
-          <Input
-            type="number"
-            step="0.01"
-            min="0.01"
-            placeholder="1"
-            value={form.watch('quantity') || ''}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (!isNaN(value)) {
-                form.setValue('quantity', value);
-              }
-            }}
-            className={form.formState.errors.quantity ? 'border-destructive' : ''}
-          />
+          <div className="relative">
+            <Input
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder={selectedTaskUnit ? `1 ${selectedTaskUnit}` : "1"}
+              value={form.watch('quantity') || ''}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                if (!isNaN(value)) {
+                  form.setValue('quantity', value);
+                }
+              }}
+              className={`${form.formState.errors.quantity ? 'border-destructive' : ''} ${selectedTaskUnit ? 'pr-12' : ''}`}
+            />
+            {selectedTaskUnit && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded">
+                {selectedTaskUnit}
+              </div>
+            )}
+          </div>
           {form.formState.errors.quantity && (
             <p className="text-xs text-destructive">
               {form.formState.errors.quantity.message}
