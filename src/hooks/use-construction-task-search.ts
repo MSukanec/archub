@@ -51,7 +51,7 @@ export function useConstructionTaskSearch(
 
       // Usar directamente la vista construction_gantt_view - ya tiene todos los datos necesarios
       let query = supabase
-        .from("construction_gantt_view")
+        .from("construction_tasks_view")
         .select("*")
         .eq("project_id", projectId);
 

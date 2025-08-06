@@ -84,12 +84,12 @@ export function useBudgetTasks(budgetId: string) {
         return [];
       }
 
-      // Ahora obtener los datos de las tareas desde construction_gantt_view
+      // Ahora obtener los datos de las tareas desde construction_tasks_view
       const taskIds = data.map(task => task.task_id);
       const { data: tasksData, error: tasksError } = await supabase
-        .from("construction_gantt_view")
+        .from("construction_tasks_view")
         .select("*")
-        .in("task_instance_id", taskIds);
+        .in("id", taskIds);
 
       if (tasksError) {
         console.error("Error fetching construction tasks data:", tasksError);
@@ -98,7 +98,7 @@ export function useBudgetTasks(budgetId: string) {
 
       // Combinar los datos
       const enrichedData = data.map(budgetTask => {
-        const taskData = tasksData?.find(t => t.task_instance_id === budgetTask.task_id);
+        const taskData = tasksData?.find(t => t.id === budgetTask.task_id);
         return {
           ...budgetTask,
           task: taskData || null

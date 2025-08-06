@@ -42,9 +42,9 @@ export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete
   }
 
   // Truncate name if too long for mobile
-  const displayName = processedName.length > 60 
+  const displayName = processedName?.length > 60 
     ? `${processedName.substring(0, 60)}...` 
-    : processedName
+    : (processedName || 'Sin nombre')
 
   return (
     <SwipeableCard
