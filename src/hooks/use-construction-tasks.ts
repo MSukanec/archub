@@ -130,9 +130,9 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
       const taskIds = constructionTasks.map(ct => ct.task_id);
       const constructionTaskIds = constructionTasks.map(ct => ct.id);
       
-      // Consultar los detalles de las tareas en task_parametric_view
+      // Consultar los detalles de las tareas en task_view
       const { data: taskDetails, error } = await supabase
-        .from('task_parametric_view')
+        .from('task_view')
         .select('*')
         .in('id', taskIds);
 
