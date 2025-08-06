@@ -37,12 +37,12 @@ export interface TaskMaterial {
 
 export function useGeneratedTasks() {
   return useQuery({
-    queryKey: ['task-parametric-view'],
+    queryKey: ['task-view'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('task_parametric_view')
+        .from('task_view')
         .select(`*`)
         .order('created_at', { ascending: false });
       
@@ -112,7 +112,7 @@ export function useCreateGeneratedTask() {
         // Verificar si ya existe una tarea con esos parámetros exactos
         const paramValuesString = JSON.stringify(payload.param_values);
         const { data: existingTask, error: searchError } = await supabase
-          .from('task_parametric')
+          .from('tasks')
           .select('*')
           .eq('param_values', paramValuesString)
           .single();
@@ -131,7 +131,7 @@ export function useCreateGeneratedTask() {
         } else {
           // Get the last code number
           const { data: lastTask, error: lastCodeError } = await supabase
-            .from('task_parametric')
+            .from('tasks')
             .select('code')
             .order('code', { ascending: false })
             .limit(1)
@@ -146,7 +146,7 @@ export function useCreateGeneratedTask() {
           
           // Create new task
           const { data: newTask, error: createError } = await supabase
-            .from('task_parametric')
+            .from('tasks')
             .insert({
               code: newCode,
               param_values: payload.param_values,
@@ -173,9 +173,9 @@ export function useCreateGeneratedTask() {
     },
     onSuccess: (data) => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
-      queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
@@ -212,7 +212,7 @@ export function useDeleteGeneratedTask() {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { error } = await supabase
-        .from('task_parametric')
+        .from('tasks')
         .delete()
         .eq('id', taskId);
       
@@ -220,9 +220,9 @@ export function useDeleteGeneratedTask() {
     },
     onSuccess: () => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
-      queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
@@ -421,7 +421,7 @@ export function useUpdateGeneratedTask() {
       }
       
       const { data, error } = await supabase
-        .from('task_parametric')
+        .from('tasks')
         .update(updateData)
         .eq('id', payload.task_id)
         .select()
@@ -437,9 +437,9 @@ export function useUpdateGeneratedTask() {
     },
     onSuccess: () => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
-      queryClient.invalidateQueries({ queryKey: ['task-parametric'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });

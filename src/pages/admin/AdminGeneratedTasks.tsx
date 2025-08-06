@@ -163,7 +163,7 @@ export default function AdminGeneratedTasks() {
         <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por tipo
         </Label>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
+        <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las tareas" />
           </SelectTrigger>
