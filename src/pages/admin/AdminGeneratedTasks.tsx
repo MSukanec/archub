@@ -16,6 +16,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
+import { ParameterDependenciesTree } from '@/components/admin/ParameterDependenciesTree'
 
 export default function AdminTasks() {
   const [activeTab, setActiveTab] = useState('Lista de Tareas')
@@ -364,24 +365,7 @@ export default function AdminTasks() {
         )}
         
         {activeTab === 'Árbol de Tareas' && (
-          <div className="bg-card border rounded-lg p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold">Parámetros de Tareas</h3>
-              <p className="text-sm text-muted-foreground">Vista jerárquica de todos los parámetros y sus opciones</p>
-            </div>
-            
-            {parameters.length === 0 ? (
-              <div className="text-center py-8">
-                <TreePine className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium text-muted-foreground">No hay parámetros</h3>
-                <p className="text-sm text-muted-foreground mt-1">Crea el primer parámetro para comenzar a estructurar las tareas.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {parameters.map(parameter => renderParameterTreeItem(parameter))}
-              </div>
-            )}
-          </div>
+          <ParameterDependenciesTree />
         )}
       </div>
     </Layout>
