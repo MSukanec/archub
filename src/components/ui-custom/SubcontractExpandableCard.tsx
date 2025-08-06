@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteSubcontract } from '@/hooks/use-subcontracts'
+import { useSubcontractBids } from '@/hooks/use-subcontract-bids'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { toast } from '@/hooks/use-toast'
 
@@ -33,6 +34,7 @@ interface SubcontractExpandableCardProps {
 export function SubcontractExpandableCard({ subcontract, isExpanded, onToggle }: SubcontractExpandableCardProps) {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
+  const { data: bids = [], isLoading: bidsLoading } = useSubcontractBids(subcontract.id)
   const deleteSubcontract = useDeleteSubcontract()
 
   // Función para obtener el color del badge según el estado
@@ -90,10 +92,10 @@ export function SubcontractExpandableCard({ subcontract, isExpanded, onToggle }:
   // Función para nueva oferta
   const handleNewOffer = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // TODO: Implementar modal de nueva oferta
-    toast({
-      title: "Nueva Oferta",
-      description: "Funcionalidad en desarrollo"
+    openModal('subcontract-bid', {
+      subcontractId: subcontract.id,
+      projectId: subcontract.project_id,
+      organizationId: subcontract.organization_id
     })
   }
 
@@ -178,12 +180,63 @@ export function SubcontractExpandableCard({ subcontract, isExpanded, onToggle }:
               </div>
             )}
 
-            {/* Aquí se mostrarán las tareas asociadas en el futuro */}
-            <div className="space-y-1">
-              <h4 className="text-xs font-medium text-muted-foreground">Tareas del Subcontrato</h4>
-              <p className="text-sm text-muted-foreground italic">
-                Las tareas asociadas a este subcontrato aparecerán aquí próximamente.
-              </p>
+            {/* Ofertas del subcontrato */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-medium text-muted-foreground">Ofertas Recibidas</h4>
+                {bids.length > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {bids.length} oferta{bids.length !== 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
+              
+              {bidsLoading ? (
+                <p className="text-sm text-muted-foreground italic">Cargando ofertas...</p>
+              ) : bids.length > 0 ? (
+                <div className="space-y-2">
+                  {bids.slice(0, 3).map((bid: any) => (
+                    <div key={bid.id} className="bg-accent/30 rounded-md p-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h5 className="text-sm font-medium">{bid.title}</h5>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm font-semibold text-primary">
+                              ${bid.amount?.toLocaleString() || '0'}
+                            </span>
+                            {bid.currencies && (
+                              <span className="text-xs text-muted-foreground">
+                                {bid.currencies.code}
+                              </span>
+                            )}
+                          </div>
+                          {bid.contacts && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Por: {bid.contacts.name}
+                            </p>
+                          )}
+                        </div>
+                        <Badge 
+                          variant={bid.status === 'aceptada' ? 'default' : bid.status === 'rechazada' ? 'destructive' : 'outline'}
+                          className="text-xs"
+                        >
+                          {bid.status === 'pendiente' ? 'Pendiente' : 
+                           bid.status === 'aceptada' ? 'Aceptada' : 'Rechazada'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {bids.length > 3 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      Y {bids.length - 3} oferta{bids.length - 3 !== 1 ? 's' : ''} más...
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Aún no hay ofertas para este subcontrato.
+                </p>
+              )}
             </div>
 
             <div className="pt-2 border-t">

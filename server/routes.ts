@@ -490,6 +490,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subcontract Bids Routes
+  app.get("/api/subcontract-bids/:subcontractId", async (req, res) => {
+    try {
+      const { subcontractId } = req.params;
+
+      const { data: bids, error } = await supabase
+        .from('subcontract_bids')
+        .select(`
+          *,
+          contacts:contact_id(id, name),
+          currencies:currency_id(id, code, name)
+        `)
+        .eq('subcontract_id', subcontractId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching subcontract bids:", error);
+        return res.status(500).json({ error: "Failed to fetch subcontract bids" });
+      }
+
+      res.json(bids || []);
+    } catch (error) {
+      console.error("Error fetching subcontract bids:", error);
+      res.status(500).json({ error: "Failed to fetch subcontract bids" });
+    }
+  });
+
+  app.post("/api/subcontract-bids", async (req, res) => {
+    try {
+      const bidData = req.body;
+
+      const { data: bid, error } = await supabase
+        .from('subcontract_bids')
+        .insert([bidData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating subcontract bid:", error);
+        return res.status(500).json({ error: "Failed to create subcontract bid" });
+      }
+
+      res.status(201).json(bid);
+    } catch (error) {
+      console.error("Error creating subcontract bid:", error);
+      res.status(500).json({ error: "Failed to create subcontract bid" });
+    }
+  });
+
+  app.patch("/api/subcontract-bids/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const { data: bid, error } = await supabase
+        .from('subcontract_bids')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating subcontract bid:", error);
+        return res.status(500).json({ error: "Failed to update subcontract bid" });
+      }
+
+      res.json(bid);
+    } catch (error) {
+      console.error("Error updating subcontract bid:", error);
+      res.status(500).json({ error: "Failed to update subcontract bid" });
+    }
+  });
+
+  app.delete("/api/subcontract-bids/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const { error } = await supabase
+        .from('subcontract_bids')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting subcontract bid:", error);
+        return res.status(500).json({ error: "Failed to delete subcontract bid" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting subcontract bid:", error);
+      res.status(500).json({ error: "Failed to delete subcontract bid" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

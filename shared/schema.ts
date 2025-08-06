@@ -404,6 +404,22 @@ export const subcontract_tasks = pgTable("subcontract_tasks", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
+// Subcontract Bids/Offers table
+export const subcontract_bids = pgTable("subcontract_bids", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  subcontract_id: uuid("subcontract_id").notNull(),
+  contact_id: uuid("contact_id"), // El subcontratista que hace la oferta
+  title: text("title").notNull(), // Título de la oferta
+  amount: real("amount").notNull(), // Monto de la oferta
+  currency_id: uuid("currency_id"),
+  exchange_rate: real("exchange_rate").default(1),
+  notes: text("notes"), // Detalles adicionales de la oferta
+  status: text("status").default("pendiente"), // pendiente, aceptada, rechazada
+  valid_until: text("valid_until"), // Fecha de vencimiento de la oferta
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 // Schemas for subcontracts
 export const insertSubcontractSchema = createInsertSchema(subcontracts).omit({
   id: true,
@@ -416,8 +432,16 @@ export const insertSubcontractTaskSchema = createInsertSchema(subcontract_tasks)
   created_at: true,
 });
 
+export const insertSubcontractBidSchema = createInsertSchema(subcontract_bids).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for subcontracts
 export type Subcontract = typeof subcontracts.$inferSelect;
 export type InsertSubcontract = z.infer<typeof insertSubcontractSchema>;
 export type SubcontractTask = typeof subcontract_tasks.$inferSelect;
 export type InsertSubcontractTask = z.infer<typeof insertSubcontractTaskSchema>;
+export type SubcontractBid = typeof subcontract_bids.$inferSelect;
+export type InsertSubcontractBid = z.infer<typeof insertSubcontractBidSchema>;

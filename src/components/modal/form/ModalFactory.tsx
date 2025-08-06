@@ -47,6 +47,7 @@ import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal'
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import { SubcontractFormModal } from '../modals/construction/SubcontractFormModal';
+import { SubcontractBidFormModal } from '../modals/construction/SubcontractBidFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -162,6 +163,8 @@ export function ModalFactory() {
       return <AddParameterToCanvasModal />;
     case 'subcontract':
       return <SubcontractFormModal modalData={data} onClose={closeModal} />;
+    case 'subcontract-bid':
+      return <SubcontractBidFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }
