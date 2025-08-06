@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect, Fragment, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -334,6 +334,8 @@ export default function ConstructionBudgets() {
   // Get selected budget - with fallback to first budget if selected doesn't exist
   const selectedBudget = filteredBudgets.find(budget => budget.id === selectedBudgetId) || filteredBudgets[0];
 
+
+
   // Delete budget mutation
   const deleteBudgetMutation = useMutation({
     mutationFn: async (budgetId: string) => {
@@ -364,8 +366,7 @@ export default function ConstructionBudgets() {
     }
   })
 
-  // Local grouping state (no database persistence needed)
-  const [groupingType, setGroupingType] = useState<string>('none')
+
 
   const handleDeleteBudget = (budget: Budget) => {
     setDeletingBudget(budget)
@@ -467,7 +468,42 @@ export default function ConstructionBudgets() {
     const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
-    // Use local grouping state
+    // Local grouping state for budget tasks
+    const [groupingType, setGroupingType] = useState<string>('none');
+
+    // Add grouping logic for budget tasks
+    const groupedBudgetTasks = useMemo(() => {
+      if (!budgetTasks) return [];
+      
+      return budgetTasks.map(task => {
+        let groupKey = 'Sin grupo';
+        
+        switch (groupingType) {
+          case 'rubros':
+            groupKey = task.category_name || 'Sin rubro';
+            break;
+          case 'phases':
+            groupKey = task.phase_name || 'Sin fase';
+            break;
+          case 'rubros-phases':
+            groupKey = `${task.category_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
+            break;
+          case 'phases-rubros':
+            groupKey = `${task.phase_name || 'Sin fase'} - ${task.category_name || 'Sin rubro'}`;
+            break;
+          case 'tasks':
+            groupKey = task.name_rendered || 'Sin nombre';
+            break;
+          default:
+            groupKey = 'Todas las tareas';
+        }
+
+        return {
+          ...task,
+          groupKey
+        };
+      });
+    }, [budgetTasks, groupingType]);
 
     // Helper functions
     const handleUpdateQuantity = async (taskId: string, newQuantity: number) => {
@@ -680,14 +716,58 @@ export default function ConstructionBudgets() {
     return (
       <Table
         columns={columns}
-        data={budgetTasks || []}
+        data={groupedBudgetTasks || []}
         isLoading={isLoading}
         mode="budget"
-        groupBy={groupingType !== 'none' ? 'rubro_name' : undefined}
-        renderGroupHeader={groupingType !== 'none' ? renderGroupHeader : undefined}
+        groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+        topBar={{
+          tabs: ['Sin Agrupar', 'Por Fases', 'Por Rubros', 'Por Tareas', 'Por Fases y Rubros', 'Por Rubros y Tareas'],
+          activeTab: groupingType === 'none' ? 'Sin Agrupar' : 
+                    groupingType === 'phases' ? 'Por Fases' :
+                    groupingType === 'rubros' ? 'Por Rubros' :
+                    groupingType === 'tasks' ? 'Por Tareas' :
+                    groupingType === 'rubros-phases' ? 'Por Fases y Rubros' : 'Por Rubros y Tareas',
+          onTabChange: (tab: string) => {
+            if (tab === 'Sin Agrupar') setGroupingType('none')
+            else if (tab === 'Por Fases') setGroupingType('phases')
+            else if (tab === 'Por Rubros') setGroupingType('rubros')
+            else if (tab === 'Por Tareas') setGroupingType('tasks')
+            else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
+            else setGroupingType('phases-rubros')
+          }
+        }}
+        renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+          if (groupingType === 'tasks') {
+            // Para agrupación por tareas, calcular suma de cantidades
+            const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
+            const categoryName = groupRows[0]?.category_name || '';
+            
+            return (
+              <>
+                <div className="col-span-1 truncate">
+                  {categoryName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
+                </div>
+                <div className="col-span-1"></div> {/* Unidad */}
+                <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
+              </>
+            );
+          } else {
+            const groupTotal = groupRows.reduce((sum, task) => 
+              sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+            );
+            
+            return (
+              <>
+                <div className="col-span-full text-sm font-medium">
+                  {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'}) - ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                </div>
+              </>
+            );
+          }
+        }}
         renderFooterRow={renderFooterRow}
         selectable={true}
-        selectedItems={budgetTasks?.filter(task => selectedTasks.includes(task.id)) || []}
+        selectedItems={groupedBudgetTasks?.filter(task => selectedTasks.includes(task.id)) || []}
         onSelectionChange={(selected) => setSelectedTasks(selected.map(task => task.id))}
         getItemId={(item) => item.id}
         renderCard={(item) => (
