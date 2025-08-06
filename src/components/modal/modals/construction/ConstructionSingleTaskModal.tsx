@@ -362,14 +362,14 @@ export function ConstructionSingleTaskModal({
                 <div 
                   key={task.id}
                   onClick={() => handleTaskSelect(task.id)}
-                  className={`px-4 py-3 cursor-pointer transition-colors duration-150 flex items-center justify-between ${
+                  className={`px-4 py-3 cursor-pointer transition-colors duration-150 grid grid-cols-[1fr,auto] gap-4 items-start ${
                     selectedTaskId === task.id 
                       ? 'bg-accent/10 border-l-2 border-l-accent' 
                       : 'hover:bg-muted/30'
                   }`}
                 >
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <p className="text-sm font-medium leading-tight text-foreground truncate">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-tight text-foreground">
                       {task.name_rendered || task.code || 'Sin nombre'}
                     </p>
                     {task.category_name && (
@@ -378,11 +378,13 @@ export function ConstructionSingleTaskModal({
                       </p>
                     )}
                   </div>
-                  {task.unit_symbol && (
-                    <div className="ml-3 text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
-                      {task.unit_symbol}
-                    </div>
-                  )}
+                  <div className="flex-shrink-0 pt-0.5">
+                    {task.unit_symbol && (
+                      <span className="text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
+                        {task.unit_symbol}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
