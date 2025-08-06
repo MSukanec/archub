@@ -101,7 +101,7 @@ export function useTaskSearch(
 
       // Construir query con filtros
       let query = supabase
-        .from("task_parametric_view")
+        .from("task_view")
         .select(`
           *,
           units!inner(

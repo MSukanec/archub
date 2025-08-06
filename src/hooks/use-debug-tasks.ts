@@ -24,7 +24,7 @@ export function useDebugTasks(organizationId: string) {
 
       // Verificar task_parametric_view
       const { data: taskParametricView, error: taskParametricViewError } = await supabase
-        .from("task_parametric_view")
+        .from("task_view")
         .select("*")
         .eq("organization_id", organizationId)
         .limit(5);
