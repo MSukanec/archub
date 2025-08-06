@@ -221,30 +221,44 @@ export const task_parameter_positions = pgTable("task_parameter_positions", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
-// Task Parametric Table - Para guardar tareas generadas con configuración paramétrica
-export const task_parametric = pgTable("task_parametric", {
+// Tasks table (renamed from task_parametric)
+export const tasks = pgTable("tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code"),
-  template_id: uuid("template_id"),
   param_values: jsonb("param_values").notNull(), // JSONB con los valores de parámetros
   param_order: text("param_order").array(), // Array con el orden de parámetros
+  name_rendered: text("name_rendered"),
+  custom_name: text("custom_name"),
+  is_system: boolean("is_system").default(true),
   organization_id: uuid("organization_id"),
   unit_id: uuid("unit_id"),
-  task_group_id: uuid("task_group_id"),
-  task_group_name: text("task_group_name"),
   category_id: uuid("category_id"),
-  category_name: text("category_name"),
-  category_code: text("category_code"),
-  subcategory_id: uuid("subcategory_id"),
-  subcategory_name: text("subcategory_name"),
-  subcategory_code: text("subcategory_code"),
-  rubro_id: uuid("rubro_id"),
-  rubro_name: text("rubro_name"),
-  rubro_code: text("rubro_code"),
-  display_name: text("display_name"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
+
+// Task View - Para SELECT queries con información expandida
+export type TaskView = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  param_values: Record<string, any>;
+  param_order: string[];
+  name_rendered: string;
+  custom_name: string | null;
+  code: string;
+  is_system: boolean;
+  organization_id: string | null;
+  unit_id: string;
+  unit_name: string;
+  element_category_id: string;
+  element_category_name: string;
+  subcategory_id: string;
+  subcategory_name: string;
+  category_id: string;
+  category_name: string;
+  display_name: string;
+};
 
 export const organization_material_prices = pgTable("organization_material_prices", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -279,11 +293,14 @@ export const insertTaskParameterPositionSchema = createInsertSchema(task_paramet
   updated_at: true,
 });
 
-export const insertTaskParametricSchema = createInsertSchema(task_parametric).omit({
+export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   created_at: true,
   updated_at: true,
 });
+
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 export const insertOrganizationMaterialPriceSchema = createInsertSchema(organization_material_prices).omit({
   id: true,
@@ -320,8 +337,7 @@ export type InsertTaskParameterDependency = z.infer<typeof insertTaskParameterDe
 export type InsertTaskParameterDependencyOption = z.infer<typeof insertTaskParameterDependencyOptionSchema>;
 export type TaskParameterPosition = typeof task_parameter_positions.$inferSelect;
 export type InsertTaskParameterPosition = z.infer<typeof insertTaskParameterPositionSchema>;
-export type TaskParametric = typeof task_parametric.$inferSelect;
-export type InsertTaskParametric = z.infer<typeof insertTaskParametricSchema>;
+// TaskParametric types removed - now using tasks table
 export type OrganizationMaterialPrice = typeof organization_material_prices.$inferSelect;
 export type InsertOrganizationMaterialPrice = z.infer<typeof insertOrganizationMaterialPriceSchema>;
 export type MovementTask = typeof movement_tasks.$inferSelect;

@@ -170,7 +170,7 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
             const unitPresentations = material.units?.unit_presentations || [];
             
             // Para unidades, priorizar presentaciones comerciales que no sean la unidad base
-            let preferredPresentation = unitPresentations.find(up => up.name !== 'Unidad' && up.equivalence > 1);
+            let preferredPresentation = unitPresentations.find((up: any) => up.name !== 'Unidad' && up.equivalence > 1);
             
             // Si no hay presentación comercial, usar la primera disponible
             if (!preferredPresentation) {
