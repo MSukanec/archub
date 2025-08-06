@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Users, UserCheck, Package, MoreHorizontal, Plus } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { ConstructionSubcontractsView } from './labor/ConstructionSubcontractsView'
 
 export default function ConstructionLabor() {
   const [activeTab, setActiveTab] = useState('propia')
@@ -68,13 +69,7 @@ export default function ConstructionLabor() {
           />
         )
       case 'subcontratos':
-        return (
-          <EmptyState
-            icon={<Package className="w-12 h-12 text-muted-foreground" />}
-            title="Subcontratos"
-            description="Gestiona los subcontratos de mano de obra para tu proyecto. Esta funcionalidad estará disponible próximamente."
-          />
-        )
+        return <ConstructionSubcontractsView />
       case 'otros':
         return (
           <EmptyState
