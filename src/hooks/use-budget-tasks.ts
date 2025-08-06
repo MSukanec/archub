@@ -47,11 +47,27 @@ export function useBudgetTasks(budgetId: string) {
         throw new Error("Supabase client not initialized");
       }
 
-      // Obtener directamente desde construction_tasks_view filtrando por budget_id
+      // Obtener los IDs de las tareas desde la tabla budget_tasks
+      const { data: budgetTasksData, error: budgetError } = await supabase
+        .from("budget_tasks")
+        .select("task_id")
+        .eq("budget_id", budgetId);
+
+      if (budgetError) {
+        console.error("Error fetching budget task IDs:", budgetError);
+        throw budgetError;
+      }
+
+      if (!budgetTasksData || budgetTasksData.length === 0) {
+        return [];
+      }
+
+      // Obtener los datos completos desde construction_tasks_view
+      const taskIds = budgetTasksData.map(item => item.task_id);
       const { data, error } = await supabase
         .from("construction_tasks_view")
         .select("*")
-        .eq("budget_id", budgetId)
+        .in("id", taskIds)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -61,7 +77,13 @@ export function useBudgetTasks(budgetId: string) {
 
       console.log("Budget tasks data received:", data);
       
-      return data || [];
+      // Agregar budget_id a cada tarea para mantener consistencia
+      const tasksWithBudgetId = data?.map(task => ({
+        ...task,
+        budget_id: budgetId
+      })) || [];
+
+      return tasksWithBudgetId;
     },
     enabled: !!budgetId && !!supabase
   });
