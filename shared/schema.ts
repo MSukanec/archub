@@ -156,7 +156,40 @@ export const task_parameter_option_group_items = pgTable("task_parameter_option_
   created_at: timestamp("created_at").defaultNow(),
 });
 
-// Task Templates System - ELIMINADO (ya no se usa)
+// Task Templates System
+export const task_templates = pgTable("task_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description"),
+  unit_id: uuid("unit_id"),
+  name_expression: text("name_expression").notNull(),
+  is_active: boolean("is_active").default(true),
+  created_by: uuid("created_by").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const task_template_parameters = pgTable("task_template_parameters", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  template_id: uuid("template_id").notNull(),
+  parameter_id: uuid("parameter_id").notNull(),
+  order_index: integer("order_index").default(0),
+  is_required: boolean("is_required").default(false),
+  condition_json: json("condition_json"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertTaskTemplateSchema = createInsertSchema(task_templates).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertTaskTemplateParameterSchema = createInsertSchema(task_template_parameters).omit({
+  id: true,
+  created_at: true,
+});
 
 // Task Parameter Dependencies System
 export const task_parameter_dependencies = pgTable("task_parameter_dependencies", {
