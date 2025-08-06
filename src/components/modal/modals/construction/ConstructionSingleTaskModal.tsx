@@ -83,16 +83,26 @@ export function ConstructionSingleTaskModal({
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data: allTasks, error } = await supabase
-        .from('task_view')
-        .select('*')
+        .from('tasks')
+        .select(`
+          *,
+          units(name),
+          task_categories!element_category_id(name)
+        `)
         .order('name_rendered', { ascending: true });
       
       if (error) {
         console.error('❌ Error cargando librería de tareas:', error);
+        console.error('❌ Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
       
-
+      console.log('✅ Tareas cargadas exitosamente:', allTasks?.length || 0);
+      if (allTasks && allTasks.length > 0) {
+        console.log('✅ Primera tarea de ejemplo:', allTasks[0]);
+      } else {
+        console.log('⚠️ No se encontraron tareas en task_view');
+      }
       
       return allTasks || [];
     },
@@ -132,8 +142,8 @@ export function ConstructionSingleTaskModal({
     if (!tasks || tasks.length === 0) return [];
     
     const rubros = tasks
-      .filter(task => task.element_category_name)
-      .map(task => task.element_category_name)
+      .filter(task => task.task_categories?.name)
+      .map(task => task.task_categories.name)
       .filter((rubro, index, self) => self.indexOf(rubro) === index)
       .sort();
     
