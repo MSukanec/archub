@@ -43,7 +43,7 @@ export function ConstructionSingleTaskModal({
 }: ConstructionSingleTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [rubroFilter, setRubroFilter] = useState<string>('');
+  const [rubroFilter, setRubroFilter] = useState<string>('todos');
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [selectedTaskUnit, setSelectedTaskUnit] = useState<string>('');
   
@@ -157,7 +157,7 @@ export function ConstructionSingleTaskModal({
     }
     
     // Filtro por rubro
-    if (rubroFilter && rubroFilter.trim()) {
+    if (rubroFilter && rubroFilter.trim() && rubroFilter !== 'todos') {
       filtered = filtered.filter(task => task.element_category_name === rubroFilter);
     }
     
@@ -278,7 +278,7 @@ export function ConstructionSingleTaskModal({
               <SelectValue placeholder="Todos los rubros" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los rubros</SelectItem>
+              <SelectItem value="todos">Todos los rubros</SelectItem>
               {uniqueRubros.map((rubro) => (
                 <SelectItem key={rubro} value={rubro}>
                   {rubro}
