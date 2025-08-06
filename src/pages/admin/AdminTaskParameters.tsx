@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Settings, Plus, Edit, Trash2, Eye, Building2, List, TreePine } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -336,12 +335,28 @@ export default function AdminTaskParameters() {
     );
   }
 
+  // Header tabs configuration
+  const headerTabs = [
+    {
+      id: "lista",
+      label: "Lista",
+      isActive: activeTab === "lista"
+    },
+    {
+      id: "arbol", 
+      label: "Árbol",
+      isActive: activeTab === "arbol"
+    }
+  ]
+
   const headerProps = {
     title: 'Parámetros de Tareas',
-    showSearch: true,
+    tabs: headerTabs,
+    onTabChange: setActiveTab,
+    showSearch: activeTab === "lista",
     searchValue: searchTerm,
     onSearchChange: setSearchTerm,
-    customFilters: renderCustomFilters(),
+    customFilters: activeTab === "lista" ? renderCustomFilters() : undefined,
     actionButton: {
       label: "Nuevo Parámetro",
       icon: Plus,
@@ -367,18 +382,6 @@ export default function AdminTaskParameters() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        {/* Tabs List */}
-        <div className="flex items-center justify-between mb-6">
-          <TabsList className="grid w-auto grid-cols-2">
-            <TabsTrigger value="lista">Lista</TabsTrigger>
-            <TabsTrigger value="arbol">Árbol</TabsTrigger>
-          </TabsList>
-          
-
-        </div>
-      
-      {/* Tab Content */}
       <div className="space-y-6">
         {activeTab === "lista" && (
           <>
@@ -393,12 +396,73 @@ export default function AdminTaskParameters() {
               />
             ) : (
               <>
+                {/* Parameter Selection Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <List className="h-5 w-5" />
+                      Seleccionar Parámetro
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="parameter-select">Parámetro</Label>
+                          <Select
+                            value={selectedParameterId}
+                            onValueChange={setSelectedParameterId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un parámetro para ver sus opciones" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredAndSortedParameters.map((parameter) => (
+                                <SelectItem key={parameter.id} value={parameter.id}>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      {parameter.type}
+                                    </Badge>
+                                    {parameter.label}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {selectedParameter && (
+                          <div className="flex flex-col justify-end">
+                            <div className="bg-muted/30 rounded-lg p-3 border border-dashed">
+                              <div className="text-sm text-muted-foreground mb-1">
+                                Parámetro seleccionado:
+                              </div>
+                              <div className="font-medium">
+                                {selectedParameter.label}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Slug: {selectedParameter.slug} | Tipo: {selectedParameter.type}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Parameter Values Table */}
                 {selectedParameter ? (
                   <ParameterValuesTable parameterId={selectedParameter.id} />
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Selecciona un parámetro para ver sus opciones
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <div className="text-lg font-medium mb-2">
+                      Selecciona un parámetro
+                    </div>
+                    <div>
+                      Utiliza el selector de arriba para elegir un parámetro y ver sus opciones
+                    </div>
                   </div>
                 )}
               </>
@@ -409,8 +473,7 @@ export default function AdminTaskParameters() {
         {activeTab === "arbol" && (
           <ParameterNodeEditor />
         )}
-        </div>
-      </Tabs>
+      </div>
 
       {/* All modals now managed by ModalFactory */}
     </Layout>
