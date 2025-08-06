@@ -16,7 +16,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
-import { ParameterDependenciesTree } from '@/components/admin/ParameterDependenciesTree'
+import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
 
 export default function AdminTasks() {
   const [activeTab, setActiveTab] = useState('Lista de Tareas')
@@ -365,7 +365,7 @@ export default function AdminTasks() {
         )}
         
         {activeTab === 'Árbol de Tareas' && (
-          <ParameterDependenciesTree />
+          <EditableParametersTable />
         )}
       </div>
     </Layout>
