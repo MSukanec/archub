@@ -428,12 +428,12 @@ export function ConstructionSingleTaskModal({
 
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
+      cancelText="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? "Guardar Cambios" : "Agregar Tarea"}
-      onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={isSubmitting}
-      rightDisabled={!selectedTaskId || isSubmitting}
+      submitText={isEditing ? "Guardar Cambios" : "Agregar Tarea"}
+      onSubmit={form.handleSubmit(onSubmit)}
+      showLoadingSpinner={isSubmitting}
+      submitDisabled={!selectedTaskId || isSubmitting}
     />
   );
 

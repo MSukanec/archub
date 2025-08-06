@@ -11,7 +11,8 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
+import { useGeneratedTasks, type GeneratedTask } from '@/hooks/use-generated-tasks'
+
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
@@ -29,7 +30,6 @@ export default function AdminTasks() {
 
   // Real data from useGeneratedTasks hook - now using task_parametric_view
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
-  const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
   const { data: parameters = [] } = useTaskParametersAdmin()
 
   // Filter and sort generated tasks
@@ -49,17 +49,16 @@ export default function AdminTasks() {
 
   const handleEdit = (generatedTask: GeneratedTask) => {
     console.log('📝 Editando tarea:', generatedTask);
-    const modalData = { task: generatedTask, isEditing: true };
-    openModal('parametric-task', modalData)
+    // No podemos editar tareas paramétricas desde esta página
+    // Esta página es solo para visualizar tareas generadas
+    console.log('⚠️ Las tareas paramétricas no se pueden editar desde esta vista');
   }
 
   const handleDelete = (task: GeneratedTask) => {
-    openModal('delete-confirmation', {
-      title: 'Eliminar Tarea',
-      description: `¿Estás seguro que deseas eliminar la tarea "${task.display_name || task.code}"?`,
-      onConfirm: () => deleteGeneratedTaskMutation.mutate(task.id),
-      mode: 'DANGEROUS'
-    })
+    // No podemos eliminar tareas paramétricas desde esta página
+    // Esta página es solo para visualizar tareas generadas
+    console.log('⚠️ Las tareas paramétricas no se pueden eliminar desde esta vista');
+    console.log('💡 Para gestionar tareas específicas de proyectos, usa la página de Tareas de Construcción');
   }
 
   const clearFilters = () => {
@@ -250,25 +249,9 @@ export default function AdminTasks() {
       width: '5%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(task)}
-            className="h-8 w-8 p-0"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
-          {!task.is_system && task.organization_id === userData?.organization?.id && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(task)}
-              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <div className="text-xs text-muted-foreground">
+            Vista Solo Lectura
+          </div>
         </div>
       )
     }
