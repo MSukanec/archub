@@ -1,44 +1,47 @@
 import { useState } from 'react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-
-import { GeneratedTask } from '@shared/schema'
+import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useGeneratedTasks, useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
+import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
-import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus } from 'lucide-react'
+import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
+import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
 
 export default function AdminTasks() {
+  const [activeTab, setActiveTab] = useState('Lista de Tareas')
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
-  
+  const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
 
   // Real data from useGeneratedTasks hook - now using task_parametric_view
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
   const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
+  const { data: parameters = [] } = useTaskParametersAdmin()
 
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
     .filter((task: GeneratedTask) => {
-      const matchesType = typeFilter === 'all' || (typeFilter === 'system' ? task.is_system : !task.is_system)
-      const searchQuery = searchValue.toLowerCase()
-      const matchesSearch = !searchQuery || 
-        task.display_name?.toLowerCase().includes(searchQuery) ||
-        task.code?.toLowerCase().includes(searchQuery) ||
-        task.unit_name?.toLowerCase().includes(searchQuery) ||
-        task.element_category_name?.toLowerCase().includes(searchQuery)
+      // Search filter - search in task name
+      const matchesSearch = !searchValue || 
+        task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.element_category_name?.toLowerCase().includes(searchValue.toLowerCase())
       
-      return matchesType && matchesSearch
+      return matchesSearch
     })
     .sort((a: GeneratedTask, b: GeneratedTask) => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -65,61 +68,188 @@ export default function AdminTasks() {
     setTypeFilter('all')
   }
 
-  // Table columns for generated tasks
-  const columns = [
-    {
-      key: 'display_name',
-      label: 'Tarea',
-      render: (task: GeneratedTask) => (
-        <div className="max-w-md">
-          <div className="font-medium text-sm">{task.display_name}</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Código: {task.code}
+  // Tree functionality for parameters
+  const toggleParameterExpanded = (parameterId: string) => {
+    const newExpanded = new Set(expandedParameters)
+    if (newExpanded.has(parameterId)) {
+      newExpanded.delete(parameterId)
+    } else {
+      newExpanded.add(parameterId)
+    }
+    setExpandedParameters(newExpanded)
+  }
+
+  // Render parameter tree item
+  const renderParameterTreeItem = (parameter: any, level = 0) => {
+    const isExpanded = expandedParameters.has(parameter.id)
+    const hasOptions = parameter.options && parameter.options.length > 0
+    const indentation = level * 24
+
+    return (
+      <div key={parameter.id} className="w-full">
+        {/* Parameter Item */}
+        <div 
+          className="group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors cursor-pointer bg-card border border-border"
+          style={{ marginLeft: `${indentation}px` }}
+        >
+          {/* Left side: Expand/collapse + parameter info */}
+          <div className="flex items-center space-x-3 flex-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 h-6 w-6"
+              onClick={() => toggleParameterExpanded(parameter.id)}
+              disabled={!hasOptions}
+            >
+              {hasOptions ? (
+                isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )
+              ) : (
+                <div className="w-4 h-4" />
+              )}
+            </Button>
+
+            <div className="flex items-center space-x-2 flex-1">
+              <TreePine className="w-4 h-4 text-accent" />
+              <div>
+                <span className="text-sm font-medium">{parameter.label}</span>
+                <div className="text-xs text-muted-foreground">
+                  Tipo: {parameter.type} • {parameter.options?.length || 0} opciones
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Right side: Actions */}
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('task-parameter', { parameter, isEditing: true })}
+              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              title="Editar"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Parameter Options - 2nd level */}
+        {hasOptions && isExpanded && (
+          <div className="mt-1">
+            {parameter.options.map((option: any) => (
+              <div 
+                key={option.id}
+                className="flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/30 transition-colors border-l-2 border-accent bg-accent/10"
+                style={{ marginLeft: `${(level + 1) * 24}px` }}
+              >
+                {/* Left side: Option info */}
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="w-5 flex justify-center">
+                    <div className="w-2 h-2 rounded-full bg-accent" />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 flex-1">
+                    <span className="text-sm font-medium text-accent">{option.label}</span>
+                    {option.value && option.value !== option.label && (
+                      <span className="text-xs text-muted-foreground">({option.value})</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Right side: Option actions */}
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openModal('task-parameter-option', { option, parameter, isEditing: true })}
+                    className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                    title="Editar"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Table columns configuration
+  const columns = [
+    { 
+      key: 'code', 
+      label: 'Código', 
+      width: '5%',
+      render: (task: GeneratedTask) => (
+        <div className="font-mono text-sm font-medium">
+          {task.code}
         </div>
       )
     },
-    {
-      key: 'unit_name',
-      label: 'Unidad',
+    { 
+      key: 'element_category_name', 
+      label: 'Rubro', 
+      width: '10%',
       render: (task: GeneratedTask) => (
-        <Badge variant="outline" className="font-mono text-xs">
-          {task.unit_name}
-        </Badge>
+        <div>
+          {task.element_category_name ? (
+            <Badge variant="outline" className="text-xs">
+              {task.element_category_name}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-sm">Sin rubro</span>
+          )}
+        </div>
       )
     },
-    {
-      key: 'element_category_name',
-      label: 'Categoría',
+    { 
+      key: 'display_name', 
+      label: 'Tarea', 
+      width: 'minmax(0, 1fr)',
       render: (task: GeneratedTask) => (
-        <span className="text-sm text-muted-foreground">
-          {task.element_category_name}
-        </span>
+        <div className="font-medium">
+          {task.display_name || 'Sin nombre'}
+        </div>
       )
     },
-    {
-      key: 'is_system',
-      label: 'Tipo',
+    { 
+      key: 'unit_name', 
+      label: 'Unidad', 
+      width: '5%',
       render: (task: GeneratedTask) => (
-        <Badge variant={task.is_system ? "default" : "secondary"}>
-          {task.is_system ? 'Sistema' : 'Usuario'}
-        </Badge>
+        <div>
+          {task.unit_name ? (
+            <Badge variant="secondary" className="text-xs">
+              {task.unit_name}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-sm">Sin unidad</span>
+          )}
+        </div>
       )
     },
-    {
-      key: 'created_at',
-      label: 'Creado',
+    { 
+      key: 'created_at', 
+      label: 'Fecha', 
+      width: '10%',
       render: (task: GeneratedTask) => (
-        <span className="text-xs text-muted-foreground">
-          {new Date(task.created_at).toLocaleDateString('es-ES')}
-        </span>
+        <div className="text-sm text-muted-foreground">
+          {format(new Date(task.created_at), 'dd/MM/yyyy', { locale: es })}
+        </div>
       )
     },
-    {
-      key: 'actions',
-      label: '',
+    { 
+      key: 'actions', 
+      label: 'Acciones', 
+      width: '5%',
       render: (task: GeneratedTask) => (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
@@ -167,66 +297,34 @@ export default function AdminTasks() {
     }
   ]
 
+  const headerTabs = [
+    {
+      id: 'Lista de Tareas',
+      label: 'Lista',
+      isActive: activeTab === 'Lista de Tareas'
+    },
+    {
+      id: 'Árbol de Tareas', 
+      label: 'Árbol',
+      isActive: activeTab === 'Árbol de Tareas'
+    }
+  ]
+
   const headerProps = {
-    title: 'Tareas Generadas',
+    title: 'Tareas',
     actionButton: {
       label: "Nueva Tarea",
       icon: Plus,
       onClick: () => openModal('parametric-task')
-    }
+    },
+    tabs: headerTabs,
+    onTabChange: setActiveTab
   };
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {filteredGeneratedTasks.length === 0 && !isLoading ? (
-          <div className="space-y-8">
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {features.map((feature, index) => (
-                <Card key={index} className="border-border/40">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                        {feature.icon}
-                      </div>
-                      <CardTitle className="text-base font-medium">{feature.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-sm leading-relaxed">
-                      {feature.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Separator />
-
-            {/* Call to Action */}
-            <div className="text-center py-12">
-              <div className="max-w-md mx-auto space-y-4">
-                <div className="p-4 bg-muted/30 rounded-lg inline-flex">
-                  <Plus className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">No hay tareas generadas</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Comienza creando tu primera tarea paramétrica para organizar el trabajo de tu proyecto.
-                  </p>
-                </div>
-                <Button 
-                  onClick={() => openModal('parametric-task')}
-                  className="mt-4"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Primera Tarea
-                </Button>
-              </div>
-            </div>
-          </div>
-        ) : (
+        {activeTab === 'Lista de Tareas' && (
           <Table
             data={filteredGeneratedTasks}
             columns={columns}
@@ -264,6 +362,10 @@ export default function AdminTasks() {
               </div>
             }
           />
+        )}
+        
+        {activeTab === 'Árbol de Tareas' && (
+          <EditableParametersTable />
         )}
       </div>
     </Layout>
