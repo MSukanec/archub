@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
@@ -13,19 +14,23 @@ import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
-import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus } from 'lucide-react'
+import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
 
 export default function AdminTasks() {
+  const [activeTab, setActiveTab] = useState('Lista de Tareas')
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
+  const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
 
   // Real data from useGeneratedTasks hook - now using task_parametric_view
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
   const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
+  const { data: parameters = [] } = useTaskParametersAdmin()
 
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
@@ -61,6 +66,118 @@ export default function AdminTasks() {
     setSearchValue('')
     setSortBy('created_at')
     setTypeFilter('all')
+  }
+
+  // Tree functionality for parameters
+  const toggleParameterExpanded = (parameterId: string) => {
+    const newExpanded = new Set(expandedParameters)
+    if (newExpanded.has(parameterId)) {
+      newExpanded.delete(parameterId)
+    } else {
+      newExpanded.add(parameterId)
+    }
+    setExpandedParameters(newExpanded)
+  }
+
+  // Render parameter tree item
+  const renderParameterTreeItem = (parameter: any, level = 0) => {
+    const isExpanded = expandedParameters.has(parameter.id)
+    const hasOptions = parameter.options && parameter.options.length > 0
+    const indentation = level * 24
+
+    return (
+      <div key={parameter.id} className="w-full">
+        {/* Parameter Item */}
+        <div 
+          className="group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors cursor-pointer bg-card border border-border"
+          style={{ marginLeft: `${indentation}px` }}
+        >
+          {/* Left side: Expand/collapse + parameter info */}
+          <div className="flex items-center space-x-3 flex-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 h-6 w-6"
+              onClick={() => toggleParameterExpanded(parameter.id)}
+              disabled={!hasOptions}
+            >
+              {hasOptions ? (
+                isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )
+              ) : (
+                <div className="w-4 h-4" />
+              )}
+            </Button>
+
+            <div className="flex items-center space-x-2 flex-1">
+              <TreePine className="w-4 h-4 text-accent" />
+              <div>
+                <span className="text-sm font-medium">{parameter.label}</span>
+                <div className="text-xs text-muted-foreground">
+                  Tipo: {parameter.type} • {parameter.options?.length || 0} opciones
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side: Actions */}
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openModal('task-parameter', { parameter, isEditing: true })}
+              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              title="Editar"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Parameter Options - 2nd level */}
+        {hasOptions && isExpanded && (
+          <div className="mt-1">
+            {parameter.options.map((option: any) => (
+              <div 
+                key={option.id}
+                className="flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/30 transition-colors border-l-2 border-accent bg-accent/10"
+                style={{ marginLeft: `${(level + 1) * 24}px` }}
+              >
+                {/* Left side: Option info */}
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="w-5 flex justify-center">
+                    <div className="w-2 h-2 rounded-full bg-accent" />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 flex-1">
+                    <span className="text-sm font-medium text-accent">{option.label}</span>
+                    {option.value && option.value !== option.label && (
+                      <span className="text-xs text-muted-foreground">({option.value})</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Right side: Option actions */}
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openModal('task-parameter-option', { option, parameter, isEditing: true })}
+                    className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                    title="Editar"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
   }
 
   // Table columns configuration
@@ -192,43 +309,73 @@ export default function AdminTasks() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        <Table
-          data={filteredGeneratedTasks}
-          columns={columns}
-          isLoading={isLoading}
-          topBar={{
-            showSearch: true,
-            searchValue: searchValue,
-            onSearchChange: setSearchValue,
-            showFilter: true,
-            isFilterActive: typeFilter !== 'all',
-            renderFilterContent: () => (
-              <div className="space-y-3 p-2 min-w-[200px]">
-                <div>
-                  <Label className="text-xs font-medium mb-1 block">Tipo</Label>
-                  <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Todas las tareas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las tareas</SelectItem>
-                      <SelectItem value="system">Tareas del sistema</SelectItem>
-                      <SelectItem value="user">Tareas de usuario</SelectItem>
-                    </SelectContent>
-                  </Select>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="Lista de Tareas">Lista de Tareas</TabsTrigger>
+            <TabsTrigger value="Árbol de Tareas">Árbol de Tareas</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="Lista de Tareas" className="space-y-4">
+            <Table
+              data={filteredGeneratedTasks}
+              columns={columns}
+              isLoading={isLoading}
+              topBar={{
+                showSearch: true,
+                searchValue: searchValue,
+                onSearchChange: setSearchValue,
+                showFilter: true,
+                isFilterActive: typeFilter !== 'all',
+                renderFilterContent: () => (
+                  <div className="space-y-3 p-2 min-w-[200px]">
+                    <div>
+                      <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                      <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Todas las tareas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todas las tareas</SelectItem>
+                          <SelectItem value="system">Tareas del sistema</SelectItem>
+                          <SelectItem value="user">Tareas de usuario</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ),
+                showClearFilters: typeFilter !== 'all',
+                onClearFilters: clearFilters
+              }}
+              emptyState={
+                <div className="text-center py-8">
+                  <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea para comenzar a organizar el trabajo.</p>
                 </div>
+              }
+            />
+          </TabsContent>
+          
+          <TabsContent value="Árbol de Tareas" className="space-y-4">
+            <div className="bg-card border rounded-lg p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold">Parámetros de Tareas</h3>
+                <p className="text-sm text-muted-foreground">Vista jerárquica de todos los parámetros y sus opciones</p>
               </div>
-            ),
-            showClearFilters: typeFilter !== 'all',
-            onClearFilters: clearFilters
-          }}
-          emptyState={
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
-              <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea para comenzar a organizar el trabajo.</p>
+              
+              {parameters.length === 0 ? (
+                <div className="text-center py-8">
+                  <TreePine className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-muted-foreground">No hay parámetros</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Crea el primer parámetro para comenzar a estructurar las tareas.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {parameters.map(parameter => renderParameterTreeItem(parameter))}
+                </div>
+              )}
             </div>
-          }
-        />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   )
