@@ -45,6 +45,7 @@ Preferred communication style: Simple, everyday language.
 - **Activity Logging**: Centralized activity tracking system for user actions across the platform.
 - **User Preferences Migration**: Replaced global `user_preferences.last_project_id` with organization-specific `user_organization_preferences` table. Each user now has a separate last project per organization, improving data accuracy and multi-organization support. Backend functions `archub_get_user()` and `archub_new_user()` updated accordingly.
 - **Material Prices Management**: Complete admin system for managing organization-specific material prices with table organization_material_prices, filtering, sorting, and CRUD operations.
+- **Task Management Fixes (2025-08-06)**: Fixed AdminGeneratedTasks page where editing created duplicates instead of updating existing tasks. Added delete button functionality with dangerous confirmation modal for non-system tasks. System tasks are clearly marked and cannot be deleted to maintain data integrity.
 
 ## External Dependencies
 

@@ -188,10 +188,23 @@ export default function AdminTasks() {
     { 
       key: 'code', 
       label: 'Código', 
-      width: '5%',
+      width: '8%',
       render: (task: GeneratedTask) => (
-        <div className="font-mono text-sm font-medium">
-          {task.code}
+        <div className="space-y-1">
+          <div className="font-mono text-sm font-medium">
+            {task.code}
+          </div>
+          <div>
+            {task.is_system ? (
+              <Badge variant="secondary" className="text-xs">
+                Sistema
+              </Badge>
+            ) : (
+              <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+                Usuario
+              </Badge>
+            )}
+          </div>
         </div>
       )
     },
@@ -269,10 +282,19 @@ export default function AdminTasks() {
               size="sm"
               onClick={() => handleDelete(task)}
               className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              title="Eliminar tarea"
+              title="Eliminar tarea (solo tareas de usuario)"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
+          )}
+          {/* Indicador visual del tipo de tarea */}
+          {task.is_system && (
+            <div 
+              className="h-8 w-8 flex items-center justify-center text-gray-400"
+              title="Tarea del sistema - no se puede eliminar"
+            >
+              <span className="text-xs">🔒</span>
+            </div>
           )}
         </div>
       )
