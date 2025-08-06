@@ -573,31 +573,27 @@ export default function ConstructionBudgets() {
     // Definir columnas para el componente Table
     const columns = [
       {
-        key: 'rubro_name',
+        key: 'category_name',
         label: 'Rubro',
-        width: '10%',
+        width: '12%',
         render: (item: any) => (
-          <span className="text-xs">{item.task?.rubro_name || '-'}</span>
+          <span className="text-xs">{item.category_name || '-'}</span>
         )
       },
       {
         key: 'display_name',
-        label: 'Tareas',
+        label: 'Tarea',
         width: '1fr',
         render: (item: any) => (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-            </span>
-            <span className="text-xs">
-              {item.name_rendered || '-'}
-            </span>
-          </div>
+          <span className="text-xs">
+            {item.name_rendered || '-'}
+          </span>
         )
       },
       {
         key: 'unit',
         label: 'Unidad',
-        width: '5%',
+        width: '8%',
         render: (item: any) => (
           <span className="text-xs">{getUnitName(item.task?.unit_id)}</span>
         )
@@ -605,7 +601,7 @@ export default function ConstructionBudgets() {
       {
         key: 'quantity',
         label: 'Cantidad',
-        width: '5%',
+        width: '8%',
         render: (item: any) => (
           <Input
             type="number"
@@ -618,22 +614,37 @@ export default function ConstructionBudgets() {
         )
       },
       {
-        key: 'material_cost',
-        label: 'Costo Mat.',
+        key: 'task_type',
+        label: 'Tipo',
         width: '8%',
         render: (item: any) => (
-          <div className="flex items-center justify-center gap-2">
-            <TaskMaterialsPopover task={{ task_id: item.task_id }} showCost={true} />
-          </div>
-        ),
-        sortable: false
+          <span className="text-xs">{item.task?.task_type || 'Estándar'}</span>
+        )
+      },
+      {
+        key: 'unit_cost',
+        label: 'Costo',
+        width: '10%',
+        render: (item: any) => (
+          <span className="text-xs">
+            ${(item.task?.unit_cost || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </span>
+        )
+      },
+      {
+        key: 'margin',
+        label: 'Margen',
+        width: '8%',
+        render: (item: any) => (
+          <span className="text-xs">{item.task?.margin_percent || 0}%</span>
+        )
       },
       {
         key: 'total_cost',
         label: 'Subtotal',
-        width: '5%',
+        width: '10%',
         render: (item: any) => (
-          <span className="text-xs text-xs">
+          <span className="text-xs font-medium">
             ${((item.quantity || 0) * (item.task?.unit_cost || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
         )
@@ -641,7 +652,7 @@ export default function ConstructionBudgets() {
       {
         key: 'actions',
         label: 'Acciones',
-        width: '5%',
+        width: '8%',
         sortable: false,
         render: (item: any) => (
           <div className="flex gap-1">
@@ -683,6 +694,8 @@ export default function ConstructionBudgets() {
           <div></div>
           <div></div>
           <div></div>
+          <div></div>
+          <div></div>
           <div className="text-xs font-medium text-green-600">
             ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </div>
@@ -701,6 +714,7 @@ export default function ConstructionBudgets() {
         <>
           <div className="text-xs font-medium">{groupKey}</div>
           <div className="text-xs">{groupRows.length} tareas</div>
+          <div></div>
           <div></div>
           <div></div>
           <div></div>
@@ -747,8 +761,14 @@ export default function ConstructionBudgets() {
                 <div className="col-span-1 truncate">
                   {categoryName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
                 </div>
-                <div className="col-span-1"></div> {/* Unidad */}
+                <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
                 <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
+                <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
               </>
             );
           } else {
