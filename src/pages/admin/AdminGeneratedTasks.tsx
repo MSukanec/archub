@@ -17,9 +17,10 @@ import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
 import EditableParametersTable from '@/components/admin/EditableParametersTable'
+import TaskBranchesView from '@/components/admin/TaskBranchesView'
 
 export default function AdminTasks() {
-  const [activeTab, setActiveTab] = useState('Lista de Tareas')
+  const [activeTab, setActiveTab] = useState('Ramas de Tareas')
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
@@ -299,14 +300,19 @@ export default function AdminTasks() {
 
   const headerTabs = [
     {
+      id: 'Ramas de Tareas',
+      label: 'Ramas',
+      isActive: activeTab === 'Ramas de Tareas'
+    },
+    {
       id: 'Lista de Tareas',
       label: 'Lista',
       isActive: activeTab === 'Lista de Tareas'
     },
     {
-      id: 'Árbol de Tareas', 
+      id: 'Árbol',
       label: 'Árbol',
-      isActive: activeTab === 'Árbol de Tareas'
+      isActive: activeTab === 'Árbol'
     }
   ]
 
@@ -324,6 +330,10 @@ export default function AdminTasks() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
+        {activeTab === 'Ramas de Tareas' && (
+          <TaskBranchesView />
+        )}
+        
         {activeTab === 'Lista de Tareas' && (
           <Table
             data={filteredGeneratedTasks}
@@ -364,7 +374,7 @@ export default function AdminTasks() {
           />
         )}
         
-        {activeTab === 'Árbol de Tareas' && (
+        {activeTab === 'Árbol' && (
           <EditableParametersTable />
         )}
       </div>
