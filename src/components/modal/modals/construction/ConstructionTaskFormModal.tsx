@@ -720,8 +720,8 @@ export function ConstructionTaskFormModal({
           </div>
           
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b">
-            <div className="col-span-10 text-xs font-medium">TAREA</div>
+          <div className="grid grid-cols-12 gap-2 py-2 px-3 bg-accent/20 font-medium text-xs border-b">
+            <div className="col-span-10 text-xs font-medium">NUEVA LISTA DE TAREAS</div>
             <div className="col-span-2 text-xs font-medium text-right">UNIDAD</div>
           </div>
 
