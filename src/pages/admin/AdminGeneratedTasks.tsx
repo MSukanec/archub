@@ -56,9 +56,12 @@ export default function AdminTasks() {
   const handleDelete = (task: GeneratedTask) => {
     openModal('delete-confirmation', {
       title: 'Eliminar Tarea',
-      description: `¿Estás seguro que deseas eliminar la tarea "${task.display_name || task.code}"?`,
+      description: `Para confirmar la eliminación, escribe el nombre exacto de la tarea.`,
+      itemName: task.display_name || task.code,
+      itemType: 'tarea',
+      destructiveActionText: 'Eliminar Tarea',
       onConfirm: () => deleteGeneratedTaskMutation.mutate(task.id),
-      mode: 'DANGEROUS'
+      mode: 'dangerous'
     })
   }
 
@@ -247,24 +250,26 @@ export default function AdminTasks() {
     { 
       key: 'actions', 
       label: 'Acciones', 
-      width: '5%',
+      width: '10%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(task)}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+            title="Editar tarea"
           >
             <Edit className="h-4 w-4" />
           </Button>
-          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
-          {!task.is_system && task.organization_id === userData?.organization?.id && (
+          {/* Mostrar botón eliminar para tareas que NO son del sistema */}
+          {!task.is_system && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleDelete(task)}
-              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              title="Eliminar tarea"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

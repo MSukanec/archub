@@ -150,10 +150,10 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
 
   // Initialize task materials when editing
   React.useEffect(() => {
-    if (isEditing && actualTask?.id) {
+    if (isEditingMode && actualTask?.id) {
       setSavedTaskId(actualTask.id)
     }
-  }, [isEditing, actualTask?.id])
+  }, [isEditingMode, actualTask?.id])
 
   React.useEffect(() => {
     if (existingTaskMaterials.length > 0) {
@@ -161,8 +161,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         id: tm.id,
         material_id: tm.material_id,
         amount: tm.amount,
-        material_name: tm.material_view?.name,
-        unit_name: tm.material_view?.unit_of_computation
+        material_name: (tm as any).material_view?.name || 'Material sin nombre',
+        unit_name: (tm as any).material_view?.unit_of_computation || 'Sin unidad'
       })))
     }
   }, [existingTaskMaterials])
@@ -184,9 +184,9 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       const paramValues: Record<string, string> = {}
       
       // Si estamos editando una tarea existente, empezar con los valores existentes
-      if (isEditing && actualTask && existingParamValues) {
+      if (isEditingMode && actualTask && existingParamValues) {
         Object.assign(paramValues, existingParamValues)
-        // Debug logs removed
+        console.log('🔄 Starting with existing param values:', paramValues)
       }
       
       // Aplicar las nuevas selecciones (esto sobrescribe los valores existentes si hay cambios)
@@ -194,7 +194,9 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         paramValues[selection.parameterSlug] = selection.optionId
       })
       
-      // Debug logs removed
+      console.log('🎯 Final param values for submit:', paramValues)
+      console.log('📝 Is editing mode?', isEditingMode, '- Task ID:', actualTask?.id)
+      
       const taskData = {
         selections,
         preview: taskPreview,
@@ -202,7 +204,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
         paramOrder: parameterOrder
       }
       
-      if (isEditing && actualTask) {
+      if (isEditingMode && actualTask) {
         // Update existing task
         await updateTaskMutation.mutateAsync({
           task_id: actualTask.id,
