@@ -11,6 +11,7 @@ import { useEffect } from 'react'
 import { Package, ShoppingCart } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { CommercialCalculationPopover } from '@/components/construction/CommercialCalculationPopover'
 
 export default function ConstructionMaterials() {
   const [activeTab, setActiveTab] = useState('materials')
@@ -152,11 +153,14 @@ export default function ConstructionMaterials() {
             )
           }
 
-          // Mostrar el cómputo comercial calculado
+          // Mostrar el cómputo comercial calculado con botón de cálculo
           return (
-            <span className="text-sm font-medium">
-              {material.commercial_quantity} {material.commercial_unit_name}
-            </span>
+            <div className="flex items-center justify-center gap-1">
+              <span className="text-sm font-medium">
+                {material.commercial_quantity} {material.commercial_unit_name}
+              </span>
+              <CommercialCalculationPopover material={material} />
+            </div>
           )
         }
       }
