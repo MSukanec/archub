@@ -624,12 +624,16 @@ export default function ConstructionBudgets() {
       {
         key: 'unit_cost',
         label: 'Costo',
-        width: '10%',
+        width: '12%',
         render: (item: any) => (
-          <span className="text-xs">
-            ${(item.task?.unit_cost || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-          </span>
-        )
+          <div className="flex items-center gap-2">
+            <span className="text-xs">
+              ${(item.task?.unit_cost || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+            </span>
+            <TaskMaterialsPopover task={{ task_id: item.task_id }} showCost={true} />
+          </div>
+        ),
+        sortable: false
       },
       {
         key: 'margin',
