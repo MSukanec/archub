@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChevronDown, ChevronRight, Package, Calendar, FileText, Edit, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, FileText, Edit, Trash2, DollarSign } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -26,10 +26,11 @@ interface SubcontractExpandableCardProps {
     created_at?: string
     updated_at?: string
   }
+  isExpanded: boolean
+  onToggle: () => void
 }
 
-export function SubcontractExpandableCard({ subcontract }: SubcontractExpandableCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export function SubcontractExpandableCard({ subcontract, isExpanded, onToggle }: SubcontractExpandableCardProps) {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const deleteSubcontract = useDeleteSubcontract()
@@ -38,15 +39,15 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'pendiente':
-        return 'secondary'
+        return 'outline'
       case 'en_progreso':
         return 'default'
       case 'completado':
-        return 'default'
+        return 'secondary'
       case 'cancelado':
         return 'destructive'
       default:
-        return 'secondary'
+        return 'outline'
     }
   }
 
@@ -76,7 +77,8 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
   }
 
   // Función para editar el subcontrato
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation()
     openModal('subcontract', {
       projectId: subcontract.project_id,
       organizationId: subcontract.organization_id,
@@ -85,8 +87,19 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
     })
   }
 
+  // Función para nueva oferta
+  const handleNewOffer = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // TODO: Implementar modal de nueva oferta
+    toast({
+      title: "Nueva Oferta",
+      description: "Funcionalidad en desarrollo"
+    })
+  }
+
   // Función para eliminar el subcontrato
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (confirm('¿Estás seguro de que quieres eliminar este subcontrato?')) {
       try {
         await deleteSubcontract.mutateAsync(subcontract.id)
@@ -105,27 +118,19 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full cursor-pointer hover:bg-accent/50 transition-colors" onClick={onToggle}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="h-8 w-8 p-0"
-            >
+            <div className="flex items-center gap-1">
               {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               )}
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-muted-foreground" />
-              <h3 className="font-medium text-sm">{subcontract.title}</h3>
             </div>
+            
+            <h3 className="font-medium text-sm">{subcontract.title}</h3>
           </div>
 
           <div className="flex items-center gap-2">
@@ -134,6 +139,14 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
             </Badge>
             
             <div className="flex items-center gap-1">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleNewOffer}
+                className="h-8 text-xs px-3"
+              >
+                Nueva Oferta
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -153,24 +166,11 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
             </div>
           </div>
         </div>
-
-        <div className="flex items-center gap-4 text-xs text-muted-foreground ml-11">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            <span>{formatDate(subcontract.date)}</span>
-          </div>
-          {subcontract.notes && (
-            <div className="flex items-center gap-1">
-              <FileText className="h-3 w-3" />
-              <span>Con notas</span>
-            </div>
-          )}
-        </div>
       </CardHeader>
 
       {isExpanded && (
         <CardContent className="pt-0">
-          <div className="space-y-4 ml-11">
+          <div className="space-y-4 ml-5">
             {subcontract.notes && (
               <div className="space-y-1">
                 <h4 className="text-xs font-medium text-muted-foreground">Notas</h4>
@@ -189,15 +189,15 @@ export function SubcontractExpandableCard({ subcontract }: SubcontractExpandable
             <div className="pt-2 border-t">
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1">
-                  <span className="text-muted-foreground">Creado</span>
+                  <span className="text-muted-foreground">Fecha</span>
                   <p className="text-foreground">
-                    {subcontract.created_at ? formatDate(subcontract.created_at) : 'N/A'}
+                    {formatDate(subcontract.date)}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-muted-foreground">Actualizado</span>
+                  <span className="text-muted-foreground">Creado</span>
                   <p className="text-foreground">
-                    {subcontract.updated_at ? formatDate(subcontract.updated_at) : 'N/A'}
+                    {subcontract.created_at ? formatDate(subcontract.created_at) : 'N/A'}
                   </p>
                 </div>
               </div>
