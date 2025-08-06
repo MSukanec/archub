@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { Plus, Edit, Copy, Trash2, Settings, ChevronRight, ChevronDown, AlertTriangle, Search } from 'lucide-react'
+import { Plus, Edit, Copy, Trash2, Settings, ChevronRight, ChevronDown, AlertTriangle, Search, ArrowRight, Minus } from 'lucide-react'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -22,12 +22,19 @@ interface ParameterNode {
   level: number
   children: ParameterNode[]
   isExpanded?: boolean
+  hasCircularDependency?: boolean
 }
 
 interface EditingState {
   parameterId: string | null
   field: 'label' | 'slug' | 'parent' | 'order' | null
   value: string
+}
+
+interface HierarchyValidation {
+  circularDependencies: string[]
+  orphanParameters: string[]
+  duplicateSlugs: string[]
 }
 
 export function EditableParametersTable() {
@@ -42,13 +49,13 @@ export function EditableParametersTable() {
   // Organizar parámetros en estructura jerárquica
   const hierarchicalParameters = buildHierarchy(parameters)
   
-  // Filtrar parámetros por búsqueda
+  // Filtrar parámetros por búsqueda (incluye hijos si el padre coincide)
   const filteredParameters = searchTerm 
-    ? hierarchicalParameters.filter(param => 
-        param.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        param.slug.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? filterParametersWithSearch(hierarchicalParameters, searchTerm)
     : hierarchicalParameters
+
+  // Validar jerarquía
+  const hierarchyValidation = validateHierarchy(parameters)
 
   // Mutation para actualizar parámetro
   const updateParameterMutation = useMutation({
@@ -80,9 +87,6 @@ export function EditableParametersTable() {
     }
   })
 
-  // Detectar problemas en la jerarquía
-  const hierarchyIssues = detectHierarchyIssues(parameters)
-
   function buildHierarchy(params: any[]): ParameterNode[] {
     const paramMap = new Map<string, ParameterNode>()
     const rootNodes: ParameterNode[] = []
@@ -94,42 +98,136 @@ export function EditableParametersTable() {
         slug: param.slug,
         label: param.label,
         type: param.type,
-        parentId: null, // Los parámetros actuales no tienen parent_id
-        order: 0, // Los parámetros actuales no tienen order
+        parentId: param.parent_id || null,
+        order: param.order || 0,
         level: 0,
         children: [],
-        isExpanded: expandedNodes.has(param.id)
+        isExpanded: expandedNodes.has(param.id),
+        hasCircularDependency: false
       })
     })
 
-    // Como no hay jerarquía real, todos son nodos raíz
+    // Construir jerarquía y calcular niveles
     params.forEach(param => {
       const node = paramMap.get(param.id)
-      if (node) {
+      if (!node) return
+
+      if (param.parent_id) {
+        const parent = paramMap.get(param.parent_id)
+        if (parent) {
+          parent.children.push(node)
+          node.level = parent.level + 1
+        } else {
+          // Padre no encontrado, convertir en raíz
+          rootNodes.push(node)
+        }
+      } else {
         rootNodes.push(node)
       }
     })
 
-    return rootNodes.sort((a, b) => a.label.localeCompare(b.label))
+    // Calcular niveles recursivamente
+    function calculateLevels(nodes: ParameterNode[], level: number = 0) {
+      nodes.forEach(node => {
+        node.level = level
+        calculateLevels(node.children, level + 1)
+      })
+    }
+    calculateLevels(rootNodes)
+
+    // Ordenar por order dentro de cada nivel
+    function sortChildren(nodes: ParameterNode[]) {
+      nodes.sort((a, b) => a.order - b.order || a.label.localeCompare(b.label))
+      nodes.forEach(node => sortChildren(node.children))
+    }
+    sortChildren(rootNodes)
+
+    return rootNodes
   }
 
-  function detectHierarchyIssues(params: any[]) {
-    const issues: string[] = []
-    const slugCounts = new Map<string, number>()
+  function filterParametersWithSearch(params: ParameterNode[], searchTerm: string): ParameterNode[] {
+    function nodeMatches(node: ParameterNode): boolean {
+      return node.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             node.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    }
+
+    function filterNode(node: ParameterNode): ParameterNode | null {
+      const childMatches = node.children.map(filterNode).filter(Boolean) as ParameterNode[]
+      
+      if (nodeMatches(node) || childMatches.length > 0) {
+        return {
+          ...node,
+          children: childMatches
+        }
+      }
+      
+      return null
+    }
+
+    return params.map(filterNode).filter(Boolean) as ParameterNode[]
+  }
+
+  function validateHierarchy(params: any[]): HierarchyValidation {
+    const circularDependencies: string[] = []
+    const orphanParameters: string[] = []
+    const duplicateSlugs: string[] = []
     
     // Detectar slugs duplicados
+    const slugCounts = new Map<string, number>()
     params.forEach(param => {
       const count = slugCounts.get(param.slug) || 0
       slugCounts.set(param.slug, count + 1)
     })
-
+    
     slugCounts.forEach((count, slug) => {
       if (count > 1) {
-        issues.push(`Slug duplicado: "${slug}" (${count} parámetros)`)
+        duplicateSlugs.push(slug)
       }
     })
 
-    return issues
+    // Detectar dependencias circulares
+    function hasCircularDependency(paramId: string, visited: Set<string> = new Set()): boolean {
+      if (visited.has(paramId)) return true
+      
+      const param = params.find(p => p.id === paramId)
+      if (!param || !param.parent_id) return false
+      
+      visited.add(paramId)
+      return hasCircularDependency(param.parent_id, visited)
+    }
+
+    params.forEach(param => {
+      if (param.parent_id && hasCircularDependency(param.id)) {
+        circularDependencies.push(param.label)
+      }
+    })
+
+    // Detectar parámetros huérfanos (tienen parent_id pero el padre no existe)
+    params.forEach(param => {
+      if (param.parent_id && !params.find(p => p.id === param.parent_id)) {
+        orphanParameters.push(param.label)
+      }
+    })
+
+    return { circularDependencies, orphanParameters, duplicateSlugs }
+  }
+
+  function getAvailableParents(currentParamId: string): any[] {
+    // Excluir el parámetro actual y sus descendientes para evitar loops
+    function getDescendants(paramId: string): string[] {
+      const descendants: string[] = []
+      const children = parameters.filter(p => p.parent_id === paramId)
+      
+      children.forEach(child => {
+        descendants.push(child.id)
+        descendants.push(...getDescendants(child.id))
+      })
+      
+      return descendants
+    }
+
+    const excludeIds = new Set([currentParamId, ...getDescendants(currentParamId)])
+    return parameters.filter(param => !excludeIds.has(param.id))
   }
 
   function handleEdit(parameterId: string, field: 'label' | 'slug' | 'parent' | 'order', currentValue: string) {
