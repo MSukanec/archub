@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { ChevronRight, ChevronDown, Search, TreePine, Target, Info } from 'lucide-react'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
@@ -357,11 +356,13 @@ export default function TaskBranchesView() {
 
       <CardContent>
         {filteredBranches.length === 0 ? (
-          <EmptyState
-            icon={TreePine}
-            title="No hay ramas de tareas"
-            description={searchQuery ? "No se encontraron ramas que coincidan con tu búsqueda." : "No hay tareas generadas para mostrar."}
-          />
+          <div className="text-center py-12">
+            <TreePine className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-muted-foreground mb-2">No hay ramas de tareas</h3>
+            <p className="text-sm text-muted-foreground">
+              {searchQuery ? "No se encontraron ramas que coincidan con tu búsqueda." : "No hay tareas generadas para mostrar."}
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             {filteredBranches.map(branch => renderBranch(branch))}
