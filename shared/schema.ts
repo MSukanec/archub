@@ -124,8 +124,6 @@ export const task_parameters = pgTable("task_parameters", {
   type: text("type", { enum: ["text", "number", "select", "boolean"] }).notNull(),
   expression_template: text("expression_template").notNull().default("{value}"),
   is_required: boolean("is_required").default(false),
-  parent_id: uuid("parent_id"), // Referencia al parámetro padre
-  order: integer("order").default(0), // Orden relativo dentro del nivel
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });

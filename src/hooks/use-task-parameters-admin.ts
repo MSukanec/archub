@@ -9,8 +9,6 @@ export interface TaskParameter {
   type: string;
   expression_template: string;
   is_required: boolean;
-  parent_id?: string | null;
-  order?: number;
   created_at: string;
   updated_at: string;
 }
@@ -81,7 +79,7 @@ export function useTaskParametersAdmin() {
       const { data: parameters, error: parametersError } = await supabase
         .from('task_parameters')
         .select('*')
-        .order('order', { ascending: true });
+        .order('slug');
 
       if (parametersError) throw parametersError;
 
