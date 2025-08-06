@@ -16,7 +16,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus } from 'lucide-react'
 
-export default function AdminGeneratedTasks() {
+export default function AdminTasks() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
@@ -32,9 +32,9 @@ export default function AdminGeneratedTasks() {
     .filter((task: GeneratedTask) => {
       // Search filter - search in task name
       const matchesSearch = !searchValue || 
-        task.name_rendered?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
         task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.category_name?.toLowerCase().includes(searchValue.toLowerCase())
+        task.element_category_name?.toLowerCase().includes(searchValue.toLowerCase())
       
       return matchesSearch
     })
@@ -50,9 +50,10 @@ export default function AdminGeneratedTasks() {
 
   const handleDelete = (task: GeneratedTask) => {
     openModal('delete-confirmation', {
-      title: 'Eliminar Tarea Generada',
-      description: `¿Estás seguro que deseas eliminar la tarea "${task.name_rendered || task.code}"?`,
-      onConfirm: () => deleteGeneratedTaskMutation.mutate(task.id)
+      title: 'Eliminar Tarea',
+      description: `¿Estás seguro que deseas eliminar la tarea "${task.display_name || task.code}"?`,
+      onConfirm: () => deleteGeneratedTaskMutation.mutate(task.id),
+      mode: 'DANGEROUS'
     })
   }
 
@@ -75,14 +76,14 @@ export default function AdminGeneratedTasks() {
       )
     },
     { 
-      key: 'category_name', 
+      key: 'element_category_name', 
       label: 'Rubro', 
       width: '10%',
       render: (task: GeneratedTask) => (
         <div>
-          {task.category_name ? (
+          {task.element_category_name ? (
             <Badge variant="outline" className="text-xs">
-              {task.category_name}
+              {task.element_category_name}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin rubro</span>
@@ -91,12 +92,12 @@ export default function AdminGeneratedTasks() {
       )
     },
     { 
-      key: 'name_rendered', 
+      key: 'display_name', 
       label: 'Tarea', 
       width: 'minmax(0, 1fr)',
       render: (task: GeneratedTask) => (
         <div className="font-medium">
-          {task.name_rendered || 'Sin nombre'}
+          {task.display_name || 'Sin nombre'}
         </div>
       )
     },
@@ -201,14 +202,14 @@ export default function AdminGeneratedTasks() {
   ]
 
   const headerProps = {
-    title: 'Tareas Generadas',
+    title: 'Tareas',
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,
     customFilters,
     onClearFilters: clearFilters,
     actionButton: {
-      label: "Nueva Tarea Generada",
+      label: "Nueva Tarea",
       icon: Plus,
       onClick: () => openModal('parametric-task')
     }
@@ -236,8 +237,8 @@ export default function AdminGeneratedTasks() {
           isLoading={isLoading}
           emptyState={
             <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-muted-foreground">No hay tareas generadas</h3>
-              <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea generada para comenzar a organizar el trabajo.</p>
+              <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
+              <p className="text-sm text-muted-foreground mt-1">Crea tu primera tarea para comenzar a organizar el trabajo.</p>
             </div>
           }
         />

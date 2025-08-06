@@ -8,10 +8,16 @@ export interface GeneratedTask {
   param_values: any; // JSONB from database
   param_order?: string[]; // Array of parameter slugs in order
   name_rendered: string;
+  custom_name?: string;
+  display_name: string;
   unit_id?: string;
   unit_name?: string;
   category_id?: string;
   category_name?: string;
+  element_category_id?: string;
+  element_category_name?: string;
+  subcategory_id?: string;
+  subcategory_name?: string;
   organization_id?: string;
   is_system: boolean;
   created_at: string;

@@ -156,7 +156,7 @@ export function SidebarSubmenu() {
         { icon: History, label: 'Changelog', href: '/admin/changelogs' },
       ]},
       { type: 'accordion', label: 'TAREAS', items: [
-        { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
+        { icon: CheckSquare, label: 'Tareas', href: '/admin/generated-tasks' },
         { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
 
         { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories' },
