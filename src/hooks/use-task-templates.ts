@@ -12,7 +12,6 @@ export interface TaskTemplate {
   is_active: boolean
   created_by: string
   created_at: string
-  updated_at?: string
   unit?: {
     id: string
     name: string

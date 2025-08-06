@@ -167,7 +167,6 @@ export const task_templates = pgTable("task_templates", {
   is_active: boolean("is_active").default(true),
   created_by: uuid("created_by").notNull(),
   created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
 });
 
 export const task_template_parameters = pgTable("task_template_parameters", {
@@ -176,14 +175,13 @@ export const task_template_parameters = pgTable("task_template_parameters", {
   parameter_id: uuid("parameter_id").notNull(),
   order_index: integer("order_index").default(0),
   is_required: boolean("is_required").default(false),
-  condition_json: json("condition_json"),
+  condition_json: jsonb("condition_json"), // Usar jsonb en lugar de json para consistencia
   created_at: timestamp("created_at").defaultNow(),
 });
 
 export const insertTaskTemplateSchema = createInsertSchema(task_templates).omit({
   id: true,
   created_at: true,
-  updated_at: true,
 });
 
 export const insertTaskTemplateParameterSchema = createInsertSchema(task_template_parameters).omit({
