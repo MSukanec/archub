@@ -8,7 +8,6 @@ export interface ConstructionTaskView {
   project_id: string;
   task_id: string;
   name_rendered: string;
-  unit_name: string;
   category_name: string;
   quantity: number; // real en DB, number en TS
   start_date: string | null; // date en DB, string en TS
@@ -16,7 +15,6 @@ export interface ConstructionTaskView {
   duration_in_days: number | null; // integer en DB, number en TS
   progress_percent: number; // integer en DB, number en TS
   phase_name: string | null;
-  phase_position: number | null; // integer en DB, number en TS
   created_at: string; // timestamp with time zone en DB, string en TS
   updated_at: string; // timestamp with time zone en DB, string en TS
 }
