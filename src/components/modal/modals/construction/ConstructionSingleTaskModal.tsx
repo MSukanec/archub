@@ -83,10 +83,7 @@ export function ConstructionSingleTaskModal({
       
       const { data: allTasks, error } = await supabase
         .from('task_view')
-        .select(`
-          *,
-          units(symbol)
-        `)
+        .select('*')
         .order('name_rendered', { ascending: true });
       
       if (error) {
@@ -387,9 +384,9 @@ export function ConstructionSingleTaskModal({
                     )}
                   </div>
                   <div className="flex-shrink-0 pt-0.5">
-                    {(task.unit_symbol || task.units?.symbol) && (
+                    {task.unit_name && (
                       <span className="text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
-                        {task.unit_symbol || task.units?.symbol}
+                        {task.unit_name}
                       </span>
                     )}
                   </div>
