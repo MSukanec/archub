@@ -98,8 +98,8 @@ export function EditableParametersTable() {
         slug: param.slug,
         label: param.label,
         type: param.type,
-        parentId: (param as any).parent_id || null,
-        order: (param as any).order || 0,
+        parentId: param.parent_id || null,
+        order: param.order || 0,
         level: 0,
         children: [],
         isExpanded: expandedNodes.has(param.id),
@@ -112,8 +112,8 @@ export function EditableParametersTable() {
       const node = paramMap.get(param.id)
       if (!node) return
 
-      if ((param as any).parent_id) {
-        const parent = paramMap.get((param as any).parent_id)
+      if (param.parent_id) {
+        const parent = paramMap.get(param.parent_id)
         if (parent) {
           parent.children.push(node)
           node.level = parent.level + 1
@@ -190,21 +190,21 @@ export function EditableParametersTable() {
       if (visited.has(paramId)) return true
       
       const param = params.find(p => p.id === paramId)
-      if (!param || !(param as any).parent_id) return false
+      if (!param || !param.parent_id) return false
       
       visited.add(paramId)
-      return hasCircularDependency((param as any).parent_id, visited)
+      return hasCircularDependency(param.parent_id, visited)
     }
 
     params.forEach(param => {
-      if ((param as any).parent_id && hasCircularDependency(param.id)) {
+      if (param.parent_id && hasCircularDependency(param.id)) {
         circularDependencies.push(param.label)
       }
     })
 
     // Detectar parámetros huérfanos (tienen parent_id pero el padre no existe)
     params.forEach(param => {
-      if ((param as any).parent_id && !params.find(p => p.id === (param as any).parent_id)) {
+      if (param.parent_id && !params.find(p => p.id === param.parent_id)) {
         orphanParameters.push(param.label)
       }
     })
@@ -216,7 +216,7 @@ export function EditableParametersTable() {
     // Excluir el parámetro actual y sus descendientes para evitar loops
     function getDescendants(paramId: string): string[] {
       const descendants: string[] = []
-      const children = parameters.filter(p => (p as any).parent_id === paramId)
+      const children = parameters.filter(p => p.parent_id === paramId)
       
       children.forEach(child => {
         descendants.push(child.id)
@@ -401,7 +401,7 @@ export function EditableParametersTable() {
                   </span>
                 )}
                 {param.hasCircularDependency && (
-                  <AlertTriangle className="h-3 w-3 text-yellow-500" title="Dependencia circular detectada" />
+                  <AlertTriangle className="h-3 w-3 text-yellow-500" />
                 )}
               </div>
             )}
