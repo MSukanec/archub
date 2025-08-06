@@ -163,6 +163,7 @@ export function HeaderDesktop({
     
     // Construcción  
     "/construction/tasks": "Tareas",
+    "/construction/labor": "Mano de Obra",
     "/construction/budgets": "Presupuestos",
     "/construction/materials": "Materiales",
     "/construction/schedule": "Cronograma",
