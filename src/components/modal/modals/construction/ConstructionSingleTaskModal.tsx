@@ -377,9 +377,9 @@ export function ConstructionSingleTaskModal({
                     <p className="text-sm font-medium leading-tight text-foreground">
                       {task.name_rendered || task.code || 'Sin nombre'}
                     </p>
-                    {task.category_name && (
+                    {task.element_category_name && (
                       <p className="text-xs text-muted-foreground">
-                        {task.category_name}
+                        {task.element_category_name}
                       </p>
                     )}
                   </div>
