@@ -262,56 +262,6 @@ export function ConstructionSingleTaskModal({
 
   const editPanel = (
     <div className="space-y-4">
-      {/* Información básica - Orden solicitado: Fase - Cantidad */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Fase del Proyecto
-          </label>
-          <Select 
-            value={form.watch('project_phase_id') || ''} 
-            onValueChange={(value) => form.setValue('project_phase_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar fase" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Sin fase</SelectItem>
-              {projectPhases.map((phase) => (
-                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
-                  {phase.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Cantidad *
-          </label>
-          <Input
-            type="number"
-            step="0.01"
-            min="0.01"
-            placeholder="1"
-            value={form.watch('quantity') || ''}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (!isNaN(value)) {
-                form.setValue('quantity', value);
-              }
-            }}
-            className={form.formState.errors.quantity ? 'border-destructive' : ''}
-          />
-          {form.formState.errors.quantity && (
-            <p className="text-xs text-destructive">
-              {form.formState.errors.quantity.message}
-            </p>
-          )}
-        </div>
-      </div>
-
       {/* Filtros de búsqueda - Orden solicitado: Filtrar por Rubro - Búsqueda de Texto */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -404,6 +354,56 @@ export function ConstructionSingleTaskModal({
           {form.formState.errors.task_id.message}
         </p>
       )}
+
+      {/* Información básica - Movido debajo de la lista */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Fase del Proyecto
+          </label>
+          <Select 
+            value={form.watch('project_phase_id') || ''} 
+            onValueChange={(value) => form.setValue('project_phase_id', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar fase" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Sin fase</SelectItem>
+              {projectPhases.map((phase) => (
+                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
+                  {phase.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Cantidad *
+          </label>
+          <Input
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="1"
+            value={form.watch('quantity') || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (!isNaN(value)) {
+                form.setValue('quantity', value);
+              }
+            }}
+            className={form.formState.errors.quantity ? 'border-destructive' : ''}
+          />
+          {form.formState.errors.quantity && (
+            <p className="text-xs text-destructive">
+              {form.formState.errors.quantity.message}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 
