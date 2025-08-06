@@ -720,14 +720,13 @@ export function ConstructionTaskFormModal({
           </div>
           
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-2 py-2 px-3 bg-accent/20 font-medium text-xs border-b">
-            <div className="col-span-10 text-xs font-medium">NUEVA LISTA DE TAREAS</div>
-            <div className="col-span-2 text-xs font-medium text-right">UNIDAD</div>
+          <div className="py-2 px-3 bg-muted/50 font-medium text-xs border-b">
+            <div className="text-xs font-medium">TAREA</div>
           </div>
 
           {/* Table Body */}
           <ScrollArea className="h-[350px]">
-            <div>
+            <div className="divide-y">
               {filteredTasks.length === 0 ? (
                 <div className="text-center py-8 space-y-4">
                   <div className="text-muted-foreground">
@@ -762,28 +761,21 @@ export function ConstructionTaskFormModal({
                   return (
                     <div 
                       key={task.id} 
-                      className={`grid grid-cols-12 gap-2 py-2 px-3 hover:bg-muted/30 cursor-pointer transition-all border-b border-border/50 ${
-                        isSelected ? 'bg-accent/5 border-l-2 border-l-accent' : ''
+                      className={`p-3 hover:bg-muted/50 cursor-pointer border-b transition-all ${
+                        isSelected ? 'border-l-4 border-l-accent bg-accent/10' : ''
                       }`}
                       onClick={() => {
                         // Permite agregar la misma tarea múltiples veces
                         setSelectedTasks(prev => [...prev, { task_id: task.id, quantity: 1 }]);
                       }}
                     >
-                      {/* Task Info - 10 columns */}
-                      <div className="col-span-10">
-                        <div className="text-sm leading-tight text-foreground">
+                      {/* Task Name */}
+                      <div>
+                        <div className="text-sm leading-tight line-clamp-2">
                           {task.name_rendered || 'Sin nombre'}
                         </div>
-                        <div className="text-xs text-muted-foreground leading-tight">
-                          {task.category_name || 'Sin rubro'}
-                        </div>
-                      </div>
-                      
-                      {/* Unit - 2 columns */}
-                      <div className="col-span-2 text-right">
-                        <div className="text-xs font-medium text-accent">
-                          {task.unit_name || 'ud'}
+                        <div className="text-xs text-muted-foreground mt-1">
+                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.unit_name || 'Sin unidad'}
                         </div>
                       </div>
                     </div>
