@@ -296,6 +296,19 @@ export default function AdminTasks() {
     }
   ]
 
+  const headerTabs = [
+    {
+      id: 'Lista de Tareas',
+      label: 'Lista',
+      isActive: activeTab === 'Lista de Tareas'
+    },
+    {
+      id: 'Árbol de Tareas', 
+      label: 'Árbol',
+      isActive: activeTab === 'Árbol de Tareas'
+    }
+  ]
+
   const headerProps = {
     title: 'Tareas',
     actionButton: {
@@ -303,11 +316,7 @@ export default function AdminTasks() {
       icon: Plus,
       onClick: () => openModal('parametric-task')
     },
-    tabs: [
-      { key: 'Lista de Tareas', label: 'Lista' },
-      { key: 'Árbol de Tareas', label: 'Árbol' }
-    ],
-    activeTab,
+    tabs: headerTabs,
     onTabChange: setActiveTab
   };
 
