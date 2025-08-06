@@ -111,8 +111,8 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
 function generateTaskDisplayName(task: any, parameterValues: any[] = []): string {
   if (!task) return 'Sin nombre';
   
-  // Usar display_name que ya fue procesado por el hook useBudgetTasks
-  return task.display_name || task.name || 'Sin nombre';
+  // Usar name_rendered que viene de construction_tasks_view
+  return task.name_rendered || task.name || 'Sin nombre';
 }
 
 interface Budget {
@@ -552,7 +552,7 @@ export default function ConstructionBudgets() {
             <span className="text-xs text-muted-foreground">
             </span>
             <span className="text-xs">
-              {item.task?.display_name || '-'}
+              {item.name_rendered || '-'}
             </span>
           </div>
         )
@@ -691,8 +691,8 @@ export default function ConstructionBudgets() {
         renderCard={(item) => (
           <BudgetTaskCard
             task={item}
-            processedName={item.task?.display_name || '-'}
-            unitName={getUnitName(item.task?.unit_id)}
+            processedName={item.name_rendered || '-'}
+            unitName={getUnitName(item.unit_id)}
             onEdit={() => openModal('budget-task-form', { 
               budgetTask: item,
               mode: 'edit'
