@@ -39,40 +39,25 @@ export default function ConstructionLabor() {
       case 'propia':
         return (
           <EmptyState
-            icon={UserCheck}
+            icon={<UserCheck className="w-12 h-12 text-muted-foreground" />}
             title="Mano de Obra Propia"
-            description="Aquí podrás gestionar la mano de obra propia de tu organización."
-            action={{
-              label: "Próximamente",
-              onClick: () => {},
-              disabled: true
-            }}
+            description="Aquí podrás gestionar la mano de obra propia de tu organización. Esta funcionalidad estará disponible próximamente."
           />
         )
       case 'subcontratos':
         return (
           <EmptyState
-            icon={Package}
+            icon={<Package className="w-12 h-12 text-muted-foreground" />}
             title="Subcontratos"
-            description="Gestiona los subcontratos de mano de obra para tu proyecto."
-            action={{
-              label: "Próximamente", 
-              onClick: () => {},
-              disabled: true
-            }}
+            description="Gestiona los subcontratos de mano de obra para tu proyecto. Esta funcionalidad estará disponible próximamente."
           />
         )
       case 'otros':
         return (
           <EmptyState
-            icon={MoreHorizontal}
+            icon={<MoreHorizontal className="w-12 h-12 text-muted-foreground" />}
             title="Otros"
-            description="Otros tipos de mano de obra y recursos humanos."
-            action={{
-              label: "Próximamente",
-              onClick: () => {},
-              disabled: true
-            }}
+            description="Otros tipos de mano de obra y recursos humanos. Esta funcionalidad estará disponible próximamente."
           />
         )
       default:
