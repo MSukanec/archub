@@ -34,44 +34,6 @@ export default function ConstructionSubcontracts() {
     setExpandedRowId(expandedRowId === subcontractId ? null : subcontractId);
   };
 
-  // Generar datos simulados de ofertas basados en subcontratos existentes
-  const bidsMap: Record<string, Array<{
-    id: string;
-    contact_name: string;
-    amount_total: number;
-    currency: string;
-    status: 'pendiente' | 'aceptado' | 'rechazado';
-    submitted_at: string;
-  }>> = useMemo(() => {
-    const map: any = {};
-    
-    // Agregar ofertas simuladas para algunos subcontratos
-    enrichedSubcontracts.slice(0, 3).forEach((subcontract, index) => {
-      const offers = [
-        {
-          id: `bid-${subcontract.id}-1`,
-          contact_name: 'Wildo Duarte',
-          amount_total: (subcontract.amount_total || 0) * 0.95, // 5% menos
-          currency: 'ARS',
-          status: index === 0 ? 'aceptado' : 'pendiente',
-          submitted_at: '2024-10-15'
-        },
-        {
-          id: `bid-${subcontract.id}-2`,
-          contact_name: 'Lucas Rojas',
-          amount_total: (subcontract.amount_total || 0) * 1.04, // 4% más
-          currency: 'ARS',
-          status: index === 0 ? 'rechazado' : 'pendiente',
-          submitted_at: '2024-10-16'
-        }
-      ];
-      
-      map[subcontract.id] = offers;
-    });
-    
-    return map;
-  }, [enrichedSubcontracts]);
-
   // Función para crear subcontrato
   const handleCreateSubcontract = () => {
     openModal('subcontract', {
@@ -169,6 +131,44 @@ export default function ConstructionSubcontracts() {
       }
     };
   });
+
+  // Generar datos simulados de ofertas basados en subcontratos existentes
+  const bidsMap: Record<string, Array<{
+    id: string;
+    contact_name: string;
+    amount_total: number;
+    currency: string;
+    status: 'pendiente' | 'aceptado' | 'rechazado';
+    submitted_at: string;
+  }>> = useMemo(() => {
+    const map: any = {};
+    
+    // Agregar ofertas simuladas para algunos subcontratos
+    enrichedSubcontracts.slice(0, 3).forEach((subcontract, index) => {
+      const offers = [
+        {
+          id: `bid-${subcontract.id}-1`,
+          contact_name: 'Wildo Duarte',
+          amount_total: (subcontract.amount_total || 0) * 0.95, // 5% menos
+          currency: 'ARS',
+          status: index === 0 ? 'aceptado' : 'pendiente',
+          submitted_at: '2024-10-15'
+        },
+        {
+          id: `bid-${subcontract.id}-2`,
+          contact_name: 'Lucas Rojas',
+          amount_total: (subcontract.amount_total || 0) * 1.04, // 4% más
+          currency: 'ARS',
+          status: index === 0 ? 'rechazado' : 'pendiente',
+          submitted_at: '2024-10-16'
+        }
+      ];
+      
+      map[subcontract.id] = offers;
+    });
+    
+    return map;
+  }, [enrichedSubcontracts]);
 
   const columns = [
     {
