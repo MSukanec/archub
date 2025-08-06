@@ -468,8 +468,8 @@ export default function ConstructionBudgets() {
     const { data: units = [] } = useUnits();
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
     
-    // Local grouping state for budget tasks
-    const [groupingType, setGroupingType] = useState<string>('none');
+    // Local grouping state for budget tasks (default to 'rubros')
+    const [groupingType, setGroupingType] = useState<string>('rubros');
 
     // Add grouping logic for budget tasks
     const groupedBudgetTasks = useMemo(() => {
@@ -570,16 +570,16 @@ export default function ConstructionBudgets() {
       return unit?.name || '-';
     };
 
-    // Definir columnas para el componente Table
+    // Definir columnas para el componente Table - ocultar columna Rubro cuando agrupamos por rubros
     const columns = [
-      {
+      ...(groupingType !== 'rubros' ? [{
         key: 'category_name',
         label: 'Rubro',
         width: '12%',
         render: (item: any) => (
           <span className="text-xs">{item.category_name || '-'}</span>
         )
-      },
+      }] : []),
       {
         key: 'display_name',
         label: 'Tarea',
@@ -687,15 +687,15 @@ export default function ConstructionBudgets() {
         sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
       ) || 0;
 
+      // Ajustar el número de columnas según si se muestra la columna Rubro
+      const rubroColumn = groupingType !== 'rubros' ? [<div key="rubro" className="text-xs font-medium">TOTAL</div>] : [];
+      const emptyColumns = groupingType !== 'rubros' ? 6 : 5; // Ajustar columnas vacías
+
       return (
         <>
-          <div className="text-xs font-medium">TOTAL</div>
-          <div className="text-xs font-medium">{totalTasks} tareas</div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
+          {rubroColumn}
+          <div className="text-xs font-medium">{groupingType === 'rubros' ? 'TOTAL' : `${totalTasks} tareas`}</div>
+          {Array.from({ length: emptyColumns }, (_, i) => <div key={i}></div>)}
           <div className="text-xs font-medium text-green-600">
             ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </div>
@@ -710,15 +710,15 @@ export default function ConstructionBudgets() {
         sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
       );
 
+      // Ajustar el número de columnas según si se muestra la columna Rubro
+      const rubroColumn = groupingType !== 'rubros' ? [<div key="rubro" className="text-xs font-medium">{groupKey}</div>] : [];
+      const emptyColumns = groupingType !== 'rubros' ? 6 : 5; // Ajustar columnas vacías
+
       return (
         <>
-          <div className="text-xs font-medium">{groupKey}</div>
-          <div className="text-xs">{groupRows.length} tareas</div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
+          {rubroColumn}
+          <div className="text-xs font-medium">{groupingType === 'rubros' ? groupKey : `${groupRows.length} tareas`}</div>
+          {Array.from({ length: emptyColumns }, (_, i) => <div key={i}></div>)}
           <div className="text-xs font-medium">
             ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </div>
@@ -751,39 +751,17 @@ export default function ConstructionBudgets() {
           }
         }}
         renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
-          if (groupingType === 'tasks') {
-            // Para agrupación por tareas, calcular suma de cantidades
-            const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-            const categoryName = groupRows[0]?.category_name || '';
-            
-            return (
-              <>
-                <div className="col-span-1 truncate">
-                  {categoryName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
-                </div>
-                <div className="col-span-1"></div>
-                <div className="col-span-1"></div>
-                <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
-                <div className="col-span-1"></div>
-                <div className="col-span-1"></div>
-                <div className="col-span-1"></div>
-                <div className="col-span-1"></div>
-                <div className="col-span-1"></div>
-              </>
-            );
-          } else {
-            const groupTotal = groupRows.reduce((sum, task) => 
-              sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
-            );
-            
-            return (
-              <>
-                <div className="col-span-full text-sm font-medium">
-                  {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'}) - ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                </div>
-              </>
-            );
-          }
+          const groupTotal = groupRows.reduce((sum, task) => 
+            sum + ((task.quantity || 0) * (task.task?.unit_cost || 0)), 0
+          );
+          
+          return (
+            <>
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'}) - ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+              </div>
+            </>
+          );
         }}
         renderFooterRow={renderFooterRow}
         selectable={true}
