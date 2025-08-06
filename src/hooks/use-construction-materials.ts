@@ -174,6 +174,17 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
               ? Math.ceil(computedQty / commercialEquivalence) 
               : undefined;
             
+            // Debug logging para ladrillos
+            if (material.name.toLowerCase().includes('ladrillo')) {
+              console.log(`🧱 LADRILLO DEBUG:`)
+              console.log(`   - Material: ${material.name}`)
+              console.log(`   - Unit presentations:`, material.units?.unit_presentations)
+              console.log(`   - Commercial unit name: ${commercialUnitName}`)
+              console.log(`   - Commercial equivalence: ${commercialEquivalence}`)
+              console.log(`   - Computed quantity: ${computedQty}`)
+              console.log(`   - Commercial quantity: ${commercialQuantity}`)
+            }
+            
             materialMap.set(material.id, {
               id: material.id,
               name: material.name,
