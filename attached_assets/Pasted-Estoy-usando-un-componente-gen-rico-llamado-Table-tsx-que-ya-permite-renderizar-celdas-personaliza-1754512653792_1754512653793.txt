@@ -1,0 +1,51 @@
+Estoy usando un componente genérico llamado `Table.tsx` que ya permite renderizar celdas personalizadas (`columns.render`) y filas agrupadas.
+
+Quiero modificar la página actual que muestra los **subcontratos** (`subcontracts`) para agregar una lógica de **fila expandible**: al hacer clic en un botón en cada fila, se debe expandir una segunda fila debajo que muestre las **ofertas recibidas** (`subcontract_bids`) asociadas a ese subcontrato.
+
+⚠️ IMPORTANTE: No quiero modificar el componente Table.tsx original. Solo quiero implementar esta lógica en la página actual que ya lo usa.
+
+---
+
+🎯 Requisitos funcionales:
+
+1. Agregar una columna con un botón (`+` / `-`) que permita expandir/colapsar cada fila de subcontrato.
+2. Al hacer clic, debajo de esa fila debe renderizarse una segunda fila que ocupe toda la tabla (`colSpan`) y muestre:
+   - Una tabla secundaria o lista de ofertas (`subcontract_bids`) asociadas al `subcontract.id`.
+   - Dejar espacio para mostrar: `contact_name`, `amount_total`, `currency`, `status`, `submitted_at`.
+3. El estado de fila expandida se debe manejar localmente con `useState`, por `expandedRowId`.
+4. El `data` de la tabla debe ser transformado con `.flatMap(...)` para insertar una fila adicional si `expandedRowId === item.id`.
+5. Para evitar colisiones en el `getItemId`, usá el patrón:
+   - `getItemId={(item) => item.isExpandedRow ? item.parentId + '-expanded' : item.id}`
+
+---
+
+🎨 Estética:
+
+- La fila expandida debe tener un fondo distinto (`bg-muted/30`) y padding.
+- Si no hay ofertas, mostrar un texto tipo: "No se han recibido ofertas para este subcontrato".
+
+---
+
+📦 Ejemplo visual (solo referencia conceptual):
+
+Subcontrato	Estado	Total	Acciones
+Estructura Obra A	Evaluando	-	[+]
+⤷ Ofertas recibidas:			
+Wildo Duarte	$5.000.000	Aceptado
+Lucas Rojas	$5.200.000	Rechazado
+
+yaml
+Copiar
+Editar
+
+---
+
+📎 Contexto adicional:
+
+- Cada fila de subcontrato tiene su `id`.
+- Las ofertas están en una tabla `subcontract_bids` con `subcontract_id` como FK.
+- La estructura de datos de subcontratos ya está cargada. Podés simular `subcontract_bids` como `bidsMap[subcontract.id]`.
+
+---
+
+Generame el código necesario para modificar la página actual de subcontratos e implementar esta lógica de filas expandibles sin tocar el componente `Table
