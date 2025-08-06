@@ -83,12 +83,20 @@ export function ConstructionSingleTaskModal({
       
       const { data: allTasks, error } = await supabase
         .from('task_view')
-        .select('*')
+        .select(`
+          *,
+          units(symbol)
+        `)
         .order('name_rendered', { ascending: true });
       
       if (error) {
         console.error('❌ Error cargando librería de tareas:', error);
         throw error;
+      }
+      
+      console.log('🔍 Debug: Datos de tareas cargadas:', allTasks?.slice(0, 3));
+      if (allTasks?.length > 0) {
+        console.log('🔍 Debug: Estructura de primera tarea:', JSON.stringify(allTasks[0], null, 2));
       }
       
       return allTasks || [];
@@ -379,9 +387,9 @@ export function ConstructionSingleTaskModal({
                     )}
                   </div>
                   <div className="flex-shrink-0 pt-0.5">
-                    {task.unit_symbol && (
+                    {(task.unit_symbol || task.units?.symbol) && (
                       <span className="text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
-                        {task.unit_symbol}
+                        {task.unit_symbol || task.units?.symbol}
                       </span>
                     )}
                   </div>
