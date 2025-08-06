@@ -267,7 +267,7 @@ export function ConstructionSingleTaskModal({
   const editPanel = (
     <div className="space-y-4">
       {/* Filtros de búsqueda - Orden solicitado: Filtrar por Rubro - Búsqueda de Texto */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none text-muted-foreground">
             Filtrar por Rubro
@@ -383,7 +383,7 @@ export function ConstructionSingleTaskModal({
       )}
 
       {/* Información básica - Movido debajo de la lista */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Fase del Proyecto
