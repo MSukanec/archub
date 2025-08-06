@@ -166,10 +166,19 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
             const computedQty = totalQuantity;
             const purchasedQty = 0; // Future use
             
-            // Información de unidad comercial (primera unit_presentation disponible)
-            const unitPresentation = material.units?.unit_presentations?.[0];
-            const commercialUnitName = unitPresentation?.name;
-            const commercialEquivalence = unitPresentation?.equivalence;
+            // Información de unidad comercial - priorizar unidades comerciales apropiadas
+            const unitPresentations = material.units?.unit_presentations || [];
+            
+            // Para unidades, priorizar presentaciones comerciales que no sean la unidad base
+            let preferredPresentation = unitPresentations.find(up => up.name !== 'Unidad' && up.equivalence > 1);
+            
+            // Si no hay presentación comercial, usar la primera disponible
+            if (!preferredPresentation) {
+              preferredPresentation = unitPresentations[0];
+            }
+            
+            const commercialUnitName = preferredPresentation?.name;
+            const commercialEquivalence = preferredPresentation?.equivalence;
             const commercialQuantity = commercialEquivalence && commercialEquivalence > 0 
               ? Math.ceil(computedQty / commercialEquivalence) 
               : undefined;
