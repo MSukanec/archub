@@ -82,7 +82,7 @@ export function ConstructionSingleTaskModal({
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data: allTasks, error } = await supabase
-        .from('task_parametric_view')
+        .from('task_view')
         .select('*')
         .order('name_rendered', { ascending: true });
       

@@ -141,7 +141,7 @@ export function ConstructionTaskFormModal({
       console.log('🔍 Cargando librería completa de tareas parametricas');
       
       const { data: allTasks, error } = await supabase
-        .from('task_parametric_view')
+        .from('task_view')
         .select('*')
         .order('name_rendered', { ascending: true });
       

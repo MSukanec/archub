@@ -42,14 +42,14 @@ export function useConstructionDependencies(projectId: string) {
           *,
           predecessor_task:construction_tasks!predecessor_task_id (
             id,
-            task:task_parametric_view!inner (
+            task:task_view!inner (
               code,
               name_rendered
             )
           ),
           successor_task:construction_tasks!successor_task_id (
             id,
-            task:task_parametric_view!inner (
+            task:task_view!inner (
               code,
               name_rendered
             )

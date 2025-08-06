@@ -171,7 +171,7 @@ export function useTaskSearchFilterOptions(organizationId: string) {
 
       // Obtener todos los valores únicos para los filtros
       const { data: filterData, error } = await supabase
-        .from("task_parametric_view")
+        .from("task_view")
         .select("rubro_name, category_name, subcategory_name")
         .limit(1000);
 
