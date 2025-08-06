@@ -396,161 +396,64 @@ export default function AdminTaskParameters() {
               />
             ) : (
               <>
-                {/* Parameters Table with Selection */}
+                {/* Parameter Selection Card */}
                 <Card>
-                  <CardHeader className="pb-4">
+                  <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <List className="h-5 w-5" />
-                      Lista de Parámetros
+                      Seleccionar Parámetro
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-0">
-                    <Table
-                      data={filteredAndSortedParameters}
-                      columns={[
-                        {
-                          key: 'selection',
-                          label: '',
-                          width: '5%',
-                          render: (parameter: TaskParameterWithOptions) => (
-                            <input
-                              type="radio"
-                              name="selectedParameter"
-                              checked={selectedParameterId === parameter.id}
-                              onChange={() => setSelectedParameterId(parameter.id)}
-                              className="w-4 h-4 text-primary"
-                            />
-                          ),
-                          sortable: false
-                        },
-                        {
-                          key: 'label',
-                          label: 'Nombre',
-                          render: (parameter: TaskParameterWithOptions) => (
-                            <div className="flex flex-col">
-                              <div className="font-medium text-sm">{parameter.label}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {parameter.slug}
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="parameter-select">Parámetro</Label>
+                          <Select
+                            value={selectedParameterId}
+                            onValueChange={setSelectedParameterId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un parámetro para ver sus opciones" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredAndSortedParameters.map((parameter) => (
+                                <SelectItem key={parameter.id} value={parameter.id}>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      {parameter.type}
+                                    </Badge>
+                                    {parameter.label}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {selectedParameter && (
+                          <div className="flex flex-col justify-end">
+                            <div className="bg-muted/30 rounded-lg p-3 border border-dashed">
+                              <div className="text-sm text-muted-foreground mb-1">
+                                Parámetro seleccionado:
+                              </div>
+                              <div className="font-medium">
+                                {selectedParameter.label}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Slug: {selectedParameter.slug} | Tipo: {selectedParameter.type}
                               </div>
                             </div>
-                          ),
-                          sortable: true,
-                          sortType: 'string' as const
-                        },
-                        {
-                          key: 'type',
-                          label: 'Tipo',
-                          width: '15%',
-                          render: (parameter: TaskParameterWithOptions) => (
-                            <Badge variant="outline" className="text-xs">
-                              {parameter.type}
-                            </Badge>
-                          ),
-                          sortable: true,
-                          sortType: 'string' as const
-                        },
-                        {
-                          key: 'options_count',
-                          label: 'Opciones',
-                          width: '12%',
-                          render: (parameter: TaskParameterWithOptions) => (
-                            <div className="text-sm text-center">
-                              <Badge variant="secondary" className="text-xs">
-                                {parameter.options?.length || 0}
-                              </Badge>
-                            </div>
-                          ),
-                          sortable: true,
-                          sortType: 'number' as const
-                        },
-                        {
-                          key: 'is_required',
-                          label: 'Requerido',
-                          width: '12%',
-                          render: (parameter: TaskParameterWithOptions) => (
-                            <div className="text-center">
-                              {parameter.is_required ? (
-                                <Badge variant="destructive" className="text-xs">
-                                  Sí
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-xs">
-                                  No
-                                </Badge>
-                              )}
-                            </div>
-                          ),
-                          sortable: true,
-                          sortType: 'boolean' as const
-                        },
-                        {
-                          key: 'actions',
-                          label: 'Acciones',
-                          width: '15%',
-                          render: (parameter: TaskParameterWithOptions) => (
-                            <div className="flex items-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                onClick={() => {
-                                  openModal('task-parameter', {
-                                    parameter: parameter,
-                                    onParameterCreated: (parameterId: string) => {
-                                      setSelectedParameterId(parameterId);
-                                    }
-                                  });
-                                }}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                onClick={() => {
-                                  openModal('delete-confirmation', {
-                                    title: 'Eliminar Parámetro',
-                                    description: '¿Estás seguro de que deseas eliminar este parámetro? Se eliminarán también todas sus opciones.',
-                                    itemName: parameter.label,
-                                    onConfirm: () => {
-                                      deleteParameterMutation.mutate(parameter.id);
-                                      if (selectedParameterId === parameter.id) {
-                                        setSelectedParameterId('');
-                                      }
-                                    }
-                                  });
-                                }}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ),
-                          sortable: false
-                        }
-                      ]}
-                      searchable={false}
-                      selectable={false}
-                    />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
-                {/* Parameter Options Section */}
+                {/* Parameter Values Table */}
                 {selectedParameter ? (
-                  <Card>
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-2">
-                        <Settings className="h-5 w-5" />
-                        Opciones del Parámetro: {selectedParameter.label}
-                      </CardTitle>
-                      <div className="text-sm text-muted-foreground">
-                        Gestiona las opciones disponibles para este parámetro
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <ParameterValuesTable parameterId={selectedParameter.id} />
-                    </CardContent>
-                  </Card>
+                  <ParameterValuesTable parameterId={selectedParameter.id} />
                 ) : (
                   <div className="text-center py-12 text-muted-foreground">
                     <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -558,7 +461,7 @@ export default function AdminTaskParameters() {
                       Selecciona un parámetro
                     </div>
                     <div>
-                      Marca un parámetro de la tabla de arriba para ver y gestionar sus opciones
+                      Utiliza el selector de arriba para elegir un parámetro y ver sus opciones
                     </div>
                   </div>
                 )}
