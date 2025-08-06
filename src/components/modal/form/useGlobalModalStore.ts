@@ -13,6 +13,6 @@ export const useGlobalModalStore = create<GlobalModalState>((set) => ({
   open: false,
   type: null,
   data: null,
-  openModal: (type, data = null) => set({ open: true, type, data }),
+  openModal: (type, data) => set({ open: true, type, data }),
   closeModal: () => set({ open: false, type: null, data: null }),
 }));

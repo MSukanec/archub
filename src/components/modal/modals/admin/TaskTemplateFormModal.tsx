@@ -106,43 +106,41 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre de la Plantilla</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="ej: Muro de Mampostería"
-                    {...field}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre de la Plantilla</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="ej: Muro de Mampostería"
+                  {...field}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="slug"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Slug (identificador único)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="ej: muro-mamposteria"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="slug"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Slug (identificador único)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="ej: muro-mamposteria"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -182,53 +180,51 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="unit_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidad</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar unidad" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {units.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id}>
-                        {unit.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Estado</FormLabel>
-                  <div className="text-sm text-muted-foreground">
-                    Plantilla {field.value ? 'activa' : 'inactiva'}
-                  </div>
-                </div>
+        <FormField
+          control={form.control}
+          name="unit_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidad</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar unidad" />
+                  </SelectTrigger>
                 </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
+                <SelectContent>
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="is_active"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Estado</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Plantilla {field.value ? 'activa' : 'inactiva'}
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
       </form>
     </Form>
   )
