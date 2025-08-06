@@ -344,10 +344,10 @@ export function ConstructionSingleTaskModal({
         </div>
       </div>
       
-      {/* Lista de tareas con scroll - Sin texto innecesario */}
+      {/* Lista de tareas optimizada como tabla */}
       <div className="border rounded-lg">
         <ScrollArea className="h-64 md:h-80">
-          <div className="p-4 space-y-2">
+          <div className="divide-y">
             {tasksLoading ? (
               <div className="text-center py-8 text-muted-foreground">
                 <div className="animate-pulse">Cargando tareas...</div>
@@ -362,34 +362,27 @@ export function ConstructionSingleTaskModal({
                 <div 
                   key={task.id}
                   onClick={() => handleTaskSelect(task.id)}
-                  className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                  className={`px-4 py-3 cursor-pointer transition-colors duration-150 flex items-center justify-between ${
                     selectedTaskId === task.id 
-                      ? 'border-accent bg-accent/10 shadow-sm' 
-                      : 'border-border hover:border-accent/50 hover:bg-accent/5'
+                      ? 'bg-accent/10 border-l-2 border-l-accent' 
+                      : 'hover:bg-muted/30'
                   }`}
                 >
-                  <div className="space-y-2">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="text-xs font-mono">
-                          {task.code}
-                        </Badge>
-                        {task.category_name && (
-                          <Badge variant="secondary" className="text-xs">
-                            {task.category_name}
-                          </Badge>
-                        )}
-                      </div>
-                      {task.unit_symbol && (
-                        <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                          {task.unit_symbol}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm font-medium leading-tight text-left">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <p className="text-sm font-medium leading-tight text-foreground truncate">
                       {task.name_rendered || task.code || 'Sin nombre'}
                     </p>
+                    {task.category_name && (
+                      <p className="text-xs text-muted-foreground">
+                        {task.category_name}
+                      </p>
+                    )}
                   </div>
+                  {task.unit_symbol && (
+                    <div className="ml-3 text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
+                      {task.unit_symbol}
+                    </div>
+                  )}
                 </div>
               ))
             )}
