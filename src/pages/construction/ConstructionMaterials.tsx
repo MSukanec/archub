@@ -143,10 +143,19 @@ export default function ConstructionMaterials() {
         label: 'Cómputo Comercial',
         width: groupingType === 'categories' ? '20%' : '25%', // Mismo ancho que Cómputo Técnico
         render: (material: any) => {
-          const unit = material.unit_name || 'unidad'
+          // Si no hay unidad comercial definida, mostrar guión
+          if (!material.commercial_unit_name || !material.commercial_quantity) {
+            return (
+              <span className="text-sm text-muted-foreground">
+                - {material.unit_name || 'unidad'}
+              </span>
+            )
+          }
+
+          // Mostrar el cómputo comercial calculado
           return (
-            <span className="text-sm text-muted-foreground">
-              - {unit}
+            <span className="text-sm font-medium">
+              {material.commercial_quantity} {material.commercial_unit_name}
             </span>
           )
         }

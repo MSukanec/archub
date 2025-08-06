@@ -11,6 +11,10 @@ export interface ConstructionMaterial {
   purchased_quantity: number;
   to_purchase_quantity: number;
   phases?: { phase_name: string; quantity: number }[];
+  // Información para cómputo comercial
+  commercial_unit_name?: string;
+  commercial_equivalence?: number;
+  commercial_quantity?: number;
 }
 
 export interface ConstructionMaterialsResult {
@@ -96,7 +100,12 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
             ),
             units:unit_id (
               id,
-              name
+              name,
+              unit_presentations (
+                id,
+                name,
+                equivalence
+              )
             )
           )
         `)
@@ -146,11 +155,25 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
               console.log(`   - New total: ${existingMaterial.computed_quantity}`)
             }
             
-            // Recalcular la cantidad a comprar
+            // Recalcular la cantidad a comprar y comercial
             existingMaterial.to_purchase_quantity = Math.max(0, existingMaterial.computed_quantity - existingMaterial.purchased_quantity);
+            
+            // Recalcular cómputo comercial
+            if (existingMaterial.commercial_equivalence && existingMaterial.commercial_equivalence > 0) {
+              existingMaterial.commercial_quantity = Math.ceil(existingMaterial.computed_quantity / existingMaterial.commercial_equivalence);
+            }
           } else {
             const computedQty = totalQuantity;
             const purchasedQty = 0; // Future use
+            
+            // Información de unidad comercial (primera unit_presentation disponible)
+            const unitPresentation = material.units?.unit_presentations?.[0];
+            const commercialUnitName = unitPresentation?.name;
+            const commercialEquivalence = unitPresentation?.equivalence;
+            const commercialQuantity = commercialEquivalence && commercialEquivalence > 0 
+              ? Math.ceil(computedQty / commercialEquivalence) 
+              : undefined;
+            
             materialMap.set(material.id, {
               id: material.id,
               name: material.name,
@@ -159,7 +182,10 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
               unit_name: material.units?.name,
               computed_quantity: computedQty,
               purchased_quantity: purchasedQty,
-              to_purchase_quantity: Math.max(0, computedQty - purchasedQty)
+              to_purchase_quantity: Math.max(0, computedQty - purchasedQty),
+              commercial_unit_name: commercialUnitName,
+              commercial_equivalence: commercialEquivalence,
+              commercial_quantity: commercialQuantity
             });
             
             // Enhanced logging for deck first time
