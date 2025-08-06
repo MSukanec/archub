@@ -120,14 +120,11 @@ export default function AdminCategories() {
   // Create header props for Layout
   const headerProps = {
     title: "Gestión de Categorías de Tareas",
-    description: "Administra las categorías y subcategorías de tareas del sistema",
     icon: TreePine,
-    actions: {
-      primary: {
-        label: "Nueva Categoría",
-        icon: Plus,
-        onClick: handleCreateCategory
-      }
+    actionButton: {
+      label: "Nueva Categoría",
+      icon: Plus,
+      onClick: handleCreateCategory
     }
   };
 
