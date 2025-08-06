@@ -24,6 +24,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
+import { TaskMaterialsPopover } from '@/components/construction/TaskMaterialsPopover'
 
 import { Input } from '@/components/ui/input'
 
@@ -581,14 +582,15 @@ export default function ConstructionBudgets() {
         )
       },
       {
-        key: 'unit_cost',
-        label: 'P.U.',
-        width: '5%',
+        key: 'material_cost',
+        label: 'Costo Mat.',
+        width: '8%',
         render: (item: any) => (
-          <span className="text-xs">
-            ${(item.task?.unit_cost || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-          </span>
-        )
+          <div className="flex items-center justify-center gap-2">
+            <TaskMaterialsPopover task={{ task_id: item.task_id }} showCost={true} />
+          </div>
+        ),
+        sortable: false
       },
       {
         key: 'total_cost',
