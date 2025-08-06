@@ -157,7 +157,7 @@ export function ConstructionSingleTaskModal({
     }
     
     // Filtro por rubro
-    if (rubroFilter) {
+    if (rubroFilter && rubroFilter.trim()) {
       filtered = filtered.filter(task => task.element_category_name === rubroFilter);
     }
     
