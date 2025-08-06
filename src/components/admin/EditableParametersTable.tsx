@@ -98,8 +98,8 @@ export function EditableParametersTable() {
         slug: param.slug,
         label: param.label,
         type: param.type,
-        parentId: param.parent_id || null,
-        order: param.order || 0,
+        parentId: (param as any).parent_id || null,
+        order: (param as any).order || 0,
         level: 0,
         children: [],
         isExpanded: expandedNodes.has(param.id),
@@ -112,8 +112,8 @@ export function EditableParametersTable() {
       const node = paramMap.get(param.id)
       if (!node) return
 
-      if (param.parent_id) {
-        const parent = paramMap.get(param.parent_id)
+      if ((param as any).parent_id) {
+        const parent = paramMap.get((param as any).parent_id)
         if (parent) {
           parent.children.push(node)
           node.level = parent.level + 1
@@ -190,21 +190,21 @@ export function EditableParametersTable() {
       if (visited.has(paramId)) return true
       
       const param = params.find(p => p.id === paramId)
-      if (!param || !param.parent_id) return false
+      if (!param || !(param as any).parent_id) return false
       
       visited.add(paramId)
-      return hasCircularDependency(param.parent_id, visited)
+      return hasCircularDependency((param as any).parent_id, visited)
     }
 
     params.forEach(param => {
-      if (param.parent_id && hasCircularDependency(param.id)) {
+      if ((param as any).parent_id && hasCircularDependency(param.id)) {
         circularDependencies.push(param.label)
       }
     })
 
     // Detectar parámetros huérfanos (tienen parent_id pero el padre no existe)
     params.forEach(param => {
-      if (param.parent_id && !params.find(p => p.id === param.parent_id)) {
+      if ((param as any).parent_id && !params.find(p => p.id === (param as any).parent_id)) {
         orphanParameters.push(param.label)
       }
     })
@@ -216,7 +216,7 @@ export function EditableParametersTable() {
     // Excluir el parámetro actual y sus descendientes para evitar loops
     function getDescendants(paramId: string): string[] {
       const descendants: string[] = []
-      const children = parameters.filter(p => p.parent_id === paramId)
+      const children = parameters.filter(p => (p as any).parent_id === paramId)
       
       children.forEach(child => {
         descendants.push(child.id)
@@ -238,7 +238,15 @@ export function EditableParametersTable() {
     if (!editingState.parameterId || !editingState.field) return
 
     const updates: any = {}
-    updates[editingState.field] = editingState.value
+    
+    // Convertir valores según el campo
+    if (editingState.field === 'order') {
+      updates[editingState.field] = parseInt(editingState.value) || 0
+    } else if (editingState.field === 'parent') {
+      updates.parent_id = editingState.value || null
+    } else {
+      updates[editingState.field] = editingState.value
+    }
 
     updateParameterMutation.mutate({
       id: editingState.parameterId,
@@ -270,6 +278,21 @@ export function EditableParametersTable() {
         <div className="grid grid-cols-12 gap-4 p-3 items-center">
           {/* Expand/Collapse + Nombre */}
           <div className="col-span-3 flex items-center gap-2" style={{ paddingLeft: `${param.level * 20}px` }}>
+            {/* Líneas de jerarquía visual */}
+            {param.level > 0 && (
+              <div className="flex items-center">
+                {Array.from({ length: param.level }).map((_, i) => (
+                  <div key={i} className="w-4 h-4 flex items-center justify-center">
+                    {i === param.level - 1 ? (
+                      <ArrowRight className="h-3 w-3 text-muted-foreground/50" />
+                    ) : (
+                      <Minus className="h-3 w-3 text-muted-foreground/30 rotate-90" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
             {param.children.length > 0 && (
               <Button
                 variant="ghost"
@@ -336,14 +359,80 @@ export function EditableParametersTable() {
             )}
           </div>
 
-          {/* Parent - TODO: Implementar select */}
+          {/* Parent */}
           <div className="col-span-2">
-            <span className="text-xs text-muted-foreground">Sin padre</span>
+            {isEditing && editingState.field === 'parent' ? (
+              <div className="flex items-center gap-2">
+                <Select
+                  value={editingState.value}
+                  onValueChange={(value) => setEditingState(prev => ({ ...prev, value }))}
+                >
+                  <SelectTrigger className="h-6 text-xs">
+                    <SelectValue placeholder="Sin padre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Sin padre</SelectItem>
+                    {getAvailableParents(param.id).map(parentParam => (
+                      <SelectItem key={parentParam.id} value={parentParam.id}>
+                        {parentParam.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleSave}>✓</Button>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>✕</Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {param.parentId ? (
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleEdit(param.id, 'parent', param.parentId || '')}
+                  >
+                    {parameters.find(p => p.id === param.parentId)?.label || 'Padre no encontrado'}
+                  </Badge>
+                ) : (
+                  <span 
+                    className="text-xs text-muted-foreground cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded"
+                    onClick={() => handleEdit(param.id, 'parent', '')}
+                  >
+                    Sin padre
+                  </span>
+                )}
+                {param.hasCircularDependency && (
+                  <AlertTriangle className="h-3 w-3 text-yellow-500" title="Dependencia circular detectada" />
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Orden - TODO: Implementar edición */}
+          {/* Orden */}
           <div className="col-span-1">
-            <span className="text-xs text-muted-foreground">{index + 1}</span>
+            {isEditing && editingState.field === 'order' ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={editingState.value}
+                  onChange={(e) => setEditingState(prev => ({ ...prev, value: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSave()
+                    if (e.key === 'Escape') handleCancel()
+                  }}
+                  className="h-6 text-sm w-16"
+                  autoFocus
+                />
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleSave}>✓</Button>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>✕</Button>
+              </div>
+            ) : (
+              <span 
+                className="text-xs text-muted-foreground cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded"
+                onClick={() => handleEdit(param.id, 'order', param.order.toString())}
+              >
+                {param.order}
+              </span>
+            )}
           </div>
 
           {/* Tipo */}
@@ -397,7 +486,7 @@ export function EditableParametersTable() {
 
         {/* Hijos (cuando esté expandido) */}
         {param.isExpanded && param.children.length > 0 && (
-          <div className="border-t border-muted-foreground/20 ml-6">
+          <div className="border-t border-muted-foreground/20">
             {param.children.map((child, childIndex) => renderParameterRow(child, childIndex))}
           </div>
         )}
@@ -456,7 +545,9 @@ export function EditableParametersTable() {
           </div>
 
           {/* Alertas de problemas */}
-          {hierarchyIssues.length > 0 && (
+          {(hierarchyValidation.circularDependencies.length > 0 || 
+            hierarchyValidation.orphanParameters.length > 0 || 
+            hierarchyValidation.duplicateSlugs.length > 0) && (
             <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -465,8 +556,14 @@ export function EditableParametersTable() {
                 </span>
               </div>
               <ul className="text-xs text-yellow-700 dark:text-yellow-300 ml-6 space-y-1">
-                {hierarchyIssues.map((issue, index) => (
-                  <li key={index}>• {issue}</li>
+                {hierarchyValidation.circularDependencies.map((dep: string, index: number) => (
+                  <li key={`circular-${index}`}>• Dependencia circular: {dep}</li>
+                ))}
+                {hierarchyValidation.orphanParameters.map((orphan: string, index: number) => (
+                  <li key={`orphan-${index}`}>• Parámetro huérfano: {orphan}</li>
+                ))}
+                {hierarchyValidation.duplicateSlugs.map((slug: string, index: number) => (
+                  <li key={`duplicate-${index}`}>• Slug duplicado: {slug}</li>
                 ))}
               </ul>
             </div>
