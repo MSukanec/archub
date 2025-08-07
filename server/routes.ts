@@ -399,46 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update user organization preferences endpoint
-  app.post("/api/user/update-organization-preferences", async (req, res) => {
-    try {
-      const { organization_id, last_project_id } = req.body;
-      const user_id = req.headers['x-user-id'];
-
-      if (!organization_id || !user_id) {
-        return res.status(400).json({ error: "Missing organization_id or user_id" });
-      }
-
-      console.log("🔧 Updating user organization preferences", { user_id, organization_id, last_project_id });
-
-      const { data, error } = await supabase
-        .from('user_organization_preferences')
-        .upsert(
-          {
-            user_id,
-            organization_id,
-            last_project_id,
-            updated_at: new Date().toISOString()
-          },
-          {
-            onConflict: 'user_id,organization_id'
-          }
-        )
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating user organization preferences:", error);
-        return res.status(500).json({ error: "Failed to update organization preferences" });
-      }
-
-      console.log("🔧 Successfully updated user organization preferences", data);
-      res.json({ success: true, data });
-    } catch (error) {
-      console.error("Error updating organization preferences:", error);
-      res.status(500).json({ error: "Failed to update organization preferences" });
-    }
-  });
+  // Endpoint eliminado - usar user_preferences.last_project_id en su lugar
 
   // Get user organization preferences endpoint
   app.get("/api/user/organization-preferences/:organizationId", async (req, res) => {

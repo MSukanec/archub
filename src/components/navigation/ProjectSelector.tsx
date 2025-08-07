@@ -51,14 +51,6 @@ export function ProjectSelector() {
     
     // Update context only - project persistence will be handled by projectContext.ts
     setSelectedProject(projectId)
-        onSuccess: (data) => {
-          console.log("🎯 ProjectSelector: Mutation successful", data);
-        },
-        onError: (error) => {
-          console.error("🎯 ProjectSelector: Mutation failed", error);
-        }
-      })
-    }
   }
 
   const displayName = currentProject?.name || "Seleccionar proyecto"
