@@ -65,75 +65,65 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
   const avatarFallback = linked_user ? getInitials(linked_user.full_name) : getInitials(displayName);
 
   return (
-    <div className="mb-3">
-      <SwipeableCard
-        onEdit={onEdit ? () => onEdit(contact) : undefined}
-        onDelete={onDelete ? () => onDelete(contact) : undefined}
-        actions={[
-          {
-            label: 'Editar',
-            icon: <Edit className="w-4 h-4" />,
-            variant: 'default',
-            onClick: () => onEdit?.(contact)
-          },
-          {
-            label: 'Eliminar',
-            icon: <Trash2 className="w-4 h-4" />,
-            variant: 'destructive',
-            onClick: () => onDelete?.(contact)
-          }
-        ]}
-      >
-        <div className="p-4 bg-card border border-card-border rounded-lg">
-          <div className="flex items-center gap-3">
-            {/* Avatar - same size as MovementCard */}
-            <Avatar className="w-12 h-12">
-              <AvatarImage src={avatar} />
-              <AvatarFallback className="text-sm font-medium">
-                {avatarFallback}
-              </AvatarFallback>
-            </Avatar>
+    <SwipeableCard
+      actions={[
+        {
+          label: 'Editar',
+          icon: <Edit className="w-4 h-4" />,
+          variant: 'default',
+          onClick: () => onEdit?.(contact)
+        },
+        {
+          label: 'Eliminar',
+          icon: <Trash2 className="w-4 h-4" />,
+          variant: 'destructive',
+          onClick: () => onDelete?.(contact)
+        }
+      ]}
+    >
+      <div className="flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors">
+        {/* Avatar - same size as MovementCard */}
+        <div className="flex-shrink-0">
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={avatar} />
+            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+              {avatarFallback}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
-            {/* Contact Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="font-medium text-sm truncate">
-                  {displayName}
-                </p>
-                {linked_user_id && (
-                  <Badge variant="secondary" className="text-xs shrink-0">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Usuario
-                  </Badge>
-                )}
-                {contact_types && contact_types.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {contact_types.map((type) => (
-                      <Badge key={type.id} variant="outline" className="text-xs shrink-0">
-                        {type.name}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex flex-col gap-0.5">
-                {displayEmail && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {displayEmail}
-                  </p>
-                )}
-                {company_name && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {company_name}
-                  </p>
-                )}
-              </div>
+        {/* Contact Info */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex items-center justify-between">
+            <div className="text-[var(--card-fg)] font-medium text-sm truncate">
+              {displayName}
             </div>
+            {linked_user_id && (
+              <Badge variant="secondary" className="text-xs shrink-0 ml-4">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Usuario
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-between mt-1">
+            {displayEmail ? (
+              <div className="text-[var(--muted-fg)] text-sm truncate" title={displayEmail}>
+                {displayEmail}
+              </div>
+            ) : company_name ? (
+              <div className="text-[var(--muted-fg)] text-sm truncate" title={company_name}>
+                {company_name}
+              </div>
+            ) : (
+              <div className="text-[var(--muted-fg)] text-sm">
+                Sin información adicional
+              </div>
+            )}
           </div>
         </div>
-      </SwipeableCard>
-    </div>
+      </div>
+    </SwipeableCard>
   );
 };
 
