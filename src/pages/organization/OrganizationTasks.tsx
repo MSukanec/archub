@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
@@ -243,24 +243,47 @@ function TasksContent() {
 
 
       {/* ActionBar Desktop - Solo selector de tableros */}
-      <ActionBarDesktop
-        title="Tableros de Tareas"
-        icon={<Kanban className="w-5 h-5" />}
-        budgetSelector={{
-          budgets: boards,
-          selectedBudgetId: currentBoardId || '',
-          onBudgetChange: handleBoardChange,
-          onEditBudget: () => {
-            if (selectedBoard) {
-              handleEditBoard(selectedBoard)
-            }
-          },
-          onDeleteBudget: () => {
-            if (currentBoardId) {
-              handleDeleteBoard(currentBoardId)
-            }
+      <ActionBarDesktopRow
+        filters={[
+          {
+            key: 'board',
+            label: 'Tablero',
+            icon: Kanban,
+            value: selectedBoard?.name || '',
+            setValue: (boardName: string) => {
+              const board = boards.find(b => b.name === boardName);
+              if (board) {
+                handleBoardChange(board.id);
+              }
+            },
+            options: boards.map(board => board.name),
+            defaultLabel: 'Selecciona un tablero'
           }
-        }}
+        ]}
+        actions={[
+          {
+            label: 'Editar',
+            icon: Edit,
+            onClick: () => {
+              if (selectedBoard) {
+                handleEditBoard(selectedBoard)
+              }
+            },
+            variant: 'ghost' as const,
+            enabled: !!selectedBoard
+          },
+          {
+            label: 'Eliminar',
+            icon: Trash2,
+            onClick: () => {
+              if (currentBoardId) {
+                handleDeleteBoard(currentBoardId)
+              }
+            },
+            variant: 'ghost' as const,
+            enabled: !!currentBoardId
+          }
+        ]}
       />
       
       {selectedBoard ? (
