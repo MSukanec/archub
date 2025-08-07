@@ -142,6 +142,12 @@ export default function SelectMode() {
       // Set a flag that prevents redirect loops permanently
       console.log('SelectMode: Completed onboarding, preventing future redirects');
       localStorage.setItem('onboarding_bypass', 'true');
+      
+      // Also force a page reload to ensure clean state
+      setTimeout(() => {
+        console.log('SelectMode: Forcing page reload to ensure clean state');
+        window.location.href = '/organization/dashboard';
+      }, 100);
     },
     onError: (err, userType, context) => {
       // Reset the flag on error

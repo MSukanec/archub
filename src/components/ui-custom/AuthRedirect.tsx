@@ -36,28 +36,40 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
       setCompletingOnboarding(false);
     }
 
-    // Check localStorage bypass flag first
+    // Check localStorage bypass flag first - this completely overrides onboarding checks
     const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
     
-    // If user is authenticated but needs onboarding (skip redirect if completing onboarding OR bypass is set)
-    const allowedDuringOnboarding = ['/onboarding', '/select-mode', '/organization/dashboard', '/dashboard'];
-    const shouldRedirectToOnboarding = user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !onboardingBypass && !allowedDuringOnboarding.includes(location);
-    
-    console.log('AuthRedirect: Checking onboarding redirect', { 
-      location, 
-      user: !!user,
-      userData: !!userData,
-      onboarding_completed: userData?.preferences?.onboarding_completed,
-      completingOnboarding,
-      onboardingBypass,
-      allowedRoute: allowedDuringOnboarding.includes(location),
-      shouldRedirect: shouldRedirectToOnboarding
-    });
-    
-    if (shouldRedirectToOnboarding) {
-      console.log('AuthRedirect: REDIRECTING to onboarding');
-      navigate('/onboarding');
-      return;
+    // If bypass is set, never redirect to onboarding regardless of other conditions
+    if (onboardingBypass) {
+      console.log('AuthRedirect: Onboarding bypass active - skipping all onboarding redirects');
+      
+      // If user is currently on onboarding page and bypass is active, redirect to dashboard
+      if (location === '/onboarding' || location === '/select-mode') {
+        console.log('AuthRedirect: Bypass active but user is on onboarding page, redirecting to dashboard');
+        navigate('/organization/dashboard');
+        return;
+      }
+    } else {
+      // Original onboarding logic only if bypass is NOT set
+      const allowedDuringOnboarding = ['/onboarding', '/select-mode', '/organization/dashboard', '/dashboard'];
+      const shouldRedirectToOnboarding = user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !allowedDuringOnboarding.includes(location);
+      
+      console.log('AuthRedirect: Checking onboarding redirect', { 
+        location, 
+        user: !!user,
+        userData: !!userData,
+        onboarding_completed: userData?.preferences?.onboarding_completed,
+        completingOnboarding,
+        onboardingBypass,
+        allowedRoute: allowedDuringOnboarding.includes(location),
+        shouldRedirect: shouldRedirectToOnboarding
+      });
+      
+      if (shouldRedirectToOnboarding) {
+        console.log('AuthRedirect: REDIRECTING to onboarding');
+        navigate('/onboarding');
+        return;
+      }
     }
   }, [user, userData, initialized, loading, userDataLoading, location, navigate]);
 
