@@ -143,11 +143,8 @@ export default function SelectMode() {
       console.log('SelectMode: Completed onboarding, preventing future redirects');
       localStorage.setItem('onboarding_bypass', 'true');
       
-      // Also force a page reload to ensure clean state
-      setTimeout(() => {
-        console.log('SelectMode: Forcing page reload to ensure clean state');
-        window.location.href = '/organization/dashboard';
-      }, 100);
+      // Force immediate navigation without timeout to prevent loops
+      console.log('SelectMode: Completed, bypass flag set, user should be able to navigate freely');
     },
     onError: (err, userType, context) => {
       // Reset the flag on error
