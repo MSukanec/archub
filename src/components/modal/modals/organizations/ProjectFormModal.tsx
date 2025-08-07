@@ -460,29 +460,122 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             <FormField
               control={form.control}
               name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color del proyecto</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="color"
-                        value={field.value || "#ffffff"}
-                        onChange={field.onChange}
-                        className="w-16 h-10 p-1 border rounded"
-                      />
-                      <Input
-                        type="text"
-                        value={field.value || "#ffffff"}
-                        onChange={field.onChange}
-                        placeholder="#ffffff"
-                        className="flex-1"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                // Función para convertir nombres de colores CSS a hex
+                const colorNameToHex = (colorName: string): string => {
+                  const colorMap: { [key: string]: string } = {
+                    'red': '#ff0000',
+                    'green': '#008000',
+                    'blue': '#0000ff',
+                    'yellow': '#ffff00',
+                    'cyan': '#00ffff',
+                    'magenta': '#ff00ff',
+                    'orange': '#ffa500',
+                    'purple': '#800080',
+                    'pink': '#ffc0cb',
+                    'brown': '#a52a2a',
+                    'gray': '#808080',
+                    'grey': '#808080',
+                    'black': '#000000',
+                    'white': '#ffffff',
+                    'lime': '#00ff00',
+                    'navy': '#000080',
+                    'maroon': '#800000',
+                    'olive': '#808000',
+                    'teal': '#008080',
+                    'silver': '#c0c0c0',
+                    'gold': '#ffd700',
+                    'indigo': '#4b0082',
+                    'violet': '#ee82ee',
+                    'turquoise': '#40e0d0',
+                    'coral': '#ff7f50',
+                    'salmon': '#fa8072',
+                    'crimson': '#dc143c',
+                    'khaki': '#f0e68c',
+                    'plum': '#dda0dd',
+                    'orchid': '#da70d6',
+                    'tan': '#d2b48c',
+                    'beige': '#f5f5dc',
+                    'mint': '#98ff98',
+                    'lavender': '#e6e6fa',
+                    'ivory': '#fffff0'
+                  };
+                  return colorMap[colorName.toLowerCase()] || colorName;
+                };
+
+                // Función para normalizar el valor del color
+                const normalizeColor = (value: string): string => {
+                  if (!value) return "#ffffff";
+                  
+                  const trimmed = value.trim().toLowerCase();
+                  
+                  // Si es un nombre de color, convertir a hex
+                  const hexFromName = colorNameToHex(trimmed);
+                  if (hexFromName !== trimmed) {
+                    return hexFromName;
+                  }
+                  
+                  // Si no tiene #, agregarlo
+                  if (!trimmed.startsWith('#')) {
+                    // Validar que sea un código hex válido (3 o 6 caracteres)
+                    if (/^[0-9a-f]{3}$|^[0-9a-f]{6}$/i.test(trimmed)) {
+                      return `#${trimmed}`;
+                    }
+                  }
+                  
+                  // Si ya tiene # y es válido, devolverlo
+                  if (/^#[0-9a-f]{3}$|^#[0-9a-f]{6}$/i.test(trimmed)) {
+                    return trimmed;
+                  }
+                  
+                  // Si no es válido, mantener el valor original
+                  return value;
+                };
+
+                const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const inputValue = e.target.value;
+                  const normalizedValue = normalizeColor(inputValue);
+                  field.onChange(normalizedValue);
+                };
+
+                const displayValue = field.value || "#ffffff";
+                const isValidColor = /^#[0-9a-f]{3}$|^#[0-9a-f]{6}$/i.test(displayValue);
+
+                return (
+                  <FormItem>
+                    <FormLabel>Color del proyecto</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="color"
+                          value={isValidColor ? displayValue : "#ffffff"}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className="w-16 h-10 p-1 border rounded"
+                        />
+                        <Input
+                          type="text"
+                          value={displayValue}
+                          onChange={handleTextChange}
+                          onBlur={() => {
+                            const normalized = normalizeColor(field.value || "");
+                            if (normalized !== field.value) {
+                              field.onChange(normalized);
+                            }
+                          }}
+                          placeholder="Ej: #ff0000, red, cyan"
+                          className="flex-1"
+                        />
+                      </div>
+                      {!isValidColor && displayValue && (
+                        <p className="text-xs text-yellow-600 mt-1">
+                          Ingresa un color válido (ej: #ff0000, red, cyan)
+                        </p>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
       </form>
