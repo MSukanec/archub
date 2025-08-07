@@ -16,14 +16,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File, Images } from 'lucide-react';
-import UserSelector from '@/components/ui-custom/UserSelector';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+
 import { supabase } from '@/lib/supabase';
 
 const gallerySchema = z.object({
   title: z.string().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
-  created_by: z.string().min(1, 'El creador es obligatorio'),
 });
 
 type GalleryFormData = z.infer<typeof gallerySchema>;
@@ -43,7 +41,6 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const queryClient = useQueryClient();
   const { setPanel } = useModalPanelStore();
   const [files, setFiles] = useState<File[]>([]);
-  const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize panel to edit mode when modal opens
@@ -56,7 +53,6 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     defaultValues: {
       title: '',
       description: '',
-      created_by: '',
     },
   });
 
@@ -64,24 +60,20 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   // Reset form when editing file changes or user data loads
   useEffect(() => {
-    if (userData && organizationMembers) {
+    if (userData) {
       if (editingFile) {
         reset({
           title: editingFile.title || '',
           description: editingFile.description || '',
-          created_by: editingFile.created_by || userData.user.id,
         });
       } else {
-        // Seleccionar usuario actual por defecto en modo creación
-        const currentUserMember = organizationMembers?.find((member: any) => member.user_id === userData?.user?.id);
         reset({
           title: '',
           description: '',
-          created_by: currentUserMember?.user_id || userData.user.id,
         });
       }
     }
-  }, [editingFile, reset, userData, organizationMembers]);
+  }, [editingFile, reset, userData]);
 
   // Efecto para autocompletar el título con el nombre del archivo
   useEffect(() => {
@@ -104,9 +96,8 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         entry_type: 'registro_general',
       }));
 
-      // Encontrar el user_id del miembro seleccionado
-      const selectedMember = organizationMembers?.find((member: any) => member.user_id === data.created_by);
-      const userIdToUse = selectedMember?.user_id || userData.user.id;
+      // Usar el ID del usuario actual como creador
+      const userIdToUse = userData.user.id;
 
       return uploadGalleryFiles(
         galleryFiles,
@@ -187,97 +178,6 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const editPanel = (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Creator Field */}
-        <FormField
-          control={form.control}
-          name="created_by"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Creador</FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={organizationMembers?.map(member => ({
-                    id: member.user_id,
-                    full_name: member.full_name,
-                    email: member.email,
-                    avatar_url: member.avatar_url,
-                    first_name: member.full_name.split(' ')[0] || '',
-                    last_name: member.full_name.split(' ').slice(1).join(' ') || ''
-                  })) || []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar creador"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* File Upload Section */}
-        {!editingFile && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Archivos
-              </label>
-              <div 
-                onClick={triggerFileInput}
-                className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
-              >
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-sm text-muted-foreground mb-2">
-                  Haz clic para subir archivos
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Imágenes y videos son compatibles
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*,video/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </div>
-            </div>
-
-            {/* Selected Files Display */}
-            {files.length > 0 && (
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-foreground">
-                  Archivos seleccionados ({files.length})
-                </label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {files.map((file, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-2 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <File className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-foreground truncate">
-                          {file.name}
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(index)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Title Field */}
         <FormField
           control={form.control}
@@ -311,6 +211,68 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
             </FormItem>
           )}
         />
+
+        {/* File Upload Section */}
+        {!editingFile && (
+          <div className="space-y-4">
+            <div>
+              <FormLabel>Archivos</FormLabel>
+              <div 
+                onClick={triggerFileInput}
+                className="relative border-2 border-dashed border-[var(--accent)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer mt-2"
+              >
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  Haz clic para subir archivos
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Imágenes y videos son compatibles
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Selected Files Display */}
+            {files.length > 0 && (
+              <div className="space-y-2">
+                <FormLabel>
+                  Archivos seleccionados ({files.length})
+                </FormLabel>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <File className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-foreground truncate">
+                          {file.name}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </form>
     </Form>
   );
