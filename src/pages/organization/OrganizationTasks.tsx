@@ -161,17 +161,30 @@ function TasksContent() {
 
   // Header configuration following ai-page-template.md
   const headerProps = {
+    icon: CheckSquare,
     title: "Tareas para Hacer",
-    showSearch: false,
-    actions: []
+    actionButton: currentBoardId ? {
+      label: 'Nueva Lista',
+      icon: Plus,
+      onClick: () => openModal('list', { boardId: currentBoardId })
+    } : undefined,
+    additionalButton: {
+      label: 'Nuevo Tablero',
+      icon: Plus,
+      variant: 'ghost' as const,
+      onClick: () => openModal('board', {}),
+      restricted: {
+        feature: "max_kanban_boards",
+        current: boards.length
+      }
+    }
   };
 
   // Loading state
   if (boardsLoading) {
     const loadingHeaderProps = {
-      title: "Tareas para Hacer",
-      showSearch: false,
-      actions: []
+      icon: CheckSquare,
+      title: "Tareas para Hacer"
     };
 
     return (
@@ -188,9 +201,17 @@ function TasksContent() {
   // Empty state with EmptyState
   if (boards.length === 0) {
     const emptyHeaderProps = {
+      icon: CheckSquare,
       title: "Tareas para Hacer",
-      showSearch: false,
-      actions: []
+      actionButton: {
+        label: 'Nuevo Tablero',
+        icon: Plus,
+        onClick: () => openModal('board', {}),
+        restricted: {
+          feature: "max_kanban_boards",
+          current: boards.length
+        }
+      }
     };
 
     return (
@@ -223,46 +244,14 @@ function TasksContent() {
           ]}
         />
 
-        {/* ActionBar Desktop - ALWAYS VISIBLE */}
-        <ActionBarDesktop
-          title="Gestión de Tareas para Hacer"
-          icon={<CheckSquare className="w-5 h-5" />}
-          showProjectSelector={false}
-          features={[
-            {
-              icon: <Kanban className="w-5 h-5" />,
-              title: "Organización visual tipo Kanban",
-              description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
-            },
-            {
-              icon: <List className="w-5 h-5" />,
-              title: "Múltiples tableros por organización",
-              description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
-            },
-            {
-              icon: <CheckSquare className="w-5 h-5" />,
-              title: "Colaboración y asignación de responsables",
-              description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
-            },
-            {
-              icon: <Plus className="w-5 h-5" />,
-              title: "Gestión flexible de contenido",
-              description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
-            }
-          ]}
-          customActions={[
-            <CustomRestricted 
-              key="nuevo-tablero"
-              feature="max_kanban_boards" 
-              current={boards.length}
-            >
-              <Button onClick={() => openModal('board', {})}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Tablero
-              </Button>
-            </CustomRestricted>
-          ]}
-        />
+        {/* ActionBar Desktop - Empty state message */}
+        <div className="bg-card rounded-lg border p-6 text-center">
+          <Kanban className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No hay tableros creados</h3>
+          <p className="text-muted-foreground mb-4">
+            Crea tu primer tablero para comenzar a organizar tareas con el sistema Kanban
+          </p>
+        </div>
 
         <EmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
@@ -305,53 +294,10 @@ function TasksContent() {
         ]}
       />
 
-      {/* ActionBar Desktop */}
+      {/* ActionBar Desktop - Solo selector de tableros */}
       <ActionBarDesktop
-        title="Gestión de Tareas para Hacer"
-        icon={<CheckSquare className="w-5 h-5" />}
-        features={[
-          {
-            icon: <Kanban className="w-5 h-5" />,
-            title: "Organización visual tipo Kanban",
-            description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
-          },
-          {
-            icon: <List className="w-5 h-5" />,
-            title: "Múltiples tableros por organización",
-            description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
-          },
-          {
-            icon: <CheckSquare className="w-5 h-5" />,
-            title: "Colaboración y asignación de responsables",
-            description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
-          },
-          {
-            icon: <Plus className="w-5 h-5" />,
-            title: "Gestión flexible de contenido",
-            description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
-          }
-        ]}
-        primaryActionLabel="Nueva Lista"
-        onPrimaryActionClick={() => {
-          if (currentBoardId) {
-            openModal('list', { boardId: currentBoardId })
-          }
-        }}
-        customActions={[
-          <CustomRestricted 
-            key="nuevo-tablero"
-            feature="max_kanban_boards" 
-            current={boards.length}
-          >
-            <Button 
-              variant="secondary" 
-              onClick={() => openModal('board', {})}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nuevo Tablero
-            </Button>
-          </CustomRestricted>
-        ]}
+        title="Tableros de Tareas"
+        icon={<Kanban className="w-5 h-5" />}
         budgetSelector={{
           budgets: boards,
           selectedBudgetId: currentBoardId || '',
