@@ -133,15 +133,23 @@ export default function SelectMode() {
       // Force cache invalidation
       await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       
-      // Force refetch with refresh parameter to ensure RPC returns fresh data
-      await queryClient.fetchQuery({ 
-        queryKey: ['/api/current-user'], 
-        queryFn: () => fetch('/api/current-user?refresh=true', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
-          }
-        }).then(res => res.json())
-      });
+      // Force refetch with refresh parameter to ensure RPC returns fresh data  
+      // Get the current Supabase session to get the correct token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      if (token) {
+        await queryClient.fetchQuery({ 
+          queryKey: ['/api/current-user'], 
+          queryFn: () => fetch('/api/current-user?refresh=true', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }).then(res => res.json())
+        });
+      } else {
+        console.warn('SelectMode: No valid session token found, skipping refresh');
+      }
       
       // Set the bypass flag
       console.log('SelectMode: Completed onboarding, preventing future redirects');
