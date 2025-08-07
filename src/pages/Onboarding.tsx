@@ -4,7 +4,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
-import { useNavigationStore } from "@/stores/navigationStore";
+
 import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -16,15 +16,13 @@ export default function Onboarding() {
   const [, navigate] = useLocation();
   const { user, loading: authLoading, initialized } = useAuthStore();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
-  const { setSidebarContext } = useNavigationStore();
+
   const { toast } = useToast();
   const { setTheme } = useThemeStore();
   const { 
-    currentStep, 
     formData, 
     updateFormData, 
-    resetOnboarding, 
-    setCurrentStep 
+    resetOnboarding
   } = useOnboardingStore();
 
   // Basic auth check without onboarding redirection
@@ -44,9 +42,6 @@ export default function Onboarding() {
     );
   }
 
-  // Onboarding optimized to 1 step only
-  const totalSteps = 1;
-
   // Initialize form data with existing user data if available
   useEffect(() => {
     if (userData && !userLoading) {
@@ -56,19 +51,11 @@ export default function Onboarding() {
         organization_name: userData.organization?.name || '',
         theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
         last_user_type: userData.preferences?.last_user_type || null,
-        default_currency_id: '',
-        secondary_currency_ids: [],
-        default_wallet_id: '',
-        secondary_wallet_ids: [],
       });
-
-      // Always start from the only step
-      setCurrentStep(1);
     }
-  }, [userData, userLoading, updateFormData, setCurrentStep]);
+  }, [userData, userLoading, updateFormData]);
 
   const handleFinishOnboarding = () => {
-    console.log('handleFinishOnboarding called - completing 1-step onboarding');
     saveOnboardingMutation.mutate();
   };
 
@@ -107,8 +94,6 @@ export default function Onboarding() {
       if (preferencesError) {
         console.error('Error updating user preferences:', preferencesError);
         throw preferencesError;
-      } else {
-        console.log('Successfully updated user preferences with onboarding_completed: true');
       }
 
       // Update organization name if provided
@@ -124,87 +109,7 @@ export default function Onboarding() {
         if (orgError) throw orgError;
       }
 
-      // Save financial preferences if provided
-      if (formData.default_currency_id && userData.organization?.id) {
-        // Save organization preferences
-        const { error: orgPrefError } = await supabase
-          .from('organization_preferences')
-          .upsert({
-            organization_id: userData.organization.id,
-            default_currency_id: formData.default_currency_id,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'organization_id' });
 
-        if (orgPrefError) throw orgPrefError;
-
-        // Save organization currencies - use insert instead of upsert to avoid conflict issues
-        if (formData.default_currency_id) {
-          const { error: currencyError } = await supabase
-            .from('organization_currencies')
-            .insert({
-              organization_id: userData.organization.id,
-              currency_id: formData.default_currency_id,
-              is_default: true,
-              is_active: true,
-              created_at: new Date().toISOString()
-            });
-
-          if (currencyError && currencyError.code !== '23505') { // Ignore duplicate key errors
-            throw currencyError;
-          }
-        }
-
-        // Save secondary currencies
-        for (const currencyId of formData.secondary_currency_ids) {
-          const { error: secCurrencyError } = await supabase
-            .from('organization_currencies')
-            .insert({
-              organization_id: userData.organization.id,
-              currency_id: currencyId,
-              is_default: false,
-              is_active: true,
-              created_at: new Date().toISOString()
-            });
-
-          if (secCurrencyError && secCurrencyError.code !== '23505') { // Ignore duplicate key errors
-            throw secCurrencyError;
-          }
-        }
-
-        // Save organization wallets - use insert instead of upsert
-        if (formData.default_wallet_id) {
-          const { error: walletError } = await supabase
-            .from('organization_wallets')
-            .insert({
-              organization_id: userData.organization.id,
-              wallet_id: formData.default_wallet_id,
-              is_default: true,
-              is_active: true,
-              created_at: new Date().toISOString()
-            });
-
-          if (walletError && walletError.code !== '23505') { // Ignore duplicate key errors
-            throw walletError;
-          }
-        }
-
-        // Save secondary wallets
-        for (const walletId of formData.secondary_wallet_ids) {
-          const { error: secWalletError } = await supabase
-            .from('organization_wallets')
-            .insert({
-              organization_id: userData.organization.id,
-              wallet_id: walletId,
-              is_default: false,
-              is_active: true,
-              created_at: new Date().toISOString()
-            });
-
-          if (secWalletError && secWalletError.code !== '23505') { // Ignore duplicate key errors
-            throw secWalletError;
-          }
-        }
-      }
 
       // Apply theme immediately
       setTheme(formData.theme === 'dark');
@@ -212,20 +117,17 @@ export default function Onboarding() {
       return { success: true };
     },
     onSuccess: () => {
-      console.log('Onboarding mutation success - about to navigate to select-mode');
       queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       toast({
         title: "¡Perfecto!",
         description: "Configuración inicial completada. Ahora elige tu modo de uso.",
       });
       
-      // Redirect to select-mode after successful onboarding
-      console.log('Setting timeout for navigation...');
+      // Navigate to select-mode after successful onboarding
       setTimeout(() => {
-        console.log('Navigating to /select-mode');
-        // Force a page reload to ensure the updated userData is fetched
-        window.location.href = '/select-mode';
-      }, 1500); // Wait 1.5 seconds to show the toast
+        navigate('/select-mode');
+        resetOnboarding();
+      }, 800);
     },
     onError: (error) => {
       console.error('Error saving onboarding data:', error);
