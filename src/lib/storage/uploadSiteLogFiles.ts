@@ -10,7 +10,8 @@ export async function uploadSiteLogFiles(
   files: File[],
   siteLogId: string,
   userId: string,
-  organizationId: string
+  organizationId: string,
+  projectId?: string
 ): Promise<UploadedFile[]> {
   const uploadedFiles: UploadedFile[] = []
 
@@ -28,21 +29,23 @@ export async function uploadSiteLogFiles(
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
-        .from('site-log-files')
+        .from('project-media')
         .getPublicUrl(filePath)
 
       const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video'
 
       const { error: dbError } = await supabase
-        .from('site_log_files')
+        .from('project_media')
         .insert({
           site_log_id: siteLogId,
           file_path: filePath,
           file_name: file.name,
           file_type: fileType,
           file_url: urlData.publicUrl,
-          user_id: userId, // Use real user.id from context, not auth.uid()
+          created_by: userId, // Use real user.id from context, not auth.uid()
           organization_id: organizationId,
+          project_id: projectId,
+          file_size: file.size,
           visibility: 'organization'
         })
 
@@ -53,7 +56,7 @@ export async function uploadSiteLogFiles(
 
       // Now upload to Supabase Storage - RLS should allow it
       const { error: uploadError } = await supabase.storage
-        .from('site-log-files')
+        .from('project-media')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
@@ -63,7 +66,7 @@ export async function uploadSiteLogFiles(
         console.error('Error uploading file:', uploadError)
         // Clean up database record if upload fails
         await supabase
-          .from('site_log_files')
+          .from('project_media')
           .delete()
           .eq('file_path', filePath)
         throw uploadError
@@ -87,7 +90,7 @@ export async function uploadSiteLogFiles(
 
 export async function getSiteLogFiles(siteLogId: string) {
   const { data, error } = await supabase
-    .from('site_log_files')
+    .from('project_media')
     .select('*')
     .eq('site_log_id', siteLogId)
 

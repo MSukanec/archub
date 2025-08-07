@@ -120,7 +120,7 @@ export default function ProjectGallery() {
       }
 
       let query = supabase
-        .from('site_log_files')
+        .from('project_media')
         .select(`
           id,
           file_url,
@@ -131,14 +131,9 @@ export default function ProjectGallery() {
           description,
           project_id,
           organization_id,
-          site_logs (
-            id,
-            project_id,
-            organization_id,
-            entry_type,
-            log_date,
-            created_by
-          ),
+          file_size,
+          visibility,
+          created_by,
           projects (
             id,
             name
@@ -164,7 +159,7 @@ export default function ProjectGallery() {
         const publicUrl = file.file_url?.startsWith('http') 
           ? file.file_url 
           : file.file_url 
-            ? supabase.storage.from('site-log-files').getPublicUrl(file.file_url).data.publicUrl
+            ? supabase.storage.from('project-media').getPublicUrl(file.file_url).data.publicUrl
             : '';
 
         return {
@@ -175,20 +170,13 @@ export default function ProjectGallery() {
           original_name: file.file_name || 'Sin nombre',
           title: file.file_name || 'Sin título',
           description: file.description || '',
-          entry_type: file.site_logs?.entry_type || 'registro_general',
+          entry_type: 'registro_general', // Default value since we don't have site_logs relation anymore
           created_at: file.created_at,
           project_id: file.project_id,
           project_name: file.projects?.name || 'Proyecto sin nombre',
-          site_log: file.site_log_id ? {
-            id: file.site_log_id,
-            log_date: file.site_logs?.log_date || file.created_at,
-            entry_type: file.site_logs?.entry_type || 'registro_general',
-            creator: {
-              id: file.site_logs?.created_by || '',
-              full_name: userData?.user?.full_name || 'Usuario',
-              avatar_url: userData?.user?.avatar_url || ''
-            }
-          } : undefined
+          file_size: file.file_size,
+          visibility: file.visibility,
+          created_by: file.created_by
         };
       }) || [];
     },
@@ -315,7 +303,7 @@ export default function ProjectGallery() {
 
   const handleEdit = (file: GalleryFile) => {
     setEditingFile(file);
-    openModal('gallery-upload', { editingFile: file });
+    openModal('gallery', { editingFile: file });
   };
 
   const handleDelete = (file: GalleryFile) => {

@@ -1,13 +1,13 @@
 import { supabase } from '@/lib/supabase';
 
-export async function setupSiteLogFilesBucket() {
+export async function setupProjectMediaBucket() {
   if (!supabase) {
     console.error('Supabase client not initialized');
     return;
   }
 
   try {
-    console.log('Setting up site-log-files bucket policies...');
+    console.log('Setting up project-media bucket policies...');
 
     // Verificar si el bucket existe
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
@@ -17,11 +17,11 @@ export async function setupSiteLogFilesBucket() {
       return;
     }
 
-    const siteLogBucket = buckets?.find(bucket => bucket.name === 'site-log-files');
+    const projectMediaBucket = buckets?.find(bucket => bucket.name === 'project-media');
     
-    if (!siteLogBucket) {
-      console.log('Creating site-log-files bucket...');
-      const { error: createError } = await supabase.storage.createBucket('site-log-files', {
+    if (!projectMediaBucket) {
+      console.log('Creating project-media bucket...');
+      const { error: createError } = await supabase.storage.createBucket('project-media', {
         public: false,
         allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4', 'video/avi', 'video/mov'],
         fileSizeLimit: 10485760 // 10MB
@@ -53,30 +53,30 @@ export async function createBucketPolicies() {
     // Estas políticas se crean desde el panel de Supabase, pero podemos intentar desde aquí
     const policies = [
       {
-        name: 'Allow authenticated uploads to site-log-files',
+        name: 'Allow authenticated uploads to project-media',
         sql: `
-          CREATE POLICY "Allow authenticated uploads to site-log-files" ON storage.objects
+          CREATE POLICY "Allow authenticated uploads to project-media" ON storage.objects
           FOR INSERT 
           TO authenticated 
-          WITH CHECK (bucket_id = 'site-log-files');
+          WITH CHECK (bucket_id = 'project-media');
         `
       },
       {
-        name: 'Allow authenticated users to view site-log-files',
+        name: 'Allow authenticated users to view project-media',
         sql: `
-          CREATE POLICY "Allow authenticated users to view site-log-files" ON storage.objects
+          CREATE POLICY "Allow authenticated users to view project-media" ON storage.objects
           FOR SELECT 
           TO authenticated 
-          USING (bucket_id = 'site-log-files');
+          USING (bucket_id = 'project-media');
         `
       },
       {
-        name: 'Allow authenticated users to delete their site-log-files',
+        name: 'Allow authenticated users to delete their project-media',
         sql: `
-          CREATE POLICY "Allow authenticated users to delete their site-log-files" ON storage.objects
+          CREATE POLICY "Allow authenticated users to delete their project-media" ON storage.objects
           FOR DELETE 
           TO authenticated 
-          USING (bucket_id = 'site-log-files');
+          USING (bucket_id = 'project-media');
         `
       }
     ];

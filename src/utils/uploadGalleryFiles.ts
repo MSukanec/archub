@@ -32,7 +32,7 @@ export async function uploadGalleryFiles(
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
-        .from('site-log-files')
+        .from('project-media')
         .getPublicUrl(filePath);
 
       const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video';
@@ -53,7 +53,7 @@ export async function uploadGalleryFiles(
       console.log('Insertando en DB:', insertData);
 
       const { error: dbError } = await supabase
-        .from('site_log_files')
+        .from('project_media')
         .insert(insertData);
 
       if (dbError) {
@@ -63,7 +63,7 @@ export async function uploadGalleryFiles(
 
       // Now upload to Supabase Storage - RLS should allow it
       const { error: uploadError } = await supabase.storage
-        .from('site-log-files')
+        .from('project-media')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
@@ -73,7 +73,7 @@ export async function uploadGalleryFiles(
         console.error('Error uploading file:', uploadError);
         // Clean up database record if upload fails
         await supabase
-          .from('site_log_files')
+          .from('project_media')
           .delete()
           .eq('file_path', filePath);
         throw uploadError;

@@ -149,7 +149,7 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
 
       // Fetch files separately
       const { data: filesData } = await supabase
-        .from('site_log_files')
+        .from('project_media')
         .select('*')
         .in('site_log_id', logIds);
 
