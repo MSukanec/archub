@@ -209,12 +209,18 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
     },
     onSuccess: async (newProject) => {
       // Si estamos creando un nuevo proyecto (no editando), establecerlo como activo
-      if (!isEditing && newProject && userData?.organization_preferences?.id && organizationId) {
+      if (!isEditing && newProject && userData?.user?.id && organizationId) {
         try {
+          // Usar upsert para crear o actualizar las preferencias de organización del usuario
           const { error: preferencesError } = await supabase
             .from('user_organization_preferences')
-            .update({ last_project_id: newProject.id })
-            .eq('id', userData.organization_preferences.id);
+            .upsert({
+              user_id: userData.user.id,
+              organization_id: organizationId,
+              last_project_id: newProject.id
+            }, {
+              onConflict: 'user_id,organization_id'
+            });
           
           if (preferencesError) {
             console.error('Error setting project as active:', preferencesError);
