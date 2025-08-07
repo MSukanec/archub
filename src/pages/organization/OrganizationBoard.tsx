@@ -303,7 +303,7 @@ function BoardContent() {
           onCreateList={() => openModal('list', { boardId: currentBoardId })}
           onDeleteList={handleDeleteList}
           onDeleteCard={handleDeleteCard}
-          onCardEdit={(card) => openModal('card', { card: card, isEditing: true })}
+          onCardEdit={(card) => openModal('card', { card: card, isEditing: true, boardId: currentBoardId })}
           loading={listsLoading || cardsLoading}
         />
       )}

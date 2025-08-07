@@ -196,7 +196,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                         <div>
                           {/* Add Card Button - Always show first */}
                           <Button
-                            onClick={() => openModal('card', { listId: list.id })}
+                            onClick={() => openModal('card', { listId: list.id, boardId })}
                             className="w-full mb-2 h-8 justify-start"
                           >
                             <Plus className="h-3 w-3 mr-2" />

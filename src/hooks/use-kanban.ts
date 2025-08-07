@@ -610,6 +610,7 @@ export function useCreateKanbanCard() {
       created_by: string;
       assigned_to?: string;
       due_date?: string;
+      board_id?: string; // Add board_id to avoid additional queries
     }) => {
       if (!userData?.user?.id) throw new Error('User required')
       
@@ -638,22 +639,15 @@ export function useCreateKanbanCard() {
         .single()
 
       if (error) throw error
-      return data
+      return { ...data, board_id: cardData.board_id } // Include board_id in response
     },
-    onSuccess: async (data) => {
-      // Get board_id from list to invalidate correct queries
-      try {
-        const { data: listData, error } = await supabase
-          .from('kanban_lists')
-          .select('board_id')
-          .eq('id', data.list_id)
-          .single()
-        
-        if (!error && listData) {
-          queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
-        }
-      } catch (error) {
-        console.warn('Could not invalidate cache after card creation:', error)
+    onSuccess: (data, variables) => {
+      // Use board_id from variables if available, otherwise try from data
+      const boardId = variables.board_id || data.board_id
+      
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: ['kanban-cards', boardId] })
+      } else {
         // Fallback: invalidate all kanban-cards queries
         queryClient.invalidateQueries({ queryKey: ['kanban-cards'] })
       }

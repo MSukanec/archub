@@ -32,12 +32,13 @@ interface CardFormModalProps {
     listId?: string;
     card?: any;
     isEditing?: boolean;
+    boardId?: string;
   };
   onClose: () => void;
 }
 
 export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
-  const { listId, card, isEditing = false } = modalData || {};
+  const { listId, card, isEditing = false, boardId } = modalData || {};
   const { toast } = useToast();
   const { setPanel } = useModalPanelStore();
   const createCardMutation = useCreateKanbanCard();
@@ -121,7 +122,8 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           title: data.title,
           description: data.description || undefined,
           created_by: data.created_by, // Already using organization member ID
-          assigned_to: data.assigned_to || undefined // Already using organization member ID
+          assigned_to: data.assigned_to || undefined, // Already using organization member ID
+          board_id: boardId // Pass boardId to avoid additional query
         });
         
         handleClose();
