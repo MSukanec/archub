@@ -25,6 +25,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ProjectItem from '@/components/cards/ProjectItem'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 
 
 
@@ -303,11 +304,17 @@ export default function OrganizationProjects() {
           />
         )}
 
+        {/* ActionBarDesktopRow - Show between hero and projects */}
+        <ActionBarDesktopRow 
+          filters={[]}
+          actions={[]}
+        />
+
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
           <>
-            {/* Single column layout for all screen sizes */}
-            <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto px-4">
+            {/* Single column layout for all screen sizes - full width */}
+            <div className="grid grid-cols-1 gap-4 w-full px-4">
               {filteredProjects.map((project) => (
                 <ProjectItem
                   key={project.id}
