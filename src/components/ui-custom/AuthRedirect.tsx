@@ -36,9 +36,12 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
       setCompletingOnboarding(false);
     }
 
-    // If user is authenticated but needs onboarding (skip redirect if completing onboarding)
+    // Check localStorage bypass flag first
+    const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
+    
+    // If user is authenticated but needs onboarding (skip redirect if completing onboarding OR bypass is set)
     const allowedDuringOnboarding = ['/onboarding', '/select-mode', '/organization/dashboard', '/dashboard'];
-    const shouldRedirectToOnboarding = user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !allowedDuringOnboarding.includes(location);
+    const shouldRedirectToOnboarding = user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !onboardingBypass && !allowedDuringOnboarding.includes(location);
     
     console.log('AuthRedirect: Checking onboarding redirect', { 
       location, 
@@ -46,6 +49,7 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
       userData: !!userData,
       onboarding_completed: userData?.preferences?.onboarding_completed,
       completingOnboarding,
+      onboardingBypass,
       allowedRoute: allowedDuringOnboarding.includes(location),
       shouldRedirect: shouldRedirectToOnboarding
     });

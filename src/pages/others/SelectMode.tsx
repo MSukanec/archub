@@ -128,28 +128,20 @@ export default function SelectMode() {
       return { previousUserData };
     },
     onSuccess: async () => {
-      // Force cache update with the correct data
-      queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
-        if (!oldData) return oldData;
-        console.log('SelectMode: SUCCESS - Force updating cache onboarding_completed = true');
-        return {
-          ...oldData,
-          preferences: {
-            ...oldData.preferences,
-            onboarding_completed: true
-          }
-        };
-      });
+      // Force cache invalidation and refetch immediately to get fresh data
+      console.log('SelectMode: SUCCESS - Forcing immediate cache refresh');
+      await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       
-      // Toast removed per user request
+      // Force refetch with fresh data
+      await queryClient.refetchQueries({ queryKey: ['/api/current-user'] });
       
       // Navigate immediately with React Router
       setSidebarContext('organization');
       navigate('/organization/dashboard');
       
-      // Don't reset the flag automatically - let the system stabilize
-      // The flag will be managed by the auth flow
-      console.log('SelectMode: Navigation completed, keeping completingOnboarding flag active for stability');
+      // Set a flag that prevents redirect loops permanently
+      console.log('SelectMode: Completed onboarding, preventing future redirects');
+      localStorage.setItem('onboarding_bypass', 'true');
     },
     onError: (err, userType, context) => {
       // Reset the flag on error
@@ -167,11 +159,8 @@ export default function SelectMode() {
       });
     },
     onSettled: () => {
-      // Don't invalidate immediately to avoid overriding our optimistic update
-      console.log('SelectMode: Delaying query invalidation to preserve optimistic update');
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
-      }, 3000);
+      // No need for delayed invalidation since we handle it in onSuccess
+      console.log('SelectMode: Mutation settled');
     },
   });
 
