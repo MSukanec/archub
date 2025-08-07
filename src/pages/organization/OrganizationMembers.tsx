@@ -68,11 +68,14 @@ export default function OrganizationMembers() {
   const organizationId = userData?.organization?.id;
 
   // Fetch organization members using the API endpoint
-  const { data: members = [], isLoading: membersLoading } = useQuery({
+  const { data: membersData = [], isLoading: membersLoading } = useQuery({
     queryKey: ['organization-members', organizationId],
     queryFn: () => `/api/organization/${organizationId}/members`,
     enabled: !!organizationId,
   });
+
+  // Ensure members is always an array
+  const members = Array.isArray(membersData) ? membersData : [];
 
   // Mock guests data (empty for now)
   const guests: any[] = [];
@@ -151,11 +154,18 @@ export default function OrganizationMembers() {
 
   const headerProps = {
     title: "Miembros",
-    actionButton: {
-      label: "Invitar miembro",
-      icon: UserPlus,
-      onClick: () => openModal('member')
-    }
+    actions: [
+      <CustomRestricted 
+        key="invite-member"
+        feature="max_members" 
+        current={members.length}
+      >
+        <Button onClick={() => openModal('member')}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          Invitar miembro
+        </Button>
+      </CustomRestricted>
+    ]
   };
 
 
