@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, CheckCircle } from 'lucide-react';
+
+import { Edit, Trash2 } from 'lucide-react';
 import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 
 type ContactCardProps = {
@@ -98,12 +98,6 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
             <div className="text-[var(--card-fg)] font-medium text-sm truncate">
               {displayName}
             </div>
-            {linked_user_id && (
-              <Badge variant="secondary" className="text-xs shrink-0 ml-4">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Usuario
-              </Badge>
-            )}
           </div>
           
           <div className="flex items-center justify-between mt-1">
