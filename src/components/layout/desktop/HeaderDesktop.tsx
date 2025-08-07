@@ -65,6 +65,8 @@ interface HeaderDesktopProps {
       variant?: "ghost" | "default" | "secondary";
     };
   };
+  // 🆕 NUEVA PROP: Breadcrumbs personalizados
+  breadcrumb?: { name: string; href: string }[];
 }
 
 export function HeaderDesktop({
@@ -81,6 +83,7 @@ export function HeaderDesktop({
   tabs = [],
   onTabChange,
   actionButton,
+  breadcrumb,
 }: HeaderDesktopProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
@@ -212,6 +215,7 @@ export function HeaderDesktop({
     "/organization/preferences": "Preferencias",
     "/organization/activity": "Actividad",
     "/organization/board": "Tablero",
+    "/organization/members": "Miembros",
 
     // Administración
     "/admin/users": "Usuarios",
@@ -228,9 +232,7 @@ export function HeaderDesktop({
     location.startsWith("/design") ||
     location.startsWith("/construction") ||
     location.startsWith("/finances") ||
-    location.startsWith("/project") ||
-    location.startsWith("/organization") ||
-    location.startsWith("/admin");
+    location.startsWith("/project");
 
   // Hook para detectar el estado del sidebar
   const { isDocked: isMainDocked, isHovered: isMainHovered } =
@@ -340,9 +342,24 @@ export function HeaderDesktop({
             </div>
           ) : (
             /* Non-project breadcrumb */
-            <h1 className="text-xs font-normal text-[var(--layout-text)]">
-              {title || getCurrentSectionLabel()}
-            </h1>
+            <div className="flex items-center gap-1">
+              {breadcrumb && breadcrumb.length > 0 ? (
+                breadcrumb.map((item, index) => (
+                  <React.Fragment key={index}>
+                    <span className="text-xs font-normal text-[var(--layout-text)]">
+                      {item.name}
+                    </span>
+                    {index < breadcrumb.length - 1 && (
+                      <span className="text-xs text-[var(--layout-text-muted)]">/</span>
+                    )}
+                  </React.Fragment>
+                ))
+              ) : (
+                <span className="text-xs font-normal text-[var(--layout-text)]">
+                  {title || getCurrentSectionLabel()}
+                </span>
+              )}
+            </div>
           )}
         </div>
 
