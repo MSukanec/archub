@@ -224,7 +224,7 @@ export default function OrganizationManagement() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-user-id': userData?.user.id, // Agregar user_id requerido
+            'x-user-id': userData?.preferences?.user_id, // Usar el user_id de las preferencias
           },
           body: JSON.stringify({ organization_id: organizationId }),
         });
