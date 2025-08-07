@@ -24,6 +24,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ProjectItem from '@/components/cards/ProjectItem'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
+import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 
 
 
@@ -293,6 +294,14 @@ export default function OrganizationProjects() {
 
 
 
+
+        {/* ProjectHeroCard - Show for active project */}
+        {activeProjectId && (
+          <ProjectHeroCard 
+            project={filteredProjects.find(p => p.id === activeProjectId)}
+            organizationId={organizationId}
+          />
+        )}
 
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
