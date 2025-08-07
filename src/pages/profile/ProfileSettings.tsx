@@ -7,7 +7,6 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
-import { supabase } from '@/lib/supabase'
 import { useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -33,21 +32,25 @@ export default function ProfileSettings() {
     mutationFn: async (data: typeof settingsData) => {
       console.log('Saving settings data:', data)
       
-      // Handle user_preferences updates
+      // Use the server endpoint to update preferences
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
           data.theme !== userData?.preferences?.theme) {
         
-        const preferencesUpdates = {
-          sidebar_docked: data.sidebarDocked,
-          theme: data.theme,
+        const response = await fetch('/api/user/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: userData?.user?.id,
+            sidebar_docked: data.sidebarDocked,
+            theme: data.theme,
+          }),
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-        
-        const { error: preferencesError } = await supabase!
-          .from('user_preferences')
-          .update(preferencesUpdates)
-          .eq('user_id', userData?.user?.id)
-        
-        if (preferencesError) throw preferencesError
       }
       
       return data
