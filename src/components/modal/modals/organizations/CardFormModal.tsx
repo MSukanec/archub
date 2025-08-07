@@ -116,15 +116,6 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           return;
         }
 
-        console.log('Creating card with data:', {
-          list_id: listId,
-          title: data.title,
-          description: data.description,
-          created_by: data.created_by,
-          assigned_to: data.assigned_to,
-          membersAvailable: members.map(m => ({ id: m.id, name: m.full_name }))
-        });
-
         await createCardMutation.mutateAsync({
           list_id: listId,
           title: data.title,

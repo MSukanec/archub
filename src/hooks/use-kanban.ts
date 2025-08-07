@@ -638,18 +638,24 @@ export function useCreateKanbanCard() {
       if (error) throw error
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Get board_id from list to invalidate correct queries
-      supabase
-        .from('kanban_lists')
-        .select('board_id')
-        .eq('id', data.list_id)
-        .single()
-        .then(({ data: listData }) => {
-          if (listData) {
-            queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
-          }
-        })
+      try {
+        const { data: listData, error } = await supabase
+          .from('kanban_lists')
+          .select('board_id')
+          .eq('id', data.list_id)
+          .single()
+        
+        if (!error && listData) {
+          queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
+        }
+      } catch (error) {
+        console.warn('Could not invalidate cache after card creation:', error)
+        // Fallback: invalidate all kanban-cards queries
+        queryClient.invalidateQueries({ queryKey: ['kanban-cards'] })
+      }
+      
       toast({ title: "Tarjeta creada exitosamente" })
     },
     onError: (error) => {
