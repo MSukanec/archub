@@ -192,7 +192,7 @@ export default function ProjectHeroImage({
           <>
             {/* No Image Placeholder - styled like EmptyState */}
             <div 
-              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)]/50 hover:border-[var(--accent)] transition-colors rounded-lg"
+              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)] hover:border-[var(--accent)]/80 transition-colors rounded-lg"
               onClick={() => document.getElementById('hero-image-input')?.click()}
             >
               <div className="text-center space-y-4 p-8">
