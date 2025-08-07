@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, File, Images } from 'lucide-react';
+import { Upload, X, File, Images, Image as ImageIcon, FileVideo } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -216,17 +216,17 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         {!editingFile && (
           <div className="space-y-4">
             <div>
-              <FormLabel>Archivos</FormLabel>
+              <FormLabel>Archivos <span className="text-[var(--accent)]">*</span></FormLabel>
               <div 
                 onClick={triggerFileInput}
                 className="relative border-2 border-dashed border-[var(--accent)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer mt-2"
               >
                 <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  Haz clic para subir archivos
+                  Haz clic aquí para seleccionar archivos
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Imágenes y videos son compatibles
+                  Formatos soportados: JPG, PNG, GIF, MP4, MOV, AVI
                 </p>
                 <input
                   ref={fileInputRef}
@@ -249,22 +249,31 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
                   {files.map((file, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-2 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
+                      className="flex items-center justify-between p-3 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
                     >
-                      <div className="flex items-center space-x-2">
-                        <File className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-foreground truncate">
-                          {file.name}
-                        </span>
+                      <div className="flex items-center space-x-3 flex-1">
+                        {file.type.startsWith('image/') ? (
+                          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <FileVideo className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <div className="flex-1">
+                          <p className="text-sm text-foreground truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
                       </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFile(index)}
-                        className="h-6 w-6 p-0"
+                        className="h-8 w-8 p-0"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
