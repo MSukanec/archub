@@ -225,10 +225,6 @@ export default function OrganizationProjects() {
         return old.filter(project => project.id !== projectId)
       })
       
-      // Close modals immediately for responsive feel
-      setProjectToDelete(null)
-      setShowConfirm(false)
-      
       return { previousProjects }
     },
     onSuccess: () => {
@@ -252,10 +248,6 @@ export default function OrganizationProjects() {
         description: error.message || "No se pudo eliminar el proyecto",
         variant: "destructive"
       })
-      
-      // Reopen modal on error  
-      setProjectToDelete(projectId)
-      setShowConfirm(true)
     }
   })
 
