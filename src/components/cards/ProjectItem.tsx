@@ -31,8 +31,8 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
   return (
     <Card className="w-full hover:shadow-lg transition-all duration-200 cursor-default">
       {/* INFO SECTION - Información del proyecto */}
-      <CardContent className="p-4 space-y-4">
-        {/* Project Name and Active Button */}
+      <CardContent className="p-4 space-y-3">
+        {/* Row 1: Project Name and Buttons */}
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-foreground text-lg leading-tight truncate flex-1 mr-3">
             {project.name}
@@ -91,25 +91,17 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
           </div>
         </div>
         
-        {/* Project Details and Member Avatars */}
-        <div className="flex items-end justify-between">
-          {/* Left side - Project details */}
-          <div className="space-y-1 flex-1">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Estado:</span> {statusConfig.label}
-            </p>
+        {/* Row 2: Inline Project Details and Member Avatars */}
+        <div className="flex items-center justify-between">
+          {/* Left side - Inline project details */}
+          <div className="text-sm text-muted-foreground">
+            {project.project_data?.project_type?.name || 'Sin especificar'} / {project.project_data?.modality?.name || 'Sin especificar'} / {statusConfig.label}
           </div>
           
           {/* Right side - Member avatars (only creator for now) */}
           <div className="flex items-center">
             {project.creator && (
-              <Avatar className="w-8 h-8 border-2 border-background">
+              <Avatar className="w-7 h-7 border-2 border-background">
                 <AvatarImage src={project.creator.avatar_url || ''} />
                 <AvatarFallback className="text-xs">
                   {project.creator.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}

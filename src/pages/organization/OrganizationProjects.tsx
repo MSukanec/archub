@@ -304,44 +304,43 @@ export default function OrganizationProjects() {
           />
         )}
 
-        {/* ActionBarDesktopRow - Show between hero and projects */}
-        <ActionBarDesktopRow 
-          filters={[]}
-          actions={[
-            {
-              label: "Buscar",
-              icon: Search,
-              onClick: () => {
-                // Placeholder for search functionality
-                console.log("Search clicked");
-              },
-              variant: "ghost"
-            },
-            {
-              label: "Filtros", 
-              icon: Filter,
-              onClick: () => {
-                // Placeholder for filters functionality
-                console.log("Filters clicked");
-              },
-              variant: "ghost"
-            },
-            {
-              label: "Limpiar",
-              icon: X,
-              onClick: () => {
-                setSearchValue("")
-                setFilterByStatus("all")
-                setSortBy("date_recent")
-              },
-              variant: "ghost"
-            }
-          ]}
-        />
-
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
           <>
+            {/* ActionBarDesktopRow - Show only when there are projects */}
+            <ActionBarDesktopRow 
+              filters={[]}
+              actions={[
+                {
+                  label: "Buscar",
+                  icon: Search,
+                  onClick: () => {
+                    // Placeholder for search functionality
+                    console.log("Search clicked");
+                  },
+                  variant: "ghost"
+                },
+                {
+                  label: "Filtros", 
+                  icon: Filter,
+                  onClick: () => {
+                    // Placeholder for filters functionality
+                    console.log("Filters clicked");
+                  },
+                  variant: "ghost"
+                },
+                {
+                  label: "Limpiar",
+                  icon: X,
+                  onClick: () => {
+                    setSearchValue("")
+                    setFilterByStatus("all")
+                    setSortBy("date_recent")
+                  },
+                  variant: "ghost"
+                }
+              ]}
+            />
             {/* Single column layout for all screen sizes - full width */}
             <div className="grid grid-cols-1 gap-4 w-full">
               {filteredProjects.map((project) => (
