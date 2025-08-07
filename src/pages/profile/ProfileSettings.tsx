@@ -100,6 +100,7 @@ export default function ProfileSettings() {
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
+        <div className="text-center text-muted-foreground">
           Loading settings...
         </div>
       </Layout>
@@ -110,33 +111,43 @@ export default function ProfileSettings() {
     <Layout headerProps={headerProps}>
       {/* ActionBar */}
       <ActionBarDesktop
+        title="Preferencias"
+        icon={<Settings className="h-5 w-5" />}
         showProjectSelector={false}
         showSearch={false}
         showGrouping={false}
         features={[
           {
+            icon: <Palette className="h-4 w-4" />,
             title: "Tema Visual",
             description: "Personaliza la apariencia de tu aplicación cambiando entre tema claro y oscuro según tu preferencia."
           },
           {
+            icon: <Monitor className="h-4 w-4" />, 
             title: "Sidebar y Navegación",
             description: "Configura el comportamiento de la barra lateral para mantenerla fija o permitir que se oculte automáticamente."
           },
           {
+            icon: <HelpCircle className="h-4 w-4" />,
             title: "Modo Tutorial",
             description: "Activa o desactiva las ayudas visuales y explicaciones para nuevos usuarios en toda la aplicación."
           },
           {
+            icon: <Shield className="h-4 w-4" />,
             title: "Configuración Avanzada",
             description: "Accede a opciones avanzadas de configuración y personalización de tu experiencia de usuario."
           }
         ]}
       />
 
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Feature Introduction */}
         <FeatureIntroduction
+          title="Configuración de Preferencias"
+          icon={<UserCircle className="h-6 w-6" />}
           features={[
             {
+              icon: <Settings className="h-4 w-4" />,
               title: "Preferencias de Aplicación",
               description: "Configura el tema visual (claro/oscuro) y el comportamiento de la barra lateral según tus preferencias."
             }
@@ -145,20 +156,33 @@ export default function ProfileSettings() {
 
         {/* Saving indicator */}
         {isSaving && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
             Guardando...
           </div>
         )}
 
         {/* Preferencias Section */}
         <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Preferencias</h3>
               </div>
+              <p className="text-sm text-muted-foreground">
                 Configura las preferencias de tu aplicación.
               </p>
             </div>
 
             {/* Right Column - Form Fields */}
+            <div className="space-y-6">
               {/* Tema */}
+              <div className="flex items-center justify-between py-2">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Modo oscuro</Label>
+                  <div className="text-xs text-muted-foreground">
                     Cambiar entre tema claro y oscuro
                   </div>
                 </div>
@@ -169,6 +193,10 @@ export default function ProfileSettings() {
               </div>
               
               {/* Sidebar fixed */}
+              <div className="flex items-center justify-between py-2">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Sidebar fijo</Label>
+                  <div className="text-xs text-muted-foreground">
                     Mantener el sidebar siempre visible
                   </div>
                 </div>
@@ -181,17 +209,29 @@ export default function ProfileSettings() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Tutorial Section */}
         <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[var(--accent)]" />
+                <h3 className="text-lg font-semibold">Tutorial</h3>
               </div>
+              <p className="text-sm text-muted-foreground">
                 Configura la experiencia de nuevo usuario.
               </p>
             </div>
 
             {/* Right Column - Form Fields */}
+            <div className="space-y-6">
               {/* Modo nuevo usuario */}
+              <div className="flex items-center justify-between py-2">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Modo nuevo usuario</Label>
+                  <div className="text-xs text-muted-foreground">
                     Mostrar ayudas y explicaciones en toda la aplicación
                   </div>
                 </div>

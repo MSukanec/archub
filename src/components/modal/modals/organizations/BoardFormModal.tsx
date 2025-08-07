@@ -118,9 +118,13 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   const viewPanel = (
     <>
       <div>
+        <h4 className="font-medium">Nombre del tablero</h4>
+        <p className="text-muted-foreground mt-1">{board?.name || 'Sin nombre'}</p>
       </div>
       
       <div>
+        <h4 className="font-medium">Descripción</h4>
+        <p className="text-muted-foreground mt-1">
           {board?.description || 'Sin descripción'}
         </p>
       </div>
@@ -129,6 +133,7 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
 
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -176,6 +181,7 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
           <button
             type="button"
             onClick={() => setPanel('view')}
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             ← Volver
           </button>

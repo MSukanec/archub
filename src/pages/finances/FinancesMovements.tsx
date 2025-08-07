@@ -169,6 +169,7 @@ export default function Movements() {
       setActions({
         slot2: {
           id: 'search',
+          icon: <Search className="h-5 w-5" />,
           label: 'Buscar',
           onClick: () => {
             const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
@@ -177,12 +178,14 @@ export default function Movements() {
         },
         slot3: {
           id: 'create',
+          icon: <Plus className="h-6 w-6" />,
           label: 'Nuevo Movimiento',
           onClick: () => openModal('movement'),
           variant: 'primary'
         },
         slot4: {
           id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
             console.log("Filter clicked");
@@ -190,6 +193,7 @@ export default function Movements() {
         },
         slot5: {
           id: 'clear',
+          icon: <X className="h-5 w-5" />,
           label: 'Limpiar',
           onClick: () => {
             setSearchValue("");
@@ -682,12 +686,15 @@ export default function Movements() {
 
   // Custom filters component
   const customFilters = (
+    <div className="space-y-4">
 
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por tipo
         </Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
@@ -702,9 +709,11 @@ export default function Movements() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por categoría
         </Label>
         <Select value={filterByCategory} onValueChange={setFilterByCategory}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las categorías" />
           </SelectTrigger>
           <SelectContent>
@@ -719,9 +728,11 @@ export default function Movements() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por subcategoría
         </Label>
         <Select value={filterBySubcategory} onValueChange={setFilterBySubcategory}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las subcategorías" />
           </SelectTrigger>
           <SelectContent>
@@ -747,9 +758,11 @@ export default function Movements() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por alcance
         </Label>
         <Select value={filterByScope} onValueChange={setFilterByScope}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los movimientos" />
           </SelectTrigger>
           <SelectContent>
@@ -761,9 +774,11 @@ export default function Movements() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por favoritos
         </Label>
         <Select value={filterByFavorites} onValueChange={setFilterByFavorites}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los movimientos" />
           </SelectTrigger>
           <SelectContent>
@@ -774,9 +789,11 @@ export default function Movements() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por moneda
         </Label>
         <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las monedas" />
           </SelectTrigger>
           <SelectContent>
@@ -791,9 +808,11 @@ export default function Movements() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por billetera
         </Label>
         <Select value={filterByWallet} onValueChange={setFilterByWallet}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las billeteras" />
           </SelectTrigger>
           <SelectContent>
@@ -861,6 +880,7 @@ export default function Movements() {
         const displayDate = item.movement_date;
 
         if (!displayDate) {
+          return <div className="text-xs text-muted-foreground">Sin fecha</div>;
         }
 
         try {
@@ -876,17 +896,20 @@ export default function Movements() {
           
           if (isNaN(date.getTime())) {
             return (
+              <div className="text-xs text-muted-foreground">
                 Fecha inválida
               </div>
             );
           }
 
           return (
+            <div className="text-xs">
               <div>{format(date, "dd/MM/yyyy", { locale: es })}</div>
             </div>
           );
         } catch (error) {
           return (
+            <div className="text-xs text-muted-foreground">Fecha inválida</div>
           );
         }
       },
@@ -898,12 +921,16 @@ export default function Movements() {
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6">
             <AvatarImage src={item.creator?.avatar_url} />
+            <AvatarFallback className="text-xs">
               {item.creator?.full_name?.charAt(0) ||
                 item.creator?.email?.charAt(0) ||
                 "U"}
             </AvatarFallback>
           </Avatar>
+          <span className="text-xs truncate">
             {item.creator?.full_name ||
               item.creator?.email ||
               "Usuario"}
@@ -920,6 +947,7 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
+            <span className="text-xs font-medium">
               Conversión
             </span>
           );
@@ -927,12 +955,14 @@ export default function Movements() {
         
         if ('is_transfer_group' in item) {
           return (
+            <span className="text-xs font-medium">
               Transferencia
             </span>
           );
         }
         
         return (
+          <span className="text-xs font-medium">
             {item.movement_data?.type?.name || "Sin tipo"}
           </span>
         );
@@ -947,12 +977,16 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
+            <div className="text-xs">
+              <span className="font-bold">Conversión</span> - {item.from_currency} → {item.to_currency}
             </div>
           );
         }
         
         if ('is_transfer_group' in item) {
           return (
+            <div className="text-xs">
+              <span className="font-bold">Transferencia</span> - {item.from_wallet} → {item.to_wallet}
             </div>
           );
         }
@@ -961,7 +995,10 @@ export default function Movements() {
         const subcategoryName = item.movement_data?.subcategory?.name;
         
         return (
+          <div className="space-y-1">
+            <div className="text-xs font-bold">{categoryName}</div>
             {subcategoryName && (
+              <div className="text-xs text-muted-foreground">{subcategoryName}</div>
             )}
           </div>
         );
@@ -976,8 +1013,10 @@ export default function Movements() {
         if ('is_conversion_group' in item) {
           return (
             <div>
+              <div className="text-xs font-medium">
                 Conversión {item.from_currency} → {item.to_currency}
               </div>
+              <div className="text-xs text-muted-foreground">
                 {item.description || "Sin descripción"}
               </div>
             </div>
@@ -987,8 +1026,10 @@ export default function Movements() {
         if ('is_transfer_group' in item) {
           return (
             <div>
+              <div className="text-xs font-medium">
                 Transferencia {item.from_wallet} → {item.to_wallet}
               </div>
+              <div className="text-xs text-muted-foreground">
                 {item.description || "Sin descripción"}
               </div>
             </div>
@@ -996,6 +1037,7 @@ export default function Movements() {
         }
         
         return (
+          <span className="text-xs">
             {item.description || "Sin descripción"}
           </span>
         );
@@ -1009,6 +1051,7 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           return (
+            <div className="text-xs space-y-1">
               <div>{item.from_currency}</div>
               <div>{item.to_currency}</div>
             </div>
@@ -1017,12 +1060,14 @@ export default function Movements() {
         
         if ('is_transfer_group' in item) {
           return (
+            <div className="text-xs">
               <div>{item.currency}</div>
             </div>
           );
         }
         
         return (
+          <div className="text-xs">
             {item.movement_data?.currency?.code || "USD"}
           </div>
         );
@@ -1042,6 +1087,7 @@ export default function Movements() {
             m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
           );
           return (
+            <div className="text-xs space-y-1">
               <div>{egresoMovement?.movement_data?.wallet?.name || "Principal"}</div>
               <div>{ingresoMovement?.movement_data?.wallet?.name || "Principal"}</div>
             </div>
@@ -1050,6 +1096,7 @@ export default function Movements() {
         
         if ('is_transfer_group' in item) {
           return (
+            <div className="text-xs space-y-1">
               <div>{item.from_wallet}</div>
               <div>{item.to_wallet}</div>
             </div>
@@ -1057,6 +1104,7 @@ export default function Movements() {
         }
         
         return (
+          <span className="text-xs">
             {item.movement_data?.wallet?.name || "Principal"}
           </span>
         );
@@ -1070,8 +1118,11 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           return (
+            <div className="text-xs space-y-1">
+              <div className="font-medium text-red-600">
                 -${item.from_amount?.toLocaleString() || "0"}
               </div>
+              <div className="font-medium text-green-600">
                 +${item.to_amount?.toLocaleString() || "0"}
               </div>
             </div>
@@ -1080,8 +1131,11 @@ export default function Movements() {
         
         if ('is_transfer_group' in item) {
           return (
+            <div className="text-xs space-y-1">
+              <div className="font-medium text-red-600">
                 -${item.amount?.toLocaleString() || "0"}
               </div>
+              <div className="font-medium text-green-600">
                 +${item.amount?.toLocaleString() || "0"}
               </div>
             </div>
@@ -1089,6 +1143,7 @@ export default function Movements() {
         }
         
         return (
+          <span className="text-xs font-medium">
             ${item.amount?.toLocaleString() || "0"}
           </span>
         );
@@ -1102,11 +1157,13 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
+            <div className="text-xs text-muted-foreground">
               -
             </div>
           );
         }
         return (
+          <span className="text-xs">
             {item.exchange_rate ? `$${item.exchange_rate?.toLocaleString()}` : "-"}
           </span>
         );
@@ -1122,6 +1179,7 @@ export default function Movements() {
           // Actions for conversion groups
           const isGroupFavorited = item.movements.some(m => m.is_favorite);
           return (
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -1131,6 +1189,7 @@ export default function Movements() {
                     handleToggleFavorite(movement);
                   });
                 }}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
               </Button>
@@ -1138,13 +1197,17 @@ export default function Movements() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleEditConversion(item)}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               >
+                <Pencil className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleDeleteConversion(item)}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               >
+                <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
             </div>
           );
@@ -1154,6 +1217,7 @@ export default function Movements() {
           // Actions for transfer groups
           const isGroupFavorited = item.movements.some(m => m.is_favorite);
           return (
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -1163,6 +1227,7 @@ export default function Movements() {
                     handleToggleFavorite(movement);
                   });
                 }}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
               </Button>
@@ -1170,13 +1235,17 @@ export default function Movements() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleEditTransfer(item)}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               >
+                <Pencil className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleDeleteTransfer(item)}
+                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               >
+                <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
             </div>
           );
@@ -1184,10 +1253,12 @@ export default function Movements() {
         
         // Actions for regular movements
         return (
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleToggleFavorite(item)}
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             >
               <Heart className={`w-4 h-4 ${item.is_favorite ? 'fill-current text-red-500' : ''}`} />
             </Button>
@@ -1195,13 +1266,17 @@ export default function Movements() {
               variant="ghost"
               size="sm"
               onClick={() => handleEdit(item)}
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             >
+              <Pencil className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleDelete(item)}
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             >
+              <Trash2 className="w-4 h-4 text-red-500" />
             </Button>
           </div>
         );
@@ -1222,7 +1297,10 @@ export default function Movements() {
         variant="ghost"
         onClick={handleDeleteSelected}
         disabled={deleteMultipleMovementsMutation.isPending}
+        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        title="Eliminar seleccionados"
       >
+        <Trash2 className="h-4 w-4" />
       </Button>
     ] : []),
     <CustomRestricted 
@@ -1234,6 +1312,7 @@ export default function Movements() {
         variant="secondary"
         onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
       >
+        <Upload className="mr-2 h-4 w-4" />
         Importar
       </Button>
     </CustomRestricted>
@@ -1269,8 +1348,15 @@ export default function Movements() {
       
       {/* Cards de resumen financiero - Solo mostrar si hay movimientos originales */}
       {movements.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Card 1: Resumen General */}
           <Card>
+            <CardContent className="p-4">
+              <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Resumen</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-green-600 dark:text-green-400">Ingresos</span>
+                  <span className="text-xs font-semibold text-green-600 dark:text-green-400">
                     {formatCurrency(
                       movements
                         .filter(m => m.movement_data?.type?.name === 'Ingresos')
@@ -1278,6 +1364,9 @@ export default function Movements() {
                     )}
                   </span>
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-red-600 dark:text-red-400">Egresos</span>
+                  <span className="text-xs font-semibold text-red-600 dark:text-red-400">
                     {formatCurrency(
                       movements
                         .filter(m => m.movement_data?.type?.name === 'Egresos')
@@ -1285,6 +1374,9 @@ export default function Movements() {
                     )}
                   </span>
                 </div>
+                <div className="flex items-center justify-between pt-1 border-t border-[var(--menues-border)]">
+                  <span className="text-xs font-medium">Balance</span>
+                  <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                     {formatCurrency(
                       movements
                         .filter(m => m.movement_data?.type?.name === 'Ingresos')
@@ -1301,6 +1393,9 @@ export default function Movements() {
 
           {/* Card 2: Por Moneda */}
           <Card>
+            <CardContent className="p-4">
+              <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Por Moneda</h3>
+              <div className="space-y-2">
                 {availableCurrencies.map((currency) => {
                   const currencyMovements = movements.filter(m => m.movement_data?.currency?.name === currency);
                   const currencyBalance = currencyMovements
@@ -1311,6 +1406,8 @@ export default function Movements() {
                     .reduce((sum, m) => sum + (m.amount || 0), 0);
                   
                   return (
+                    <div key={currency} className="flex items-center justify-between">
+                      <span className="text-xs font-medium">{currency}</span>
                       <span className={`text-xs font-semibold ${currencyBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {formatCurrency(currencyBalance)}
                       </span>
@@ -1323,6 +1420,9 @@ export default function Movements() {
 
           {/* Card 3: Por Billetera con Monedas */}
           <Card>
+            <CardContent className="p-4">
+              <h3 className="text-sm font-medium text-[var(--text-card-title)] mb-3">Por Billetera</h3>
+              <div className="space-y-3">
                 {availableWallets.map((wallet) => {
                   // Obtener todas las monedas para esta billetera
                   const walletCurrenciesSet = new Set(
@@ -1334,6 +1434,9 @@ export default function Movements() {
                   const walletCurrencies = Array.from(walletCurrenciesSet);
 
                   return (
+                    <div key={wallet} className="space-y-1">
+                      <h4 className="text-xs font-medium text-[var(--secondary-card-fg)]">{wallet}</h4>
+                      <div className="space-y-1 pl-2">
                         {walletCurrencies.map((currency) => {
                           const walletCurrencyMovements = movements.filter(
                             m => m.movement_data?.wallet?.name === wallet && 
@@ -1347,6 +1450,8 @@ export default function Movements() {
                             .reduce((sum, m) => sum + (m.amount || 0), 0);
 
                           return (
+                            <div key={`${wallet}-${currency}`} className="flex items-center justify-between">
+                              <span className="text-xs text-[var(--secondary-card-fg)]">{currency}</span>
                               <span className={`text-xs font-semibold ${balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                 {formatCurrency(balance)}
                               </span>
@@ -1379,8 +1484,11 @@ export default function Movements() {
           showFilter: true,
           isFilterActive: filterByType !== 'all' || filterByCategory !== 'all' || filterBySubcategory !== 'all' || filterByFavorites !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
           renderFilterContent: () => (
+            <div className="space-y-3 p-2 min-w-[200px]">
               <div>
+                <Label className="text-xs font-medium mb-1 block">Tipo</Label>
                 <Select value={filterByType} onValueChange={setFilterByType}>
+                  <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todos los tipos" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1391,10 +1499,12 @@ export default function Movements() {
                 </Select>
               </div>
               <div>
+                <Label className="text-xs font-medium mb-1 block">Categoría</Label>
                 <Select value={filterByCategory} onValueChange={(value) => {
                   setFilterByCategory(value);
                   if (value === 'all') setFilterBySubcategory('all');
                 }}>
+                  <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las categorías" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1408,11 +1518,13 @@ export default function Movements() {
                 </Select>
               </div>
               <div>
+                <Label className="text-xs font-medium mb-1 block">Subcategoría</Label>
                 <Select 
                   value={filterBySubcategory} 
                   onValueChange={setFilterBySubcategory}
                   disabled={filterByCategory === 'all'}
                 >
+                  <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las subcategorías" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1431,7 +1543,9 @@ export default function Movements() {
                 </Select>
               </div>
               <div>
+                <Label className="text-xs font-medium mb-1 block">Favoritos</Label>
                 <Select value={filterByFavorites} onValueChange={setFilterByFavorites}>
+                  <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1442,7 +1556,9 @@ export default function Movements() {
                 </Select>
               </div>
               <div>
+                <Label className="text-xs font-medium mb-1 block">Moneda</Label>
                 <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+                  <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las monedas" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1456,7 +1572,9 @@ export default function Movements() {
                 </Select>
               </div>
               <div>
+                <Label className="text-xs font-medium mb-1 block">Billetera</Label>
                 <Select value={filterByWallet} onValueChange={setFilterByWallet}>
+                  <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las billeteras" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1567,6 +1685,8 @@ export default function Movements() {
         }}
         emptyState={
           <EmptyState
+            icon={<DollarSign className="h-12 w-12" />}
+            title="No hay movimientos registrados"
             description="Crea el primer movimiento del proyecto"
           />
         }

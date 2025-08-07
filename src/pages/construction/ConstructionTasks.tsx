@@ -297,6 +297,7 @@ export default function ConstructionTasks() {
       key: 'labor_cost',
       label: 'Costo Mo.',
       render: (task: any) => (
+        <div className="text-center">
           <TaskLaborCost task={task} />
         </div>
       ),
@@ -307,6 +308,7 @@ export default function ConstructionTasks() {
       key: 'labor_subtotal',
       label: 'Subt. Mo.',
       render: (task: any) => (
+        <div className="text-center">
           <TaskLaborSubtotal task={task} />
         </div>
       ),
@@ -317,6 +319,7 @@ export default function ConstructionTasks() {
       key: 'material_details',
       label: 'Costo Mat.',
       render: (task: any) => (
+        <div className="flex items-center justify-center gap-2">
           <TaskMaterialsPopover task={task} showCost={true} />
         </div>
       ),
@@ -327,6 +330,7 @@ export default function ConstructionTasks() {
       key: 'material_subtotal',
       label: 'Subt. Mat.',
       render: (task: any) => (
+        <div className="text-center">
           <TaskMaterialsSubtotal task={task} />
         </div>
       ),
@@ -337,6 +341,7 @@ export default function ConstructionTasks() {
       key: 'total_subtotal',
       label: 'Subtotal',
       render: (task: any) => (
+        <div className="text-center">
           <TaskTotalSubtotal task={task} />
         </div>
       ),
@@ -347,17 +352,22 @@ export default function ConstructionTasks() {
       key: 'actions',
       label: 'Acciones',
       render: (task: any) => (
+        <div className="flex gap-1 justify-center">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEditTask(task)}
+            className="h-8 w-8 p-0"
           >
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDeleteTask(task.id)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -396,17 +406,20 @@ export default function ConstructionTasks() {
       key: 'actions',
       label: 'Acciones',
       render: (phase: any) => (
+        <div className="flex gap-1 justify-center">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEditPhase(phase)}
           >
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDeletePhase(phase.project_phase_id)}
           >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -502,6 +515,8 @@ export default function ConstructionTasks() {
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Cargando tareas...</div>
         </div>
       </Layout>
     )
@@ -509,11 +524,14 @@ export default function ConstructionTasks() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
+      <div className="space-y-6">
         {/* Tab Content */}
         {activeTab === "tasks" ? (
           // Tab Tareas - Contenido actual
           tasks.length === 0 ? (
             <EmptyState
+              icon={<CheckSquare className="h-8 w-8" />}
+              title="No hay tareas en el proyecto"
               description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
             />
           ) : (
@@ -556,13 +574,17 @@ export default function ConstructionTasks() {
                   
                   return (
                     <>
+                      <div className="col-span-1 truncate">
                         {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
                       </div>
+                      <div className="col-span-1">{unitSymbol}</div> {/* Unidad */}
+                      <div className="col-span-1">{totalQuantity.toFixed(2)}</div> {/* Cantidad total */}
                     </>
                   );
                 } else {
                   return (
                     <>
+                      <div className="col-span-full text-sm font-medium">
                         {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
                       </div>
                     </>
@@ -571,6 +593,8 @@ export default function ConstructionTasks() {
               }}
               emptyState={
                 <EmptyState
+                  icon={<CheckSquare className="h-8 w-8" />}
+                  title="No hay tareas que coincidan"
                   description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
                 />
               }
@@ -580,6 +604,8 @@ export default function ConstructionTasks() {
           // Tab Fases - Drag & Drop Phase Manager
           projectPhases.length === 0 ? (
             <EmptyState
+              icon={<Settings className="h-8 w-8" />}
+              title="No hay fases en el proyecto"
               description="Comienza creando la primera fase del proyecto para organizar las tareas por etapas."
             />
           ) : (

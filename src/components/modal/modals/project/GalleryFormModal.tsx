@@ -186,6 +186,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Creator Field */}
         <FormField
           control={form.control}
@@ -215,14 +216,20 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
         {/* File Upload Section */}
         {!editingFile && (
+          <div className="space-y-4">
             <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Archivos
               </label>
               <div 
                 onClick={triggerFileInput}
+                className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
               >
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
                   Haz clic para subir archivos
                 </p>
+                <p className="text-xs text-muted-foreground">
                   Imágenes y videos son compatibles
                 </p>
                 <input
@@ -231,18 +238,26 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
                   multiple
                   accept="image/*,video/*"
                   onChange={handleFileSelect}
+                  className="hidden"
                 />
               </div>
             </div>
 
             {/* Selected Files Display */}
             {files.length > 0 && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
                   Archivos seleccionados ({files.length})
                 </label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
                   {files.map((file, index) => (
                     <div
                       key={index}
+                      className="flex items-center justify-between p-2 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
                     >
+                      <div className="flex items-center space-x-2">
+                        <File className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-foreground truncate">
                           {file.name}
                         </span>
                       </div>
@@ -251,7 +266,9 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFile(index)}
+                        className="h-6 w-6 p-0"
                       >
+                        <X className="h-3 w-3" />
                       </Button>
                     </div>
                   ))}

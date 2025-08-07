@@ -60,9 +60,14 @@ export default function WorkloadOverTime({ data }: WorkloadOverTimeProps) {
   }, [data])
 
   return (
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">Carga de Trabajo Diaria</CardTitle>
       </CardHeader>
+      <CardContent className="pt-0">
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" className="opacity-30" />
             <XAxis 
               dataKey="week" 
               tick={{ fontSize: 11, fill: 'hsl(var(--chart-grid-text))' }}

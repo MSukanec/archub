@@ -116,6 +116,7 @@ export default function AdminMaterialPrices() {
       label: 'Fecha de Actualización',
       width: '8%',
       render: (price: MaterialPrice) => (
+        <span className="text-xs text-muted-foreground">
           {format(new Date(price.updated_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -125,6 +126,7 @@ export default function AdminMaterialPrices() {
       label: 'Categoría',
       width: '15%',
       render: (price: MaterialPrice) => (
+        <span className="text-xs text-muted-foreground">
           {buildCategoryPath(price.material_id)}
         </span>
       )
@@ -134,6 +136,9 @@ export default function AdminMaterialPrices() {
       label: 'Material',
       width: '25%',
       render: (price: MaterialPrice) => (
+        <div className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium text-sm">{price.material?.name || 'Material sin nombre'}</span>
         </div>
       )
     },
@@ -142,6 +147,7 @@ export default function AdminMaterialPrices() {
       label: 'Marca',
       width: '15%',
       render: (price: MaterialPrice) => (
+        <span className="text-sm text-muted-foreground">
           {/* TODO: Conectar con brands cuando esté disponible */}
           Sin marca
         </span>
@@ -152,6 +158,7 @@ export default function AdminMaterialPrices() {
       label: 'Modelo',
       width: '15%',
       render: (price: MaterialPrice) => (
+        <span className="text-sm text-muted-foreground">
           {/* TODO: Conectar con product models cuando esté disponible */}
           Genérico
         </span>
@@ -162,8 +169,12 @@ export default function AdminMaterialPrices() {
       label: 'Precio',
       width: '10%',
       render: (price: MaterialPrice) => (
+        <div className="flex items-center gap-1">
+          <DollarSign className="h-3 w-3 text-muted-foreground" />
+          <span className="font-mono text-sm">
             {price.currency?.symbol || '$'}{price.unit_price.toFixed(2)}
           </span>
+          <span className="text-xs text-muted-foreground">
             / {price.material?.unit?.name || 'ud'}
           </span>
         </div>
@@ -174,17 +185,22 @@ export default function AdminMaterialPrices() {
       label: 'Acciones',
       width: '7%',
       render: (price: MaterialPrice) => (
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
+            className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(price)}
           >
+            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(price)}
           >
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -192,7 +208,11 @@ export default function AdminMaterialPrices() {
   ]
 
   const customFilters = (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -204,7 +224,10 @@ export default function AdminMaterialPrices() {
         </Select>
       </div>
       
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Material</Label>
         <Select value={filterByMaterial} onValueChange={setFilterByMaterial}>
+          <SelectTrigger className="h-8">
             <SelectValue placeholder="Todos los materiales" />
           </SelectTrigger>
           <SelectContent>
@@ -218,7 +241,10 @@ export default function AdminMaterialPrices() {
         </Select>
       </div>
 
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Moneda</Label>
         <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+          <SelectTrigger className="h-8">
             <SelectValue placeholder="Todas las monedas" />
           </SelectTrigger>
           <SelectContent>
@@ -253,12 +279,16 @@ export default function AdminMaterialPrices() {
     <Layout 
       headerProps={headerProps}
     >
+      <div className="space-y-6">
         {/* Material Prices Table */}
         <Table
           data={sortedPrices}
           columns={columns}
           isLoading={isLoading}
           emptyState={
+            <div className="text-center py-8">
+              <h3 className="text-lg font-medium text-muted-foreground">No hay precios de materiales</h3>
+              <p className="text-sm text-muted-foreground mt-1">No hay precios que coincidan con los filtros seleccionados.</p>
             </div>
           }
         />

@@ -49,31 +49,38 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
       actions={[
         {
           label: "Favorito",
+          icon: <Star className="w-4 h-4" />,
           onClick: () => {
             console.log('Toggle favorite for project:', project.id);
           }
         },
         {
           label: "Editar",
+          icon: <Edit className="w-4 h-4" />,
           onClick: () => onEdit(project)
         },
         {
           label: "Eliminar",
+          icon: <Trash2 className="w-4 h-4" />,
           variant: "destructive" as const,
           onClick: () => onDelete(project)
         }
       ]}
     >
+      <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200 cursor-default">
         {/* HERO SECTION - Imagen completa con avatar y acciones superpuestas */}
+        <div className="relative h-48 w-full">
           {/* Background Image */}
           {project.project_data?.project_image_url ? (
             <img 
               src={project.project_data.project_image_url} 
               alt={project.name}
+              className="w-full h-full object-cover"
               key={project.project_data.project_image_url}
             />
           ) : (
             <div 
+              className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80"
               style={{ backgroundColor: project.color || '#ffffff' }}
             >
               {getProjectInitials(project.name)}
@@ -81,9 +88,13 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           )}
           
           {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30" />
           
           {/* Project Avatar - Top Left */}
+          <div className="absolute top-4 left-4">
+            <Avatar className="h-12 w-12 border border-black shadow-lg">
               <AvatarFallback 
+                className="text-black font-bold text-lg"
                 style={{ backgroundColor: project.color || '#ffffff' }}
               >
                 {getProjectInitials(project.name)}
@@ -92,21 +103,28 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           </div>
           
           {/* Actions Menu - Top Right */}
+          <div className="absolute top-4 right-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="secondary"
                   size="sm"
+                  className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 p-0"
                 >
+                  <MoreHorizontal className="w-4 h-4 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(project); }}>
+                  <Edit className="w-4 h-4 mr-2" />
                   Edición rápida
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onNavigateToBasicData(project); }}>
+                  <Edit className="w-4 h-4 mr-2" />
                   Edición completa
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(project); }} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
                   Eliminar
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -115,13 +133,17 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
         </div>
 
         {/* INFO SECTION - Información del proyecto */}
+        <CardContent className="p-4 space-y-4">
           {/* Project Name and Active Button */}
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-foreground text-lg leading-tight truncate flex-1 mr-3">
               {project.name}
             </h3>
             
             {isActiveProject ? (
               <Button 
                 size="sm"
+                className="text-xs font-medium px-3 py-1 h-7 text-white"
                 style={{ backgroundColor: 'var(--accent)' }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -134,6 +156,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
               <Button 
                 variant="ghost"
                 size="sm"
+                className="text-xs font-medium px-3 py-1 h-7"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect(project);
@@ -145,20 +168,32 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
           </div>
           
           {/* Project Details and Member Avatars */}
+          <div className="flex items-end justify-between">
             {/* Left side - Project details */}
+            <div className="space-y-1 flex-1">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Tipología:</span> {project.project_data?.project_type?.name || 'Sin especificar'}
               </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Modalidad:</span> {project.project_data?.modality?.name || 'Sin especificar'}
               </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">Estado:</span> {statusConfig.label}
               </p>
             </div>
             
             {/* Right side - Member avatars (only creator for now) */}
+            <div className="flex items-center">
               {project.creator && (
+                <Avatar className="w-8 h-8 border-2 border-background">
                   <AvatarImage src={project.creator.avatar_url || ''} />
+                  <AvatarFallback className="text-xs">
                     {project.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
                   </AvatarFallback>
                 </Avatar>
               )}
               {/* Placeholder for future members count */}
+              <span className="text-xs text-muted-foreground ml-2">(1)</span>
             </div>
           </div>
         </CardContent>

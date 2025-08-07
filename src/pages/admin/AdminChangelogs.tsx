@@ -174,6 +174,7 @@ export default function AdminChangelogs() {
       label: 'Fecha de Creación',
       width: '20%',
       render: (entry: ChangelogEntry) => (
+        <span className="text-sm">
           {format(new Date(entry.created_at), 'dd/MM/yyyy', { locale: es })}
         </span>
       )
@@ -183,6 +184,7 @@ export default function AdminChangelogs() {
       label: 'Fecha del Cambio',
       width: '20%',
       render: (entry: ChangelogEntry) => (
+        <span className="text-sm">
           {format(new Date(entry.date), 'dd/MM/yyyy', { locale: es })}
         </span>
       )
@@ -207,17 +209,22 @@ export default function AdminChangelogs() {
       label: 'Acciones',
       width: '10%',
       render: (entry: ChangelogEntry) => (
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(entry)}
+            className="h-8 w-8 p-0"
           >
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(entry)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -239,29 +246,50 @@ export default function AdminChangelogs() {
   return (
     <Layout headerProps={headerProps} wide>
       {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
               <div>
+                <p className="text-xs text-muted-foreground">Total de Entradas</p>
+                <p className="text-lg font-semibold">{totalEntries}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
               <div>
+                <p className="text-xs text-muted-foreground">Entradas Públicas</p>
+                <p className="text-lg font-semibold">{publicEntries}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
+                <p className="text-xs text-muted-foreground">Recientes (7 días)</p>
+                <p className="text-lg font-semibold">{recentEntries}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-2">
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
               <div>
+                <p className="text-xs text-muted-foreground">Mejoras</p>
+                <p className="text-lg font-semibold">{entriesByType['Mejora'] || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -274,6 +302,9 @@ export default function AdminChangelogs() {
         columns={columns}
         isLoading={isLoading}
         emptyState={
+          <div className="text-center py-8">
+            <h3 className="text-lg font-medium text-muted-foreground">No hay entradas del changelog</h3>
+            <p className="text-sm text-muted-foreground mt-1">No se encontraron entradas que coincidan con los filtros seleccionados.</p>
           </div>
         }
         defaultSort={{ key: 'created_at', direction: 'desc' }}

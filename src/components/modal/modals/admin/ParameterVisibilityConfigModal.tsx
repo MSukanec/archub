@@ -124,38 +124,56 @@ export function ParameterVisibilityConfigModal() {
   const getModalContent = () => {
     if (dependenciesLoading) {
       return (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
         </div>
       );
     }
 
     if (dependencies.length === 0) {
       return (
+        <div className="text-center py-8 text-muted-foreground">
+          <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p className="text-lg mb-2">Sin dependencias padre</p>
           <p>Este parámetro no tiene parámetros padre conectados, por lo que no se puede configurar visibilidad condicional.</p>
         </div>
       );
     }
 
     return (
+      <ScrollArea className="max-h-[500px]">
+        <div className="space-y-8">
           {dependencies.map((dependency, index) => (
+            <div key={dependency.id} className="space-y-4">
               {index > 0 && <Separator />}
               
               {/* Encabezado de la dependencia */}
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="font-medium">
                   {dependency.parent_parameter?.label}
                 </Badge>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                <Badge variant="outline" className="font-medium">
                   {dependency.parent_option?.label}
                 </Badge>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                <Badge variant="secondary" className="font-medium">
                   {childParameter?.label}
                 </Badge>
               </div>
 
+              <div className="pl-4 border-l-2 border-muted space-y-3">
+                <p className="text-sm text-muted-foreground">
                   Cuando se seleccione <strong>"{dependency.parent_option?.label}"</strong> en <strong>"{dependency.parent_parameter?.label}"</strong>, mostrar estas opciones en <strong>"{childParameter?.label}"</strong>:
                 </p>
 
                 {/* Grid de opciones del hijo */}
+                <div className="grid grid-cols-2 gap-3">
                   {childOptions.map(option => {
                     const isChecked = (configuredOptions[dependency.id] || []).includes(option.id);
                     
                     return (
+                      <div key={option.id} className="flex items-center space-x-2 p-2 rounded border bg-card">
                         <Checkbox
                           id={`${dependency.id}-${option.id}`}
                           checked={isChecked}
@@ -165,6 +183,7 @@ export function ParameterVisibilityConfigModal() {
                         />
                         <Label 
                           htmlFor={`${dependency.id}-${option.id}`}
+                          className="text-sm font-medium cursor-pointer flex-1"
                         >
                           {option.label}
                         </Label>
@@ -174,6 +193,8 @@ export function ParameterVisibilityConfigModal() {
                 </div>
 
                 {/* Resumen de opciones seleccionadas */}
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground">
                     {(configuredOptions[dependency.id] || []).length} de {childOptions.length} opciones seleccionadas
                   </p>
                 </div>
@@ -188,12 +209,14 @@ export function ParameterVisibilityConfigModal() {
   const viewPanel = null;
 
   const editPanel = (
+    <div className="space-y-4">
       {getModalContent()}
     </div>
   );
 
   const headerContent = (
     <FormModalHeader 
+      title="Configurar Visibilidad por Opción"
       icon={Settings}
     />
   );

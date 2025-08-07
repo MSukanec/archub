@@ -99,6 +99,7 @@ export default function ConstructionMaterials() {
         label: 'Categoría',
         width: '15%',
         render: (material: any) => (
+          <span className="text-sm font-medium">{material.category_name}</span>
         )
       },
       {
@@ -106,6 +107,7 @@ export default function ConstructionMaterials() {
         label: 'Nombre',
         width: groupingType === 'categories' ? '35%' : '25%', // Más ancho cuando no hay categoría
         render: (material: any) => (
+          <span className="text-sm">{material.name}</span>
         )
       },
       {
@@ -113,6 +115,7 @@ export default function ConstructionMaterials() {
         label: 'Marca',
         width: groupingType === 'categories' ? '13%' : '10%', // Igual que las demás cuando agrupado
         render: (material: any) => (
+          <span className="text-sm text-muted-foreground">Indefinido</span>
         )
       },
       {
@@ -120,6 +123,7 @@ export default function ConstructionMaterials() {
         label: 'Modelo',
         width: groupingType === 'categories' ? '13%' : '10%', // Igual que las demás cuando agrupado
         render: (material: any) => (
+          <span className="text-sm text-muted-foreground">Indefinido</span>
         )
       },
       {
@@ -129,6 +133,7 @@ export default function ConstructionMaterials() {
         render: (material: any) => {
           const unit = material.unit_name || 'unidad'
           return (
+            <span className="text-sm font-medium">
               {material.computed_quantity.toFixed(2)} {unit}
             </span>
           )
@@ -142,6 +147,7 @@ export default function ConstructionMaterials() {
           // Si no hay unidad comercial definida, mostrar guión
           if (!material.commercial_unit_name || !material.commercial_quantity) {
             return (
+              <span className="text-sm text-muted-foreground">
                 - {material.unit_name || 'unidad'}
               </span>
             )
@@ -149,6 +155,8 @@ export default function ConstructionMaterials() {
 
           // Mostrar el cómputo comercial calculado con botón de cálculo
           return (
+            <div className="flex items-center justify-center gap-1">
+              <span className="text-sm font-medium">
                 {material.commercial_quantity} {material.commercial_unit_name}
               </span>
               <CommercialCalculationPopover material={material} />
@@ -169,6 +177,8 @@ export default function ConstructionMaterials() {
   if (isLoading || materialsLoading) {
     return (
       <Layout headerProps={headerProps} wide>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando materiales...</div>
         </div>
       </Layout>
     )
@@ -181,6 +191,8 @@ export default function ConstructionMaterials() {
         <>
           {filteredMaterials.length === 0 ? (
             <EmptyState
+              icon={<Package className="w-8 h-8 text-muted-foreground" />}
+              title="No hay materiales disponibles"
               description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
             />
           ) : (
@@ -200,8 +212,11 @@ export default function ConstructionMaterials() {
                 showFilter: true,
                 isFilterActive: selectedPhase !== '' || selectedCategory !== '',
                 renderFilterContent: () => (
+                  <div className="space-y-3 p-2 min-w-[200px]">
                     <div>
+                      <Label className="text-xs font-medium mb-1 block">Fase</Label>
                       <Select value={selectedPhase} onValueChange={setSelectedPhase}>
+                        <SelectTrigger className="h-8 text-xs">
                           <SelectValue placeholder="Todas las fases" />
                         </SelectTrigger>
                         <SelectContent>
@@ -215,7 +230,9 @@ export default function ConstructionMaterials() {
                       </Select>
                     </div>
                     <div>
+                      <Label className="text-xs font-medium mb-1 block">Categoría</Label>
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="h-8 text-xs">
                           <SelectValue placeholder="Todas las categorías" />
                         </SelectTrigger>
                         <SelectContent>
@@ -238,6 +255,7 @@ export default function ConstructionMaterials() {
               }}
               renderGroupHeader={(groupKey: string, groupRows: any[]) => (
                 <>
+                  <div className="col-span-full text-sm font-medium">
                     {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
                   </div>
                 </>
@@ -248,7 +266,12 @@ export default function ConstructionMaterials() {
       )}
 
       {activeTab === 'purchase-orders' && (
+        <div className="space-y-6">
           <CustomRestricted reason="coming_soon">
+            <div className="flex flex-col items-center justify-center py-16">
+              <ShoppingCart className="w-16 h-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Órdenes de Compra</h3>
+              <p className="text-muted-foreground text-center max-w-md">
                 Esta funcionalidad estará disponible próximamente. Aquí podrás gestionar órdenes de compra, 
                 proveedores y hacer seguimiento de tus pedidos de materiales.
               </p>

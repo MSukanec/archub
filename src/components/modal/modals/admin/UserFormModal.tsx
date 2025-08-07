@@ -138,22 +138,36 @@ export function UserFormModal({ modalData, onClose }: UserFormModalProps) {
   };
 
   const viewPanel = (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <Avatar className="h-16 w-16">
           <AvatarImage src={user?.avatar_url} />
           <AvatarFallback>
             {user?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
           </AvatarFallback>
         </Avatar>
         <div>
+          <h3 className="text-lg font-semibold">{user?.full_name}</h3>
+          <p className="text-sm text-muted-foreground">{user?.email}</p>
         </div>
       </div>
       
+      <div className="grid grid-cols-2 gap-4">
         <div>
+          <p className="text-sm font-medium">Nombre</p>
+          <p className="text-sm text-muted-foreground">{user?.user_data?.first_name || 'No especificado'}</p>
         </div>
         <div>
+          <p className="text-sm font-medium">Apellido</p>
+          <p className="text-sm text-muted-foreground">{user?.user_data?.last_name || 'No especificado'}</p>
         </div>
         <div>
+          <p className="text-sm font-medium">Estado</p>
+          <p className="text-sm text-muted-foreground">{user?.is_active ? 'Activo' : 'Inactivo'}</p>
         </div>
         <div>
+          <p className="text-sm font-medium">Organizaciones</p>
+          <p className="text-sm text-muted-foreground">{user?.organizations_count || 0}</p>
         </div>
       </div>
     </div>
@@ -161,6 +175,8 @@ export function UserFormModal({ modalData, onClose }: UserFormModalProps) {
 
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="first_name"
@@ -247,6 +263,7 @@ export function UserFormModal({ modalData, onClose }: UserFormModalProps) {
 
   const headerContent = (
     <FormModalHeader 
+      title="Editar Usuario"
       icon={User}
     />
   );

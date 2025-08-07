@@ -120,6 +120,7 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts,
 
 
       {/* Fila: Moneda | Billetera */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="currency_id"
@@ -172,6 +173,7 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts,
       </div>
 
       {/* Fila: Monto | Cotización */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="amount"
@@ -218,7 +220,10 @@ export function MaterialesFields({ form, currencies, wallets, members, concepts,
 
 
       {/* Botón para Selección de Tareas */}
+      <div className="col-span-2">
         <FormSubsectionButton
+          icon={<Package />}
+          title="Seleccionar Tarea de Construcción"
           description={selectedTaskId ? "Tarea seleccionada" : "Selecciona la tarea relacionada con este material"}
           onClick={onOpenTasksSubform}
         />

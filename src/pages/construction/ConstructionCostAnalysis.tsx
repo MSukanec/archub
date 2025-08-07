@@ -72,18 +72,22 @@ export default function ConstructionCostAnalysis() {
 
   const features = [
     {
+      icon: <BarChart3 className="w-4 h-4" />,
       title: "Análisis de Costos por Categoría",
       description: "Visualiza y compara los costos de tareas organizadas por categorías y subcategorías específicas."
     },
     {
+      icon: <Search className="w-4 h-4" />,
       title: "Búsqueda Avanzada de Tareas",
       description: "Encuentra rápidamente tareas específicas usando códigos, nombres, rubros o categorías."
     },
     {
+      icon: <Layers className="w-4 h-4" />,
       title: "Filtrado por Rubros",
       description: "Organiza y filtra las tareas por diferentes rubros de construcción para mejor análisis."
     },
     {
+      icon: <Grid className="w-4 h-4" />,
       title: "Vista Comparativa de Costos",
       description: "Compara costos unitarios y cantidades entre diferentes tareas del mismo tipo."
     }
@@ -98,6 +102,7 @@ export default function ConstructionCostAnalysis() {
       label: 'Código',
       width: '5%',
       render: (task: any) => (
+        <span className="text-xs font-mono text-muted-foreground">{task.code}</span>
       )
     },
     {
@@ -105,6 +110,7 @@ export default function ConstructionCostAnalysis() {
       label: 'Rubro',
       width: '10%',
       render: (task: any) => (
+        <Badge variant="outline" className="text-xs">
           {task.category_name || 'Sin categoría'}
         </Badge>
       )
@@ -113,6 +119,7 @@ export default function ConstructionCostAnalysis() {
       key: 'name_rendered',
       label: 'Tarea',
       render: (task: any) => (
+        <span className="text-sm">{task.name_rendered}</span>
       )
     },
     {
@@ -120,6 +127,7 @@ export default function ConstructionCostAnalysis() {
       label: 'Unidad',
       width: '5%',
       render: (task: any) => (
+        <Badge variant="secondary" className="text-xs">
           {task.unit_name || 'N/A'}
         </Badge>
       )
@@ -129,11 +137,14 @@ export default function ConstructionCostAnalysis() {
       label: 'Acciones',
       width: '10%',
       render: (task: any) => (
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => openModal('parametric-task', { taskId: task.id })}
+            className="h-8 w-8 p-0"
           >
+            <Edit className="h-4 w-4" />
           </Button>
           {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
           {!task.is_system && task.organization_id === userData?.organization?.id && (
@@ -151,7 +162,9 @@ export default function ConstructionCostAnalysis() {
                   }
                 })
               }}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
             >
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -165,6 +178,7 @@ export default function ConstructionCostAnalysis() {
       key: 'name',
       label: 'Material',
       render: (material: any) => (
+        <span className="text-sm font-medium">{material.name}</span>
       )
     },
     {
@@ -172,6 +186,7 @@ export default function ConstructionCostAnalysis() {
       label: 'Categoría',
       width: '20%',
       render: (material: any) => (
+        <Badge variant="outline" className="text-xs">
           {material.category?.name || 'Sin categoría'}
         </Badge>
       )
@@ -181,6 +196,7 @@ export default function ConstructionCostAnalysis() {
       label: 'Unidad',
       width: '12%',
       render: (material: any) => (
+        <Badge variant="secondary" className="text-xs">
           {material.unit?.name || 'N/A'}
         </Badge>
       )
@@ -190,6 +206,7 @@ export default function ConstructionCostAnalysis() {
       label: 'Costo Promedio de Archub',
       width: '18%',
       render: (material: any) => (
+        <div className="text-xs text-muted-foreground italic">
           Próximamente
         </div>
       )
@@ -204,11 +221,13 @@ export default function ConstructionCostAnalysis() {
         if (materialPrice?.unit_price && materialPrice?.currency) {
           const formattedPrice = Number(materialPrice.unit_price).toFixed(2)
           return (
+            <div className="text-sm font-medium">
               {materialPrice.currency.symbol} {formattedPrice}
             </div>
           )
         }
         return (
+          <div className="text-xs text-muted-foreground">
             Sin precio
           </div>
         )
@@ -219,11 +238,14 @@ export default function ConstructionCostAnalysis() {
       label: 'Acciones',
       width: '10%',
       render: (material: any) => (
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => openModal('material-form', { editingMaterial: material })}
+            className="h-8 w-8 p-0"
           >
+            <Edit className="h-4 w-4" />
           </Button>
           {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
           {!material.is_system && material.organization_id === userData?.organization?.id && (
@@ -240,7 +262,9 @@ export default function ConstructionCostAnalysis() {
                   }
                 })
               }}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
             >
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -253,6 +277,8 @@ export default function ConstructionCostAnalysis() {
   if (tasksLoading) {
     return (
       <Layout wide>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando análisis de costos...</div>
         </div>
       </Layout>
     )
@@ -260,8 +286,11 @@ export default function ConstructionCostAnalysis() {
 
   return (
     <Layout wide>
+      <div className="space-y-6">
         {/* ActionBar with Tabs */}
         <ActionBarDesktop
+          title="Análisis de Costos"
+          icon={<BarChart3 className="w-6 h-6" />}
           features={features}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
@@ -277,14 +306,20 @@ export default function ConstructionCostAnalysis() {
             undefined
           }
           customGhostButtons={[
+            <div key="data-type-selector" className="flex items-center">
               <Selector
                 options={dataTypeOptions}
                 value={dataType}
                 onValueChange={setDataType}
+                className="h-8"
               />
             </div>
           ]}
           tabs={[
+            { value: 'tareas', label: 'Tareas', icon: <TableIcon className="h-4 w-4" /> },
+            { value: 'mano-obra', label: 'Mano de Obra', icon: <Users className="h-4 w-4" /> },
+            { value: 'materiales', label: 'Materiales', icon: <Package className="h-4 w-4" /> },
+            { value: 'indirectos', label: 'Indirectos', icon: <DollarSign className="h-4 w-4" /> }
           ]}
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -292,8 +327,11 @@ export default function ConstructionCostAnalysis() {
 
         {/* Tab Content */}
         {activeTab === 'tareas' && (
+          <div className="space-y-6">
             {filteredTasks.length === 0 ? (
               <EmptyState
+                icon={<TableIcon className="h-16 w-16" />}
+                title="No hay tareas para analizar"
                 description="Las tareas parametrizadas aparecerán aquí para análisis de costos."
               />
             ) : (
@@ -307,8 +345,12 @@ export default function ConstructionCostAnalysis() {
         )}
 
         {activeTab === 'mano-obra' && (
+          <div className="space-y-6">
+            <div className="min-h-[400px] flex items-center justify-center">
               <CustomRestricted reason="coming_soon">
                 <EmptyState
+                  icon={<Users className="h-16 w-16" />}
+                  title="Análisis de Mano de Obra"
                   description="Funcionalidad coming soon"
                 />
               </CustomRestricted>
@@ -317,8 +359,11 @@ export default function ConstructionCostAnalysis() {
         )}
 
         {activeTab === 'materiales' && (
+          <div className="space-y-6">
             {filteredMaterials.length === 0 ? (
               <EmptyState
+                icon={<Package className="h-16 w-16" />}
+                title="No hay materiales que coincidan"
                 description="No se encontraron materiales que coincidan con los filtros seleccionados."
               />
             ) : (
@@ -332,8 +377,12 @@ export default function ConstructionCostAnalysis() {
         )}
 
         {activeTab === 'indirectos' && (
+          <div className="space-y-6">
+            <div className="min-h-[400px] flex items-center justify-center">
               <CustomRestricted reason="coming_soon">
                 <EmptyState
+                  icon={<DollarSign className="h-16 w-16" />}
+                  title="Análisis de Costos Indirectos"
                   description="Funcionalidad coming soon"
                 />
               </CustomRestricted>

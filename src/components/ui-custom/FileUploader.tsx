@@ -73,8 +73,11 @@ export function FileUploader({
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) {
+      return <Image className="h-4 w-4" />
     } else if (file.type.startsWith('video/')) {
+      return <Video className="h-4 w-4" />
     }
+    return <File className="h-4 w-4" />
   }
 
   const formatFileSize = (bytes: number) => {
@@ -101,8 +104,12 @@ export function FileUploader({
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
       >
+        <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+        <div className="space-y-2">
+          <p className="text-sm font-medium">
             {multiple ? "Arrastra archivos aquí o haz clic para seleccionar" : "Arrastra un archivo aquí o haz clic para seleccionar"}
           </p>
+          <p className="text-xs text-muted-foreground">
             {accept.join(", ")} {maxSizeMB && `(máx. ${maxSizeMB}MB)`}
           </p>
         </div>
@@ -114,28 +121,41 @@ export function FileUploader({
         multiple={multiple}
         accept={accept.join(",")}
         onChange={(e) => handleFiles(e.target.files)}
+        className="hidden"
       />
 
       {/* File Preview */}
       {value.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Archivos seleccionados</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {value.map((file, index) => (
+              <div key={index} className="relative group">
+                <div className="bg-card border rounded-lg p-3 space-y-2">
                   {/* Preview */}
                   {file.type.startsWith('image/') ? (
+                    <div className="aspect-square rounded overflow-hidden bg-muted">
                       <img
                         src={URL.createObjectURL(file)}
                         alt={file.name}
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   ) : (
+                    <div className="aspect-square rounded bg-muted flex items-center justify-center">
                       {getFileIcon(file)}
+                      <span className="ml-2 text-xs text-muted-foreground">
                         {file.type.startsWith('video/') ? 'VIDEO' : 'ARCHIVO'}
                       </span>
                     </div>
                   )}
 
                   {/* File Info */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium truncate" title={file.name}>
                       {file.name}
                     </p>
+                    <p className="text-xs text-muted-foreground">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -145,8 +165,10 @@ export function FileUploader({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/90 hover:bg-destructive text-destructive-foreground"
                     onClick={() => removeFile(index)}
                   >
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
               </div>

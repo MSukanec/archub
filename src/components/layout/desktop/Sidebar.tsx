@@ -331,16 +331,22 @@ export function Sidebar() {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Logo Section */}
+      <div className="h-9 flex items-center justify-center bg-[var(--main-sidebar-bg)]">
+        <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
       </div>
 
       {/* Navigation Items */}
+      <div className="flex-1 p-1 pt-3">
+        <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {/* Context Title - Removed since sidebar doesn't expand */}
             {mainSidebarItems.map((item, index) => (
+              <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button with potential restriction */}
                 {item.generalModeRestricted ? (
                   <CustomRestricted reason="general_mode" functionName={item.label}>
                     <SidebarButton
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
                       label={item.label}
                       isActive={item.isActive}
                       isExpanded={isExpanded}
@@ -350,6 +356,7 @@ export function Sidebar() {
                   </CustomRestricted>
                 ) : (
                   <SidebarButton
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
                     label={item.label}
                     isActive={item.isActive}
                     isExpanded={isExpanded}
@@ -364,9 +371,12 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Section - Fixed Buttons */}
+      <div className="p-1">
+        <div className="flex flex-col gap-[2px]">
           {/* Admin button (above Profile) */}
           {isAdmin && (
             <SidebarButton
+              icon={<Crown className="w-[18px] h-[18px]" />}
               label="Administración"
               isActive={activeSidebarSection === 'administracion' || location.startsWith('/admin')}
               isExpanded={isExpanded}
@@ -376,8 +386,10 @@ export function Sidebar() {
           )}
           
           {/* Settings buttons */}
+          <div className="flex flex-col gap-[2px] mb-[2px]">
             {/* Dock/Undock button */}
             <SidebarButton
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
               label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
               isActive={false}
               isExpanded={isExpanded}
@@ -387,6 +399,7 @@ export function Sidebar() {
             
             {/* Theme toggle button */}
             <SidebarButton
+              icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
               label={isDark ? "Modo Claro" : "Modo Oscuro"}
               isActive={false}
               isExpanded={isExpanded}
@@ -397,6 +410,7 @@ export function Sidebar() {
           
           {/* Profile */}
           <SidebarButton
+            icon={<UserCircle className="w-[18px] h-[18px]" />}
             label="Mi Perfil"
             isActive={activeSidebarSection === 'perfil' || location.startsWith('/profile')}
             isExpanded={isExpanded}

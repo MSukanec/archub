@@ -305,6 +305,7 @@ export default function ConstructionGallery() {
       setActions({
         slot2: {
           id: 'search',
+          icon: <Search className="h-5 w-5" />,
           label: 'Buscar',
           onClick: () => {
             const searchInput = document.getElementById('gallery-search');
@@ -313,11 +314,13 @@ export default function ConstructionGallery() {
         },
         slot3: {
           id: 'new-file',
+          icon: <Plus className="h-6 w-6" />,
           label: 'Subir',
           onClick: () => openModal('gallery'),
         },
         slot4: {
           id: 'filters',
+          icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
             const filtersContainer = document.getElementById('gallery-filters');
@@ -328,6 +331,7 @@ export default function ConstructionGallery() {
         },
         slot5: {
           id: 'clear-filters',
+          icon: <FilterX className="h-5 w-5" />,
           label: 'Limpiar',
           onClick: () => {
             setSearchTerm('');
@@ -405,6 +409,10 @@ export default function ConstructionGallery() {
   if (isLoading) {
     return (
       <Layout>
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Cargando galería...</p>
           </div>
         </div>
       </Layout>
@@ -414,6 +422,10 @@ export default function ConstructionGallery() {
   if (error) {
     return (
       <Layout>
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-destructive mb-2">Error al cargar la galería</p>
+            <p className="text-sm text-muted-foreground">
               {error instanceof Error ? error.message : 'Error desconocido'}
             </p>
           </div>
@@ -425,18 +437,23 @@ export default function ConstructionGallery() {
   if (galleryFiles.length === 0) {
     return (
       <Layout>
+        <div className="space-y-6">
           {/* ActionBar */}
           <ActionBarDesktop
             title={projectId ? "Galería Multimedia del Proyecto" : "Galería Multimedia - Todos los Proyectos"}
+            icon={<Images className="w-5 h-5" />}
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}
             primaryActionLabel="Subir Archivo"
             onPrimaryActionClick={() => openModal('gallery')}
             customFilters={
+              <div className="space-y-4">
                 <div>
+                  <Label className="text-xs font-medium text-muted-foreground">
                     Filtrar por tipo de archivo
                   </Label>
                   <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                    <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Todos los archivos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -448,9 +465,11 @@ export default function ConstructionGallery() {
                 </div>
 
                 <div>
+                  <Label className="text-xs font-medium text-muted-foreground">
                     Filtrar por tipo de entrada
                   </Label>
                   <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+                    <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Todos los tipos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -471,18 +490,22 @@ export default function ConstructionGallery() {
             }
             features={[
               {
+                icon: <Camera className="w-4 h-4" />,
                 title: "Fotos y Videos",
                 description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
               },
               {
+                icon: <FolderOpen className="w-4 h-4" />,
                 title: "Organización Automática",
                 description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
               },
               {
+                icon: <Calendar className="w-4 h-4" />,
                 title: "Histórico Visual",
                 description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
               },
               {
+                icon: <Eye className="w-4 h-4" />,
                 title: "Visor Integrado",
                 description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
               }
@@ -491,27 +514,36 @@ export default function ConstructionGallery() {
 
           {/* Feature Introduction - Mobile Only */}
           <FeatureIntroduction
+            title="Galería Multimedia"
+            icon={<Images className="w-6 h-6" />}
             features={[
               {
+                icon: <Camera className="w-4 h-4" />,
                 title: "Fotos y Videos",
                 description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
               },
               {
+                icon: <FolderOpen className="w-4 h-4" />,
                 title: "Organización Automática",
                 description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
               },
               {
+                icon: <Calendar className="w-4 h-4" />,
                 title: "Histórico Visual",
                 description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
               },
               {
+                icon: <Eye className="w-4 h-4" />,
                 title: "Visor Integrado",
                 description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
               }
             ]}
+            className="md:hidden"
           />
 
           <EmptyState
+            icon={<Images />}
+            title="No hay archivos en la galería"
             description="Sube tu primer archivo para comenzar"
           />
         </div>
@@ -521,18 +553,23 @@ export default function ConstructionGallery() {
 
   return (
     <Layout>
+      <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktop
           title={projectId ? "Galería Multimedia del Proyecto" : "Galería Multimedia - Todos los Proyectos"}
+          icon={<Images className="w-5 h-5" />}
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
           primaryActionLabel="Subir Archivo"
           onPrimaryActionClick={() => openModal('gallery')}
           customFilters={
+            <div className="space-y-4">
               <div>
+                <Label className="text-xs font-medium text-muted-foreground">
                   Filtrar por tipo de archivo
                 </Label>
                 <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                  <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Todos los archivos" />
                   </SelectTrigger>
                   <SelectContent>
@@ -544,9 +581,11 @@ export default function ConstructionGallery() {
               </div>
 
               <div>
+                <Label className="text-xs font-medium text-muted-foreground">
                   Filtrar por tipo de entrada
                 </Label>
                 <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
+                  <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Todos los tipos" />
                   </SelectTrigger>
                   <SelectContent>
@@ -567,18 +606,22 @@ export default function ConstructionGallery() {
           }
           features={[
             {
+              icon: <Camera className="w-4 h-4" />,
               title: "Fotos y Videos",
               description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
             },
             {
+              icon: <FolderOpen className="w-4 h-4" />,
               title: "Organización Automática",
               description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
             },
             {
+              icon: <Calendar className="w-4 h-4" />,
               title: "Histórico Visual",
               description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
             },
             {
+              icon: <Eye className="w-4 h-4" />,
               title: "Visor Integrado",
               description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
             }
@@ -587,75 +630,103 @@ export default function ConstructionGallery() {
 
         {/* Feature Introduction - Mobile Only */}
         <FeatureIntroduction
+          title="Galería Multimedia"
+          icon={<Images className="w-6 h-6" />}
           features={[
             {
+              icon: <Camera className="w-4 h-4" />,
               title: "Fotos y Videos",
               description: "Captura y organiza fotos y videos del progreso de la obra directamente desde el móvil."
             },
             {
+              icon: <FolderOpen className="w-4 h-4" />,
               title: "Organización Automática",
               description: "Los archivos se organizan automáticamente por fecha y tipo de entrada para fácil navegación."
             },
             {
+              icon: <Calendar className="w-4 h-4" />,
               title: "Histórico Visual",
               description: "Mantén un registro visual completo del progreso de la obra con fechas y descripciones."
             },
             {
+              icon: <Eye className="w-4 h-4" />,
               title: "Visor Integrado",
               description: "Visualiza imágenes y reproduce videos directamente en la aplicación con navegación intuitiva."
             }
           ]}
+          className="md:hidden"
         />
 
         {/* Gallery Grid */}
         {filteredFiles.length === 0 ? (
           <EmptyState
+            icon={<Filter />}
+            title="No se encontraron archivos"
             description="Intenta cambiar los filtros para ver más resultados"
           />
         ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {filteredFiles.map((file) => (
               <Card 
                 key={file.id} 
+                className="group cursor-pointer overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200"
                 onClick={() => handleImageClick(file)}
               >
+                <div className="aspect-square relative">
                   {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
                     <img 
                       src={file.file_url} 
                       alt={file.title}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <PlayCircle className="h-12 w-12 text-primary" />
                     </div>
                   )}
                   
                   {/* Overlay with info and actions */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-2">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded block">
                           {getEntryTypeLabel(file.entry_type || 'registro_general')}
                         </span>
                         {!projectId && file.project_name && (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded block">
                             {file.project_name}
                           </span>
                         )}
                       </div>
+                      <div className="flex gap-1">
                         <Button
                           size="sm"
                           variant="ghost"
+                          className="h-6 w-6 p-0 bg-white/20 hover:bg-white/40"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEdit(file);
                           }}
                         >
+                          <Edit className="h-3 w-3 text-white" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
+                          className="h-6 w-6 p-0 bg-white/20 hover:bg-white/40"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(file);
                           }}
                         >
+                          <Trash2 className="h-3 w-3 text-white" />
                         </Button>
                       </div>
                     </div>
                     
+                    <div className="text-white">
+                      <p className="text-xs font-medium truncate">{file.title}</p>
+                      <p className="text-xs">
                         {format(new Date(file.created_at), 'dd MMM yyyy', { locale: es })}
                       </p>
                     </div>

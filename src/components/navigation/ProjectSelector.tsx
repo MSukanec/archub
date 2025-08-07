@@ -84,24 +84,34 @@ export function ProjectSelector() {
   }
 
   const displayName = currentProject?.name || "Seleccionar proyecto"
+  const displayIcon = <Folder className="w-4 h-4" />
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          className="flex items-center gap-2 px-2 py-1 h-auto text-sm font-medium hover:bg-muted/50 data-[state=open]:bg-muted/50"
         >
           {displayIcon}
+          <span className="truncate max-w-32">{displayName}</span>
+          <ChevronDown className="w-3 h-3 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-56">
         {/* Lista de proyectos */}
         {projects.map((project) => (
           <DropdownMenuItem
             key={project.id}
             onClick={() => handleProjectSelect(project.id)}
+            className="flex items-center justify-between"
           >
+            <div className="flex items-center gap-2">
+              <Folder className="w-4 h-4" />
+              <span className="truncate">{project.name}</span>
             </div>
             {selectedProjectId === project.id && (
+              <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
             )}
           </DropdownMenuItem>
         ))}

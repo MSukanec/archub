@@ -58,6 +58,7 @@ export function HelpPopover({
           tabIndex={-1}
         >
           <HelpCircle 
+            className="text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors"
             size={iconSize} 
           />
         </Button>
@@ -75,19 +76,24 @@ export function HelpPopover({
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
+        <div className="space-y-3">
           {title && (
+            <h4 className="font-semibold text-sm leading-none">
               {title}
             </h4>
           )}
           
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {description}
           </p>
           
           {(primaryActionText || secondaryActionText) && (
+            <div className="flex items-center justify-end gap-2 pt-2">
               {secondaryActionText && (
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:underline"
                   onClick={handleSecondaryAction}
                 >
                   {secondaryActionText}
@@ -97,6 +103,7 @@ export function HelpPopover({
               {primaryActionText && (
                 <Button
                   size="sm"
+                  className="h-8 px-4 text-xs"
                   onClick={handlePrimaryAction}
                 >
                   {primaryActionText}

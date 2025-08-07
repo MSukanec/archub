@@ -156,6 +156,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Material Selection */}
         <FormField
           control={form.control}
@@ -321,6 +322,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
               <FormControl>
                 <Textarea
                   placeholder="Descripción detallada del producto, especificaciones técnicas..."
+                  className="resize-none"
                   rows={3}
                   {...field}
                 />

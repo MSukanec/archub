@@ -46,9 +46,14 @@ export default function DurationByRubro({ data }: DurationByRubroProps) {
   }, [data])
 
   return (
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">Duración Promedio por Rubro</CardTitle>
       </CardHeader>
+      <CardContent className="pt-0">
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 30 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" className="opacity-30" />
             <XAxis 
               dataKey="rubro"
               tick={{ fontSize: 10, fill: 'hsl(var(--chart-grid-text))' }}

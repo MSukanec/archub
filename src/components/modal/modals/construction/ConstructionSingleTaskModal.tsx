@@ -220,28 +220,39 @@ export function ConstructionSingleTaskModal({
   };
 
   const viewPanel = isEditing && modalData.editingTask ? (
+    <div className="space-y-4">
       <div>
+        <h4 className="font-medium">Tarea</h4>
+        <p className="text-muted-foreground mt-1">
           {modalData.editingTask.task?.display_name || modalData.editingTask.task_code || 'Sin tarea'}
         </p>
       </div>
       
       <div>
+        <h4 className="font-medium">Código</h4>
+        <p className="text-muted-foreground mt-1">
           {modalData.editingTask.task_code || 'Sin código'}
         </p>
       </div>
 
       <div>
+        <h4 className="font-medium">Cantidad</h4>
+        <p className="text-muted-foreground mt-1">
           {modalData.editingTask.quantity || 0}
         </p>
       </div>
 
       <div>
+        <h4 className="font-medium">Fase</h4>
+        <p className="text-muted-foreground mt-1">
           {modalData.editingTask.phase_name || 'Sin fase'}
         </p>
       </div>
 
       {modalData.editingTask.created_at && (
         <div>
+          <h4 className="font-medium">Fecha de Creación</h4>
+          <p className="text-muted-foreground mt-1">
             {new Date(modalData.editingTask.created_at).toLocaleDateString('es-ES', {
               year: 'numeric',
               month: 'long',
@@ -254,7 +265,11 @@ export function ConstructionSingleTaskModal({
   ) : null;
 
   const editPanel = (
+    <div className="space-y-4">
       {/* Filtros de búsqueda - Orden solicitado: Filtrar por Rubro - Búsqueda de Texto */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none text-muted-foreground">
             Filtrar por Rubro
           </label>
           <Select value={rubroFilter} onValueChange={setRubroFilter}>
@@ -272,24 +287,38 @@ export function ConstructionSingleTaskModal({
           </Select>
         </div>
         
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none text-muted-foreground">
             Búsqueda de Texto
           </label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar tarea..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
             />
           </div>
         </div>
       </div>
       
       {/* Lista de tareas optimizada como tabla */}
+      <div className="border rounded-lg">
+        <ScrollArea className="h-64 md:h-80">
+          <div className="divide-y">
             {tasksLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <div className="animate-pulse">Cargando tareas...</div>
               </div>
             ) : filteredTasks.length === 0 ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="text-muted-foreground">
                   {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
                 </div>
                 {searchQuery && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
                       ¿No encuentras la tarea que necesitas?
                     </p>
                     <Button
@@ -302,7 +331,9 @@ export function ConstructionSingleTaskModal({
                           description: "Esta funcionalidad estará disponible pronto",
                         });
                       }}
+                      className="gap-2"
                     >
+                      <Plus className="w-4 h-4" />
                       Crear Tarea Personalizada
                     </Button>
                   </div>
@@ -319,14 +350,19 @@ export function ConstructionSingleTaskModal({
                       : 'hover:bg-muted/30'
                   }`}
                 >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-tight text-foreground">
                       {task.name_rendered || task.code || 'Sin nombre'}
                     </p>
                     {task.element_category_name && (
+                      <p className="text-xs text-muted-foreground">
                         {task.element_category_name}
                       </p>
                     )}
                   </div>
+                  <div className="flex-shrink-0 pt-0.5">
                     {task.unit_name && (
+                      <span className="text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
                         {task.unit_name}
                       </span>
                     )}
@@ -340,11 +376,16 @@ export function ConstructionSingleTaskModal({
       
       {/* Validación de selección */}
       {form.formState.errors.task_id && (
+        <p className="text-xs text-destructive flex items-center gap-1">
+          <span className="w-1 h-1 bg-destructive rounded-full"></span>
           {form.formState.errors.task_id.message}
         </p>
       )}
 
       {/* Información básica - Movido debajo de la lista */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Fase del Proyecto
           </label>
           <Select 
@@ -365,8 +406,11 @@ export function ConstructionSingleTaskModal({
           </Select>
         </div>
         
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Cantidad *
           </label>
+          <div className="relative">
             <Input
               type="number"
               step="0.01"
@@ -382,11 +426,13 @@ export function ConstructionSingleTaskModal({
               className={`${form.formState.errors.quantity ? 'border-destructive' : ''} ${selectedTaskUnit ? 'pr-12' : ''}`}
             />
             {selectedTaskUnit && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded">
                 {selectedTaskUnit}
               </div>
             )}
           </div>
           {form.formState.errors.quantity && (
+            <p className="text-xs text-destructive">
               {form.formState.errors.quantity.message}
             </p>
           )}

@@ -61,6 +61,7 @@ export function Selector({
       ref={containerRef}
       onMouseEnter={handleMouseEnter} 
       onMouseLeave={handleMouseLeave}
+      className="relative"
     >
       {/* Main button */}
       <button
@@ -80,10 +81,13 @@ export function Selector({
           className
         )}
       >
+        <div className="flex items-center gap-2 flex-1">
           {selectedOption?.icon && (
+            <div className="text-muted-foreground">
               {selectedOption.icon}
             </div>
           )}
+          <span className="text-left whitespace-nowrap">{displayText}</span>
         </div>
         <ChevronDown className={cn(
           "w-4 h-4 ml-2 shrink-0 transition-transform duration-200",
@@ -95,8 +99,10 @@ export function Selector({
       {open && (
         <>
           {/* Invisible bridge to prevent hover gaps */}
+          <div className="absolute top-full left-0 right-0 h-1 z-40" />
           
           <div 
+            className="absolute top-full left-0 z-50 mt-1 rounded-lg shadow-button-normal border min-w-full"
             style={{ 
               backgroundColor: 'var(--card-bg)',
               borderColor: 'var(--card-border)',
@@ -104,6 +110,7 @@ export function Selector({
             }}
           >
             <div 
+              className="py-1 overflow-y-auto overflow-x-hidden"
               style={{
                 maxHeight: '200px' // Scroll interno dentro del popover
               }}
@@ -121,6 +128,7 @@ export function Selector({
                   )}
                 >
                   {option.icon && (
+                    <div className="text-muted-foreground">
                       {option.icon}
                     </div>
                   )}
@@ -129,6 +137,7 @@ export function Selector({
               ))}
               
               {options.length === 0 && (
+                <div className="px-2 py-2 text-sm text-[var(--button-ghost-text)]">
                   No hay opciones disponibles
                 </div>
               )}

@@ -165,17 +165,26 @@ export function AvatarUploader({
   };
 
   return (
+    <div className="space-y-4">
       {/* Current Avatar Display */}
+      <div className="flex items-center gap-4">
+        <Avatar className="h-20 w-20">
           <AvatarImage src={currentImageUrl} alt={title} />
+          <AvatarFallback className="bg-gradient-to-br from-green-400 to-green-600 text-white text-lg font-semibold">
             {fallbackText}
           </AvatarFallback>
         </Avatar>
+        <div className="flex-1">
+          <h3 className="font-medium text-foreground">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
+          <div className="flex items-center gap-2 mt-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowUpload(!showUpload)}
               disabled={isUploading}
             >
+              <Upload className="h-4 w-4 mr-2" />
               {currentImageUrl ? 'Cambiar' : 'Subir'}
             </Button>
           </div>
@@ -185,7 +194,12 @@ export function AvatarUploader({
       {/* Upload Section */}
       {showUpload && (
         <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
                 <div>
+                  <p className="font-medium text-foreground">Subir nueva imagen</p>
+                  <p className="text-sm text-muted-foreground">
                     La imagen se recortará automáticamente a formato cuadrado
                   </p>
                 </div>
@@ -195,19 +209,24 @@ export function AvatarUploader({
                   onClick={() => setShowUpload(false)}
                   disabled={isUploading}
                 >
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
 
+              <div className="space-y-2">
                 <Button
                   onClick={handleButtonClick}
                   disabled={isUploading}
+                  className="w-full"
                 >
                   {isUploading ? (
                     <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Subiendo...
                     </>
                   ) : (
                     <>
+                      <Upload className="h-4 w-4 mr-2" />
                       Seleccionar archivo
                     </>
                   )}
@@ -218,8 +237,10 @@ export function AvatarUploader({
                   type="file"
                   accept="image/*"
                   onChange={handleFileSelect}
+                  className="hidden"
                 />
                 
+                <p className="text-xs text-muted-foreground text-center">
                   Formatos: JPG, PNG, GIF. Máximo {maxSizeMB}MB.
                 </p>
               </div>

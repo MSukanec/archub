@@ -101,6 +101,8 @@ export default function DesignDocumentation() {
   if (foldersLoading || groupsLoading || documentsLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Cargando documentos...</div>
         </div>
       </Layout>
     );
@@ -108,6 +110,7 @@ export default function DesignDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
+      <div className="space-y-6">
 
         {/* Table with TableTopBar - Always show table */}
         <Table
@@ -117,9 +120,13 @@ export default function DesignDocumentation() {
                 label: 'Tipo',
                 sortable: true,
                 render: (item: any) => (
+                  <div className="flex items-center gap-2">
                     {item.type === 'folder' ? (
+                      <FolderOpen className="w-4 h-4 text-blue-600" />
                     ) : (
+                      <FileText className="w-4 h-4 text-green-600" />
                     )}
+                    <span className="text-xs font-medium">
                       {item.type === 'folder' ? 'Carpeta' : 'Grupo'}
                     </span>
                   </div>
@@ -131,7 +138,9 @@ export default function DesignDocumentation() {
                 sortable: true,
                 render: (item: any) => (
                   <div>
+                    <div className="font-medium">{item.name}</div>
                     {item.type === 'folder' && (
+                      <div className="text-xs text-muted-foreground">
                         {(documentsByFolder[item.id] || []).length} documentos
                       </div>
                     )}
@@ -143,6 +152,7 @@ export default function DesignDocumentation() {
                 label: 'Fecha de Creación',
                 sortable: true,
                 render: (item: any) => (
+                  <span className="text-sm text-muted-foreground">
                     {item.created_at ? new Date(item.created_at).toLocaleDateString('es-AR') : 'N/A'}
                   </span>
                 )
@@ -151,6 +161,7 @@ export default function DesignDocumentation() {
                 key: 'actions',
                 label: 'Acciones',
                 render: (item: any) => (
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -161,7 +172,9 @@ export default function DesignDocumentation() {
                           handleEditGroup(item);
                         }
                       }}
+                      className="text-xs font-normal"
                     >
+                      <Upload className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -174,7 +187,9 @@ export default function DesignDocumentation() {
                           handleDeleteGroup(item);
                         }
                       }}
+                      className="text-xs font-normal text-red-600 hover:text-red-700"
                     >
+                      <Archive className="w-4 h-4" />
                     </Button>
                   </div>
                 )
@@ -193,6 +208,8 @@ export default function DesignDocumentation() {
             }}
             emptyState={
               <EmptyState
+                icon={<FileText className="w-12 h-12" />}
+                title="No hay documentos de diseño"
                 description="Comienza creando tu primera carpeta para organizar los documentos del proyecto de diseño."
               />
             }

@@ -60,10 +60,13 @@ export default function DatePicker({
             className
           )}
         >
+          <span className="truncate">
             {value ? format(value, "dd/MM/yyyy", { locale: es }) : placeholder}
           </span>
+          <CalendarDays className="h-4 w-4 text-foreground opacity-50" />
         </div>
       </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={value}

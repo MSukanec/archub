@@ -70,14 +70,17 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
       actions={[
         {
           label: "Favorito",
+          icon: <Star className="w-4 h-4" />,
           onClick: () => onToggleFavorite?.(movement)
         },
         {
           label: "Editar",
+          icon: <Edit className="w-4 h-4" />,
           onClick: () => onEdit?.(movement)
         },
         {
           label: "Eliminar",
+          icon: <Trash2 className="w-4 h-4" />,
           variant: "destructive" as const,
           onClick: () => onDelete?.(movement)
         }
@@ -86,17 +89,23 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
       <div className={`flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors`}
            style={{ borderRight: isIngreso ? '4px solid var(--movement-income-border)' : '4px solid var(--movement-expense-border)' }}>
         {/* Left: Avatar */}
+        <div className="flex-shrink-0">
+          <Avatar className="w-10 h-10">
             <AvatarImage 
               src={creator?.avatar_url || ''} 
               alt={creator?.name || 'Usuario'} 
             />
+            <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
               {getInitials(creator?.name || 'Usuario')}
             </AvatarFallback>
           </Avatar>
         </div>
 
         {/* Center: Data - Two rows layout */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex items-center justify-between">
             <div 
+              className="text-[var(--card-fg)] font-medium text-sm"
               title={category}
             >
               {categoryDisplay}
@@ -106,16 +115,20 @@ const MovementCard: React.FC<MovementCardProps> = ({ movement, onEdit, onDelete,
             </div>
           </div>
           
+          <div className="flex items-center justify-between mt-1">
             {subcategoryDisplay ? (
               <div 
+                className="text-[var(--muted-fg)] text-sm truncate"
                 title={subcategoryDisplay}
               >
                 {subcategoryDisplay}
               </div>
             ) : (
+              <div className="text-[var(--muted-fg)] text-sm">
                 Sin subcategoría
               </div>
             )}
+            <div className="text-xs text-gray-500 ml-4">
               {currency}
             </div>
           </div>

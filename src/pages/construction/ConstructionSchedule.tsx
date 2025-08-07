@@ -153,6 +153,8 @@ export default function ConstructionSchedule() {
   if (isLoading) {
     return (
       <Layout wide={true}>
+        <div className="flex items-center justify-center h-32">
+          <div className="text-sm text-muted-foreground">Cargando...</div>
         </div>
       </Layout>
     )
@@ -201,20 +203,27 @@ export default function ConstructionSchedule() {
     >
       {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
+        icon={<Calendar className="h-6 w-6" />}
+        title="Cronograma de Construcción"
+        className="md:hidden"
         features={[
           {
+            icon: <Clock className="h-5 w-5" />,
             title: "Vista Gantt Avanzada",
             description: "Visualiza el cronograma con barras temporales, dependencias y fases del proyecto organizadas jerárquicamente."
           },
           {
+            icon: <Activity className="h-5 w-5" />,
             title: "Análisis Visual",
             description: "Gráficos de progreso, burndown charts y análisis de rutas críticas para optimizar el cronograma."
           },
           {
+            icon: <CheckSquare className="h-5 w-5" />,
             title: "Gestión de Dependencias",
             description: "Define y visualiza dependencias entre tareas para identificar bottlenecks y rutas críticas."
           },
           {
+            icon: <BarChart3 className="h-5 w-5" />,
             title: "Reportes de Avance",
             description: "Métricas de progreso temporal, distribución de carga de trabajo y análisis de desviaciones."
           }
@@ -225,8 +234,11 @@ export default function ConstructionSchedule() {
 
       {/* Tab Content */}
       {activeTab === 'gantt' && (
+        <div className="space-y-6">
           {filteredTasks.length === 0 ? (
             <EmptyState
+              icon={<Calendar className="h-16 w-16" />}
+              title="No hay tareas en el cronograma"
               description="Comienza agregando tareas de construcción para visualizar el cronograma del proyecto."
             />
           ) : (
@@ -254,7 +266,12 @@ export default function ConstructionSchedule() {
 
 
       {activeTab === 'list' && (
+        <div className="space-y-6">
           <CustomRestricted reason="coming_soon">
+            <div className="flex flex-col items-center justify-center py-16">
+              <CheckSquare className="w-16 h-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Listado de Tareas</h3>
+              <p className="text-muted-foreground text-center max-w-md">
                 Esta funcionalidad estará disponible próximamente. Aquí podrás ver y gestionar todas las tareas 
                 del proyecto en formato de tabla con filtros avanzados.
               </p>
@@ -264,7 +281,12 @@ export default function ConstructionSchedule() {
       )}
 
       {activeTab === 'analytics' && (
+        <div className="space-y-6">
           <CustomRestricted reason="coming_soon">
+            <div className="flex flex-col items-center justify-center py-16">
+              <BarChart3 className="w-16 h-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Análisis Visual</h3>
+              <p className="text-muted-foreground text-center max-w-md">
                 Esta funcionalidad estará disponible próximamente. Aquí podrás ver gráficos de progreso, 
                 burndown charts y análisis de rutas críticas del cronograma.
               </p>

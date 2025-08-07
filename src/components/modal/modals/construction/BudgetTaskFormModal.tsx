@@ -58,12 +58,16 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
   };
 
   const viewPanel = (
+    <div className="space-y-6">
+      <div className="text-center text-muted-foreground">
+        <Plus className="w-12 h-12 mx-auto mb-4 text-muted-foreground/60" />
         <p>Modal de agregar tareas funcionando correctamente</p>
       </div>
     </div>
   );
 
   const editPanel = (
+    <div className="space-y-6">
       <TaskSelectionTable
         selectedTasks={selectedTasks}
         onTasksChange={setSelectedTasks}
@@ -74,6 +78,7 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
 
   const headerContent = (
     <FormModalHeader 
+      title="Agregar Tareas al Presupuesto"
       icon={Plus}
     />
   );

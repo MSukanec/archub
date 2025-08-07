@@ -112,6 +112,8 @@ export function AddParameterToCanvasModal() {
   }));
 
   const editPanel = (
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="parameter-select">Seleccionar Parámetro</Label>
         <ComboBox
           options={comboBoxOptions}
@@ -125,10 +127,12 @@ export function AddParameterToCanvasModal() {
                 : "Buscar parámetro..."
           }
           disabled={parametersLoading || availableParameters.length === 0}
+          className="w-full"
         />
       </div>
 
       {availableParameters.length === 0 && !parametersLoading && (
+        <div className="text-sm text-muted-foreground">
           No hay parámetros disponibles en el sistema.
         </div>
       )}
@@ -137,6 +141,7 @@ export function AddParameterToCanvasModal() {
 
   const headerContent = (
     <FormModalHeader 
+      title="Agregar Parámetro al Canvas"
       icon={Plus}
     />
   );

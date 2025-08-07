@@ -46,17 +46,25 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
         onSelect(organization.id)
       }}
     >
+      <CardContent className="p-4">
+        <div className="grid grid-cols-6 gap-4 items-center">
           {/* Fecha */}
+          <div className="col-span-1 text-xs text-muted-foreground">
             {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
           </div>
 
           {/* Organización */}
+          <div className="col-span-1 flex items-center gap-2">
+            <Avatar className="w-8 h-8 avatar-border">
+              <AvatarFallback className="text-xs">
                 {organization.name?.substring(0, 2)?.toUpperCase() || 'ORG'}
               </AvatarFallback>
             </Avatar>
             <div>
+              <div className="font-medium flex items-center gap-2">
                 {organization.name}
                 {isSelected && (
+                  <Badge variant="secondary" className="text-xs">
                     Activa
                   </Badge>
                 )}
@@ -65,9 +73,11 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
           </div>
 
           {/* Plan */}
+          <div className="col-span-1">
             {organization.plan ? (
               <Badge 
                 variant="secondary" 
+                className="text-xs text-white" 
                 style={{
                   backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
                                  organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
@@ -75,51 +85,67 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
                                  'var(--plan-free-bg)'
                 }}
               >
+                <Crown className="w-3 h-3 mr-1" />
                 {organization.plan.name}
               </Badge>
             ) : (
               <Badge 
                 variant="secondary" 
+                className="text-xs text-white" 
                 style={{ backgroundColor: 'var(--plan-free-bg)' }}
               >
+                <Crown className="w-3 h-3 mr-1" />
                 Free
               </Badge>
             )}
           </div>
 
           {/* Miembros */}
+          <div className="col-span-1 flex items-center gap-2">
+            <span className="text-xs font-medium">({members.length})</span>
+            <div className="flex -space-x-1">
               {members.slice(0, 3).map((member, index) => (
+                <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
                   {member.avatar_url ? (
                     <img 
                       src={member.avatar_url} 
                       alt={member.full_name || member.email} 
+                      className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
+                    <AvatarFallback className="text-xs">
                       {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
               ))}
               {members.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '3px solid var(--card-border)'}}>
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">+{members.length - 3}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Estado */}
+          <div className="col-span-1">
+            <Badge variant={organization.is_active ? "default" : "secondary"} className="text-xs">
               {organization.is_active ? "Activa" : "Inactiva"}
             </Badge>
           </div>
 
           {/* Acciones */}
+          <div className="col-span-1">
             <Button 
               variant="ghost" 
               size="sm" 
+              className="h-8 w-8 p-0"
               onClick={(e) => {
                 e.stopPropagation()
                 onEdit(organization)
               }}
             >
+              <Edit className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -311,6 +337,9 @@ export default function OrganizationManagement() {
 
   // Filtros personalizados
   const customFilters = (
+    <div className="w-72 p-4 space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger>
             <SelectValue />
@@ -324,6 +353,8 @@ export default function OrganizationManagement() {
         </Select>
       </div>
 
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Filtrar por estado</Label>
         <Select value={filterByStatus} onValueChange={setFilterByStatus}>
           <SelectTrigger>
             <SelectValue />
@@ -352,8 +383,10 @@ export default function OrganizationManagement() {
     actions: [
       <Button 
         key="new-organization"
+        className="h-8 px-3 text-sm"
         onClick={() => openModal('organization', { open: true })}
       >
+        <Plus className="w-4 h-4 mr-2" />
         Nueva Organización
       </Button>
     ]
@@ -362,6 +395,7 @@ export default function OrganizationManagement() {
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
+        <div className="p-8 text-center text-muted-foreground">
           Cargando organizaciones...
         </div>
       </Layout>
@@ -372,29 +406,36 @@ export default function OrganizationManagement() {
     <Layout headerProps={headerProps}>
       {/* ActionBar */}
       <ActionBarDesktop
+        title="Gestión de Organizaciones"
+        icon={<Building className="h-5 w-5" />}
         showProjectSelector={false}
         showSearch={false}
         showGrouping={false}
         features={[
           {
+            icon: <Settings className="h-4 w-4" />,
             title: "Administración de Organizaciones",
             description: "Crea, edita y gestiona las organizaciones de las que formas parte, incluyendo configuración de roles y permisos."
           },
           {
+            icon: <Users className="h-4 w-4" />,
             title: "Gestión de Miembros",
             description: "Administra los miembros de cada organización, invita nuevos colaboradores y gestiona sus roles y permisos."
           },
           {
+            icon: <Crown className="h-4 w-4" />,
             title: "Planes y Suscripciones",
             description: "Visualiza y gestiona los planes de suscripción de tus organizaciones con diferentes niveles de funcionalidad."
           },
           {
+            icon: <BarChart3 className="h-4 w-4" />,
             title: "Estadísticas y Análisis",
             description: "Accede a métricas detalladas sobre el uso y rendimiento de cada organización en la plataforma."
           }
         ]}
       />
 
+      <div className="space-y-6">
         {/* Plan Card con color del plan actual */}
         {(() => {
           const activeOrg = userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id) || userData?.organization;
@@ -408,11 +449,19 @@ export default function OrganizationManagement() {
             <Card 
               className={`border-0 plan-card-${planName}`}
             >
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <p className="text-sm text-white font-bold">
                       Tu aplicación está actualmente en el plan {planDisplayName}
                     </p>
+                    <p className="text-xs text-white/80 break-words">
                       Los planes pagos ofrecen límites de uso más altos, ramas adicionales y mucho más. 
+                      <span className="text-white underline cursor-pointer ml-1">Aprende más aquí.</span>
                     </p>
                   </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
+                    <Button variant="secondary" size="sm" className="w-full sm:w-auto text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white border-white/20 hover:border-white hover:text-white">
                       Actualizar
                     </Button>
                   </div>
@@ -426,15 +475,25 @@ export default function OrganizationManagement() {
         {(() => {
           const activeOrg = userData?.organizations?.find(org => org.id === userData?.preferences?.last_organization_id) || userData?.organization;
           return activeOrg ? (
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="w-16 h-16 avatar-border">
+                      <AvatarFallback className="text-lg font-semibold">
                         {activeOrg?.name?.substring(0, 2).toUpperCase() || 'ORG'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
+                      <h2 className="text-xl font-semibold">{activeOrg.name}</h2>
+                      <p className="text-sm text-muted-foreground">
                         Creada el {format(new Date(activeOrg.created_at), 'dd/MM/yyyy', { locale: es })}
                       </p>
                       {/* Badge del plan */}
+                      <div className="mt-2">
                         <Badge 
                           variant="secondary" 
+                          className="text-xs text-white" 
                           style={{
                             backgroundColor: activeOrg.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
                                            activeOrg.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
@@ -442,13 +501,16 @@ export default function OrganizationManagement() {
                                            'var(--plan-free-bg)'
                           }}
                         >
+                          <Crown className="w-3 h-3 mr-1" />
                           {activeOrg.plan?.name || 'Free'}
                         </Badge>
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-col items-end gap-2">
                     {/* Avatares de miembros más grandes */}
                     <ActiveOrganizationMembersCard members={activeOrgMembers} />
+                    <Badge variant="default" className="bg-[var(--accent)] text-white">
                       ACTIVA
                     </Badge>
                   </div>
@@ -459,9 +521,17 @@ export default function OrganizationManagement() {
         })()}
 
         {/* Headers de columnas */}
+        <div className="grid grid-cols-6 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
+          <div className="col-span-1">Fecha</div>
+          <div className="col-span-1">Organización</div>
+          <div className="col-span-1">Plan</div>
+          <div className="col-span-1">Miembros</div>
+          <div className="col-span-1">Estado</div>
+          <div className="col-span-1">Acciones</div>
         </div>
 
         {/* Lista de organizaciones */}
+        <div className="space-y-2">
           {filteredOrganizations.map((organization) => {
             const isSelected = userData?.preferences?.last_organization_id === organization.id
             
@@ -480,8 +550,12 @@ export default function OrganizationManagement() {
 
         {filteredOrganizations.length === 0 && (
           <Card>
+            <CardContent className="text-center py-8">
+              <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
                 No se encontraron organizaciones
               </h3>
+              <p className="text-muted-foreground">
                 {searchValue || filterByStatus !== "all" 
                   ? "Intenta ajustar los filtros de búsqueda" 
                   : "Aún no perteneces a ninguna organización"

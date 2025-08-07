@@ -11,6 +11,7 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
     return (
       <Badge 
         variant="secondary"
+        className="text-xs px-1 py-0.5"
         style={{
           backgroundColor: 'hsl(0, 0%, 20%)',
           color: 'white',
@@ -30,6 +31,7 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
     return (
       <Badge 
         variant="secondary"
+        className="text-xs px-1 py-0.5"
         style={{
           backgroundColor: 'hsl(0, 0%, 20%)',
           color: 'white',
@@ -53,6 +55,7 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
   return (
     <Badge 
       variant="secondary"
+      className="text-xs px-1 py-0.5"
       style={{
         backgroundColor: backgroundColor,
         color: 'white',

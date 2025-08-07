@@ -71,16 +71,21 @@ export function ComboBoxMultiSelect({
           aria-expanded={open}
           className={cn("justify-between text-left", className)}
         >
+          <span className="truncate">{getDisplayText()}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>No se encontraron opciones.</CommandEmpty>
+          <CommandGroup className="max-h-64 overflow-auto">
             {options?.map((option) => (
               <CommandItem
                 key={option.value}
                 value={option.label}
                 onSelect={() => handleSelect(option.value)}
+                className="cursor-pointer"
               >
                 <Check
                   className={cn(
@@ -93,18 +98,22 @@ export function ComboBoxMultiSelect({
             )) || []}
           </CommandGroup>
           {value && value.length > 0 && (
+            <div className="border-t p-2">
+              <div className="flex flex-wrap gap-1">
                 {value.slice(0, maxDisplay).map((v) => {
                   const option = options?.find((opt) => opt.value === v);
                   return option ? (
                     <Badge
                       key={v}
                       variant="secondary"
+                      className="text-xs"
                     >
                       {option.label}
                     </Badge>
                   ) : null;
                 })}
                 {value.length > maxDisplay && (
+                  <Badge variant="outline" className="text-xs">
                     +{value.length - maxDisplay} más
                   </Badge>
                 )}

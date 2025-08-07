@@ -427,10 +427,13 @@ export default function FinancesInstallments() {
 
   // Custom filters component
   const customFilters = (
+    <div className="space-y-4">
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por contacto
         </Label>
         <Select value={filterByContact} onValueChange={setFilterByContact}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todos los contactos" />
           </SelectTrigger>
           <SelectContent>
@@ -445,9 +448,11 @@ export default function FinancesInstallments() {
       </div>
 
       <div>
+        <Label className="text-xs font-medium text-muted-foreground">
           Filtrar por moneda
         </Label>
         <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
+          <SelectTrigger className="mt-1">
             <SelectValue placeholder="Todas las monedas" />
           </SelectTrigger>
           <SelectContent>
@@ -524,12 +529,14 @@ export default function FinancesInstallments() {
       render: (item: any) => {
         if (item.isTotal) {
           return (
+            <div className="text-sm font-bold text-foreground">
               TOTAL
             </div>
           )
         }
         
         if (!item.contact) {
+          return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
         const displayName = item.contact.company_name || 
@@ -539,9 +546,14 @@ export default function FinancesInstallments() {
           : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
 
         return (
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div>
+              <div className="text-sm font-medium">{displayName}</div>
               {item.contact.company_name && (
+                <div className="text-xs text-muted-foreground">
                   {item.contact.first_name} {item.contact.last_name}
                 </div>
               )}
@@ -557,6 +569,7 @@ export default function FinancesInstallments() {
       render: (item: any) => {
         if (item.isTotal) {
           return (
+            <div className="text-sm font-bold text-muted-foreground">
               -
             </div>
           )
@@ -566,10 +579,13 @@ export default function FinancesInstallments() {
         const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
         
         return (
+          <div className="text-sm">
             {clientCurrency ? (
+              <Badge variant="outline" className="text-xs">
                 {clientCurrency.code}
               </Badge>
             ) : (
+              <div className="text-muted-foreground text-xs">
                 Sin configurar
               </div>
             )}
@@ -585,6 +601,7 @@ export default function FinancesInstallments() {
         if (item.isTotal) {
           const totalCommitted = item.totalCommittedAmount || 0
           return (
+            <div className="text-sm font-bold text-blue-600">
               US$ {totalCommitted.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           )
@@ -595,10 +612,13 @@ export default function FinancesInstallments() {
         const symbol = clientCurrency?.symbol || '$'
         
         return (
+          <div className="text-sm">
             {committedAmount > 0 ? (
+              <div className="font-medium text-blue-600">
                 {symbol} {committedAmount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             ) : (
+              <div className="text-muted-foreground text-xs">
                 Sin monto comprometido
               </div>
             )}
@@ -612,16 +632,20 @@ export default function FinancesInstallments() {
       width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
+          return <div className="text-sm font-bold">100%</div>
         }
         
         const committedAmount = item.client?.committed_amount || 0
         const percentage = item.commitmentPercentage || 0
         
         return (
+          <div className="text-sm">
             {committedAmount > 0 ? (
+              <div className="font-medium">
                 {percentage.toFixed(1)}%
               </div>
             ) : (
+              <div className="text-muted-foreground text-xs">-</div>
             )}
           </div>
         )
@@ -641,12 +665,14 @@ export default function FinancesInstallments() {
             maximumFractionDigits: 0
           }).format(totalDollarized)
           return (
+            <div className="text-sm font-bold text-green-600">
               US$ {formattedTotal}
             </div>
           )
         }
         
         if (!item.dollarizedTotal || item.dollarizedTotal === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
         }
 
         const formattedAmount = new Intl.NumberFormat('es-AR', {
@@ -654,6 +680,7 @@ export default function FinancesInstallments() {
           maximumFractionDigits: 0
         }).format(item.dollarizedTotal)
         return (
+          <div className="text-sm font-medium text-green-600">
             US$ {formattedAmount}
           </div>
         )
@@ -666,16 +693,20 @@ export default function FinancesInstallments() {
       render: (item: any) => {
         if (item.isTotal) {
           const overallPercentage = item.contributionPercentage || 0
+          return <div className="text-sm font-bold">{overallPercentage.toFixed(1)}%</div>
         }
         
         const dollarizedTotal = item.dollarizedTotal || 0
         const percentage = item.contributionPercentage || 0
         
         return (
+          <div className="text-sm">
             {dollarizedTotal > 0 ? (
+              <div className="font-medium">
                 {percentage.toFixed(1)}%
               </div>
             ) : (
+              <div className="text-muted-foreground text-xs">-</div>
             )}
           </div>
         )
@@ -690,6 +721,7 @@ export default function FinancesInstallments() {
           const totalRemaining = item.totalRemainingAmount || 0
           const isPositive = totalRemaining >= 0
           return (
+            <div className="text-sm font-bold text-red-600">
               {isPositive ? '+' : '-'}US$ {Math.abs(totalRemaining).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           )
@@ -718,6 +750,7 @@ export default function FinancesInstallments() {
         }).format(Math.abs(remaining))
         
         return (
+          <div className="text-sm font-medium text-red-600">
             {remaining >= 0 ? '+' : '-'}US$ {formattedRemaining}
           </div>
         )
@@ -729,9 +762,11 @@ export default function FinancesInstallments() {
       width: "12.5%",
       render: (item: any) => {
         if (item.isTotal) {
+          return <div className="text-sm text-muted-foreground">-</div>
         }
         
         return (
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
@@ -752,7 +787,9 @@ export default function FinancesInstallments() {
                   console.log('No installments found for client:', item.contact?.first_name)
                 }
               }}
+              className="h-8 w-8 p-0"
             >
+              <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -804,7 +841,9 @@ export default function FinancesInstallments() {
                   }
                 })
               }}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
             >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         )
@@ -821,6 +860,7 @@ export default function FinancesInstallments() {
         width: "30%",
         render: (item: any) => {
           if (!item.contact) {
+            return <div className="text-sm text-muted-foreground">Sin contacto</div>
           }
 
           const displayName = item.contact.company_name || 
@@ -830,9 +870,14 @@ export default function FinancesInstallments() {
             : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase()
 
           return (
+            <div className="flex items-center gap-2">
+              <Avatar className="w-8 h-8">
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
               <div>
+                <div className="text-sm font-medium">{displayName}</div>
                 {item.contact.company_name && (
+                  <div className="text-xs text-muted-foreground">
                     {item.contact.first_name} {item.contact.last_name}
                   </div>
                 )}
@@ -853,10 +898,12 @@ export default function FinancesInstallments() {
       render: (item: any) => {
         const currencyData = item.currencies[currencyCode]
         if (!currencyData || currencyData.amount === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
         }
 
         const formattedAmount = new Intl.NumberFormat('es-AR').format(currencyData.amount)
         return (
+          <div className="text-sm font-medium">
             {currencyData.currency?.symbol || currencyCode} {formattedAmount}
           </div>
         )
@@ -877,6 +924,7 @@ export default function FinancesInstallments() {
       render: (item: Installment) => {
         const date = new Date(item.movement_date + 'T00:00:00')
         return (
+          <div className="text-sm">
             {format(date, 'dd/MM/yyyy', { locale: es })}
           </div>
         )
@@ -888,6 +936,7 @@ export default function FinancesInstallments() {
       width: "16.7%",
       render: (item: any) => {
         if (!item.contact_name) {
+          return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
         const displayName = item.contact_company_name || item.contact_name || 'Sin nombre'
@@ -896,8 +945,12 @@ export default function FinancesInstallments() {
           : (item.contact_name?.split(' ').map((n: string) => n[0]).join('') || 'SC').toUpperCase()
 
         return (
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8">
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div>
+              <div className="text-sm font-medium">{displayName}</div>
             </div>
           </div>
         )
@@ -912,6 +965,8 @@ export default function FinancesInstallments() {
       render: (item: any) => {
         const subcategoryName = item.subcategory_name || 'Sin especificar'
         return (
+          <div className="text-sm">
+            <Badge variant="secondary" className="text-xs">
               {subcategoryName}
             </Badge>
           </div>
@@ -923,6 +978,7 @@ export default function FinancesInstallments() {
       label: "Billetera",
       width: "16.7%",
       render: (item: any) => (
+        <div className="text-sm">{item.wallet_name || 'Sin billetera'}</div>
       )
     },
     {
@@ -934,6 +990,7 @@ export default function FinancesInstallments() {
       render: (item: any) => {
         const symbol = item.currency_symbol || '$'
         return (
+          <div className="text-sm font-medium text-green-600">
             {symbol} {Math.abs(item.amount || 0).toLocaleString('es-AR')}
           </div>
         )
@@ -947,10 +1004,12 @@ export default function FinancesInstallments() {
       sortType: "number" as const,
       render: (item: any) => {
         if (!item.exchange_rate) {
+          return <div className="text-sm text-muted-foreground">-</div>
         }
         
         // Siempre mostrar cotización en pesos argentinos
         return (
+          <div className="text-sm">
             $ {item.exchange_rate.toLocaleString('es-AR')}
           </div>
         )
@@ -987,6 +1046,8 @@ export default function FinancesInstallments() {
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando aportes...</div>
         </div>
       </Layout>
     )
@@ -996,26 +1057,38 @@ export default function FinancesInstallments() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Feature Introduction */}
       <FeatureIntroduction
+          icon={<Receipt className="h-6 w-6" />}
+          title="Gestión de Aportes de Terceros"
           features={[
+            { icon: <Receipt className="h-4 w-4" />, title: "Aportes Detallados", description: "Registro detallado de aportes financieros de clientes e inversores" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Multi-moneda", description: "Seguimiento de aportes con múltiples monedas y cotizaciones" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Análisis USD", description: "Cálculo automático de equivalencias en USD para análisis financiero" },
+            { icon: <Receipt className="h-4 w-4" />, title: "Resúmenes", description: "Resúmenes por cliente con porcentajes de cumplimiento y montos restantes" }
           ]}
         />
 
       {/* Action Bar Desktop con funcionalidad normal */}
       <ActionBarDesktop
+        title="Gestión de Aportes de Terceros"
+        icon={<Receipt className="w-6 h-6" />}
         features={[
           {
+            icon: <Users className="w-5 h-5" />,
             title: "Aportes Detallados por Cliente",
             description: "Registro detallado de aportes financieros de clientes e inversores con seguimiento individualizado de compromisos."
           },
           {
+            icon: <Coins className="w-5 h-5" />,
             title: "Análisis Multi-moneda",
             description: "Seguimiento de aportes con múltiples monedas y cotizaciones automáticas para control completo de flujos financieros."
           },
           {
+            icon: <BarChart3 className="w-5 h-5" />,
             title: "Análisis USD Dolarizado",
             description: "Cálculo automático de equivalencias en USD para análisis financiero unificado y reportes consolidados."
           },
           {
+            icon: <FileText className="w-5 h-5" />,
             title: "Resúmenes y Porcentajes",
             description: "Resúmenes por cliente con porcentajes de cumplimiento, montos restantes y métricas de desempeño financiero."
           }
@@ -1032,9 +1105,12 @@ export default function FinancesInstallments() {
       {/* Conditional Content - EmptyState o Tabs */}
       {installments.length === 0 ? (
         <EmptyState
+          icon={<Receipt className="h-8 w-8" />}
+          title="Aún no hay compromisos registrados"
           description="Esta sección muestra los compromisos de pago registrados en el proyecto."
         />
       ) : (
+        <div className="space-y-4">
           {activeTab === "clients" && clientSummary.length > 0 && (
             <Table
               data={clientSummary}
@@ -1076,6 +1152,7 @@ export default function FinancesInstallments() {
               />
             ) : (
               <EmptyState
+                title="No se encontraron compromisos"
                 description="No hay compromisos que coincidan con los filtros aplicados"
               />
             )

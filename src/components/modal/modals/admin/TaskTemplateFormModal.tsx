@@ -106,6 +106,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
 
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -150,6 +151,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
               <FormControl>
                 <Textarea
                   placeholder="Describe el propósito de esta plantilla..."
+                  className="min-h-[80px]"
                   {...field}
                 />
               </FormControl>
@@ -170,6 +172,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                   {...field}
                 />
               </FormControl>
+              <p className="text-sm text-muted-foreground">
                 Usa llaves {'{}'} para indicar parámetros dinámicos que se reemplazarán.
               </p>
               <FormMessage />
@@ -206,6 +209,10 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           control={form.control}
           name="is_active"
           render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Estado</FormLabel>
+                <div className="text-sm text-muted-foreground">
                   Plantilla {field.value ? 'activa' : 'inactiva'}
                 </div>
               </div>

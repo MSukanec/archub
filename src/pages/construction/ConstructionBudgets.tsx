@@ -452,6 +452,7 @@ export default function ConstructionBudgets() {
   if (isLoading || budgetsLoading) {
     return (
       <Layout wide={true} headerProps={headerProps}>
+        <div className="p-8 text-center text-muted-foreground">
           Cargando presupuestos...
         </div>
       </Layout>
@@ -576,6 +577,7 @@ export default function ConstructionBudgets() {
         label: 'Rubro',
         width: '12%',
         render: (item: any) => (
+          <span className="text-xs">{item.category_name || '-'}</span>
         )
       }] : []),
       {
@@ -583,6 +585,7 @@ export default function ConstructionBudgets() {
         label: 'Tarea',
         width: '1fr',
         render: (item: any) => (
+          <span className="text-xs">
             {item.name_rendered || '-'}
           </span>
         )
@@ -592,6 +595,7 @@ export default function ConstructionBudgets() {
         label: 'Unidad',
         width: '8%',
         render: (item: any) => (
+          <span className="text-xs">{getUnitName(item.task?.unit_id)}</span>
         )
       },
       {
@@ -603,6 +607,7 @@ export default function ConstructionBudgets() {
             type="number"
             value={item.quantity || 0}
             onChange={(e) => handleUpdateQuantity(item.id, parseFloat(e.target.value) || 0)}
+            className="h-7 text-xs"
             step="0.01"
             min="0"
           />
@@ -613,6 +618,7 @@ export default function ConstructionBudgets() {
         label: 'Tipo',
         width: '8%',
         render: (item: any) => (
+          <span className="text-xs">{item.task?.task_type || 'Estándar'}</span>
         )
       },
       {
@@ -620,6 +626,7 @@ export default function ConstructionBudgets() {
         label: 'Costo',
         width: '8%',
         render: (item: any) => (
+          <div className="flex items-center justify-center">
             <TaskMaterialsPopover task={{ task_id: item.task_id }} showCost={true} />
           </div>
         ),
@@ -630,6 +637,7 @@ export default function ConstructionBudgets() {
         label: 'Margen',
         width: '8%',
         render: (item: any) => (
+          <span className="text-xs">{item.task?.margin_percent || 0}%</span>
         )
       },
       {
@@ -637,6 +645,7 @@ export default function ConstructionBudgets() {
         label: 'Subtotal',
         width: '10%',
         render: (item: any) => (
+          <span className="text-xs font-medium">
             ${((item.quantity || 0) * (item.task?.unit_cost || 0)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
         )
@@ -647,6 +656,7 @@ export default function ConstructionBudgets() {
         width: '8%',
         sortable: false,
         render: (item: any) => (
+          <div className="flex gap-1">
             <Button
               variant="ghost"
               size="sm"
@@ -654,13 +664,17 @@ export default function ConstructionBudgets() {
                 budgetTask: item,
                 mode: 'edit'
               })}
+              className="h-6 w-6 p-0"
             >
+              <Edit className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleDeleteTask(item.id)}
+              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
             >
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         )
@@ -675,12 +689,15 @@ export default function ConstructionBudgets() {
       ) || 0;
 
       // Ajustar el número de columnas según si se muestra la columna Rubro
+      const rubroColumn = groupingType !== 'rubros' ? [<div key="rubro" className="text-xs font-medium">TOTAL</div>] : [];
       const emptyColumns = groupingType !== 'rubros' ? 6 : 5; // Ajustar columnas vacías
 
       return (
         <>
           {rubroColumn}
+          <div className="text-xs font-medium">{groupingType === 'rubros' ? 'TOTAL' : `${totalTasks} tareas`}</div>
           {Array.from({ length: emptyColumns }, (_, i) => <div key={i}></div>)}
+          <div className="text-xs font-medium text-green-600">
             ${totalCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </div>
           <div></div>
@@ -695,12 +712,15 @@ export default function ConstructionBudgets() {
       );
 
       // Ajustar el número de columnas según si se muestra la columna Rubro
+      const rubroColumn = groupingType !== 'rubros' ? [<div key="rubro" className="text-xs font-medium">{groupKey}</div>] : [];
       const emptyColumns = groupingType !== 'rubros' ? 6 : 5; // Ajustar columnas vacías
 
       return (
         <>
           {rubroColumn}
+          <div className="text-xs font-medium">{groupingType === 'rubros' ? groupKey : `${groupRows.length} tareas`}</div>
           {Array.from({ length: emptyColumns }, (_, i) => <div key={i}></div>)}
+          <div className="text-xs font-medium">
             ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </div>
           <div></div>
@@ -738,6 +758,7 @@ export default function ConstructionBudgets() {
           
           return (
             <>
+              <div className="col-span-full text-sm font-medium">
                 {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'}) - ${groupTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </div>
             </>
@@ -770,20 +791,26 @@ export default function ConstructionBudgets() {
     <Layout wide={true} headerProps={headerProps}>
       {/* Feature Introduction - Mobile only */}
       <FeatureIntroduction
+        title="Gestión de Presupuestos"
+        icon={<Calculator className="w-6 h-6" />}
         features={[
           {
+            icon: <CheckSquare className="w-4 h-4" />,
             title: "Presupuestos Detallados",
             description: "Crea y gestiona presupuestos con tareas específicas, cantidades y costos detallados por proyecto."
           },
           {
+            icon: <Filter className="w-4 h-4" />,
             title: "Organización por Rubros",
             description: "Agrupa tareas por categorías para una mejor visualización y análisis de costos por área."
           },
           {
+            icon: <Target className="w-4 h-4" />,
             title: "Búsqueda Inteligente",
             description: "Encuentra rápidamente tareas del catálogo o crea nuevas tareas personalizadas para tu presupuesto."
           },
           {
+            icon: <BarChart3 className="w-4 h-4" />,
             title: "Control de Costos",
             description: "Monitorea el progreso y los totales de tu presupuesto en tiempo real con actualizaciones automáticas."
           }
@@ -792,7 +819,13 @@ export default function ConstructionBudgets() {
 
       {/* Budget Selector Card */}
       {budgets.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Seleccionar Presupuesto</label>
                 <Select value={selectedBudgetId || ''} onValueChange={handleBudgetChange}>
+                  <SelectTrigger className="w-full sm:w-[300px]">
                     <SelectValue placeholder="Selecciona un presupuesto" />
                   </SelectTrigger>
                   <SelectContent>
@@ -804,20 +837,25 @@ export default function ConstructionBudgets() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex gap-2">
                 {selectedBudget && (
                   <>
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleEditBudget()}
+                      className="text-xs font-normal"
                     >
+                      <Edit className="w-4 h-4 mr-1" />
                       Editar
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={handleDeleteSelectedBudget}
+                      className="text-xs font-normal text-destructive hover:text-destructive"
                     >
+                      <Trash2 className="w-4 h-4 mr-1" />
                       Eliminar
                     </Button>
                     <Button 
@@ -831,7 +869,9 @@ export default function ConstructionBudgets() {
                           }
                         })
                       }}
+                      className="text-xs font-normal"
                     >
+                      <Plus className="w-4 h-4 mr-1" />
                       Nueva Tarea
                     </Button>
                   </>
@@ -844,6 +884,8 @@ export default function ConstructionBudgets() {
 
       {budgets.length === 0 ? (
         <EmptyState
+          icon={<Calculator className="w-12 h-12 text-muted-foreground" />}
+          title="No hay presupuestos creados"
           description="Comienza creando tu primer presupuesto para gestionar los costos del proyecto"
         />
       ) : (

@@ -17,12 +17,16 @@ export function ExpensesTrendChart({ data, isLoading }: ExpensesTrendChartProps)
 
   if (isLoading) {
     return (
+      <div className="h-72 flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">Cargando análisis de tendencias...</div>
       </div>
     )
   }
 
   if (!data || data.length === 0) {
     return (
+      <div className="h-72 flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">No hay datos para el análisis de tendencias</div>
       </div>
     )
   }
@@ -68,7 +72,9 @@ export function ExpensesTrendChart({ data, isLoading }: ExpensesTrendChartProps)
   const averageAmount = chartData.reduce((sum, item) => sum + item.actual, 0) / chartData.length
 
   return (
+    <div className="space-y-4">
       {/* Chart */}
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <XAxis 
@@ -135,11 +141,21 @@ export function ExpensesTrendChart({ data, isLoading }: ExpensesTrendChartProps)
       </div>
       
       {/* Analysis summary */}
+      <div className="border-t pt-4">
+        <div className="text-xs font-medium text-muted-foreground mb-3">Análisis Comparativo:</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
           {chartData.map((item, index) => (
+            <div key={item.name} className="flex items-center justify-between p-2 rounded border">
+              <div className="flex items-center gap-2">
                 <div 
+                  className="w-3 h-3 rounded-sm" 
                   style={{ backgroundColor: item.fill }}
                 />
+                <span className="font-medium">{item.name}</span>
               </div>
+              <div className="text-right">
+                <div className="font-medium">{item.percentage}%</div>
+                <div className="text-muted-foreground">
                   {index === 0 ? 'Mayor' : index === 1 ? 'Medio' : 'Menor'} impacto
                 </div>
               </div>

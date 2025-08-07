@@ -150,8 +150,11 @@ export function UserGrowthChart() {
     return (
       <Card>
         <CardHeader>
+          <CardTitle className="text-lg font-semibold">Crecimiento de Usuarios</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="h-64 flex items-center justify-center">
+            <div className="text-muted-foreground">Cargando datos...</div>
           </div>
         </CardContent>
       </Card>
@@ -162,8 +165,11 @@ export function UserGrowthChart() {
     return (
       <Card>
         <CardHeader>
+          <CardTitle className="text-lg font-semibold">Crecimiento de Usuarios</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="h-64 flex items-center justify-center">
+            <div className="text-muted-foreground">Error al cargar datos</div>
           </div>
         </CardContent>
       </Card>
@@ -175,16 +181,21 @@ export function UserGrowthChart() {
   return (
     <Card>
       <CardHeader>
+        <div className="flex items-center justify-between">
           <div>
+            <CardTitle className="text-lg font-semibold">Crecimiento de Usuarios</CardTitle>
+            <div className="text-sm text-muted-foreground">
               {totalUsers} usuarios registrados en {getPeriodDescription()}
             </div>
           </div>
+          <div className="flex gap-1">
             {(['days', 'weeks', 'months'] as PeriodType[]).map((periodType) => (
               <Button
                 key={periodType}
                 variant={period === periodType ? "default" : "outline"}
                 size="sm"
                 onClick={() => setPeriod(periodType)}
+                className="text-xs"
               >
                 {getPeriodLabel(periodType)}
               </Button>
@@ -193,6 +204,7 @@ export function UserGrowthChart() {
         </div>
       </CardHeader>
       <CardContent>
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" opacity={0.3} />

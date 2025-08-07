@@ -266,8 +266,12 @@ export function Table<T = any>({
   // Function to get sort icon for column header
   const getSortIcon = (key: string) => {
     if (sortKey !== key)
+      return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
     if (sortDirection === "asc")
+      return <ChevronUp className="ml-1 h-3 w-3 text-accent" />;
     if (sortDirection === "desc")
+      return <ChevronDown className="ml-1 h-3 w-3 text-accent" />;
+    return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
   };
 
   // Handle the special case for numbers with thousands formatting (accounting for TypeScript strict mode)
@@ -289,20 +293,25 @@ export function Table<T = any>({
     return (
       <div className={cn("space-y-3", className)}>
         {/* Desktop loading skeleton */}
+        <div className="hidden lg:block">
           <div
+            className="grid gap-4 p-4 bg-muted/50 rounded-lg"
             style={{ gridTemplateColumns: getGridTemplateColumns() }}
           >
             {columns.map((_, index) => (
+              <div key={index} className="h-4 bg-muted rounded animate-pulse" />
             ))}
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
+              className="grid gap-4 p-4 border rounded-lg"
               style={{ gridTemplateColumns: getGridTemplateColumns() }}
             >
               {columns.map((_, colIndex) => (
                 <div
                   key={colIndex}
+                  className="h-4 bg-muted/50 rounded animate-pulse"
                 />
               ))}
             </div>
@@ -310,8 +319,14 @@ export function Table<T = any>({
         </div>
 
         {/* Mobile loading skeleton */}
+        <div className="lg:hidden">
           {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="p-4 border rounded-lg mb-2">
+              <div className="space-y-3">
                 {columns.slice(0, 4).map((_, colIndex) => (
+                  <div key={colIndex} className="space-y-1">
+                    <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                    <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />
                   </div>
                 ))}
               </div>
@@ -328,6 +343,7 @@ export function Table<T = any>({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
+      <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
         {/* Nueva barra superior flexible */}
         <TableTopBar
           tabs={topBar?.tabs}
@@ -349,10 +365,13 @@ export function Table<T = any>({
         {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}
         {headerActions && showDoubleHeader && (
           <div 
+            className="flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)]"
             style={{ backgroundColor: "var(--card-bg)", color: "var(--card-fg)" }}
           >
+            <div className="flex items-center gap-2">
               {headerActions.leftActions}
             </div>
+            <div className="flex items-center gap-2">
               {headerActions.rightActions}
             </div>
           </div>
@@ -371,6 +390,7 @@ export function Table<T = any>({
           }}
         >
           {selectable && (
+            <div className="flex items-center justify-center">
               <Checkbox
                 checked={
                   paginatedData.length > 0 &&
@@ -378,6 +398,7 @@ export function Table<T = any>({
                 }
                 onCheckedChange={handleSelectAll}
                 aria-label="Seleccionar todos"
+                className="h-3 w-3"
               />
             </div>
           )}
@@ -404,6 +425,7 @@ export function Table<T = any>({
         <div>
           {!hasData ? (
             // Mostrar empty state cuando no hay datos
+            <div className="p-8 text-center">
               {emptyState}
             </div>
           ) : groupBy ? (
@@ -441,12 +463,14 @@ export function Table<T = any>({
                     style={{ gridTemplateColumns: getGridTemplateColumns() }}
                   >
                     {selectable && (
+                      <div className="flex items-center justify-center">
                         <Checkbox
                           checked={isItemSelected(item)}
                           onCheckedChange={(checked) =>
                             handleSelectItem(item, checked as boolean)
                           }
                           aria-label={`Seleccionar fila ${index + 1}`}
+                          className="h-3 w-3"
                         />
                       </div>
                     )}
@@ -483,18 +507,21 @@ export function Table<T = any>({
                 style={{ gridTemplateColumns: getGridTemplateColumns() }}
               >
                 {selectable && (
+                  <div className="flex items-center justify-center">
                     <Checkbox
                       checked={isItemSelected(item)}
                       onCheckedChange={(checked) =>
                         handleSelectItem(item, checked as boolean)
                       }
                       aria-label={`Seleccionar fila ${index + 1}`}
+                      className="h-3 w-3"
                     />
                   </div>
                 )}
                 {columns.map((column) => (
                   <div
                     key={String(column.key)}
+                    className="text-xs flex items-center justify-start"
                   >
                     {column.render
                       ? column.render(item)
@@ -523,7 +550,9 @@ export function Table<T = any>({
       </div>
 
       {/* Mobile Card View */}
+      <div className="lg:hidden">
         {!hasData ? (
+          <div className="p-8 text-center">
             {emptyState}
           </div>
         ) : paginatedData.map((item, index) =>
@@ -543,6 +572,8 @@ export function Table<T = any>({
               onClick={() => onCardClick?.(item)}
             >
               {selectable && (
+                <div className="flex items-center justify-between mb-2 pb-2 border-b">
+                  <span className="text-xs font-medium text-muted-foreground">
                     Seleccionar
                   </span>
                   <Checkbox
@@ -551,10 +582,12 @@ export function Table<T = any>({
                       handleSelectItem(item, checked === true);
                     }}
                     aria-label="Seleccionar elemento"
+                    className="h-4 w-4"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               )}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                 {columns
                   .filter((_, idx) => idx < 6)
                   .map((column) => {
@@ -565,9 +598,12 @@ export function Table<T = any>({
                     return (
                       <div
                         key={String(column.key)}
+                        className="flex flex-col min-w-0"
                       >
+                        <span className="text-xs font-medium text-muted-foreground truncate">
                           {column.label}
                         </span>
+                        <div className="text-sm font-medium truncate">
                           {value}
                         </div>
                       </div>
@@ -575,6 +611,8 @@ export function Table<T = any>({
                   })}
               </div>
               {columns.length > 6 && (
+                <div className="mt-2 pt-2 border-t">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     {columns.slice(6).map((column) => {
                       const value = column.render
                         ? column.render(item)
@@ -583,9 +621,12 @@ export function Table<T = any>({
                       return (
                         <div
                           key={String(column.key)}
+                          className="flex flex-col min-w-0"
                         >
+                          <span className="text-xs font-medium text-muted-foreground truncate">
                             {column.label}
                           </span>
+                          <div className="text-sm font-medium truncate">
                             {value}
                           </div>
                         </div>
@@ -601,6 +642,9 @@ export function Table<T = any>({
 
       {/* Pagination Controls */}
       {showPagination && (
+        <div className="mt-4 pt-4 border-t border-[var(--table-border)]">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-[var(--muted-fg)]">
               Mostrando{" "}
               {Math.min(
                 (currentPage - 1) * itemsPerPage + 1,
@@ -609,12 +653,14 @@ export function Table<T = any>({
               a {Math.min(currentPage * itemsPerPage, flattenedData.length)} de{" "}
               {flattenedData.length} entradas
             </div>
+            <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
+                <ChevronLeft className="h-4 w-4" />
               </Button>
 
               {/* Page Number Buttons */}
@@ -639,6 +685,7 @@ export function Table<T = any>({
                       return (
                         <span
                           key={pageNum}
+                          className="px-1 text-[var(--muted-fg)]"
                         >
                           ...
                         </span>
@@ -653,6 +700,7 @@ export function Table<T = any>({
                       variant={pageNum === currentPage ? "default" : "outline"}
                       size="sm"
                       onClick={() => setCurrentPage(pageNum)}
+                      className="min-w-[32px]"
                     >
                       {pageNum}
                     </Button>
@@ -668,6 +716,7 @@ export function Table<T = any>({
                 }
                 disabled={currentPage === totalPages}
               >
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>

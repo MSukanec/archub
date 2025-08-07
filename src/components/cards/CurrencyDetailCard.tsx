@@ -21,6 +21,8 @@ interface CurrencyDetailCardProps {
 export default function CurrencyDetailCard({ item }: CurrencyDetailCardProps) {
   if (!item.contact) {
     return (
+      <div className="p-4 bg-card border border-border rounded-lg">
+        <div className="text-sm text-muted-foreground">Sin contacto</div>
       </div>
     );
   }
@@ -32,10 +34,17 @@ export default function CurrencyDetailCard({ item }: CurrencyDetailCardProps) {
     : `${item.contact.first_name?.charAt(0) || ''}${item.contact.last_name?.charAt(0) || ''}`.toUpperCase();
 
   return (
+    <div className="p-4 bg-card border border-border rounded-lg">
+      <div className="flex items-center justify-between">
         {/* Left side: Avatar and name */}
+        <div className="flex items-center gap-3">
+          <Avatar className="w-10 h-10">
+            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
           </Avatar>
           <div>
+            <div className="font-medium text-sm">{displayName}</div>
             {item.contact.company_name && (
+              <div className="text-xs text-muted-foreground">
                 {item.contact.first_name} {item.contact.last_name}
               </div>
             )}
@@ -43,6 +52,9 @@ export default function CurrencyDetailCard({ item }: CurrencyDetailCardProps) {
         </div>
 
         {/* Right side: Currency and Total */}
+        <div className="text-right">
+          <div className="text-sm font-medium text-muted-foreground">Aporte USD</div>
+          <div className="text-sm font-medium">
             {item.dollarizedTotal ? 
               `US$ ${item.dollarizedTotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` 
               : '-'

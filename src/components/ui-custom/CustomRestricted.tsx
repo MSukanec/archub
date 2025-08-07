@@ -232,6 +232,7 @@ export function CustomRestricted({
   }
 
   return (
+    <div className="relative w-full">
       {/* Contenido bloqueado - sin efectos hover */}
       <div className={`relative pointer-events-none [&_*]:hover:bg-transparent [&_*]:hover:text-inherit [&_*]:hover:scale-100 [&_*]:hover:shadow-none ${
         isGeneralMode ? 'opacity-60' : 'opacity-50'
@@ -252,6 +253,7 @@ export function CustomRestricted({
             {/* Solo mostrar badge si NO es general_mode */}
             {!isGeneralMode && badgeStyle && (
               <div
+                className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
                 style={{
                   ...badgeStyle,
                   // Forzar que el badge siempre tenga fondo circular visible
@@ -259,6 +261,7 @@ export function CustomRestricted({
                   backgroundColor: badgeStyle.backgroundColor,
                 }}
               >
+                <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
               </div>
             )}
           </div>
@@ -277,7 +280,9 @@ export function CustomRestricted({
           onMouseEnter={() => !isGeneralMode && setIsPopoverOpen(true)}
           onMouseLeave={() => !isGeneralMode && setIsPopoverOpen(false)}
         >
+          <div className="flex items-start gap-2">
             <div
+              className="rounded-full p-1 flex-shrink-0"
               style={{
                 backgroundColor: isGeneralMode
                   ? "var(--accent-bg)"
@@ -287,6 +292,7 @@ export function CustomRestricted({
               }}
             >
               <BadgeIcon
+                className="h-3 w-3"
                 style={{
                   color: isGeneralMode
                     ? iconColor
@@ -296,6 +302,8 @@ export function CustomRestricted({
                 }}
               />
             </div>
+            <div className="flex-1">
+              <h4 className="font-medium text-sm" style={{ color: textColor }}>
                 {isGeneralMode
                   ? functionName
                     ? `${functionName} - Requiere Proyecto`
@@ -304,6 +312,7 @@ export function CustomRestricted({
                     ? `${functionName} - Función Bloqueada`
                     : "Función Bloqueada"}
               </h4>
+              <p className="text-xs mt-1" style={{ color: subtextColor }}>
                 {isGeneralMode
                   ? "Esta sección está únicamente disponible con un proyecto seleccionado."
                   : dynamicRestriction.message}
@@ -313,6 +322,7 @@ export function CustomRestricted({
                 dynamicRestriction.actionUrl && (
                   <button
                     onClick={handleActionClick}
+                    className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-white/10"
                     style={{
                       color: "white",
                       borderColor: "rgba(255, 255, 255, 0.3)",

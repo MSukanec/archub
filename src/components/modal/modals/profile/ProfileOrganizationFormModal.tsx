@@ -116,9 +116,14 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
   };
 
   const viewPanel = (
+    <div className="space-y-4">
       <div>
+        <label className="text-sm font-medium">Nombre de la Organización</label>
+        <p className="text-sm text-muted-foreground mt-1">{organization?.name}</p>
       </div>
       <div>
+        <label className="text-sm font-medium">Estado</label>
+        <p className="text-sm text-muted-foreground mt-1">
           {organization?.is_active ? 'Activa' : 'Inactiva'}
         </p>
       </div>
@@ -127,6 +132,7 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
 
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -145,7 +151,10 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
           control={form.control}
           name="is_active"
           render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+              <div className="space-y-0.5">
                 <FormLabel>Estado Activo</FormLabel>
+                <div className="text-xs text-muted-foreground">
                   La organización está activa y sus miembros pueden acceder
                 </div>
               </div>

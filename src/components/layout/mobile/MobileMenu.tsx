@@ -432,45 +432,60 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   };
 
   const menuContent = (
+    <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={handleCloseMenu}>
       <div 
+        className="fixed inset-0 flex flex-col overflow-hidden"
         style={{ 
           backgroundColor: 'var(--menues-bg)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header con botón de cierre */}
+        <div className="flex justify-between items-center h-14 px-4 pr-6 border-b border-[var(--menues-border)]">
           {currentView !== 'main' && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleBackToMain}
+              className="text-[var(--menues-fg)] p-2"
             >
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
           )}
+          <div className="flex-1" />
           <Button
             variant="ghost"
             size="sm"
             onClick={handleCloseMenu}
+            className="text-[var(--menues-fg)] p-2"
           >
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
         {/* Navigation Menu */}
+        <div className="flex-1 px-4 py-2 overflow-y-auto">
           {/* Título de la sección actual */}
+          <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
+            <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
               {getCurrentViewTitle()}
             </h2>
           </div>
           {currentView === 'main' ? (
             // Menu principal - solo botones principales
+            <nav className="space-y-2">
               {mainMenuItems.map((item) => (
                 <div key={item.id}>
                   {('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
                         disabled
                       >
+                        <item.icon className="h-5 w-5" />
                         {item.label}
+                        <ChevronRight className="h-4 w-4 ml-auto" />
                       </button>
                     </CustomRestricted>
                   ) : (
@@ -483,7 +498,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
                       )}
                     >
+                      <item.icon className="h-5 w-5" />
                       {item.label}
+                      <ChevronRight className="h-4 w-4 ml-auto" />
                     </button>
                   )}
                 </div>
@@ -491,13 +508,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </nav>
           ) : (
             // Submenu - mostrar opciones de la sección seleccionada
+            <nav className="space-y-2">
               {submenuContent[currentView as keyof typeof submenuContent]?.map((item, index) => (
                 <div key={index}>
                   {('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
                         disabled
                       >
+                        <item.icon className="h-5 w-5" />
                         {item.label}
                       </button>
                     </CustomRestricted>
@@ -516,11 +536,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
                       )}
                     >
+                      <item.icon className="h-5 w-5" />
                       {item.label}
                     </button>
                   )}
                 </div>
               )) || (
+                <div className="text-center py-4 text-[var(--menues-fg)] opacity-60">
                   No hay opciones disponibles
                 </div>
               )}
@@ -529,21 +551,28 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         </div>
 
         {/* Footer with project selector - Fixed at bottom */}
+        <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
           {/* Project Selector Button - Full width */}
+          <div className="relative">
             <button
               onClick={() => {
                 setExpandedProjectSelector(!expandedProjectSelector);
               }}
+              className="w-full h-12 flex items-center justify-between px-3 rounded-xl transition-all duration-150 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
             >
+              <span className="text-sm font-medium truncate">{currentProjectName}</span>
+              <FolderOpen className="h-5 w-5 ml-2 flex-shrink-0" />
             </button>
 
             {expandedProjectSelector && (
               <div 
+                className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
                 style={{ 
                   backgroundColor: 'var(--menues-bg)',
                   borderColor: 'var(--menues-border)',
                 }}
               >
+                <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
                   Proyecto
                 </div>
                 {projectsData?.map((project: any) => (
@@ -553,6 +582,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       projectMutation.mutate(project.id);
                       setExpandedProjectSelector(false);
                     }}
+                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-xl shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
                     style={{ color: 'var(--menues-fg)' }}
                   >
                     {project.name}

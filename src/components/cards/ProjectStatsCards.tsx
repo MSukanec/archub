@@ -47,9 +47,20 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
 
   if (isLoading) {
     return (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="bg-[var(--card-bg)] border-[var(--card-border)]">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-2">
+                  <div className="h-4 w-20 bg-gray-200 animate-pulse rounded" />
+                  <div className="h-8 w-12 bg-gray-200 animate-pulse rounded" />
+                  <div className="h-3 w-16 bg-gray-200 animate-pulse rounded" />
                 </div>
+                <div className="h-4 w-4 bg-gray-200 animate-pulse rounded" />
               </div>
+              <div className="h-20 bg-gray-200 animate-pulse rounded mb-4" />
+              <div className="h-8 bg-gray-200 animate-pulse rounded" />
             </CardContent>
           </Card>
         ))}
@@ -101,6 +112,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
   ]
 
   return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {statCards.map((card, index) => (
         <motion.div
           key={card.title}
@@ -108,18 +120,29 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
         >
+          <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {card.title}
                   </p>
                   <motion.div 
+                    className="text-2xl font-bold text-foreground"
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: index * 0.1 + 0.2, duration: 0.3 }}
                   >
                     {card.value.toLocaleString()}
                   </motion.div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-green-600">{card.increase}</span>
+                    <span className="text-xs text-muted-foreground">{card.description}</span>
                   </div>
                 </div>
+                <card.icon className="h-4 w-4 text-[var(--accent)]" />
               </div>
+              <div className="h-20 mb-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={generateTrendData(card.value)}>
                     <Line
@@ -133,6 +156,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
                 </ResponsiveContainer>
               </div>
               <Button 
+                className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-[var(--accent-foreground)]"
                 size="sm"
                 onClick={() => navigate(card.route)}
               >

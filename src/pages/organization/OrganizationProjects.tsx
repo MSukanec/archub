@@ -23,6 +23,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 
 export default function OrganizationProjects() {
@@ -302,6 +303,7 @@ export default function OrganizationProjects() {
   if (isLoading || projectsLoading) {
     return (
       <Layout headerProps={headerProps}>
+        <div className="p-8 text-center text-muted-foreground">
           Cargando proyectos...
         </div>
       </Layout>
@@ -314,10 +316,12 @@ export default function OrganizationProjects() {
   // Define feature introduction content
   const projectFeatures = [
     {
+      icon: <Plus className="w-5 h-5" />,
       title: "Crear Proyecto Nuevo",
       description: "Haz clic en 'Nuevo Proyecto' para crear un proyecto para tu organización. Completa la información básica como nombre, tipología, modalidad y estado. Una vez creado, puedes seleccionarlo como 'ACTIVO' para trabajar en él desde todas las secciones de la aplicación (Diseño, Obra, Finanzas, etc.)."
     },
     {
+      icon: <Crown className="w-5 h-5" />,
       title: "Cambio de Proyecto Activo",
       description: "No necesitas venir a esta página para cambiar de proyecto. Desde el selector del header (parte superior) puedes cambiar entre proyectos activos de forma rápida. También tienes la opción de seleccionar 'Todos los Proyectos' para ver información general de toda tu organización en lugar de datos específicos de un proyecto."
     }
@@ -326,9 +330,16 @@ export default function OrganizationProjects() {
   return (
     <>
     <Layout headerProps={headerProps}>
+      <div className="space-y-6">
 
 
-        {/* Feature Introduction removida */}
+        {/* Feature Introduction - Solo móvil */}
+        <FeatureIntroduction
+          title="Proyectos"
+          icon={<Folder className="w-5 h-5" />}
+          features={projectFeatures}
+          className="md:hidden"
+        />
 
 
 
@@ -337,6 +348,7 @@ export default function OrganizationProjects() {
           <>
             {/* Vista móvil */}
             {isMobile ? (
+              <div className="grid grid-cols-1 gap-4 px-4">
                 {filteredProjects.map((project) => (
                   <ModernProjectCard
                     key={project.id}
@@ -351,6 +363,7 @@ export default function OrganizationProjects() {
               </div>
             ) : (
               /* Desktop Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredProjects.map((project) => (
                   <ModernProjectCard
                     key={project.id}
@@ -367,6 +380,7 @@ export default function OrganizationProjects() {
           </>
         ) : (
           <EmptyState
+            icon={<Folder className="w-12 h-12" />}
             title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
             description={searchValue || filterByStatus !== 'all' 
               ? 'Prueba ajustando los filtros de búsqueda' 

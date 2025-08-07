@@ -125,10 +125,13 @@ export default function AdminMaterials() {
       label: 'Completado',
       width: '8%',
       render: (material: Material) => (
+        <div className="flex justify-center">
           {material.is_completed ? (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Completado
             </span>
           ) : (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
               Incompleto
             </span>
           )}
@@ -139,6 +142,9 @@ export default function AdminMaterials() {
       key: 'name',
       label: 'Material',
       render: (material: Material) => (
+        <div className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium text-sm">{material.name}</span>
         </div>
       )
     },
@@ -146,6 +152,7 @@ export default function AdminMaterials() {
       key: 'category_id',
       label: 'Categoría',
       render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
           {buildCategoryPath(material.category_id)}
         </span>
       )
@@ -155,6 +162,7 @@ export default function AdminMaterials() {
       label: 'Proveedor',
       width: '10%',
       render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
           {material.provider || 'N/A'}
         </span>
       )
@@ -164,6 +172,7 @@ export default function AdminMaterials() {
       label: 'Unidad de Cómputo',
       width: '8%',
       render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
           {material.unit?.name || 'N/A'}
         </span>
       )
@@ -173,6 +182,7 @@ export default function AdminMaterials() {
       label: 'Unidad de Venta por Defecto',
       width: '10%',
       render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
           {material.default_unit_presentation?.name || 'N/A'}
         </span>
       )
@@ -182,6 +192,7 @@ export default function AdminMaterials() {
       label: 'Precio por Defecto',
       width: '8%',
       render: (material: Material) => (
+        <span className="text-xs text-muted-foreground">
           {material.base_price_override ? `$${material.base_price_override.toLocaleString()}` : 'N/A'}
         </span>
       )
@@ -192,23 +203,30 @@ export default function AdminMaterials() {
       label: 'Acciones',
       width: '5%',
       render: (material: Material) => (
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
+            className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(material)}
           >
+            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDuplicate(material)}
           >
+            <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(material)}
           >
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -216,7 +234,11 @@ export default function AdminMaterials() {
   ]
 
   const customFilters = (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -227,7 +249,10 @@ export default function AdminMaterials() {
         </Select>
       </div>
       
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Categoría</Label>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -260,6 +285,7 @@ export default function AdminMaterials() {
 
   return (
     <Layout wide headerProps={headerProps}>
+      <div className="space-y-6">
         {/* KPI Cards removed as requested */}
 
         {/* Materials Table */}
@@ -268,6 +294,9 @@ export default function AdminMaterials() {
           columns={columns}
           isLoading={isLoading}
           emptyState={
+            <div className="text-center py-8">
+              <h3 className="text-lg font-medium text-muted-foreground">No hay materiales</h3>
+              <p className="text-sm text-muted-foreground mt-1">No hay materiales que coincidan con los filtros seleccionados.</p>
             </div>
           }
         />

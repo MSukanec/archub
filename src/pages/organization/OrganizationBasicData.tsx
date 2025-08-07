@@ -3,6 +3,7 @@ import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { AvatarUploader } from '@/components/ui-custom/AvatarUploader';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -278,45 +279,60 @@ export default function OrganizationBasicData() {
         title: "Datos Básicos"
       }}
     >
+      <div className="space-y-6">
         {/* ActionBar - Desktop Only */}
         <ActionBarDesktop 
+          title="Datos Básicos"
+          icon={<Building2 className="h-5 w-5" />}
           showProjectSelector={false}
           showSearch={false}
           showGrouping={false}
           features={[
             {
+              icon: <FileText className="w-4 h-4" />,
               title: "Información completa de la organización",
               description: "Centraliza toda la información fundamental de tu organización en un solo lugar. Desde nombre y descripción hasta datos fiscales, mantén todos los datos organizados y actualizados automáticamente."
             },
             {
+              icon: <Users className="w-4 h-4" />,
               title: "Datos de contacto integrados",
               description: "Almacena la información de contacto de la organización. Teléfonos, emails y sitio web siempre disponibles para todo el equipo cuando los necesiten."
             },
             {
+              icon: <MapPin className="w-4 h-4" />,
               title: "Ubicación y datos legales",
               description: "Define la ubicación exacta de la organización y los datos fiscales. Esta información se usa automáticamente en documentos oficiales y comunicaciones."
             },
             {
+              icon: <Globe className="w-4 h-4" />,
               title: "Configuración automática",
               description: "Guarda automáticamente los cambios mientras escribes. Sin necesidad de hacer clic en botones, toda la información se mantiene sincronizada."
             }
           ]}
         />
 
+        {/* FeatureIntroduction - Mobile Only */}
+        <FeatureIntroduction
+          title="Datos Básicos"
+          icon={<Building2 className="w-5 h-5" />}
           features={[
             {
+              icon: <FileText className="w-5 h-5" />,
               title: "Información completa de la organización",
               description: "Centraliza toda la información fundamental de tu organización en un solo lugar. Desde nombre y descripción hasta datos fiscales, mantén todos los datos organizados y actualizados automáticamente."
             },
             {
+              icon: <Users className="w-5 h-5" />,
               title: "Datos de contacto integrados",
               description: "Almacena la información de contacto de la organización. Teléfonos, emails y sitio web siempre disponibles para todo el equipo cuando los necesiten."
             },
             {
+              icon: <MapPin className="w-5 h-5" />,
               title: "Ubicación y datos legales",
               description: "Define la ubicación exacta de la organización y los datos fiscales. Esta información se usa automáticamente en documentos oficiales y comunicaciones."
             },
             {
+              icon: <Globe className="w-5 h-5" />,
               title: "Configuración automática",
               description: "Guarda automáticamente los cambios mientras escribes. Sin necesidad de hacer clic en botones, toda la información se mantiene sincronizada."
             }
@@ -324,10 +340,16 @@ export default function OrganizationBasicData() {
         />
 
         {/* Logo Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Logo Description */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Building2 className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Logo de la Organización</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Sube el logo oficial de tu organización. Este logo se mostrará en documentos, reportes y comunicaciones oficiales.
+              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
             </p>
           </div>
 
@@ -339,23 +361,33 @@ export default function OrganizationBasicData() {
               bucketName="organization-logo"
               uploadPath={`org-${organizationId}/logo.jpg`}
               onUploadSuccess={handleLogoUploadSuccess}
+              title="Logo de la organización"
               description="Imagen que representa tu organización"
               maxSizeMB={5}
             />
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información Básica */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <FileText className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información Básica</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Datos fundamentales de la organización que se usarán en todo el sistema. Estos campos son la base para proyectos, documentos y comunicaciones.
+              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
             </p>
           </div>
 
           {/* Right Column - Información Básica Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="organization-name">Nombre de la Organización</Label>
                 <Input 
                   id="organization-name"
@@ -365,6 +397,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea 
                   id="description"
@@ -378,16 +411,24 @@ export default function OrganizationBasicData() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información de Contacto */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Users className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información de Contacto</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Datos de contacto de la organización. Esta información estará disponible para todo el equipo y se usará en comunicaciones oficiales.
             </p>
           </div>
 
           {/* Right Column - Información de Contacto Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="phone">Teléfono</Label>
                 <PhoneInput 
                   value={phone}
@@ -396,6 +437,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input 
                   id="email"
@@ -406,6 +448,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="website">Sitio Web</Label>
                 <Input 
                   id="website"
@@ -419,16 +462,24 @@ export default function OrganizationBasicData() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Ubicación */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <MapPin className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Ubicación de la Organización</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Dirección completa de la sede principal. Esta información se usa para documentación oficial, entregas y comunicaciones.
             </p>
           </div>
 
           {/* Right Column - Ubicación Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="address">Dirección</Label>
                 <Input 
                   id="address"
@@ -438,6 +489,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="city">Ciudad</Label>
                 <Input 
                   id="city"
@@ -447,6 +499,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="state">Provincia/Estado</Label>
                 <Input 
                   id="state"
@@ -456,6 +509,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="country">País</Label>
                 <Input 
                   id="country"
@@ -465,6 +519,7 @@ export default function OrganizationBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="postal-code">Código Postal</Label>
                 <Input 
                   id="postal-code"
@@ -477,16 +532,24 @@ export default function OrganizationBasicData() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información Legal */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Globe className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información Legal</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Datos fiscales y legales de la organización. Esta información se usa en facturación, contratos y documentación oficial.
             </p>
           </div>
 
           {/* Right Column - Información Legal Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="tax-id">CUIT/CUIL/ID Fiscal</Label>
                 <Input 
                   id="tax-id"
@@ -501,6 +564,8 @@ export default function OrganizationBasicData() {
 
         {/* Saving indicator */}
         {isSaving && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center mt-8">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
             Guardando...
           </div>
         )}

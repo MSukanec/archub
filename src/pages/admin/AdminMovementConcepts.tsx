@@ -234,26 +234,43 @@ export default function AdminMovementConcepts() {
 
   return (
     <Layout headerProps={headerProps}>
+      <div className="space-y-6">
         {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Conceptos</CardTitle>
+              <Package2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
+              <div className="text-2xl font-bold">{stats.totalConcepts}</div>
+              <p className="text-xs text-muted-foreground">
                 Conceptos de movimientos registrados
               </p>
             </CardContent>
           </Card>
 
           <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Conceptos Sistema</CardTitle>
+              <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
+              <div className="text-2xl font-bold">{stats.systemConcepts}</div>
+              <p className="text-xs text-muted-foreground">
                 Conceptos predefinidos del sistema
               </p>
             </CardContent>
           </Card>
 
           <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Conceptos Usuario</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
+              <div className="text-2xl font-bold">{stats.userConcepts}</div>
+              <p className="text-xs text-muted-foreground">
                 Conceptos creados por usuarios
               </p>
             </CardContent>
@@ -262,15 +279,23 @@ export default function AdminMovementConcepts() {
 
         {/* Main Content - Direct Tree without Card */}
         {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Cargando conceptos...</div>
           </div>
         ) : filteredConcepts.length === 0 ? (
+          <div className="text-center py-8">
+            <Package2 className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">No hay conceptos</h3>
+            <p className="mt-1 text-sm text-gray-500">
               {hasActiveFilters 
                 ? 'No se encontraron conceptos con los filtros aplicados.'
                 : 'Comienza creando tu primer concepto de movimiento.'
               }
             </p>
             {!hasActiveFilters && (
+              <div className="mt-6">
                 <Button onClick={handleOpenCreateModal}>
+                  <Plus className="h-4 w-4 mr-1" />
                   Crear primer concepto
                 </Button>
               </div>

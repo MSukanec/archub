@@ -205,6 +205,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   // Edit panel
   const editPanel = (
     <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Material Name */}
         <FormField
           control={form.control}
@@ -241,6 +242,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                     field.onChange(deepestCategoryId)
                   }}
                   placeholder="Seleccionar categoría..."
+                  className="w-full"
                 />
               </FormControl>
               <FormMessage />
@@ -345,8 +347,12 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           control={form.control}
           name="is_completed"
           render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">
                   Material Completado
                 </FormLabel>
+                <div className="text-sm text-muted-foreground">
                   Marca este material como completado
                 </div>
               </div>

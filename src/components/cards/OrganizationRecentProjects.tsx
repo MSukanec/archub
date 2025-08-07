@@ -104,11 +104,16 @@ export function OrganizationRecentProjects() {
     return (
       <Card>
         <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
             Proyectos Recientes
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-16 bg-gray-200 rounded-lg"></div>
               </div>
             ))}
           </div>
@@ -120,26 +125,37 @@ export function OrganizationRecentProjects() {
   return (
     <Card>
       <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
             Proyectos Recientes
           </CardTitle>
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate('/organization/projects')}
+            className="text-sm"
           >
+            <ExternalLink className="h-4 w-4 mr-1" />
             Ver Todos
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {recentProjects.length === 0 ? (
+          <div className="text-center py-8">
+            <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-medium mb-2">No hay proyectos</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               Crea tu primer proyecto para comenzar
             </p>
             <Button onClick={() => navigate('/organization/projects')}>
+              <Plus className="h-4 w-4 mr-2" />
               Crear Proyecto
             </Button>
           </div>
         ) : (
+          <div className="space-y-3">
             {recentProjects.map((project, index) => (
               <motion.div
                 key={project.id}
@@ -153,16 +169,25 @@ export function OrganizationRecentProjects() {
                 }`}
                 onClick={() => handleSetActiveProject(project.id)}
               >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={project.hero_image_url} alt={project.name} />
+                    <AvatarFallback className="text-sm font-bold text-accent-foreground bg-accent">
                       {getProjectInitials(project.name)}
                     </AvatarFallback>
                   </Avatar>
                   
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm truncate">{project.name}</h4>
                       {userData?.preferences?.last_project_id === project.id && (
+                        <Badge variant="outline" className="text-xs px-1 py-0 border-accent text-accent">
                           ACTIVO
                         </Badge>
                       )}
                     </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
                       <span>
                         Actualizado el {format(new Date(project.updated_at || project.created_at), 'dd/MM/yyyy', { locale: es })}
                       </span>
@@ -170,6 +195,7 @@ export function OrganizationRecentProjects() {
                   </div>
                   
                   {project.type && (
+                    <Badge variant="outline" className="text-xs">
                       {project.type}
                     </Badge>
                   )}

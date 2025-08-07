@@ -198,32 +198,51 @@ export function ExpensesSunburstRadialChart({ data, isLoading }: ExpensesSunburs
 
   if (isLoading) {
     return (
+      <div className="h-[500px] flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">Cargando gráfico sunburst...</div>
       </div>
     )
   }
 
   if (!data || data.length === 0) {
     return (
+      <div className="h-[500px] flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">No hay datos de subcategorías</div>
       </div>
     )
   }
 
   return (
+    <div className="w-full">
       {/* Title */}
+      <div className="text-center mb-6">
+        <h3 className="text-lg font-semibold text-foreground mb-2">
           Distribución de Costos por Rubro y Subcategoría
         </h3>
+        <p className="text-sm text-muted-foreground">
           Visualización circular concéntrica de gastos por categoría principal y subcategorías
         </p>
       </div>
       
       {/* Chart */}
+      <div className="flex justify-center">
+        <svg ref={svgRef} className="overflow-visible" />
       </div>
 
       {/* Legend */}
+      <div className="mt-6 border-t pt-4">
+        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda de Rubros:</div>
+        <div className="flex justify-center gap-6 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(76, 100%, 40%)' }} />
             <span>Mano de Obra</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(173, 58%, 39%)' }} />
             <span>Materiales</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: 'hsl(197, 37%, 24%)' }} />
             <span>Indirectos</span>
           </div>
         </div>

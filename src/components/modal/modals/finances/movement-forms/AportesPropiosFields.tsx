@@ -33,6 +33,7 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
   const categories = concepts?.filter((concept: any) => concept.parent_id && concept.view_mode?.trim() === "aportes_propios")
 
   return (
+    <div className="space-y-4">
 
       {/* Socio */}
       <FormField
@@ -45,6 +46,10 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
               <FormItem>
                 <FormLabel>Socio</FormLabel>
                 <FormControl>
+                  <div className="flex items-center justify-center p-4 border-accent border-dashed border-2 rounded-lg bg-muted/50">
+                    <div className="text-center">
+                      <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-2">
                         Aún no tienes Socios, ¿quieres agregar uno?
                       </p>
                       <Button variant="default" size="sm" disabled>
@@ -76,6 +81,7 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
       />
 
       {/* Fila: Moneda | Billetera */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="currency_id"
@@ -128,6 +134,7 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
       </div>
 
       {/* Fila: Cantidad | Cotización */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="amount"

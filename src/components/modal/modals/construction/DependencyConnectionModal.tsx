@@ -61,28 +61,45 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
   };
 
   const viewPanel = (
+    <div className="space-y-4">
+      <div className="text-sm text-muted-foreground">
         Esta conexión establece una dependencia entre las siguientes tareas:
       </div>
       
+      <div className="space-y-3">
+        <div className="p-3 bg-muted/20 rounded-lg">
+          <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Tarea Predecesora
           </div>
+          <div className="text-sm font-medium">
             {cleanTaskName(predecessorTask.display_name)}
           </div>
         </div>
         
+        <div className="flex justify-center">
+          <div className="flex items-center text-xs text-muted-foreground">
+            <div className="w-8 h-px bg-border"></div>
+            <span className="mx-2">debe finalizar antes de que inicie</span>
+            <div className="w-8 h-px bg-border"></div>
           </div>
         </div>
         
+        <div className="p-3 bg-muted/20 rounded-lg">
+          <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Tarea Sucesora
           </div>
+          <div className="text-sm font-medium">
             {cleanTaskName(successorTask.display_name)}
           </div>
         </div>
       </div>
       
       {dependency.lag_days > 0 && (
+        <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+          <div className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">
             Días de Retraso
           </div>
+          <div className="text-sm text-blue-700 dark:text-blue-300">
             {dependency.lag_days} día{dependency.lag_days !== 1 ? 's' : ''} adicional{dependency.lag_days !== 1 ? 'es' : ''} de espera
           </div>
         </div>
@@ -94,6 +111,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
 
   const headerContent = (
     <FormModalHeader 
+      title="Conexión de Dependencia"
       icon={Link}
     />
   );

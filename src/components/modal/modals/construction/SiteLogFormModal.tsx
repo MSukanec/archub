@@ -337,15 +337,26 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const isLoading = siteLogMutation.isPending;
 
   const viewPanel = (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold">Bitácora de Obra</h3>
+        <p className="text-sm text-muted-foreground mt-2">
           {data ? "Visualizar información de la bitácora" : "No hay datos para mostrar"}
         </p>
       </div>
       {data && (
+        <div className="space-y-4">
           <div>
+            <label className="text-sm font-medium">Fecha:</label>
+            <p className="text-sm text-muted-foreground">{(data.data || data).log_date}</p>
           </div>
           <div>
+            <label className="text-sm font-medium">Tipo:</label>
+            <p className="text-sm text-muted-foreground">{(data.data || data).entry_type}</p>
           </div>
           <div>
+            <label className="text-sm font-medium">Comentarios:</label>
+            <p className="text-sm text-muted-foreground">{(data.data || data).comments || "Sin comentarios"}</p>
           </div>
         </div>
       )}
@@ -362,13 +373,21 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             form.handleSubmit(onSubmit)();
           }
         }}
+        className="space-y-6"
       >
         {/* Información Básica */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
+              <Calendar className="w-4 h-4 text-accent" />
             </div>
             <div>
+              <h3 className="text-sm font-medium text-foreground">Información Básica</h3>
+              <p className="text-xs text-muted-foreground">Datos principales de la entrada de bitácora</p>
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="created_by"
@@ -403,6 +422,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="entry_type"
@@ -471,6 +491,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                 <FormControl>
                   <Textarea 
                     placeholder="Descripción general de las actividades del día..."
+                    className="min-h-[100px]"
                     {...field}
                   />
                 </FormControl>
@@ -481,7 +502,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Fotos y Videos */}
+        <div className="space-y-4">
           <FormSubsectionButton
+            icon={<Camera />}
+            title="Fotos y Videos"
             description="Adjunta archivos multimedia al registro"
             onClick={() => {
               setCurrentSubform('files');
@@ -491,8 +515,12 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           
           {/* Lista de archivos agregados */}
           {uploadedFiles.length > 0 && (
+            <div className="space-y-2">
               {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-sm">{file}</span>
                   <Button variant="ghost" size="sm">
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
@@ -501,7 +529,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Eventos */}
+        <div className="space-y-4">
           <FormSubsectionButton
+            icon={<Calendar />}
+            title="Eventos"
             description="Registra eventos importantes del día"
             onClick={() => {
               setCurrentSubform('events');
@@ -511,12 +542,19 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           
           {/* Lista de eventos agregados */}
           {events.length > 0 && (
+            <div className="space-y-2">
               {events.map((event, index) => (
+                <div key={event.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{event.description}</p>
+                    <p className="text-xs text-muted-foreground">
                       {event.time} {event.responsible && `- ${event.responsible}`}
                     </p>
                   </div>
+                  <div className="flex gap-2">
                     <Button variant="ghost" size="sm">Editar</Button>
                     <Button variant="ghost" size="sm" onClick={() => removeEvent(event.id)}>
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -526,7 +564,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Personal */}
+        <div className="space-y-4">
           <FormSubsectionButton
+            icon={<Users />}
+            title="Personal"
             description="Control de asistencia y personal en obra"
             onClick={() => {
               setCurrentSubform('personal');
@@ -536,15 +577,22 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           
           {/* Lista de personal agregado */}
           {attendees.length > 0 && (
+            <div className="space-y-2">
               {attendees.map((attendee, index) => {
                 const contact = contacts.find(c => c.id === attendee.contact_id);
                 const contactName = contact ? `${contact.first_name} ${contact.last_name}`.trim() : 'Sin contacto';
                 const attendanceText = attendee.attendance_type === 'full' ? 'Jornada Completa' : 'Media Jornada';
                 
                 return (
+                  <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{contactName}</p>
+                      <p className="text-xs text-muted-foreground">{attendanceText}</p>
                       {attendee.description && (
+                        <p className="text-xs text-muted-foreground">{attendee.description}</p>
                       )}
                     </div>
+                    <div className="flex gap-2">
                       <Button 
                         variant="ghost" 
                         size="sm"
@@ -553,6 +601,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                           setAttendees(newAttendees);
                         }}
                       >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -563,7 +612,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
 
         {/* Maquinaria */}
+        <div className="space-y-4">
           <FormSubsectionButton
+            icon={<Wrench />}
+            title="Maquinaria"
             description="Control de equipos y maquinaria utilizada"
             onClick={() => {
               setCurrentSubform('equipment');
@@ -573,12 +625,19 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           
           {/* Lista de equipos agregados */}
           {equipment.length > 0 && (
+            <div className="space-y-2">
               {equipment.map((item, index) => (
+                <div key={item.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">
                       Cantidad: {item.quantity} {item.condition && `- ${item.condition}`}
                     </p>
                   </div>
+                  <div className="flex gap-2">
                     <Button variant="ghost" size="sm">Editar</Button>
                     <Button variant="ghost" size="sm" onClick={() => removeEquipment(item.id)}>
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -592,16 +651,25 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   // Subform de Personal
   const personalSubform = (
+    <div className="space-y-4">
       {/* Header */}
+      <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
+        <div className="col-span-1">✓</div>
+        <div className="col-span-4">Personal</div>
+        <div className="col-span-3">Horario</div>
+        <div className="col-span-4">Descripción</div>
       </div>
 
       {/* Lista completa de contactos */}
+      <div className="space-y-1 max-h-96 overflow-y-auto">
         {contacts?.map((contact: any) => {
           const isPresent = attendees.some(a => a.contact_id === contact.id);
           const attendeeData = attendees.find(a => a.contact_id === contact.id);
           
           return (
+            <div key={contact.id} className="grid grid-cols-12 gap-1 items-center py-1 border-b border-muted/20">
               {/* Checkbox */}
+              <div className="col-span-1">
                 <input
                   type="checkbox"
                   checked={isPresent}
@@ -625,16 +693,19 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                       setAttendees(attendees.filter(a => a.contact_id !== contact.id));
                     }
                   }}
+                  className="h-4 w-4 rounded checkbox-accent"
                 />
               </div>
 
               {/* Nombre del contacto */}
+              <div className="col-span-4">
                 <span className={`text-sm ${isPresent ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                   {contact.first_name} {contact.last_name}
                 </span>
               </div>
 
               {/* Selector de horario */}
+              <div className="col-span-3">
                 <Select
                   value={attendeeData?.attendance_type || 'full'}
                   onValueChange={(value) => {
@@ -660,6 +731,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               </div>
 
               {/* Campo de descripción */}
+              <div className="col-span-4">
                 <Input
                   placeholder="Notas adicionales..."
                   value={attendeeData?.description || ''}
@@ -684,12 +756,17 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
       {/* Contador de personal presente */}
       {attendees.length > 0 && (
+        <div className="text-sm text-muted-foreground text-center pt-2 border-t">
           Personal presente: {attendees.length}
         </div>
       )}
 
       {/* Empty state si no hay contactos */}
       {!contacts || contacts.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay contactos disponibles</p>
+          <p className="text-xs">Agrega contactos en la sección de Contactos</p>
         </div>
       )}
     </div>
@@ -697,6 +774,12 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   // Subform de Eventos
   const eventsSubform = (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay eventos registrados</p>
+          <p className="text-xs">Agrega eventos importantes del día</p>
         </div>
       </div>
     </div>
@@ -704,6 +787,12 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   // Subform de Archivos
   const filesSubform = (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay archivos adjuntos</p>
+          <p className="text-xs">Sube fotos y videos del progreso</p>
         </div>
       </div>
     </div>
@@ -711,6 +800,12 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   // Subform de Equipos
   const equipmentSubform = (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="text-center py-8 text-muted-foreground">
+          <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay equipos registrados</p>
+          <p className="text-xs">Agrega maquinaria y equipos utilizados</p>
         </div>
       </div>
     </div>
@@ -765,7 +860,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               <Button
                 variant="ghost"
                 onClick={() => setPanel('edit')}
+                className="flex items-center gap-2"
               >
+                <ArrowLeft className="h-4 w-4" />
                 Volver
               </Button>
             }

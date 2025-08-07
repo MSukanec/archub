@@ -186,8 +186,10 @@ export function GanttDependencies({
 
   
   return (
+    <div className="absolute top-0 left-0 h-full pointer-events-none" style={{ width: timelineWidth }}>
       
       <svg 
+        className="absolute top-0 left-0 h-full pointer-events-none"
         width={timelineWidth}
         height="100%"
         style={{ 
@@ -223,6 +225,7 @@ export function GanttDependencies({
               style={{
                 transition: 'stroke-width 0.2s ease'
               }}
+              className="hover:[stroke-width:6px]"
             />
             {/* Línea principal de la flecha - hover: doble ancho */}
             <path
@@ -236,6 +239,7 @@ export function GanttDependencies({
               style={{
                 transition: 'stroke-width 0.2s ease, stroke 0.2s ease'
               }}
+              className="cursor-pointer pointer-events-auto hover:stroke-red-500 hover:[stroke-width:4px]"
               onClick={() => {
                 if (onDependencyClick) {
                   onDependencyClick(arrow.dependency);

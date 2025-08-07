@@ -120,8 +120,11 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
   const viewPanel = null; // No view mode needed for this modal
 
   const editPanel = (
+    <div className="space-y-6">
       <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           {/* Nombre y Slug inline */}
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="label"
@@ -173,10 +176,12 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             />
           </div>
           
+          <div className="text-sm text-muted-foreground">
             El Slug se genera automáticamente en formato snake_case basado en el nombre. Puedes modificarlo si es necesario.
           </div>
 
           {/* Tipo y Plantilla inline */}
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="type"
@@ -189,6 +194,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                         <SelectValue placeholder="Seleccionar tipo" />
                       </SelectTrigger>
                     </FormControl>
+                    <SelectContent className="z-[9999]">
                       <SelectItem value="text">Texto</SelectItem>
                       <SelectItem value="number">Número</SelectItem>
                       <SelectItem value="select">Selección</SelectItem>
@@ -206,6 +212,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Plantilla de frase</FormLabel>
+                  <div className="flex gap-2">
                     <FormControl>
                       <Input 
                         placeholder="de {value}" 
@@ -232,6 +239,8 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             />
           </div>
           
+          <div className="text-sm text-muted-foreground">
+            Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
           </div>
 
           {/* Campo is_required */}
@@ -239,12 +248,14 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
             control={form.control}
             name="is_required"
             render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
+                <div className="space-y-1 leading-none">
                   <FormLabel>
                     Parámetro obligatorio
                   </FormLabel>

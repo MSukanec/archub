@@ -17,12 +17,16 @@ interface BudgetProgressChartProps {
 export function BudgetProgressChart({ data, isLoading }: BudgetProgressChartProps) {
   if (isLoading) {
     return (
+      <div className="h-64 flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">Cargando progreso de presupuesto...</div>
       </div>
     )
   }
 
   if (!data || data.length === 0) {
     return (
+      <div className="h-64 flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">No hay datos de presupuesto disponibles</div>
       </div>
     )
   }
@@ -45,6 +49,12 @@ export function BudgetProgressChart({ data, isLoading }: BudgetProgressChartProp
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
+        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+          <p className="font-medium mb-2">{label}</p>
+          <p className="text-sm">Presupuesto: {formatCurrency(data.budget)}</p>
+          <p className="text-sm">Gastado: {formatCurrency(data.spent)}</p>
+          <p className="text-sm">Restante: {formatCurrency(data.remaining)}</p>
+          <p className="text-sm">Progreso: {data.percentage.toFixed(1)}%</p>
         </div>
       )
     }

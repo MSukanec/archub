@@ -12,6 +12,8 @@ export function ConstructionSubcontractsView() {
 
   if (isLoading) {
     return (
+      <div className="flex items-center justify-center h-32">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -19,15 +21,20 @@ export function ConstructionSubcontractsView() {
   if (!subcontracts || subcontracts.length === 0) {
     return (
       <EmptyState
+        icon={<Package className="w-12 h-12 text-muted-foreground" />}
+        title="No hay subcontratos"
         description="Aún no has creado ningún subcontrato. Haz clic en 'Nuevo Subcontrato' para comenzar."
       />
     )
   }
 
   return (
+    <div className="space-y-4">
+      <div className="text-sm text-muted-foreground">
         {subcontracts.length} subcontrato{subcontracts.length !== 1 ? 's' : ''}
       </div>
       
+      <div className="grid gap-4">
         {subcontracts.map((subcontract) => (
           <SubcontractExpandableCard 
             key={subcontract.id} 

@@ -36,18 +36,24 @@ function TaskCard({ task, onToggleCompleted }: { task: Task; onToggleCompleted: 
 
   return (
     <Card className={`group transition-all duration-200 ${isCompleted ? 'opacity-75' : ''}`}>
+      <CardContent className="p-3">
+        <div className="flex items-start gap-3">
           {/* Checkbox/Check Icon */}
           <Button
             variant="ghost"
             size="sm"
+            className="h-6 w-6 p-0 flex-shrink-0 mt-0.5"
             onClick={() => onToggleCompleted(task.id, !isCompleted)}
           >
             {isCompleted ? (
+              <CheckCircle className="h-4 w-4 text-primary" />
             ) : (
+              <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
             )}
           </Button>
 
           {/* Task Content */}
+          <div className="flex-1 min-w-0">
             <div 
               className={`text-sm font-medium ${
                 isCompleted 
@@ -72,6 +78,8 @@ function TaskCard({ task, onToggleCompleted }: { task: Task; onToggleCompleted: 
 
             {/* Completed Date */}
             {isCompleted && task.completed_at && (
+              <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
+                <Calendar className="h-3 w-3" />
                 <span>Completado el {formatCompletedDate(task.completed_at)}</span>
               </div>
             )}
@@ -101,7 +109,15 @@ export function KanbanList({ tasks, onToggleCompleted, isLoading = false }: Prop
 
   if (isLoading) {
     return (
+      <div className="space-y-2">
         {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-3">
+              <div className="flex items-start gap-3">
+                <div className="h-4 w-4 bg-muted rounded-full mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="h-4 bg-muted rounded mb-1" />
+                  <div className="h-3 bg-muted rounded w-3/4" />
                 </div>
               </div>
             </CardContent>
@@ -112,6 +128,7 @@ export function KanbanList({ tasks, onToggleCompleted, isLoading = false }: Prop
   }
 
   return (
+    <div className="space-y-2">
       {/* Active Tasks */}
       {activeTasks.map(task => (
         <TaskCard key={task.id} task={task} onToggleCompleted={onToggleCompleted} />
@@ -119,14 +136,19 @@ export function KanbanList({ tasks, onToggleCompleted, isLoading = false }: Prop
 
       {/* Completed Tasks Section */}
       {completedTasks.length > 0 && (
+        <div className="pt-4">
           <Collapsible open={isCompletedOpen} onOpenChange={setIsCompletedOpen}>
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
+                className="h-auto p-2 w-full justify-start text-sm text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
               >
                 <ChevronRight className={`h-4 w-4 transition-transform ${isCompletedOpen ? 'rotate-90' : ''}`} />
+                <span className="ml-1">Completadas ({completedTasks.length})</span>
               </Button>
             </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <div className="space-y-2">
                 {completedTasks.map(task => (
                   <TaskCard key={task.id} task={task} onToggleCompleted={onToggleCompleted} />
                 ))}
@@ -138,6 +160,10 @@ export function KanbanList({ tasks, onToggleCompleted, isLoading = false }: Prop
 
       {/* Empty State */}
       {activeTasks.length === 0 && completedTasks.length === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="p-8 text-center">
+            <Circle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <div className="text-sm text-muted-foreground">No hay tareas disponibles</div>
           </CardContent>
         </Card>
       )}

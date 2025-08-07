@@ -151,27 +151,39 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
 
   if (isLoading) {
     return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-sm text-muted-foreground">Cargando tareas disponibles...</div>
       </div>
     );
   }
 
   return (
+    <div className="space-y-4">
       {/* Search and Grouping Controls */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nombre o rubro..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
         </div>
         <Select value={grouping} onValueChange={(value: GroupingType) => setGrouping(value)}>
+          <SelectTrigger className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="rubro">
+              <div className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
                 <span>Agrupadas por Rubro</span>
               </div>
             </SelectItem>
             <SelectItem value="none">
+              <div className="flex items-center gap-2">
+                <List className="w-4 h-4" />
                 <span>Sin Agrupar</span>
               </div>
             </SelectItem>
@@ -181,6 +193,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
 
       {/* Selection Summary */}
       {selectedTasks.length > 0 && (
+        <Card className="border-accent/20 bg-accent/5">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="w-4 h-4 text-accent" />
+              <span className="text-sm font-medium">
                 {selectedTasks.length} tarea{selectedTasks.length !== 1 ? 's' : ''} seleccionada{selectedTasks.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -191,26 +208,39 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       {/* Render based on grouping type */}
       {grouping === 'rubro' ? (
         // Grouped by Rubro View
+        <div className="space-y-2">
           {Object.entries(tasksByRubro).map(([rubroName, rubroTasks]) => (
+            <Card key={rubroName} className="overflow-hidden">
+              <CardHeader className="pb-2 pt-3">
+                <div className="flex items-center gap-3">
                   <Checkbox
                     checked={isRubroFullySelected(rubroTasks)}
                     onCheckedChange={(checked) => handleSelectAllRubro(rubroTasks, !!checked)}
                   />
+                  <Package className="w-4 h-4 text-muted-foreground" />
+                  <CardTitle className="text-sm">{rubroName}</CardTitle>
+                  <Badge variant="secondary" className="text-xs ml-auto">
                     {rubroTasks.length}
                   </Badge>
                 </div>
               </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-1">
                   {rubroTasks.map((task) => (
                     <div 
                       key={task.task_instance_id}
+                      className="flex items-center gap-3 py-1 px-2 rounded hover:bg-muted/50 transition-colors"
                     >
                       <Checkbox
                         checked={isTaskSelected(task.task_instance_id)}
                         onCheckedChange={(checked) => handleTaskToggle(task, !!checked)}
                       />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-foreground line-clamp-1">
                           {task.task?.display_name || task.display_name || task.task_code}
                         </div>
                       </div>
+                      <div className="text-sm font-medium text-muted-foreground flex-shrink-0">
                         {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || ''}
                       </div>
                     </div>
@@ -223,20 +253,27 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       ) : (
         // Flat List View
         <Card>
+          <CardContent className="p-3">
+            <div className="space-y-1">
               {filteredTasks.map((task) => (
                 <div 
                   key={task.task_instance_id}
+                  className="flex items-center gap-3 py-2 px-2 rounded hover:bg-muted/50 transition-colors"
                 >
                   <Checkbox
                     checked={isTaskSelected(task.task_instance_id)}
                     onCheckedChange={(checked) => handleTaskToggle(task, !!checked)}
                   />
+                  <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto] gap-3">
                     <div>
+                      <div className="text-sm text-foreground line-clamp-1">
                         {task.task?.display_name || task.display_name || task.task_code}
                       </div>
+                      <div className="text-xs text-muted-foreground">
                         {task.task?.rubro_name || task.rubro_name || 'Sin Rubro'}
                       </div>
                     </div>
+                    <div className="text-sm font-medium text-muted-foreground text-right">
                       {task.quantity || 0} {task.task?.unit_symbol || task.unit_symbol || ''}
                     </div>
                   </div>
@@ -249,7 +286,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
 
       {filteredTasks.length === 0 && searchTerm && (
         <Card>
+          <CardContent className="p-8 text-center">
+            <div className="text-muted-foreground">
+              <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>No se encontraron tareas con "{searchTerm}"</p>
+              <p className="text-xs mt-1">Intenta con otros términos de búsqueda</p>
             </div>
           </CardContent>
         </Card>
@@ -257,7 +298,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
 
       {availableTasks.length === 0 && (
         <Card>
+          <CardContent className="p-8 text-center">
+            <div className="text-muted-foreground">
+              <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>No hay tareas disponibles para agregar</p>
+              <p className="text-xs mt-1">Todas las tareas ya están incluidas en el presupuesto</p>
             </div>
           </CardContent>
         </Card>

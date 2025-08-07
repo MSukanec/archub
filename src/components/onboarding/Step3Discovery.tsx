@@ -105,14 +105,26 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
   };
 
   return (
+    <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
+      <CardHeader className="text-center pb-4">
+        <div className="flex items-center justify-center mb-4">
+          <div className="p-3 rounded-lg bg-[var(--accent)] text-white">
+            <Search className="h-8 w-8" />
           </div>
         </div>
+        <CardTitle className="text-2xl font-bold">Queremos conocerte mejor</CardTitle>
+        <CardDescription className="text-base">
           Esta información nos ayuda a personalizar tu experiencia en Archub y mejorar nuestra plataforma.
         </CardDescription>
       </CardHeader>
       
+      <CardContent className="space-y-4">
         {/* Fuente de descubrimiento - OBLIGATORIO */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="discovered_by">¿Cómo conociste Archub? <span className="text-[var(--accent)]">*</span></Label>
             <HelpPopover
+              title="Fuente de Descubrimiento"
               description="Conocer cómo nos encontraste nos ayuda a entender qué canales funcionan mejor y donde enfocar nuestros esfuerzos para llegar a más profesionales como tú."
               primaryActionText="Entendido"
               placement="top"
@@ -142,6 +154,8 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
 
         {/* Campo adicional si elige "Otro" */}
         {discoveredBy === 'Otro' && (
+          <div className="space-y-2">
+            <Label htmlFor="discovered_by_other_text">Especifica cómo nos conociste <span className="text-[var(--accent)]">*</span></Label>
             <Input
               id="discovered_by_other_text"
               placeholder="Escribe aquí..."
@@ -152,8 +166,11 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
         )}
 
         {/* Uso principal - OPCIONAL */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <Label htmlFor="main_use">¿Para qué vas a usar principalmente Archub?</Label>
             <HelpPopover
+              title="Uso Principal"
               description="Entender tu propósito principal nos permite personalizar las funciones más relevantes para ti y sugerir flujos de trabajo optimizados. Puedes cambiarlo después."
               primaryActionText="Entendido"
               placement="top"
@@ -183,6 +200,7 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
 
         {/* Campo adicional si elige "Otro" en uso principal */}
         {mainUse === 'Otro' && (
+          <div className="space-y-2">
             <Label htmlFor="main_use_other">Especifica tu uso principal</Label>
             <Input
               id="main_use_other"
@@ -194,17 +212,21 @@ export function Step3Discovery({ onFinish }: Step3DiscoveryProps) {
         )}
 
         {/* Botones de navegación */}
+        <div className="flex justify-between pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={goPrevStep}
+            className="flex items-center gap-2"
           >
+            <ArrowLeft className="h-4 w-4" />
             Volver
           </Button>
           
           <Button 
             onClick={handleFinish}
             disabled={!discoveredBy || (discoveredBy === 'Otro' && !discoveredByOther) || isFinishing}
+            className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white"
           >
             {isFinishing ? 'Finalizando...' : 'Finalizar configuración'}
           </Button>

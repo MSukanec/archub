@@ -159,11 +159,17 @@ export default function AdminMaterialCategories() {
 
   return (
     <Layout wide headerProps={headerProps}>
+      <div className="space-y-6">
         {/* Hierarchical Category Tree */}
         <Card>
+          <CardContent className="p-6">
             {filteredCategories.length === 0 ? (
+              <div className="text-center py-12">
+                <Tag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">
                   {searchTerm ? 'No se encontraron categorías' : 'No hay categorías creadas'}
                 </h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   {searchTerm 
                     ? 'Intenta con otros términos de búsqueda'
                     : 'Comienza creando tu primera categoría de materiales'

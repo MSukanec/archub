@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import { MemberCard } from "@/components/cards/MemberCard";
@@ -194,20 +195,27 @@ export default function OrganizationMembers() {
     <Layout headerProps={headerProps}>
       <div>
         {/* Feature Introduction - Mobile only */}
+        <FeatureIntroduction
+          title="Gestión de Miembros"
+          icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
           features={[
             {
+              icon: <Users className="h-4 w-4" />,
               title: "Invitación de miembros",
               description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
             },
             {
+              icon: <UserCheck className="h-4 w-4" />,
               title: "Gestión de roles",
               description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
             },
             {
+              icon: <Clock className="h-4 w-4" />,
               title: "Control de acceso",
               description: "Controla el acceso a configuraciones de la organización y datos sensibles"
             },
             {
+              icon: <MoreHorizontal className="h-4 w-4" />,
               title: "Supervisión de actividad",
               description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
             }
@@ -216,6 +224,8 @@ export default function OrganizationMembers() {
 
         {/* ActionBar Desktop */}
         <ActionBarDesktop
+          title="Gestión de Miembros"
+          icon={<Users className="h-5 w-5" />}
           showProjectSelector={false}
           customActions={[
             <CustomRestricted 
@@ -224,24 +234,29 @@ export default function OrganizationMembers() {
               current={members.length}
             >
               <Button onClick={() => openModal('member')}>
+                <UserPlus className="h-4 w-4 mr-2" />
                 Invitar miembro
               </Button>
             </CustomRestricted>
           ]}
           features={[
             {
+              icon: <Users className="h-4 w-4" />,
               title: "Invitación y gestión de equipo",
               description: "Invita a miembros de tu equipo con acceso completo a proyectos y herramientas de colaboración. Administra perfiles y datos de contacto."
             },
             {
+              icon: <Shield className="h-4 w-4" />,
               title: "Control de roles y permisos",
               description: "Asigna roles específicos (Admin, Editor, Viewer) con permisos diferenciados. Controla acceso a configuraciones sensibles de la organización."
             },
             {
+              icon: <Activity className="h-4 w-4" />,
               title: "Supervisión de actividad y estado",
               description: "Monitorea el estado de conexión, última actividad y participación de cada miembro del equipo en tiempo real."
             },
             {
+              icon: <UserCheck className="h-4 w-4" />,
               title: "Gestión de invitaciones y huéspedes",
               description: "Administra invitaciones pendientes, cuentas de huéspedes temporales y colaboradores externos con acceso limitado a proyectos específicos."
             }
@@ -249,15 +264,23 @@ export default function OrganizationMembers() {
         />
 
         {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
           {/* Left Column - Section Description */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Miembros</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Invita a tu equipo para trabajar juntos y colaborar fácilmente. Gestiona sus permisos para proyectos mejores.
             </p>
           </div>
 
           {/* Right Column - Members Content */}
+          <div className="lg:col-span-8">
             
             {isMobile ? (
+              <div className="space-y-3">
                 {members.map((member) => (
                   <MemberCard 
                     key={member.id} 
@@ -269,25 +292,41 @@ export default function OrganizationMembers() {
                   />
                 ))}
                 {members.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay miembros en esta organización.</p>
+                    <p className="text-xs">Invita al primer miembro para comenzar.</p>
                   </div>
                 )}
               </div>
             ) : (
+              <div className="space-y-2">
                 {members.map((member) => (
+                  <Card key={member.id} className="p-4">
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
                             <AvatarImage src={member.users?.avatar_url} />
                             <AvatarFallback>
                               {getInitials(member.users?.full_name || member.users?.email || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">
                                 {member.users?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
+                            <p className="text-xs text-muted-foreground">
                               {member.users?.email}
                             </p>
                           </div>
                         </div>
 
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
                             <div>
                               {member.joined_at && !isNaN(new Date(member.joined_at).getTime()) 
                                 ? format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })
@@ -305,6 +344,8 @@ export default function OrganizationMembers() {
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -312,6 +353,7 @@ export default function OrganizationMembers() {
                                 Editar rol
                               </DropdownMenuItem>
                               <DropdownMenuItem 
+                                className="text-red-600"
                                 onClick={() => handleDeleteMember(member)}
                               >
                                 Eliminar miembro
@@ -325,6 +367,10 @@ export default function OrganizationMembers() {
                 ))}
 
                 {members.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay miembros en esta organización.</p>
+                    <p className="text-xs">Invita al primer miembro para comenzar.</p>
                   </div>
                 )}
               </div>
@@ -332,16 +378,25 @@ export default function OrganizationMembers() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Guests Section Description */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <UserCheck className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Invitados</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
             </p>
           </div>
 
           {/* Right Column - Guests Content */}
+          <div className="lg:col-span-8">
             
             {isMobile ? (
+              <div className="space-y-3">
                 {guests.map((guest) => (
                   <MemberCard 
                     key={guest.id} 
@@ -349,25 +404,41 @@ export default function OrganizationMembers() {
                   />
                 ))}
                 {guests.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay invitados en esta organización.</p>
+                    <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
                   </div>
                 )}
               </div>
             ) : (
+              <div className="space-y-2">
                 {guests.map((guest) => (
+                  <Card key={guest.id} className="p-4">
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
                             <AvatarImage src={guest.users?.avatar_url} />
                             <AvatarFallback>
                               {getInitials(guest.users?.full_name || guest.users?.email || 'G')}
                             </AvatarFallback>
                           </Avatar>
                           
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">
                                 {guest.users?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
+                            <p className="text-xs text-muted-foreground">
                               {guest.users?.email}
                             </p>
                           </div>
                         </div>
 
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
                             <div>
                               {guest.joined_at && !isNaN(new Date(guest.joined_at).getTime()) 
                                 ? format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })
@@ -382,6 +453,8 @@ export default function OrganizationMembers() {
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -389,6 +462,7 @@ export default function OrganizationMembers() {
                                 Editar rol
                               </DropdownMenuItem>
                               <DropdownMenuItem 
+                                className="text-red-600"
                                 onClick={() => handleDeleteMember(guest)}
                               >
                                 Eliminar invitado
@@ -402,6 +476,10 @@ export default function OrganizationMembers() {
                 ))}
 
                 {guests.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay invitados en esta organización.</p>
+                    <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
                   </div>
                 )}
               </div>
@@ -409,29 +487,49 @@ export default function OrganizationMembers() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Pending Invites Section Description */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
             </p>
           </div>
 
           {/* Right Column - Pending Invites Content */}
+          <div className="lg:col-span-8">
             
+            <div className="space-y-2">
               {pendingInvites.map((invite) => (
+                <Card key={invite.id} className="p-4">
+                  <CardContent className="p-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
                           <AvatarFallback>
                             {getInitials(invite.email || 'P')}
                           </AvatarFallback>
                         </Avatar>
                         
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-sm">
                               {invite.email}
                             </h4>
                           </div>
+                          <p className="text-xs text-muted-foreground">
                             Invitación enviada
                           </p>
                         </div>
                       </div>
 
+                      <div className="flex items-center gap-4">
+                        <div className="text-xs text-muted-foreground text-right">
                           <div>
                             {invite.created_at && !isNaN(new Date(invite.created_at).getTime()) 
                               ? format(new Date(invite.created_at), 'MMM dd, yyyy', { locale: es })
@@ -440,6 +538,7 @@ export default function OrganizationMembers() {
                           </div>
                         </div>
 
+                        <div className="flex gap-2">
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -450,6 +549,7 @@ export default function OrganizationMembers() {
                           <Button 
                             variant="outline" 
                             size="sm" 
+                            className="text-red-600 hover:text-red-700"
                             onClick={() => revokeInviteMutation.mutate(invite.id)}
                           >
                             Revocar invitación
@@ -462,6 +562,10 @@ export default function OrganizationMembers() {
               ))}
 
               {pendingInvites.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                  <p className="text-sm">No hay invitaciones pendientes.</p>
+                  <p className="text-xs">Las invitaciones aparecerán aquí una vez enviadas.</p>
                 </div>
               )}
             </div>

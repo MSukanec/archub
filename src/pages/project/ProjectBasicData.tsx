@@ -203,25 +203,32 @@ export default function ProjectBasicData() {
         title: "Datos Básicos"
       }}
     >
+      <div className="space-y-6">
         {/* ActionBar - Desktop Only */}
         <ActionBarDesktop 
+          title="Datos Básicos"
+          icon={<Building2 className="h-5 w-5" />}
           showProjectSelector={false}
           showSearch={false}
           showGrouping={false}
           features={[
             {
+              icon: <FileText className="w-4 h-4" />,
               title: "Información completa del proyecto",
               description: "Centraliza toda la información fundamental de tu proyecto en un solo lugar. Desde nombre y descripción hasta fechas importantes, mantén todos los datos organizados y actualizados automáticamente."
             },
             {
+              icon: <Users className="w-4 h-4" />,
               title: "Datos del cliente integrados", 
               description: "Almacena la información de contacto del cliente directamente en el proyecto. Teléfonos, emails y datos de contacto siempre disponibles para todo el equipo cuando los necesiten."
             },
             {
+              icon: <MapPin className="w-4 h-4" />,
               title: "Ubicación y medidas precisas",
               description: "Define la ubicación exacta de la obra y las superficies del proyecto. Esta información se usa automáticamente en cálculos de presupuestos y planificación de materiales."
             },
             {
+              icon: <Globe className="w-4 h-4" />,
               title: "Configuración automática",
               description: "Guarda automáticamente los cambios mientras escribes. Sin necesidad de hacer clic en botones, toda la información se mantiene sincronizada."
             }
@@ -230,16 +237,21 @@ export default function ProjectBasicData() {
 
         {/* FeatureIntroduction - Mobile Only */}
         <FeatureIntroduction
+          title="Datos Básicos"
+          icon={<Building2 className="w-5 h-5" />}
           features={[
             {
+              icon: <FileText className="w-5 h-5" />,
               title: "Información completa del proyecto",
               description: "Centraliza toda la información fundamental de tu proyecto en un solo lugar. Desde nombre y descripción hasta fechas importantes, mantén todos los datos organizados y actualizados automáticamente."
             },
             {
+              icon: <Users className="w-5 h-5" />,
               title: "Datos del cliente integrados",
               description: "Almacena la información de contacto del cliente directamente en el proyecto. Teléfonos, emails y datos de contacto siempre disponibles para todo el equipo cuando los necesiten."
             },
             {
+              icon: <MapPin className="w-5 h-5" />,
               title: "Ubicación y medidas precisas",
               description: "Define la ubicación exacta de la obra y las superficies del proyecto. Esta información se usa automáticamente en cálculos de presupuestos y planificación de materiales."
             }
@@ -247,10 +259,16 @@ export default function ProjectBasicData() {
         />
 
         {/* Two Column Layout - Section descriptions left, content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Imagen Principal */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <ImageIcon className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Imagen Principal</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Imagen que representa tu proyecto en tarjetas y vistas principales. Esta imagen aparecerá en el dashboard y listados de proyectos.
+              {isSaving && <span className="block text-[var(--accent)] mt-2">Guardando...</span>}
             </p>
           </div>
 
@@ -267,16 +285,24 @@ export default function ProjectBasicData() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información Básica */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <FileText className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información Básica</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Datos fundamentales del proyecto que se usarán en todo el sistema. Estos campos son la base para presupuestos, documentos y comunicaciones.
             </p>
           </div>
 
           {/* Right Column - Información Básica Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="project-name">Nombre del Proyecto</Label>
                 <Input 
                   id="project-name"
@@ -286,6 +312,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea 
                   id="description"
@@ -296,6 +323,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="internal-notes">Notas Internas</Label>
                 <Textarea 
                   id="internal-notes"
@@ -309,16 +337,24 @@ export default function ProjectBasicData() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Información del Cliente */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <Users className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Información del Cliente</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Datos de contacto del cliente responsable del proyecto. Esta información estará disponible para todo el equipo cuando necesiten comunicarse.
             </p>
           </div>
 
           {/* Right Column - Información del Cliente Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="client-name">Nombre del Cliente</Label>
                 <Input 
                   id="client-name"
@@ -328,6 +364,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
                 <Input 
                   id="contact-phone"
@@ -337,6 +374,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="email">Email de Contacto</Label>
                 <Input 
                   id="email"
@@ -351,13 +389,19 @@ export default function ProjectBasicData() {
 
           {/* Left Column - Ubicación */}
           <div>
+            <div className="flex items-center gap-2 mb-6">
+              <MapPin className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Ubicación del Proyecto</h2>
             </div>
+            <p className="text-sm text-muted-foreground">
               Dirección completa donde se ejecutará la obra. Esta información se usa para logística, entregas y documentación oficial.
             </p>
           </div>
 
           {/* Right Column - Ubicación Content */}
           <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="address">Dirección</Label>
                 <Input 
                   id="address"
@@ -367,6 +411,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="city">Ciudad</Label>
                 <Input 
                   id="city"
@@ -376,6 +421,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="state">Provincia/Estado</Label>
                 <Input 
                   id="state"
@@ -385,6 +431,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="country">País</Label>
                 <Input 
                   id="country"
@@ -394,6 +441,7 @@ export default function ProjectBasicData() {
                 />
               </div>
 
+              <div className="space-y-2">
                 <Label htmlFor="zip-code">Código Postal</Label>
                 <Input 
                   id="zip-code"

@@ -14,6 +14,9 @@ interface ProjectActivityChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium mb-2">{label}</p>
+        <p className="text-sm font-medium" style={{ color: '#92c900' }}>
           Actividad total: {payload[0]?.value || 0}
         </p>
       </div>
@@ -28,10 +31,16 @@ export function ProjectActivityChart({ data, isLoading }: ProjectActivityChartPr
       <Card>
         <CardHeader>
           <CardTitle>Actividad del Proyecto</CardTitle>
+          <p className="text-sm text-muted-foreground">
             Actividad de los últimos 7 días
           </p>
         </CardHeader>
         <CardContent>
+          <div className="h-80 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
               </div>
             </div>
           </div>
@@ -44,10 +53,12 @@ export function ProjectActivityChart({ data, isLoading }: ProjectActivityChartPr
     <Card>
       <CardHeader>
         <CardTitle>Actividad del Proyecto</CardTitle>
+        <p className="text-sm text-muted-foreground">
           Actividad de los últimos 7 días
         </p>
       </CardHeader>
       <CardContent>
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
               <defs>
@@ -56,6 +67,7 @@ export function ProjectActivityChart({ data, isLoading }: ProjectActivityChartPr
                   <stop offset="95%" stopColor="#92c900" stopOpacity={0.1}/>
                 </linearGradient>
               </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-text)" className="opacity-30" />
               <XAxis 
                 dataKey="date" 
                 tick={{ fontSize: 12, fill: 'var(--chart-grid-text)' }}

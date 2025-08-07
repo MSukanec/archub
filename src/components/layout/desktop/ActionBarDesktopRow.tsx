@@ -40,9 +40,12 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
 }) => {
   return (
     <div 
+      className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg"
       style={{ backgroundColor: "var(--card-bg)" }}
     >
+      <div className="flex items-center justify-between px-4 py-3">
         {/* Filtros a la izquierda - Completamente dinámicos */}
+        <div className="flex items-center gap-2">
           {filters.filter(filter => filter.enabled !== false).map((filter) => {
             // Convertir las opciones al formato esperado por SelectableGhostButton
             const selectableOptions: SelectableGhostButtonOption[] = filter.options
@@ -63,6 +66,7 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
                   // Si no hay valor seleccionado, usar string vacío
                   filter.setValue(value || "");
                 }}
+                icon={<filter.icon className="w-4 h-4" />}
                 placeholder={filter.defaultLabel}
               />
             );
@@ -70,6 +74,7 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
         </div>
 
         {/* Acciones a la derecha - Completamente dinámicas */}
+        <div className="flex items-center gap-2">
           {customRestricted}
           {actions.filter(action => action.enabled !== false).map((action, index) => (
             <Button
@@ -77,7 +82,9 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
               variant={action.variant || 'default'}
               size="sm"
               onClick={action.onClick}
+              className="h-8 px-3 text-xs"
             >
+              <action.icon className="mr-1 h-3 w-3" />
               {action.label}
             </Button>
           ))}

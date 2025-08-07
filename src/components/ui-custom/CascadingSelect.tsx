@@ -180,6 +180,7 @@ export function CascadingSelect({
   }, [isOpen])
 
   return (
+    <div className="relative">
       {/* Trigger - Estéticamente idéntico al Select */}
       <button
         ref={triggerRef}
@@ -192,6 +193,7 @@ export function CascadingSelect({
           className
         )}
       >
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Botón de volver - solo visible si no estamos en el nivel raíz */}
           {currentLevel > 0 && isOpen && (
             <div
@@ -199,11 +201,14 @@ export function CascadingSelect({
                 e.stopPropagation()
                 handleBack()
               }}
+              className="flex-shrink-0 p-1 hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] rounded transition-colors cursor-pointer"
             >
+              <ArrowLeft className="h-3 w-3" />
             </div>
           )}
           
           {/* Texto del valor seleccionado */}
+          <span className="line-clamp-1 text-left">
             {getDisplayText()}
           </span>
         </div>
@@ -223,6 +228,7 @@ export function CascadingSelect({
             "absolute z-[100000] w-full mt-1 max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
           )}
         >
+          <div className="p-1 max-h-56 overflow-auto overscroll-contain">
             {currentOptions.map((option) => (
               <div
                 key={option.value}
@@ -232,14 +238,17 @@ export function CascadingSelect({
                   "cursor-pointer"
                 )}
               >
+                <span className="truncate">{option.label}</span>
                 
                 {/* Indicador de que tiene hijos */}
                 {option.children && option.children.length > 0 && (
+                  <ChevronDown className="ml-auto h-3 w-3 opacity-50 transform -rotate-90" />
                 )}
               </div>
             ))}
             
             {currentOptions.length === 0 && (
+              <div className="py-1.5 pl-8 pr-2 text-sm text-[var(--input-placeholder)]">
                 No hay opciones disponibles
               </div>
             )}

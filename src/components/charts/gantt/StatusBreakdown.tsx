@@ -82,7 +82,11 @@ export default function StatusBreakdown({ data }: StatusBreakdownProps) {
   }
 
   return (
+    <Card className="h-[350px]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">Estado de Tareas</CardTitle>
       </CardHeader>
+      <CardContent className="pt-0">
         <ResponsiveContainer width="100%" height={280}>
           <PieChart>
             <Pie

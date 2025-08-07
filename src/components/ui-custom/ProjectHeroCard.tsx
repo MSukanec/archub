@@ -104,12 +104,14 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      className="relative"
     >
       {/* Settings Button */}
       <input
         type="file"
         id="project-image-upload"
         accept="image/*"
+        className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) {
@@ -121,6 +123,7 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
       <Button
         variant="ghost"
         size="sm"
+        className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50 cursor-pointer z-50"
         type="button"
         onClick={(e) => {
           e.preventDefault();
@@ -132,10 +135,13 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
         }}
         disabled={updateProjectImageMutation.isPending}
       >
+        <Settings className="h-4 w-4" />
       </Button>
 
       {/* Move indicator when image exists */}
       {project.project_data?.project_image_url && (
+        <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded px-2 py-1 text-white text-xs">
+          <Move className="h-3 w-3" />
           <span>Arrastra para posicionar</span>
         </div>
       )}
@@ -151,6 +157,7 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
           <img 
             src={project.project_data.project_image_url}
             alt="Project background"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-200"
             style={{
               objectPosition: `center ${imagePosition}%`
             }}
@@ -160,30 +167,42 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
             }}
           />
         ) : (
+          <div className="absolute inset-0 bg-[var(--accent)]" />
         )}
         
         {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
 
         {/* Content */}
+        <CardContent className="relative z-10 p-4 md:p-6 h-full flex flex-col justify-end">
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-4 md:gap-6">
             {/* Project Icon */}
+            <div className="flex-shrink-0">
+              <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-white/30">
+                <AvatarFallback className="text-sm md:text-lg font-bold text-white bg-white/20">
                   {getProjectInitials(project.name)}
                 </AvatarFallback>
               </Avatar>
             </div>
 
             {/* Project Info */}
+            <div className="flex-1">
               <motion.h1
+                className="text-2xl md:text-4xl font-black text-white mb-1"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
               >
                 {project.name}
               </motion.h1>
+              <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
+                <p className="text-base md:text-lg text-white/90">
                   Resumen del proyecto
                 </p>
                 {project.status && (
                   <Badge 
                     variant="outline" 
+                    className="w-fit border-0"
                     style={{
                       backgroundColor: 'var(--accent)',
                       color: 'var(--accent-foreground)'
@@ -196,6 +215,8 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
                 )}
               </div>
               {project.created_at && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-white/80">
+                  <Calendar className="h-3 w-3" />
                   <span>
                     Creado el {format(new Date(project.created_at), "d 'de' MMMM 'de' yyyy", { locale: es })}
                   </span>

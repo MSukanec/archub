@@ -18,12 +18,16 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
   
   if (isLoading) {
     return (
+      <div className="h-72 flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">Cargando gráfico de categorías...</div>
       </div>
     )
   }
 
   if (!data || data.length === 0) {
     return (
+      <div className="h-72 flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">No hay datos de categorías</div>
       </div>
     )
   }
@@ -45,7 +49,9 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
   }
 
   return (
+    <div className="space-y-4">
       {/* Chart */}
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             {/* Single ring - Categories only */}
@@ -83,11 +89,19 @@ export function ExpensesSunburstChart({ data, isLoading }: ExpensesSunburstChart
       </div>
       
       {/* Legend inside card */}
+      <div className="border-t pt-4">
+        <div className="text-xs font-medium text-muted-foreground mb-3">Leyenda:</div>
+        <div className="grid grid-cols-1 gap-2 text-xs">
           {categoryData.map((category, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <div 
+                  className="w-3 h-3 rounded-sm"
                   style={{ backgroundColor: category.color }}
                 />
+                <span className="font-medium">{category.name}</span>
               </div>
+              <span className="text-muted-foreground font-medium">
                 {formatCurrency(category.value)}
               </span>
             </div>

@@ -47,23 +47,33 @@ function ConceptItem({
   return (
     <div
       style={{ marginLeft: `${level * 24}px` }}
+      className="group relative border rounded-lg p-3 transition-all duration-200 hover:border-accent/50 bg-[var(--card-bg)] border-[var(--card-border)]"
     >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
           {/* Expand/Collapse Button */}
           <Button
             variant="ghost"
             size="sm"
+            className="p-0 h-6 w-6"
             onClick={() => onToggleExpanded(concept.id)}
             disabled={!hasChildren}
           >
             {hasChildren ? (
               isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
               ) : (
+                <ChevronRight className="h-4 w-4" />
               )
             ) : (
+              <div className="w-4 h-4" />
             )}
           </Button>
 
           {/* Concept Name and Info */}
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium text-foreground">{concept.name}</h4>
               
               {/* System/User Badge */}
               <Badge 
@@ -73,11 +83,13 @@ function ConceptItem({
                 {concept.is_system ? (
                   'Sistema'
                 ) : (
+                  <><Building2 className="h-3 w-3 mr-1" />Organización</>
                 )}
               </Badge>
 
               {/* Children count */}
               {hasChildren && (
+                <Badge variant="outline" className="text-xs">
                   {concept.children!.length} elementos
                 </Badge>
               )}
@@ -85,6 +97,7 @@ function ConceptItem({
             
             {/* Description - small text below name */}
             {concept.description && (
+              <p className="text-xs text-muted-foreground mt-1 leading-tight">
                 {concept.description}
               </p>
             )}
@@ -92,23 +105,33 @@ function ConceptItem({
         </div>
 
         {/* Action Buttons */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             variant="ghost"
             size="sm"
+            className="h-8 w-8 p-0"
             onClick={() => onCreateChild(concept)}
+            title="Crear concepto hijo"
           >
+            <Plus className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-8 w-8 p-0"
             onClick={() => onEdit(concept)}
+            title="Editar concepto"
           >
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
             onClick={() => onDelete(concept.id)}
+            title="Eliminar concepto"
           >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -154,6 +177,8 @@ export function DraggableConceptTree({
         {/* Render children if expanded */}
         {concept.children && concept.children.length > 0 && expandedConcepts.has(concept.id) && (
           <Collapsible open={true}>
+            <CollapsibleContent className="mt-2">
+              <div className="space-y-2">
                 {renderConcepts(concept.children, currentLevel + 1)}
               </div>
             </CollapsibleContent>
@@ -164,6 +189,7 @@ export function DraggableConceptTree({
   };
 
   return (
+    <div className="space-y-2">
       {renderConcepts(concepts, level)}
     </div>
   );

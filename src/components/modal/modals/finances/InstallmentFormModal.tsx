@@ -295,21 +295,33 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   // Panel de vista (solo lectura)
   const viewPanel = editingInstallment ? (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
+          <h4 className="font-medium text-foreground mb-2">Cliente</h4>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
               <AvatarFallback>
                 {editingInstallment.contact?.first_name?.[0]}
                 {editingInstallment.contact?.last_name?.[0]}
               </AvatarFallback>
             </Avatar>
+            <span className="text-sm">{editingInstallment.contact?.full_name}</span>
           </div>
         </div>
         <div>
+          <h4 className="font-medium text-foreground mb-2">Monto</h4>
+          <div className="flex items-center gap-2">
+            <Coins className="h-4 w-4 text-accent" />
+            <span className="text-sm font-medium">
               {editingInstallment.currency?.symbol} {editingInstallment.amount?.toLocaleString()}
             </span>
           </div>
         </div>
       </div>
       <div>
+        <h4 className="font-medium text-foreground mb-2">Descripción</h4>
+        <p className="text-sm text-muted-foreground">
           {editingInstallment.description || 'Sin descripción'}
         </p>
       </div>
@@ -320,6 +332,10 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const editPanel = () => {
     if (isLoading) {
       return (
+        <div className="space-y-4">
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+            <p className="text-sm text-muted-foreground mt-2">Cargando datos del formulario...</p>
           </div>
         </div>
       )
@@ -327,7 +343,9 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
     return (
       <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* 1. Creador - Fecha (inline) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="created_by"
@@ -358,14 +376,18 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
+                          <div className="relative">
                             <Input
                               placeholder="Seleccionar fecha"
                               value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                              className="pl-10"
                               readOnly
                             />
+                            <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                           </div>
                         </FormControl>
                       </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
@@ -385,6 +407,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           </div>
 
           {/* 2. Cliente - Concepto (inline) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="contact_id"
@@ -439,6 +462,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           </div>
 
         {/* 5. Moneda - Billetera */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="currency_id"
@@ -491,6 +515,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         </div>
 
         {/* 6. Monto - Cotización */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="amount"

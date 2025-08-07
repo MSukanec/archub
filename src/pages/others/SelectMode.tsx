@@ -134,13 +134,24 @@ export default function SelectMode() {
 
 
   return (
+    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
         {/* Mode selection card */}
+        <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
+          <CardHeader className="text-center pb-4">
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 rounded-lg bg-[var(--accent)] text-white">
+                <CheckCircle className="h-8 w-8" />
               </div>
             </div>
+            <CardTitle className="text-2xl font-bold">Elegir modo de uso</CardTitle>
+            <CardDescription className="text-base">
               Elige cómo planeas usar Archub para personalizar tu experiencia. Luego puedes cambiarlo.
             </CardDescription>
           </CardHeader>
           
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {modeOptions.map((mode) => {
                 const Icon = mode.icon;
                 const isSelected = selectedMode === mode.type;
@@ -159,12 +170,20 @@ export default function SelectMode() {
                     `}
                     onClick={() => isAvailable && !isLoading && !hasFinished && handleModeSelect(mode.type)}
                   >
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
                         <div className={`p-2 rounded-lg ${mode.color} text-white`}>
+                          <Icon className="h-5 w-5" />
                         </div>
                         {(isLoading || hasFinished) && isSelected && (
+                          <div className="flex items-center text-blue-600 dark:text-blue-400">
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            <span className="text-xs font-medium">Guardando...</span>
                           </div>
                         )}
                       </div>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
                           {mode.title}
                         </CardTitle>
                         <HelpPopover
@@ -176,6 +195,8 @@ export default function SelectMode() {
                         />
                       </div>
                     </CardHeader>
+                    <CardContent className="pt-0">
+                      <CardDescription className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                         {mode.description}
                       </CardDescription>
                     </CardContent>

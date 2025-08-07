@@ -2139,11 +2139,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const viewPanel = editingMovement ? (
     <>
       <div>
+        <h4 className="font-medium">Creador</h4>
+        <p className="text-muted-foreground mt-1">
           {selectedCreator ? selectedCreator.user?.full_name || 'Sin nombre' : 'Sin creador'}
         </p>
       </div>
       
       <div>
+        <h4 className="font-medium">Fecha</h4>
+        <p className="text-muted-foreground mt-1">
           {editingMovement.movement_date ? 
             format(new Date(editingMovement.movement_date), 'PPP', { locale: es }) : 
             'Sin fecha'
@@ -2152,21 +2156,29 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       </div>
 
       <div>
+        <h4 className="font-medium">Tipo</h4>
+        <p className="text-muted-foreground mt-1">
           {selectedConcept?.name || 'Sin tipo'}
         </p>
       </div>
 
       <div>
+        <h4 className="font-medium">Moneda</h4>
+        <p className="text-muted-foreground mt-1">
           {selectedCurrency?.name || 'Sin moneda'}
         </p>
       </div>
 
       <div>
+        <h4 className="font-medium">Billetera</h4>
+        <p className="text-muted-foreground mt-1">
           {selectedWallet?.name || 'Sin billetera'}
         </p>
       </div>
 
       <div>
+        <h4 className="font-medium">Monto</h4>
+        <p className="text-muted-foreground mt-1">
           {editingMovement.amount ? 
             `${selectedCurrency?.symbol || '$'} ${editingMovement.amount.toLocaleString()}` : 
             'Sin monto'
@@ -2176,11 +2188,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
       {editingMovement.exchange_rate && (
         <div>
+          <h4 className="font-medium">Cotización</h4>
+          <p className="text-muted-foreground mt-1">{editingMovement.exchange_rate}</p>
         </div>
       )}
 
       {editingMovement.description && (
         <div>
+          <h4 className="font-medium">Descripción</h4>
+          <p className="text-muted-foreground mt-1">{editingMovement.description}</p>
         </div>
       )}
     </>
@@ -2195,8 +2211,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isEditingSubcontratos = editingMovement && editingMovement.subcategory_id === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
 
   const editPanel = (
+    <div className="space-y-4">
       {/* Campos centralizados: Fecha y Tipo de Movimiento */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Fecha */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Fecha *
           </label>
           <DatePicker
@@ -2219,6 +2239,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         </div>
 
         {/* Tipo de Movimiento (Selector en Cascada) */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Tipo de Movimiento *
           </label>
           <CascadingSelect
@@ -2308,12 +2330,15 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               setMovementType(detectedFormType)
             }}
             placeholder="Tipo > Categoría > Subcategoría..."
+            className="w-full"
           />
         </div>
       </div>
 
       {/* Selector de proyecto - Solo mostrar en modo GENERAL (sin proyecto activo) */}
       {!userData?.preferences?.last_project_id && !editingMovement && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Proyecto
           </label>
           <Select 
@@ -2328,12 +2353,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="general">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-gray-400"></div>
                   <span>General</span>
                 </div>
               </SelectItem>
               {projects?.map((project) => (
                 <SelectItem key={project.id} value={project.id}>
+                  <div className="flex items-center gap-2">
                     <div 
+                      className="w-2 h-2 rounded-full" 
                       style={{ backgroundColor: project.color || '#000000' }}
                     ></div>
                     <span>{project.name}</span>
@@ -2348,6 +2377,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
 
       {/* Campo de Descripción - COMÚN para todos los formularios */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Descripción (opcional)
         </label>
         <Textarea
@@ -2366,6 +2397,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             conversionForm.setValue('description', value)
             transferForm.setValue('description', value)
           }}
+          className="text-sm placeholder:text-sm"
         />
       </div>
 
@@ -2393,6 +2425,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         </Form>
       ) : (isAportes || isEditingAportes) ? (
         <Form {...aportesForm}>
+          <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
             <AportesFields
               form={aportesForm}
               currencies={currencies || []}
@@ -2406,6 +2439,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       ) : (isAportesPropios || isEditingAportesPropios) ? (
         // FORMULARIO DE APORTES PROPIOS
         <Form {...aportesPropriosForm}>
+          <form onSubmit={aportesPropriosForm.handleSubmit(onSubmitAportesPropios)} className="space-y-4">
             <AportesPropiosFields
               form={aportesPropriosForm}
               currencies={currencies || []}
@@ -2418,6 +2452,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       ) : (isRetirosPropios || isEditingRetirosPropios) ? (
         // FORMULARIO DE RETIROS PROPIOS
         <Form {...retirosPropriosForm}>
+          <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
             <RetirosPropiosFields
               form={retirosPropriosForm}
               currencies={currencies || []}
@@ -2430,6 +2465,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       ) : (isSubcontratos || isEditingSubcontratos) ? (
         // FORMULARIO DE SUBCONTRATOS
         <Form {...subcontratosForm}>
+          <form onSubmit={subcontratosForm.handleSubmit(onSubmitSubcontratos)} className="space-y-4">
             <SubcontratosFields
               form={subcontratosForm}
               currencies={currencies || []}
@@ -2446,6 +2482,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       ) : isMateriales ? (
         // FORMULARIO DE MATERIALES
         <Form {...materialesForm}>
+          <form onSubmit={materialesForm.handleSubmit(onSubmitMateriales)} className="space-y-4">
             <MaterialesFields
               form={materialesForm}
               currencies={currencies || []}
@@ -2462,9 +2499,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       ) : (
         // FORMULARIO NORMAL
         <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
 
 
             {/* Fila: Moneda | Billetera */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="currency_id"
@@ -2517,6 +2556,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             </div>
 
             {/* Fila: Monto | Cotización */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="amount"
@@ -2524,11 +2564,14 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   <FormItem>
                     <FormLabel>Monto *</FormLabel>
                     <FormControl>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
                           type="number" 
                           step="0.01"
                           min="0"
                           placeholder="0.00"
+                          className="pl-10"
                           value={field.value || ''}
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -2580,7 +2623,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         <Button
           variant="ghost"
           onClick={closeSubform}
+          className="flex items-center gap-2"
         >
+          <ArrowLeft className="h-4 w-4" />
           Volver
         </Button>
       }
@@ -2594,6 +2639,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           <button
             type="button"
             onClick={() => setPanel('view')}
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             ← Volver
           </button>
@@ -2611,7 +2657,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 description: `Subcontrato: ${selectedSubcontractId ? 'Seleccionado' : 'No seleccionado'}`
               })
             }}
+            className="flex items-center gap-2"
           >
+            <Info className="h-4 w-4" />
           </Button>
         ) : undefined
       }
@@ -2656,11 +2704,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   // Subform para selección de tareas
   const tasksSubform = (
+    <div className="space-y-6">
       {isTasksLoading ? (
+        <div className="flex items-center justify-center h-48">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">Cargando datos...</p>
           </div>
         </div>
       ) : (
+        <div className="space-y-4">
           {/* Campo de Subcontrato */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-foreground">
               Subcontrato
             </label>
             <ComboBoxWrite
@@ -2673,6 +2729,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </div>
           
+          <p className="text-xs text-muted-foreground">
             Configura el subcontrato relacionado con este pago
           </p>
         </div>
@@ -2693,12 +2750,17 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   // Si los datos aún están cargando, mostrar estado de carga
   if (isDataLoading) {
     const loadingViewPanel = (
+      <div className="flex items-center justify-center h-48">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Cargando datos del formulario...</p>
         </div>
       </div>
     )
 
     const loadingHeaderContent = (
       <FormModalHeader
+        title="Nuevo Movimiento"
         icon={DollarSign}
       />
     )

@@ -57,7 +57,10 @@ export function TableTopBar({
   };
 
   return (
+    <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+      <div className="flex items-center justify-between px-4 py-3">
         {/* Lado izquierdo - Tabs (solo texto) */}
+        <div className="flex items-center gap-1">
           {tabs.map((tab) => (
             <Button
               key={tab}
@@ -75,9 +78,11 @@ export function TableTopBar({
         </div>
 
         {/* Lado derecho - Búsqueda, Orden, Filtros (solo iconos) */}
+        <div className="flex items-center gap-1">
           {/* Buscador expandible */}
           {showSearch && (
             <div 
+              className="relative flex items-center"
               onMouseLeave={() => {
                 if (isSearchExpanded && !searchFocused) {
                   setIsSearchExpanded(false);
@@ -120,6 +125,7 @@ export function TableTopBar({
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="absolute right-0 h-8 w-8 p-0 hover:bg-transparent"
                     onClick={() => {
                       setIsSearchExpanded(!isSearchExpanded);
                       if (!isSearchExpanded) {
@@ -127,6 +133,7 @@ export function TableTopBar({
                       }
                     }}
                   >
+                    <Search className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -145,8 +152,10 @@ export function TableTopBar({
                     isSortActive ? "button-secondary-pressed" : ""
                   )}
                 >
+                  <ArrowUpDown className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
                 {renderSortContent()}
               </PopoverContent>
             </Popover>
@@ -164,8 +173,10 @@ export function TableTopBar({
                     isFilterActive ? "button-secondary-pressed" : ""
                   )}
                 >
+                  <Filter className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
                 {renderFilterContent()}
               </PopoverContent>
             </Popover>
@@ -176,8 +187,11 @@ export function TableTopBar({
             <Button
               variant="ghost"
               size="sm"
+              className="h-8 w-8 p-0"
               onClick={onClearFilters}
+              title="Limpiar filtros"
             >
+              <X className="h-4 w-4" />
             </Button>
           )}
         </div>

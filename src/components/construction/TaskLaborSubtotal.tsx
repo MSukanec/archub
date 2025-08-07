@@ -18,9 +18,11 @@ export default function TaskLaborSubtotal({ task }: TaskLaborSubtotalProps) {
   }
 
   if (subtotal === 0) {
+    return <span className="text-xs text-muted-foreground">–</span>
   }
 
   return (
+    <span className="text-xs font-medium text-foreground">
       {formatCost(subtotal)}
     </span>
   )

@@ -68,45 +68,63 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
   }));
 
   return (
+    <div className="relative">
+      <Card className="min-w-[250px] max-w-[300px] border-2 shadow-lg bg-white">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold flex-1">
               {parameter.label}
             </CardTitle>
+            <div className="flex items-center gap-1 ml-2">
               <Button
                 size="sm"
                 variant="ghost"
+                className="h-6 w-6 p-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDuplicate(parameter.id);
                 }}
+                title="Duplicar parámetro"
               >
+                <Copy className="h-3 w-3" />
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
+                className="h-6 w-6 p-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(parameter.id);
                 }}
+                title="Editar parámetro"
               >
+                <Edit className="h-3 w-3" />
               </Button>
               {hasParentDependencies && onConfigureVisibility && (
                 <Button
                   size="sm"
                   variant="ghost"
+                  className="h-6 w-6 p-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     onConfigureVisibility(parameter.id);
                   }}
+                  title="Configurar visibilidad por opción"
                 >
+                  <Settings className="h-3 w-3" />
                 </Button>
               )}
               <Button
                 size="sm"
                 variant="ghost"
+                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(id);
                 }}
+                title="Borrar parámetro"
               >
+                <Trash2 className="h-3 w-3" />
               </Button>
             </div>
           </div>
@@ -115,13 +133,17 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
             value={visibleOptions}
             onChange={onVisibleOptionsChange}
             placeholder="Seleccionar opciones..."
+            className="text-xs w-full"
             maxDisplay={2}
           />
         </CardHeader>
+        <CardContent className="pt-0 space-y-1">
           {visibleOptionsList.map((option, index) => (
             <div
               key={option.id}
+              className="relative flex items-center py-1 px-2 rounded bg-muted/50 text-xs"
             >
+              <span className="truncate pr-4">{option.label}</span>
               {/* Handle de salida al nivel del borde */}
               <Handle
                 type="source"
@@ -470,8 +492,11 @@ function AddParameterButton() {
   return (
     <Button 
       onClick={handleAddParameter}
+      className="absolute top-4 right-4 z-10 rounded-full w-10 h-10 p-0"
       size="sm"
+      title="Agregar parámetro al canvas"
     >
+      <Plus className="w-4 h-4" />
     </Button>
   );
 }
@@ -964,6 +989,10 @@ function AddParameterButton() {
 
   if (parametersLoading || dependenciesLoading) {
     return (
+      <div className="flex items-center justify-center h-[500px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando editor visual...</p>
         </div>
       </div>
     );
@@ -972,7 +1001,9 @@ function AddParameterButton() {
   console.log('DEBUG - Parameters:', parametersData.length, 'Dependencies:', dependencies.length, 'Nodes:', nodes.length, 'Edges:', edges.length);
 
   return (
+    <div className="space-y-4">
       {/* Canvas de React Flow */}
+      <div className="h-[600px] border rounded-lg overflow-hidden relative" style={{ backgroundColor: 'var(--card-bg)' }}>
         {/* Botón flotante para agregar parámetros */}
         <AddParameterButton />
         
@@ -1073,6 +1104,7 @@ function AddParameterButton() {
       </div>
       
       {/* Debug info */}
+      <div className="text-xs text-muted-foreground">
         Nodos: {nodes.length} | Conexiones: {edges.length} | Dependencias en BD: {dependencies.length}
       </div>
       
@@ -1100,6 +1132,7 @@ function AddParameterButton() {
                 setShowDeleteDialog(false);
                 setSelectedEdge(null);
               }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
             </AlertDialogAction>

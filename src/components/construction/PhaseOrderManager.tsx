@@ -53,6 +53,7 @@ export function PhaseOrderManager({
   const sortedPhases = [...phases].sort((a, b) => a.position - b.position)
 
   return (
+    <div className="space-y-4">
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="phases">
           {(provided, snapshot) => (
@@ -82,20 +83,28 @@ export function PhaseOrderManager({
                           : 'hover:shadow-md'
                       } ${isUpdating ? 'opacity-50' : ''}`}
                     >
+                      <div className="flex items-center gap-3">
                         {/* Drag Handle */}
                         <div
                           {...provided.dragHandleProps}
+                          className="flex-shrink-0 p-2 -ml-2 rounded cursor-grab active:cursor-grabbing hover:bg-muted/50"
                         >
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
                         </div>
                         
                         {/* Position Badge */}
+                        <Badge variant="outline" className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium">
                           {phase.position}
                         </Badge>
                         
                         {/* Phase Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium text-sm truncate">
                               {phase.name}
                             </h3>
                             {phase.taskCount !== undefined && (
+                              <Badge variant="secondary" className="text-xs">
                                 {phase.taskCount} tareas
                               </Badge>
                             )}
@@ -103,12 +112,14 @@ export function PhaseOrderManager({
                         </div>
                         
                         {/* Actions */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(phase)}
                             disabled={isUpdating}
                           >
+                            <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -116,6 +127,7 @@ export function PhaseOrderManager({
                             onClick={() => onDelete(phase.project_phase_id || phase.id)}
                             disabled={isUpdating}
                           >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -126,6 +138,9 @@ export function PhaseOrderManager({
               {provided.placeholder}
               
               {sortedPhases.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="text-sm">No hay fases en este proyecto</div>
+                  <div className="text-xs mt-1">Arrastra y suelta para reordenar las fases</div>
                 </div>
               )}
             </div>
@@ -134,6 +149,7 @@ export function PhaseOrderManager({
       </DragDropContext>
       
       {isUpdating && (
+        <div className="text-center text-sm text-muted-foreground">
           Actualizando orden de fases...
         </div>
       )}

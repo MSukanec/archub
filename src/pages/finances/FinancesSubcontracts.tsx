@@ -207,6 +207,7 @@ export default function FinancesSubcontracts() {
       key: 'title',
       label: 'Título',
       render: (subcontract: any) => (
+        <div className="font-medium">{subcontract.title}</div>
       )
     },
     {
@@ -221,6 +222,8 @@ export default function FinancesSubcontracts() {
         
         return (
           <div>
+            <div className="font-medium">{contactName}</div>
+            {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
           </div>
         );
       }
@@ -286,6 +289,7 @@ export default function FinancesSubcontracts() {
         
         // Evitar división por cero
         if (montoTotal === 0) {
+          return <span className="text-muted-foreground">-</span>;
         }
         
         // Calcular porcentaje: (pago_realizado / monto_total) * 100
@@ -375,6 +379,7 @@ export default function FinancesSubcontracts() {
         }
         
         return (
+          <Badge style={badgeStyle} className="border-0">
             {displayText}
           </Badge>
         );
@@ -385,9 +390,11 @@ export default function FinancesSubcontracts() {
       label: 'Acciones',
       sortable: false,
       render: (subcontract: any) => (
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => {
               openModal('subcontract', {
                 projectId: userData?.preferences?.last_project_id,
@@ -398,10 +405,12 @@ export default function FinancesSubcontracts() {
               });
             }}
           >
+            <Edit className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Subcontrato',
@@ -414,6 +423,7 @@ export default function FinancesSubcontracts() {
               });
             }}
           >
+            <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
         </div>
       )
@@ -427,6 +437,7 @@ export default function FinancesSubcontracts() {
       label: 'Subcontrato',
       width: '20%',
       render: (payment: any) => (
+        <div className="font-medium">{payment.subcontract_title}</div>
       )
     },
     {
@@ -442,6 +453,7 @@ export default function FinancesSubcontracts() {
       label: 'Proveedor',
       width: '16%',
       render: (payment: any) => (
+        <div className="font-medium">{payment.contact_name}</div>
       )
     },
     {
@@ -460,6 +472,8 @@ export default function FinancesSubcontracts() {
       label: 'Billetera',
       width: '12%',
       render: (payment: any) => (
+        <div className="flex items-center gap-2">
+          <Wallet className="w-4 h-4 text-muted-foreground" />
           {payment.wallet_name}
         </div>
       )
@@ -479,6 +493,7 @@ export default function FinancesSubcontracts() {
       label: 'T.C.',
       width: '8%',
       render: (payment: any) => (
+        <div className="text-sm text-muted-foreground">
           {payment.exchange_rate.toFixed(2)}
         </div>
       )
@@ -533,6 +548,7 @@ export default function FinancesSubcontracts() {
       wide={false}
       headerProps={headerProps}
     >
+      <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktopRow
           filters={[
@@ -560,6 +576,7 @@ export default function FinancesSubcontracts() {
         />
 
         {/* Gráfico de Pagos por Mes */}
+        <div className="grid grid-cols-4 gap-4">
           <SubcontractPaymentsChart
             data={paymentsChartData}
             isLoading={isLoading}
@@ -569,8 +586,11 @@ export default function FinancesSubcontracts() {
         </div>
 
         {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SubcontractKPICard
+            title="Valor Total Contratado"
             value={totalContractValue}
+            icon={<DollarSign className="h-4 w-4" />}
             color="var(--chart-positive)"
             isLoading={isLoading}
             formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
@@ -578,7 +598,9 @@ export default function FinancesSubcontracts() {
           />
           
           <SubcontractKPICard
+            title="Total Pagado"
             value={totalPaid}
+            icon={<CheckCircle className="h-4 w-4" />}
             color="var(--chart-2)"
             isLoading={isLoading}
             formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
@@ -586,7 +608,9 @@ export default function FinancesSubcontracts() {
           />
           
           <SubcontractKPICard
+            title="Diferencia"
             value={totalPending}
+            icon={<AlertTriangle className="h-4 w-4" />}
             color={totalPending > 0 ? "var(--chart-positive)" : totalPending < 0 ? "var(--chart-negative)" : "var(--chart-neutral)"}
             isLoading={isLoading}
             formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
@@ -598,13 +622,17 @@ export default function FinancesSubcontracts() {
         {activeTab === 'summary' && (
           filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
             <EmptyState
+              icon={<Package className="w-12 h-12 text-muted-foreground" />}
+              title="Aún no tienes subcontratos creados"
               description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
             />
           ) : (
+            <div className="space-y-4">
               <Table
                 columns={columns}
                 data={filteredSubcontracts}
                 isLoading={isLoading || isLoadingAnalysis}
+                className="bg-card"
                 defaultSort={{ key: 'title', direction: 'asc' }}
               />
             </div>
@@ -614,13 +642,17 @@ export default function FinancesSubcontracts() {
         {activeTab === 'payments' && (
           filteredPayments.length === 0 && !isLoadingPayments ? (
             <EmptyState
+              icon={<DollarSign className="w-12 h-12 text-muted-foreground" />}
+              title="Aún no hay pagos registrados"
               description="Los pagos a subcontratistas aparecerán aquí una vez que se registren movimientos financieros asociados a los subcontratos."
             />
           ) : (
+            <div className="space-y-4">
               <Table
                 columns={paymentsColumns}
                 data={filteredPayments}
                 isLoading={isLoadingPayments}
+                className="bg-card"
                 defaultSort={{ key: 'movement_date', direction: 'desc' }}
               />
             </div>

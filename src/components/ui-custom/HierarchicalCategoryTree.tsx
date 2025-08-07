@@ -86,6 +86,7 @@ export function HierarchicalCategoryTree({
     const hasIncompleteTemplates = templateCompletion.total > 0 && templateCompletion.completed < templateCompletion.total;
     
     return (
+      <div key={category.id} className="w-full">
         {/* Category Item */}
         <div 
           className={`group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors cursor-pointer ${
@@ -95,21 +96,32 @@ export function HierarchicalCategoryTree({
           onClick={() => hasChildCategories && onToggleExpanded(category.id)}
         >
           {/* Left side: Chevron + Category info */}
+          <div className="flex items-center space-x-2 flex-1">
             {/* Chevron or placeholder */}
             {hasChildCategories ? (
+              <div className="h-5 w-5 flex items-center justify-center">
                 {isExpanded ? (
+                  <ChevronDown className="h-3 w-3" />
                 ) : (
+                  <ChevronRight className="h-3 w-3" />
                 )}
               </div>
             ) : (
+              <div className="w-5 flex justify-center">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
               </div>
             )}
             
             {/* Category name and badges */}
+            <div className="flex items-center space-x-2 flex-1">
+              <span className="text-sm font-medium text-foreground">{category.name}</span>
               {category.code && (
+                <div className="flex items-center space-x-1">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5">
                     {category.code}
                   </Badge>
                   {templateCompletion.total > 0 && (
+                    <span className="text-xs text-muted-foreground">
                       ({templateCompletion.completed}/{templateCompletion.total})
                     </span>
                   )}
@@ -120,13 +132,17 @@ export function HierarchicalCategoryTree({
           </div>
           
           {/* Right side: Action buttons - +, EDITAR, BORRAR */}
+          <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             {/* Botón + para crear categoría hija (siempre visible) */}
             {onCreateChild && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onCreateChild(category)}
+                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                title="Crear categoría hija"
               >
+                <Plus className="h-3 w-3" />
               </Button>
             )}
             
@@ -136,7 +152,10 @@ export function HierarchicalCategoryTree({
                 variant="ghost"
                 size="sm"
                 onClick={() => onAddTaskGroup(category)}
+                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                title="Agregar Grupo de Tareas"
               >
+                <Layers className="h-3 w-3" />
               </Button>
             )}
             
@@ -144,20 +163,27 @@ export function HierarchicalCategoryTree({
               variant="ghost"
               size="sm"
               onClick={() => onEdit(category)}
+              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              title="Editar"
             >
+              <Edit className="h-3 w-3" />
             </Button>
             
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onDelete(category.id)}
+              className="h-6 w-6 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+              title="Eliminar"
             >
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </div>
         
         {/* Children */}
         {hasChildCategories && isExpanded && (
+          <div className="mt-1">
             <HierarchicalCategoryTree
               categories={category.children!}
               expandedCategories={expandedCategories}
@@ -177,19 +203,27 @@ export function HierarchicalCategoryTree({
 
         {/* Task Groups - 4th level (show for 3rd level categories with 3-letter codes) */}
         {category.code && category.code.length === 3 && category.taskGroups && category.taskGroups.length > 0 && isExpanded && (
+          <div className="mt-1">
             {category.taskGroups.map(taskGroup => (
               <div 
                 key={taskGroup.id}
+                className="flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/30 transition-colors border-l-2 border-accent bg-accent/10"
                 style={{ marginLeft: `${(currentLevel + 1) * 24}px` }}
               >
                 {/* Left side: Task group info */}
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="w-5 flex justify-center">
+                    <Layers className="w-3 h-3 text-accent" />
                   </div>
                   
+                  <div className="flex items-center space-x-2 flex-1">
+                    <span className="text-sm font-medium text-accent">{taskGroup.name}</span>
 
                   </div>
                 </div>
                 
                 {/* Right side: Task group actions - SAME AS CATEGORIES */}
+                <div className="flex items-center space-x-1">
 
 
                   {onEditTaskGroup && (
@@ -197,7 +231,10 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onEditTaskGroup(taskGroup, category)}
+                      className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                      title="Editar"
                     >
+                      <Edit className="h-3 w-3" />
                     </Button>
                   )}
                   
@@ -206,7 +243,10 @@ export function HierarchicalCategoryTree({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDeleteTaskGroup(taskGroup.id)}
+                      className="h-6 w-6 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                      title="Eliminar"
                     >
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   )}
                 </div>
@@ -219,6 +259,7 @@ export function HierarchicalCategoryTree({
   };
   
   return (
+    <div className="space-y-1">
       {categories.map(category => renderCategory(category, level))}
     </div>
   );

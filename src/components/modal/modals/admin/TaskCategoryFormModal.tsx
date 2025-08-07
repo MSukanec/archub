@@ -94,12 +94,15 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
   const viewPanel = null; // No view mode needed for this modal
 
   const editPanel = (
+    <div className="space-y-6">
       <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Single parent selector for both create and edit */}
           <FormField
             control={form.control}
             name="parent_id"
             render={({ field }) => (
+              <FormItem className="flex flex-col">
                 <FormLabel>Categoría Padre</FormLabel>
                 <FormControl>
                   <CustomCombobox

@@ -95,13 +95,26 @@ export function ProjectRecentActivity({ projectId }: ProjectRecentActivityProps)
 
   if (isLoading) {
     return (
+      <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-[var(--accent)]" />
+            <CardTitle className="text-foreground">Actividad Reciente</CardTitle>
           </div>
+          <p className="text-sm text-muted-foreground">
             Últimas actividades del proyecto
           </p>
         </CardHeader>
         <CardContent>
+          <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center space-x-3">
+                <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-4 w-32 bg-gray-200 animate-pulse rounded" />
+                  <div className="h-3 w-24 bg-gray-200 animate-pulse rounded" />
                 </div>
+                <div className="h-3 w-16 bg-gray-200 animate-pulse rounded" />
               </div>
             ))}
           </div>
@@ -111,29 +124,49 @@ export function ProjectRecentActivity({ projectId }: ProjectRecentActivityProps)
   }
 
   return (
+    <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-[var(--accent)]" />
+          <CardTitle className="text-foreground">Actividad Reciente</CardTitle>
         </div>
+        <p className="text-sm text-muted-foreground">
           Últimas actividades del proyecto
         </p>
       </CardHeader>
       <CardContent>
         {!recentActivity || recentActivity.length === 0 ? (
+          <div className="text-center py-8">
+            <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-medium mb-2 text-foreground">Sin actividad reciente</h3>
+            <p className="text-sm text-muted-foreground">
               La actividad del proyecto aparecerá aquí
             </p>
           </div>
         ) : (
+          <div className="space-y-4">
             {recentActivity.map((activity) => (
+              <div key={`${activity.type}-${activity.id}`} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent/5 transition-colors">
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={activity.creator?.avatar_url} />
+                  <AvatarFallback className="text-xs bg-[var(--accent)] text-[var(--accent-foreground)]">
                     {activity.creator?.full_name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-medium truncate text-foreground">{activity.title}</p>
                   </div>
                   {activity.description && (
+                    <p className="text-xs text-muted-foreground truncate">
                       {activity.description}
                     </p>
                   )}
+                  <p className="text-xs text-muted-foreground mt-1">
                     {format(activity.date, "d 'de' MMMM 'a las' HH:mm", { locale: es })}
                   </p>
                 </div>
+                <activity.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </div>
             ))}
           </div>

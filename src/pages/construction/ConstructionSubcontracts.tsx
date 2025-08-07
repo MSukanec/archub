@@ -74,18 +74,24 @@ export default function ConstructionSubcontracts() {
     if (currencyView === 'discriminado') {
       const symbol = originalCurrency === 'USD' ? 'USD' : 'ARS';
       return (
+        <div className="text-left">
+          <div className="font-medium">
             {symbol} {convertedAmount.toLocaleString('es-AR')}
           </div>
         </div>
       );
     } else if (currencyView === 'pesificado') {
       return (
+        <div className="text-left">
+          <div className="font-medium">
             ARS {convertedAmount.toLocaleString('es-AR')}
           </div>
         </div>
       );
     } else { // dolarizado
       return (
+        <div className="text-left">
+          <div className="font-medium">
             USD {Math.round(convertedAmount).toLocaleString('es-AR')}
           </div>
         </div>
@@ -113,6 +119,7 @@ export default function ConstructionSubcontracts() {
       label: 'Título',
       width: '15%',
       render: (subcontract: any) => (
+        <div className="font-medium">{subcontract.title}</div>
       )
     },
     {
@@ -134,6 +141,7 @@ export default function ConstructionSubcontracts() {
       render: (subcontract: any) => {
         const contact = subcontract.contact;
         if (!contact) {
+          return <span className="text-muted-foreground">Sin proveedor</span>;
         }
         
         // Usar full_name si existe, sino construir con first_name y last_name
@@ -143,6 +151,8 @@ export default function ConstructionSubcontracts() {
         
         return (
           <div>
+            <div className="font-medium">{contactName}</div>
+            {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
           </div>
         );
       }
@@ -191,9 +201,11 @@ export default function ConstructionSubcontracts() {
       width: '14%',
       sortable: false,
       render: (subcontract: any) => (
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => {
               openModal('subcontract', {
                 projectId: userData?.preferences?.last_project_id,
@@ -204,10 +216,12 @@ export default function ConstructionSubcontracts() {
               });
             }}
           >
+            <Edit className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Subcontrato',
@@ -220,6 +234,7 @@ export default function ConstructionSubcontracts() {
               });
             }}
           >
+            <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
         </div>
       )
@@ -258,11 +273,14 @@ export default function ConstructionSubcontracts() {
     showFilter: true,
     isFilterActive: currencyView !== 'discriminado',
     renderFilterContent: () => (
+      <div className="space-y-3 p-2 min-w-[200px]">
         <div>
+          <Label className="text-xs font-medium mb-1 block">Moneda</Label>
           <Select 
             value={currencyView} 
             onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
           >
+            <SelectTrigger className="h-8 text-xs">
               <SelectValue placeholder="Seleccionar moneda" />
             </SelectTrigger>
             <SelectContent>
@@ -284,6 +302,8 @@ export default function ConstructionSubcontracts() {
     <Layout wide={true} headerProps={headerProps}>
       {filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
         <EmptyState
+          icon={<Package className="w-12 h-12 text-muted-foreground" />}
+          title="Aún no tienes subcontratos creados"
           description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
         />
       ) : (

@@ -60,6 +60,7 @@ export function FolderComboBox({
       allowCreate={true}
       onCreateNew={handleCreateFolder}
       createLabel={(value) => `Crear "${value}"`}
+      createIcon={<FolderPlus className="h-4 w-4" />}
     />
   );
 }

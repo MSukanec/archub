@@ -43,14 +43,17 @@ export default function SwipeableCard({
   const defaultActions: SwipeAction[] = [
     {
       label: "Favorito",
+      icon: <Star className="w-2 h-2" />,
       onClick: onFavorite || (() => {}),
     },
     {
       label: "Editar",
+      icon: <Edit className="w-2 h-2" />,
       onClick: onEdit || (() => {}),
     },
     {
       label: "Eliminar",
+      icon: <Trash2 className="w-2 h-2" />,
       variant: "destructive",
       onClick: onDelete || (() => {}),
     },
@@ -91,8 +94,10 @@ export default function SwipeableCard({
   }
 
   return (
+    <div className="relative overflow-hidden">
       {/* Acciones detrás del contenido */}
       <motion.div
+        className="absolute right-0 top-0 bottom-0 flex"
         style={{ opacity: actionOpacity, scale: actionScale }}
       >
         {finalActions.map((action, index) => (
@@ -114,6 +119,7 @@ export default function SwipeableCard({
             onClick={() => handleActionClick(action)}
           >
             {action.icon}
+            <span className="text-xs">{action.label}</span>
           </Button>
         ))}
       </motion.div>
@@ -125,6 +131,7 @@ export default function SwipeableCard({
         dragElastic={0}
         onDragEnd={handleDragEnd}
         style={{ x }}
+        className="relative bg-background z-10"
         transition={{ type: "spring", damping: 30, stiffness: 600, duration: 0.2 }}
       >
         {children}

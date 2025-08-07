@@ -394,6 +394,7 @@ export function GanttContainer({
 
   if (data.length === 0) {
     return (
+      <div className="border border-border rounded-lg p-8 text-center text-muted-foreground">
         No hay fases o tareas para mostrar
       </div>
     );
@@ -420,8 +421,10 @@ export function GanttContainer({
   }, [data, collapsedPhases]);
 
   return (
+    <div className="relative border border-border rounded-lg overflow-hidden bg-card">
       {/* Handle de redimensionamiento unificado (de punta a punta vertical desde encabezado) */}
       <div 
+        className="absolute w-3 cursor-col-resize bg-transparent hover:bg-[var(--accent)] hover:opacity-40 transition-colors z-50 hover:border-l-2 hover:border-[var(--accent)]"
         style={{ 
           left: leftPanelWidth - 2,
           top: 0,
@@ -431,27 +434,34 @@ export function GanttContainer({
       />
       
       {/* Encabezado unificado */}
+      <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
         {/* Encabezado del panel izquierdo - FIJO */}
         <div 
+          className="border-r border-[var(--table-header-border)] flex-shrink-0 h-14 flex bg-[var(--table-header-bg)]"
           style={{ width: leftPanelWidth }}
         >
           {/* Columna Fase/Tarea - ancho calculado */}
+          <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30"
             style={{ width: `${leftPanelWidth - 225}px` }}>
             Fase / Tarea
           </div>
           {/* Columna Cantidad - 75px fijo */}
+          <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
             Cantidad
           </div>
           {/* Columna Inicio - 75px fijo */}
+          <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30">
             Inicio
           </div>
           {/* Columna Días - 75px fijo */}
+          <div className="w-[75px] px-1 flex items-center justify-center font-medium text-xs text-[var(--table-header-fg)]">
             Días
           </div>
         </div>
 
         {/* Encabezado de fechas POR SEMANAS - SCROLL INVISIBLE */}
         <div 
+          className="flex-1 overflow-x-auto" 
           id="timeline-header-scroll"
           style={{
             scrollbarWidth: 'none',
@@ -474,6 +484,7 @@ export function GanttContainer({
           </style>
           <div style={{ width: timelineWidth }}>
             {/* Fila superior: Meses - GROUPED BY ACTUAL MONTHS */}
+            <div className="flex h-6">
               {(() => {
                 const monthGroups: Array<{ monthLabel: string; dayCount: number }> = [];
                 let currentMonth = '';
@@ -504,6 +515,7 @@ export function GanttContainer({
                 return monthGroups.map((month, index) => (
                   <div 
                     key={`month-${index}`}
+                    className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
                     style={{ width: month.dayCount * dayWidth }}
                   >
                     {month.monthLabel}
@@ -513,6 +525,7 @@ export function GanttContainer({
             </div>
             
             {/* Fila inferior: Días de la semana + número - INDIVIDUAL DAYS TO MATCH BARS */}
+            <div className="flex h-8 border-t border-[var(--table-header-border)]">
               {calendarStructure.weeks.map((week) => 
                 week.days.map((day: any, dayIndex: number) => {
                   const today = new Date();
@@ -541,14 +554,17 @@ export function GanttContainer({
       </div>
 
       {/* Contenido principal */}
+      <div className="relative flex">
         {/* Panel Izquierdo - FIJO (sin scroll horizontal) */}
         <div 
+          className="border-r border-border flex-shrink-0 overflow-hidden"
           style={{ 
             width: leftPanelWidth,
             backgroundColor: 'var(--table-header-bg)'
           }}
         >
           {/* Contenido del panel izquierdo */}
+          <div className="overflow-x-hidden">
             {filteredData.map((item) => (
               <div 
                 key={`left-${item.id}`} 
@@ -559,7 +575,9 @@ export function GanttContainer({
                 onMouseLeave={() => setHoveredRowId(null)}
               >
                 {item.isHeader ? (
+                  <div className="bg-muted/30 w-full h-full flex relative">
                     {/* Columna Nombre - ancho calculado */}
+                    <div className="flex items-center px-4 border-r border-[var(--table-header-border)]/30 overflow-hidden"
                       style={{ width: `${leftPanelWidth - 225}px` }}>
                       {/* Icono de colapso para fases header */}
                       {item.type === 'phase' && (
@@ -568,26 +586,33 @@ export function GanttContainer({
                             e.stopPropagation();
                             togglePhaseCollapse(item.id);
                           }}
+                          className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
                         >
                           {collapsedPhases.has(item.id) ? (
+                            <ChevronRight className="w-3 h-3 text-foreground" />
                           ) : (
+                            <ChevronDown className="w-3 h-3 text-foreground" />
                           )}
                         </button>
                       )}
+                      <span className="text-xs text-foreground font-medium uppercase leading-tight line-clamp-2" title={item.name}>
                         {item.name}
                       </span>
                     </div>
                     
                     {/* Columna Cantidad - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {/* Las fases no muestran cantidad */}
                     </div>
                     
                     {/* Columna Inicio - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {(() => {
                         if (item.type === 'phase') {
                           const { startDate, isValid } = calculateResolvedEndDate(item);
                           if (isValid && startDate) {
                             return (
+                              <span className="text-xs text-foreground font-medium">
                                 {format(startDate, 'dd/MM/yy', { locale: es })}
                               </span>
                             );
@@ -597,6 +622,7 @@ export function GanttContainer({
                           const dateStr = item.startDate;
                           const localDate = dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T00:00:00');
                           return (
+                            <span className="text-xs text-foreground font-medium">
                               {format(localDate, 'dd/MM/yy', { locale: es })}
                             </span>
                           );
@@ -606,12 +632,14 @@ export function GanttContainer({
                     </div>
                     
                     {/* Columna Días - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center">
                       {(() => {
                         if (item.type === 'phase') {
                           const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
                           if (isValid && startDate && resolvedEndDate) {
                             const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                             return (
+                              <span className="text-xs text-foreground font-medium">
                                 {durationInDays}
                               </span>
                             );
@@ -624,6 +652,7 @@ export function GanttContainer({
                           const localEndDate = endStr.includes('T') ? new Date(endStr) : new Date(endStr + 'T00:00:00');
                           const durationInDays = Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                           return (
+                            <span className="text-xs text-foreground font-medium">
                               {durationInDays}
                             </span>
                           );
@@ -634,13 +663,17 @@ export function GanttContainer({
                     
                     {/* Botones de acción flotantes para fases header */}
                     {item.type === 'phase' && (onItemEdit || onItemDelete) && hoveredRowId === item.id && (
+                      <div className="absolute right-[152px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onItemEdit && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onItemEdit(item);
                             }}
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            title="Editar fase"
                           >
+                            <Edit className="w-3 h-3" />
                           </button>
                         )}
                         {onItemDelete && (
@@ -649,16 +682,21 @@ export function GanttContainer({
                               e.stopPropagation();
                               onItemDelete(item);
                             }}
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            title="Eliminar fase"
                           >
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         )}
                       </div>
                     )}
                   </div>
                 ) : (
+                  <div className="group w-full h-full flex cursor-pointer transition-colors relative"
                     onClick={() => onItemClick?.(item)}
                   >
                     {/* Columna Nombre - ancho calculado */}
+                    <div className="flex items-center border-r border-[var(--table-header-border)]/30 overflow-hidden"
                       style={{ 
                         width: `${leftPanelWidth - 225}px`,
                         paddingLeft: `${4 + item.level * 16}px`, 
@@ -672,15 +710,19 @@ export function GanttContainer({
                             e.stopPropagation();
                             togglePhaseCollapse(item.id);
                           }}
+                          className="mr-2 p-0.5 rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors flex-shrink-0"
                         >
                           {collapsedPhases.has(item.id) ? (
+                            <ChevronRight className="w-3 h-3 text-[var(--table-row-fg)]" />
                           ) : (
+                            <ChevronDown className="w-3 h-3 text-[var(--table-row-fg)]" />
                           )}
                         </button>
                       )}
                       
                       {/* Text - ocupando todo el ancho disponible */}
                       <span 
+                        className="text-xs text-[var(--table-row-fg)] flex-1 leading-tight line-clamp-2"
                         title={item.name}
                       >
                         {item.name}
@@ -688,18 +730,22 @@ export function GanttContainer({
                     </div>
                     
                     {/* Columna Cantidad - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {item.type === 'task' && item.taskData?.quantity && item.taskData?.unit_name && (
+                        <span className="text-xs text-[var(--table-row-fg)]">
                           {item.taskData.quantity} {item.taskData.unit_name}
                         </span>
                       )}
                     </div>
                     
                     {/* Columna Inicio - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
                       {(() => {
                         if (item.type === 'phase') {
                           const { startDate, isValid } = calculateResolvedEndDate(item);
                           if (isValid && startDate) {
                             return (
+                              <span className="text-xs text-[var(--table-row-fg)]">
                                 {format(startDate, 'dd/MM/yy', { locale: es })}
                               </span>
                             );
@@ -709,6 +755,7 @@ export function GanttContainer({
                           const dateStr = item.startDate;
                           const localDate = dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T00:00:00');
                           return (
+                            <span className="text-xs text-[var(--table-row-fg)]">
                               {format(localDate, 'dd/MM/yy', { locale: es })}
                             </span>
                           );
@@ -718,12 +765,14 @@ export function GanttContainer({
                     </div>
                     
                     {/* Columna Días - 75px fijo */}
+                    <div className="w-[75px] px-1 flex items-center justify-center">
                       {(() => {
                         if (item.type === 'phase') {
                           const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
                           if (isValid && startDate && resolvedEndDate) {
                             const durationInDays = Math.ceil((resolvedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                             return (
+                              <span className="text-xs text-[var(--table-row-fg)]">
                                 {durationInDays}
                               </span>
                             );
@@ -736,6 +785,7 @@ export function GanttContainer({
                           const localEndDate = endStr.includes('T') ? new Date(endStr) : new Date(endStr + 'T00:00:00');
                           const durationInDays = Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                           return (
+                            <span className="text-xs text-[var(--table-row-fg)]">
                               {durationInDays}
                             </span>
                           );
@@ -746,13 +796,16 @@ export function GanttContainer({
                     
                     {/* Floating Action buttons - al final de la columna FASE/TAREA */}
                     {(onItemEdit || onItemDelete) && hoveredRowId === item.id && (
+                      <div className="absolute right-[227px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
                         {onItemEdit && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onItemEdit(item);
                             }}
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
+                            <Edit className="w-3 h-3" />
                           </button>
                         )}
                         {onItemDelete && (
@@ -761,7 +814,9 @@ export function GanttContainer({
                               e.stopPropagation();
                               onItemDelete(item);
                             }}
+                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         )}
                       </div>
@@ -773,6 +828,7 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para sincronizar con timeline */}
             {Array.from({ length: 2 }).map((_, index) => (
+              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
                 {/* Fila vacía para mantener altura sincronizada */}
               </div>
             ))}
@@ -783,6 +839,7 @@ export function GanttContainer({
         {/* Timeline - CON SCROLL HORIZONTAL SINCRONIZADO */}
         <div 
           ref={timelineRef}
+          className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
             scrollbarWidth: 'auto',
@@ -809,6 +866,7 @@ export function GanttContainer({
               >
                 {item.isHeader ? (
                   <div 
+                    className="bg-muted/30 h-full w-full relative"
                     style={{ width: timelineWidth }}
                   >
                     {/* Línea del día de hoy también en headers */}
@@ -840,6 +898,7 @@ export function GanttContainer({
                         
                         return (
                           <div 
+                            className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
                             style={{ left: `${todayPosition}px` }}
                           />
                         );
@@ -849,6 +908,7 @@ export function GanttContainer({
 
                     {/* Barra de fase - solo para elementos tipo 'phase' */}
                     {item.type === 'phase' && item.startDate && (
+                      <div className="absolute inset-0 flex items-center px-1">
                         {(() => {
                           const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
                           
@@ -894,6 +954,7 @@ export function GanttContainer({
                           return (
                             <div
                               key={`phase-bar-${item.id}-${scrollUpdateTrigger}`}
+                              className="bg-[var(--chart-2)] rounded-sm flex items-center text-white text-xs font-medium shadow-sm absolute overflow-hidden"
                               style={{
                                 left: `${barLeft}px`,
                                 width: `${barWidth}px`,
@@ -905,6 +966,7 @@ export function GanttContainer({
                               title={`${item.name}: ${startDate.toLocaleDateString()} - ${resolvedEndDate.toLocaleDateString()}`}
                             >
                               <span 
+                                className="absolute whitespace-nowrap text-xs font-medium px-2"
                                 style={{
                                   left: `${Math.max(8, textCenterPosition - 50)}px`,
                                   transform: 'translateX(-50%)'
@@ -920,18 +982,22 @@ export function GanttContainer({
                   </div>
                 ) : (
                   <div 
+                    className="relative h-full w-full"
                     style={{ width: timelineWidth }}
                   >
                     {/* Grilla de semanas SIN LÍNEAS VERTICALES */}
+                    <div className="absolute inset-0 flex">
                       {calendarStructure.weeks.map((week) => (
                         <div 
                           key={`week-grid-${week.key}`}
+                          className="h-full"
                           style={{ width: weekWidth }}
                         />
                       ))}
                     </div>
                     
                     {/* Línea del día de hoy */}
+                    <div className="absolute inset-0">
                       {(() => {
                         const today = new Date();
                         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -957,6 +1023,7 @@ export function GanttContainer({
                           
                           return (
                             <div 
+                              className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
                               style={{ left: `${todayPosition}px` }}
                               title={`Hoy: ${todayStart.toLocaleDateString()}`}
                             />
@@ -967,6 +1034,7 @@ export function GanttContainer({
                     </div>
 
                     {/* Barra de tarea */}
+                    <div className="absolute inset-0 flex items-center px-1">
                       <GanttTimelineBar 
                         item={item}
                         timelineStart={timelineStart}
@@ -994,13 +1062,17 @@ export function GanttContainer({
             
             {/* Filas vacías adicionales para más espacio */}
             {Array.from({ length: 2 }).map((_, index) => (
+              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
                 <div 
+                  className="relative h-full w-full"
                   style={{ width: timelineWidth }}
                 >
                   {/* Grilla de semanas SIN LÍNEAS VERTICALES */}
+                  <div className="absolute inset-0 flex">
                     {calendarStructure.weeks.map((week) => (
                       <div 
                         key={`empty-${index}-${week.key}`}
+                        className="h-full"
                         style={{ width: weekWidth }}
                       />
                     ))}
@@ -1032,6 +1104,7 @@ export function GanttContainer({
                       
                       return (
                         <div 
+                          className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
                           style={{ left: `${todayPosition}px` }}
                         />
                       );
@@ -1062,12 +1135,14 @@ export function GanttContainer({
 
       {/* Resize handle */}
       <div
+        className="w-1 bg-[var(--accent)] cursor-col-resize hover:bg-[var(--accent)]/80 transition-colors flex-shrink-0"
         onMouseDown={handleMouseDown}
       />
       
       {/* LÍNEA PUNTEADA TEMPORAL DURANTE CONEXIÓN */}
       {connectionLineData && (
         <svg
+          className="fixed inset-0 pointer-events-none"
           style={{ zIndex: 9999 }}
           width="100vw"
           height="100vh"

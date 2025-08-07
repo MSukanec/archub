@@ -33,15 +33,18 @@ export function SidebarButton({
       {/* Icono siempre visible */}
       {Icon && (
         <Icon
+          className="flex-shrink-0 w-[18px] h-[18px]"
         />
       )}
       {!Icon && (
         <div
+          className="flex-shrink-0 w-[18px] h-[18px]"
         />
       )}
 
       {/* Texto que se desliza como en Supabase */}
       <span
+        className="text-xs font-medium overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out ml-2"
         style={{
           maxWidth: isExpanded ? 160 : 0,
           opacity: isExpanded ? 1 : 0,
