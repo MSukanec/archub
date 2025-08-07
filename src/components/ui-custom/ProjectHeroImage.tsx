@@ -207,8 +207,8 @@ export default function ProjectHeroImage({
                     Formatos: JPG, PNG, WebP • Tamaño máximo: 10MB
                   </p>
                 </div>
-                <Button disabled={isUploading} variant="default" className="gap-2 bg-transparent border-2 border-dashed border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)] hover:border-[var(--accent)]">
-                  <Upload className="h-4 w-4" />
+                <Button disabled={isUploading} variant="default">
+                  <Upload className="h-4 w-4 mr-2" />
                   {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
                 </Button>
               </div>
