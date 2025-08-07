@@ -22,7 +22,7 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import ModernProjectCard from '@/components/cards/ModernProjectCard'
+import ProjectItem from '@/components/cards/ProjectItem'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 
 
@@ -297,37 +297,20 @@ export default function OrganizationProjects() {
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
           <>
-            {/* Vista móvil */}
-            {isMobile ? (
-              <div className="grid grid-cols-1 gap-4 px-4">
-                {filteredProjects.map((project) => (
-                  <ModernProjectCard
-                    key={project.id}
-                    project={project}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onSelect={(project) => handleSelectProject(project.id)}
-                    onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userOrgPrefs?.last_project_id}
-                  />
-                ))}
-              </div>
-            ) : (
-              /* Desktop Grid */
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProjects.map((project) => (
-                  <ModernProjectCard
-                    key={project.id}
-                    project={project}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onSelect={(project) => handleSelectProject(project.id)}
-                    onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userOrgPrefs?.last_project_id}
-                  />
-                ))}
-              </div>
-            )}
+            {/* Single column layout for all screen sizes */}
+            <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto px-4">
+              {filteredProjects.map((project) => (
+                <ProjectItem
+                  key={project.id}
+                  project={project}
+                  onEdit={handleEdit}
+                  onDelete={handleDeleteClick}
+                  onSelect={(project) => handleSelectProject(project.id)}
+                  onNavigateToBasicData={handleNavigateToBasicData}
+                  isActiveProject={project.id === userOrgPrefs?.last_project_id}
+                />
+              ))}
+            </div>
           </>
         ) : (
           <EmptyState
