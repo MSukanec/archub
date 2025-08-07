@@ -32,13 +32,20 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
 
     // If user is authenticated but needs onboarding (skip redirect if completing onboarding)
     const allowedDuringOnboarding = ['/onboarding', '/select-mode', '/organization/dashboard', '/dashboard'];
-    if (user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !allowedDuringOnboarding.includes(location)) {
-      console.log('AuthRedirect: Redirecting to onboarding', { 
-        location, 
-        onboarding_completed: userData.preferences?.onboarding_completed,
-        completingOnboarding,
-        allowed: allowedDuringOnboarding.includes(location)
-      });
+    const shouldRedirectToOnboarding = user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !allowedDuringOnboarding.includes(location);
+    
+    console.log('AuthRedirect: Checking onboarding redirect', { 
+      location, 
+      user: !!user,
+      userData: !!userData,
+      onboarding_completed: userData?.preferences?.onboarding_completed,
+      completingOnboarding,
+      allowedRoute: allowedDuringOnboarding.includes(location),
+      shouldRedirect: shouldRedirectToOnboarding
+    });
+    
+    if (shouldRedirectToOnboarding) {
+      console.log('AuthRedirect: REDIRECTING to onboarding');
       navigate('/onboarding');
       return;
     }

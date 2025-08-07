@@ -171,6 +171,8 @@ export default function SelectMode() {
     }
     
     console.log('SelectMode - Processing mode selection:', modeType);
+    console.log('SelectMode - Setting completingOnboarding = true BEFORE mutation');
+    setCompletingOnboarding(true);
     setHasFinished(true);
     setSelectedMode(modeType);
     
