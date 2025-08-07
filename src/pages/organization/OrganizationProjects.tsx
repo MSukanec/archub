@@ -10,7 +10,7 @@ import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { Folder, Crown, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText, SortAsc } from 'lucide-react'
+import { Folder, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText, SortAsc } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -23,7 +23,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ModernProjectCard from '@/components/cards/ModernProjectCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+
 
 
 export default function OrganizationProjects() {
@@ -158,45 +158,7 @@ export default function OrganizationProjects() {
     // Only update header, no navigation
   }
 
-  // Mutation to go to General mode (no project selected)
-  const selectGeneralMutation = useMutation({
-    mutationFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_project_id: null })
-        .eq('user_id', userData?.user.id)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      // Clear project context immediately
-      setSelectedProject(null);
-      
-      // Force immediate refresh of user data  
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.refetchQueries({ queryKey: ['current-user'] });
-      
-      toast({
-        title: "Modo General activado",
-        description: "Ahora puedes ver información de toda la organización"
-      })
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "No se pudo cambiar al modo General",
-        variant: "destructive"
-      })
-    }
-  })
 
-  const handleSelectGeneral = () => {
-    selectGeneralMutation.mutate()
-  }
 
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
@@ -310,22 +272,9 @@ export default function OrganizationProjects() {
     )
   }
 
-  // Obtener el proyecto seleccionado para mostrar información
-  const selectedProject = projects?.find(p => p.id === userData?.preferences?.last_project_id);
 
-  // Define feature introduction content
-  const projectFeatures = [
-    {
-      icon: <Plus className="w-5 h-5" />,
-      title: "Crear Proyecto Nuevo",
-      description: "Haz clic en 'Nuevo Proyecto' para crear un proyecto para tu organización. Completa la información básica como nombre, tipología, modalidad y estado. Una vez creado, puedes seleccionarlo como 'ACTIVO' para trabajar en él desde todas las secciones de la aplicación (Diseño, Obra, Finanzas, etc.)."
-    },
-    {
-      icon: <Crown className="w-5 h-5" />,
-      title: "Cambio de Proyecto Activo",
-      description: "No necesitas venir a esta página para cambiar de proyecto. Desde el selector del header (parte superior) puedes cambiar entre proyectos activos de forma rápida. También tienes la opción de seleccionar 'Todos los Proyectos' para ver información general de toda tu organización en lugar de datos específicos de un proyecto."
-    }
-  ]
+
+
 
   return (
     <>
@@ -333,13 +282,7 @@ export default function OrganizationProjects() {
       <div className="space-y-6">
 
 
-        {/* Feature Introduction - Solo móvil */}
-        <FeatureIntroduction
-          title="Proyectos"
-          icon={<Folder className="w-5 h-5" />}
-          features={projectFeatures}
-          className="md:hidden"
-        />
+
 
 
 
