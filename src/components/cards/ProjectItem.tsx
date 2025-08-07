@@ -30,12 +30,13 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
 
   return (
     <Card 
-      className={`w-full hover:shadow-lg transition-all duration-200 cursor-default ${
+      className={`w-full hover:shadow-lg transition-all duration-200 ${
         isActiveProject 
-          ? 'border-2 shadow-md' 
-          : 'border border-border'
+          ? 'border-2 shadow-md cursor-default' 
+          : 'border border-border cursor-pointer hover:bg-muted/50'
       }`}
       style={isActiveProject ? { borderColor: 'var(--accent)' } : {}}
+      onClick={!isActiveProject ? () => onSelect(project) : undefined}
     >
       {/* INFO SECTION - Información del proyecto */}
       <CardContent className="p-4 space-y-3">
@@ -46,20 +47,6 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
           </h3>
           
           <div className="flex items-center gap-2">
-            {!isActiveProject && (
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="text-xs font-medium px-3 py-1 h-7"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelect(project);
-                }}
-              >
-                Seleccionar activo
-              </Button>
-            )}
-            
             {/* Edit and Delete buttons */}
             <Button
               variant="ghost"
