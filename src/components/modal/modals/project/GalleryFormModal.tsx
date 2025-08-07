@@ -62,7 +62,16 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const uploadMutation = useMutation({
     mutationFn: async (data: GalleryFormData) => {
-      if (!userData?.organization_preferences?.last_project_id || !userData?.organization?.id) {
+      // Verificar que tenemos los datos del usuario
+      if (!userData) {
+        throw new Error('No se han cargado los datos del usuario');
+      }
+
+      // Usar organization_preferences.last_project_id o preferences.last_project_id como fallback
+      const projectId = userData.organization_preferences?.last_project_id || userData.preferences?.last_project_id;
+      const organizationId = userData.organization?.id || userData.preferences?.last_organization_id;
+
+      if (!projectId || !organizationId) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
 
@@ -73,21 +82,30 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         entry_type: 'registro_general',
       }));
 
-      // Usar el ID del usuario actual como creador (la tabla project_media ahora usa created_by como UUID del usuario)
-      const createdByUserId = userData.user.id;
+      // Obtener el organization_member ID para created_by
+      const currentMembership = userData.memberships?.find(
+        m => m.organization_id === organizationId
+      );
       
-      console.log('Upload data:', {
-        projectId: userData.organization_preferences.last_project_id,
-        organizationId: userData.organization?.id,
-        createdBy: createdByUserId,
-        filesCount: galleryFiles.length
+      if (!currentMembership?.id) {
+        throw new Error('No se encontró la membresía de la organización');
+      }
+      
+      const createdByMemberId = currentMembership.id;
+      
+      console.log('Upload data check:', {
+        projectId,
+        organizationId,
+        createdBy: createdByMemberId,
+        filesCount: galleryFiles.length,
+        membershipFound: !!currentMembership
       });
 
       return uploadGalleryFiles(
         galleryFiles,
-        userData.organization_preferences.last_project_id,
-        userData.organization?.id,
-        createdByUserId
+        projectId,
+        organizationId,
+        createdByMemberId
       );
     },
     onSuccess: () => {
