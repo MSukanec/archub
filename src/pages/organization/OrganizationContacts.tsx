@@ -246,7 +246,7 @@ export default function OrganizationContacts() {
         <div className="flex flex-wrap gap-1">
           {contact.contact_types && contact.contact_types.length > 0 ? (
             contact.contact_types.map((type: any) => (
-              <Badge key={type.id} variant="secondary" className="text-xs">
+              <Badge key={type.id} variant="secondary" className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded-md border">
                 {type.name}
               </Badge>
             ))
