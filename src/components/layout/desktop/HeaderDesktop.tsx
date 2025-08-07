@@ -239,27 +239,53 @@ export function HeaderDesktop({
                       <ChevronDown className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56">
-                    {projects.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onClick={() => handleProjectChange(project.id)}
-                        className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
-                      >
-                        <div className="flex items-center w-full">
-                          <Folder className="w-4 h-4 mr-2" />
-                          <span className="truncate">{project.name}</span>
+                  <DropdownMenuContent align="start" className="w-64">
+                    {projects.length > 0 ? (
+                      projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          onClick={() => handleProjectChange(project.id)}
+                          className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                        >
+                          <div className="flex items-center w-full">
+                            <Folder className="w-4 h-4 mr-2" />
+                            <span className="truncate">{project.name}</span>
+                          </div>
+                          {userData?.preferences?.last_project_id === project.id && (
+                            <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                          )}
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <div className="px-3 py-4 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <Folder className="w-8 h-8 text-[var(--layout-text-muted)]" />
+                          <div className="text-sm text-[var(--layout-text)]">
+                            No hay proyectos
+                          </div>
+                          <div className="text-xs text-[var(--layout-text-muted)] mb-2">
+                            Crea tu primer proyecto para comenzar
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              window.location.href = `/organization/${userData?.preferences?.last_organization_id}/projects`;
+                            }}
+                            className="h-7 px-3 text-xs"
+                          >
+                            Crear proyecto
+                          </Button>
                         </div>
-                        {userData?.preferences?.last_project_id === project.id && (
-                          <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-                        )}
-                      </DropdownMenuItem>
-                    ))}
+                      </div>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CustomRestricted>
               <span className="text-xs font-normal text-[var(--layout-text)]">
-                {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto"}
+                {projects.length === 0 
+                  ? "No hay proyectos" 
+                  : projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto seleccionado"
+                }
               </span>
               <span className="text-xs text-[var(--layout-text-muted)]">/</span>
               <span className="text-xs font-normal text-[var(--layout-text)]">
