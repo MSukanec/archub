@@ -105,7 +105,13 @@ export default function OrganizationMembers() {
     enabled: !!organizationId,
   });
 
+  // Mock guests data (empty for now)
+  const guests: any[] = [];
+  console.log('No guest accounts table found, using empty array');
 
+  // Mock pending invites data (empty for now)
+  const pendingInvites: any[] = [];
+  console.log('No invites table found, using empty array');
 
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {
@@ -148,7 +154,31 @@ export default function OrganizationMembers() {
 
 
 
+  const resendInviteMutation = useMutation({
+    mutationFn: async (inviteId: string) => {
+      // Mock functionality
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitación reenviada",
+        description: "La invitación ha sido reenviada exitosamente.",
+      });
+    },
+  });
 
+  const revokeInviteMutation = useMutation({
+    mutationFn: async (inviteId: string) => {
+      // Mock functionality
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitación revocada",
+        description: "La invitación ha sido revocada exitosamente.",
+      });
+    },
+  });
 
   const headerProps = {
     title: "Miembros",
@@ -287,7 +317,204 @@ export default function OrganizationMembers() {
           </div>
         </div>
 
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Guests Section Description */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <UserCheck className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Invitados</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
+            </p>
+          </div>
+
+          {/* Right Column - Guests Content */}
+          <div className="lg:col-span-8">
+            
+            {isMobile ? (
+              <div className="space-y-3">
+                {guests.map((guest) => (
+                  <MemberCard 
+                    key={guest.id} 
+                    member={guest}
+                  />
+                ))}
+                {guests.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay invitados en esta organización.</p>
+                    <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {guests.map((guest) => (
+                  <Card key={guest.id} className="p-4">
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={guest.users?.avatar_url} />
+                            <AvatarFallback>
+                              {getInitials(guest.users?.full_name || guest.users?.email || 'G')}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">
+                                {guest.users?.full_name || 'Sin nombre'}
+                              </h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {guest.users?.email}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
+                            <div>
+                              {guest.joined_at && !isNaN(new Date(guest.joined_at).getTime()) 
+                                ? format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })
+                                : 'Fecha no disponible'
+                              }
+                            </div>
+                          </div>
+
+                          <Badge variant="secondary">
+                            {guest.roles?.name || 'Invitado'}
+                          </Badge>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                Editar rol
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeleteMember(guest)}
+                              >
+                                Eliminar invitado
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {guests.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-sm">No hay invitados en esta organización.</p>
+                    <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <hr className="border-t border-[var(--section-divider)] my-8" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Pending Invites Section Description */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
+            </p>
+          </div>
+
+          {/* Right Column - Pending Invites Content */}
+          <div className="lg:col-span-8">
+            
+            <div className="space-y-2">
+              {pendingInvites.map((invite) => (
+                <Card key={invite.id} className="p-4">
+                  <CardContent className="p-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback>
+                            {getInitials(invite.email || 'P')}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-sm">
+                              {invite.email}
+                            </h4>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Invitación enviada
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="text-xs text-muted-foreground text-right">
+                          <div>
+                            {invite.created_at && !isNaN(new Date(invite.created_at).getTime()) 
+                              ? format(new Date(invite.created_at), 'MMM dd, yyyy', { locale: es })
+                              : 'Fecha no disponible'
+                            }
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => resendInviteMutation.mutate(invite.id)}
+                          >
+                            Reenviar invitación
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => revokeInviteMutation.mutate(invite.id)}
+                          >
+                            Revocar invitación
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {pendingInvites.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                  <p className="text-sm">No hay invitaciones pendientes.</p>
+                  <p className="text-xs">Las invitaciones aparecerán aquí una vez enviadas.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+
+
+
+
     </Layout>
   );
 }
