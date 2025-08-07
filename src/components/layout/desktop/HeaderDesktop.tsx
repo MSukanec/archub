@@ -269,7 +269,7 @@ export function HeaderDesktop({
                           <Button
                             size="sm"
                             onClick={() => {
-                              window.location.href = `/organization/${userData?.preferences?.last_organization_id}/projects`;
+                              navigate('/organization/projects');
                             }}
                             className="h-7 px-3 text-xs"
                           >
