@@ -276,7 +276,11 @@ export default function OrganizationBasicData() {
   return (
     <Layout 
       headerProps={{ 
-        title: "Datos Básicos"
+        title: "Datos Básicos",
+        breadcrumb: [
+          { name: "Organización", href: "/organization/dashboard" },
+          { name: "Datos Básicos", href: "/organization/basic-data" }
+        ]
       }}
     >
       <div className="space-y-6">

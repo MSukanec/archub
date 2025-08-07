@@ -396,6 +396,10 @@ export default function OrganizationContacts() {
       headerProps={{
         icon: Users,
         title: "Contactos",
+        breadcrumb: [
+          { name: "Organización", href: "/organization/dashboard" },
+          { name: "Contactos", href: "/organization/contacts" }
+        ],
         tabs: headerTabs,
         onTabChange: (tabId: string) => {
           if (tabId === "empresas") {

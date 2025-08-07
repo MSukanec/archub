@@ -3,6 +3,9 @@ import { Layout } from "@/components/layout/desktop/Layout";
 export default function OrganizationDashboard() {
   const headerProps = {
     title: "Resumen de Organización",
+    breadcrumb: [
+      { name: "Organización", href: "/organization/dashboard" }
+    ],
     showSearch: false,
     showFilters: false,
   };

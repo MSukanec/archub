@@ -265,6 +265,10 @@ export default function OrganizationProjects() {
 
   const headerProps = {
     title: "Proyectos",
+    breadcrumb: [
+      { name: "Organización", href: "/organization/dashboard" },
+      { name: "Proyectos", href: "/organization/projects" }
+    ],
     actionButton: {
       label: "Nuevo Proyecto",
       icon: Plus,

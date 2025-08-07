@@ -361,7 +361,11 @@ export default function OrganizationPreferences() {
       showSidebar 
       wide={false}
       headerProps={{
-        title: "Preferencias"
+        title: "Preferencias",
+        breadcrumb: [
+          { name: "Organización", href: "/organization/dashboard" },
+          { name: "Preferencias", href: "/organization/preferences" }
+        ]
       }}
     >
       <div className="space-y-8">
