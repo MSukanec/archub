@@ -116,18 +116,31 @@ export default function Onboarding() {
 
       return { success: true };
     },
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
+      
+      // Optimistically update cache immediately
+      queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          preferences: {
+            ...oldData.preferences,
+            onboarding_completed: true
+          }
+        };
+      });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       toast({
         title: "¡Perfecto!",
         description: "Configuración inicial completada. Ahora elige tu modo de uso.",
       });
       
-      // Navigate to select-mode after successful onboarding
-      setTimeout(() => {
-        navigate('/select-mode');
-        resetOnboarding();
-      }, 800);
+      // Navigate immediately without delay
+      navigate('/select-mode');
+      resetOnboarding();
     },
     onError: (error) => {
       console.error('Error saving onboarding data:', error);
