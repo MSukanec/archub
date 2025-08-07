@@ -14,6 +14,7 @@ import { useCreateKanbanList, useUpdateKanbanList } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useToast } from "@/hooks/use-toast";
+import { useModalPanelStore } from "../../form/modalPanelStore";
 
 const listSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
@@ -34,6 +35,7 @@ interface ListFormModalProps {
 export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   const { boardId, list, isEditing = false } = modalData || {};
   const { toast } = useToast();
+  const { setPanel } = useModalPanelStore();
   const createListMutation = useCreateKanbanList();
   const updateListMutation = useUpdateKanbanList();
   const { data: userData } = useCurrentUser();
@@ -72,8 +74,16 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
     }
   }, [members, currentUserMember, list, isEditing, form]);
 
+  // Set panel to edit mode when editing a list
+  useEffect(() => {
+    if (isEditing) {
+      setPanel('edit');
+    }
+  }, [isEditing, setPanel]);
+
   const handleClose = () => {
     form.reset();
+    setPanel('edit'); // Reset to edit panel
     onClose();
   };
 
