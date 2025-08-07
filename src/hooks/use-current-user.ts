@@ -97,7 +97,7 @@ interface UserData {
   }[] | null
 }
 
-export function useCurrentUser() {
+export function useCurrentUser(forceRefresh?: boolean) {
   const { user: authUser } = useAuthStore()
 
   return useQuery<UserData>({
@@ -115,8 +115,11 @@ export function useCurrentUser() {
         throw new Error('No authentication token available')
       }
 
+      // Add refresh parameter if forced refresh is requested
+      const url = forceRefresh ? '/api/current-user?refresh=true' : '/api/current-user'
+
       // Use the server endpoint instead of Supabase directly
-      const response = await fetch('/api/current-user', {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -138,6 +141,6 @@ export function useCurrentUser() {
     },
     enabled: !!authUser,
     retry: 3,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // No cache when force refresh
   })
 }

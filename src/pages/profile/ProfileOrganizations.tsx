@@ -23,6 +23,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
 import { useProjectContext } from '@/stores/projectContext'
+import { useAuthStore } from '@/stores/authStore'
 
 // Componente para una sola tarjeta de organización
 
@@ -217,9 +218,6 @@ export default function OrganizationManagement() {
   const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
       try {
-        console.log('Switching to organization:', organizationId);
-        console.log('User ID:', userData?.user.id);
-        
         // Usar el endpoint del servidor para cambiar organización
         const response = await fetch('/api/user/select-organization', {
           method: 'POST',
@@ -229,18 +227,13 @@ export default function OrganizationManagement() {
           },
           body: JSON.stringify({ organization_id: organizationId }),
         });
-
-        console.log('Response status:', response.status);
         
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Response error:', errorData);
           throw new Error(errorData.error || 'Error al cambiar organización');
         }
 
-        const responseData = await response.json();
-        console.log('Response data:', responseData);
-        return responseData;
+        return await response.json();
       } catch (error) {
         console.error('Error switching organization:', error);
         throw error;
@@ -251,13 +244,15 @@ export default function OrganizationManagement() {
       const { setSelectedProject } = useProjectContext.getState()
       setSelectedProject(null)
       
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      setSidebarContext('organization')
-      navigate('/organization/dashboard')
       toast({
         title: "Organización seleccionada",
         description: "La organización se ha seleccionado correctamente"
       })
+      
+      // Forzar recarga completa de la página para evitar problemas de cache
+      setTimeout(() => {
+        window.location.href = '/organization/dashboard'
+      }, 500)
     },
     onError: () => {
       toast({
