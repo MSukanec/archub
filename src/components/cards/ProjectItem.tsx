@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -37,31 +38,57 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
             {project.name}
           </h3>
           
-          {isActiveProject ? (
-            <Button 
-              size="sm"
-              className="text-xs font-medium px-3 py-1 h-7 text-white"
-              style={{ backgroundColor: 'var(--accent)' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                // Do nothing - just prevent card click
-              }}
-            >
-              ACTIVO
-            </Button>
-          ) : (
-            <Button 
+          <div className="flex items-center gap-2">
+            {isActiveProject ? (
+              <Button 
+                size="sm"
+                className="text-xs font-medium px-3 py-1 h-7 text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Do nothing - just prevent card click
+                }}
+              >
+                ACTIVO
+              </Button>
+            ) : (
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-xs font-medium px-3 py-1 h-7"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(project);
+                }}
+              >
+                Seleccionar activo
+              </Button>
+            )}
+            
+            {/* Edit and Delete buttons */}
+            <Button
               variant="ghost"
               size="sm"
-              className="text-xs font-medium px-3 py-1 h-7"
+              className="h-7 w-7 p-0"
               onClick={(e) => {
                 e.stopPropagation();
-                onSelect(project);
+                onEdit(project);
               }}
             >
-              Seleccionar activo
+              <Edit className="h-3 w-3" />
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(project);
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
         
         {/* Project Details and Member Avatars */}

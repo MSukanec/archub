@@ -311,13 +311,19 @@ export default function OrganizationProjects() {
             {
               label: "Buscar",
               icon: Search,
-              onClick: () => {},
+              onClick: () => {
+                // Placeholder for search functionality
+                console.log("Search clicked");
+              },
               variant: "ghost"
             },
             {
-              label: "Filtros",
+              label: "Filtros", 
               icon: Filter,
-              onClick: () => {},
+              onClick: () => {
+                // Placeholder for filters functionality
+                console.log("Filters clicked");
+              },
               variant: "ghost"
             },
             {
