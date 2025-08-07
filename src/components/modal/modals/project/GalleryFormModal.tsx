@@ -41,6 +41,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const queryClient = useQueryClient();
   const { setPanel } = useModalPanelStore();
   const [files, setFiles] = useState<File[]>([]);
+  const [fileNames, setFileNames] = useState<{[key: number]: string}>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize panel to edit mode when modal opens
@@ -89,9 +90,9 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         throw new Error('No hay proyecto u organización seleccionada');
       }
 
-      const galleryFiles: GalleryFileInput[] = files.map(file => ({
+      const galleryFiles: GalleryFileInput[] = files.map((file, index) => ({
         file,
-        title: data.title,
+        title: fileNames[index] || file.name.replace(/\.[^/.]+$/, ''),
         description: data.description || undefined,
         entry_type: 'registro_general',
       }));
@@ -142,10 +143,37 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
     }
 
     setFiles(validFiles);
+    
+    // Initialize file names with original names (without extension)
+    const newFileNames: {[key: number]: string} = {};
+    validFiles.forEach((file, index) => {
+      newFileNames[index] = file.name.replace(/\.[^/.]+$/, '');
+    });
+    setFileNames(newFileNames);
   };
 
   const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
+    
+    // Update file names mapping
+    const newFileNames: {[key: number]: string} = {};
+    Object.entries(fileNames).forEach(([key, value]) => {
+      const keyNum = parseInt(key);
+      if (keyNum < index) {
+        newFileNames[keyNum] = value;
+      } else if (keyNum > index) {
+        newFileNames[keyNum - 1] = value;
+      }
+    });
+    setFileNames(newFileNames);
+  };
+
+  const updateFileName = (index: number, name: string) => {
+    setFileNames(prev => ({
+      ...prev,
+      [index]: name
+    }));
   };
 
   const triggerFileInput = () => {
@@ -155,6 +183,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const handleClose = () => {
     reset();
     setFiles([]);
+    setFileNames({});
     onClose();
   };
 
@@ -258,11 +287,14 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
                           <FileVideo className="h-4 w-4 text-muted-foreground" />
                         )}
                         <div className="flex-1">
-                          <p className="text-sm text-foreground truncate">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          <Input
+                            value={fileNames[index] || ''}
+                            onChange={(e) => updateFileName(index, e.target.value)}
+                            placeholder="Nombre del archivo"
+                            className="text-sm"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Archivo original: {file.name}
                           </p>
                         </div>
                       </div>
