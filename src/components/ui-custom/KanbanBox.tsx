@@ -119,7 +119,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
 
   return (
-    <Card className="rounded-lg border border-[var(--card-border)] shadow-lg p-6" style={{ backgroundColor: "var(--card-bg)" }}>
+    <>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="lists" direction="horizontal" type="LIST">
           {(provided) => (
@@ -137,17 +137,17 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                       {...provided.draggableProps}
                       className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none"
                     >
-                      <Card className={`h-fit w-full md:max-w-none mx-3 md:mx-0 ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
+                      <div className={`h-fit w-full md:max-w-none mx-3 md:mx-0 ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
                         <div 
                           {...provided.dragHandleProps}
-                          className="flex items-center justify-between p-3 border-b cursor-grab active:cursor-grabbing"
+                          className="flex items-center justify-between pb-3 cursor-grab active:cursor-grabbing"
                         >
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-sm">{list.name}</h3>
-                            <Badge variant="secondary" className="text-xs">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-semibold text-base uppercase tracking-wide">{list.name}</h3>
+                            <span className="text-sm text-muted-foreground">
                               {cardsByList[list.id]?.filter(card => !card.is_completed).length || 0}
-                            </Badge>
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             {list.creator && (
@@ -198,9 +198,12 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                             </DropdownMenu>
                           </div>
                         </div>
+                        
+                        {/* Línea divisoria con color accent */}
+                        <div className="w-full h-0.5 bg-accent mb-4"></div>
 
                         {/* Cards Container */}
-                        <div className="p-3">
+                        <div>
                           {/* Add Card Button - Always show first */}
                           <Button
                             onClick={() => openModal('card', { listId: list.id })}
@@ -534,7 +537,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                             )}
                           </Droppable>
                         </div>
-                      </Card>
+                      </div>
                     </div>
                   )}
                 </Draggable>
@@ -579,6 +582,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
       {/* Modals are managed by ModalFactory now */}
 
-    </Card>
+    </>
   );
 }
