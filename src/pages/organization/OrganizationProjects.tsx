@@ -202,8 +202,7 @@ export default function OrganizationProjects() {
           const { error: projectDataError } = await supabase
             .from('project_data')
             .delete()
-            .eq('project_id', projectId)
-            .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
+            .eq('project_id', projectId) // project_data no tiene organization_id, solo project_id
           
           if (projectDataError) {
             console.error('Error deleting project_data:', projectDataError)
