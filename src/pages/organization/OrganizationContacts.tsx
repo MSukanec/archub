@@ -115,7 +115,9 @@ export default function OrganizationContacts() {
       id: "empresas",
       label: "Empresas",
       isActive: activeTab === "empresas",
-      isRestricted: true
+      badge: "Próximamente",
+      badgeVariant: "secondary" as const,
+      isDisabled: true
     }
   ]
 
@@ -400,7 +402,7 @@ export default function OrganizationContacts() {
         tabs: headerTabs,
         onTabChange: (tabId: string) => {
           if (tabId === "empresas") {
-            return; // No hacer nada si es empresas (restringida)
+            return; // No hacer nada si es empresas (deshabilitada)
           }
           setActiveTab(tabId);
         },

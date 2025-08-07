@@ -30,6 +30,9 @@ interface Tab {
   id: string;
   label: string;
   isActive: boolean;
+  badge?: string;
+  badgeVariant?: 'default' | 'secondary' | 'outline';
+  isDisabled?: boolean;
 }
 
 interface HeaderDesktopProps {
@@ -346,15 +349,23 @@ export function HeaderDesktop({
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => onTabChange?.(tab.id)}
-                className={`relative text-sm transition-colors duration-200 ${
-                  tab.isActive 
-                    ? 'text-[var(--layout-text)] font-medium' 
-                    : 'text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]'
+                onClick={() => tab.isDisabled ? undefined : onTabChange?.(tab.id)}
+                disabled={tab.isDisabled}
+                className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
+                  tab.isDisabled 
+                    ? 'text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed'
+                    : tab.isActive 
+                      ? 'text-[var(--layout-text)] font-medium' 
+                      : 'text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]'
                 }`}
               >
                 {tab.label}
-                {tab.isActive && (
+                {tab.badge && (
+                  <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                    {tab.badge}
+                  </span>
+                )}
+                {tab.isActive && !tab.isDisabled && (
                   <div 
                     className="absolute -bottom-[9px] left-0 right-0 h-0.5"
                     style={{ backgroundColor: 'var(--accent)' }}
