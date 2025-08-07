@@ -254,9 +254,10 @@ export default function OrganizationManagement() {
       
       console.log('🔧 Forcing complete page reload to ensure fresh data');
       // Usar window.location.replace para evitar que el usuario pueda volver atrás
+      // Dar más tiempo para que la base de datos se actualice
       setTimeout(() => {
         window.location.replace('/organization/dashboard')
-      }, 1000)
+      }, 2000)
     },
     onError: () => {
       toast({

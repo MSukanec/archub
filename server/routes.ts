@@ -355,17 +355,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing organization_id or user_id" });
       }
 
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_organization_id: organization_id })
-        .eq('user_id', user_id);
+      console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
-      if (error) {
-        console.error("Error updating last_organization_id:", error);
+      // Usar una transacción para asegurar consistencia
+      const { data: updateResult, error: updateError } = await supabase
+        .from('user_preferences')
+        .update({ 
+          last_organization_id: organization_id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user_id)
+        .select();
+
+      if (updateError) {
+        console.error("Error updating last_organization_id:", updateError);
         return res.status(500).json({ error: "Failed to update organization selection" });
       }
 
-      res.json({ success: true, message: "Organization selected successfully" });
+      console.log("Update result:", updateResult);
+
+      // Verificar que el cambio se persistió correctamente
+      const { data: verification, error: verifyError } = await supabase
+        .from('user_preferences')
+        .select('last_organization_id, updated_at')
+        .eq('user_id', user_id)
+        .single();
+
+      if (verifyError) {
+        console.error("Error verifying update:", verifyError);
+        return res.status(500).json({ error: "Failed to verify organization update" });
+      }
+
+      console.log("Verification result:", verification);
+
+      if (verification.last_organization_id !== organization_id) {
+        console.error("Organization update failed - values don't match");
+        return res.status(500).json({ error: "Organization update verification failed" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Organization selected successfully",
+        updated_organization_id: verification.last_organization_id,
+        updated_at: verification.updated_at
+      });
     } catch (error) {
       console.error("Error selecting organization:", error);
       res.status(500).json({ error: "Failed to select organization" });
