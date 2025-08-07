@@ -51,6 +51,12 @@ export async function uploadGalleryFiles(
       };
 
       console.log('Insertando en DB:', insertData);
+      console.log('File details:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        customTitle: title
+      });
 
       const { error: dbError } = await supabase
         .from('project_media')

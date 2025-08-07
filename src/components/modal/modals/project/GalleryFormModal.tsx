@@ -180,6 +180,8 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       return;
     }
 
+    console.log('Form submit data:', data);
+    console.log('Files to upload:', files.map((f, i) => ({ name: f.name, customName: fileNames[i] })));
     uploadMutation.mutate(data);
   };
 
