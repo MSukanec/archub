@@ -255,12 +255,6 @@ export default function ProjectClients() {
               <p className="text-sm text-muted-foreground">
                 Gestiona los clientes vinculados al proyecto actual. Controla sus compromisos financieros y nivel de acceso.
               </p>
-              <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                <div className="text-xs text-muted-foreground mb-1">Total de clientes</div>
-                <div className="text-2xl font-bold text-foreground">
-                  {projectClients?.length || 0}
-                </div>
-              </div>
             </div>
 
             {/* Right Column - Clients Content */}
