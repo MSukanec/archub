@@ -66,13 +66,16 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
     if (members.length > 0) {
       if (isEditing && list?.created_by) {
         // Set the creator from the editing list
+        console.log('Setting creator for editing:', list.created_by);
+        console.log('Available users:', users);
         form.setValue('created_by', list.created_by);
       } else if (currentUserMember && !form.watch('created_by')) {
         // Set current user as default for new lists
+        console.log('Setting current user as creator:', currentUserMember.id);
         form.setValue('created_by', currentUserMember.id);
       }
     }
-  }, [members, currentUserMember, list, isEditing, form]);
+  }, [members, currentUserMember, list, isEditing, form, users]);
 
   // Set panel to edit mode when editing a list
   useEffect(() => {
