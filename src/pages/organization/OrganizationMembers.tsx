@@ -67,41 +67,10 @@ export default function OrganizationMembers() {
 
   const organizationId = userData?.organization?.id;
 
-  // Fetch organization members
+  // Fetch organization members using the API endpoint
   const { data: members = [], isLoading: membersLoading } = useQuery({
     queryKey: ['organization-members', organizationId],
-    queryFn: async () => {
-      if (!supabase || !organizationId) return [];
-      
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select(`
-          id,
-          user_id,
-          organization_id,
-          role_id,
-          joined_at,
-          last_active_at,
-          is_active,
-          users (
-            id,
-            email,
-            full_name,
-            avatar_url
-          ),
-          roles (
-            id,
-            name,
-            type
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .order('joined_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: () => `/api/organization/${organizationId}/members`,
     enabled: !!organizationId,
   });
 
@@ -182,19 +151,11 @@ export default function OrganizationMembers() {
 
   const headerProps = {
     title: "Miembros",
-    description: "Gestiona los miembros de tu organización",
-    actions: [
-      <CustomRestricted 
-        key="invite-member"
-        feature="max_members" 
-        current={members.length}
-      >
-        <Button onClick={() => openModal('member')}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invitar miembro
-        </Button>
-      </CustomRestricted>
-    ]
+    actionButton: {
+      label: "Invitar miembro",
+      icon: UserPlus,
+      onClick: () => openModal('member')
+    }
   };
 
 
