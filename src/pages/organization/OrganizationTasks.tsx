@@ -30,7 +30,7 @@ function TasksContent() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   
-  // Get boards for current organization (no project filtering)
+  // Get boards for current organization (filtered by project if one is selected)
   const { data: boards = [], isLoading: boardsLoading } = useKanbanBoards();
   const { data: lists = [], isLoading: listsLoading } = useKanbanLists(currentBoardId || '');
   const { data: cards = [], isLoading: cardsLoading } = useKanbanCards(currentBoardId || '');

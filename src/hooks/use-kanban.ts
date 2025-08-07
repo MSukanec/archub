@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { toast } from '@/hooks/use-toast'
 
 export interface KanbanBoard {
@@ -92,21 +93,31 @@ export interface KanbanAttachment {
   }
 }
 
-// Hook to get boards for current organization
-export function useKanbanBoards() {
+// Hook to get boards for current organization (and optionally filter by project)
+export function useKanbanBoards(projectId?: string | null) {
   const { data: userData } = useCurrentUser()
+  const { selectedProjectId } = useProjectContext()
   const organizationId = userData?.organization?.id
+  
+  // Use provided projectId or fallback to selected project
+  const filterProjectId = projectId !== undefined ? projectId : selectedProjectId
 
   return useQuery({
-    queryKey: ['kanban-boards', organizationId],
+    queryKey: ['kanban-boards', organizationId, filterProjectId],
     queryFn: async () => {
       if (!organizationId) throw new Error('Organization ID required')
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('kanban_boards')
         .select('*')
         .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false })
+
+      // Filter by project if one is specified
+      if (filterProjectId) {
+        query = query.eq('project_id', filterProjectId)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
       return data as KanbanBoard[]
@@ -295,9 +306,10 @@ export function useKanbanAttachments(cardId: string) {
 export function useCreateKanbanBoard() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+  const { selectedProjectId } = useProjectContext()
 
   return useMutation({
-    mutationFn: async (boardData: { name: string; description?: string }) => {
+    mutationFn: async (boardData: { name: string; description?: string; project_id?: string }) => {
       if (!userData?.organization?.id || !userData?.user?.id) {
         throw new Error('Organization and user required')
       }
@@ -319,6 +331,7 @@ export function useCreateKanbanBoard() {
           name: boardData.name,
           description: boardData.description,
           organization_id: userData.organization.id,
+          project_id: boardData.project_id || selectedProjectId || null, // Use provided project_id or current selected project
           created_by: memberData.id // Use organization member ID
         })
         .select()
