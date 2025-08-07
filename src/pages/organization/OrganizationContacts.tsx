@@ -30,7 +30,6 @@ export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('name_asc')
   const [filterByType, setFilterByType] = useState('all')
-  const [groupingType, setGroupingType] = useState('none') // 'none' | 'type'
   const { openModal } = useGlobalModalStore()
 
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -416,12 +415,6 @@ export default function OrganizationContacts() {
             direction: "desc",
           }}
           topBar={{
-            tabs: ['Todos los Tipos', 'Por Tipo'],
-            activeTab: groupingType === 'none' ? 'Todos los Tipos' : 'Por Tipo',
-            onTabChange: (tab: string) => {
-              if (tab === 'Todos los Tipos') setGroupingType('none')
-              else if (tab === 'Por Tipo') setGroupingType('type')
-            },
             showSearch: true,
             searchValue: searchValue,
             onSearchChange: setSearchValue,
@@ -466,20 +459,6 @@ export default function OrganizationContacts() {
               setSortBy('date_desc');
               setFilterByType('all');
             }
-          }}
-          groupBy={groupingType === 'type' ? 'contact_type' : undefined}
-          renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
-            if (groupingType === 'type') {
-              const typeLabel = contactTypes.find(t => t.id === groupKey)?.name || groupKey;
-              return (
-                <>
-                  <div className="col-span-full text-sm font-medium">
-                    {typeLabel} ({groupRows.length} {groupRows.length === 1 ? 'contacto' : 'contactos'})
-                  </div>
-                </>
-              );
-            }
-            return null;
           }}
           emptyState={
             <div className="text-center py-8">
