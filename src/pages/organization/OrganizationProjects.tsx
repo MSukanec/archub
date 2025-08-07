@@ -10,6 +10,7 @@ import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
+import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
 import { Folder, Plus, Calendar, MoreHorizontal, Edit, Trash2, Home, Search, Filter, X, Users, Settings, BarChart3, FileText, SortAsc } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -92,8 +93,9 @@ export default function OrganizationProjects() {
     }
   })
 
-  // Mark active project and put it first - ahora usando user_organization_preferences
-  const activeProjectId = userData?.user_organization_preferences?.last_project_id
+  // Mark active project and put it first - usando useUserOrganizationPreferences hook
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
+  const activeProjectId = userOrgPrefs?.last_project_id
   filteredProjects = filteredProjects.map(project => ({
     ...project,
     is_active: project.id === activeProjectId
@@ -299,7 +301,7 @@ export default function OrganizationProjects() {
                     onDelete={handleDeleteClick}
                     onSelect={(project) => handleSelectProject(project.id)}
                     onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userData?.user_organization_preferences?.last_project_id}
+                    isActiveProject={project.id === userOrgPrefs?.last_project_id}
                   />
                 ))}
               </div>
@@ -314,7 +316,7 @@ export default function OrganizationProjects() {
                     onDelete={handleDeleteClick}
                     onSelect={(project) => handleSelectProject(project.id)}
                     onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userData?.user_organization_preferences?.last_project_id}
+                    isActiveProject={project.id === userOrgPrefs?.last_project_id}
                   />
                 ))}
               </div>
