@@ -29,7 +29,14 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
 
   return (
-    <Card className="w-full hover:shadow-lg transition-all duration-200 cursor-default">
+    <Card 
+      className={`w-full hover:shadow-lg transition-all duration-200 cursor-default ${
+        isActiveProject 
+          ? 'border-2 shadow-md' 
+          : 'border border-border'
+      }`}
+      style={isActiveProject ? { borderColor: 'var(--accent)' } : {}}
+    >
       {/* INFO SECTION - Información del proyecto */}
       <CardContent className="p-4 space-y-3">
         {/* Row 1: Project Name and Buttons */}
@@ -39,19 +46,7 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
           </h3>
           
           <div className="flex items-center gap-2">
-            {isActiveProject ? (
-              <Button 
-                size="sm"
-                className="text-xs font-medium px-3 py-1 h-7 text-white"
-                style={{ backgroundColor: 'var(--accent)' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Do nothing - just prevent card click
-                }}
-              >
-                ACTIVO
-              </Button>
-            ) : (
+            {!isActiveProject && (
               <Button 
                 variant="ghost"
                 size="sm"
