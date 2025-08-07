@@ -216,42 +216,34 @@ export default function OrganizationManagement() {
   // Mutación para seleccionar organización
   const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-      
-      // Primero verificar si existe una fila de preferencias
-      const { data: existingPrefs } = await supabase
-        .from('user_preferences')
-        .select('id')
-        .eq('user_id', userData?.user.id)
-        .single()
-      
-      if (existingPrefs) {
-        // Actualizar preferencias existentes - siempre limpiar proyecto al cambiar organización
-        const { error } = await supabase
-          .from('user_preferences')
-          .update({ 
-            last_organization_id: organizationId,
-            last_project_id: null // Limpiar proyecto al cambiar organización
-          })
-          .eq('user_id', userData?.user.id)
+      try {
+        console.log('Switching to organization:', organizationId);
+        console.log('User ID:', userData?.user.id);
         
-        if (error) throw error
-      } else {
-        // Crear nuevas preferencias
-        const { error } = await supabase
-          .from('user_preferences')
-          .insert({
-            user_id: userData?.user.id,
-            last_organization_id: organizationId,
-            last_project_id: null, // Sin proyecto al cambiar organización
-            theme: 'light',
-            sidebar_docked: false,
-            onboarding_completed: false
-          })
+        // Usar el endpoint del servidor para cambiar organización
+        const response = await fetch('/api/user/select-organization', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': userData?.user.id, // Agregar user_id requerido
+          },
+          body: JSON.stringify({ organization_id: organizationId }),
+        });
+
+        console.log('Response status:', response.status);
         
-        if (error) throw error
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Response error:', errorData);
+          throw new Error(errorData.error || 'Error al cambiar organización');
+        }
+
+        const responseData = await response.json();
+        console.log('Response data:', responseData);
+        return responseData;
+      } catch (error) {
+        console.error('Error switching organization:', error);
+        throw error;
       }
     },
     onSuccess: () => {
