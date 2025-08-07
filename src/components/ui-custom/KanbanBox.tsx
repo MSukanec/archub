@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
@@ -169,31 +169,21 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                   <Edit className="h-3 w-3 mr-2" />
                                   Editar lista
                                 </DropdownMenuItem>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                                      <Trash2 className="h-3 w-3 mr-2" />
-                                      Eliminar lista
-                                    </DropdownMenuItem>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>¿Eliminar lista?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Esta acción eliminará permanentemente la lista "{list.name}" y todas sus tarjetas.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        onClick={() => onDeleteList?.(list.id)}
-                                      >
-                                        Eliminar
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                <DropdownMenuItem 
+                                  className="text-destructive" 
+                                  onClick={() => openModal('delete-confirmation', {
+                                    mode: 'simple',
+                                    title: '¿Eliminar lista?',
+                                    description: `Esta acción eliminará permanentemente la lista "${list.name}" y todas sus tarjetas.`,
+                                    itemName: list.name,
+                                    itemType: 'lista',
+                                    destructiveActionText: 'Eliminar lista',
+                                    onConfirm: () => onDeleteList?.(list.id)
+                                  })}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-2" />
+                                  Eliminar lista
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -260,35 +250,25 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                             >
                                               <Edit className="h-3 w-3" />
                                             </Button>
-                                            <AlertDialog>
-                                              <AlertDialogTrigger asChild>
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
-                                                  onClick={(e) => e.stopPropagation()}
-                                                >
-                                                  <Trash2 className="h-3 w-3" />
-                                                </Button>
-                                              </AlertDialogTrigger>
-                                              <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                  <AlertDialogTitle>¿Eliminar tarjeta?</AlertDialogTitle>
-                                                  <AlertDialogDescription>
-                                                    Esta acción eliminará permanentemente la tarjeta "{card.title}".
-                                                  </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                  <AlertDialogAction 
-                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                    onClick={() => onDeleteCard?.(card.id)}
-                                                  >
-                                                    Eliminar
-                                                  </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                              </AlertDialogContent>
-                                            </AlertDialog>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                openModal('delete-confirmation', {
+                                                  mode: 'simple',
+                                                  title: '¿Eliminar tarjeta?',
+                                                  description: `Esta acción eliminará permanentemente la tarjeta "${card.title}".`,
+                                                  itemName: card.title,
+                                                  itemType: 'tarjeta',
+                                                  destructiveActionText: 'Eliminar tarjeta',
+                                                  onConfirm: () => onDeleteCard?.(card.id)
+                                                });
+                                              }}
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
                                           </div>
 
                                           {/* Completion Status and Creator Info Header */}
