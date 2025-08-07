@@ -358,6 +358,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
       // Primero, verificar si existe el registro de user_preferences
+      console.log("Searching for user_id:", user_id);
+      
+      // Buscar sin filtro para ver todos los registros
+      const { data: allPrefs, error: allError } = await supabase
+        .from('user_preferences')
+        .select('id, user_id, last_organization_id');
+      
+      console.log("All user_preferences records:", allPrefs);
+      
       const { data: existingPrefs, error: checkError } = await supabase
         .from('user_preferences')
         .select('id, user_id, last_organization_id')
