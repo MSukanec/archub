@@ -146,9 +146,9 @@ export function ActionBarDesktop({
       style={{ backgroundColor: "var(--card-bg)" }}
     >
       {/* Bottom Row - ActionBar Content */}
-      <div className="flex items-center px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3">
         {/* Left side - Tabs OR Budget Selector with actions */}
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-3">
           {/* Tabs */}
           {tabs && activeTab && onTabChange && (
             <Tabs
@@ -240,7 +240,7 @@ export function ActionBarDesktop({
         </div>
 
         {/* Right side - Filters and Actions */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2">
           {/* Custom Filters */}
           {customFilters && (
             <Popover>
