@@ -251,9 +251,7 @@ export default function OrganizationContacts() {
               </Badge>
             ))
           ) : (
-            <Badge variant="outline" className="text-xs">
-              Sin tipo
-            </Badge>
+            <span className="text-sm text-muted-foreground">Sin tipo</span>
           )}
         </div>
       )
