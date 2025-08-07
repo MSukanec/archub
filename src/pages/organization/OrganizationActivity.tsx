@@ -14,16 +14,14 @@ import { Label } from '@/components/ui/label';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
   const [, navigate] = useLocation();
-  const [searchValue, setSearchValue] = useState("");
   const [sortBy, setSortBy] = useState('date_recent');
   const [filterByType, setFilterByType] = useState('all');
-  const [timePeriod, setTimePeriod] = useState<'week' | 'month' | 'year'>('week');
   const organizationId = userData?.preferences?.last_organization_id;
 
   // Placeholder activities data - will be implemented with proper data later
@@ -32,16 +30,6 @@ export default function OrganizationActivity() {
 
   // Filter and sort activities
   const filteredActivities = activities.filter(activity => {
-    // Filter by search
-    if (searchValue) {
-      const searchLower = searchValue.toLowerCase();
-      return (
-        activity.description.toLowerCase().includes(searchLower) ||
-        activity.author?.full_name?.toLowerCase().includes(searchLower) ||
-        activity.type_label.toLowerCase().includes(searchLower)
-      );
-    }
-    
     // Filter by type
     if (filterByType !== 'all') {
       return activity.type === filterByType;
@@ -99,45 +87,44 @@ export default function OrganizationActivity() {
   };
 
   const clearFilters = () => {
-    setSearchValue("");
     setSortBy('date_recent');
     setFilterByType('all');
   };
 
-  // Custom filters para ActionBar
-  const customFilters = (
-    <div className="w-64 p-3 space-y-3">
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Ordenar por</Label>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date_recent">Fecha (Más reciente)</SelectItem>
-            <SelectItem value="date_old">Fecha (Más antigua)</SelectItem>
-            <SelectItem value="type">Tipo (A-Z)</SelectItem>
-            <SelectItem value="author">Autor (A-Z)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+  // Configuración de filtros para ActionBarDesktopRow
+  const filters = [
+    {
+      key: 'sortBy',
+      label: 'Ordenar por',
+      icon: Filter,
+      value: sortBy,
+      setValue: setSortBy,
+      options: ['date_recent', 'date_old', 'type', 'author'],
+      defaultLabel: 'Fecha (Más reciente)',
+      enabled: true
+    },
+    {
+      key: 'filterByType',
+      label: 'Filtrar por tipo',
+      icon: Activity,
+      value: filterByType,
+      setValue: setFilterByType,
+      options: ['all', 'create', 'update', 'delete'],
+      defaultLabel: 'Todos los tipos',
+      enabled: true
+    }
+  ];
 
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Filtrar por miembro</Label>
-        <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los miembros</SelectItem>
-            <SelectItem value="create">Creaciones</SelectItem>
-            <SelectItem value="update">Ediciones</SelectItem>
-            <SelectItem value="delete">Eliminaciones</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
+  // Configuración de acciones para ActionBarDesktopRow
+  const actions = [
+    {
+      label: 'Limpiar filtros',
+      icon: X,
+      onClick: clearFilters,
+      variant: 'outline' as const,
+      enabled: sortBy !== 'date_recent' || filterByType !== 'all'
+    }
+  ];
 
   if (!organizationId) {
     return (
@@ -241,38 +228,10 @@ export default function OrganizationActivity() {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* ActionBar Desktop */}
-        <ActionBarDesktop
-          title="Actividad"
-          icon={<Activity className="w-5 h-5" />}
-          showProjectSelector={false}
-          features={[
-            {
-              icon: <Building className="w-5 h-5" />,
-              title: "Registro central de actividades",
-              description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
-            },
-            {
-              icon: <Activity className="w-5 h-5" />,
-              title: "Filtrado por miembro",
-              description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
-            },
-            {
-              icon: <Search className="w-5 h-5" />,
-              title: "Búsqueda avanzada de actividades",
-              description: "Sistema de búsqueda que permite localizar actividades específicas por descripción, autor, tipo de acción o fecha. Incluye filtros para acotar resultados por período de tiempo, tipo de actividad y responsable de la acción."
-            },
-            {
-              icon: <Filter className="w-5 h-5" />,
-              title: "Organización temporal y filtrado",
-              description: "Las actividades se organizan cronológicamente con opciones de filtrado por miembro del equipo, tipo de acción (creación, edición, eliminación) y período temporal para facilitar el seguimiento y auditoría."
-            }
-          ]}
-          showSearch={true}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          customFilters={customFilters}
-          onClearFilters={clearFilters}
+        {/* ActionBar Desktop Row */}
+        <ActionBarDesktopRow
+          filters={filters}
+          actions={actions}
         />
 
         {/* Feature Introduction - Mobile only */}
