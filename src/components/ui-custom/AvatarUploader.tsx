@@ -179,7 +179,7 @@ export function AvatarUploader({
           <p className="text-sm text-muted-foreground">{description}</p>
           <div className="flex items-center gap-2 mt-2">
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => setShowUpload(!showUpload)}
               disabled={isUploading}
