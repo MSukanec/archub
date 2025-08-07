@@ -468,6 +468,7 @@ export default function OrganizationContacts() {
                     </div>
                   </div>
                 ),
+                showClearFilters: true,
                 onClearFilters: () => {
                   setSearchValue("");
                   setSortBy('name_asc');
