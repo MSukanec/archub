@@ -246,9 +246,9 @@ export default function OrganizationContacts() {
         <div className="flex flex-wrap gap-1">
           {contact.contact_types && contact.contact_types.length > 0 ? (
             contact.contact_types.map((type: any) => (
-              <Badge key={type.id} variant="default" className="text-xs">
+              <span key={type.id} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-blue-600 text-white border-transparent">
                 {type.name}
-              </Badge>
+              </span>
             ))
           ) : (
             <span className="text-sm text-muted-foreground">Sin tipo</span>
