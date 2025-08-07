@@ -417,19 +417,12 @@ export function useDeleteKanbanCard() {
 // Mutation to create a new list
 export function useCreateKanbanList() {
   const queryClient = useQueryClient()
+  const { data: userData } = useCurrentUser()
 
   return useMutation({
-    mutationFn: async (listData: { board_id: string; name: string; created_by: string }) => {
+    mutationFn: async (listData: { board_id: string; name: string; created_by?: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
-      
-      // Get the user_id from organization_members table
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('user_id')
-        .eq('id', listData.created_by)
-        .single()
-
-      if (memberError) throw memberError
+      if (!userData?.user?.id) throw new Error('User not authenticated')
       
       // Get next position
       const { data: lists } = await supabase
@@ -446,7 +439,7 @@ export function useCreateKanbanList() {
         .insert({
           board_id: listData.board_id,
           name: listData.name,
-          created_by: memberData.user_id,
+          created_by: userData.user.id, // Use current user's ID directly
           position: nextPosition
         })
         .select()
@@ -460,6 +453,7 @@ export function useCreateKanbanList() {
       toast({ title: "Lista creada exitosamente" })
     },
     onError: (error) => {
+      console.error('Error creating kanban list:', error)
       toast({
         title: "Error al crear lista",
         description: error.message,
@@ -474,23 +468,14 @@ export function useUpdateKanbanList() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (listData: { id: string; name: string; board_id: string; created_by: string }) => {
+    mutationFn: async (listData: { id: string; name: string; board_id: string; created_by?: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
-      
-      // Get the user_id from organization_members table
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('user_id')
-        .eq('id', listData.created_by)
-        .single()
-
-      if (memberError) throw memberError
       
       const { data, error } = await supabase
         .from('kanban_lists')
         .update({ 
-          name: listData.name,
-          created_by: memberData.user_id
+          name: listData.name
+          // Don't update created_by during edit - preserve original creator
         })
         .eq('id', listData.id)
         .select()
@@ -504,6 +489,7 @@ export function useUpdateKanbanList() {
       toast({ title: "Lista actualizada exitosamente" })
     },
     onError: (error) => {
+      console.error('Error updating kanban list:', error)
       toast({
         title: "Error al actualizar lista",
         description: error.message,

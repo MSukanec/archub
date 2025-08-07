@@ -43,8 +43,9 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   const { data: members = [] } = useOrganizationMembers(organizationId);
 
   // Convert members to users format for UserSelector
+  // Use user_id as the value since that's what gets stored in created_by
   const users = members.map(member => ({
-    id: member.id, // Use member.id for created_by field
+    id: member.user_id, // Use user_id for created_by field
     full_name: member.full_name || member.email || 'Usuario',
     email: member.email || '',
     avatar_url: member.avatar_url || undefined
@@ -57,25 +58,22 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
     resolver: zodResolver(listSchema),
     defaultValues: {
       name: list?.name || '',
-      created_by: list?.created_by || currentUserMember?.id || '',
+      created_by: isEditing && list?.created_by ? list.created_by : (userData?.user?.id || ''),
     }
   });
 
   // Set current user as default creator when modal opens
   useEffect(() => {
-    if (members.length > 0) {
+    if (members.length > 0 && userData?.user?.id) {
       if (isEditing && list?.created_by) {
-        // Set the creator from the editing list
-        console.log('Setting creator for editing:', list.created_by);
-        console.log('Available users:', users);
+        // For editing, use the existing created_by value
         form.setValue('created_by', list.created_by);
-      } else if (currentUserMember && !form.watch('created_by')) {
-        // Set current user as default for new lists
-        console.log('Setting current user as creator:', currentUserMember.id);
-        form.setValue('created_by', currentUserMember.id);
+      } else if (!isEditing) {
+        // For new lists, set current user as default
+        form.setValue('created_by', userData.user.id);
       }
     }
-  }, [members, currentUserMember, list, isEditing, form, users]);
+  }, [members, userData, list, isEditing, form]);
 
   // Set panel to edit mode when editing a list
   useEffect(() => {
@@ -105,8 +103,8 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
         await updateListMutation.mutateAsync({
           id: list.id,
           board_id: boardId,
-          name: data.name,
-          created_by: data.created_by
+          name: data.name
+          // Don't pass created_by for updates - it's preserved
         });
         toast({
           title: "Lista actualizada",
@@ -115,8 +113,8 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
       } else {
         await createListMutation.mutateAsync({
           board_id: boardId,
-          name: data.name,
-          created_by: data.created_by
+          name: data.name
+          // created_by is handled automatically in the hook using current user
         });
         toast({
           title: "Lista creada",
