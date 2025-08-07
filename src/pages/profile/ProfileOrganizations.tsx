@@ -219,11 +219,20 @@ export default function OrganizationManagement() {
     mutationFn: async (organizationId: string) => {
       console.log('🔧 Starting organization switch to:', organizationId);
       try {
+        // Obtener el token de autenticación
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        
+        if (!token) {
+          throw new Error('No authentication token available')
+        }
+
         // Usar el endpoint del servidor para cambiar organización
         const response = await fetch('/api/user/select-organization', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
             'x-user-id': userData?.preferences?.user_id, // Usar el user_id de las preferencias
           },
           body: JSON.stringify({ organization_id: organizationId }),

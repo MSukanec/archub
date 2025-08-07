@@ -357,17 +357,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client (same as current-user endpoint)
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
       // Primero, verificar si existe el registro de user_preferences
       console.log("Searching for user_id:", user_id);
       
       // Buscar sin filtro para ver todos los registros
-      const { data: allPrefs, error: allError } = await supabase
+      const { data: allPrefs, error: allError } = await authenticatedSupabase
         .from('user_preferences')
         .select('id, user_id, last_organization_id');
       
       console.log("All user_preferences records:", allPrefs);
       
-      const { data: existingPrefs, error: checkError } = await supabase
+      const { data: existingPrefs, error: checkError } = await authenticatedSupabase
         .from('user_preferences')
         .select('id, user_id, last_organization_id')
         .eq('user_id', user_id)
@@ -386,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Actualizar el registro existente
-      const { data: updateResult, error: updateError } = await supabase
+      const { data: updateResult, error: updateError } = await authenticatedSupabase
         .from('user_preferences')
         .update({ 
           last_organization_id: organization_id,
