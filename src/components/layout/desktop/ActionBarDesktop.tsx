@@ -161,7 +161,7 @@ export function ActionBarDesktop({
           {/* Budget Selector */}
           {budgetSelector && (
             <div className="flex items-center gap-2">
-              <div className="w-64">
+              <div className="min-w-96 w-auto">
                 <Selector
                   options={budgetSelector.budgets.map((budget: any) => ({
                     value: budget.id,
@@ -196,7 +196,7 @@ export function ActionBarDesktop({
           {/* Parameter Selector */}
           {parameterSelector && (
             <div className="flex items-center gap-2">
-              <div className="w-64">
+              <div className="min-w-96 w-auto">
                 <Selector
                   options={parameterSelector.parameters.map((parameter: any) => ({
                     value: parameter.id,
