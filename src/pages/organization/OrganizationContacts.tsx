@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Building, Phone, Mail, Share2, UserCheck } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail } from 'lucide-react'
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { FILTER_ICONS } from '@/constants/actionBarConstants'
 import React, { useState, useEffect } from 'react'
@@ -22,7 +22,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
@@ -418,34 +418,7 @@ export default function OrganizationContacts() {
         {activeTab === "personas" && (
           <>
             {/* FeatureIntroduction - Solo mobile */}
-            <div className="md:hidden">
-              <FeatureIntroduction
-                title="Contactos"
-                icon={<Users className="w-5 h-5" />}
-                features={[
-                  {
-                    icon: <Building className="w-5 h-5" />,
-                    title: "Gestión integral de personas",
-                    description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
-                  },
-                  {
-                    icon: <UserCheck className="w-5 h-5" />,
-                    title: "Vinculación con usuarios de Archub",
-                    description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
-                  },
-                  {
-                    icon: <Users className="w-5 h-5" />,
-                    title: "Base fundamental para otras funciones",
-                    description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
-                  },
-                  {
-                    icon: <Share2 className="w-5 h-5" />,
-                    title: "Compartir información fácilmente",
-                    description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
-                  }
-                ]}
-              />
-            </div>
+
 
             <Table
               data={filteredContacts}

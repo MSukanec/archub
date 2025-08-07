@@ -97,7 +97,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 pb-12 ${
-          headerProps?.tabs?.length ? "md:pt-24" : "md:pt-12"
+          headerProps?.tabs?.length ? "md:pt-20" : "md:pt-12"
         } ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded
