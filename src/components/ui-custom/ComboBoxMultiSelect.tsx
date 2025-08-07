@@ -44,6 +44,9 @@ export function ComboBoxMultiSelect({
       ? value.filter((v) => v !== optionValue)
       : [...value, optionValue];
     onChange(newValue);
+    
+    // Cerrar el popover después de seleccionar
+    setOpen(false);
   };
 
   const handleRemove = (optionValue: string) => {
