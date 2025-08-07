@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
 interface UserData {
   user: {
@@ -106,11 +107,20 @@ export function useCurrentUser() {
         throw new Error('User not authenticated')
       }
 
+      // Get the session token to send to the server
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData?.session?.access_token
+      
+      if (!token) {
+        throw new Error('No authentication token available')
+      }
+
       // Use the server endpoint instead of Supabase directly
       const response = await fetch('/api/current-user', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       })
 

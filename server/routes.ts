@@ -24,8 +24,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Attempting to fetch current user data...");
       
-      // Use the RPC function to get user data
-      const { data: userData, error } = await supabase.rpc('archub_get_user');
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create a Supabase client with the user's token for authenticated requests
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // Use the RPC function to get user data with authenticated client
+      const { data: userData, error } = await authenticatedSupabase.rpc('archub_get_user');
       
       console.log("Supabase RPC result:", { userData, error });
       
@@ -446,7 +467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let clientToUse = supabase;
       if (user_token) {
         // Create a client with the user's session token
-        clientToUse = createClient(supabaseUrl, supabaseServiceKey, {
+        clientToUse = createClient(supabaseUrl!, supabaseServiceKey, {
           global: {
             headers: {
               Authorization: `Bearer ${user_token}`
