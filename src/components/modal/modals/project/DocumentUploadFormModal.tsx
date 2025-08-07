@@ -313,58 +313,31 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* 1. Folder and Group Fields - Inline */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="folder_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar o crear carpeta..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {folders.map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="group_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grupo/Entrega (opcional)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un grupo existente o se generará uno automáticamente" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        {/* 1. Folder Field - Full Width */}
+        <FormField
+          control={form.control}
+          name="folder_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar o crear carpeta..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {folders.map((folder) => (
+                    <SelectItem key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* 3. Status and Visibility Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
