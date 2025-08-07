@@ -116,15 +116,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
     );
   }
 
-  if (lists.length === 0) {
-    return (
-      <EmptyState
-        icon={<List className="w-8 h-8 text-muted-foreground" />}
-        title="No hay listas en este tablero"
-        description="Crea tu primera lista para comenzar a organizar tareas"
-      />
-    );
-  }
+
 
   return (
     <>
