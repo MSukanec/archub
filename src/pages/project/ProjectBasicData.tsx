@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Database, ImageIcon, FileText, Users, MapPin, Building2, Globe } from 'lucide-react';
+import { ImageIcon, FileText, Users, MapPin, Building2 } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -204,60 +202,6 @@ export default function ProjectBasicData() {
       }}
     >
       <div className="space-y-6">
-        {/* ActionBar - Desktop Only */}
-        <ActionBarDesktop 
-          title="Datos Básicos"
-          icon={<Building2 className="h-5 w-5" />}
-          showProjectSelector={false}
-          showSearch={false}
-          showGrouping={false}
-          features={[
-            {
-              icon: <FileText className="w-4 h-4" />,
-              title: "Información completa del proyecto",
-              description: "Centraliza toda la información fundamental de tu proyecto en un solo lugar. Desde nombre y descripción hasta fechas importantes, mantén todos los datos organizados y actualizados automáticamente."
-            },
-            {
-              icon: <Users className="w-4 h-4" />,
-              title: "Datos del cliente integrados", 
-              description: "Almacena la información de contacto del cliente directamente en el proyecto. Teléfonos, emails y datos de contacto siempre disponibles para todo el equipo cuando los necesiten."
-            },
-            {
-              icon: <MapPin className="w-4 h-4" />,
-              title: "Ubicación y medidas precisas",
-              description: "Define la ubicación exacta de la obra y las superficies del proyecto. Esta información se usa automáticamente en cálculos de presupuestos y planificación de materiales."
-            },
-            {
-              icon: <Globe className="w-4 h-4" />,
-              title: "Configuración automática",
-              description: "Guarda automáticamente los cambios mientras escribes. Sin necesidad de hacer clic en botones, toda la información se mantiene sincronizada."
-            }
-          ]}
-        />
-
-        {/* FeatureIntroduction - Mobile Only */}
-        <FeatureIntroduction
-          title="Datos Básicos"
-          icon={<Building2 className="w-5 h-5" />}
-          features={[
-            {
-              icon: <FileText className="w-5 h-5" />,
-              title: "Información completa del proyecto",
-              description: "Centraliza toda la información fundamental de tu proyecto en un solo lugar. Desde nombre y descripción hasta fechas importantes, mantén todos los datos organizados y actualizados automáticamente."
-            },
-            {
-              icon: <Users className="w-5 h-5" />,
-              title: "Datos del cliente integrados",
-              description: "Almacena la información de contacto del cliente directamente en el proyecto. Teléfonos, emails y datos de contacto siempre disponibles para todo el equipo cuando los necesiten."
-            },
-            {
-              icon: <MapPin className="w-5 h-5" />,
-              title: "Ubicación y medidas precisas",
-              description: "Define la ubicación exacta de la obra y las superficies del proyecto. Esta información se usa automáticamente en cálculos de presupuestos y planificación de materiales."
-            }
-          ]}
-        />
-
         {/* Two Column Layout - Section descriptions left, content right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Imagen Principal */}
