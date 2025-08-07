@@ -257,20 +257,12 @@ export default function OrganizationContacts() {
       )
     },
     {
-      key: "contact_types" as const,
-      label: "Tipos",
+      key: "phone" as const,
+      label: "Teléfono",
       className: "w-1/5",
       render: (contact: any) => (
-        <div className="flex flex-wrap gap-1">
-          {contact.contact_types && contact.contact_types.length > 0 ? (
-            contact.contact_types.map((type: any) => (
-              <span key={type.id} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent" style={{backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)'}}>
-                {type.name}
-              </span>
-            ))
-          ) : (
-            <span className="text-sm text-muted-foreground">Sin tipo</span>
-          )}
+        <div className="text-sm text-muted-foreground">
+          {contact.phone || '—'}
         </div>
       )
     },
