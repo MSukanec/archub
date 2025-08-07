@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Table } from '@/components/ui-custom/Table'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Building, Phone, Mail, Share2, UserCheck } from 'lucide-react'
@@ -341,7 +343,7 @@ export default function OrganizationContacts() {
     return (
       <Layout
         headerProps={{
-          icon: <Users className="w-5 h-5" />,
+          icon: Users,
           title: "Contactos",
           actionButton: {
             label: 'Crear Contacto',
@@ -362,7 +364,7 @@ export default function OrganizationContacts() {
   return (
     <Layout
       headerProps={{
-        icon: <Users className="w-5 h-5" />,
+        icon: Users,
         title: "Contactos",
         actionButton: {
           label: 'Crear Contacto',
@@ -372,43 +374,7 @@ export default function OrganizationContacts() {
       }}
     >
       <div className="space-y-6">
-        {/* ActionBar Desktop */}
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'sort',
-              label: 'Ordenar',
-              icon: FILTER_ICONS.FILTER,
-              value: sortBy === 'name_asc' ? 'Nombre (A-Z)' : 
-                     sortBy === 'name_desc' ? 'Nombre (Z-A)' :
-                     sortBy === 'date_asc' ? 'Más Antiguos' : 'Más Recientes',
-              setValue: (value) => {
-                if (value === 'Nombre (A-Z)') setSortBy('name_asc')
-                else if (value === 'Nombre (Z-A)') setSortBy('name_desc')
-                else if (value === 'Más Antiguos') setSortBy('date_asc')
-                else setSortBy('date_desc')
-              },
-              options: ['Más Antiguos', 'Nombre (A-Z)', 'Nombre (Z-A)'],
-              defaultLabel: 'Más Recientes'
-            },
-            {
-              key: 'type',
-              label: 'Tipo',
-              icon: FILTER_ICONS.TYPE,
-              value: filterByType === 'all' ? 'Todos los Tipos' : contactTypes.find(t => t.id === filterByType)?.name || 'Todos los Tipos',
-              setValue: (value) => {
-                if (value === 'Todos los Tipos') {
-                  setFilterByType('all')
-                } else {
-                  const type = contactTypes.find(t => t.name === value)
-                  if (type) setFilterByType(type.id)
-                }
-              },
-              options: ['Arquitecto', 'Ingeniero', 'Constructor', 'Proveedor', 'Cliente'],
-              defaultLabel: 'Todos los Tipos'
-            }
-          ]}
-        />
+
 
         {/* FeatureIntroduction - Solo mobile */}
         <div className="md:hidden">
@@ -444,6 +410,56 @@ export default function OrganizationContacts() {
           data={filteredContacts}
           columns={columns}
           isLoading={contactsLoading}
+          defaultSort={{
+            key: "created_at",
+            direction: "desc",
+          }}
+          topBar={{
+            showSearch: true,
+            searchValue: searchValue,
+            onSearchChange: setSearchValue,
+            showFilter: true,
+            isFilterActive: sortBy !== 'date_desc' || filterByType !== 'all',
+            renderFilterContent: () => (
+              <div className="space-y-3 p-2 min-w-[200px]">
+                <div>
+                  <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Más Recientes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date_desc">Más Recientes</SelectItem>
+                      <SelectItem value="date_asc">Más Antiguos</SelectItem>
+                      <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                      <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                  <Select value={filterByType} onValueChange={setFilterByType}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todos los Tipos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los Tipos</SelectItem>
+                      <SelectItem value="arquitecto">Arquitecto</SelectItem>
+                      <SelectItem value="ingeniero">Ingeniero</SelectItem>
+                      <SelectItem value="constructor">Constructor</SelectItem>
+                      <SelectItem value="proveedor">Proveedor</SelectItem>
+                      <SelectItem value="cliente">Cliente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ),
+            onClearFilters: () => {
+              setSearchValue("");
+              setSortBy('date_desc');
+              setFilterByType('all');
+            }
+          }}
           emptyState={
             <div className="text-center py-8">
               <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
@@ -451,7 +467,6 @@ export default function OrganizationContacts() {
               <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
             </div>
           }
-
           renderCard={(contact: any) => (
             <ContactCard
               key={contact.id}
