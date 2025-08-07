@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -26,7 +25,6 @@ interface ComboBoxMultiSelectProps {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyText?: string;
-  maxDisplay?: number;
   className?: string;
 }
 
@@ -37,7 +35,6 @@ export function ComboBoxMultiSelect({
   placeholder = "Seleccionar opciones...",
   searchPlaceholder = "Buscar opciones...",
   emptyText = "No se encontraron opciones",
-  maxDisplay = 3,
   className,
 }: ComboBoxMultiSelectProps) {
   const [open, setOpen] = useState(false);
@@ -49,81 +46,83 @@ export function ComboBoxMultiSelect({
     onChange(newValue);
   };
 
+  const handleRemove = (optionValue: string) => {
+    const newValue = value.filter((v) => v !== optionValue);
+    onChange(newValue);
+  };
+
   const getDisplayText = () => {
     if (!value || value.length === 0) {
       return placeholder;
     }
     
-    if (value.length <= maxDisplay) {
-      return value
-        .map((v) => options?.find((opt) => opt.value === v)?.label)
-        .filter(Boolean)
-        .join(", ");
-    }
-    
-    return `${value.length} opciones seleccionadas`;
+    return `${value.length} tipo${value.length !== 1 ? 's' : ''} seleccionado${value.length !== 1 ? 's' : ''}`;
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("justify-between text-left", className)}
-        >
-          <span className="truncate">{getDisplayText()}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandEmpty>{emptyText}</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-            {options?.map((option) => (
-              <CommandItem
-                key={option.value}
-                value={option.label}
-                onSelect={() => handleSelect(option.value)}
-                className="cursor-pointer"
+    <div className={cn("space-y-2", className)}>
+      {/* Trigger que se ve como un Input/Select normal */}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            role="combobox"
+            aria-expanded={open}
+            className="flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1"
+          >
+            <span className={cn(
+              "truncate text-left",
+              (!value || value.length === 0) && "text-[var(--input-placeholder)]"
+            )}>
+              {getDisplayText()}
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+          <Command>
+            <CommandInput placeholder={searchPlaceholder} />
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto">
+              {options?.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => handleSelect(option.value)}
+                  className="cursor-pointer"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value?.includes(option.value) ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option.label}
+                </CommandItem>
+              )) || []}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {/* Badges debajo del componente */}
+      {value && value.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {value.map((v) => {
+            const option = options?.find((opt) => opt.value === v);
+            return option ? (
+              <Badge
+                key={v}
+                className="text-xs bg-[var(--accent)] text-white cursor-pointer hover:bg-[var(--accent)]/80 transition-colors flex items-center gap-1"
+                onClick={() => handleRemove(v)}
               >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value?.includes(option.value) ? "opacity-100" : "opacity-0"
-                  )}
-                />
                 {option.label}
-              </CommandItem>
-            )) || []}
-          </CommandGroup>
-          {value && value.length > 0 && (
-            <div className="border-t p-2">
-              <div className="flex flex-wrap gap-1">
-                {value.slice(0, maxDisplay).map((v) => {
-                  const option = options?.find((opt) => opt.value === v);
-                  return option ? (
-                    <Badge
-                      key={v}
-                      variant="secondary"
-                      className="text-xs"
-                    >
-                      {option.label}
-                    </Badge>
-                  ) : null;
-                })}
-                {value.length > maxDisplay && (
-                  <Badge variant="outline" className="text-xs">
-                    +{value.length - maxDisplay} más
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-        </Command>
-      </PopoverContent>
-    </Popover>
+                <X className="h-3 w-3" />
+              </Badge>
+            ) : null;
+          })}
+        </div>
+      )}
+    </div>
   );
 }
