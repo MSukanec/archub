@@ -24,7 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
+
 
 import { MemberCard } from "@/components/cards/MemberCard";
 
@@ -198,33 +198,7 @@ export default function OrganizationMembers() {
   return (
     <Layout headerProps={headerProps}>
       <div>
-        {/* Feature Introduction - Mobile only */}
-        <FeatureIntroduction
-          title="Gestión de Miembros"
-          icon={<Users className="h-5 w-5 text-[var(--accent)]" />}
-          features={[
-            {
-              icon: <Users className="h-4 w-4" />,
-              title: "Invitación de miembros",
-              description: "Invita a miembros de tu equipo que puedan acceder a todos los proyectos y herramientas de colaboración"
-            },
-            {
-              icon: <UserCheck className="h-4 w-4" />,
-              title: "Gestión de roles",
-              description: "Gestiona roles y permisos individuales para cada miembro según sus responsabilidades"
-            },
-            {
-              icon: <Clock className="h-4 w-4" />,
-              title: "Control de acceso",
-              description: "Controla el acceso a configuraciones de la organización y datos sensibles"
-            },
-            {
-              icon: <MoreHorizontal className="h-4 w-4" />,
-              title: "Supervisión de actividad",
-              description: "Supervisa la actividad y el estado de conexión de cada miembro del equipo"
-            }
-          ]}
-        />
+
 
 
 
