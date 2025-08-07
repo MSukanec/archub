@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import { Layout } from "@/components/layout/desktop/Layout";
-import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import { MemberCard } from "@/components/cards/MemberCard";
 
@@ -183,7 +182,16 @@ export default function OrganizationMembers() {
 
   const headerProps = {
     title: "Miembros",
-    description: "Gestiona los miembros de tu organización"
+    description: "Gestiona los miembros de tu organización",
+    action: {
+      label: "Invitar miembro",
+      icon: UserPlus,
+      onClick: () => openModal('member'),
+      customRestriction: {
+        feature: "max_members" as const,
+        current: members.length
+      }
+    }
   };
 
   const breadcrumb = [
@@ -222,46 +230,7 @@ export default function OrganizationMembers() {
           ]}
         />
 
-        {/* ActionBar Desktop */}
-        <ActionBarDesktop
-          title="Gestión de Miembros"
-          icon={<Users className="h-5 w-5" />}
-          showProjectSelector={false}
-          customActions={[
-            <CustomRestricted 
-              key="invite-member"
-              feature="max_members" 
-              current={members.length}
-            >
-              <Button onClick={() => openModal('member')}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Invitar miembro
-              </Button>
-            </CustomRestricted>
-          ]}
-          features={[
-            {
-              icon: <Users className="h-4 w-4" />,
-              title: "Invitación y gestión de equipo",
-              description: "Invita a miembros de tu equipo con acceso completo a proyectos y herramientas de colaboración. Administra perfiles y datos de contacto."
-            },
-            {
-              icon: <Shield className="h-4 w-4" />,
-              title: "Control de roles y permisos",
-              description: "Asigna roles específicos (Admin, Editor, Viewer) con permisos diferenciados. Controla acceso a configuraciones sensibles de la organización."
-            },
-            {
-              icon: <Activity className="h-4 w-4" />,
-              title: "Supervisión de actividad y estado",
-              description: "Monitorea el estado de conexión, última actividad y participación de cada miembro del equipo en tiempo real."
-            },
-            {
-              icon: <UserCheck className="h-4 w-4" />,
-              title: "Gestión de invitaciones y huéspedes",
-              description: "Administra invitaciones pendientes, cuentas de huéspedes temporales y colaboradores externos con acceso limitado a proyectos específicos."
-            }
-          ]}
-        />
+
 
         {/* Two Column Layout - Section descriptions left, content right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
@@ -309,18 +278,18 @@ export default function OrganizationMembers() {
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={member.users?.avatar_url} />
                             <AvatarFallback>
-                              {getInitials(member.users?.full_name || member.users?.email || 'U')}
+                              {getInitials((member.users as any)?.full_name || (member.users as any)?.email || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">
-                                {member.users?.full_name || 'Sin nombre'}
+                                {(member.users as any)?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {member.users?.email}
+                              {(member.users as any)?.email}
                             </p>
                           </div>
                         </div>
@@ -336,10 +305,10 @@ export default function OrganizationMembers() {
                           </div>
 
                           <Badge 
-                            variant={getRoleBadgeVariant(member.roles?.name || '')}
-                            className={getRoleBadgeClassName(member.roles?.name || '')}
+                            variant={getRoleBadgeVariant((member.roles as any)?.name || '')}
+                            className={getRoleBadgeClassName((member.roles as any)?.name || '')}
                           >
-                            {member.roles?.name || 'Sin rol'}
+                            {(member.roles as any)?.name || 'Sin rol'}
                           </Badge>
 
                           <DropdownMenu>
