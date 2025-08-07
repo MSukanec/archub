@@ -12,8 +12,6 @@ import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
 interface Contact {
@@ -209,41 +207,24 @@ export default function ProjectClients() {
 
 
 
-  // ActionBar features
-  const features = [
-    {
-      icon: <UserCheck className="h-4 w-4" />,
-      title: "Vincular Contactos al Proyecto",
-      description: "Agrega contactos de tu organización como clientes del proyecto actual para un control detallado."
-    },
-    {
-      icon: <CreditCard className="h-4 w-4" />,
-      title: "Gestión de Compromisos Financieros",
-      description: "Administra los montos comprometidos por cada cliente y configura las monedas correspondientes."
-    },
-    {
-      icon: <Users className="h-4 w-4" />,
-      title: "Roles y Permisos",
-      description: "Asigna roles específicos a cada cliente y controla su nivel de acceso a la información del proyecto."
-    },
-    {
-      icon: <TrendingUp className="h-4 w-4" />,
-      title: "Seguimiento de Aportes",
-      description: "Conecta automáticamente los aportes financieros con los clientes correspondientes para un seguimiento completo."
-    }
-  ]
+
 
   if (isLoading || loadingClients) {
     return (
       <Layout>
         <div className="space-y-6">
-          <ActionBarDesktop
-            title="Gestión de Clientes del Proyecto"
-            icon={<Handshake className="h-5 w-5" />}
-            features={features}
-            primaryActionLabel="Agregar Cliente"
-            onPrimaryActionClick={() => openModal('project-client')}
-          />
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Handshake className="h-6 w-6 text-[var(--accent)]" />
+              <h1 className="text-2xl font-bold">Clientes del Proyecto</h1>
+            </div>
+            <Button onClick={() => openModal('project-client')} variant="default">
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cliente
+            </Button>
+          </div>
+          
           <div className="flex items-center justify-center h-64">
             <div className="text-sm text-muted-foreground">Cargando clientes...</div>
           </div>
@@ -255,22 +236,17 @@ export default function ProjectClients() {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktop
-          title="Gestión de Clientes del Proyecto"
-          icon={<Handshake className="h-5 w-5" />}
-          features={features}
-          primaryActionLabel="Agregar Cliente"
-          onPrimaryActionClick={() => openModal('project-client')}
-        />
-
-        {/* Feature Introduction - Mobile only */}
-        <FeatureIntroduction
-          title="Gestión de Clientes del Proyecto"
-          icon={<Handshake className="h-6 w-6" />}
-          features={features}
-          className="md:hidden"
-        />
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Handshake className="h-6 w-6 text-[var(--accent)]" />
+            <h1 className="text-2xl font-bold">Clientes del Proyecto</h1>
+          </div>
+          <Button onClick={() => openModal('project-client')} variant="default">
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Cliente
+          </Button>
+        </div>
 
         {/* Conditional rendering: Two-column layout OR full-width empty state */}
         {projectClients && projectClients.length > 0 ? (
@@ -349,11 +325,17 @@ export default function ProjectClients() {
             </div>
           </div>
         ) : (
-          /* Full-width Custom Empty State - spans entire width below FeatureIntroduction */
+          /* Full-width Custom Empty State - spans entire width below header */
           <EmptyState
             icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
             title="No hay clientes agregados"
             description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
+            action={
+              <Button onClick={() => openModal('project-client')} variant="default">
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Cliente
+              </Button>
+            }
           />
         )}
       </div>
