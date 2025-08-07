@@ -13,7 +13,6 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
-import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
@@ -66,7 +65,10 @@ export default function ProfileBasicData() {
     mutationFn: async (data: typeof profileData) => {
       console.log('Saving profile data:', data)
       
-      const updates: any = {}
+      // Use the server endpoint to update user data and avatar
+      const profileUpdates: any = {
+        user_id: userData?.user?.id,
+      }
       
       // Handle user_data updates
       if (data.firstName !== userData?.user_data?.first_name ||
@@ -74,28 +76,30 @@ export default function ProfileBasicData() {
           data.country !== userData?.user_data?.country ||
           data.birthdate !== userData?.user_data?.birthdate) {
         
-        const userDataUpdates = {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          country: data.country || null,
-          birthdate: data.birthdate || null,
-        }
-        
-        const { error: userDataError } = await supabase!
-          .from('user_data')
-          .update(userDataUpdates)
-          .eq('user_id', userData?.user?.id)
-        
-        if (userDataError) throw userDataError
+        profileUpdates.first_name = data.firstName
+        profileUpdates.last_name = data.lastName
+        profileUpdates.country = data.country || null
+        profileUpdates.birthdate = data.birthdate || null
       }
       
       // Handle avatar URL update if changed
       if (data.avatarUrl !== userData?.user?.avatar_url) {
-        const { error: avatarError } = await supabase!.auth.updateUser({
-          data: { avatar_url: data.avatarUrl }
+        profileUpdates.avatar_url = data.avatarUrl
+      }
+      
+      // Only make request if there are updates beyond user_id
+      if (Object.keys(profileUpdates).length > 1) {
+        const response = await fetch('/api/user/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(profileUpdates),
         })
         
-        if (avatarError) throw avatarError
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
       }
       
       return data
