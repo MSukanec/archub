@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import UserSelector from "@/components/ui-custom/UserSelector";
+import DatePicker from "@/components/ui-custom/DatePicker";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -23,7 +24,7 @@ const cardSchema = z.object({
   description: z.string().optional(),
   created_by: z.string().min(1, "El creador es requerido"),
   assigned_to: z.string().optional(),
-  due_date: z.string().optional(),
+  due_date: z.date().optional(),
 });
 
 type CardFormData = z.infer<typeof cardSchema>;
@@ -62,7 +63,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       description: card?.description || '',
       created_by: card?.created_by || userData?.user?.id || '',
       assigned_to: card?.assigned_to || '',
-      due_date: card?.due_date || '',
+      due_date: card?.due_date ? new Date(card.due_date) : undefined,
     }
   });
 
@@ -95,7 +96,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           title: data.title,
           description: data.description || undefined,
           assigned_to: data.assigned_to || undefined,
-          due_date: data.due_date || undefined,
+          due_date: data.due_date ? data.due_date.toISOString().split('T')[0] : undefined,
           list_id: card.list_id
         });
         
@@ -121,7 +122,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           description: data.description || undefined,
           created_by: data.created_by,
           assigned_to: data.assigned_to || undefined,
-          due_date: data.due_date || undefined
+          due_date: data.due_date ? data.due_date.toISOString().split('T')[0] : undefined
         });
         
         handleClose();
@@ -223,9 +224,10 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
             <FormItem>
               <FormLabel>Fecha límite (opcional)</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="date"
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar fecha límite"
                 />
               </FormControl>
               <FormMessage />
