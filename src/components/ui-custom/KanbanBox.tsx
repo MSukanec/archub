@@ -44,9 +44,9 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
     const member = members.find(m => m.id === createdBy);
     if (!member) return null;
     return {
-      name: member.user?.full_name || member.user?.email || 'Usuario',
-      avatar: member.user?.avatar_url,
-      initials: member.user?.full_name?.split(' ').map(n => n[0]).join('') || 'U'
+      name: (member as any).user?.full_name || (member as any).user?.email || 'Usuario',
+      avatar: (member as any).user?.avatar_url,
+      initials: (member as any).user?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'
     };
   };
 
@@ -119,7 +119,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
 
   return (
-    <>
+    <Card className="rounded-lg border border-[var(--card-border)] shadow-lg p-6" style={{ backgroundColor: "var(--card-bg)" }}>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="lists" direction="horizontal" type="LIST">
           {(provided) => (
@@ -579,7 +579,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
       {/* Modals are managed by ModalFactory now */}
 
-
-    </>
+    </Card>
   );
 }
