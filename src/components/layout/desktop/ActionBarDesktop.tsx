@@ -146,52 +146,54 @@ export function ActionBarDesktop({
       style={{ backgroundColor: "var(--card-bg)" }}
     >
       {/* Bottom Row - ActionBar Content */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* Tabs */}
-        {tabs && activeTab && onTabChange && (
-          <Tabs
-            tabs={tabs}
-            value={activeTab}
-            onValueChange={onTabChange}
-          />
-        )}
-        
-        {/* Budget Selector */}
-        {budgetSelector && (
-          <div className="flex items-center gap-2">
-            <div className="w-80">
-              <Selector
-                options={budgetSelector.budgets.map((budget: any) => ({
-                  value: budget.id,
-                  label: budget.name
-                }))}
-                value={budgetSelector.selectedBudgetId}
-                onValueChange={budgetSelector.onBudgetChange}
-                placeholder="Selecciona un presupuesto"
-                className="h-8"
-              />
-            </div>
-            
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost-icon"
-                onClick={budgetSelector.onEditBudget}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
+      <div className="flex items-center justify-between px-4 py-3">
+        {/* Left side - Tabs OR Budget Selector with actions */}
+        <div className="flex items-center gap-3">
+          {/* Tabs */}
+          {tabs && activeTab && onTabChange && (
+            <Tabs
+              tabs={tabs}
+              value={activeTab}
+              onValueChange={onTabChange}
+            />
+          )}
+          
+          {/* Budget Selector */}
+          {budgetSelector && (
+            <div className="flex items-center gap-2">
+              <div className="min-w-96 w-auto">
+                <Selector
+                  options={budgetSelector.budgets.map((budget: any) => ({
+                    value: budget.id,
+                    label: budget.name
+                  }))}
+                  value={budgetSelector.selectedBudgetId}
+                  onValueChange={budgetSelector.onBudgetChange}
+                  placeholder="Selecciona un presupuesto"
+                  className="h-8"
+                />
+              </div>
               
-              <Button
-                variant="ghost-icon"
-                className="text-destructive hover:text-destructive"
-                onClick={budgetSelector.onDeleteBudget}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost-icon"
+                  onClick={budgetSelector.onEditBudget}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                
+                <Button
+                  variant="ghost-icon"
+                  className="text-destructive hover:text-destructive"
+                  onClick={budgetSelector.onDeleteBudget}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {/* Parameter Selector */}
+          )}
+          
+          {/* Parameter Selector */}
           {parameterSelector && (
             <div className="flex items-center gap-2">
               <div className="min-w-96 w-auto">
