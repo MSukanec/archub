@@ -38,7 +38,6 @@ export function useContacts() {
           )
         `)
         .eq('organization_id', userData.organization.id)
-        .not('linked_user_id', 'eq', userData.id)
         .order('first_name', { ascending: true })
 
       if (error) {
@@ -46,11 +45,11 @@ export function useContacts() {
         throw error
       }
       
-      // Transform the contact_types data structure
+      // Transform the contact_types data structure and filter out current user
       const transformedData = data?.map(contact => ({
         ...contact,
         contact_types: contact.contact_types?.map((link: any) => link.contact_type).filter(Boolean) || []
-      })) || []
+      })).filter(contact => contact.linked_user_id !== userData.user.id) || []
       
       return transformedData
     },
