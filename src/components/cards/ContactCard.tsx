@@ -13,7 +13,10 @@ type ContactCardProps = {
     email?: string;
     phone?: string;
     company_name?: string;
-    contact_type?: string;
+    contact_types?: Array<{
+      id: string;
+      name: string;
+    }>;
     linked_user_id?: string;
     linked_user?: {
       id: string;
@@ -46,7 +49,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
     email,
     phone,
     company_name,
-    contact_type,
+    contact_types,
     linked_user_id,
     linked_user
   } = contact;
@@ -61,16 +64,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
   const avatar = linked_user?.avatar_url || '';
   const avatarFallback = linked_user ? getInitials(linked_user.full_name) : getInitials(displayName);
 
-  // Get contact type display
-  const contactTypes: { [key: string]: string } = {
-    'arquitecto': 'Arquitecto',
-    'ingeniero': 'Ingeniero',
-    'constructor': 'Constructor',
-    'proveedor': 'Proveedor',
-    'cliente': 'Cliente'
-  };
-  
-  const typeDisplay = contact_type ? contactTypes[contact_type] || contact_type : '';
+  // Variable removed as we now display contact types directly in the component
 
   return (
     <SwipeableCard
@@ -113,10 +107,14 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
                   Usuario
                 </Badge>
               )}
-              {typeDisplay && (
-                <Badge variant="outline" className="text-xs shrink-0">
-                  {typeDisplay}
-                </Badge>
+              {contact_types && contact_types.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {contact_types.map((type) => (
+                    <Badge key={type.id} variant="outline" className="text-xs shrink-0">
+                      {type.name}
+                    </Badge>
+                  ))}
+                </div>
               )}
             </div>
             

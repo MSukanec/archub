@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
+import { useContactTypes } from '@/hooks/use-contact-types'
 import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Building, Phone, Mail, Share2, UserCheck } from 'lucide-react'
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { FILTER_ICONS } from '@/constants/actionBarConstants'
@@ -41,14 +42,8 @@ export default function OrganizationContacts() {
   const { setActions, setShowActionBar, clearActions } = useMobileActionBar()
   const isMobile = useMobile()
 
-  // Lista hardcoded de tipos de contacto
-  const contactTypes = [
-    { id: 'arquitecto', name: 'Arquitecto' },
-    { id: 'ingeniero', name: 'Ingeniero' },
-    { id: 'constructor', name: 'Constructor' },
-    { id: 'proveedor', name: 'Proveedor' },
-    { id: 'cliente', name: 'Cliente' }
-  ]
+  // Cargar tipos de contacto de la base de datos
+  const { data: contactTypes = [] } = useContactTypes()
 
   // Configure mobile action bar
   useEffect(() => {
@@ -124,7 +119,9 @@ export default function OrganizationContacts() {
 
     // Filtro por tipo
     if (filterByType !== 'all') {
-      filtered = filtered.filter(contact => contact.contact_type_id === filterByType)
+      filtered = filtered.filter(contact => 
+        contact.contact_types && contact.contact_types.some((type: any) => type.name.toLowerCase() === filterByType)
+      )
     }
 
     // Ordenamiento
@@ -244,12 +241,22 @@ export default function OrganizationContacts() {
       )
     },
     {
-      key: "contact_type_id" as const,
-      label: "Tipo",
+      key: "contact_types" as const,
+      label: "Tipos",
       render: (contact: any) => (
-        <Badge variant="secondary" className="text-xs">
-          {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
-        </Badge>
+        <div className="flex flex-wrap gap-1">
+          {contact.contact_types && contact.contact_types.length > 0 ? (
+            contact.contact_types.map((type: any) => (
+              <Badge key={type.id} variant="secondary" className="text-xs">
+                {type.name}
+              </Badge>
+            ))
+          ) : (
+            <Badge variant="outline" className="text-xs">
+              Sin tipo
+            </Badge>
+          )}
+        </div>
       )
     },
     {
@@ -444,11 +451,11 @@ export default function OrganizationContacts() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos los Tipos</SelectItem>
-                      <SelectItem value="arquitecto">Arquitecto</SelectItem>
-                      <SelectItem value="ingeniero">Ingeniero</SelectItem>
-                      <SelectItem value="constructor">Constructor</SelectItem>
-                      <SelectItem value="proveedor">Proveedor</SelectItem>
-                      <SelectItem value="cliente">Cliente</SelectItem>
+                      {contactTypes?.map((type) => (
+                        <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ComboBoxMultiSelect } from "@/components/ui-custom/ComboBoxMultiSelect";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContactTypes } from "@/hooks/use-contact-types";
@@ -30,7 +31,7 @@ const createContactSchema = z.object({
   last_name: z.string().optional(),
   email: z.union([z.string().email("Email inválido"), z.literal("")]).optional(),
   phone: z.string().optional(),
-  contact_type_id: z.string().optional(),
+  contact_type_ids: z.array(z.string()).optional(),
   company_name: z.string().optional(),
   location: z.string().optional(),
   notes: z.string().optional(),
@@ -47,7 +48,10 @@ interface Contact {
   full_name?: string;
   email?: string;
   phone?: string;
-  contact_type_id?: string;
+  contact_types?: Array<{
+    id: string;
+    name: string;
+  }>;
   company_name?: string;
   location?: string;
   notes?: string;
@@ -87,7 +91,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       last_name: editingContact?.last_name || '',
       email: editingContact?.email || '',
       phone: editingContact?.phone || '',
-      contact_type_id: editingContact?.contact_type_id || '',
+      contact_type_ids: editingContact?.contact_types?.map(ct => ct.id) || [],
       company_name: editingContact?.company_name || '',
       location: editingContact?.location || '',
       notes: editingContact?.notes || '',
@@ -104,7 +108,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         last_name: editingContact.last_name || '',
         email: editingContact.email || '',
         phone: editingContact.phone || '',
-        contact_type_id: editingContact.contact_type_id || '',
+        contact_type_ids: editingContact.contact_types?.map(ct => ct.id) || [],
         company_name: editingContact.company_name || '',
         location: editingContact.location || '',
         notes: editingContact.notes || '',
@@ -117,7 +121,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
         last_name: '',
         email: '',
         phone: '',
-        contact_type_id: '',
+        contact_type_ids: [],
         company_name: '',
         location: '',
         notes: '',
@@ -134,6 +138,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       }
 
       if (isEditing && editingContact) {
+        // Update contact
         const { data: updatedContact, error } = await supabase
           .from('contacts')
           .update({
@@ -141,7 +146,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             last_name: data.last_name || null,
             email: data.email || null,
             phone: data.phone || null,
-            contact_type_id: data.contact_type_id || null,
             company_name: data.company_name || null,
             location: data.location || null,
             notes: data.notes || null,
@@ -152,8 +156,30 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           .single();
 
         if (error) throw error;
+
+        // Delete existing contact type links
+        await supabase
+          .from('contact_type_links')
+          .delete()
+          .eq('contact_id', editingContact.id);
+
+        // Insert new contact type links
+        if (data.contact_type_ids && data.contact_type_ids.length > 0) {
+          const typeLinks = data.contact_type_ids.map(typeId => ({
+            contact_id: editingContact.id,
+            contact_type_id: typeId,
+          }));
+
+          const { error: linksError } = await supabase
+            .from('contact_type_links')
+            .insert(typeLinks);
+
+          if (linksError) throw linksError;
+        }
+
         return updatedContact;
       } else {
+        // Create new contact
         const { data: newContact, error } = await supabase
           .from('contacts')
           .insert({
@@ -162,7 +188,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             last_name: data.last_name || null,
             email: data.email || null,
             phone: data.phone || null,
-            contact_type_id: data.contact_type_id || null,
             company_name: data.company_name || null,
             location: data.location || null,
             notes: data.notes || null,
@@ -172,6 +197,21 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           .single();
 
         if (error) throw error;
+
+        // Insert contact type links
+        if (data.contact_type_ids && data.contact_type_ids.length > 0) {
+          const typeLinks = data.contact_type_ids.map(typeId => ({
+            contact_id: newContact.id,
+            contact_type_id: typeId,
+          }));
+
+          const { error: linksError } = await supabase
+            .from('contact_type_links')
+            .insert(typeLinks);
+
+          if (linksError) throw linksError;
+        }
+
         return newContact;
       }
     },
@@ -402,7 +442,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                 <FormLabel>Teléfono</FormLabel>
                 <FormControl>
                   <PhoneInput
-                    value={field.value}
+                    value={field.value || ""}
                     onChange={field.onChange}
                     placeholder="Número de teléfono"
                   />
@@ -412,27 +452,27 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             )}
           />
 
-          {/* Tipo de Contacto - FULL WIDTH */}
+          {/* Tipos de Contacto - FULL WIDTH */}
           <FormField
             control={form.control}
-            name="contact_type_id"
+            name="contact_type_ids"
             render={({ field }) => (
               <FormItem className="lg:col-span-2">
-                <FormLabel>Tipo de contacto</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {contactTypes?.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Tipos de contacto</FormLabel>
+                <FormControl>
+                  <ComboBoxMultiSelect
+                    options={contactTypes?.map(type => ({
+                      value: type.id,
+                      label: type.name
+                    })) || []}
+                    value={field.value || []}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar tipos de contacto..."
+                    searchPlaceholder="Buscar tipos..."
+                    emptyText="No hay tipos disponibles"
+                    className="w-full min-h-[40px]"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -520,7 +560,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           form.handleSubmit(onSubmit)();
         }
       }}
-      rightLoading={createContactMutation.isPending}
+      isLoading={createContactMutation.isPending}
     />
   );
 

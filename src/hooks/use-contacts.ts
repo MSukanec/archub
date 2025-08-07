@@ -29,6 +29,12 @@ export function useContacts() {
                 name
               )
             )
+          ),
+          contact_types:contact_type_links!contact_type_links_contact_id_fkey(
+            contact_type:contact_types!contact_type_links_contact_type_id_fkey(
+              id,
+              name
+            )
           )
         `)
         .eq('organization_id', userData.organization.id)
@@ -39,7 +45,13 @@ export function useContacts() {
         throw error
       }
       
-      return data || []
+      // Transform the contact_types data structure
+      const transformedData = data?.map(contact => ({
+        ...contact,
+        contact_types: contact.contact_types?.map((link: any) => link.contact_type).filter(Boolean) || []
+      })) || []
+      
+      return transformedData
     },
     enabled: !!supabase && !!userData?.organization?.id && !userLoading,
   })
