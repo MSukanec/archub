@@ -246,7 +246,7 @@ export default function OrganizationContacts() {
         <div className="flex flex-wrap gap-1">
           {contact.contact_types && contact.contact_types.length > 0 ? (
             contact.contact_types.map((type: any) => (
-              <span key={type.id} className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-md border border-gray-200">
+              <span key={type.id} className="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-800 rounded-full border">
                 {type.name}
               </span>
             ))
