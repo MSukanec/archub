@@ -183,14 +183,10 @@ export default function OrganizationMembers() {
   const headerProps = {
     title: "Miembros",
     description: "Gestiona los miembros de tu organización",
-    action: {
+    actionButton: {
       label: "Invitar miembro",
       icon: UserPlus,
-      onClick: () => openModal('member'),
-      customRestriction: {
-        feature: "max_members" as const,
-        current: members.length
-      }
+      onClick: () => openModal('member')
     }
   };
 
