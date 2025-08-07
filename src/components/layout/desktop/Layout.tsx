@@ -97,7 +97,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-3 md:p-6 pb-12 ${
-          headerProps?.tabs?.length ? 'md:pt-24' : 'md:pt-12'
+          headerProps?.tabs?.length ? "md:pt-24" : "md:pt-12"
         } ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded
@@ -105,7 +105,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             : "md:ml-[80px]" // 40px main + 40px secondary
         } ml-0 pt-1 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
       >
-        <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>{children}</div>
+        <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>
+          {children}
+        </div>
       </main>
 
       {/* Mobile Action Bar - Solo visible en mobile */}
