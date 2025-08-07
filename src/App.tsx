@@ -48,7 +48,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import DesignDocumentation from "@/pages/design/DesignDocumentation";
 
 import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
-import OrganizationTasks from "@/pages/organization/OrganizationTasks";
+import OrganizationBoard from "@/pages/organization/OrganizationBoard";
 import ProfileOrganizations from "@/pages/profile/ProfileOrganizations";
 
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
@@ -138,7 +138,7 @@ function Router() {
         </Route>
         <Route path="/organization/tasks">
           <ProtectedRoute>
-            <OrganizationTasks />
+            <OrganizationBoard />
           </ProtectedRoute>
         </Route>
         <Route path="/organizaciones">

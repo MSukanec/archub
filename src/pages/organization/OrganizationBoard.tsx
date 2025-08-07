@@ -20,7 +20,7 @@ import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
 
 import { Card } from '@/components/ui/card';
 
-function TasksContent() {
+function BoardContent() {
 
 
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
@@ -159,10 +159,17 @@ function TasksContent() {
   // Current board for display
   const currentBoard = boards.find(board => board.id === currentBoardId);
 
+  // Breadcrumb configuration
+  const breadcrumb = [
+    { name: "Organización", href: "/organization/dashboard" },
+    { name: "Tablero", href: "/organization/tasks" }
+  ];
+
   // Header configuration following ai-page-template.md
   const headerProps = {
     icon: CheckSquare,
-    title: "Tareas para Hacer",
+    title: "Tablero",
+    breadcrumb,
     actionButton: currentBoardId ? {
       label: 'Nueva Lista',
       icon: Plus,
@@ -202,7 +209,8 @@ function TasksContent() {
   if (boards.length === 0) {
     const emptyHeaderProps = {
       icon: CheckSquare,
-      title: "Tareas para Hacer",
+      title: "Tablero",
+      breadcrumb,
       actionButton: {
         label: 'Nuevo Tablero',
         icon: Plus,
@@ -303,10 +311,10 @@ function TasksContent() {
   );
 }
 
-export default function Tasks() {
+export default function OrganizationBoard() {
   return (
     <MobileActionBarProvider>
-      <TasksContent />
+      <BoardContent />
       <MobileActionBar />
     </MobileActionBarProvider>
   );
