@@ -339,7 +339,17 @@ export default function OrganizationContacts() {
 
   if (contacts.length === 0 && !searchValue && filterByType === 'all') {
     return (
-      <Layout>
+      <Layout
+        headerProps={{
+          icon: <Users className="w-5 h-5" />,
+          title: "Contactos",
+          actionButton: {
+            label: 'Crear Contacto',
+            icon: UserPlus,
+            onClick: () => openModal('contact', { isEditing: false })
+          }
+        }}
+      >
         <EmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="No hay contactos"
@@ -350,7 +360,17 @@ export default function OrganizationContacts() {
   }
 
   return (
-    <Layout>
+    <Layout
+      headerProps={{
+        icon: <Users className="w-5 h-5" />,
+        title: "Contactos",
+        actionButton: {
+          label: 'Crear Contacto',
+          icon: UserPlus,
+          onClick: () => openModal('contact', { isEditing: false })
+        }
+      }}
+    >
       <div className="space-y-6">
         {/* ActionBar Desktop */}
         <ActionBarDesktopRow
@@ -386,14 +406,6 @@ export default function OrganizationContacts() {
               },
               options: ['Arquitecto', 'Ingeniero', 'Constructor', 'Proveedor', 'Cliente'],
               defaultLabel: 'Todos los Tipos'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Crear contacto',
-              icon: Plus,
-              onClick: () => openModal('contact', { isEditing: false }),
-              variant: 'default'
             }
           ]}
         />
