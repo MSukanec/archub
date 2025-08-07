@@ -209,24 +209,25 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
     },
     onSuccess: async (newProject) => {
       // Si estamos creando un nuevo proyecto (no editando), establecerlo como activo
-      if (!isEditing && newProject && userData?.preferences?.id) {
+      if (!isEditing && newProject && userData?.organization_preferences?.id && organizationId) {
         try {
           const { error: preferencesError } = await supabase
-            .from('user_preferences')
+            .from('user_organization_preferences')
             .update({ last_project_id: newProject.id })
-            .eq('id', userData.preferences.id);
+            .eq('id', userData.organization_preferences.id);
           
           if (preferencesError) {
             console.error('Error setting project as active:', preferencesError);
           }
         } catch (error) {
-          console.error('Error updating user preferences:', error);
+          console.error('Error updating user organization preferences:', error);
         }
       }
 
       // Only invalidate necessary queries to prevent unnecessary requests
       queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
         description: isEditing 
