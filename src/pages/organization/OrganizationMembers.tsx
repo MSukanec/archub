@@ -187,13 +187,12 @@ export default function OrganizationMembers() {
       label: "Invitar miembro",
       icon: UserPlus,
       onClick: () => openModal('member')
-    }
+    },
+    breadcrumb: [
+      { name: "Organización", href: "/organization/dashboard" },
+      { name: "Miembros", href: "/organization/members" }
+    ]
   };
-
-  const breadcrumb = [
-    { name: "Organización", href: "/organization/dashboard" },
-    { name: "Miembros", href: "/organization/members" }
-  ];
 
   return (
     <Layout headerProps={headerProps}>

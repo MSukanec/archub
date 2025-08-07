@@ -160,8 +160,17 @@ export default function OrganizationActivity() {
     }
   ];
 
+  const headerProps = {
+    title: "Actividad",
+    description: "Registro de todas las acciones de la organización",
+    breadcrumb: [
+      { name: "Organización", href: "/organization/dashboard" },
+      { name: "Actividad", href: "/organization/activity" }
+    ]
+  };
+
   return (
-    <Layout>
+    <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Activity Chart and Table */}
         {isLoading ? (
