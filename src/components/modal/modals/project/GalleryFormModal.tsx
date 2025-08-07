@@ -19,10 +19,7 @@ import { Upload, X, File, Images, Image as ImageIcon, FileVideo } from 'lucide-r
 
 import { supabase } from '@/lib/supabase';
 
-const gallerySchema = z.object({
-  title: z.string().min(1, 'El título es obligatorio'),
-  description: z.string().optional(),
-});
+const gallerySchema = z.object({});
 
 type GalleryFormData = z.infer<typeof gallerySchema>;
 
@@ -51,10 +48,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const form = useForm<GalleryFormData>({
     resolver: zodResolver(gallerySchema),
-    defaultValues: {
-      title: '',
-      description: '',
-    },
+    defaultValues: {},
   });
 
   const { handleSubmit, reset, formState: { isSubmitting } } = form;
@@ -62,27 +56,9 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   // Reset form when editing file changes or user data loads
   useEffect(() => {
     if (userData) {
-      if (editingFile) {
-        reset({
-          title: editingFile.title || '',
-          description: editingFile.description || '',
-        });
-      } else {
-        reset({
-          title: '',
-          description: '',
-        });
-      }
+      reset({});
     }
   }, [editingFile, reset, userData]);
-
-  // Efecto para autocompletar el título con el nombre del archivo
-  useEffect(() => {
-    if (files.length > 0 && !editingFile) {
-      const fileName = files[0].name.split('.').slice(0, -1).join('.'); // Remover extensión
-      form.setValue('title', fileName);
-    }
-  }, [files, form, editingFile]);
 
   const uploadMutation = useMutation({
     mutationFn: async (data: GalleryFormData) => {
@@ -93,7 +69,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       const galleryFiles: GalleryFileInput[] = files.map((file, index) => ({
         file,
         title: fileNames[index] || file.name.replace(/\.[^/.]+$/, ''),
-        description: data.description || undefined,
+        description: undefined,
         entry_type: 'registro_general',
       }));
 
@@ -207,40 +183,6 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const editPanel = (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Title Field */}
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título</FormLabel>
-              <FormControl>
-                <Input placeholder="Título del archivo" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Description Field */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción (Opcional)</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descripción del archivo"
-                  rows={3}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* File Upload Section */}
         {!editingFile && (
           <div className="space-y-4">
