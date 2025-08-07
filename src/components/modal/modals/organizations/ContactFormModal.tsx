@@ -330,7 +330,8 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   const editPanel = (
     <>
-      {/* User Linking Section - FULL WIDTH */}
+      {/* User Linking Section - COMENTADO TEMPORALMENTE */}
+      {/*
       <div className="space-y-3 lg:col-span-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Vincular usuario existente</label>
         
@@ -372,7 +373,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           </Button>
         )}
 
-        {/* User Search */}
         {isLinkingUser && (
           <div className="space-y-3 p-4 border rounded-lg bg-muted/20">
             <div className="relative">
@@ -423,91 +423,96 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           </div>
         )}
       </div>
+      */}
 
-      {/* FORM FIELDS - RESPONSIVE GRID LAYOUT */}
+      {/* FORM FIELDS - CON SPACING CONSISTENTE */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Nombre - Apellido */}
-          <FormField
-            control={form.control}
-            name="first_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre *</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Nombre" 
-                    {...field} 
-                    disabled={!!selectedUser || !!editingContact?.linked_user}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Nombre" 
+                      {...field} 
+                      disabled={!!selectedUser || !!editingContact?.linked_user}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="last_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Apellido</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Apellido" 
-                    {...field} 
-                    disabled={!!selectedUser || !!editingContact?.linked_user}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Apellido" 
+                      {...field} 
+                      disabled={!!selectedUser || !!editingContact?.linked_user}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Email - Telefono */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="email" 
-                    placeholder="email@ejemplo.com" 
-                    {...field} 
-                    disabled={!!selectedUser || !!editingContact?.linked_user}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="email@ejemplo.com" 
+                      {...field} 
+                      disabled={!!selectedUser || !!editingContact?.linked_user}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teléfono</FormLabel>
-                <FormControl>
-                  <PhoneInput
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    placeholder="Número de teléfono"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teléfono</FormLabel>
+                  <FormControl>
+                    <PhoneInput
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Número de teléfono"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Tipos de Contacto - FULL WIDTH */}
           <FormField
             control={form.control}
             name="contact_type_ids"
             render={({ field }) => (
-              <FormItem className="lg:col-span-2">
+              <FormItem>
                 <FormLabel>Tipos de contacto</FormLabel>
                 <FormControl>
                   <ComboBoxMultiSelect
@@ -529,40 +534,42 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           />
 
           {/* Empresa - Ubicacion */}
-          <FormField
-            control={form.control}
-            name="company_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Empresa</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nombre de la empresa" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="company_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Empresa</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nombre de la empresa" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ubicación</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ciudad, país" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ubicación</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ciudad, país" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Notas - FULL WIDTH */}
           <FormField
             control={form.control}
             name="notes"
             render={({ field }) => (
-              <FormItem className="lg:col-span-2">
+              <FormItem>
                 <FormLabel>Notas</FormLabel>
                 <FormControl>
                   <Textarea 
@@ -610,7 +617,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           form.handleSubmit(onSubmit)();
         }
       }}
-
+      rightDisabled={createContactMutation.isPending}
     />
   );
 
