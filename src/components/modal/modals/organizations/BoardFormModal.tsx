@@ -214,6 +214,7 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      onSubmit={form.handleSubmit(onSubmit)}
     />
   );
 }

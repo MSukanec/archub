@@ -48,7 +48,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
 
   // Convert members to users format for UserSelector
   const users = members.map(member => ({
-    id: member.user_id,
+    id: member.id, // Use organization member ID, not user_id
     full_name: member.full_name || member.email || 'Usuario',
     email: member.email || '',
     avatar_url: member.avatar_url
@@ -57,7 +57,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const form = useForm<CardFormData>({
     resolver: zodResolver(cardSchema),
     defaultValues: {
-      created_by: card?.created_by || userData?.user?.id || '',
+      created_by: card?.created_by || '',
       assigned_to: card?.assigned_to || '',
       title: card?.title || '',
       description: card?.description || '',
@@ -66,10 +66,14 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
 
   // Set current user as default creator when modal opens
   useEffect(() => {
-    if (!isEditing && userData?.user?.id) {
-      form.setValue('created_by', userData.user.id);
+    if (!isEditing && userData?.organization?.id) {
+      // Find current user's organization member ID
+      const currentMember = members.find(m => m.user_id === userData.user?.id);
+      if (currentMember) {
+        form.setValue('created_by', currentMember.id);
+      }
     }
-  }, [userData?.user?.id, form, isEditing]);
+  }, [userData, members, form, isEditing]);
 
   // Set panel to edit mode when editing a card
   useEffect(() => {
@@ -265,6 +269,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
+      onSubmit={form.handleSubmit(onSubmit)}
     />
   );
 }
