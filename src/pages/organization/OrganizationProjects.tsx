@@ -33,8 +33,6 @@ export default function OrganizationProjects() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
-  const [filterByModality, setFilterByModality] = useState('all')
-  const [filterByType, setFilterByType] = useState('all')
   
   const { openModal } = useGlobalModalStore()
   const [isMobile, setIsMobile] = useState(false)
@@ -72,36 +70,13 @@ export default function OrganizationProjects() {
   let filteredProjects = projects?.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchValue.toLowerCase())
     
-    // Filtro por estado
-    let matchesStatus = true
-    if (filterByStatus !== "all") {
-      if (filterByStatus === "active") matchesStatus = project.status === 'active'
-      else if (filterByStatus === "planning") matchesStatus = project.status === 'planning'
-      else if (filterByStatus === "completed") matchesStatus = project.status === 'completed'
-      else if (filterByStatus === "on-hold") matchesStatus = project.status === 'on-hold'
-    }
+    if (filterByStatus === "all") return matchesSearch
+    if (filterByStatus === "active") return matchesSearch && project.status === 'active'
+    if (filterByStatus === "planning") return matchesSearch && project.status === 'planning'
+    if (filterByStatus === "completed") return matchesSearch && project.status === 'completed'
+    if (filterByStatus === "on-hold") return matchesSearch && project.status === 'on-hold'
     
-    // Filtro por modalidad (usar project_data)
-    let matchesModality = true
-    if (filterByModality !== "all") {
-      const modality = project.project_data?.modality
-      if (filterByModality === "residential") matchesModality = modality === 'residential'
-      else if (filterByModality === "commercial") matchesModality = modality === 'commercial'
-      else if (filterByModality === "industrial") matchesModality = modality === 'industrial'
-      else if (filterByModality === "mixed") matchesModality = modality === 'mixed'
-    }
-    
-    // Filtro por tipo (usar project_data)
-    let matchesType = true
-    if (filterByType !== "all") {
-      const type = project.project_data?.type
-      if (filterByType === "new") matchesType = type === 'new'
-      else if (filterByType === "renovation") matchesType = type === 'renovation'
-      else if (filterByType === "expansion") matchesType = type === 'expansion'
-      else if (filterByType === "maintenance") matchesType = type === 'maintenance'
-    }
-    
-    return matchesSearch && matchesStatus && matchesModality && matchesType
+    return matchesSearch
   }) || []
 
   // Aplicar ordenamiento
@@ -282,8 +257,6 @@ export default function OrganizationProjects() {
     setSearchValue("")
     setSortBy('date_recent')
     setFilterByStatus('all')
-    setFilterByModality('all')
-    setFilterByType('all')
   }
 
 
@@ -336,58 +309,34 @@ export default function OrganizationProjects() {
           <>
             {/* ActionBarDesktopRow - Show only when there are projects */}
             <ActionBarDesktopRow 
-              filters={[
-                {
-                  key: "modality",
-                  label: "Modalidad",
-                  icon: Home,
-                  value: filterByModality,
-                  setValue: setFilterByModality,
-                  options: [
-                    { value: "all", label: "Todas las modalidades" },
-                    { value: "residential", label: "Residencial" },
-                    { value: "commercial", label: "Comercial" },
-                    { value: "industrial", label: "Industrial" },
-                    { value: "mixed", label: "Mixto" }
-                  ],
-                  defaultLabel: "Todas las modalidades"
-                },
-                {
-                  key: "type", 
-                  label: "Tipo",
-                  icon: FileText,
-                  value: filterByType,
-                  setValue: setFilterByType,
-                  options: [
-                    { value: "all", label: "Todos los tipos" },
-                    { value: "new", label: "Obra Nueva" },
-                    { value: "renovation", label: "Remodelación" },
-                    { value: "expansion", label: "Ampliación" },
-                    { value: "maintenance", label: "Mantenimiento" }
-                  ],
-                  defaultLabel: "Todos los tipos"
-                },
-                {
-                  key: "status",
-                  label: "Estado", 
-                  icon: BarChart3,
-                  value: filterByStatus,
-                  setValue: setFilterByStatus,
-                  options: [
-                    { value: "all", label: "Todos los estados" },
-                    { value: "planning", label: "Planificación" },
-                    { value: "active", label: "Activo" },
-                    { value: "completed", label: "Completado" },
-                    { value: "on-hold", label: "En Pausa" }
-                  ],
-                  defaultLabel: "Todos los estados"
-                }
-              ]}
+              filters={[]}
               actions={[
+                {
+                  label: "Buscar",
+                  icon: Search,
+                  onClick: () => {
+                    // Placeholder for search functionality
+                    console.log("Search clicked");
+                  },
+                  variant: "ghost"
+                },
+                {
+                  label: "Filtros", 
+                  icon: Filter,
+                  onClick: () => {
+                    // Placeholder for filters functionality
+                    console.log("Filters clicked");
+                  },
+                  variant: "ghost"
+                },
                 {
                   label: "Limpiar",
                   icon: X,
-                  onClick: clearFilters,
+                  onClick: () => {
+                    setSearchValue("")
+                    setFilterByStatus("all")
+                    setSortBy("date_recent")
+                  },
                   variant: "ghost"
                 }
               ]}
