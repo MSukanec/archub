@@ -9,7 +9,7 @@ import { FormModalLayout } from "../../form/FormModalLayout";
 import FormModalBody from "../../form/FormModalBody";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import UserSelector from "@/components/ui-custom/UserSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateKanbanList, useUpdateKanbanList } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -45,7 +45,7 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
     id: member.id, // Use member.id for created_by field
     full_name: member.full_name || member.email || 'Usuario',
     email: member.email || '',
-    avatar_url: member.avatar_url
+    avatar_url: member.avatar_url || undefined
   }));
 
   // Find current user's member ID for default selection
@@ -132,12 +132,18 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
             <FormItem>
               <FormLabel>Creador</FormLabel>
               <FormControl>
-                <UserSelector
-                  users={users}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar creador"
-                />
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar creador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
