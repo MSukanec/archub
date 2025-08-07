@@ -30,8 +30,9 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
       return;
     }
 
-    // If user is authenticated but needs onboarding (except for select-mode during onboarding completion)
-    if (user && userData && !userData.preferences?.onboarding_completed && location !== '/onboarding' && location !== '/select-mode') {
+    // If user is authenticated but needs onboarding (except for select-mode and dashboard during onboarding completion)
+    const allowedDuringOnboarding = ['/onboarding', '/select-mode', '/organization/dashboard', '/dashboard'];
+    if (user && userData && !userData.preferences?.onboarding_completed && !allowedDuringOnboarding.includes(location)) {
       navigate('/onboarding');
       return;
     }

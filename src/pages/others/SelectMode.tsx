@@ -94,19 +94,19 @@ export default function SelectMode() {
       if (error) throw error;
       return { success: true };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+    onSuccess: async () => {
+      // Force refetch current user data
+      await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       console.log('User type updated successfully, navigating to dashboard');
       toast({
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
       });
       
-      // Navigate to dashboard after a small delay to ensure cache update
+      // Navigate to dashboard with window.location to ensure clean state
       setTimeout(() => {
-        setSidebarContext('organization');
-        navigate('/organization/dashboard');
-      }, 300);
+        window.location.href = '/organization/dashboard';
+      }, 500);
     },
     onError: (error) => {
       console.error('Error updating user type:', error);
