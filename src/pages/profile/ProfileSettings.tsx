@@ -2,7 +2,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Settings, UserCircle, Palette, Shield, HelpCircle, Monitor } from 'lucide-react'
+import { Settings, UserCircle, Palette, Shield, Monitor } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -21,13 +21,11 @@ export default function ProfileSettings() {
   const { isDark, setTheme } = useThemeStore()
   
   const [sidebarDocked, setSidebarDocked] = useState(false)
-  const [tutorialMode, setTutorialMode] = useState(true)
 
   // Settings data object for debounced auto-save
   const settingsData = {
     sidebarDocked,
-    theme: isDark ? 'dark' : 'light',
-    tutorial: tutorialMode
+    theme: isDark ? 'dark' : 'light'
   }
 
   // Auto-save mutation for settings data
@@ -37,13 +35,11 @@ export default function ProfileSettings() {
       
       // Handle user_preferences updates
       if (data.sidebarDocked !== userData?.preferences?.sidebar_docked ||
-          data.theme !== userData?.preferences?.theme ||
-          data.tutorial !== userData?.preferences?.tutorial) {
+          data.theme !== userData?.preferences?.theme) {
         
         const preferencesUpdates = {
           sidebar_docked: data.sidebarDocked,
           theme: data.theme,
-          tutorial: data.tutorial,
         }
         
         const { error: preferencesError } = await supabase!
@@ -87,7 +83,6 @@ export default function ProfileSettings() {
   useEffect(() => {
     if (userData?.preferences) {
       setSidebarDocked(userData.preferences.sidebar_docked || false)
-      setTutorialMode(userData.preferences.tutorial !== false) // Default to true if not set
       // Set theme from user preferences
       setTheme(userData.preferences.theme === 'dark')
     }
@@ -127,11 +122,7 @@ export default function ProfileSettings() {
             title: "Sidebar y Navegación",
             description: "Configura el comportamiento de la barra lateral para mantenerla fija o permitir que se oculte automáticamente."
           },
-          {
-            icon: <HelpCircle className="h-4 w-4" />,
-            title: "Modo Tutorial",
-            description: "Activa o desactiva las ayudas visuales y explicaciones para nuevos usuarios en toda la aplicación."
-          },
+
           {
             icon: <Shield className="h-4 w-4" />,
             title: "Configuración Avanzada",
@@ -209,40 +200,7 @@ export default function ProfileSettings() {
           </div>
         </div>
 
-        <hr className="border-t border-[var(--section-divider)] my-8" />
 
-        {/* Tutorial Section */}
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Tutorial</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Configura la experiencia de nuevo usuario.
-              </p>
-            </div>
-
-            {/* Right Column - Form Fields */}
-            <div className="space-y-6">
-              {/* Modo nuevo usuario */}
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Modo nuevo usuario</Label>
-                  <div className="text-xs text-muted-foreground">
-                    Mostrar ayudas y explicaciones en toda la aplicación
-                  </div>
-                </div>
-                <Switch
-                  checked={tutorialMode}
-                  onCheckedChange={setTutorialMode}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </Layout>
   )
