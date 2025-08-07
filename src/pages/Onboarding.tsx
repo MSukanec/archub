@@ -256,23 +256,7 @@ export default function Onboarding() {
             ¡Bienvenido a Archub!
           </h1>
           
-          <div className="flex items-center justify-center space-x-2 mt-4">
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Paso {currentStep} de {totalSteps}
-            </p>
-            <div className="flex space-x-1">
-              {Array.from({ length: totalSteps }, (_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 w-8 rounded-full transition-colors ${
-                    index + 1 <= currentStep 
-                      ? 'bg-[var(--accent)]' 
-                      : 'bg-slate-300 dark:bg-slate-600'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
+
         </div>
 
         {/* Current step content */}
