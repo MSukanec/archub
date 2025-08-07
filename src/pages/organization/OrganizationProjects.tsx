@@ -364,11 +364,15 @@ export default function OrganizationProjects() {
               ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
             }
-            actionButton={{
-              label: "Nuevo Proyecto",
-              icon: Plus,
-              onClick: () => openModal('project', {})
-            }}
+            action={
+              <Button
+                onClick={() => openModal('project', {})}
+                className="mt-4"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Proyecto
+              </Button>
+            }
           />
         )}
 
