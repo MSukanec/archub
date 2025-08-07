@@ -12,7 +12,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
 import { Step2FinancialSetup } from "@/components/onboarding/Step2FinancialSetup";
-import { Step3Discovery } from "@/components/onboarding/Step3Discovery";
+
 
 
 export default function Onboarding() {
@@ -47,8 +47,8 @@ export default function Onboarding() {
     );
   }
 
-  // This is now always onboarding (3 steps only)
-  const totalSteps = 3;
+  // Onboarding optimized to 2 steps only
+  const totalSteps = 2;
 
   // Initialize form data with existing user data if available
   useEffect(() => {
@@ -56,12 +56,8 @@ export default function Onboarding() {
       updateFormData({
         first_name: userData.user_data?.first_name || '',
         last_name: userData.user_data?.last_name || '',
-        country: userData.user_data?.country || '',
-        birthdate: userData.user_data?.birthdate || '',
         organization_name: userData.organization?.name || '',
         theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
-        discovered_by: userData.user_data?.discovered_by || '',
-        discovered_by_other_text: userData.user_data?.discovered_by_other_text || '',
         last_user_type: userData.preferences?.last_user_type || null,
         default_currency_id: '',
         secondary_currency_ids: [],
@@ -69,13 +65,9 @@ export default function Onboarding() {
         secondary_wallet_ids: [],
       });
 
-      // If onboarding and has existing data, skip appropriate steps
+      // If onboarding and has existing data, skip to appropriate step
       if (userData.user_data?.first_name && userData.user_data?.last_name) {
-        if (userData.user_data?.discovered_by) {
-          setCurrentStep(3); // Skip to discovery step (final step)
-        } else {
-          setCurrentStep(3); // Skip to discovery step
-        }
+        setCurrentStep(2); // Skip to financial setup step
       } else {
         setCurrentStep(1); // Start from beginning
       }
@@ -83,11 +75,9 @@ export default function Onboarding() {
   }, [userData, userLoading, updateFormData, setCurrentStep]);
 
   const handleFinishOnboarding = () => {
-    console.log('handleFinishOnboarding called - completing 3-step onboarding');
+    console.log('handleFinishOnboarding called - completing 2-step onboarding');
     saveOnboardingMutation.mutate();
   };
-
-  // Note: Onboarding completion is now handled directly by Step3Discovery component
 
   // Mutation to save all onboarding data
   const saveOnboardingMutation = useMutation({
@@ -98,17 +88,12 @@ export default function Onboarding() {
 
       if (!supabase) throw new Error('Supabase no está configurado');
 
-      // Update user_data table
+      // Update user_data table  
       const { error: userDataError } = await supabase
         .from('user_data')
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
-          country: formData.country || null,
-          birthdate: formData.birthdate || null,
-          discovered_by: formData.discovered_by,
-          discovered_by_other_text: formData.discovered_by_other_text || null,
-          main_use: formData.main_use || null,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
@@ -270,9 +255,7 @@ export default function Onboarding() {
       case 1:
         return <Step1UserData />;
       case 2:
-        return <Step2FinancialSetup />;
-      case 3:
-        return <Step3Discovery onFinish={handleFinishOnboarding} />;
+        return <Step2FinancialSetup onFinish={handleFinishOnboarding} />;
       default:
         return <Step1UserData />;
     }

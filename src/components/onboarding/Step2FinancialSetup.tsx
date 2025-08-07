@@ -14,7 +14,11 @@ import { useWallets } from "@/hooks/use-wallets";
 import { Coins, ArrowLeft } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
-export function Step2FinancialSetup() {
+interface Step2FinancialSetupProps {
+  onFinish?: () => void;
+}
+
+export function Step2FinancialSetup({ onFinish }: Step2FinancialSetupProps = {}) {
   const { data: userData } = useCurrentUser();
   const { data: allCurrencies } = useCurrencies();
   const { data: allWallets } = useAllWallets();
@@ -62,7 +66,7 @@ export function Step2FinancialSetup() {
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
-  const handleNext = () => {
+  const handleFinish = () => {
     // Update formData with current values
     updateFormData({
       default_currency_id: defaultCurrency,
@@ -70,7 +74,13 @@ export function Step2FinancialSetup() {
       default_wallet_id: defaultWallet,
       secondary_wallet_ids: secondaryWallets,
     });
-    goNextStep();
+    
+    // Call onFinish if provided, otherwise goNextStep
+    if (onFinish) {
+      onFinish();
+    } else {
+      goNextStep();
+    }
   };
 
   const handleDefaultCurrencyChange = (currencyId: string) => {
@@ -162,8 +172,8 @@ export function Step2FinancialSetup() {
               value: currency.id,
               label: `${currency.name} (${currency.symbol})`
             }))}
-            values={secondaryCurrencies}
-            onValuesChange={setSecondaryCurrencies}
+            value={secondaryCurrencies}
+            onChange={setSecondaryCurrencies}
             placeholder="Selecciona monedas adicionales"
             searchPlaceholder="Buscar monedas..."
             emptyText="No se encontraron monedas"
@@ -211,8 +221,8 @@ export function Step2FinancialSetup() {
               value: wallet.id,
               label: wallet.name
             }))}
-            values={secondaryWallets}
-            onValuesChange={setSecondaryWallets}
+            value={secondaryWallets}
+            onChange={setSecondaryWallets}
             placeholder="Selecciona billeteras adicionales"
             searchPlaceholder="Buscar billeteras..."
             emptyText="No se encontraron billeteras"
@@ -229,11 +239,11 @@ export function Step2FinancialSetup() {
             Volver
           </Button>
           <Button 
-            onClick={handleNext}
+            onClick={handleFinish}
             disabled={!isValid}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
-            Siguiente
+            {onFinish ? 'Finalizar configuración' : 'Siguiente'}
           </Button>
         </div>
       </CardContent>

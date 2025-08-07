@@ -25,6 +25,7 @@ interface ComboBoxMultiSelectProps {
   onChange: (value: string[]) => void;
   placeholder?: string;
   searchPlaceholder?: string;
+  emptyText?: string;
   maxDisplay?: number;
   className?: string;
 }
@@ -35,6 +36,7 @@ export function ComboBoxMultiSelect({
   onChange,
   placeholder = "Seleccionar opciones...",
   searchPlaceholder = "Buscar opciones...",
+  emptyText = "No se encontraron opciones",
   maxDisplay = 3,
   className,
 }: ComboBoxMultiSelectProps) {
@@ -78,7 +80,7 @@ export function ComboBoxMultiSelect({
       <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
-          <CommandEmpty>No se encontraron opciones.</CommandEmpty>
+          <CommandEmpty>{emptyText}</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
             {options?.map((option) => (
               <CommandItem
