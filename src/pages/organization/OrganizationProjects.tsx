@@ -196,7 +196,7 @@ export default function OrganizationProjects() {
         throw new Error('No authentication token available')
       }
       
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetch(`/api/projects/${projectId}?organizationId=${organizationId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

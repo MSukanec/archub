@@ -101,16 +101,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid authentication" });
       }
       
-      // Get user's current organization more efficiently
-      const { data: userPrefs } = await authenticatedSupabase
-        .from('user_preferences')
-        .select('last_organization_id')
-        .eq('user_id', user.id)
-        .single();
-      
-      const organizationId = userPrefs?.last_organization_id;
+      // Get organization ID from query parameters (passed from frontend)
+      const organizationId = req.query.organizationId as string;
       if (!organizationId) {
-        return res.status(403).json({ error: "No active organization found" });
+        return res.status(400).json({ error: "Organization ID is required" });
       }
       
       // Combined operation: verify ownership and delete in fewer queries
