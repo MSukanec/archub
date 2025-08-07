@@ -105,7 +105,7 @@ export function SidebarSubmenu() {
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
       { type: 'plan', label: 'Plan', icon: Crown },
