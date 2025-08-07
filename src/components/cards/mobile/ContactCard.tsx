@@ -1,8 +1,8 @@
-import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { Edit, Trash2 } from 'lucide-react';
-import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
+import { Edit, Trash2 } from "lucide-react";
+import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
 
 type ContactCardProps = {
   contact: {
@@ -32,16 +32,21 @@ type ContactCardProps = {
 
 // Utility function to get initials from name
 const getInitials = (name: string): string => {
-  if (!name) return '?';
+  if (!name) return "?";
   return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
     .toUpperCase()
     .slice(0, 2);
 };
 
-const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, onClick }) => {
+const ContactCard: React.FC<ContactCardProps> = ({
+  contact,
+  onEdit,
+  onDelete,
+  onClick,
+}) => {
   const {
     first_name,
     last_name,
@@ -51,34 +56,36 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
     company_name,
     contact_types,
     linked_user_id,
-    linked_user
+    linked_user,
   } = contact;
 
   // Determine display name - prioritize full_name, fallback to first_name + last_name
-  const displayName = full_name || `${first_name} ${last_name || ''}`.trim();
-  
+  const displayName = full_name || `${first_name} ${last_name || ""}`.trim();
+
   // Determine display email
-  const displayEmail = email || '';
+  const displayEmail = email || "";
 
   // Get avatar and name from linked user if available
-  const avatar = linked_user?.avatar_url || '';
-  const avatarFallback = linked_user ? getInitials(linked_user.full_name) : getInitials(displayName);
+  const avatar = linked_user?.avatar_url || "";
+  const avatarFallback = linked_user
+    ? getInitials(linked_user.full_name)
+    : getInitials(displayName);
 
   return (
     <SwipeableCard
       actions={[
         {
-          label: 'Editar',
+          label: "Editar",
           icon: <Edit className="w-4 h-4" />,
-          variant: 'default',
-          onClick: () => onEdit?.(contact)
+          variant: "default",
+          onClick: () => onEdit?.(contact),
         },
         {
-          label: 'Eliminar',
+          label: "Eliminar",
           icon: <Trash2 className="w-4 h-4" />,
-          variant: 'destructive',
-          onClick: () => onDelete?.(contact)
-        }
+          variant: "destructive",
+          onClick: () => onDelete?.(contact),
+        },
       ]}
     >
       <div className="flex items-center justify-between gap-3 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-3 mb-2 transition-colors">
@@ -99,14 +106,20 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
               {displayName}
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between mt-1">
             {displayEmail ? (
-              <div className="text-[var(--muted-fg)] text-sm truncate" title={displayEmail}>
+              <div
+                className="text-[var(--muted-fg)] text-sm truncate"
+                title={displayEmail}
+              >
                 {displayEmail}
               </div>
             ) : company_name ? (
-              <div className="text-[var(--muted-fg)] text-sm truncate" title={company_name}>
+              <div
+                className="text-[var(--muted-fg)] text-sm truncate"
+                title={company_name}
+              >
                 {company_name}
               </div>
             ) : (

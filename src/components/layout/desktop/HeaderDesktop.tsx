@@ -23,15 +23,17 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { ProjectSelector } from "@/components/navigation/ProjectSelector";
 import { useProjectContext } from "@/stores/projectContext";
 import { useEffect } from "react";
-import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
-
+import {
+  useSidebarStore,
+  useSecondarySidebarStore,
+} from "@/stores/sidebarStore";
 
 interface Tab {
   id: string;
   label: string;
   isActive: boolean;
   badge?: string;
-  badgeVariant?: 'default' | 'secondary' | 'outline';
+  badgeVariant?: "default" | "secondary" | "outline";
   isDisabled?: boolean;
   isRestricted?: boolean;
   restrictionReason?: string;
@@ -85,46 +87,60 @@ export function HeaderDesktop({
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
-  const { data: userOrgPrefs } = useUserOrganizationPreferences(userData?.organization?.id);
-  const { setSidebarContext, currentSidebarContext, setActiveSidebarSection } = useNavigationStore();
+  const { data: projects = [] } = useProjects(
+    userData?.preferences?.last_organization_id,
+  );
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(
+    userData?.organization?.id,
+  );
+  const { setSidebarContext, currentSidebarContext, setActiveSidebarSection } =
+    useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
-  
+
   // Usar directamente userData.organization_preferences.last_project_id como fuente de verdad
 
   // Mutation para actualizar proyecto seleccionado usando nuevo sistema
   const updateProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      if (!supabase || !userData?.user?.id || !userData?.organization?.id) return;
-      
-      console.log("🔧 HeaderDesktop: Updating project", { projectId, organizationId: userData.organization.id });
-      
+      if (!supabase || !userData?.user?.id || !userData?.organization?.id)
+        return;
+
+      console.log("🔧 HeaderDesktop: Updating project", {
+        projectId,
+        organizationId: userData.organization.id,
+      });
+
       const { error } = await supabase
-        .from('user_organization_preferences')
+        .from("user_organization_preferences")
         .upsert(
           {
             user_id: userData.user.id,
             organization_id: userData.organization.id,
             last_project_id: projectId,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           },
-          { onConflict: 'user_id,organization_id' }
+          { onConflict: "user_id,organization_id" },
         );
-      
+
       if (error) {
         console.error("🔧 HeaderDesktop: Error updating project", error);
         // Fallback to localStorage
-        localStorage.setItem(`last-project-${userData.organization.id}`, projectId);
+        localStorage.setItem(
+          `last-project-${userData.organization.id}`,
+          projectId,
+        );
       }
-      
+
       return projectId;
     },
     onSuccess: (projectId) => {
       console.log("🔧 HeaderDesktop: Project updated successfully", projectId);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      queryClient.invalidateQueries({
+        queryKey: ["user-organization-preferences"],
+      });
       setSelectedProject(projectId || null);
-    }
+    },
   });
 
   const handleProjectChange = (projectId: string) => {
@@ -148,15 +164,15 @@ export function HeaderDesktop({
   const getBreadcrumbText = () => {
     const section = getCurrentSectionLabel();
     const pageName = pageMap[location];
-    const projectName = projects.find(p => p.id === selectedProjectId)?.name;
-    
+    const projectName = projects.find((p) => p.id === selectedProjectId)?.name;
+
     if (isProjectBasedSection && projectName) {
       if (pageName && section !== pageName) {
         return `${projectName} / ${section} / ${pageName}`;
       }
       return `${projectName} / ${section}`;
     }
-    
+
     return title || section;
   };
 
@@ -164,11 +180,11 @@ export function HeaderDesktop({
   const pageMap: { [key: string]: string } = {
     // Finanzas
     "/finances/movements": "Movimientos",
-    "/finances/installments": "Aportes de Terceros", 
+    "/finances/installments": "Aportes de Terceros",
     "/finances/analysis": "Análisis de Obra",
     "/finances": "Resumen Financiero",
-    
-    // Construcción  
+
+    // Construcción
     "/construction/tasks": "Tareas",
     "/construction/labor": "Mano de Obra",
     "/construction/budgets": "Presupuestos",
@@ -179,24 +195,24 @@ export function HeaderDesktop({
     "/construction/gallery": "Galería",
     "/construction/subcontracts": "Subcontratos",
     "/construction": "Resumen de Construcción",
-    
+
     // Diseño
     "/design/dashboard": "Resumen de Diseño",
     "/design/documentation": "Documentación",
-    
+
     // Proyecto
     "/project/documentation": "Documentación",
     "/project/basic-data": "Datos Básicos",
     "/project/clients": "Clientes",
     "/project": "Resumen del Proyecto",
-    
+
     // Organización
     "/organization/projects": "Proyectos",
     "/organization/contacts": "Contactos",
     "/organization/preferences": "Preferencias",
     "/organization/activity": "Actividad",
     "/organization/tasks": "Tareas para Hacer",
-    
+
     // Administración
     "/admin/users": "Usuarios",
     "/admin/organizations": "Organizaciones",
@@ -205,31 +221,38 @@ export function HeaderDesktop({
     "/admin/material-categories": "Categorías de Materiales",
     "/admin/movement-concepts": "Conceptos de Movimientos",
     "/admin/task-parameters": "Parámetros de Tareas",
-    "/admin/generated-tasks": "Tareas Generadas"
+    "/admin/generated-tasks": "Tareas Generadas",
   };
 
-
-
-  const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances") || location.startsWith("/project") || location.startsWith("/organization") || location.startsWith("/admin");
+  const isProjectBasedSection =
+    location.startsWith("/design") ||
+    location.startsWith("/construction") ||
+    location.startsWith("/finances") ||
+    location.startsWith("/project") ||
+    location.startsWith("/organization") ||
+    location.startsWith("/admin");
 
   // Hook para detectar el estado del sidebar
-  const { isDocked: isMainDocked, isHovered: isMainHovered } = useSidebarStore();
-  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } = useSecondarySidebarStore();
-  
-  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isMainHovered;
+  const { isDocked: isMainDocked, isHovered: isMainHovered } =
+    useSidebarStore();
+  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } =
+    useSecondarySidebarStore();
+
+  const isSecondaryExpanded =
+    isSecondaryDocked || isSecondaryHovered || isMainHovered;
   const hasTabs = tabs.length > 0;
 
   return (
-    <div 
-      className={`fixed top-0 right-0 z-50 ${hasTabs ? 'h-20' : 'h-10'} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
+    <div
+      className={`fixed top-0 right-0 z-50 ${hasTabs ? "h-20" : "h-10"} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
         // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
         isSecondaryExpanded
-          ? "left-[304px]" // 40px main + 264px secondary  
+          ? "left-[304px]" // 40px main + 264px secondary
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
       {/* Primera fila: Breadcrumb y Selector de Proyecto */}
-      <div className="w-full h-10 px-4 flex items-center justify-between">
+      <div className="w-full h-10 px-6 flex items-center justify-between">
         {/* Left: Breadcrumb */}
         <div className="flex items-center gap-2">
           {isProjectBasedSection ? (
@@ -251,15 +274,20 @@ export function HeaderDesktop({
                       projects.map((project) => (
                         <DropdownMenuItem
                           key={project.id}
-                          onClick={() => updateProjectMutation.mutate(project.id)}
-                          className={`${userOrgPrefs?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                          onClick={() =>
+                            updateProjectMutation.mutate(project.id)
+                          }
+                          className={`${userOrgPrefs?.last_project_id === project.id ? "bg-[var(--accent)] text-white" : ""}`}
                         >
                           <div className="flex items-center w-full">
                             <Folder className="w-4 h-4 mr-2" />
                             <span className="truncate">{project.name}</span>
                           </div>
                           {userOrgPrefs?.last_project_id === project.id && (
-                            <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+                            <div
+                              className="w-2 h-2 rounded-full ml-auto"
+                              style={{ backgroundColor: "var(--accent)" }}
+                            />
                           )}
                         </DropdownMenuItem>
                       ))
@@ -276,7 +304,7 @@ export function HeaderDesktop({
                           <Button
                             size="sm"
                             onClick={() => {
-                              navigate('/organization/projects');
+                              navigate("/organization/projects");
                             }}
                             className="h-7 px-3 text-xs"
                           >
@@ -289,23 +317,26 @@ export function HeaderDesktop({
                 </DropdownMenu>
               </CustomRestricted>
               <span className="text-xs font-normal text-[var(--layout-text)]">
-                {projects.length === 0 
-                  ? "No hay proyectos" 
-                  : projects.find(p => p.id === userOrgPrefs?.last_project_id)?.name || "Sin proyecto seleccionado"
-                }
+                {projects.length === 0
+                  ? "No hay proyectos"
+                  : projects.find((p) => p.id === userOrgPrefs?.last_project_id)
+                      ?.name || "Sin proyecto seleccionado"}
               </span>
               <span className="text-xs text-[var(--layout-text-muted)]">/</span>
               <span className="text-xs font-normal text-[var(--layout-text)]">
                 {getCurrentSectionLabel()}
               </span>
-              {pageMap[location] && getCurrentSectionLabel() !== pageMap[location] && (
-                <>
-                  <span className="text-xs text-[var(--layout-text-muted)]">/</span>
-                  <span className="text-xs font-normal text-[var(--layout-text)]">
-                    {pageMap[location]}
-                  </span>
-                </>
-              )}
+              {pageMap[location] &&
+                getCurrentSectionLabel() !== pageMap[location] && (
+                  <>
+                    <span className="text-xs text-[var(--layout-text-muted)]">
+                      /
+                    </span>
+                    <span className="text-xs font-normal text-[var(--layout-text)]">
+                      {pageMap[location]}
+                    </span>
+                  </>
+                )}
             </div>
           ) : (
             /* Non-project breadcrumb */
@@ -325,7 +356,9 @@ export function HeaderDesktop({
               onClick={actionButton.additionalButton.onClick}
               className="h-8 px-3 text-xs font-normal"
             >
-              {actionButton.additionalButton.icon && <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />}
+              {actionButton.additionalButton.icon && (
+                <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />
+              )}
               {actionButton.additionalButton.label}
             </Button>
           )}
@@ -337,7 +370,9 @@ export function HeaderDesktop({
               onClick={actionButton.onClick}
               className="h-8 px-3 text-xs font-normal"
             >
-              {actionButton.icon && <actionButton.icon className="w-4 h-4 mr-1" />}
+              {actionButton.icon && (
+                <actionButton.icon className="w-4 h-4 mr-1" />
+              )}
               {actionButton.label}
             </Button>
           )}
@@ -346,20 +381,24 @@ export function HeaderDesktop({
 
       {/* Segunda fila: Tabs (solo si hay tabs) */}
       {hasTabs && (
-        <div className="w-full h-10 px-4 flex items-center">
+        <div className="w-full h-10 px-6 flex items-center">
           <div className="flex items-center space-x-6">
             {tabs.map((tab) => {
               const tabContent = (
                 <button
                   key={tab.id}
-                  onClick={() => (tab.isDisabled || tab.isRestricted) ? undefined : onTabChange?.(tab.id)}
+                  onClick={() =>
+                    tab.isDisabled || tab.isRestricted
+                      ? undefined
+                      : onTabChange?.(tab.id)
+                  }
                   disabled={tab.isDisabled}
                   className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
-                    (tab.isDisabled || tab.isRestricted)
-                      ? 'text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed'
-                      : tab.isActive 
-                        ? 'text-[var(--layout-text)] font-medium' 
-                        : 'text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]'
+                    tab.isDisabled || tab.isRestricted
+                      ? "text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed"
+                      : tab.isActive
+                        ? "text-[var(--layout-text)] font-medium"
+                        : "text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]"
                   }`}
                 >
                   {tab.label}
@@ -369,9 +408,9 @@ export function HeaderDesktop({
                     </span>
                   )}
                   {tab.isActive && !tab.isDisabled && !tab.isRestricted && (
-                    <div 
+                    <div
                       className="absolute -bottom-[9px] left-0 right-0 h-0.5"
-                      style={{ backgroundColor: 'var(--accent)' }}
+                      style={{ backgroundColor: "var(--accent)" }}
                     />
                   )}
                 </button>
