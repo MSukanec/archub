@@ -1,58 +1,31 @@
-import { useState } from 'react';
+
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Activity, Building, Eye, Search, Filter, X } from 'lucide-react';
+import { Activity, Building, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+
 import { useCurrentUser } from '@/hooks/use-current-user';
 
 export default function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
   const [, navigate] = useLocation();
-  const [sortBy, setSortBy] = useState('date_recent');
-  const [filterByType, setFilterByType] = useState('all');
+
   const organizationId = userData?.preferences?.last_organization_id;
 
   // Placeholder activities data - will be implemented with proper data later
   const activities: any[] = []
   const isLoading = false
 
-  // Filter and sort activities
-  const filteredActivities = activities.filter(activity => {
-    // Filter by type
-    if (filterByType !== 'all') {
-      return activity.type === filterByType;
-    }
-    
-    return true;
-  });
 
-  // Sort activities
-  const sortedActivities = [...filteredActivities].sort((a, b) => {
-    switch (sortBy) {
-      case 'date_recent':
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      case 'date_old':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      case 'author':
-        return (a.author?.full_name || '').localeCompare(b.author?.full_name || '');
-      case 'type':
-        return a.type_label.localeCompare(b.type_label);
-      default:
-        return 0;
-    }
-  });
 
   // Helper function for initials
   const getInitials = (name: string) => {
@@ -86,45 +59,7 @@ export default function OrganizationActivity() {
     }
   };
 
-  const clearFilters = () => {
-    setSortBy('date_recent');
-    setFilterByType('all');
-  };
 
-  // Configuración de filtros para ActionBarDesktopRow
-  const filters = [
-    {
-      key: 'sortBy',
-      label: 'Ordenar por',
-      icon: Filter,
-      value: sortBy,
-      setValue: setSortBy,
-      options: ['date_recent', 'date_old', 'type', 'author'],
-      defaultLabel: 'Fecha (Más reciente)',
-      enabled: true
-    },
-    {
-      key: 'filterByType',
-      label: 'Filtrar por tipo',
-      icon: Activity,
-      value: filterByType,
-      setValue: setFilterByType,
-      options: ['all', 'create', 'update', 'delete'],
-      defaultLabel: 'Todos los tipos',
-      enabled: true
-    }
-  ];
-
-  // Configuración de acciones para ActionBarDesktopRow
-  const actions = [
-    {
-      label: 'Limpiar filtros',
-      icon: X,
-      onClick: clearFilters,
-      variant: 'outline' as const,
-      enabled: sortBy !== 'date_recent' || filterByType !== 'all'
-    }
-  ];
 
   if (!organizationId) {
     return (
@@ -228,39 +163,13 @@ export default function OrganizationActivity() {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* ActionBar Desktop Row */}
-        <ActionBarDesktopRow
-          filters={filters}
-          actions={actions}
-        />
-
-        {/* Feature Introduction - Mobile only */}
-        <div className="md:hidden">
-          <FeatureIntroduction
-            title="Actividad"
-            icon={<Activity className="w-5 h-5" />}
-            features={[
-              {
-                icon: <Building className="w-5 h-5" />,
-                title: "Registro central de actividades",
-                description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
-              },
-              {
-                icon: <Activity className="w-5 h-5" />,
-                title: "Filtrado por miembro",
-                description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
-              }
-            ]}
-          />
-        </div>
-
         {/* Activity Chart and Table */}
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">
             <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
             <p className="text-sm">Cargando actividades...</p>
           </div>
-        ) : sortedActivities.length === 0 ? (
+        ) : activities.length === 0 ? (
           <EmptyState
             icon={<Activity className="w-12 h-12" />}
             title="No hay actividades registradas"
@@ -268,11 +177,8 @@ export default function OrganizationActivity() {
           />
         ) : (
           <Table
-            data={sortedActivities}
+            data={activities}
             columns={columns}
-            emptyStateMessage="No se encontraron actividades"
-            showSearch={false} // Search is handled in ActionBar
-            showHeader={false} // Header is handled by ActionBar
           />
         )}
       </div>
