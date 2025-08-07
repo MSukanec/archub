@@ -38,6 +38,7 @@ export function useContacts() {
           )
         `)
         .eq('organization_id', userData.organization.id)
+        .not('linked_user_id', 'eq', userData.id)
         .order('first_name', { ascending: true })
 
       if (error) {
