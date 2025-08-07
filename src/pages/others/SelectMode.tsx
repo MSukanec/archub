@@ -128,23 +128,30 @@ export default function SelectMode() {
       return { previousUserData };
     },
     onSuccess: async () => {
-      // Force cache invalidation and refetch immediately to get fresh data
-      console.log('SelectMode: SUCCESS - Forcing immediate cache refresh');
+      console.log('SelectMode: SUCCESS - Forcing RPC refresh to get updated onboarding status');
+      
+      // Force cache invalidation
       await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       
-      // Force refetch with fresh data
-      await queryClient.refetchQueries({ queryKey: ['/api/current-user'] });
+      // Force refetch with refresh parameter to ensure RPC returns fresh data
+      await queryClient.fetchQuery({ 
+        queryKey: ['/api/current-user'], 
+        queryFn: () => fetch('/api/current-user?refresh=true', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+          }
+        }).then(res => res.json())
+      });
+      
+      // Set the bypass flag
+      console.log('SelectMode: Completed onboarding, preventing future redirects');
+      localStorage.setItem('onboarding_bypass', 'true');
       
       // Navigate immediately with React Router
       setSidebarContext('organization');
       navigate('/organization/dashboard');
       
-      // Set a flag that prevents redirect loops permanently
-      console.log('SelectMode: Completed onboarding, preventing future redirects');
-      localStorage.setItem('onboarding_bypass', 'true');
-      
-      // Force immediate navigation without timeout to prevent loops
-      console.log('SelectMode: Completed, bypass flag set, user should be able to navigate freely');
+      console.log('SelectMode: Navigation completed with fresh user data');
     },
     onError: (err, userType, context) => {
       // Reset the flag on error

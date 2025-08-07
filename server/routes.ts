@@ -45,10 +45,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
       
-      // Use the RPC function to get user data with authenticated client
-      const { data: userData, error } = await authenticatedSupabase.rpc('archub_get_user');
+      // Try RPC first, but if we suspect stale data, refresh it
+      const forceRefresh = req.query.refresh === 'true';
       
-      console.log("Supabase RPC result:", { userData, error });
+      let userData, error;
+      
+      if (forceRefresh) {
+        console.log("Force refresh requested - calling RPC twice to ensure fresh data");
+        // Call RPC twice to force refresh of cached data
+        await authenticatedSupabase.rpc('archub_get_user');
+        const result = await authenticatedSupabase.rpc('archub_get_user');
+        userData = result.data;
+        error = result.error;
+      } else {
+        // Normal RPC call
+        const result = await authenticatedSupabase.rpc('archub_get_user');
+        userData = result.data;
+        error = result.error;
+      }
+      
+      console.log("Supabase RPC result:", { userData, error, forceRefresh });
       
       if (error) {
         console.error("Error fetching current user:", error);
