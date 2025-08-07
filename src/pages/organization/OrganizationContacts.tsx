@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building } from 'lucide-react'
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { FILTER_ICONS } from '@/constants/actionBarConstants'
 import React, { useState, useEffect } from 'react'
