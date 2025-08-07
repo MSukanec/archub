@@ -348,11 +348,6 @@ export function HeaderDesktop({
 
         {/* Right: Action Buttons */}
         <div className="flex items-center gap-2">
-          {/* Actions Array */}
-          {actions.map((action, index) => (
-            <div key={index}>{action}</div>
-          ))}
-          
           {/* Additional Button (appears first/left) */}
           {actionButton?.additionalButton && (
             <Button

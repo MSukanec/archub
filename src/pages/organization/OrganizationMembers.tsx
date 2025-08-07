@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { Layout } from "@/components/layout/desktop/Layout";
+import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,15 +68,43 @@ export default function OrganizationMembers() {
 
   const organizationId = userData?.organization?.id;
 
-  // Fetch organization members using the API endpoint
-  const { data: membersData = [], isLoading: membersLoading } = useQuery({
+  // Fetch organization members
+  const { data: members = [], isLoading: membersLoading } = useQuery({
     queryKey: ['organization-members', organizationId],
-    queryFn: () => `/api/organization/${organizationId}/members`,
+    queryFn: async () => {
+      if (!supabase || !organizationId) return [];
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select(`
+          id,
+          user_id,
+          organization_id,
+          role_id,
+          joined_at,
+          last_active_at,
+          is_active,
+          users (
+            id,
+            email,
+            full_name,
+            avatar_url
+          ),
+          roles (
+            id,
+            name,
+            type
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('joined_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
     enabled: !!organizationId,
   });
-
-  // Ensure members is always an array
-  const members = Array.isArray(membersData) ? membersData : [];
 
   // Mock guests data (empty for now)
   const guests: any[] = [];
@@ -154,21 +183,13 @@ export default function OrganizationMembers() {
 
   const headerProps = {
     title: "Miembros",
-    actions: [
-      <CustomRestricted 
-        key="invite-member"
-        feature="max_members" 
-        current={members.length}
-      >
-        <Button onClick={() => openModal('member')}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invitar miembro
-        </Button>
-      </CustomRestricted>
-    ]
+    description: "Gestiona los miembros de tu organización"
   };
 
-
+  const breadcrumb = [
+    { name: "Organización", href: "/organization/dashboard" },
+    { name: "Miembros", href: "/organization/members" }
+  ];
 
   return (
     <Layout headerProps={headerProps}>
@@ -201,7 +222,46 @@ export default function OrganizationMembers() {
           ]}
         />
 
-
+        {/* ActionBar Desktop */}
+        <ActionBarDesktop
+          title="Gestión de Miembros"
+          icon={<Users className="h-5 w-5" />}
+          showProjectSelector={false}
+          customActions={[
+            <CustomRestricted 
+              key="invite-member"
+              feature="max_members" 
+              current={members.length}
+            >
+              <Button onClick={() => openModal('member')}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invitar miembro
+              </Button>
+            </CustomRestricted>
+          ]}
+          features={[
+            {
+              icon: <Users className="h-4 w-4" />,
+              title: "Invitación y gestión de equipo",
+              description: "Invita a miembros de tu equipo con acceso completo a proyectos y herramientas de colaboración. Administra perfiles y datos de contacto."
+            },
+            {
+              icon: <Shield className="h-4 w-4" />,
+              title: "Control de roles y permisos",
+              description: "Asigna roles específicos (Admin, Editor, Viewer) con permisos diferenciados. Controla acceso a configuraciones sensibles de la organización."
+            },
+            {
+              icon: <Activity className="h-4 w-4" />,
+              title: "Supervisión de actividad y estado",
+              description: "Monitorea el estado de conexión, última actividad y participación de cada miembro del equipo en tiempo real."
+            },
+            {
+              icon: <UserCheck className="h-4 w-4" />,
+              title: "Gestión de invitaciones y huéspedes",
+              description: "Administra invitaciones pendientes, cuentas de huéspedes temporales y colaboradores externos con acceso limitado a proyectos específicos."
+            }
+          ]}
+        />
 
         {/* Two Column Layout - Section descriptions left, content right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
@@ -247,20 +307,20 @@ export default function OrganizationMembers() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={member.users?.[0]?.avatar_url} />
+                            <AvatarImage src={member.users?.avatar_url} />
                             <AvatarFallback>
-                              {getInitials(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U')}
+                              {getInitials(member.users?.full_name || member.users?.email || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">
-                                {member.users?.[0]?.full_name || 'Sin nombre'}
+                                {member.users?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {member.users?.[0]?.email}
+                              {member.users?.email}
                             </p>
                           </div>
                         </div>
@@ -276,10 +336,10 @@ export default function OrganizationMembers() {
                           </div>
 
                           <Badge 
-                            variant={getRoleBadgeVariant(member.roles?.[0]?.name || '')}
-                            className={getRoleBadgeClassName(member.roles?.[0]?.name || '')}
+                            variant={getRoleBadgeVariant(member.roles?.name || '')}
+                            className={getRoleBadgeClassName(member.roles?.name || '')}
                           >
-                            {member.roles?.[0]?.name || 'Sin rol'}
+                            {member.roles?.name || 'Sin rol'}
                           </Badge>
 
                           <DropdownMenu>
