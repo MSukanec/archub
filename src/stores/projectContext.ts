@@ -21,47 +21,7 @@ export const useProjectContext = create<ProjectContextState>()(
         
         const currentOrgId = organizationId || get().currentOrganizationId;
         
-        // Si cambiamos de organización, persistir el proyecto en las preferencias
-        if (currentOrgId && projectId) {
-          // Obtener user_id de current-user endpoint con token de autorización
-          import('@/lib/supabase').then(({ supabase }) => {
-            return supabase.auth.getSession();
-          }).then(({ data: sessionData }) => {
-            const token = sessionData?.session?.access_token;
-            if (token) {
-              console.log("Attempting to fetch current user data...");
-              return fetch('/api/current-user', {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-              });
-            } else {
-              throw new Error('No authentication token available');
-            }
-          }).then(response => response.json())
-          .then(userData => {
-            if (userData?.user?.id) {
-              // Usar la API para persistir en user_organization_preferences
-              fetch('/api/user/update-organization-preferences', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-user-id': userData.user.id  // Usar el ID de la aplicación, no el de Supabase Auth
-                },
-                body: JSON.stringify({
-                  organization_id: currentOrgId,
-                  last_project_id: projectId
-                })
-              }).catch(error => {
-                console.error("🔧 Error updating organization preferences:", error);
-              });
-            }
-          }).catch(error => {
-            console.error("🔧 Error fetching current user:", error);
-          });
-        }
+        // La persistencia de preferencias se maneja en los componentes que usan useUpdateUserOrganizationPreferences
         
         set({ 
           selectedProjectId: projectId,
