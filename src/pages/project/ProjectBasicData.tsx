@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ImageIcon, FileText, Users, MapPin, Building2 } from 'lucide-react';
+import { ImageIcon, FileText, Users, MapPin } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
