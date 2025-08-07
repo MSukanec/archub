@@ -24,7 +24,7 @@ export function useSearchUsers(query: string) {
         searchCondition = `full_name.ilike.%${query}%`
       }
 
-      // Search users by name or email
+      // Search users by name or email, excluding current user
       const { data, error } = await supabase
         .from('users')
         .select(`
@@ -41,6 +41,7 @@ export function useSearchUsers(query: string) {
           )
         `)
         .or(searchCondition)
+        .neq('id', userData.id)
         .limit(10)
 
       if (error) {

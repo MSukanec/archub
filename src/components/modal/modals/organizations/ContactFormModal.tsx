@@ -602,7 +602,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isEditing ? "Actualizar Contacto" : "Crear Contacto"}
+      rightLabel={createContactMutation.isPending ? "Guardando..." : (isEditing ? "Actualizar Contacto" : "Crear Contacto")}
       onRightClick={() => {
         if (currentPanel === 'view' && isEditing) {
           setPanel('edit');
@@ -610,7 +610,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           form.handleSubmit(onSubmit)();
         }
       }}
-      isLoading={createContactMutation.isPending}
+
     />
   );
 
