@@ -127,7 +127,20 @@ export default function SelectMode() {
 
       return { previousUserData };
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Force cache update with the correct data
+      queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
+        if (!oldData) return oldData;
+        console.log('SelectMode: SUCCESS - Force updating cache onboarding_completed = true');
+        return {
+          ...oldData,
+          preferences: {
+            ...oldData.preferences,
+            onboarding_completed: true
+          }
+        };
+      });
+      
       toast({
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
@@ -139,8 +152,9 @@ export default function SelectMode() {
       
       // Reset the flag after successful navigation
       setTimeout(() => {
+        console.log('SelectMode: Resetting completingOnboarding flag');
         setCompletingOnboarding(false);
-      }, 1000);
+      }, 2000); // Increased timeout to ensure navigation completes
     },
     onError: (err, userType, context) => {
       // Reset the flag on error
@@ -158,8 +172,11 @@ export default function SelectMode() {
       });
     },
     onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+      // Don't invalidate immediately to avoid overriding our optimistic update
+      console.log('SelectMode: Delaying query invalidation to preserve optimistic update');
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+      }, 3000);
     },
   });
 
