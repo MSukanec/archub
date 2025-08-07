@@ -313,7 +313,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Folder Field */}
+        {/* 1. Folder Field */}
         <FormField
           control={form.control}
           name="folder_id"
@@ -339,7 +339,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           )}
         />
 
-        {/* Group Field */}
+        {/* 2. Group Field */}
         <FormField
           control={form.control}
           name="group_id"
@@ -365,96 +365,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           )}
         />
 
-        {/* File Upload Section */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Archivos <span className="text-[var(--accent)]">*</span>
-            </label>
-            <div 
-              onClick={triggerFileInput}
-              className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
-            >
-              <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground mb-2">
-                Haz clic aquí para seleccionar archivos
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Formatos soportados: PDF, DOC, XLS, PPT, imágenes, CAD, 3D, comprimidos
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.cad,.dwg,.zip,.rar,.7z"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* Selected Files Display */}
-          {selectedFiles.length > 0 && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
-                Archivos seleccionados ({selectedFiles.length})
-              </label>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
-                  >
-                    <div className="flex items-center space-x-3 flex-1">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Input
-                          value={fileNames[index] || ''}
-                          onChange={(e) => updateFileName(index, e.target.value)}
-                          placeholder="Nombre del documento"
-                          className="text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Archivo original: {file.name}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Description Field */}
-        <FormField
-          control={form.control}
-          name="group_description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción (opcional)</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descripción de los documentos"
-                  rows={3}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Status and Visibility Row */}
+        {/* 3. Status and Visibility Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -501,25 +412,112 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
               </FormItem>
             )}
           />
+        </div>
 
-          {/* Existing Documents Section (only in edit mode) */}
-          {isEditing && groupDocuments.length > 0 && (
-            <div className="col-span-full">
-              <h4 className="text-sm font-medium mb-3">Documentos Existentes</h4>
-              <div className="space-y-2">
-                {groupDocuments.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
-                    <div className="flex items-center gap-2">
-                      <File className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{doc.file_name}</span>
-                      <span className="text-xs text-muted-foreground">({doc.status})</span>
+        {/* 4. Description Field */}
+        <FormField
+          control={form.control}
+          name="group_description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción (opcional)</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descripción de los documentos"
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 5. File Upload Section */}
+        <div className="space-y-4">
+          <div>
+            <FormLabel>Archivos <span className="text-[var(--accent)]">*</span></FormLabel>
+            <div 
+              onClick={triggerFileInput}
+              className="relative border-2 border-dashed border-[var(--accent)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer mt-2"
+            >
+              <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground mb-2">
+                Haz clic aquí para seleccionar archivos
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Formatos soportados: PDF, DOC, XLS, PPT, imágenes, CAD, 3D, comprimidos
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.cad,.dwg,.zip,.rar,.7z"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Selected Files Display */}
+          {selectedFiles.length > 0 && (
+            <div className="space-y-2">
+              <FormLabel>
+                Archivos seleccionados ({selectedFiles.length})
+              </FormLabel>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {selectedFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
+                  >
+                    <div className="flex items-center space-x-3 flex-1">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Input
+                          value={fileNames[index] || ''}
+                          onChange={(e) => updateFileName(index, e.target.value)}
+                          placeholder="Nombre del documento"
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Archivo original: {file.name}
+                        </p>
+                      </div>
                     </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
             </div>
           )}
         </div>
+
+        {/* Existing Documents Section (only in edit mode) */}
+        {isEditing && groupDocuments.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium mb-3">Documentos Existentes</h4>
+            <div className="space-y-2">
+              {groupDocuments.map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <File className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{doc.file_name}</span>
+                    <span className="text-xs text-muted-foreground">({doc.status})</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
