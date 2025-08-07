@@ -86,19 +86,25 @@ export default function SelectMode() {
       if (!supabase) throw new Error('Supabase no está configurado');
 
       // Update both last_user_type and onboarding_completed to ensure complete flow
-      const { error } = await supabase
+      console.log('SelectMode: Updating DB with onboarding_completed = true for user:', userData.user.id);
+      const { error, data } = await supabase
         .from('user_preferences')
         .update({
           last_user_type: userType,
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
         })
-        .eq('user_id', userData.user.id);
+        .eq('user_id', userData.user.id)
+        .select();
 
+      console.log('SelectMode: DB update result:', { data, error });
       if (error) throw error;
       return { success: true };
     },
     onMutate: async (userType: string) => {
+      // Set the flag to prevent redirects
+      setCompletingOnboarding(true);
+      
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
 
@@ -108,6 +114,7 @@ export default function SelectMode() {
       // Optimistically update to the new value
       queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
         if (!oldData) return oldData;
+        console.log('SelectMode: Setting optimistic onboarding_completed = true');
         return {
           ...oldData,
           preferences: {
@@ -136,6 +143,9 @@ export default function SelectMode() {
       }, 1000);
     },
     onError: (err, userType, context) => {
+      // Reset the flag on error
+      setCompletingOnboarding(false);
+      
       // Rollback on error
       if (context?.previousUserData) {
         queryClient.setQueryData(['/api/current-user'], context.previousUserData);
