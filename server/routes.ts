@@ -14,6 +14,39 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Test endpoint
+  app.get("/api/test", (req, res) => {
+    res.json({ message: "API is working", timestamp: new Date().toISOString() });
+  });
+
+  // Get current user data
+  app.get("/api/current-user", async (req, res) => {
+    try {
+      console.log("Attempting to fetch current user data...");
+      
+      // Use the RPC function to get user data
+      const { data: userData, error } = await supabase.rpc('archub_get_user');
+      
+      console.log("Supabase RPC result:", { userData, error });
+      
+      if (error) {
+        console.error("Error fetching current user:", error);
+        return res.status(500).json({ error: "Failed to fetch user data", details: error });
+      }
+      
+      if (!userData) {
+        console.log("No user data found");
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      console.log("Returning user data:", userData);
+      res.json(userData);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      res.status(500).json({ error: "Failed to fetch user data", details: error });
+    }
+  });
+  
   // Get all countries
   app.get("/api/countries", async (req, res) => {
     try {
