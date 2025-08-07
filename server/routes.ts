@@ -349,7 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/user/select-organization", async (req, res) => {
     try {
       const { organization_id } = req.body;
-      const user_id = req.headers['x-user-id']; // You'll need to pass this from frontend
+      const user_id = req.headers['x-user-id'];
 
       if (!organization_id || !user_id) {
         return res.status(400).json({ error: "Missing organization_id or user_id" });
@@ -357,7 +357,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
-      // Usar una transacción para asegurar consistencia
+      // Primero, verificar si existe el registro de user_preferences
+      const { data: existingPrefs, error: checkError } = await supabase
+        .from('user_preferences')
+        .select('id, user_id, last_organization_id')
+        .eq('user_id', user_id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error("Error checking existing preferences:", checkError);
+        return res.status(500).json({ error: "Failed to check user preferences" });
+      }
+
+      console.log("Existing preferences:", existingPrefs);
+
+      if (!existingPrefs) {
+        console.error("No user_preferences record found for user_id:", user_id);
+        return res.status(404).json({ error: "User preferences not found" });
+      }
+
+      // Actualizar el registro existente
       const { data: updateResult, error: updateError } = await supabase
         .from('user_preferences')
         .update({ 
@@ -365,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user_id)
-        .select();
+        .select('last_organization_id, updated_at');
 
       if (updateError) {
         console.error("Error updating last_organization_id:", updateError);
@@ -374,21 +393,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Update result:", updateResult);
 
-      // Verificar que el cambio se persistió correctamente
-      const { data: verification, error: verifyError } = await supabase
-        .from('user_preferences')
-        .select('last_organization_id, updated_at')
-        .eq('user_id', user_id)
-        .single();
-
-      if (verifyError) {
-        console.error("Error verifying update:", verifyError);
-        return res.status(500).json({ error: "Failed to verify organization update" });
+      if (!updateResult || updateResult.length === 0) {
+        console.error("No rows were updated");
+        return res.status(500).json({ error: "No preferences were updated" });
       }
 
-      console.log("Verification result:", verification);
+      const updatedPrefs = updateResult[0];
+      console.log("Updated preferences:", updatedPrefs);
 
-      if (verification.last_organization_id !== organization_id) {
+      if (updatedPrefs.last_organization_id !== organization_id) {
         console.error("Organization update failed - values don't match");
         return res.status(500).json({ error: "Organization update verification failed" });
       }
@@ -396,8 +409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true, 
         message: "Organization selected successfully",
-        updated_organization_id: verification.last_organization_id,
-        updated_at: verification.updated_at
+        updated_organization_id: updatedPrefs.last_organization_id,
+        updated_at: updatedPrefs.updated_at
       });
     } catch (error) {
       console.error("Error selecting organization:", error);
