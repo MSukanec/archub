@@ -237,7 +237,7 @@ export default function FinancesDashboard() {
                   {/* Mini Chart */}
                   <div className="mb-4">
                     <MiniTrendChart 
-                      data={incomeTrend} 
+                      data={monthlyFlow?.map(month => ({ value: month.income || 0 })) || []} 
                       color="var(--chart-positive)" 
                       isLoading={flowLoading} 
                     />
@@ -276,7 +276,7 @@ export default function FinancesDashboard() {
                   {/* Mini Chart */}
                   <div className="mb-4">
                     <MiniTrendChart 
-                      data={expensesTrend} 
+                      data={monthlyFlow?.map(month => ({ value: Math.abs(month.expenses || 0) })) || []} 
                       color="var(--chart-negative)" 
                       isLoading={flowLoading} 
                     />
@@ -315,7 +315,7 @@ export default function FinancesDashboard() {
                   {/* Mini Chart */}
                   <div className="mb-4">
                     <MiniTrendChart 
-                      data={balanceTrend} 
+                      data={monthlyFlow?.map(month => ({ value: month.net || 0 })) || []} 
                       color="var(--chart-neutral)" 
                       isLoading={flowLoading} 
                     />
