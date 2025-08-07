@@ -2,18 +2,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOnboardingStore } from "@/stores/onboardingStore";
-import { useCountries } from "@/hooks/use-countries";
 import { User } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
 export function Step1UserData() {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
-  const { data: countries } = useCountries();
 
   const handleNext = () => {
-    if (formData.first_name && formData.last_name && formData.country && formData.birthdate) {
+    if (formData.first_name && formData.last_name && formData.organization_name) {
       goNextStep();
     }
   };
@@ -28,7 +25,7 @@ export function Step1UserData() {
         </div>
         <CardTitle className="text-2xl font-bold">Datos básicos</CardTitle>
         <CardDescription className="text-base">
-          Completa tu información personal y preferencias iniciales. Luego puedes cambiarlo.
+          Completa tu información personal y el nombre de tu organización.
         </CardDescription>
       </CardHeader>
       
@@ -71,50 +68,22 @@ export function Step1UserData() {
           />
         </div>
 
-        {/* País */}
+        {/* Nombre de Organización */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label htmlFor="country">País <span className="text-[var(--accent)]">*</span></Label>
+            <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
             <HelpPopover
-              title="País de Residencia"
-              description="Tu país nos ayuda a configurar monedas locales, regulaciones y funcionalidades específicas de tu región."
-              primaryActionText="Entendido"
-              placement="top"
-            />
-          </div>
-          <Select
-            value={formData.country}
-            onValueChange={(value) => updateFormData({ country: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona tu país" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries?.map((country) => (
-                <SelectItem key={country.id} value={country.id}>
-                  {country.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Fecha de Nacimiento */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="birthdate">Fecha de Nacimiento <span className="text-[var(--accent)]">*</span></Label>
-            <HelpPopover
-              title="Fecha de Nacimiento"
-              description="Tu fecha de nacimiento es privada y se usa únicamente para estadísticas demográficas internas y funcionalidades de edad requerida."
+              title="Organización"
+              description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
               primaryActionText="Entendido"
               placement="top"
             />
           </div>
           <Input
-            id="birthdate"
-            type="date"
-            value={formData.birthdate}
-            onChange={(e) => updateFormData({ birthdate: e.target.value })}
+            id="organization_name"
+            placeholder="Nombre de tu organización"
+            value={formData.organization_name}
+            onChange={(e) => updateFormData({ organization_name: e.target.value })}
           />
         </div>
 
@@ -123,7 +92,7 @@ export function Step1UserData() {
         <div className="flex justify-end pt-4">
           <Button 
             onClick={handleNext}
-            disabled={!formData.first_name || !formData.last_name || !formData.country || !formData.birthdate}
+            disabled={!formData.first_name || !formData.last_name || !formData.organization_name}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
             Siguiente

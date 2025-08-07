@@ -95,7 +95,7 @@ export function Step2FinancialSetup({ onFinish }: Step2FinancialSetupProps = {})
     setSecondaryWallets(prev => prev.filter(id => id !== walletId));
   };
 
-  const isValid = formData.organization_name && defaultCurrency && defaultWallet;
+  const isValid = defaultCurrency && defaultWallet;
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
@@ -105,32 +105,13 @@ export function Step2FinancialSetup({ onFinish }: Step2FinancialSetupProps = {})
             <Coins className="h-8 w-8" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold">Configuración de Organización</CardTitle>
+        <CardTitle className="text-2xl font-bold">Configuración Financiera</CardTitle>
         <CardDescription className="text-base">
-          Define el nombre de tu organización y sus preferencias financieras iniciales.
+          Define las preferencias financieras iniciales de tu organización.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Nombre de Organización */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
-            <HelpPopover
-              title="Organización"
-              description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
-              primaryActionText="Entendido"
-              placement="top"
-            />
-          </div>
-          <Input
-            id="organization_name"
-            placeholder="Nombre de tu organización"
-            value={formData.organization_name}
-            onChange={(e) => updateFormData({ organization_name: e.target.value })}
-          />
-        </div>
-
         {/* Moneda por Defecto */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
