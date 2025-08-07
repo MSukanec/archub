@@ -94,19 +94,30 @@ export default function SelectMode() {
       if (error) throw error;
       return { success: true };
     },
-    onSuccess: async () => {
-      // Force refetch current user data
-      await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
-      console.log('User type updated successfully, navigating to dashboard');
+    onSuccess: () => {
+      // Update the cache immediately with optimistic update
+      queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          preferences: {
+            ...oldData.preferences,
+            onboarding_completed: true
+          }
+        };
+      });
+      
+      // Also invalidate to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+      
       toast({
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
       });
       
-      // Navigate to dashboard with window.location to ensure clean state
-      setTimeout(() => {
-        window.location.href = '/organization/dashboard';
-      }, 500);
+      // Navigate immediately with React Router
+      setSidebarContext('organization');
+      navigate('/organization/dashboard');
     },
     onError: (error) => {
       console.error('Error updating user type:', error);
