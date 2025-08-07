@@ -38,42 +38,45 @@ export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Nombre */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="first_name">Nombre/s <span className="text-[var(--accent)]">*</span></Label>
-            <HelpPopover
-              title="Nombre Personal"
-              description="Usamos tu nombre para personalizar tu experiencia y para que tu equipo pueda identificarte en colaboraciones. Puedes usar uno o varios nombres."
-              primaryActionText="Entendido"
-              placement="top"
+        {/* Nombre y Apellido - Inline en desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Nombre */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="first_name">Nombre/s <span className="text-[var(--accent)]">*</span></Label>
+              <HelpPopover
+                title="Nombre Personal"
+                description="Usamos tu nombre para personalizar tu experiencia y para que tu equipo pueda identificarte en colaboraciones. Puedes usar uno o varios nombres."
+                primaryActionText="Entendido"
+                placement="top"
+              />
+            </div>
+            <Input
+              id="first_name"
+              placeholder="Tu nombre"
+              value={formData.first_name}
+              onChange={(e) => updateFormData({ first_name: e.target.value })}
             />
           </div>
-          <Input
-            id="first_name"
-            placeholder="Tu nombre"
-            value={formData.first_name}
-            onChange={(e) => updateFormData({ first_name: e.target.value })}
-          />
-        </div>
-        
-        {/* Apellido */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="last_name">Apellido/s <span className="text-[var(--accent)]">*</span></Label>
-            <HelpPopover
-              title="Apellido Personal"
-              description="Tu apellido completa tu identificación en la plataforma y es útil para reportes oficiales y documentación del proyecto."
-              primaryActionText="Entendido"
-              placement="top"
+          
+          {/* Apellido */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="last_name">Apellido/s <span className="text-[var(--accent)]">*</span></Label>
+              <HelpPopover
+                title="Apellido Personal"
+                description="Tu apellido completa tu identificación en la plataforma y es útil para reportes oficiales y documentación del proyecto."
+                primaryActionText="Entendido"
+                placement="top"
+              />
+            </div>
+            <Input
+              id="last_name"
+              placeholder="Tu apellido"
+              value={formData.last_name}
+              onChange={(e) => updateFormData({ last_name: e.target.value })}
             />
           </div>
-          <Input
-            id="last_name"
-            placeholder="Tu apellido"
-            value={formData.last_name}
-            onChange={(e) => updateFormData({ last_name: e.target.value })}
-          />
         </div>
 
         {/* Nombre de Organización */}
