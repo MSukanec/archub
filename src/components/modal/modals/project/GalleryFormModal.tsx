@@ -73,14 +73,21 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         entry_type: 'registro_general',
       }));
 
-      // Usar el ID del usuario actual como creador
-      const userIdToUse = userData.user.id;
+      // Usar el ID del usuario actual como creador (la tabla project_media ahora usa created_by como UUID del usuario)
+      const createdByUserId = userData.user.id;
+      
+      console.log('Upload data:', {
+        projectId: userData.organization_preferences.last_project_id,
+        organizationId: userData.organization?.id,
+        createdBy: createdByUserId,
+        filesCount: galleryFiles.length
+      });
 
       return uploadGalleryFiles(
         galleryFiles,
         userData.organization_preferences.last_project_id,
         userData.organization?.id,
-        userIdToUse
+        createdByUserId
       );
     },
     onSuccess: () => {
