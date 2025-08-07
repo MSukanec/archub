@@ -43,9 +43,9 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   const { data: members = [] } = useOrganizationMembers(organizationId);
 
   // Convert members to users format for UserSelector
-  // Use user_id as the value since that's what gets stored in created_by
+  // Use member.id as the value since created_by now references organization_members.id
   const users = members.map(member => ({
-    id: member.user_id, // Use user_id for created_by field
+    id: member.id, // Use organization_members.id for created_by field
     full_name: member.full_name || member.email || 'Usuario',
     email: member.email || '',
     avatar_url: member.avatar_url || undefined
@@ -58,22 +58,22 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
     resolver: zodResolver(listSchema),
     defaultValues: {
       name: list?.name || '',
-      created_by: isEditing && list?.created_by ? list.created_by : (userData?.user?.id || ''),
+      created_by: isEditing && list?.created_by ? list.created_by : (currentUserMember?.id || ''),
     }
   });
 
   // Set current user as default creator when modal opens
   useEffect(() => {
-    if (members.length > 0 && userData?.user?.id) {
+    if (members.length > 0 && currentUserMember) {
       if (isEditing && list?.created_by) {
-        // For editing, use the existing created_by value
+        // For editing, use the existing created_by value (organization_members.id)
         form.setValue('created_by', list.created_by);
       } else if (!isEditing) {
-        // For new lists, set current user as default
-        form.setValue('created_by', userData.user.id);
+        // For new lists, set current user's member ID as default
+        form.setValue('created_by', currentUserMember.id);
       }
     }
-  }, [members, userData, list, isEditing, form]);
+  }, [members, currentUserMember, list, isEditing, form]);
 
   // Set panel to edit mode when editing a list
   useEffect(() => {
@@ -113,8 +113,8 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
       } else {
         await createListMutation.mutateAsync({
           board_id: boardId,
-          name: data.name
-          // created_by is handled automatically in the hook using current user
+          name: data.name,
+          created_by: data.created_by // Pass the selected organization member ID
         });
         toast({
           title: "Lista creada",

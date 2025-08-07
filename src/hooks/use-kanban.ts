@@ -19,8 +19,7 @@ export interface KanbanList {
   board_id: string
   name: string
   position: number
-  color?: string
-  created_by: string
+  created_by: string // This references organization_members.id
   created_at: string
   updated_at: string
   // Relations
@@ -37,12 +36,12 @@ export interface KanbanCard {
   list_id: string
   title: string
   description?: string
-  assigned_to?: string
+  assigned_to?: string // This references organization_members.id
   due_date?: string
   position: number
   is_completed: boolean
   completed_at?: string
-  created_by: string
+  created_by: string // This references organization_members.id
   created_at: string
   updated_at: string
   // Relations
@@ -64,11 +63,11 @@ export interface KanbanComment {
   id: string
   card_id: string
   content: string
-  created_by: string
+  author_id: string // This references organization_members.id
   created_at: string
   updated_at: string
   // Relations
-  user?: {
+  author?: {
     id: string
     full_name: string
     email: string
@@ -79,12 +78,18 @@ export interface KanbanComment {
 export interface KanbanAttachment {
   id: string
   card_id: string
-  filename: string
   file_url: string
-  file_size: number
-  mime_type: string
-  uploaded_by: string
+  file_name: string
+  uploaded_by: string // This references organization_members.id
   created_at: string
+  updated_at: string
+  // Relations
+  uploader?: {
+    id: string
+    full_name: string
+    email: string
+    avatar_url?: string
+  }
 }
 
 // Hook to get boards for current organization
@@ -125,29 +130,29 @@ export function useKanbanLists(boardId: string) {
 
       if (error) throw error
       
-      // If we have lists, fetch user data for creators
+      // If we have lists, fetch organization member data for creators
       if (data && data.length > 0) {
-        const userIds = new Set<string>()
+        const memberIds = new Set<string>()
         data.forEach(list => {
-          if (list.created_by) userIds.add(list.created_by)
+          if (list.created_by) memberIds.add(list.created_by)
         })
 
-        if (userIds.size > 0) {
-          const { data: users, error: usersError } = await supabase
-            .from('users')
+        if (memberIds.size > 0) {
+          const { data: members, error: membersError } = await supabase
+            .from('organization_members')
             .select('id, full_name, email, avatar_url')
-            .in('id', Array.from(userIds))
+            .in('id', Array.from(memberIds))
 
-          if (!usersError && users) {
-            const userMap = users.reduce((acc, user) => {
-              acc[user.id] = user
+          if (!membersError && members) {
+            const memberMap = members.reduce((acc, member) => {
+              acc[member.id] = member
               return acc
             }, {} as Record<string, any>)
 
-            // Attach user data to lists
+            // Attach member data to lists
             return data.map(list => ({
               ...list,
-              creator: list.created_by ? userMap[list.created_by] : undefined
+              creator: list.created_by ? memberMap[list.created_by] : undefined
             })) as KanbanList[]
           }
         }
@@ -202,31 +207,31 @@ export function useKanbanCards(boardId: string) {
 
       console.log('Cards fetched:', data?.length || 0, 'cards')
       
-      // If we have cards, fetch user data for creators and assigned users
+      // If we have cards, fetch organization member data for creators and assigned users
       if (data && data.length > 0) {
-        const userIds = new Set<string>()
+        const memberIds = new Set<string>()
         data.forEach(card => {
-          if (card.created_by) userIds.add(card.created_by)
-          if (card.assigned_to) userIds.add(card.assigned_to)
+          if (card.created_by) memberIds.add(card.created_by)
+          if (card.assigned_to) memberIds.add(card.assigned_to)
         })
 
-        if (userIds.size > 0) {
-          const { data: users, error: usersError } = await supabase
-            .from('users')
+        if (memberIds.size > 0) {
+          const { data: members, error: membersError } = await supabase
+            .from('organization_members')
             .select('id, full_name, email, avatar_url')
-            .in('id', Array.from(userIds))
+            .in('id', Array.from(memberIds))
 
-          if (!usersError && users) {
-            const userMap = users.reduce((acc, user) => {
-              acc[user.id] = user
+          if (!membersError && members) {
+            const memberMap = members.reduce((acc, member) => {
+              acc[member.id] = member
               return acc
             }, {} as Record<string, any>)
 
-            // Attach user data to cards
+            // Attach member data to cards
             return data.map(card => ({
               ...card,
-              creator: card.created_by ? userMap[card.created_by] : undefined,
-              assigned_user: card.assigned_to ? userMap[card.assigned_to] : undefined
+              creator: card.created_by ? memberMap[card.created_by] : undefined,
+              assigned_user: card.assigned_to ? memberMap[card.assigned_to] : undefined
             })) as KanbanCard[]
           }
         }
@@ -249,7 +254,7 @@ export function useKanbanComments(cardId: string) {
         .from('kanban_comments')
         .select(`
           *,
-          user:users!kanban_comments_created_by_fkey(
+          author:organization_members!kanban_comments_author_id_fkey(
             id,
             full_name,
             email,
@@ -293,9 +298,20 @@ export function useCreateKanbanBoard() {
 
   return useMutation({
     mutationFn: async (boardData: { name: string; description?: string }) => {
-      if (!userData?.organization?.id) {
-        throw new Error('Organization required')
+      if (!userData?.organization?.id || !userData?.user?.id) {
+        throw new Error('Organization and user required')
       }
+
+      // Get the current user's organization member ID
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('user_id', userData.user.id)
+        .eq('organization_id', userData.organization.id)
+        .single()
+
+      if (memberError) throw memberError
+      if (!memberData) throw new Error('User is not a member of this organization')
 
       const { data, error } = await supabase
         .from('kanban_boards')
@@ -303,7 +319,7 @@ export function useCreateKanbanBoard() {
           name: boardData.name,
           description: boardData.description,
           organization_id: userData.organization.id,
-          created_by: userData.user.id
+          created_by: memberData.id // Use organization member ID
         })
         .select()
         .single()
@@ -422,7 +438,24 @@ export function useCreateKanbanList() {
   return useMutation({
     mutationFn: async (listData: { board_id: string; name: string; created_by?: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
-      if (!userData?.user?.id) throw new Error('User not authenticated')
+      if (!userData?.user?.id || !userData?.organization?.id) throw new Error('User not authenticated')
+      
+      // Use the provided created_by or get current user's member ID as fallback
+      let createdBy = listData.created_by
+      
+      if (!createdBy) {
+        // Get the current user's organization member ID as fallback
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .eq('organization_id', userData.organization.id)
+          .single()
+
+        if (memberError) throw memberError
+        if (!memberData) throw new Error('User is not a member of this organization')
+        createdBy = memberData.id
+      }
       
       // Get next position
       const { data: lists } = await supabase
@@ -439,7 +472,7 @@ export function useCreateKanbanList() {
         .insert({
           board_id: listData.board_id,
           name: listData.name,
-          created_by: userData.user.id, // Use current user's ID directly
+          created_by: createdBy, // Use provided or fallback organization member ID
           position: nextPosition
         })
         .select()
