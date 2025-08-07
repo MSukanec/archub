@@ -134,10 +134,7 @@ export default function OrganizationContacts() {
           return nameA.localeCompare(nameB)
         case 'name_desc':
           return nameB.localeCompare(nameA)
-        case 'date_asc':
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        case 'date_desc':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+
         default:
           return 0
       }
@@ -212,6 +209,7 @@ export default function OrganizationContacts() {
       key: "name" as const,
       label: "Contacto",
       sortable: true,
+      className: "w-1/5",
       render: (contact: any) => (
         <div className="flex items-center gap-3">
           {contact.linked_user ? (
@@ -243,6 +241,7 @@ export default function OrganizationContacts() {
     {
       key: "contact_types" as const,
       label: "Tipos",
+      className: "w-1/5",
       render: (contact: any) => (
         <div className="flex flex-wrap gap-1">
           {contact.contact_types && contact.contact_types.length > 0 ? (
@@ -262,6 +261,7 @@ export default function OrganizationContacts() {
     {
       key: "email" as const,
       label: "Email",
+      className: "w-1/5",
       render: (contact: any) => (
         <div className="text-sm text-muted-foreground">
           {contact.email || '—'}
@@ -271,27 +271,19 @@ export default function OrganizationContacts() {
     {
       key: "company_name" as const,
       label: "Empresa",
+      className: "w-1/5",
       render: (contact: any) => (
         <div className="text-sm text-muted-foreground">
           {contact.company_name || '—'}
         </div>
       )
     },
-    {
-      key: "created_at" as const,
-      label: "Fecha",
-      sortable: true,
-      sortType: "date" as const,
-      render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
-          {format(new Date(contact.created_at), 'dd/MM/yyyy', { locale: es })}
-        </div>
-      )
-    },
+
     {
       key: "actions" as const,
       label: "Acciones",
       sortable: false,
+      className: "w-1/5",
       render: (contact: any) => (
         <div className="flex items-center gap-1">
           <Button
@@ -418,15 +410,15 @@ export default function OrganizationContacts() {
           columns={columns}
           isLoading={contactsLoading}
           defaultSort={{
-            key: "created_at",
-            direction: "desc",
+            key: "name",
+            direction: "asc",
           }}
           topBar={{
             showSearch: true,
             searchValue: searchValue,
             onSearchChange: setSearchValue,
             showFilter: true,
-            isFilterActive: sortBy !== 'date_desc' || filterByType !== 'all',
+            isFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
             renderFilterContent: () => (
               <div className="space-y-3 p-2 min-w-[200px]">
                 <div>
@@ -436,8 +428,6 @@ export default function OrganizationContacts() {
                       <SelectValue placeholder="Más Recientes" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="date_desc">Más Recientes</SelectItem>
-                      <SelectItem value="date_asc">Más Antiguos</SelectItem>
                       <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
                       <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
                     </SelectContent>
@@ -463,7 +453,7 @@ export default function OrganizationContacts() {
             ),
             onClearFilters: () => {
               setSearchValue("");
-              setSortBy('date_desc');
+              setSortBy('name_asc');
               setFilterByType('all');
             }
           }}
