@@ -663,10 +663,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
     
     // Inicializar PROYECTO (solo si no está editando)
-    if (!editingMovement && userData?.preferences?.last_project_id !== undefined) {
+    if (!editingMovement && userData?.organization_preferences?.last_project_id !== undefined) {
       // Si hay proyecto activo, usar ese proyecto automáticamente
-      if (userData.preferences.last_project_id) {
-        form.setValue('project_id', userData.preferences.last_project_id)
+      if (userData.organization_preferences.last_project_id) {
+        form.setValue('project_id', userData.organization_preferences.last_project_id)
       } else if (form.watch('project_id') === undefined) {
         // Solo en modo General permitir selección libre
         form.setValue('project_id', null)

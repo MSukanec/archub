@@ -88,9 +88,9 @@ export default function ConstructionGallery() {
 
   // Query to check if stored project belongs to current organization
   const { data: currentProject } = useQuery({
-    queryKey: ['currentProject', storedProjectId, userData?.preferences?.last_organization_id],
+    queryKey: ['currentProject', storedProjectId, userData?.organization?.id],
     queryFn: async () => {
-      if (!storedProjectId || !userData?.preferences?.last_organization_id || !supabase) {
+      if (!storedProjectId || !userData?.organization?.id || !supabase) {
         return null;
       }
       
@@ -98,7 +98,7 @@ export default function ConstructionGallery() {
         .from('projects')
         .select('id, name, organization_id')
         .eq('id', storedProjectId)
-        .eq('organization_id', userData.preferences.last_organization_id)
+        .eq('organization_id', userData.organization.id)
         .single();
       
       if (error) {
@@ -108,7 +108,7 @@ export default function ConstructionGallery() {
       
       return data;
     },
-    enabled: !!storedProjectId && !!userData?.preferences?.last_organization_id
+    enabled: !!storedProjectId && !!userData?.organization?.id
   });
 
   // Use project ID only if the project belongs to current organization
@@ -116,12 +116,12 @@ export default function ConstructionGallery() {
 
   // Gallery files query
   const { data: galleryFiles = [], isLoading, error } = useQuery({
-    queryKey: ['galleryFiles', projectId, userData?.preferences?.last_organization_id],
+    queryKey: ['galleryFiles', projectId, userData?.organization?.id],
     queryFn: async () => {
       console.log('Fetching gallery files for project:', projectId);
-      console.log('Organization ID:', userData?.preferences?.last_organization_id);
+      console.log('Organization ID:', userData?.organization?.id);
       
-      if (!supabase || !userData?.preferences?.last_organization_id) {
+      if (!supabase || !userData?.organization?.id) {
         throw new Error('Missing required data');
       }
 
@@ -150,7 +150,7 @@ export default function ConstructionGallery() {
             name
           )
         `)
-        .eq('organization_id', userData.preferences.last_organization_id);
+        .eq('organization_id', userData.organization.id);
 
       // If no project selected (GENERAL mode), show all projects' images
       // If project selected, show only that project's images

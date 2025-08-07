@@ -73,14 +73,14 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
 
   const createBudgetMutation = useMutation({
     mutationFn: async (data: BudgetFormData) => {
-      if (!supabase || !userData?.organization?.id || !userData?.preferences?.last_project_id) {
+      if (!supabase || !userData?.organization?.id || !userData?.organization_preferences?.last_project_id) {
         throw new Error('Missing required data');
       }
 
       const budgetData = {
         name: data.name,
         description: data.description || null,
-        project_id: userData.preferences.last_project_id,
+        project_id: userData.organization_preferences.last_project_id,
         organization_id: userData.organization.id,
         status: data.status,
         created_at: data.created_at.toISOString(),

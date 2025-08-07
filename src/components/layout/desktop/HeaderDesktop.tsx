@@ -83,7 +83,7 @@ export function HeaderDesktop({
   const { setSidebarContext, currentSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
-  // Usar directamente userData.preferences.last_project_id como fuente de verdad
+  // Usar directamente userData.organization_preferences.last_project_id como fuente de verdad
 
   // Mutation para actualizar proyecto seleccionado usando nuevo sistema
   const updateProjectMutation = useMutation({

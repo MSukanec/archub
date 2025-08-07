@@ -73,7 +73,7 @@ export default function FinancesSubcontracts() {
             contact:contacts!inner(id, first_name, last_name, full_name)
           )
         `)
-        .eq('movement.project_id', userData.preferences.last_project_id)
+        .eq('movement.project_id', userData.organization_preferences?.last_project_id)
         .eq('movement.organization_id', userData.organization.id)
         .order('movement(movement_date)', { ascending: false });
 

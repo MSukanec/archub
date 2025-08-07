@@ -92,8 +92,8 @@ export default function OrganizationProjects() {
     }
   })
 
-  // Mark active project and put it first
-  const activeProjectId = userData?.preferences?.last_project_id
+  // Mark active project and put it first - ahora usando user_organization_preferences
+  const activeProjectId = userData?.user_organization_preferences?.last_project_id
   filteredProjects = filteredProjects.map(project => ({
     ...project,
     is_active: project.id === activeProjectId
@@ -300,7 +300,7 @@ export default function OrganizationProjects() {
                     onDelete={handleDeleteClick}
                     onSelect={(project) => handleSelectProject(project.id)}
                     onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userData?.preferences?.last_project_id}
+                    isActiveProject={project.id === userData?.user_organization_preferences?.last_project_id}
                   />
                 ))}
               </div>
@@ -315,7 +315,7 @@ export default function OrganizationProjects() {
                     onDelete={handleDeleteClick}
                     onSelect={(project) => handleSelectProject(project.id)}
                     onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userData?.preferences?.last_project_id}
+                    isActiveProject={project.id === userData?.user_organization_preferences?.last_project_id}
                   />
                 ))}
               </div>

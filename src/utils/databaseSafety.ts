@@ -67,7 +67,7 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
     details: { 
       userId: userData.user.id,
       preferencesId: userData.preferences.id,
-      organizationId: userData.preferences.last_organization_id
+      organizationId: userData.organization.id
     }
   };
 }

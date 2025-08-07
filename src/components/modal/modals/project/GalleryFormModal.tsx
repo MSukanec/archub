@@ -93,14 +93,14 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const uploadMutation = useMutation({
     mutationFn: async (data: GalleryFormData) => {
-      if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
+      if (!userData?.organization_preferences?.last_project_id || !userData?.organization?.id) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
 
       const galleryFiles: GalleryFileInput[] = files.map(file => ({
         file,
         title: data.title,
-        description: data.description || null,
+        description: data.description || undefined,
         entry_type: 'registro_general',
       }));
 
@@ -110,8 +110,8 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
       return uploadGalleryFiles(
         galleryFiles,
-        userData.preferences.last_project_id,
-        userData.preferences.last_organization_id,
+        userData.organization_preferences.last_project_id,
+        userData.organization?.id,
         userIdToUse
       );
     },
@@ -328,7 +328,8 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       onLeftClick={handleClose}
       rightLabel={editingFile ? "Actualizar" : "Subir"}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={uploadMutation.isPending}
+      submitDisabled={uploadMutation.isPending}
+      showLoadingSpinner={uploadMutation.isPending}
     />
   );
 
