@@ -106,7 +106,7 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
   // Add client mutation
   const addClientMutation = useMutation({
     mutationFn: async (contactId: string) => {
-      if (!supabase) throw new Error('Supabase client not initialized')
+      if (!supabase || !organizationId) throw new Error('Supabase client not initialized or missing organization ID')
       
       const { data, error } = await supabase
         .from('project_clients')
@@ -114,11 +114,11 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
           project_id: projectId,
           client_id: contactId,
           committed_amount: 0,
-          role: 'cliente',
+          currency_id: userData?.organization?.default_currency_id || null,
+          role: 'Cliente',
           is_active: true,
           notes: '',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          organization_id: organizationId
         })
         .select()
 
@@ -217,8 +217,8 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
       onLeftClick={onClose}
       rightLabel="Agregar Cliente"
       onRightClick={handleSubmit}
-      rightLoading={addClientMutation.isPending}
-      rightDisabled={!selectedContactId || availableContacts.length === 0}
+      submitDisabled={!selectedContactId || availableContacts.length === 0}
+      showLoadingSpinner={addClientMutation.isPending}
     />
   )
 
