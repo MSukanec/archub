@@ -217,9 +217,7 @@ export default function OrganizationManagement() {
   // Mutación para seleccionar organización
   const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      console.log('🔧 Starting organization switch to:', organizationId);
       try {
-        // Obtener el token de autenticación
         const { data: sessionData } = await supabase.auth.getSession()
         const token = sessionData?.session?.access_token
         
@@ -227,13 +225,12 @@ export default function OrganizationManagement() {
           throw new Error('No authentication token available')
         }
 
-        // Usar el endpoint del servidor para cambiar organización
         const response = await fetch('/api/user/select-organization', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
-            'x-user-id': userData?.preferences?.user_id, // Usar el user_id de las preferencias
+            'x-user-id': userData?.preferences?.user_id,
           },
           body: JSON.stringify({ organization_id: organizationId }),
         });
@@ -243,47 +240,64 @@ export default function OrganizationManagement() {
           throw new Error(errorData.error || 'Error al cambiar organización');
         }
 
-        const result = await response.json();
-        console.log('🔧 Organization switch successful:', result);
-        return result;
+        return await response.json();
       } catch (error) {
-        console.error('🔧 Error switching organization:', error);
+        console.error('Error switching organization:', error);
         throw error;
       }
     },
-    onSuccess: async (_, variables) => {
-      console.log('🔧 Organization switch onSuccess started for org:', variables);
+    onMutate: async (organizationId) => {
+      // Cancelar queries para evitar conflictos
+      await queryClient.cancelQueries({ queryKey: ['current-user'] })
       
-      // Limpiar project context al cambiar organización
+      // Obtener snapshot para rollback
+      const previousUserData = queryClient.getQueryData(['current-user'])
+      
+      // Actualización optimista inmediata
+      if (previousUserData && userData?.organizations) {
+        const selectedOrg = userData.organizations.find(org => org.id === organizationId)
+        if (selectedOrg) {
+          queryClient.setQueryData(['current-user'], (old: any) => ({
+            ...old,
+            organization: selectedOrg,
+            preferences: {
+              ...old.preferences,
+              last_organization_id: organizationId
+            }
+          }))
+        }
+      }
+      
+      // Limpiar proyecto context
       const { setSelectedProject } = useProjectContext.getState()
       setSelectedProject(null)
-      console.log('🔧 Project context cleared');
       
-      // Invalidar todas las queries relacionadas con el usuario y organizaciones
-      console.log('🔧 Invalidating queries...');
-      await queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      await queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] })
-      await queryClient.invalidateQueries({ queryKey: ['organization-members'] })
+      // Navegación inmediata
+      setSidebarContext('organization')
+      navigate('/organization/dashboard')
       
-      // Refetch inmediato para obtener datos actualizados
-      console.log('🔧 Refetching current-user...');
-      await queryClient.refetchQueries({ queryKey: ['current-user'] })
+      return { previousUserData }
+    },
+    onSuccess: () => {
+      // Solo invalidar queries para refrescar datos
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] })
       
       toast({
         title: "Organización seleccionada",
-        description: "La organización se ha cambiado correctamente"
+        description: "Los datos se han actualizado correctamente",
+        duration: 1000
       })
-      
-      // Navegar sin recarga de página
-      console.log('🔧 Navigating to dashboard...');
-      setSidebarContext('organization')
-      navigate('/organization/dashboard')
-      console.log('🔧 Organization switch onSuccess completed');
     },
-    onError: () => {
+    onError: (error, variables, context) => {
+      // Rollback en caso de error
+      if (context?.previousUserData) {
+        queryClient.setQueryData(['current-user'], context.previousUserData)
+      }
+      
       toast({
         title: "Error",
-        description: "No se pudo seleccionar la organización",
+        description: "No se pudo cambiar la organización",
         variant: "destructive"
       })
     }
