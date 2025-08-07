@@ -17,7 +17,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
+
 import { Card } from '@/components/ui/card';
 
 function TasksContent() {
@@ -216,33 +216,7 @@ function TasksContent() {
 
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
-        {/* FeatureIntroduction */}
-        <FeatureIntroduction
-          title="Tareas para Hacer"
-          icon={<CheckSquare className="w-5 h-5" />}
-          features={[
-            {
-              icon: <Kanban className="w-5 h-5" />,
-              title: "Tableros Kanban organizados",
-              description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
-            },
-            {
-              icon: <List className="w-5 h-5" />,
-              title: "Listas flexibles y personalizables",
-              description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
-            },
-            {
-              icon: <CheckSquare className="w-5 h-5" />,
-              title: "Seguimiento de completitud",
-              description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
-            },
-            {
-              icon: <Plus className="w-5 h-5" />,
-              title: "Colaboración en equipo",
-              description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
-            }
-          ]}
-        />
+
 
         {/* ActionBar Desktop - Empty state message */}
         <div className="bg-card rounded-lg border p-6 text-center">
@@ -266,33 +240,7 @@ function TasksContent() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* FeatureIntroduction */}
-      <FeatureIntroduction
-        title="Tareas para Hacer"
-        icon={<CheckSquare className="w-5 h-5" />}
-        features={[
-          {
-            icon: <Kanban className="w-5 h-5" />,
-            title: "Tableros Kanban organizados",
-            description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
-          },
-          {
-            icon: <List className="w-5 h-5" />,
-            title: "Listas flexibles y personalizables",
-            description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
-          },
-          {
-            icon: <CheckSquare className="w-5 h-5" />,
-            title: "Seguimiento de completitud",
-            description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
-          },
-          {
-            icon: <Plus className="w-5 h-5" />,
-            title: "Colaboración en equipo",
-            description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
-          }
-        ]}
-      />
+
 
       {/* ActionBar Desktop - Solo selector de tableros */}
       <ActionBarDesktop
