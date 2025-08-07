@@ -242,61 +242,21 @@ export default function OrganizationManagement() {
         throw error;
       }
     },
-    onSuccess: async () => {
-      console.log('🔧 Organization switch onSuccess started');
+    onSuccess: async (_, variables) => {
+      console.log('🔧 Organization switch onSuccess started for org:', variables);
       
-      // Limpiar project context al cambiar organización
-      const { setSelectedProject } = useProjectContext.getState()
-      setSelectedProject(null)
-      console.log('🔧 Project context cleared');
-      
-      // Invalidar todas las queries relacionadas con el usuario y organizaciones
-      console.log('🔧 Invalidating queries...');
-      await queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      await queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] })
-      await queryClient.invalidateQueries({ queryKey: ['organization-members'] })
-      
-      // Refetch inmediato para forzar la actualización con refresh=true
-      console.log('🔧 Refetching current-user with force refresh...');
-      const { data: refreshedData } = await queryClient.fetchQuery({
-        queryKey: ['current-user'],
-        queryFn: async () => {
-          const { data: sessionData } = await supabase.auth.getSession()
-          const token = sessionData?.session?.access_token
-          
-          if (!token) {
-            throw new Error('No authentication token available')
-          }
-
-          const response = await fetch('/api/current-user?refresh=true', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-          })
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-          }
-
-          return await response.json()
-        }
-      })
-      
-      console.log('🔧 Refreshed user data:', refreshedData)
-      
-      console.log('🔧 Showing success toast');
+      // SOLUCIÓN DIRECTA: Forzar recarga completa de página para evitar problemas de cache
+      // El RPC archub_get_user tiene su propia lógica y no está reflejando los cambios
       toast({
         title: "Organización seleccionada",
-        description: "La organización se ha seleccionado correctamente"
+        description: "Cambiando a la nueva organización..."
       })
       
-      // Navegar sin recarga de página
-      console.log('🔧 Navigating to dashboard...');
-      setSidebarContext('organization')
-      navigate('/organization/dashboard')
-      console.log('🔧 Organization switch onSuccess completed');
+      console.log('🔧 Forcing complete page reload to ensure fresh data');
+      // Usar window.location.replace para evitar que el usuario pueda volver atrás
+      setTimeout(() => {
+        window.location.replace('/organization/dashboard')
+      }, 1000)
     },
     onError: () => {
       toast({
