@@ -190,8 +190,8 @@ export function ActionBarDesktop({
             </div>
           </div>
         )}
-          
-          {/* Parameter Selector */}
+        
+        {/* Parameter Selector */}
           {parameterSelector && (
             <div className="flex items-center gap-2">
               <div className="min-w-96 w-auto">
