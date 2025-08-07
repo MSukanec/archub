@@ -117,8 +117,8 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
           currency_id: userData?.organization?.default_currency_id || null,
           role: 'Cliente',
           is_active: true,
-          notes: '',
-          organization_id: organizationId
+          organization_id: organizationId,
+          exchange_rate: 1.0
         })
         .select()
 
@@ -148,15 +148,9 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
   }
 
   // Get available contacts (not already clients)
-  const availableContacts = organizationContacts?.filter(contact => {
-    const isAlreadyClient = projectClients?.some(client => client.client_id === contact.id)
-    console.log('Contact:', contact.first_name, contact.last_name, 'ID:', contact.id, 'Already client:', isAlreadyClient)
-    return !isAlreadyClient
-  }) || []
-  
-  console.log('Total organization contacts:', organizationContacts?.length)
-  console.log('Total project clients:', projectClients?.length)
-  console.log('Available contacts:', availableContacts.length)
+  const availableContacts = organizationContacts?.filter(contact => 
+    !projectClients?.some(client => client.client_id === contact.id)
+  ) || []
 
   const viewPanel = (
     <div>
