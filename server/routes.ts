@@ -68,6 +68,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Delete project safely - server-side implementation
+  app.delete("/api/projects/:projectId", async (req, res) => {
+    try {
+      console.log("Attempting to delete project:", req.params.projectId);
+      
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7);
+      const projectId = req.params.projectId;
+      
+      // Create authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+      
+      // First get user data to verify permissions
+      const { data: userData } = await authenticatedSupabase.rpc('archub_get_user');
+      if (!userData?.organization?.id) {
+        return res.status(403).json({ error: "User organization not found" });
+      }
+      
+      // Verify project ownership
+      const { data: projectCheck, error: checkError } = await authenticatedSupabase
+        .from('projects')
+        .select('id, organization_id')
+        .eq('id', projectId)
+        .eq('organization_id', userData.organization.id)
+        .single();
+      
+      if (checkError || !projectCheck) {
+        console.error("Project verification failed:", checkError);
+        return res.status(404).json({ error: "Project not found or access denied" });
+      }
+      
+      // Delete related data first (project_data table)
+      const { error: projectDataError } = await authenticatedSupabase
+        .from('project_data')
+        .delete()
+        .eq('project_id', projectId);
+      
+      if (projectDataError) {
+        console.error("Error deleting project_data:", projectDataError);
+        // Continue anyway, project_data might not exist
+      }
+      
+      // Delete the main project
+      const { error: projectError } = await authenticatedSupabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId)
+        .eq('organization_id', userData.organization.id);
+      
+      if (projectError) {
+        console.error("Error deleting project:", projectError);
+        return res.status(500).json({ error: "Failed to delete project", details: projectError });
+      }
+      
+      console.log("Project deleted successfully:", projectId);
+      res.json({ success: true, message: "Project deleted successfully" });
+      
+    } catch (error) {
+      console.error("Error in delete project endpoint:", error);
+      res.status(500).json({ error: "Internal server error", details: error });
+    }
+  });
+
   // Get all countries
   app.get("/api/countries", async (req, res) => {
     try {
@@ -467,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let clientToUse = supabase;
       if (user_token) {
         // Create a client with the user's session token
-        clientToUse = createClient(supabaseUrl!, supabaseServiceKey, {
+        clientToUse = createClient(supabaseUrl!, supabaseServiceKey!, {
           global: {
             headers: {
               Authorization: `Bearer ${user_token}`

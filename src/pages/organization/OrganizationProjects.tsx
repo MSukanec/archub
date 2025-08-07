@@ -185,43 +185,33 @@ export default function OrganizationProjects() {
     navigate('/project/basic-data')
   }
 
-  // Mutación para eliminar proyecto
+  // Mutación para eliminar proyecto usando el endpoint del servidor
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized')
+      console.log('Deleting project via server endpoint:', projectId)
       
-      try {
-        // CORREGIDO: Solo eliminar el proyecto específico usando transaction
-        const { error } = await supabase.rpc('delete_project_safely', {
-          project_id: projectId
-        })
-        
-        if (error) {
-          // Fallback: eliminar manualmente pero con más cuidado
-          console.log('RPC failed, using manual deletion:', error)
-          
-          // Primero eliminar project_data específico
-          const { error: projectDataError } = await supabase
-            .from('project_data')
-            .delete()
-            .eq('project_id', projectId) // project_data no tiene organization_id, solo project_id
-          
-          if (projectDataError) {
-            console.error('Error deleting project_data:', projectDataError)
-          }
-          
-          // Luego eliminar el proyecto principal
-          const { error: projectError } = await supabase
-            .from('projects')
-            .delete()
-            .eq('id', projectId)
-            .eq('organization_id', userData?.organization?.id) // SEGURIDAD EXTRA
-          
-          if (projectError) throw projectError
-        }
-      } catch (error: any) {
-        throw error
+      // Get auth session for authenticated API call
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('No authentication token available')
       }
+      
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete project')
+      }
+      
+      const result = await response.json()
+      console.log('Project deleted successfully:', result)
+      return result
     },
     onSuccess: () => {
       // Invalidar cache para actualizar lista
