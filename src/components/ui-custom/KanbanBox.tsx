@@ -144,7 +144,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                           className="flex items-center justify-between pb-3 cursor-grab active:cursor-grabbing"
                         >
                           <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-base uppercase tracking-wide">{list.name}</h3>
+                            <h3 className="font-medium text-sm">{list.name}</h3>
                             <span className="text-sm text-muted-foreground">
                               {cardsByList[list.id]?.filter(card => !card.is_completed).length || 0}
                             </span>
