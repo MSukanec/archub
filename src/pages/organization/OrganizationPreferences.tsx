@@ -358,7 +358,6 @@ export default function OrganizationPreferences() {
 
   return (
     <Layout 
-      showSidebar 
       wide={false}
       headerProps={{
         title: "Preferencias",
@@ -382,6 +381,7 @@ export default function OrganizationPreferences() {
         <FeatureIntroduction
           icon={<Coins className="h-5 w-5" />}
           title="Preferencias de la Organización"
+          features={[]}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
