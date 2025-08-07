@@ -211,43 +211,37 @@ export default function ProjectClients() {
 
   if (isLoading || loadingClients) {
     return (
-      <Layout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Handshake className="h-6 w-6 text-[var(--accent)]" />
-              <h1 className="text-2xl font-bold">Clientes del Proyecto</h1>
-            </div>
-            <Button onClick={() => openModal('project-client')} variant="default">
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Cliente
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-center h-64">
-            <div className="text-sm text-muted-foreground">Cargando clientes...</div>
-          </div>
+      <Layout
+        headerProps={{
+          icon: Handshake,
+          title: "Clientes",
+          actionButton: {
+            label: 'Agregar Cliente',
+            icon: Plus,
+            onClick: () => openModal('project-client')
+          }
+        }}
+      >
+        <div className="flex items-center justify-center h-64">
+          <div className="text-sm text-muted-foreground">Cargando clientes...</div>
         </div>
       </Layout>
     )
   }
 
   return (
-    <Layout>
+    <Layout
+      headerProps={{
+        icon: Handshake,
+        title: "Clientes",
+        actionButton: {
+          label: 'Agregar Cliente',
+          icon: Plus,
+          onClick: () => openModal('project-client')
+        }
+      }}
+    >
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Handshake className="h-6 w-6 text-[var(--accent)]" />
-            <h1 className="text-2xl font-bold">Clientes del Proyecto</h1>
-          </div>
-          <Button onClick={() => openModal('project-client')} variant="default">
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Cliente
-          </Button>
-        </div>
-
         {/* Conditional rendering: Two-column layout OR full-width empty state */}
         {projectClients && projectClients.length > 0 ? (
           /* Two Column Layout - Section descriptions left, content right */
