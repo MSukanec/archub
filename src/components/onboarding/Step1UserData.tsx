@@ -6,12 +6,20 @@ import { useOnboardingStore } from "@/stores/onboardingStore";
 import { User } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
-export function Step1UserData() {
+interface Step1UserDataProps {
+  onFinish?: () => void;
+}
+
+export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
   const { formData, updateFormData, goNextStep } = useOnboardingStore();
 
-  const handleNext = () => {
+  const handleFinish = () => {
     if (formData.first_name && formData.last_name && formData.organization_name) {
-      goNextStep();
+      if (onFinish) {
+        onFinish();
+      } else {
+        goNextStep();
+      }
     }
   };
 
@@ -91,11 +99,11 @@ export function Step1UserData() {
 
         <div className="flex justify-end pt-4">
           <Button 
-            onClick={handleNext}
+            onClick={handleFinish}
             disabled={!formData.first_name || !formData.last_name || !formData.organization_name}
             className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
-            Siguiente
+            {onFinish ? 'Finalizar configuración' : 'Siguiente'}
           </Button>
         </div>
       </CardContent>

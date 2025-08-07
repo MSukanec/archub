@@ -11,9 +11,6 @@ import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Step1UserData } from "@/components/onboarding/Step1UserData";
-import { Step2FinancialSetup } from "@/components/onboarding/Step2FinancialSetup";
-
-
 
 export default function Onboarding() {
   const [, navigate] = useLocation();
@@ -47,8 +44,8 @@ export default function Onboarding() {
     );
   }
 
-  // Onboarding optimized to 2 steps only
-  const totalSteps = 2;
+  // Onboarding optimized to 1 step only
+  const totalSteps = 1;
 
   // Initialize form data with existing user data if available
   useEffect(() => {
@@ -65,17 +62,13 @@ export default function Onboarding() {
         secondary_wallet_ids: [],
       });
 
-      // If onboarding and has existing data, skip to appropriate step
-      if (userData.user_data?.first_name && userData.user_data?.last_name) {
-        setCurrentStep(2); // Skip to financial setup step
-      } else {
-        setCurrentStep(1); // Start from beginning
-      }
+      // Always start from the only step
+      setCurrentStep(1);
     }
   }, [userData, userLoading, updateFormData, setCurrentStep]);
 
   const handleFinishOnboarding = () => {
-    console.log('handleFinishOnboarding called - completing 2-step onboarding');
+    console.log('handleFinishOnboarding called - completing 1-step onboarding');
     saveOnboardingMutation.mutate();
   };
 
@@ -251,14 +244,7 @@ export default function Onboarding() {
   }
 
   const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <Step1UserData />;
-      case 2:
-        return <Step2FinancialSetup onFinish={handleFinishOnboarding} />;
-      default:
-        return <Step1UserData />;
-    }
+    return <Step1UserData onFinish={handleFinishOnboarding} />;
   };
 
   return (
