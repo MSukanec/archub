@@ -213,24 +213,49 @@ export default function OrganizationProjects() {
       console.log('Project deleted successfully:', result)
       return result
     },
-    onSuccess: () => {
-      // Invalidar cache para actualizar lista
-      queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+    onMutate: async (projectId) => {
+      // Optimistic update: remove from UI immediately  
+      await queryClient.cancelQueries({ queryKey: ['projects', userData?.organization?.id] })
       
+      const previousProjects = queryClient.getQueryData(['projects', userData?.organization?.id])
+      
+      // Update cache optimistically
+      queryClient.setQueryData(['projects', userData?.organization?.id], (old: any[]) => {
+        if (!old) return old
+        return old.filter(project => project.id !== projectId)
+      })
+      
+      // Close modals immediately for responsive feel
+      setProjectToDelete(null)
+      setShowConfirm(false)
+      
+      return { previousProjects }
+    },
+    onSuccess: () => {
       toast({
         title: "Proyecto eliminado",
         description: "El proyecto se ha eliminado correctamente"
       })
       
-
+      // Still invalidate for consistency but UI already updated
+      queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
     },
-    onError: (error: any) => {
+    onError: (error: any, projectId, context) => {
+      // Restore on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['projects', userData?.organization?.id], context.previousProjects)
+      }
+      
       toast({
         title: "Error",
         description: error.message || "No se pudo eliminar el proyecto",
         variant: "destructive"
       })
+      
+      // Reopen modal on error  
+      setProjectToDelete(projectId)
+      setShowConfirm(true)
     }
   })
 

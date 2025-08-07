@@ -95,42 +95,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
       
-      // First get user data to verify permissions
-      const { data: userData } = await authenticatedSupabase.rpc('archub_get_user');
-      if (!userData?.organization?.id) {
-        return res.status(403).json({ error: "User organization not found" });
+      // Get user organization directly from token instead of heavy RPC call
+      const { data: { user } } = await authenticatedSupabase.auth.getUser();
+      if (!user) {
+        return res.status(401).json({ error: "Invalid authentication" });
       }
       
-      // Verify project ownership
-      const { data: projectCheck, error: checkError } = await authenticatedSupabase
-        .from('projects')
-        .select('id, organization_id')
-        .eq('id', projectId)
-        .eq('organization_id', userData.organization.id)
+      // Get user's current organization more efficiently
+      const { data: userPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', user.id)
         .single();
       
-      if (checkError || !projectCheck) {
-        console.error("Project verification failed:", checkError);
-        return res.status(404).json({ error: "Project not found or access denied" });
+      const organizationId = userPrefs?.last_organization_id;
+      if (!organizationId) {
+        return res.status(403).json({ error: "No active organization found" });
       }
       
-      // Delete related data first (project_data table)
-      const { error: projectDataError } = await authenticatedSupabase
+      // Combined operation: verify ownership and delete in fewer queries
+      // First delete project_data (if exists) - no verification needed since it's linked to project
+      await authenticatedSupabase
         .from('project_data')
         .delete()
         .eq('project_id', projectId);
       
-      if (projectDataError) {
-        console.error("Error deleting project_data:", projectDataError);
-        // Continue anyway, project_data might not exist
-      }
-      
-      // Delete the main project
+      // Delete the main project with organization verification in one step
       const { error: projectError } = await authenticatedSupabase
         .from('projects')
         .delete()
         .eq('id', projectId)
-        .eq('organization_id', userData.organization.id);
+        .eq('organization_id', organizationId);
       
       if (projectError) {
         console.error("Error deleting project:", projectError);

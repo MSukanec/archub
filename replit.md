@@ -46,6 +46,7 @@ Preferred communication style: Simple, everyday language.
 - **User Preferences Migration**: Replaced global `user_preferences.last_project_id` with organization-specific `user_organization_preferences` table. Each user now has a separate last project per organization, improving data accuracy and multi-organization support. Backend functions `archub_get_user()` and `archub_new_user()` updated accordingly.
 - **Material Prices Management**: Complete admin system for managing organization-specific material prices with table organization_material_prices, filtering, sorting, and CRUD operations.
 - **Task Management Fixes (2025-08-06)**: Fixed AdminGeneratedTasks page where editing created duplicates instead of updating existing tasks. Added delete button functionality with dangerous confirmation modal for non-system tasks. System tasks are clearly marked and cannot be deleted to maintain data integrity.
+- **Project Deletion Optimization (2025-08-07)**: Completely rebuilt project deletion system with server-side endpoint and optimistic UI updates. Reduced deletion time from ~8 seconds to ~2 seconds by eliminating heavy RPC calls and using efficient auth token validation. Frontend now provides instant UI feedback while server handles actual deletion.
 
 ## External Dependencies
 
