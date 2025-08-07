@@ -195,7 +195,7 @@ export function HeaderDesktop({
     "/construction/schedule": "Cronograma",
     "/construction/logs": "Bitácoras",
     "/construction/attendance": "Asistencia",
-    "/construction/gallery": "Galería",
+    "/project/gallery": "Galería",
     "/construction/subcontracts": "Subcontratos",
     "/construction": "Resumen de Construcción",
 

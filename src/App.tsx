@@ -39,7 +39,7 @@ import ConstructionAttendance from "@/pages/construction/ConstructionAttendance"
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import ConstructionCostAnalysis from "@/pages/construction/ConstructionCostAnalysis";
-import ConstructionGallery from "@/pages/construction/ConstructionGallery";
+import ProjectGallery from "@/pages/project/ProjectGallery";
 import ConstructionTasks from "@/pages/construction/ConstructionTasks";
 import ConstructionLabor from "@/pages/construction/ConstructionLabor";
 import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
@@ -180,7 +180,7 @@ function Router() {
         </Route>
         <Route path="/project/gallery">
           <ProtectedRoute>
-            <ConstructionGallery />
+            <ProjectGallery />
           </ProtectedRoute>
         </Route>
 
