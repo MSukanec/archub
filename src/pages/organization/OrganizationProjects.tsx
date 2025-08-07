@@ -364,6 +364,11 @@ export default function OrganizationProjects() {
               ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
             }
+            actionButton={{
+              label: "Nuevo Proyecto",
+              icon: Plus,
+              onClick: () => openModal('project', {})
+            }}
           />
         )}
 
