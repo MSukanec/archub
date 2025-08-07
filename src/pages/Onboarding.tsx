@@ -223,8 +223,8 @@ export default function Onboarding() {
       console.log('Setting timeout for navigation...');
       setTimeout(() => {
         console.log('Navigating to /select-mode');
-        navigate('/select-mode');
-        resetOnboarding();
+        // Force a page reload to ensure the updated userData is fetched
+        window.location.href = '/select-mode';
       }, 1500); // Wait 1.5 seconds to show the toast
     },
     onError: (error) => {

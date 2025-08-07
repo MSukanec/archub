@@ -30,8 +30,8 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
       return;
     }
 
-    // If user is authenticated but needs onboarding
-    if (user && userData && !userData.preferences?.onboarding_completed && location !== '/onboarding') {
+    // If user is authenticated but needs onboarding (except for select-mode during onboarding completion)
+    if (user && userData && !userData.preferences?.onboarding_completed && location !== '/onboarding' && location !== '/select-mode') {
       navigate('/onboarding');
       return;
     }
