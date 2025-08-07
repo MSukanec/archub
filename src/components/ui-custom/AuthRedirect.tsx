@@ -8,7 +8,7 @@ interface AuthRedirectProps {
 }
 
 export function AuthRedirect({ children }: AuthRedirectProps) {
-  const { user, initialized, loading, completingOnboarding } = useAuthStore();
+  const { user, initialized, loading, completingOnboarding, setCompletingOnboarding } = useAuthStore();
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const [location, navigate] = useLocation();
 
@@ -28,6 +28,12 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
     if (!user && !isPublicRoute) {
       navigate('/login');
       return;
+    }
+
+    // Reset completingOnboarding flag if user reaches dashboard with onboarding completed
+    if (user && userData && userData.preferences?.onboarding_completed && completingOnboarding && (location.includes('/dashboard') || location.includes('/organization'))) {
+      console.log('AuthRedirect: User reached dashboard with completed onboarding, resetting flag');
+      setCompletingOnboarding(false);
     }
 
     // If user is authenticated but needs onboarding (skip redirect if completing onboarding)

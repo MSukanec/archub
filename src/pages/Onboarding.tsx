@@ -136,10 +136,7 @@ export default function Onboarding() {
       });
     },
     onSuccess: () => {
-      toast({
-        title: "¡Perfecto!",
-        description: "Configuración inicial completada. Ahora elige tu modo de uso.",
-      });
+      // Toast removed per user request
       
       // Navigate immediately without delay
       navigate('/select-mode');

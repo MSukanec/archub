@@ -141,20 +141,15 @@ export default function SelectMode() {
         };
       });
       
-      toast({
-        title: "Modo actualizado",
-        description: "Tu modo de uso se ha actualizado correctamente.",
-      });
+      // Toast removed per user request
       
       // Navigate immediately with React Router
       setSidebarContext('organization');
       navigate('/organization/dashboard');
       
-      // Reset the flag after successful navigation
-      setTimeout(() => {
-        console.log('SelectMode: Resetting completingOnboarding flag');
-        setCompletingOnboarding(false);
-      }, 2000); // Increased timeout to ensure navigation completes
+      // Don't reset the flag automatically - let the system stabilize
+      // The flag will be managed by the auth flow
+      console.log('SelectMode: Navigation completed, keeping completingOnboarding flag active for stability');
     },
     onError: (err, userType, context) => {
       // Reset the flag on error
