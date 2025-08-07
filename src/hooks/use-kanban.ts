@@ -642,25 +642,18 @@ export function useCreateKanbanCard() {
       return { ...data, board_id: cardData.board_id } // Include board_id in response
     },
     onSuccess: (data, variables) => {
-      console.log('Card creation success - data:', data, 'variables:', variables)
-      
-      // Use board_id from variables if available, otherwise try from data
-      const boardId = variables.board_id || data.board_id
-      
-      console.log('Using boardId for cache invalidation:', boardId)
-      
+      // Simple cache invalidation - only invalidate the specific board's cards
+      const boardId = variables.board_id
       if (boardId) {
-        console.log('Invalidating cache with specific boardId:', boardId)
-        queryClient.invalidateQueries({ queryKey: ['kanban-cards', boardId] })
-      } else {
-        console.log('Fallback: invalidating all kanban-cards queries')
-        queryClient.invalidateQueries({ queryKey: ['kanban-cards'] })
+        queryClient.invalidateQueries({ 
+          queryKey: ['kanban-cards', boardId],
+          exact: true
+        })
       }
       
       toast({ title: "Tarjeta creada exitosamente" })
     },
     onError: (error) => {
-      console.error('Card creation error:', error)
       toast({
         title: "Error al crear tarjeta",
         description: error.message,

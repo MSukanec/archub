@@ -117,18 +117,14 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           return;
         }
 
-        const cardPayload = {
+        await createCardMutation.mutateAsync({
           list_id: listId,
           title: data.title,
           description: data.description || undefined,
           created_by: data.created_by, // Already using organization member ID
           assigned_to: data.assigned_to || undefined, // Already using organization member ID
           board_id: boardId // Pass boardId to avoid additional query
-        };
-        
-        console.log('Creating card with payload:', cardPayload);
-        
-        await createCardMutation.mutateAsync(cardPayload);
+        });
         
         handleClose();
         toast({
