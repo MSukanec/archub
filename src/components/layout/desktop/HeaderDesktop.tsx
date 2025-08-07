@@ -211,7 +211,7 @@ export function HeaderDesktop({
     "/organization/contacts": "Contactos",
     "/organization/preferences": "Preferencias",
     "/organization/activity": "Actividad",
-    "/organization/tasks": "Tablero",
+    "/organization/board": "Tablero",
 
     // Administración
     "/admin/users": "Usuarios",

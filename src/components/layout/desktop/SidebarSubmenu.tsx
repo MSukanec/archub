@@ -103,7 +103,7 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
       { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      { icon: CheckSquare, label: 'Tablero', href: '/organization/tasks' },
+      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },

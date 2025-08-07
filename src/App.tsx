@@ -136,7 +136,7 @@ function Router() {
             <OrganizationActivity />
           </ProtectedRoute>
         </Route>
-        <Route path="/organization/tasks">
+        <Route path="/organization/board">
           <ProtectedRoute>
             <OrganizationBoard />
           </ProtectedRoute>
