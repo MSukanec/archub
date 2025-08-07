@@ -19,7 +19,6 @@ import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useToast } from "@/hooks/use-toast";
 
 const cardSchema = z.object({
-  created_by: z.string().min(1, "El creador es requerido"),
   assigned_to: z.string().optional(),
   title: z.string().min(1, "El título es requerido"),
   description: z.string().optional(),
@@ -58,23 +57,13 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const form = useForm<CardFormData>({
     resolver: zodResolver(cardSchema),
     defaultValues: {
-      created_by: card?.created_by || '',
       assigned_to: card?.assigned_to || '',
       title: card?.title || '',
       description: card?.description || '',
     }
   });
 
-  // Set current user as default creator when modal opens
-  useEffect(() => {
-    if (!isEditing && userData?.organization?.id) {
-      // Find current user's organization member ID
-      const currentMember = members.find(m => m.user_id === userData.user?.id);
-      if (currentMember) {
-        form.setValue('created_by', currentMember.id);
-      }
-    }
-  }, [userData, members, form, isEditing]);
+
 
   // Set panel to edit mode when editing a card
   useEffect(() => {
@@ -117,11 +106,14 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           return;
         }
 
+        // Find current user's organization member ID
+        const currentMember = members.find(m => m.user_id === userData?.user?.id);
+        
         await createCardMutation.mutateAsync({
           list_id: listId,
           title: data.title,
           description: data.description || undefined,
-          created_by: data.created_by, // Already using organization member ID
+          created_by: currentMember?.id || '', // Use current user's member ID automatically
           assigned_to: data.assigned_to || undefined, // Already using organization member ID
           board_id: boardId // Pass boardId to avoid additional query
         });
@@ -145,45 +137,24 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creador</FormLabel>
-                <FormControl>
-                  <UserSelector
-                    users={users}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar creador"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="assigned_to"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Asignado a (opcional)</FormLabel>
-                <FormControl>
-                  <UserSelector
-                    users={users}
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    placeholder="Sin asignar"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="assigned_to"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Asignado a (opcional)</FormLabel>
+              <FormControl>
+                <UserSelector
+                  users={users}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  placeholder="Sin asignar"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -242,15 +213,9 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
 
   const viewPanel = isEditing ? (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h4 className="font-medium">Creador</h4>
-          <p className="text-muted-foreground mt-1">{card?.creator?.full_name || 'Sin creador'}</p>
-        </div>
-        <div>
-          <h4 className="font-medium">Asignado a</h4>
-          <p className="text-muted-foreground mt-1">{card?.assignedUser?.full_name || 'Sin asignar'}</p>
-        </div>
+      <div>
+        <h4 className="font-medium">Asignado a</h4>
+        <p className="text-muted-foreground mt-1">{card?.assignedUser?.full_name || 'Sin asignar'}</p>
       </div>
       <div>
         <h4 className="font-medium">Título</h4>

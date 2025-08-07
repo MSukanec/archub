@@ -9,7 +9,6 @@ import { FormModalLayout } from "../../form/FormModalLayout";
 import FormModalBody from "../../form/FormModalBody";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateKanbanList, useUpdateKanbanList } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -18,7 +17,6 @@ import { useModalPanelStore } from "../../form/modalPanelStore";
 
 const listSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  created_by: z.string().min(1, "El creador es requerido"),
 });
 
 type ListFormData = z.infer<typeof listSchema>;
@@ -42,14 +40,7 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
 
-  // Convert members to users format for UserSelector
-  // Use member.id as the value since created_by now references organization_members.id
-  const users = members.map(member => ({
-    id: member.id, // Use organization_members.id for created_by field
-    full_name: member.full_name || member.email || 'Usuario',
-    email: member.email || '',
-    avatar_url: member.avatar_url || undefined
-  }));
+
 
   // Find current user's member ID for default selection
   const currentUserMember = members.find(member => member.user_id === userData?.user?.id);
@@ -58,22 +49,10 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
     resolver: zodResolver(listSchema),
     defaultValues: {
       name: list?.name || '',
-      created_by: isEditing && list?.created_by ? list.created_by : (currentUserMember?.id || ''),
     }
   });
 
-  // Set current user as default creator when modal opens
-  useEffect(() => {
-    if (members.length > 0 && currentUserMember) {
-      if (isEditing && list?.created_by) {
-        // For editing, use the existing created_by value (organization_members.id)
-        form.setValue('created_by', list.created_by);
-      } else if (!isEditing) {
-        // For new lists, set current user's member ID as default
-        form.setValue('created_by', currentUserMember.id);
-      }
-    }
-  }, [members, currentUserMember, list, isEditing, form]);
+
 
   // Set panel to edit mode when editing a list
   useEffect(() => {
@@ -114,7 +93,7 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
         await createListMutation.mutateAsync({
           board_id: boardId,
           name: data.name,
-          created_by: data.created_by // Pass the selected organization member ID
+          created_by: currentUserMember?.id || '' // Use current user's member ID automatically
         });
         toast({
           title: "Lista creada",
@@ -136,31 +115,6 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   const editPanel = (
     <Form {...form}>
       <form className="space-y-4">
-        <FormField
-          control={form.control}
-          name="created_by"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Creador</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar creador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="name"
@@ -204,12 +158,6 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
       <div>
         <h4 className="font-medium">Nombre</h4>
         <p className="text-muted-foreground mt-1">{list?.name || 'Sin nombre'}</p>
-      </div>
-      <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">
-          {users.find(u => u.id === list?.created_by)?.full_name || 'Sin creador'}
-        </p>
       </div>
     </div>
   ) : editPanel;
