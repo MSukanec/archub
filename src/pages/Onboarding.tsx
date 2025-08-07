@@ -212,6 +212,7 @@ export default function Onboarding() {
       return { success: true };
     },
     onSuccess: () => {
+      console.log('Onboarding mutation success - about to navigate to select-mode');
       queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       toast({
         title: "¡Perfecto!",
@@ -219,10 +220,12 @@ export default function Onboarding() {
       });
       
       // Redirect to select-mode after successful onboarding
+      console.log('Setting timeout for navigation...');
       setTimeout(() => {
+        console.log('Navigating to /select-mode');
         navigate('/select-mode');
         resetOnboarding();
-      }, 1000); // Wait 1 second to show the toast
+      }, 1500); // Wait 1.5 seconds to show the toast
     },
     onError: (error) => {
       console.error('Error saving onboarding data:', error);
