@@ -109,11 +109,20 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
         // Find current user's organization member ID
         const currentMember = members.find(m => m.user_id === userData?.user?.id);
         
+        if (!currentMember?.id) {
+          toast({
+            title: "Error",
+            description: "No se pudo identificar el usuario actual",
+            variant: "destructive"
+          });
+          return;
+        }
+        
         await createCardMutation.mutateAsync({
           list_id: listId,
           title: data.title,
           description: data.description || undefined,
-          created_by: currentMember?.id || '', // Use current user's member ID automatically
+          created_by: currentMember.id, // Use current user's member ID automatically
           assigned_to: data.assigned_to || undefined, // Already using organization member ID
           board_id: boardId // Pass boardId to avoid additional query
         });

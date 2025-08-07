@@ -77,6 +77,15 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
       return;
     }
 
+    if (!currentUserMember?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo identificar el usuario actual",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       if (isEditing && list) {
         await updateListMutation.mutateAsync({
@@ -93,7 +102,7 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
         await createListMutation.mutateAsync({
           board_id: boardId,
           name: data.name,
-          created_by: currentUserMember?.id || '' // Use current user's member ID automatically
+          created_by: currentUserMember.id // Use current user's member ID automatically
         });
         toast({
           title: "Lista creada",
