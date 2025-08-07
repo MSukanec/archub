@@ -83,10 +83,12 @@ export default function SelectMode() {
       if (!userData?.user?.id) throw new Error('Usuario no encontrado');
       if (!supabase) throw new Error('Supabase no está configurado');
 
+      // Update both last_user_type and onboarding_completed to ensure complete flow
       const { error } = await supabase
         .from('user_preferences')
         .update({
           last_user_type: userType,
+          onboarding_completed: true,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userData.user.id);
@@ -94,22 +96,29 @@ export default function SelectMode() {
       if (error) throw error;
       return { success: true };
     },
-    onSuccess: () => {
-      // Update the cache immediately with optimistic update
+    onMutate: async (userType: string) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
+
+      // Snapshot previous value
+      const previousUserData = queryClient.getQueryData(['/api/current-user']);
+
+      // Optimistically update to the new value
       queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
           preferences: {
             ...oldData.preferences,
+            last_user_type: userType,
             onboarding_completed: true
           }
         };
       });
-      
-      // Also invalidate to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
-      
+
+      return { previousUserData };
+    },
+    onSuccess: () => {
       toast({
         title: "Modo actualizado",
         description: "Tu modo de uso se ha actualizado correctamente.",
@@ -118,6 +127,16 @@ export default function SelectMode() {
       // Navigate immediately with React Router
       setSidebarContext('organization');
       navigate('/organization/dashboard');
+    },
+    onError: (err, userType, context) => {
+      // Rollback on error
+      if (context?.previousUserData) {
+        queryClient.setQueryData(['/api/current-user'], context.previousUserData);
+      }
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
     },
     onError: (error) => {
       console.error('Error updating user type:', error);
