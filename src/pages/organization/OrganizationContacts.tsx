@@ -26,8 +26,10 @@ import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 
 export default function OrganizationContacts() {
+  const [activeTab, setActiveTab] = useState("personas")
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('name_asc')
   const [filterByType, setFilterByType] = useState('all')
@@ -101,6 +103,21 @@ export default function OrganizationContacts() {
   }, [userData?.preferences?.last_organization_id])
 
   const organizationName = userData?.organization?.name || "Organización"
+
+  // Header tabs configuration
+  const headerTabs = [
+    {
+      id: "personas",
+      label: "Personas", 
+      isActive: activeTab === "personas"
+    },
+    {
+      id: "empresas",
+      label: "Empresas",
+      isActive: activeTab === "empresas",
+      isRestricted: true
+    }
+  ]
 
   // Filtros y búsqueda
   const filteredContacts = React.useMemo(() => {
@@ -342,6 +359,13 @@ export default function OrganizationContacts() {
         headerProps={{
           icon: Users,
           title: "Contactos",
+          tabs: headerTabs,
+          onTabChange: (tabId: string) => {
+            if (tabId === "empresas") {
+              return; // No hacer nada si es empresas (restringida)
+            }
+            setActiveTab(tabId);
+          },
           actionButton: {
             label: 'Crear Contacto',
             icon: UserPlus,
@@ -349,11 +373,21 @@ export default function OrganizationContacts() {
           }
         }}
       >
-        <EmptyState
-          icon={<Users className="w-8 h-8 text-muted-foreground" />}
-          title="No hay contactos"
-          description="Comienza agregando tu primer contacto a la organización"
-        />
+        {activeTab === "personas" ? (
+          <EmptyState
+            icon={<Users className="w-8 h-8 text-muted-foreground" />}
+            title="No hay contactos"
+            description="Comienza agregando tu primer contacto a la organización"
+          />
+        ) : (
+          <CustomRestricted reason="coming_soon">
+            <div className="text-center py-12">
+              <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
+              <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
+            </div>
+          </CustomRestricted>
+        )}
       </Layout>
     )
   }
@@ -363,115 +397,137 @@ export default function OrganizationContacts() {
       headerProps={{
         icon: Users,
         title: "Contactos",
-        actionButton: {
+        tabs: headerTabs,
+        onTabChange: (tabId: string) => {
+          if (tabId === "empresas") {
+            return; // No hacer nada si es empresas (restringida)
+          }
+          setActiveTab(tabId);
+        },
+        actionButton: activeTab === "personas" ? {
           label: 'Crear Contacto',
           icon: UserPlus,
           onClick: () => openModal('contact', { isEditing: false })
-        }
+        } : undefined
       }}
     >
       <div className="space-y-6">
-
-
-        {/* FeatureIntroduction - Solo mobile */}
-        <div className="md:hidden">
-          <FeatureIntroduction
-            title="Contactos"
-            icon={<Users className="w-5 h-5" />}
-            features={[
-              {
-                icon: <Building className="w-5 h-5" />,
-                title: "Gestión integral de personas",
-                description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
-              },
-              {
-                icon: <UserCheck className="w-5 h-5" />,
-                title: "Vinculación con usuarios de Archub",
-                description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
-              },
-              {
-                icon: <Users className="w-5 h-5" />,
-                title: "Base fundamental para otras funciones",
-                description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
-              },
-              {
-                icon: <Share2 className="w-5 h-5" />,
-                title: "Compartir información fácilmente",
-                description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
-              }
-            ]}
-          />
-        </div>
-
-        <Table
-          data={filteredContacts}
-          columns={columns}
-          isLoading={contactsLoading}
-          defaultSort={{
-            key: "name",
-            direction: "asc",
-          }}
-          topBar={{
-            showSearch: true,
-            searchValue: searchValue,
-            onSearchChange: setSearchValue,
-            showFilter: true,
-            isFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
-            renderFilterContent: () => (
-              <div className="space-y-3 p-2 min-w-[200px]">
-                <div>
-                  <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
-                  <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Más Recientes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                      <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-xs font-medium mb-1 block">Tipo</Label>
-                  <Select value={filterByType} onValueChange={setFilterByType}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Todos los Tipos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los Tipos</SelectItem>
-                      {contactTypes?.map((type) => (
-                        <SelectItem key={type.id} value={type.name.toLowerCase()}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            ),
-            onClearFilters: () => {
-              setSearchValue("");
-              setSortBy('name_asc');
-              setFilterByType('all');
-            }
-          }}
-          emptyState={
-            <div className="text-center py-8">
-              <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
-              <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
+        
+        {/* Contenido para la tab de Personas */}
+        {activeTab === "personas" && (
+          <>
+            {/* FeatureIntroduction - Solo mobile */}
+            <div className="md:hidden">
+              <FeatureIntroduction
+                title="Contactos"
+                icon={<Users className="w-5 h-5" />}
+                features={[
+                  {
+                    icon: <Building className="w-5 h-5" />,
+                    title: "Gestión integral de personas",
+                    description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
+                  },
+                  {
+                    icon: <UserCheck className="w-5 h-5" />,
+                    title: "Vinculación con usuarios de Archub",
+                    description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
+                  },
+                  {
+                    icon: <Users className="w-5 h-5" />,
+                    title: "Base fundamental para otras funciones",
+                    description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
+                  },
+                  {
+                    icon: <Share2 className="w-5 h-5" />,
+                    title: "Compartir información fácilmente",
+                    description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
+                  }
+                ]}
+              />
             </div>
-          }
-          renderCard={(contact: any) => (
-            <ContactCard
-              key={contact.id}
-              contact={contact}
-              onEdit={handleEditContact}
-              onDelete={handleDeleteContact}
+
+            <Table
+              data={filteredContacts}
+              columns={columns}
+              isLoading={contactsLoading}
+              defaultSort={{
+                key: "name",
+                direction: "asc",
+              }}
+              topBar={{
+                showSearch: true,
+                searchValue: searchValue,
+                onSearchChange: setSearchValue,
+                showFilter: true,
+                isFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
+                renderFilterContent: () => (
+                  <div className="space-y-3 p-2 min-w-[200px]">
+                    <div>
+                      <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
+                      <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Más Recientes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                          <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                      <Select value={filterByType} onValueChange={setFilterByType}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Todos los Tipos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los Tipos</SelectItem>
+                          {contactTypes?.map((type) => (
+                            <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ),
+                onClearFilters: () => {
+                  setSearchValue("");
+                  setSortBy('name_asc');
+                  setFilterByType('all');
+                }
+              }}
+              emptyState={
+                <div className="text-center py-8">
+                  <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
+                  <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
+                </div>
+              }
+              renderCard={(contact: any) => (
+                <ContactCard
+                  key={contact.id}
+                  contact={contact}
+                  onEdit={handleEditContact}
+                  onDelete={handleDeleteContact}
+                />
+              )}
+              cardSpacing="space-y-3"
             />
-          )}
-          cardSpacing="space-y-3"
-        />
+          </>
+        )}
+
+        {/* Contenido para la tab de Empresas - Restringida */}
+        {activeTab === "empresas" && (
+          <CustomRestricted reason="coming_soon">
+            <div className="text-center py-12">
+              <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
+              <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
+            </div>
+          </CustomRestricted>
+        )}
       </div>
 
       {/* Los modales de confirmación ahora se manejan a través del sistema global */}
