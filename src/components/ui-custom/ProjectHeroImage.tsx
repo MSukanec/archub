@@ -192,7 +192,7 @@ export default function ProjectHeroImage({
           <>
             {/* No Image Placeholder - styled like EmptyState */}
             <div 
-              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-muted-foreground/25 hover:border-[var(--accent)]/50 transition-colors bg-card rounded-lg"
+              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)]/50 hover:border-[var(--accent)] transition-colors rounded-lg"
               onClick={() => document.getElementById('hero-image-input')?.click()}
             >
               <div className="text-center space-y-4 p-8">
@@ -207,7 +207,7 @@ export default function ProjectHeroImage({
                     Formatos: JPG, PNG, WebP • Tamaño máximo: 10MB
                   </p>
                 </div>
-                <Button disabled={isUploading} variant="outline" className="gap-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
+                <Button disabled={isUploading} variant="default" className="gap-2 bg-transparent border-2 border-dashed border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)] hover:border-[var(--accent)]">
                   <Upload className="h-4 w-4" />
                   {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
                 </Button>
