@@ -432,7 +432,10 @@ export function useDeleteKanbanCard() {
     },
     onSuccess: (data) => {
       // Directly invalidate with the provided boardId
-      queryClient.invalidateQueries({ queryKey: ['kanban-cards', data.boardId] })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-cards', data.boardId],
+        exact: true
+      })
       toast({ title: "Tarjeta eliminada exitosamente" })
     },
     onError: (error) => {
@@ -497,7 +500,10 @@ export function useCreateKanbanList() {
       return data
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['kanban-lists', variables.board_id] })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-lists', variables.board_id],
+        exact: true
+      })
       toast({ title: "Lista creada exitosamente" })
     },
     onError: (error) => {
@@ -533,7 +539,10 @@ export function useUpdateKanbanList() {
       return data
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['kanban-lists', variables.board_id] })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-lists', variables.board_id],
+        exact: true
+      })
       toast({ title: "Lista actualizada exitosamente" })
     },
     onError: (error) => {
@@ -583,8 +592,14 @@ export function useDeleteKanbanList() {
       return { listId, boardId }
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['kanban-lists', data.boardId] })
-      queryClient.invalidateQueries({ queryKey: ['kanban-cards', data.boardId] })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-lists', data.boardId],
+        exact: true
+      })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-cards', data.boardId],
+        exact: true
+      })
       toast({ title: "Lista eliminada exitosamente" })
     },
     onError: (error) => {
@@ -692,7 +707,10 @@ export function useMoveKanbanCard() {
       if (error) throw error
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['kanban-cards', variables.boardId] })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-cards', variables.boardId],
+        exact: true
+      })
     },
     onError: (error) => {
       console.error('Error moving card:', error)
@@ -745,7 +763,10 @@ export function useUpdateKanbanCard() {
           .single()
         
         if (!error && listData?.board_id) {
-          queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
+          queryClient.invalidateQueries({ 
+            queryKey: ['kanban-cards', listData.board_id],
+            exact: true
+          })
         }
       } catch (error) {
         console.warn('Could not invalidate cache after card update:', error)
@@ -788,7 +809,10 @@ export function useCreateKanbanComment() {
       return data
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['kanban-comments', variables.cardId] })
+      queryClient.invalidateQueries({ 
+        queryKey: ['kanban-comments', variables.cardId],
+        exact: true
+      })
       toast({ title: "Comentario agregado exitosamente" })
     },
     onError: (error) => {
