@@ -115,9 +115,8 @@ export default function OrganizationContacts() {
       id: "empresas",
       label: "Empresas",
       isActive: activeTab === "empresas",
-      badge: "Próximamente",
-      badgeVariant: "secondary" as const,
-      isDisabled: true
+      isRestricted: true,
+      restrictionReason: "coming_soon" as const
     }
   ]
 

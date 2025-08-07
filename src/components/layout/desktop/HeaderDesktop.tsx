@@ -33,6 +33,8 @@ interface Tab {
   badge?: string;
   badgeVariant?: 'default' | 'secondary' | 'outline';
   isDisabled?: boolean;
+  isRestricted?: boolean;
+  restrictionReason?: string;
 }
 
 interface HeaderDesktopProps {
@@ -346,33 +348,46 @@ export function HeaderDesktop({
       {hasTabs && (
         <div className="w-full h-10 px-4 flex items-center">
           <div className="flex items-center space-x-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => tab.isDisabled ? undefined : onTabChange?.(tab.id)}
-                disabled={tab.isDisabled}
-                className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
-                  tab.isDisabled 
-                    ? 'text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed'
-                    : tab.isActive 
-                      ? 'text-[var(--layout-text)] font-medium' 
-                      : 'text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]'
-                }`}
-              >
-                {tab.label}
-                {tab.badge && (
-                  <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                    {tab.badge}
-                  </span>
-                )}
-                {tab.isActive && !tab.isDisabled && (
-                  <div 
-                    className="absolute -bottom-[9px] left-0 right-0 h-0.5"
-                    style={{ backgroundColor: 'var(--accent)' }}
-                  />
-                )}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const tabContent = (
+                <button
+                  key={tab.id}
+                  onClick={() => (tab.isDisabled || tab.isRestricted) ? undefined : onTabChange?.(tab.id)}
+                  disabled={tab.isDisabled}
+                  className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
+                    (tab.isDisabled || tab.isRestricted)
+                      ? 'text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed'
+                      : tab.isActive 
+                        ? 'text-[var(--layout-text)] font-medium' 
+                        : 'text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.badge && (
+                    <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                      {tab.badge}
+                    </span>
+                  )}
+                  {tab.isActive && !tab.isDisabled && !tab.isRestricted && (
+                    <div 
+                      className="absolute -bottom-[9px] left-0 right-0 h-0.5"
+                      style={{ backgroundColor: 'var(--accent)' }}
+                    />
+                  )}
+                </button>
+              );
+
+              // Si la tab está restringida, envolverla con CustomRestricted
+              if (tab.isRestricted && tab.restrictionReason) {
+                return (
+                  <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
+                    {tabContent}
+                  </CustomRestricted>
+                );
+              }
+
+              return tabContent;
+            })}
           </div>
         </div>
       )}
