@@ -23,24 +23,30 @@ export const useProjectContext = create<ProjectContextState>()(
         
         // Si cambiamos de organización, persistir el proyecto en las preferencias
         if (currentOrgId && projectId) {
-          // Obtener user_id del authStore
-          const user = useAuthStore.getState().user;
-          if (user) {
-            // Usar la API para persistir en user_organization_preferences
-            fetch('/api/user/update-organization-preferences', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-user-id': user.id
-              },
-              body: JSON.stringify({
-                organization_id: currentOrgId,
-                last_project_id: projectId
-              })
-            }).catch(error => {
-              console.error("🔧 Error updating organization preferences:", error);
+          // Obtener user_id de current-user endpoint (no del authStore)
+          fetch('/api/current-user')
+            .then(response => response.json())
+            .then(userData => {
+              if (userData?.user?.id) {
+                // Usar la API para persistir en user_organization_preferences
+                fetch('/api/user/update-organization-preferences', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-id': userData.user.id  // Usar el ID de la aplicación, no el de Supabase Auth
+                  },
+                  body: JSON.stringify({
+                    organization_id: currentOrgId,
+                    last_project_id: projectId
+                  })
+                }).catch(error => {
+                  console.error("🔧 Error updating organization preferences:", error);
+                });
+              }
+            })
+            .catch(error => {
+              console.error("🔧 Error fetching current user:", error);
             });
-          }
         }
         
         set({ 
