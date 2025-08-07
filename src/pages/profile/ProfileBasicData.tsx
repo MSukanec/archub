@@ -158,8 +158,16 @@ export default function ProfileBasicData() {
   // Sign out mutation
   const signOutMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase!.auth.signOut()
-      if (error) throw error
+      const response = await fetch('/api/user/signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
     },
     onSuccess: () => {
       window.location.href = '/'

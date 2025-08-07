@@ -165,6 +165,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User sign out endpoint
+  app.post("/api/user/signout", async (req, res) => {
+    try {
+      // For Supabase auth, we don't need server-side logout logic
+      // The client handles the session cleanup
+      res.json({ success: true, message: "Signed out successfully" });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      res.status(500).json({ error: "Failed to sign out" });
+    }
+  });
+
+  // Get user organization preferences endpoint
+  app.get("/api/user/organization-preferences", async (req, res) => {
+    try {
+      const { user_id, organization_id } = req.query;
+
+      if (!user_id || !organization_id) {
+        return res.status(400).json({ error: "Missing user_id or organization_id" });
+      }
+
+      const { data, error } = await supabase
+        .from('user_organization_preferences')
+        .select('*')
+        .eq('user_id', user_id)
+        .eq('organization_id', organization_id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') { // No rows found
+          return res.status(404).json({ error: "Preferences not found" });
+        }
+        console.error("Error fetching user organization preferences:", error);
+        return res.status(500).json({ error: "Failed to fetch organization preferences" });
+      }
+
+      res.json(data);
+    } catch (error) {
+      console.error("Error fetching organization preferences:", error);
+      res.status(500).json({ error: "Failed to fetch organization preferences" });
+    }
+  });
+
   // Select organization endpoint
   app.post("/api/user/select-organization", async (req, res) => {
     try {

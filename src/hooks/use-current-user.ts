@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 
 interface UserData {
@@ -103,44 +102,31 @@ export function useCurrentUser() {
   return useQuery<UserData>({
     queryKey: ['current-user'],
     queryFn: async () => {
-      if (!supabase || !authUser) {
+      if (!authUser) {
         throw new Error('User not authenticated')
       }
 
-      // First get the main user data from RPC
-      const { data: mainData, error: rpcError } = await supabase.rpc('archub_get_user')
-      
-      if (rpcError) {
-        throw rpcError
+      // Use the server endpoint instead of Supabase directly
+      const response = await fetch('/api/current-user', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
+
+      const userData = await response.json()
       
-      if (!mainData) {
+      if (!userData) {
         throw new Error('No user data returned')
-      }
-
-      // Then get the discovery fields directly from user_data table
-      const { data: discoveryData, error: discoveryError } = await supabase
-        .from('user_data')
-        .select('discovered_by, discovered_by_other_text, main_use, main_use_other, user_role, user_role_other, team_size')
-        .eq('user_id', mainData.user.id)
-        .single()
-
-      if (discoveryError && discoveryError.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('Error fetching discovery data:', discoveryError)
-      }
-
-      // Merge the discovery data into the main user_data object
-      const userData = {
-        ...mainData,
-        user_data: {
-          ...mainData.user_data,
-          ...(discoveryData || {})
-        }
       }
 
       return userData as UserData
     },
-    enabled: !!authUser && !!supabase,
+    enabled: !!authUser,
     retry: 3,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
