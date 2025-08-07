@@ -376,56 +376,12 @@ export default function OrganizationPreferences() {
           showProjectSelector={false}
           showSearch={false}
           showGrouping={false}
-          features={[
-            {
-              icon: <Coins className="h-4 w-4" />,
-              title: "Monedas Predeterminadas", 
-              description: "Configurar monedas predeterminadas y secundarias para movimientos financieros"
-            },
-            {
-              icon: <Coins className="h-4 w-4" />,
-              title: "Billeteras por Defecto",
-              description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
-            },
-            {
-              icon: <Package2 className="h-4 w-4" />,
-              title: "Conceptos de Finanzas", 
-              description: "Administrar los conceptos disponibles para categorizar movimientos financieros"
-            },
-            {
-              icon: <Settings className="h-4 w-4" />,
-              title: "Preferencias Globales",
-              description: "Administrar las preferencias globales que afectan a todos los proyectos"
-            }
-          ]}
         />
 
         {/* FeatureIntroduction - Mobile Only */}
         <FeatureIntroduction
           icon={<Coins className="h-5 w-5" />}
           title="Preferencias de la Organización"
-          features={[
-            {
-              icon: <Coins className="h-4 w-4" />,
-              title: "Monedas Predeterminadas",
-              description: "Configurar monedas predeterminadas y secundarias para movimientos financieros"
-            },
-            {
-              icon: <Coins className="h-4 w-4" />,
-              title: "Billeteras por Defecto",
-              description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
-            },
-            {
-              icon: <Package2 className="h-4 w-4" />,
-              title: "Conceptos de Finanzas",
-              description: "Administrar los conceptos disponibles para categorizar movimientos financieros"
-            },
-            {
-              icon: <Settings className="h-4 w-4" />,
-              title: "Preferencias Globales",
-              description: "Administrar las preferencias globales que afectan a todos los proyectos"
-            }
-          ]}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
