@@ -17,8 +17,6 @@ export const useProjectContext = create<ProjectContextState>()(
       isGlobalView: true,
       currentOrganizationId: null,
       setSelectedProject: (projectId: string | null, organizationId?: string | null) => {
-        console.log("🔧 ProjectContext: Setting project to", projectId, "for organization", organizationId);
-        
         const currentOrgId = organizationId || get().currentOrganizationId;
         
         // La persistencia de preferencias se maneja en los componentes que usan useUpdateUserOrganizationPreferences
