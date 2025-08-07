@@ -95,7 +95,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
         {/* Contact Info */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="flex items-center justify-between">
-            <div className="text-[var(--card-fg)] font-medium text-sm truncate">
+            <div className="text-[var(--card-fg)] font-semibold text-base truncate">
               {displayName}
             </div>
           </div>
