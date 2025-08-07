@@ -212,15 +212,17 @@ export default function Onboarding() {
       return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       toast({
         title: "¡Perfecto!",
         description: "Configuración inicial completada. Ahora elige tu modo de uso.",
       });
       
       // Redirect to select-mode after successful onboarding
-      navigate('/select-mode');
-      resetOnboarding();
+      setTimeout(() => {
+        navigate('/select-mode');
+        resetOnboarding();
+      }, 1000); // Wait 1 second to show the toast
     },
     onError: (error) => {
       console.error('Error saving onboarding data:', error);
