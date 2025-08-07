@@ -368,7 +368,7 @@ export default function OrganizationPreferences() {
         ]
       }}
     >
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* ActionBar - Desktop Only */}
         <ActionBarDesktop 
           title="Preferencias de la Organización"

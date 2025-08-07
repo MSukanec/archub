@@ -196,13 +196,9 @@ export default function OrganizationMembers() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div>
-
-
-
-
+      <div className="space-y-6">
         {/* Two Column Layout - Section descriptions left, content right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column - Section Description */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">

@@ -248,9 +248,8 @@ function BoardContent() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-
-
-      {/* ActionBar Desktop - Solo selector de tableros */}
+      <div className="space-y-6">
+        {/* ActionBar Desktop - Solo selector de tableros */}
       <ActionBarDesktopRow
         filters={[
           {
@@ -307,6 +306,7 @@ function BoardContent() {
           loading={listsLoading || cardsLoading}
         />
       )}
+      </div>
     </Layout>
   );
 }
