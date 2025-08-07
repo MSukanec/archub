@@ -36,6 +36,15 @@ const createContactSchema = z.object({
   location: z.string().optional(),
   notes: z.string().optional(),
   linked_user_id: z.string().optional(),
+}).refine((data) => {
+  // Si no hay usuario vinculado, el nombre es obligatorio
+  if (!data.linked_user_id && !data.first_name) {
+    return false;
+  }
+  return true;
+}, {
+  message: "El nombre es requerido cuando no hay usuario vinculado",
+  path: ["first_name"],
 });
 
 type CreateContactForm = z.infer<typeof createContactSchema>;
@@ -103,10 +112,22 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   React.useEffect(() => {
     if (editingContact) {
+      // Si tiene usuario vinculado, usar datos del usuario; sino, usar datos del contacto
+      let firstName = editingContact.first_name || '';
+      let lastName = editingContact.last_name || '';
+      let email = editingContact.email || '';
+      
+      if (editingContact.linked_user) {
+        const nameParts = editingContact.linked_user.full_name?.split(' ') || [];
+        firstName = nameParts[0] || editingContact.first_name || '';
+        lastName = nameParts.slice(1).join(' ') || editingContact.last_name || '';
+        email = editingContact.linked_user.email || editingContact.email || '';
+      }
+      
       form.reset({
-        first_name: editingContact.first_name || '',
-        last_name: editingContact.last_name || '',
-        email: editingContact.email || '',
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
         phone: editingContact.phone || '',
         contact_type_ids: editingContact.contact_types?.map(ct => ct.id) || [],
         company_name: editingContact.company_name || '',
@@ -252,11 +273,27 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     setSelectedUser(user);
     setIsLinkingUser(false);
     form.setValue("linked_user_id", userId);
+    
+    // Auto-rellenar datos del usuario vinculado
+    if (user) {
+      const nameParts = user.full_name?.split(' ') || [];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      form.setValue("first_name", firstName);
+      form.setValue("last_name", lastName);
+      form.setValue("email", user.email || '');
+    }
   };
 
   const handleUnlinkUser = () => {
     setSelectedUser(null);
     form.setValue("linked_user_id", "");
+    
+    // Limpiar campos cuando se desvincula el usuario
+    form.setValue("first_name", "");
+    form.setValue("last_name", "");
+    form.setValue("email", "");
   };
 
   const viewPanel = (
@@ -398,7 +435,11 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Nombre *</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nombre" {...field} />
+                  <Input 
+                    placeholder="Nombre" 
+                    {...field} 
+                    disabled={!!selectedUser || !!editingContact?.linked_user}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -412,7 +453,11 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Apellido</FormLabel>
                 <FormControl>
-                  <Input placeholder="Apellido" {...field} />
+                  <Input 
+                    placeholder="Apellido" 
+                    {...field} 
+                    disabled={!!selectedUser || !!editingContact?.linked_user}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -427,7 +472,12 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="email@ejemplo.com" {...field} />
+                  <Input 
+                    type="email" 
+                    placeholder="email@ejemplo.com" 
+                    {...field} 
+                    disabled={!!selectedUser || !!editingContact?.linked_user}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
