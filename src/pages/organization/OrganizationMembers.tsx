@@ -183,10 +183,6 @@ export default function OrganizationMembers() {
   const headerProps = {
     title: "Miembros",
     description: "Gestiona los miembros de tu organización",
-    breadcrumb: [
-      { name: "Organización", href: "/organization/dashboard" },
-      { name: "Miembros", href: "/organization/members" }
-    ],
     actions: [
       <CustomRestricted 
         key="invite-member"
@@ -280,20 +276,20 @@ export default function OrganizationMembers() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={member.user_data?.avatar_url} />
+                            <AvatarImage src={member.users?.[0]?.avatar_url} />
                             <AvatarFallback>
-                              {getInitials(member.user_data?.full_name || member.user_data?.email || 'U')}
+                              {getInitials(member.users?.[0]?.full_name || member.users?.[0]?.email || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium text-sm">
-                                {member.user_data?.full_name || 'Sin nombre'}
+                                {member.users?.[0]?.full_name || 'Sin nombre'}
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {member.user_data?.email}
+                              {member.users?.[0]?.email}
                             </p>
                           </div>
                         </div>
@@ -309,10 +305,10 @@ export default function OrganizationMembers() {
                           </div>
 
                           <Badge 
-                            variant={getRoleBadgeVariant(member.role?.name || '')}
-                            className={getRoleBadgeClassName(member.role?.name || '')}
+                            variant={getRoleBadgeVariant(member.roles?.[0]?.name || '')}
+                            className={getRoleBadgeClassName(member.roles?.[0]?.name || '')}
                           >
-                            {member.role?.name || 'Sin rol'}
+                            {member.roles?.[0]?.name || 'Sin rol'}
                           </Badge>
 
                           <DropdownMenu>
