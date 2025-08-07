@@ -42,6 +42,7 @@ interface LayoutProps {
       icon?: React.ComponentType<any>;
       onClick: () => void;
     };
+    breadcrumb?: { name: string; href: string }[];
   };
 }
 
