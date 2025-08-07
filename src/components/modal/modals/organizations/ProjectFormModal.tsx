@@ -312,49 +312,109 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
-          {/* Creador */}
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creador *</FormLabel>
-                <FormControl>
-                  <UserSelector
-                    users={organizationMembers?.map(member => ({
-                      id: member.id,
-                      full_name: member.full_name,
-                      email: member.email || '',
-                      avatar_url: member.avatar_url,
-                      first_name: member.first_name,
-                      last_name: member.last_name
-                    })) || []}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar creador"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Primera fila: Creador - Fecha */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Creador */}
+            <FormField
+              control={form.control}
+              name="created_by"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Creador *</FormLabel>
+                  <FormControl>
+                    <UserSelector
+                      users={organizationMembers?.map(member => ({
+                        id: member.id,
+                        full_name: member.full_name,
+                        email: member.email || '',
+                        avatar_url: member.avatar_url,
+                        first_name: member.first_name,
+                        last_name: member.last_name
+                      })) || []}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Seleccionar creador"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Fecha */}
-          <FormField
-            control={form.control}
-            name="created_at"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha *</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Fecha */}
+            <FormField
+              control={form.control}
+              name="created_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha *</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          {/* Nombre del proyecto */}
+          {/* Segunda fila: Tipo - Modalidad */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tipo de proyecto */}
+            <FormField
+              control={form.control}
+              name="project_type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de proyecto</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin especificar</SelectItem>
+                      {projectTypes?.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Modalidad */}
+            <FormField
+              control={form.control}
+              name="modality_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Modalidad</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar modalidad" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Sin especificar</SelectItem>
+                      {projectModalities?.map((modality) => (
+                        <SelectItem key={modality.id} value={modality.id}>
+                          {modality.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Tercera fila: Nombre (solo) */}
           <FormField
             control={form.control}
             name="name"
@@ -369,113 +429,62 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
             )}
           />
 
-          {/* Tipo de proyecto */}
-          <FormField
-            control={form.control}
-            name="project_type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de proyecto</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">Sin especificar</SelectItem>
-                    {projectTypes?.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Cuarta fila: Estado - Color */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Estado */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado del proyecto *</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Activo</SelectItem>
+                      <SelectItem value="inactive">Inactivo</SelectItem>
+                      <SelectItem value="completed">Completado</SelectItem>
+                      <SelectItem value="paused">Pausado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Modalidad */}
-          <FormField
-            control={form.control}
-            name="modality_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Modalidad</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
+            {/* Color */}
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Color del proyecto</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar modalidad" />
-                    </SelectTrigger>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={field.value || "#ffffff"}
+                        onChange={field.onChange}
+                        className="w-16 h-10 p-1 border rounded"
+                      />
+                      <Input
+                        type="text"
+                        value={field.value || "#ffffff"}
+                        onChange={field.onChange}
+                        placeholder="#ffffff"
+                        className="flex-1"
+                      />
+                    </div>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">Sin especificar</SelectItem>
-                    {projectModalities?.map((modality) => (
-                      <SelectItem key={modality.id} value={modality.id}>
-                        {modality.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Estado */}
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estado del proyecto *</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                    <SelectItem value="completed">Completado</SelectItem>
-                    <SelectItem value="paused">Pausado</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Color */}
-          <FormField
-            control={form.control}
-            name="color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Color del proyecto</FormLabel>
-                <FormControl>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="color"
-                      value={field.value || "#ffffff"}
-                      onChange={field.onChange}
-                      className="w-16 h-10 p-1 border rounded"
-                    />
-                    <Input
-                      type="text"
-                      value={field.value || "#ffffff"}
-                      onChange={field.onChange}
-                      placeholder="#ffffff"
-                      className="flex-1"
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
       </form>
     </Form>
   );
