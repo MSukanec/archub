@@ -428,9 +428,11 @@ export function useDeleteKanbanCard() {
         .eq('id', cardId)
 
       if (error) throw error
+      return { cardId, boardId }
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['kanban-cards', variables.boardId] })
+    onSuccess: (data) => {
+      // Directly invalidate with the provided boardId
+      queryClient.invalidateQueries({ queryKey: ['kanban-cards', data.boardId] })
       toast({ title: "Tarjeta eliminada exitosamente" })
     },
     onError: (error) => {
@@ -740,18 +742,24 @@ export function useUpdateKanbanCard() {
       if (error) throw error
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Get board_id from list to invalidate correct queries
-      supabase
-        ?.from('kanban_lists')
-        .select('board_id')
-        .eq('id', data.list_id)
-        .single()
-        .then(({ data: listData }) => {
-          if (listData?.board_id) {
-            queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
-          }
-        })
+      try {
+        const { data: listData, error } = await supabase
+          .from('kanban_lists')
+          .select('board_id')
+          .eq('id', data.list_id)
+          .single()
+        
+        if (!error && listData?.board_id) {
+          queryClient.invalidateQueries({ queryKey: ['kanban-cards', listData.board_id] })
+        }
+      } catch (error) {
+        console.warn('Could not invalidate cache after card update:', error)
+        // Fallback: invalidate all kanban-cards queries
+        queryClient.invalidateQueries({ queryKey: ['kanban-cards'] })
+      }
+      
       toast({ title: "Tarjeta actualizada exitosamente" })
     },
     onError: (error) => {
