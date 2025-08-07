@@ -8,7 +8,7 @@ interface AuthRedirectProps {
 }
 
 export function AuthRedirect({ children }: AuthRedirectProps) {
-  const { user, initialized, loading } = useAuthStore();
+  const { user, initialized, loading, completingOnboarding } = useAuthStore();
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const [location, navigate] = useLocation();
 
@@ -30,12 +30,13 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
       return;
     }
 
-    // If user is authenticated but needs onboarding (except for select-mode and dashboard during onboarding completion)
+    // If user is authenticated but needs onboarding (skip redirect if completing onboarding)
     const allowedDuringOnboarding = ['/onboarding', '/select-mode', '/organization/dashboard', '/dashboard'];
-    if (user && userData && !userData.preferences?.onboarding_completed && !allowedDuringOnboarding.includes(location)) {
+    if (user && userData && !userData.preferences?.onboarding_completed && !completingOnboarding && !allowedDuringOnboarding.includes(location)) {
       console.log('AuthRedirect: Redirecting to onboarding', { 
         location, 
         onboarding_completed: userData.preferences?.onboarding_completed,
+        completingOnboarding,
         allowed: allowedDuringOnboarding.includes(location)
       });
       navigate('/onboarding');

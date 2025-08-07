@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ export default function SelectMode() {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
+  const { setCompletingOnboarding } = useAuthStore();
   const { toast } = useToast();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [hasFinished, setHasFinished] = useState(false);
@@ -127,24 +129,27 @@ export default function SelectMode() {
       // Navigate immediately with React Router
       setSidebarContext('organization');
       navigate('/organization/dashboard');
+      
+      // Reset the flag after successful navigation
+      setTimeout(() => {
+        setCompletingOnboarding(false);
+      }, 1000);
     },
     onError: (err, userType, context) => {
       // Rollback on error
       if (context?.previousUserData) {
         queryClient.setQueryData(['/api/current-user'], context.previousUserData);
       }
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
-    },
-    onError: (error) => {
-      console.error('Error updating user type:', error);
+      console.error('Error updating user type:', err);
       toast({
         variant: "destructive",
         title: "Error",
         description: "No se pudo actualizar el modo. Intenta nuevamente.",
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
     },
   });
 

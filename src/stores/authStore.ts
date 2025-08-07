@@ -6,17 +6,20 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   initialized: boolean;
+  completingOnboarding: boolean;
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  setCompletingOnboarding: (completing: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: true,
   initialized: false,
+  completingOnboarding: false,
 
   initialize: async () => {
     const state = get();
@@ -148,5 +151,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     await supabase.auth.signOut();
     set({ user: null });
+  },
+
+  setCompletingOnboarding: (completing: boolean) => {
+    set({ completingOnboarding: completing });
   },
 }));

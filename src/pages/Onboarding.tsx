@@ -14,7 +14,7 @@ import { Step1UserData } from "@/components/onboarding/Step1UserData";
 
 export default function Onboarding() {
   const [, navigate] = useLocation();
-  const { user, loading: authLoading, initialized } = useAuthStore();
+  const { user, loading: authLoading, initialized, setCompletingOnboarding } = useAuthStore();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
 
   const { toast } = useToast();
@@ -117,6 +117,9 @@ export default function Onboarding() {
       return { success: true };
     },
     onMutate: async () => {
+      // Set flag to prevent AuthRedirect interference during onboarding completion
+      setCompletingOnboarding(true);
+      
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
       
