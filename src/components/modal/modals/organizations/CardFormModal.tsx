@@ -116,16 +116,21 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           return;
         }
 
-        // Find organization member ID for created_by
-        const creatorMember = members.find(m => m.id === data.created_by);
-        const assigneeMember = data.assigned_to ? members.find(m => m.id === data.assigned_to) : undefined;
+        console.log('Creating card with data:', {
+          list_id: listId,
+          title: data.title,
+          description: data.description,
+          created_by: data.created_by,
+          assigned_to: data.assigned_to,
+          membersAvailable: members.map(m => ({ id: m.id, name: m.full_name }))
+        });
 
         await createCardMutation.mutateAsync({
           list_id: listId,
           title: data.title,
           description: data.description || undefined,
-          created_by: creatorMember?.id || data.created_by, // Use organization member ID
-          assigned_to: assigneeMember?.id || undefined // Use organization member ID
+          created_by: data.created_by, // Already using organization member ID
+          assigned_to: data.assigned_to || undefined // Already using organization member ID
         });
         
         handleClose();
