@@ -545,32 +545,34 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
                   <FormItem>
                     <FormLabel>Color del proyecto</FormLabel>
                     <FormControl>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={isValidColor ? displayValue : "#ffffff"}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          className="w-16 h-10 p-1 border rounded"
-                        />
-                        <Input
-                          type="text"
-                          value={displayValue}
-                          onChange={handleTextChange}
-                          onBlur={() => {
-                            const normalized = normalizeColor(field.value || "");
-                            if (normalized !== field.value) {
-                              field.onChange(normalized);
-                            }
-                          }}
-                          placeholder="Ej: #ff0000, red, cyan"
-                          className="flex-1"
-                        />
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="color"
+                            value={isValidColor ? displayValue : "#ffffff"}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            className="w-16 h-10 p-1 border rounded"
+                          />
+                          <Input
+                            type="text"
+                            value={displayValue}
+                            onChange={handleTextChange}
+                            onBlur={() => {
+                              const normalized = normalizeColor(field.value || "");
+                              if (normalized !== field.value) {
+                                field.onChange(normalized);
+                              }
+                            }}
+                            placeholder="Ej: #ff0000, red, cyan"
+                            className="flex-1"
+                          />
+                        </div>
+                        {!isValidColor && displayValue && (
+                          <p className="text-xs text-yellow-600">
+                            Ingresa un color válido (ej: #ff0000, red, cyan)
+                          </p>
+                        )}
                       </div>
-                      {!isValidColor && displayValue && (
-                        <p className="text-xs text-yellow-600 mt-1">
-                          Ingresa un color válido (ej: #ff0000, red, cyan)
-                        </p>
-                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
