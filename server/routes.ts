@@ -378,16 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
 
-      // Primero, verificar si existe el registro de user_preferences
-      console.log("Searching for user_id:", user_id);
-      
-      // Buscar sin filtro para ver todos los registros
-      const { data: allPrefs, error: allError } = await authenticatedSupabase
-        .from('user_preferences')
-        .select('id, user_id, last_organization_id');
-      
-      console.log("All user_preferences records:", allPrefs);
-      
+      // Verificar si existe el registro de user_preferences
       const { data: existingPrefs, error: checkError } = await authenticatedSupabase
         .from('user_preferences')
         .select('id, user_id, last_organization_id')
@@ -399,7 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to check user preferences" });
       }
 
-      console.log("Existing preferences:", existingPrefs);
+
 
       if (!existingPrefs) {
         console.error("No user_preferences record found for user_id:", user_id);
@@ -421,15 +412,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to update organization selection" });
       }
 
-      console.log("Update result:", updateResult);
-
       if (!updateResult || updateResult.length === 0) {
         console.error("No rows were updated");
         return res.status(500).json({ error: "No preferences were updated" });
       }
 
       const updatedPrefs = updateResult[0];
-      console.log("Updated preferences:", updatedPrefs);
 
       if (updatedPrefs.last_organization_id !== organization_id) {
         console.error("Organization update failed - values don't match");

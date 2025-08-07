@@ -254,19 +254,31 @@ export default function OrganizationManagement() {
     onSuccess: async (_, variables) => {
       console.log('🔧 Organization switch onSuccess started for org:', variables);
       
-      // SOLUCIÓN DIRECTA: Forzar recarga completa de página para evitar problemas de cache
-      // El RPC archub_get_user tiene su propia lógica y no está reflejando los cambios
+      // Limpiar project context al cambiar organización
+      const { setSelectedProject } = useProjectContext.getState()
+      setSelectedProject(null)
+      console.log('🔧 Project context cleared');
+      
+      // Invalidar todas las queries relacionadas con el usuario y organizaciones
+      console.log('🔧 Invalidating queries...');
+      await queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      await queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] })
+      await queryClient.invalidateQueries({ queryKey: ['organization-members'] })
+      
+      // Refetch inmediato para obtener datos actualizados
+      console.log('🔧 Refetching current-user...');
+      await queryClient.refetchQueries({ queryKey: ['current-user'] })
+      
       toast({
         title: "Organización seleccionada",
-        description: "Cambiando a la nueva organización..."
+        description: "La organización se ha cambiado correctamente"
       })
       
-      console.log('🔧 Forcing complete page reload to ensure fresh data');
-      // Usar window.location.replace para evitar que el usuario pueda volver atrás
-      // Dar más tiempo para que la base de datos se actualice
-      setTimeout(() => {
-        window.location.replace('/organization/dashboard')
-      }, 2000)
+      // Navegar sin recarga de página
+      console.log('🔧 Navigating to dashboard...');
+      setSidebarContext('organization')
+      navigate('/organization/dashboard')
+      console.log('🔧 Organization switch onSuccess completed');
     },
     onError: () => {
       toast({
