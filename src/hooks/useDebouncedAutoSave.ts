@@ -23,6 +23,7 @@ export function useDebouncedAutoSave<T>({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousDataRef = useRef<T>(data);
   const isFirstRenderRef = useRef(true);
+  const hasUserEditedRef = useRef(false);
 
   const debouncedSave = useCallback(async (dataToSave: T) => {
     if (!enabled || !dataToSave) {
@@ -41,6 +42,18 @@ export function useDebouncedAutoSave<T>({
     }
   }, [saveFn, enabled]);
 
+  // Check if the data contains meaningful values (not just empty strings)
+  const hasNonEmptyValues = useCallback((data: any): boolean => {
+    if (!data || typeof data !== 'object') return false;
+    
+    return Object.values(data).some(value => {
+      if (typeof value === 'string') return value.trim() !== '';
+      if (typeof value === 'number') return value !== 0;
+      if (typeof value === 'boolean') return true;
+      return value != null;
+    });
+  }, []);
+
   useEffect(() => {
     // Skip first render to avoid saving initial data
     if (isFirstRenderRef.current) {
@@ -53,6 +66,22 @@ export function useDebouncedAutoSave<T>({
     const hasChanged = JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
     
     if (!hasChanged || !enabled || !data) {
+      return;
+    }
+
+    // Skip auto-save if this looks like initial data loading
+    // (previous data was mostly empty and current data has values)
+    const previousHadValues = hasNonEmptyValues(previousDataRef.current);
+    const currentHasValues = hasNonEmptyValues(data);
+    
+    if (!previousHadValues && currentHasValues && !hasUserEditedRef.current) {
+      // This looks like initial data loading, not user editing
+      console.log('Skipping auto-save: detected initial data loading');
+      previousDataRef.current = data;
+      // Set a flag to enable saves after a delay (allowing for user interactions)
+      setTimeout(() => {
+        hasUserEditedRef.current = true;
+      }, 1000);
       return;
     }
 
@@ -69,7 +98,7 @@ export function useDebouncedAutoSave<T>({
       debouncedSave(data);
     }, delay);
 
-  }, [JSON.stringify(data), delay, enabled]); // Removed debouncedSave from dependencies
+  }, [JSON.stringify(data), delay, enabled, hasNonEmptyValues]); // Removed debouncedSave from dependencies
 
   // Cleanup on unmount
   useEffect(() => {
