@@ -147,7 +147,7 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
       )}
 
       <Card 
-        className={`hero-card relative overflow-hidden border-[var(--card-border)] h-48 md:h-56 ${
+        className={`hero-card relative overflow-hidden border-[var(--card-border)] h-60 md:h-56 ${
           project.project_data?.project_image_url ? 'cursor-move' : ''
         }`}
         onMouseDown={handleMouseDown}
